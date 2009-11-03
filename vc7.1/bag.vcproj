@@ -1573,49 +1573,49 @@
 			<Filter
 				Name="PNG Library">
 				<File
-					RelativePath="..\src\pnglib\png.c">
+					RelativePath="..\src\libpng-1.2.40\png.c">
 				</File>
 				<File
-					RelativePath="..\src\pnglib\pngerror.c">
+					RelativePath="..\src\libpng-1.2.40\pngerror.c">
 				</File>
 				<File
-					RelativePath="..\src\pnglib\pngget.c">
+					RelativePath="..\src\libpng-1.2.40\pngget.c">
 				</File>
 				<File
-					RelativePath="..\src\pnglib\pngmem.c">
+					RelativePath="..\src\libpng-1.2.40\pngmem.c">
 				</File>
 				<File
-					RelativePath="..\src\pnglib\pngpread.c">
+					RelativePath="..\src\libpng-1.2.40\pngpread.c">
 				</File>
 				<File
-					RelativePath="..\src\pnglib\pngread.c">
+					RelativePath="..\src\libpng-1.2.40\pngread.c">
 				</File>
 				<File
-					RelativePath="..\src\pnglib\pngrio.c">
+					RelativePath="..\src\libpng-1.2.40\pngrio.c">
 				</File>
 				<File
-					RelativePath="..\src\pnglib\pngrtran.c">
+					RelativePath="..\src\libpng-1.2.40\pngrtran.c">
 				</File>
 				<File
-					RelativePath="..\src\pnglib\pngrutil.c">
+					RelativePath="..\src\libpng-1.2.40\pngrutil.c">
 				</File>
 				<File
-					RelativePath="..\src\pnglib\pngset.c">
+					RelativePath="..\src\libpng-1.2.40\pngset.c">
 				</File>
 				<File
-					RelativePath="..\src\pnglib\pngtrans.c">
+					RelativePath="..\src\libpng-1.2.40\pngtrans.c">
 				</File>
 				<File
-					RelativePath="..\src\pnglib\pngwio.c">
+					RelativePath="..\src\libpng-1.2.40\pngwio.c">
 				</File>
 				<File
-					RelativePath="..\src\pnglib\pngwrite.c">
+					RelativePath="..\src\libpng-1.2.40\pngwrite.c">
 				</File>
 				<File
-					RelativePath="..\src\pnglib\pngwtran.c">
+					RelativePath="..\src\libpng-1.2.40\pngwtran.c">
 				</File>
 				<File
-					RelativePath="..\src\pnglib\pngwutil.c">
+					RelativePath="..\src\libpng-1.2.40\pngwutil.c">
 				</File>
 			</Filter>
 			<Filter

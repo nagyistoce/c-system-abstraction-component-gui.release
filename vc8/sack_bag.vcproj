@@ -1553,78 +1553,78 @@
 					Name="PNG Library"
 					>
 					<File
-						RelativePath="..\src\libpng-1.2.31\png.c"
+						RelativePath="..\src\libpng-1.2.40\png.c"
 						>
 					</File>
 					<File
-						RelativePath="..\src\libpng-1.2.31\pngerror.c"
+						RelativePath="..\src\libpng-1.2.40\pngerror.c"
 						>
 					</File>
 					<File
-						RelativePath="..\src\libpng-1.2.31\pnggccrd.c"
+						RelativePath="..\src\libpng-1.2.40\pnggccrd.c"
 						>
 					</File>
 					<File
-						RelativePath="..\src\libpng-1.2.31\pngget.c"
+						RelativePath="..\src\libpng-1.2.40\pngget.c"
 						>
 					</File>
 					<File
-						RelativePath="..\src\libpng-1.2.31\pngmem.c"
+						RelativePath="..\src\libpng-1.2.40\pngmem.c"
 						>
 					</File>
 					<File
-						RelativePath="..\src\libpng-1.2.31\pngpread.c"
+						RelativePath="..\src\libpng-1.2.40\pngpread.c"
 						>
 					</File>
 					<File
-						RelativePath="..\src\libpng-1.2.31\pngread.c"
+						RelativePath="..\src\libpng-1.2.40\pngread.c"
 						>
 					</File>
 					<File
-						RelativePath="..\src\libpng-1.2.31\pngrio.c"
+						RelativePath="..\src\libpng-1.2.40\pngrio.c"
 						>
 					</File>
 					<File
-						RelativePath="..\src\libpng-1.2.31\pngrtran.c"
+						RelativePath="..\src\libpng-1.2.40\pngrtran.c"
 						>
 					</File>
 					<File
-						RelativePath="..\src\libpng-1.2.31\pngrutil.c"
+						RelativePath="..\src\libpng-1.2.40\pngrutil.c"
 						>
 					</File>
 					<File
-						RelativePath="..\src\libpng-1.2.31\pngset.c"
+						RelativePath="..\src\libpng-1.2.40\pngset.c"
 						>
 					</File>
 					<File
-						RelativePath="..\src\libpng-1.2.31\pngtrans.c"
+						RelativePath="..\src\libpng-1.2.40\pngtrans.c"
 						>
 					</File>
 					<File
-						RelativePath="..\src\libpng-1.2.31\pngvcrd.c"
+						RelativePath="..\src\libpng-1.2.40\pngvcrd.c"
 						>
 					</File>
 					<File
-						RelativePath="..\src\libpng-1.2.31\pngwio.c"
+						RelativePath="..\src\libpng-1.2.40\pngwio.c"
 						>
 					</File>
 					<File
-						RelativePath="..\src\libpng-1.2.31\pngwrite.c"
+						RelativePath="..\src\libpng-1.2.40\pngwrite.c"
 						>
 					</File>
 					<File
-						RelativePath="..\src\libpng-1.2.31\pngwtran.c"
+						RelativePath="..\src\libpng-1.2.40\pngwtran.c"
 						>
 					</File>
 					<File
-						RelativePath="..\src\libpng-1.2.31\pngwutil.c"
+						RelativePath="..\src\libpng-1.2.40\pngwutil.c"
 						>
 					</File>
 					<Filter
 						Name="Headers"
 						>
 						<File
-							RelativePath="..\src\libpng-1.2.31\png.h"
+							RelativePath="..\src\libpng-1.2.40\png.h"
 							>
 							<FileConfiguration
 								Name="Debug|Win32"
@@ -1682,7 +1682,7 @@
 							</FileConfiguration>
 						</File>
 						<File
-							RelativePath="..\src\libpng-1.2.31\pngconf.h"
+							RelativePath="..\src\libpng-1.2.40\pngconf.h"
 							>
 							<FileConfiguration
 								Name="Debug|Win32"
