@@ -191,7 +191,7 @@ NEED_PNG=1
   else
 #  $(warning huh - static make this differently please? )
 NEED_PNG=0
-MORE_PROJECTS:=src/libpng-1.2.31/Makefile $(MORE_PROJECTS)
+MORE_PROJECTS:=src/libpng-1.2.40/Makefile $(MORE_PROJECTS)
   endif
 NEED_ZLIB=1
 NEED_JPEG=1
@@ -274,7 +274,7 @@ endif
 
 ifeq '$(NEED_PNG)' '1'
 ifndef __NO_GUI__
-PBASEDIR=src/libpng-1.2.31
+PBASEDIR=src/libpng-1.2.40
 include $(PBASEDIR)/Makefile.bag.part
 endif
 endif
