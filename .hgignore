@@ -8,6 +8,7 @@ err$
 \.vcproj.*\.user
 \.vcproj.*\.old
 MSDebug
+/Debug C\+\+/
 MSRelease
 debug-.*$
 release-.*$
