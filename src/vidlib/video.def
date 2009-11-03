@@ -1,0 +1,31 @@
+EXPORTS
+   GetDisplayInterface
+   InitDisplay
+   SetApplicationTitle
+   SetApplicationIcon
+   GetDisplaySize
+   ProcessDisplayMessages
+   OpenDisplaySizedAt
+   OpenDisplayAboveSizedAt
+   CloseDisplay
+   UpdateDisplay
+   ClearDisplay
+   UpdateDisplayPortionEx
+   SetMousePosition
+   MoveDisplayRel
+   SizeDisplay
+   MoveDisplay
+   PutDisplayAbove
+
+   IsKeyDown
+   KeyDown
+   KeyDouble
+
+   SetCloseHandler
+   SetMouseHandler
+   SetRedrawHandler
+   SetKeyboardHandler
+   GetKeyText
+   GetDisplayKeyboard
+
+   

@@ -1,0 +1,9 @@
+
+CXFLAGS=-DMEM_LIBRARY_SOURCE
+
+OBJS = $(DEST)/sharemem.$(OBJEXT) 
+
+BASENAME=shmem
+DEFNAME=sharemem.def #used for lcc compilation
+
+MORELIBS=$(LIBPREFIX)$(COMLIBPATH)syslog$(LIBEXT)

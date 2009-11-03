@@ -1,0 +1,43 @@
+
+EXPORTS
+   _DoPing
+   _DoWhois
+   _NetworkWait
+   _NetworkQuit
+   _NetworkAlive
+   _SetNetworkLong
+   _SetNetworkWord
+   _SetNetworkWriteComplete
+   _SetNetworkCloseCallback
+   _SetNetworkReadComplete
+   _SetNetworkCallbackWindow
+   _GetNetworkLong
+   _GetNetworkWord
+   _AllocAddr
+   _CreateRemote
+   _CreateLocal
+   _ReleaseAddress
+   _CreateBroadcast
+   _ServeUDPAddr
+   _ServeUDP
+   _ConnectUDPAddr
+   _ConnectUDP
+   _SendUDPEx
+   _ReconnectUDP
+   _OpenUDPResponder
+   _CloseUDPRespond
+   _OpenUDPPinger
+   _CloseUDPPing
+   _OpenTCPListenerAddrEx
+   _OpenTCPListenerEx
+   _RemoveClientEx
+   _OpenTCPClientAddrEx
+   _OpenTCPClientEx
+   _UDPPing
+   _doUDPRead
+   _doReadEx
+   _doTCPWrite
+   _TCPDrain
+   _OpenTCPClientAddrExx
+   _OpenTCPClientExx
+

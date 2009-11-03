@@ -1,0 +1,4 @@
+database "m:/monotone/master.db"
+  branch "org.d3x0r.trunk.sack"
+     key "jim@jugle.d3x0r.org"
+  keydir "h:/d3x0r/AppData_Roaming/monotone/keys"
