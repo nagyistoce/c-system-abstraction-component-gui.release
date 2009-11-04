@@ -1,0 +1,14 @@
+EXPORTS
+	AllocateEx
+	ReleaseEx	
+	HoldEx
+	MemSet
+	MemCpy
+	LockedExchange
+	LockedIncrement
+	LockedDecrement
+   EnterCriticalSecEx
+   LeaveCriticalSecEx
+   InitializeCriticalSec
+   DeleteCriticalSec
+   SetMemoryCapacity

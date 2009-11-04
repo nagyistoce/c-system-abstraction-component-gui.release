@@ -1,0 +1,5 @@
+
+PSI_NAMESPACE
+void DrawFrameCaption( PCOMMON );
+PSI_NAMESPACE_END
+

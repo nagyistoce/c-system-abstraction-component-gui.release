@@ -1,0 +1,1094 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug C++|Win32">
+      <Configuration>Debug C++</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug CLR|Win32">
+      <Configuration>Debug CLR</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release C++|Win32">
+      <Configuration>Release C++</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release CLR|Win32">
+      <Configuration>Release CLR</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{CE932DB0-A729-4B0D-A2BE-E835A89764AD}</ProjectGuid>
+    <RootNamespace>sack_bag</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <CLRSupport>true</CLRSupport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <CLRSupport>true</CLRSupport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.21006.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">$(SolutionDir)\output\debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">$(ProjectDir)/../$(Configuration)\</IntDir>
+    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">false</IgnoreImportLibrary>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">$(Configuration)\</IntDir>
+    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">false</IgnoreImportLibrary>
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir)..\src\freetype-2.3.7\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;SACK_BAG_EXPORTS;TARGETNAME="$(TargetFileName)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <CompileAs>CompileAsC</CompileAs>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>wsock32.lib;opengl32.lib;iphlpapi.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir)..\src\freetype-2.3.7\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;SACK_BAG_EXPORTS;TARGETNAME="$(TargetFileName)"</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>CompileAsC</CompileAs>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>
+      </PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>wsock32.lib;opengl32.lib;iphlpapi.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>false</OptimizeReferences>
+      <EnableCOMDATFolding>false</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+      <Profile>true</Profile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir)..\src\freetype-2.3.7\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;SACK_BAG_EXPORTS;TARGETNAME="$(TargetFileName)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <CompileAs>CompileAsCpp</CompileAs>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>wsock32.lib;opengl32.lib;iphlpapi.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir)..\src\freetype-2.3.7\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;SACK_BAG_EXPORTS;TARGETNAME=$(TargetFileName)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>CompileAsCpp</CompileAs>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>
+      </PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>wsock32.lib;opengl32.lib;iphlpapi.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>false</OptimizeReferences>
+      <EnableCOMDATFolding>false</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir)..\src\freetype-2.3.7\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;SACK_BAG_EXPORTS;TARGETNAME="$(TargetFileName)";__WINDOWS__;FORCE_NO_INTERFACE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>CompileAsCpp</CompileAs>
+    </ClCompile>
+    <Link>
+      <RegisterOutput>false</RegisterOutput>
+      <AdditionalDependencies>wsock32.lib;opengl32.lib;iphlpapi.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AssemblyDebug>true</AssemblyDebug>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapExports>true</MapExports>
+      <SubSystem>NotSet</SubSystem>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">
+    <ClCompile>
+      <Optimization>Full</Optimization>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir)..\src\freetype-2.3.7\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;SACK_BAG_EXPORTS;TARGETNAME="$(TargetFileName)";__WINDOWS__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <CompileAs>CompileAsCpp</CompileAs>
+    </ClCompile>
+    <Link>
+      <RegisterOutput>false</RegisterOutput>
+      <AdditionalDependencies>wsock32.lib;opengl32.lib;iphlpapi.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AssemblyDebug>true</AssemblyDebug>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapExports>true</MapExports>
+      <SubSystem>NotSet</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\netlib\net_winsock2.c" />
+    <ClCompile Include="..\src\DotNetCompat\file.c" />
+    <ClCompile Include="..\src\sysloglib\syslog.c" />
+    <ClCompile Include="..\src\memlib\sharemem.c">
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">false</PreprocessToFile>
+      <PreprocessSuppressLineNumbers Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">false</PreprocessSuppressLineNumbers>
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">false</PreprocessToFile>
+      <PreprocessSuppressLineNumbers Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">false</PreprocessSuppressLineNumbers>
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</PreprocessToFile>
+      <PreprocessSuppressLineNumbers Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</PreprocessSuppressLineNumbers>
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">false</PreprocessToFile>
+      <PreprocessSuppressLineNumbers Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">false</PreprocessSuppressLineNumbers>
+    </ClCompile>
+    <ClCompile Include="..\src\typelib\binarylist.c" />
+    <ClCompile Include="..\src\typelib\familytree.c" />
+    <ClCompile Include="..\src\typelib\input.c" />
+    <ClCompile Include="..\src\typelib\msgqueue.c" />
+    <ClCompile Include="..\src\typelib\sets.c" />
+    <ClCompile Include="..\src\typelib\text.c" />
+    <ClCompile Include="..\src\typelib\typecode.c" />
+    <ClCompile Include="..\src\timerlib\timers.c" />
+    <ClCompile Include="..\src\idlelib\idle.c" />
+    <ClCompile Include="..\src\msgsvr\client\client.c" />
+    <ClCompile Include="..\src\configlib\configscript.c" />
+    <ClCompile Include="..\src\procreglib\names.c" />
+    <ClCompile Include="..\src\netlib\network.c" />
+    <ClCompile Include="..\src\netlib\ping.c" />
+    <ClCompile Include="..\src\netlib\tcpnetwork.c" />
+    <ClCompile Include="..\src\netlib\udpnetwork.c" />
+    <ClCompile Include="..\src\netlib\whois.c" />
+    <ClCompile Include="..\src\filesyslib\filescan.c" />
+    <ClCompile Include="..\src\filesyslib\pathops.c" />
+    <ClCompile Include="..\src\filesyslib\filemon\allfiles.c" />
+    <ClCompile Include="..\src\filesyslib\filemon\windowsfiles.c" />
+    <ClCompile Include="..\src\systemlib\args.c" />
+    <ClCompile Include="..\src\systemlib\spawntask.c" />
+    <ClCompile Include="..\src\systemlib\system.c" />
+    <ClCompile Include="..\src\msgsvr\summoner\construct.c" />
+    <ClCompile Include="..\src\deadstart\deadlib.c" />
+    <ClCompile Include="..\src\deadstart\deadstart.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\deadstart\deadstart_core.c" />
+    <ClCompile Include="..\src\deadstart\deadstart_lib.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\deadstart\deadstop.c" />
+    <ClCompile Include="..\src\vectlib\vectlib.c" />
+    <ClCompile Include="..\src\jpeg-6b\jcapimin.c" />
+    <ClCompile Include="..\src\jpeg-6b\jcapistd.c" />
+    <ClCompile Include="..\src\jpeg-6b\jccoefct.c" />
+    <ClCompile Include="..\src\jpeg-6b\jccolor.c" />
+    <ClCompile Include="..\src\jpeg-6b\jcdctmgr.c" />
+    <ClCompile Include="..\src\jpeg-6b\jchuff.c" />
+    <ClCompile Include="..\src\jpeg-6b\jcinit.c" />
+    <ClCompile Include="..\src\jpeg-6b\jcmainct.c" />
+    <ClCompile Include="..\src\jpeg-6b\jcmarker.c" />
+    <ClCompile Include="..\src\jpeg-6b\jcmaster.c" />
+    <ClCompile Include="..\src\jpeg-6b\jcomapi.c" />
+    <ClCompile Include="..\src\jpeg-6b\jcparam.c" />
+    <ClCompile Include="..\src\jpeg-6b\jcphuff.c" />
+    <ClCompile Include="..\src\jpeg-6b\jcprepct.c" />
+    <ClCompile Include="..\src\jpeg-6b\jcsample.c" />
+    <ClCompile Include="..\src\jpeg-6b\jctrans.c" />
+    <ClCompile Include="..\src\jpeg-6b\jdapimin.c" />
+    <ClCompile Include="..\src\jpeg-6b\jdapistd.c" />
+    <ClCompile Include="..\src\jpeg-6b\jdatadst.c" />
+    <ClCompile Include="..\src\jpeg-6b\jdatasrc.c" />
+    <ClCompile Include="..\src\jpeg-6b\jdcoefct.c" />
+    <ClCompile Include="..\src\jpeg-6b\jdcolor.c" />
+    <ClCompile Include="..\src\jpeg-6b\jddctmgr.c" />
+    <ClCompile Include="..\src\jpeg-6b\jdhuff.c" />
+    <ClCompile Include="..\src\jpeg-6b\jdinput.c" />
+    <ClCompile Include="..\src\jpeg-6b\jdmainct.c" />
+    <ClCompile Include="..\src\jpeg-6b\jdmarker.c" />
+    <ClCompile Include="..\src\jpeg-6b\jdmaster.c" />
+    <ClCompile Include="..\src\jpeg-6b\jdmerge.c" />
+    <ClCompile Include="..\src\jpeg-6b\jdphuff.c" />
+    <ClCompile Include="..\src\jpeg-6b\jdpostct.c" />
+    <ClCompile Include="..\src\jpeg-6b\jdsample.c" />
+    <ClCompile Include="..\src\jpeg-6b\jdtrans.c" />
+    <ClCompile Include="..\src\jpeg-6b\jerror.c" />
+    <ClCompile Include="..\src\jpeg-6b\jfdctflt.c" />
+    <ClCompile Include="..\src\jpeg-6b\jfdctfst.c" />
+    <ClCompile Include="..\src\jpeg-6b\jfdctint.c" />
+    <ClCompile Include="..\src\jpeg-6b\jidctflt.c" />
+    <ClCompile Include="..\src\jpeg-6b\jidctfst.c" />
+    <ClCompile Include="..\src\jpeg-6b\jidctint.c" />
+    <ClCompile Include="..\src\jpeg-6b\jidctred.c" />
+    <ClCompile Include="..\src\jpeg-6b\jmemmgr.c" />
+    <ClCompile Include="..\src\jpeg-6b\jmemnobs.c" />
+    <ClCompile Include="..\src\jpeg-6b\jquant1.c" />
+    <ClCompile Include="..\src\jpeg-6b\jquant2.c" />
+    <ClCompile Include="..\src\jpeg-6b\jutils.c" />
+    <ClCompile Include="..\src\sha1lib\sha1.c" />
+    <ClCompile Include="..\src\genx\charProps.c" />
+    <ClCompile Include="..\src\genx\genx.c" />
+    <ClCompile Include="..\src\sexpat\xmlparse.c" />
+    <ClCompile Include="..\src\sexpat\xmlrole.c" />
+    <ClCompile Include="..\src\sexpat\xmltok.c" />
+    <ClCompile Include="..\src\SQLlib\sql_ref_class.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\SQLlib\sqlparse.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\SQLlib\sqlparse3.c" />
+    <ClCompile Include="..\src\SQLlib\sqlstub.c" />
+    <ClCompile Include="..\src\SQLlib\sqlutil.c" />
+    <ClCompile Include="..\src\SQLlib\sqlwrap.c" />
+    <ClCompile Include="..\src\sqlite\sqlite3.c" />
+    <ClCompile Include="..\src\libpng-1.2.31\png.c" />
+    <ClCompile Include="..\src\libpng-1.2.31\pngerror.c" />
+    <ClCompile Include="..\src\libpng-1.2.31\pnggccrd.c" />
+    <ClCompile Include="..\src\libpng-1.2.31\pngget.c" />
+    <ClCompile Include="..\src\libpng-1.2.31\pngmem.c" />
+    <ClCompile Include="..\src\libpng-1.2.31\pngpread.c" />
+    <ClCompile Include="..\src\libpng-1.2.31\pngread.c" />
+    <ClCompile Include="..\src\libpng-1.2.31\pngrio.c" />
+    <ClCompile Include="..\src\libpng-1.2.31\pngrtran.c" />
+    <ClCompile Include="..\src\libpng-1.2.31\pngrutil.c" />
+    <ClCompile Include="..\src\libpng-1.2.31\pngset.c" />
+    <ClCompile Include="..\src\libpng-1.2.31\pngtrans.c" />
+    <ClCompile Include="..\src\libpng-1.2.31\pngvcrd.c" />
+    <ClCompile Include="..\src\libpng-1.2.31\pngwio.c" />
+    <ClCompile Include="..\src\libpng-1.2.31\pngwrite.c" />
+    <ClCompile Include="..\src\libpng-1.2.31\pngwtran.c" />
+    <ClCompile Include="..\src\libpng-1.2.31\pngwutil.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\autofit\autofit.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\bdf\bdf.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\cff\cff.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\base\ftbase.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\base\ftbitmap.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\cache\ftcache.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\base\ftgasp.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\base\ftglyph.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\base\ftgxval.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\gzip\ftgzip.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\base\ftinit.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\lzw\ftlzw.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\base\ftmm.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\base\ftotval.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\base\ftpfr.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\base\ftstroke.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\base\ftsynth.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\base\ftsystem.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\base\fttype1.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\base\ftwinfnt.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\base\ftxf86.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\gxvalid\gxvalid.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\otvalid\otvalid.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\pcf\pcf.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\pfr\pfr.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\psaux\psaux.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\pshinter\pshinter.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\psnames\psmodule.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\raster\raster.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\sfnt\sfnt.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\smooth\smooth.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\truetype\truetype.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\type1\type1.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\cid\type1cid.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\type42\type42.c" />
+    <ClCompile Include="..\src\freetype-2.3.7\src\winfonts\winfnt.c" />
+    <ClCompile Include="..\src\zlib-1.2.3\compress.c" />
+    <ClCompile Include="..\src\zlib-1.2.3\crc32.c" />
+    <ClCompile Include="..\src\zlib-1.2.3\deflate.c" />
+    <ClCompile Include="..\src\zlib-1.2.3\gzio.c" />
+    <ClCompile Include="..\src\zlib-1.2.3\infback.c" />
+    <ClCompile Include="..\src\zlib-1.2.3\inffast.c" />
+    <ClCompile Include="..\src\zlib-1.2.3\inflate.c" />
+    <ClCompile Include="..\src\zlib-1.2.3\inftrees.c" />
+    <ClCompile Include="..\src\zlib-1.2.3\trees.c" />
+    <ClCompile Include="..\src\zlib-1.2.3\uncompr.c" />
+    <ClCompile Include="..\src\zlib-1.2.3\zutil.c" />
+    <ClCompile Include="..\src\zlib-1.2.3\adler32.c" />
+    <ClCompile Include="..\src\snmplib\asn1.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\coexistance.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\mib.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\mibii.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\mini-client.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\new-parse.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\parse.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\snmp_api.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\snmp_api_error.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\snmp_api_util.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\snmp_client.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\snmp_dump.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\snmp_error.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\snmp_extra.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\snmp_msg.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\snmp_pdu.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\snmp_vars.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\version.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_callback_xs.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_chunk_descr.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_chunk_io.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_chunk_prc.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_chunk_xs.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_cms.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_display.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_dither.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_error.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_filter.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_hlapi.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_jpeg.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_object_prc.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_pixels.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_prop_xs.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_read.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_trace.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_write.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_zlib.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\netservicelib\udprequest.c" />
+    <ClCompile Include="..\src\netservicelib\udpresp.c" />
+    <ClCompile Include="..\src\fractionlib\fractions.c" />
+    <ClCompile Include="..\src\SQLlib\optlib\getoption.c" />
+    <ClCompile Include="..\src\SQLlib\optlib\getoption_new.c" />
+    <ClCompile Include="..\src\psilib\option_frame.c" />
+    <ClCompile Include="..\src\SQLlib\optlib\optionutil.c" />
+    <ClCompile Include="..\src\SQLlib\optlib\optionutil_new.c" />
+    <ClCompile Include="..\src\imglib\alphastab.c" />
+    <ClCompile Include="..\src\imglib\alphatab.c" />
+    <ClCompile Include="..\src\imglib\blotdirect.c" />
+    <ClCompile Include="..\src\imglib\blotscaled.c" />
+    <ClCompile Include="..\src\imglib\bmpimage.c" />
+    <ClCompile Include="..\src\imglib\fntcache.c" />
+    <ClCompile Include="..\src\imglib\fntrender.c" />
+    <ClCompile Include="..\src\imglib\font.c" />
+    <ClCompile Include="..\src\imglib\gifimage.c" />
+    <ClCompile Include="..\src\imglib\image.c" />
+    <ClCompile Include="..\src\imglib\image_client.c" />
+    <ClCompile Include="..\src\imglib\interface.c" />
+    <ClCompile Include="..\src\imglib\jpgimage.c" />
+    <ClCompile Include="..\src\imglib\line.c" />
+    <ClCompile Include="..\src\imglib\lucidaconsole.c" />
+    <ClCompile Include="..\src\imglib\math.c" />
+    <ClCompile Include="..\src\imglib\pngimage.c" />
+    <ClCompile Include="..\src\imglib\smooth_sprite.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\imglib\sprite.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\imglib\sprite_common.c" />
+    <ClCompile Include="..\src\vidlib\key.c" />
+    <ClCompile Include="..\src\vidlib\keydefs.c" />
+    <ClCompile Include="..\src\vidlib\opengl.c" />
+    <ClCompile Include="..\src\vidlib\viddll.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\vidlib\vidlib.c" />
+    <ClCompile Include="..\src\psilib\calctl\analog.c" />
+    <ClCompile Include="..\src\psilib\borders.c" />
+    <ClCompile Include="..\src\psilib\calctl\calender.c" />
+    <ClCompile Include="..\src\psilib\calctl\clock.c" />
+    <ClCompile Include="..\src\psilib\controls.c" />
+    <ClCompile Include="..\src\psilib\ctlbutton.c" />
+    <ClCompile Include="..\src\psilib\ctledit.c" />
+    <ClCompile Include="..\src\psilib\ctllistbox.c" />
+    <ClCompile Include="..\src\psilib\ctlmisc.c" />
+    <ClCompile Include="..\src\psilib\ctlprop.c" />
+    <ClCompile Include="..\src\psilib\ctlscroll.c" />
+    <ClCompile Include="..\src\psilib\ctlsheet.c" />
+    <ClCompile Include="..\src\psilib\ctlslider.c" />
+    <ClCompile Include="..\src\psilib\ctltext.c" />
+    <ClCompile Include="..\src\psilib\fileopen.c" />
+    <ClCompile Include="..\src\psilib\fntdlg.c" />
+    <ClCompile Include="..\src\psilib\loadsave.c" />
+    <ClCompile Include="..\src\psilib\mouse.c" />
+    <ClCompile Include="..\src\psilib\palette.c" />
+    <ClCompile Include="..\src\psilib\popups.c" />
+    <ClCompile Include="..\src\systraylib\systray.c" />
+    <ClCompile Include="..\src\psilib\xml_load.c" />
+    <ClCompile Include="..\src\psilib\xml_save.c" />
+    <ClCompile Include="..\src\psilib\console\console_keydefs.c" />
+    <ClCompile Include="..\src\psilib\console\history.c" />
+    <ClCompile Include="..\src\psilib\console\paste.c" />
+    <ClCompile Include="..\src\psilib\console\psicon.c" />
+    <ClCompile Include="..\src\psilib\console\psicon_interface.c" />
+    <ClCompile Include="..\src\psilib\console\regaccess.c" />
+    <ClCompile Include="..\src\psilib\console\WinLogic.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\memlib\sharestruc.h" />
+    <ClInclude Include="..\include\sharemem.h" />
+    <ClInclude Include="..\include\typelib.h" />
+    <ClInclude Include="..\include\msgclient.h" />
+    <ClInclude Include="..\include\msgprotocol.h" />
+    <ClInclude Include="..\include\msgserver.h" />
+    <ClInclude Include="..\include\procreg.h" />
+    <ClInclude Include="..\src\netlib\netstruc.h" />
+    <ClInclude Include="..\src\netlib\ping.h" />
+    <ClInclude Include="..\include\loadsock.h" />
+    <ClInclude Include="..\include\network.h" />
+    <ClInclude Include="..\src\filesyslib\filemon\monitor.h" />
+    <ClInclude Include="..\include\vectlib.h" />
+    <ClInclude Include="..\include\vectypes.h" />
+    <CustomBuild Include="..\src\genx\genx.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">mkdir $(ProjectDir)..\include\genxml
+copy %(FullPath) $(ProjectDir)..\include\genxml
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">$(ProjectDir)..\include\genxml\genx.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">mkdir $(ProjectDir)..\include\genxml
+copy %(FullPath) $(ProjectDir)..\include\genxml
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">$(ProjectDir)..\include\genxml\genx.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">mkdir $(ProjectDir)..\include\genxml
+copy %(FullPath) $(ProjectDir)..\include\genxml
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\include\genxml\genx.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">mkdir $(ProjectDir)..\include\genxml
+copy %(FullPath) $(ProjectDir)..\include\genxml
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">$(ProjectDir)..\include\genxml\genx.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">mkdir $(ProjectDir)..\include\genxml
+copy %(FullPath) $(ProjectDir)..\include\genxml
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">$(ProjectDir)..\include\genxml\genx.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">mkdir $(ProjectDir)..\include\genxml
+copy %(FullPath) $(ProjectDir)..\include\genxml
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)..\include\genxml\genx.h;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\src\sexpat\expat.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">mkdir $(ProjectDir)..\include\sexpat
+copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat.h
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">$(ProjectDir)..\include\sexpat\sexpat.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">mkdir $(ProjectDir)..\include\sexpat
+copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat.h
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">$(ProjectDir)..\include\sexpat\sexpat.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">mkdir $(ProjectDir)..\include\sexpat
+copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat.h
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\include\sexpat\sexpat.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">mkdir $(ProjectDir)..\include\sexpat
+copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat.h
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">$(ProjectDir)..\include\sexpat\sexpat.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">mkdir $(ProjectDir)..\include\sexpat
+copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat.h
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">$(ProjectDir)..\include\sexpat\sexpat.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">mkdir $(ProjectDir)..\include\sexpat
+copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat.h
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)..\include\sexpat\sexpat.h;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\src\sexpat\expat_external.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">mkdir $(ProjectDir)..\include\sexpat
+copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat_external.h
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">$(ProjectDir)..\include\sexpat\sexpat_external.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">mkdir $(ProjectDir)..\include\sexpat
+copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat_external.h
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">$(ProjectDir)..\include\sexpat\sexpat_external.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">mkdir $(ProjectDir)..\include\sexpat
+copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat_external.h
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\include\sexpat\sexpat_external.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">mkdir $(ProjectDir)..\include\sexpat
+copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat_external.h
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">$(ProjectDir)..\include\sexpat\sexpat_external.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">mkdir $(ProjectDir)..\include\sexpat
+copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat_external.h
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">$(ProjectDir)..\include\sexpat\sexpat_external.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">mkdir $(ProjectDir)..\include\sexpat
+copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat_external.h
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)..\include\sexpat\sexpat_external.h;%(Outputs)</Outputs>
+    </CustomBuild>
+    <ClInclude Include="..\src\SQLlib\sqlstruc.h" />
+    <CustomBuild Include="..\src\libpng-1.2.31\png.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">mkdir $(ProjectDir)..\include\png
+copy %(FullPath) $(ProjectDir)..\include\png
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">$(ProjectDir)..\include\png\png.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">mkdir $(ProjectDir)..\include\png
+copy %(FullPath) $(ProjectDir)..\include\png
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">$(ProjectDir)..\include\png\png.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">mkdir $(ProjectDir)..\include\png
+copy %(FullPath) $(ProjectDir)..\include\png
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\include\png\png.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">mkdir $(ProjectDir)..\include\png
+copy %(FullPath) $(ProjectDir)..\include\png
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">$(ProjectDir)..\include\png\png.h;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\src\libpng-1.2.31\pngconf.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">mkdir $(ProjectDir)..\include\png
+copy %(FullPath) $(ProjectDir)..\include\png
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">$(ProjectDir)..\include\png\pngconf.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">mkdir $(ProjectDir)..\include\png
+copy %(FullPath) $(ProjectDir)..\include\png
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">$(ProjectDir)..\include\png\pngconf.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">mkdir $(ProjectDir)..\include\png
+copy %(FullPath) $(ProjectDir)..\include\png
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\include\png\pngconf.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">mkdir $(ProjectDir)..\include\png
+copy %(FullPath) $(ProjectDir)..\include\png
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">$(ProjectDir)..\include\png\pngconf.h;%(Outputs)</Outputs>
+    </CustomBuild>
+    <ClInclude Include="..\src\zlib-1.2.3\crc32.h" />
+    <ClInclude Include="..\src\zlib-1.2.3\deflate.h" />
+    <ClInclude Include="..\src\zlib-1.2.3\inffast.h" />
+    <ClInclude Include="..\src\zlib-1.2.3\inffixed.h" />
+    <ClInclude Include="..\src\zlib-1.2.3\inflate.h" />
+    <ClInclude Include="..\src\zlib-1.2.3\inftrees.h" />
+    <ClInclude Include="..\src\zlib-1.2.3\trees.h" />
+    <CustomBuild Include="..\src\zlib-1.2.3\zconf.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">mkdir $(ProjectDir)..\include\png
+copy %(FullPath) $(ProjectDir)..\include\png
+mkdir $(ProjectDir)..\include\zlib
+copy %(FullPath) $(ProjectDir)..\include\zlib
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">$(ProjectDir)..\include\png\zconf.h;$(ProjectDir)..\include\zlib\zconf.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">mkdir $(ProjectDir)..\include\png
+copy %(FullPath) $(ProjectDir)..\include\png
+mkdir $(ProjectDir)..\include\zlib
+copy %(FullPath) $(ProjectDir)..\include\zlib
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">$(ProjectDir)..\include\png\zconf.h;$(ProjectDir)..\include\zlib\zconf.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">mkdir $(ProjectDir)..\include\zlib
+copy %(FullPath) $(ProjectDir)..\include\zlib
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\include\zlib\zconf.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">mkdir $(ProjectDir)..\include\png
+copy %(FullPath) $(ProjectDir)..\include\png
+mkdir $(ProjectDir)..\include\zlib
+copy %(FullPath) $(ProjectDir)..\include\zlib
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">$(ProjectDir)..\include\png\zconf.h;$(ProjectDir)..\include\zlib\zconf.h;%(Outputs)</Outputs>
+    </CustomBuild>
+    <ClInclude Include="..\src\zlib-1.2.3\zconf.in.h" />
+    <CustomBuild Include="..\src\zlib-1.2.3\zlib.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">mkdir $(ProjectDir)..\include\png
+copy %(FullPath) $(ProjectDir)..\include\png
+mkdir $(ProjectDir)..\include\zlib
+copy %(FullPath) $(ProjectDir)..\include\zlib
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">$(ProjectDir)..\include\png\zlib.h;$(ProjectDir)..\include\zlib\zlib.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">mkdir $(ProjectDir)..\include\png
+copy %(FullPath) $(ProjectDir)..\include\png
+mkdir $(ProjectDir)..\include\zlib
+copy %(FullPath) $(ProjectDir)..\include\zlib
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">$(ProjectDir)..\include\png\zlib.h;$(ProjectDir)..\include\zlib\zlib.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">mkdir $(ProjectDir)..\include\zlib
+copy %(FullPath) $(ProjectDir)..\include\zlib
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\include\zlib\zlib.h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">mkdir $(ProjectDir)..\include\png
+copy %(FullPath) $(ProjectDir)..\include\png
+mkdir $(ProjectDir)..\include\zlib
+copy %(FullPath) $(ProjectDir)..\include\zlib
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">$(ProjectDir)..\include\png\zlib.h;$(ProjectDir)..\include\zlib\zlib.h;%(Outputs)</Outputs>
+    </CustomBuild>
+    <ClInclude Include="..\src\zlib-1.2.3\zutil.h" />
+    <ClInclude Include="..\include\sqlgetoption.h" />
+    <ClInclude Include="..\include\sqloptint.h" />
+    <ClInclude Include="..\src\SQLlib\optlib\optlib.h" />
+    <ClInclude Include="..\src\imglib\blotproto.h" />
+    <ClInclude Include="..\src\imglib\fntglobal.h" />
+    <ClInclude Include="..\src\imglib\gifimage.h" />
+    <ClInclude Include="..\src\imglib\jpgimage.h" />
+    <ClInclude Include="..\src\imglib\pngimage.h" />
+    <ClInclude Include="..\include\imglib\fontstruct.h" />
+    <ClInclude Include="..\include\keybrd.h" />
+    <ClInclude Include="..\src\vidlib\local.h" />
+    <ClInclude Include="..\include\render.h" />
+    <ClInclude Include="..\src\psilib\console\consolestruc.h" />
+    <ClInclude Include="..\src\psilib\console\history.h" />
+    <ClInclude Include="..\src\psilib\console\histstruct.h" />
+    <ClInclude Include="..\src\psilib\console\keydefs.h" />
+    <ClInclude Include="..\src\psilib\console\mydatapath.h" />
+    <ClInclude Include="..\src\psilib\console\regaccess.h" />
+    <ClInclude Include="..\src\psilib\console\resource.h" />
+    <ClInclude Include="..\src\psilib\console\WinLogic.h" />
+    <ClInclude Include="..\include\controls.h" />
+    <ClInclude Include="..\src\psilib\controlstruc.h" />
+    <ClInclude Include="..\src\psilib\global.h" />
+    <ClInclude Include="..\include\psi.h" />
+    <ClInclude Include="..\include\deadstart.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="..\include\sack_types.h" />
+    <ClInclude Include="..\include\stdhdrs.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\src\procreglib\interface.conf">
+      <DeploymentContent>true</DeploymentContent>
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">copy "%(FullPath)" "$(OutDir)"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">$(OutDir)%(Identity);%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">copy "%(FullPath)" "$(OutDir)"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">$(OutDir)%(Identity);%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy "%(FullPath)" "$(OutDir)"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)%(Identity);%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">copy "%(FullPath)" "$(OutDir)"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">$(OutDir)%(Identity);%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">copy "%(FullPath)" "$(OutDir)"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">$(OutDir)%(Identity);%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy "%(FullPath)" "$(OutDir)"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)%(Identity);%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\src\imglib\blatcolor.asm">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\src\imglib\blotdirasm.asm">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\src\imglib\blotdirmshadeasm.asm">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\src\imglib\blotdirshadeasm.asm">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\src\imglib\blotscaasm.asm">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\src\imglib\blotscamshadeasm.asm">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\src\imglib\blotscashadeasm.asm">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\src\imglib\lineasm.asm">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\src\imglib\plotasm.asm">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\src\imglib\alphamac.asm">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\src\imglib\blotdirmac.asm">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\src\imglib\blotscamac.asm">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\src\imglib\blotshademac.asm">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\src\imglib\ImageFile.asm">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\src\imglib\mmx.asm">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\src\SQLlib\sqlstub.rc">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ResourceCompile>
+    <ResourceCompile Include="..\src\systraylib\systray.rc">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ResourceCompile>
+    <ResourceCompile Include="..\all_resources.rc">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">$(SACK_BASE)/src/psilib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">$(SACK_BASE)/src/psilib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SACK_BASE)/src/psilib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">$(SACK_BASE)/src/psilib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\trunk\xperdex\xperdex.classes\xperdex.classes.vc10.csproj">
+      <Project>{041e5a37-8678-451e-9500-ee3d7864c092}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
