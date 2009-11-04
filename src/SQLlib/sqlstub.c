@@ -2745,7 +2745,7 @@ int __DoSQLQueryEx( PODBC odbc, PCOLLECT collection, CTEXTSTR query DBG_PASS )
 #if defined( USE_SQLITE ) || defined( USE_SQLITE_INTERFACE )
 		if( odbc->flags.bSQLite_native )
 		{
-			retry = DumpInfo2( collection->pvt_errorinfo, SQL_HANDLE_STMT, collection->hstmt, odbc->flags.bNoLogging );
+			retry = DumpInfo2( collection->pvt_errorinfo, SQL_HANDLE_STMT, odbc, odbc->flags.bNoLogging );
 			//tmp = VarTextPeek( collection->pvt_errorinfo );
 			//_lprintf(DBG_RELAY)( WIDE("SQLITE Command excecution failed(1)....%s"), tmp?GetText( tmp ):WIDE("NO ERROR RESULT") );
 		}
