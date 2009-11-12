@@ -867,7 +867,8 @@ typedef struct LinkStack
 {
    _32     Top;
    _32     Cnt;
-   _32     Lock;  // thread interlock using InterlockedExchange semaphore
+	_32     Lock;  // thread interlock using InterlockedExchange semaphore
+   _32     Max;
    POINTER pNode[1];
 } LINKSTACK, *PLINKSTACK;
 

@@ -410,13 +410,21 @@ POINTER GetDataItem( PDATALIST *ppdl, INDEX idx )
 namespace link_stack {
 #endif
 
-TYPELIB_PROC( PLINKSTACK, CreateLinkStackEx )( DBG_VOIDPASS )
+TYPELIB_PROC( PLINKSTACK,     CreateLinkStackLimitedEx        )( int max_entries  DBG_PASS )
 {
    PLINKSTACK pls;
    pls = (PLINKSTACK)AllocateEx( sizeof( LINKSTACK ) DBG_RELAY );
    pls->Top = 0;
-   pls->Cnt = 0;
+	pls->Cnt = 0;
+   pls->Max = max_entries;
    return pls;
+}
+
+//--------------------------------------------------------------------------
+
+TYPELIB_PROC( PLINKSTACK, CreateLinkStackEx )( DBG_VOIDPASS )
+{
+   return CreateLinkStackLimitedEx( 0 DBG_RELAY );
 }
 
 //--------------------------------------------------------------------------
@@ -488,8 +496,14 @@ TYPELIB_PROC( PLINKSTACK, PushLinkEx )( PLINKSTACK *pls, POINTER p DBG_PASS )
    if( !*pls ||
        (*pls)->Top == (*pls)->Cnt )
    {
-      ExpandStackEx( pls, 1 DBG_RELAY );
-   }
+      ExpandStackEx( pls, ((*pls)->Max)+8 DBG_RELAY );
+	}
+   if( (*pls)->Max )
+		if( ((*pls)->Top) >= (*pls)->Max )
+		{
+			MemCpy( (*pls)->pNode, (*pls)->pNode + 1, (*pls)->Top - 1 );
+			(*pls)->Top--;
+		}
    (*pls)->pNode[(*pls)->Top] = p;
    (*pls)->Top++;
    return (*pls);
@@ -923,7 +937,7 @@ TYPELIB_PROC( PDATAQUEUE, PrequeDataEx )( PDATAQUEUE *ppdq, POINTER link DBG_PAS
 	if( link )
 	{
 		tmp = pdq->Bottom - 1;
-		if( tmp < 0 )
+		if( tmp > 0x80000000 )
 			tmp += pdq->Cnt;
 		if( tmp == pdq->Top ) // collided with self...
 		{
