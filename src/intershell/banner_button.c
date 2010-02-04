@@ -153,7 +153,7 @@ void StripConfigString( TEXTSTR out, CTEXTSTR in )
 	out[0] = in[0];
 }
 
-void ExpandConfigString( TEXTSTR out, CTEXTSTR in )
+void MyExpandConfigString( TEXTSTR out, CTEXTSTR in )
 {
 	// convert \r\n to literal characters...
 	if( !in )

@@ -763,6 +763,7 @@ int CPROC FirstFrameMouse( PPHYSICAL_DEVICE pf, S_32 x, S_32 y, _32 b, int bCall
 #ifdef DETAILED_MOUSE_DEBUG
 				lprintf( WIDE("sizing by %d,%d"), dx, dy );
 #endif
+				pc->flags.bResizedDirty = 1;
             if( pf->flags.bSizing_left )
             {
                 if( pf->flags.bSizing_top )
@@ -814,7 +815,9 @@ int CPROC FirstFrameMouse( PPHYSICAL_DEVICE pf, S_32 x, S_32 y, _32 b, int bCall
 #endif
                     pf->flags.bSizing = 0;
                 }
-            }
+				}
+				//DebugBreak();
+            //SmudgeCommon( pc );
             return TRUE;
         }
         else

@@ -710,6 +710,7 @@ void DestroySQLTable( PTABLE table )
 		}
 		Release( (POINTER)table->keys.key[n].name );
 	}
+   Release( (POINTER)table->name );
 	Release( (POINTER)table->fields.field );
 	Release( (POINTER)table->keys.key );
 	Release( table );

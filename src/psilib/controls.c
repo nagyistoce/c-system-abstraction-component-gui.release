@@ -2018,8 +2018,10 @@ void CPROC FrameRedraw( PTRSZVAL psvFrame, PRENDERER psvSelf )
 #endif
    pc->flags.bShown = 1;
 	GetCurrentDisplaySurface(pf);
-	if( pc->flags.bDirty )
+	if( pc->flags.bDirty || pc->flags.bResizedDirty )
 	{
+		pc->flags.bResizedDirty = 0;
+      pc->flags.bDirty = 1;
 #ifdef DEBUG_UPDAATE_DRAW
 		Log( WIDE("Redraw frame...") );
 #endif
@@ -2069,7 +2071,11 @@ void CPROC FrameRedraw( PTRSZVAL psvFrame, PRENDERER psvSelf )
 		{
 			//lprintf( WIDE("Recomputing border...") );
 			// fix up surface rect.
-			SetCommonBorder( pc, pc->BorderType );
+			{
+            extern void UpdateSurface( PSI_CONTROL pc );
+            UpdateSurface( pc );
+			}
+			//SetCommonBorder( pc, pc->BorderType );
 			if( pc->DrawBorder )
 			{
 #ifdef DEBUG_BORDER_DRAWING
@@ -2801,7 +2807,7 @@ static void InvokeControlHidden( PSI_CONTROL pc )
 static void InvokeControlRevealed( PSI_CONTROL pc )
 {
 	void (CPROC *OnReveal)(PSI_CONTROL);
-	TEXTCHAR keyname[32];
+	TEXTCHAR keyname[40];
 	PCLASSROOT data = NULL;
    CTEXTSTR name;
    snprintf( keyname, sizeof( keyname ), WIDE("/psi/control/%d/reveal_control"), pc->nType );
@@ -3185,6 +3191,10 @@ PSI_PROC( void, SizeCommon )( PSI_CONTROL pc, _32 width, _32 height )
 		}
 
 		ResizeImage( pc->Window, width, height );
+		{
+				extern void UpdateSurface( PCOMMON pc );
+				UpdateSurface( pc );
+		}
 		ResizeImage( pc->Surface
 					  , pc->surface_rect.width += delw
 					  , pc->surface_rect.height += delh );

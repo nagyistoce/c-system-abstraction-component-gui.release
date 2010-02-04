@@ -164,7 +164,7 @@ PRIORITY_PRELOAD( ImageRegisterInterface, IMAGE_PRELOAD_PRIORITY )
 //   and the related changes may not exist in assembly objects.
 //   The only safe method is C anyhow.  AND it's not that slow
 //   what with modern compilers and all.
-   SetBlotMethod( BLOT_MMX );
+   SetBlotMethod( BLOT_C );
 //#else
 	// cleans up declarations.
 //   SetBlotMethod( BLOT_C );

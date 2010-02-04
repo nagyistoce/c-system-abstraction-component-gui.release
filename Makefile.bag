@@ -148,7 +148,7 @@ MORE_TARGETS+=$(if $(__NO_SQL__),,$(if $(USE_SQLITE),$(SACK_BASE)/include/sqlite
 
 
 
-SYSLIBS=$(if $(__WINDOWS__),odbc32 wsock32 iphlpapi, m odbc)
+SYSLIBS=$(if $(__WINDOWS__),odbc32 wsock32 iphlpapi winmm, m odbc)
 CXFLAGS:=$(CXFLAGS) $(if $(__NO_SQL__),,-DUSE_ODBC) $(if $(__EXTERNAL_SQLITE__),-DUSE_SQLITE_INTERFACE)
 
 

@@ -818,7 +818,7 @@ void InvokeCallbacks( PTRANSFORM pt )
 				// how much time passed between then and no
 				// and what's our target resolution?
 				static _32 now;
-				_32 delta = ( now = GetTickCount() ) - pt->last_tick;
+				_32 delta = ( now = timeGetTime() ) - pt->last_tick;
 				if( !delta )
 				{
 					if( !tick_freq_cpu )
@@ -857,7 +857,7 @@ void InvokeCallbacks( PTRANSFORM pt )
 			}
 			else
 			{
-				tick_cpu = pt->last_tick = GetTickCount();
+				tick_cpu = pt->last_tick = timeGetTime();
 				last_tick_cpu = GetCPUTick();
 				pt->time_scale = ONE;
 			}

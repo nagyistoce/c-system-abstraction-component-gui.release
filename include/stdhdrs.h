@@ -73,6 +73,9 @@
 
 // INCLUDE WINDOWS.H
 #include <windows.h>
+
+// we like timeGetTime() instead of GetTickCount()
+#include <mmsystem.h>
 #ifdef NEED_V4W
 #include <vfw.h>
 #endif
