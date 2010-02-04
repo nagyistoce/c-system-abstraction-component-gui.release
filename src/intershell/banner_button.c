@@ -123,64 +123,6 @@ OnKeyPressEvent( "Banner Message Remove" )( PTRSZVAL psvBanner )
 	//BannerMessage( "Yo, whatcha want!?" );
 }
 
-void StripConfigString( TEXTSTR out, CTEXTSTR in )
-{
-	// convert \r\n to literal characters...
-	if( !in )
-	{
-		out[0] = 0;
-		return;
-	}
-	for( ; in[0]; in++,out++ )
-	{
-		if( in[0] == '\\' )
-		{
-			switch( in[1] )
-			{
-			case 'n':
-				in++;
-				out[0] = '\n';
-				break;
-			default:
-				out[0] = in[1];
-				in++;
-				break;
-			}
-		}
-		else
-			out[0] = in[0];
-	}
-	out[0] = in[0];
-}
-
-void MyExpandConfigString( TEXTSTR out, CTEXTSTR in )
-{
-	// convert \r\n to literal characters...
-	if( !in )
-	{
-		out[0] = 0;
-		return;
-	}
-	for( ; in[0]; in++,out++ )
-	{
-		if( in[0] == '\n' )
-		{
-			out[0] = '\\';
-			out++;
-			out[0] = 'n';
-		}
-		else if( in[0] == '\\' )
-		{
-			out[0] = '\\';
-			out++;
-			out[0] = '\\';
-		}
-		else
-			out[0] = in[0];
-	}
-	out[0] = in[0];
-}
-
 OnConfigureControl( "Banner Message" )( PTRSZVAL psvBanner, PSI_CONTROL parent )
 {
 	PBANNER_BUTTON banner = (PBANNER_BUTTON)psvBanner;
