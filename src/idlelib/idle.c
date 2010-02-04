@@ -157,8 +157,8 @@ IDLE_PROC( int, Idle )( void )
 
 IDLE_PROC( int, IdleForEx )( _32 dwMilliseconds DBG_PASS )
 {
-	_32 dwStart = GetTickCount();
-	while( ( dwStart + dwMilliseconds ) > GetTickCount() )
+	_32 dwStart = timeGetTime();
+	while( ( dwStart + dwMilliseconds ) > timeGetTime() )
 	{
 		if( !IdleEx( DBG_VOIDRELAY ) )
 		{

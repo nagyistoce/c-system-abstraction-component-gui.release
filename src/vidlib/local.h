@@ -15,6 +15,7 @@ typedef struct vidlib_local_tag
 		BIT_FIELD bLayeredWindowDefault : 1;
 		BIT_FIELD mouse_on : 1;
 		BIT_FIELD bOptimizeHide : 1;
+		BIT_FIELD bUseLLKeyhook : 1;
       //---------- see comment above
 	} flags;
    PRENDERER mouse_last_vid;

@@ -3,6 +3,7 @@
 //#define USE_RENDER_INTERFACE banner_local.pdi
 //#define USE_IMAGE_INTERFACE banner_local.pii
 //#endif
+#include <stdhdrs.h>
 #include <render.h>
 #include <sharemem.h>
 #include <controls.h>
@@ -663,7 +664,7 @@ void SetBannerText( PBANNER banner, char *text )
 void CPROC BannerTimeout( PTRSZVAL ppsv )
 {
 	PBANNER *ppBanner = (PBANNER*)ppsv;
-   int delta = (int)(*ppBanner)->timeout - (int)GetTickCount();
+   int delta = (int)(*ppBanner)->timeout - (int)timeGetTime();
 	//PBANNER banner = ppBanner?(*ppBanner):NULL;
 	if( delta < 0 )
 	{
@@ -708,7 +709,7 @@ void SetBannerOptionsEx( PBANNER *ppBanner, _32 flags, _32 extra  )
 		banner->flags = flags;
 		if( flags & BANNER_TIMEOUT )
 		{
-			banner->timeout = GetTickCount() + extra;
+			banner->timeout = timeGetTime() + extra;
 			if( !banner->timer )
 			{
 				banner->timer = AddTimerEx( extra, 0, BannerTimeout, (PTRSZVAL)ppBanner );

@@ -594,55 +594,55 @@
     <ClCompile Include="..\src\libmng\libmng_zlib.c">
       <Filter>Source Files\BAG Source Files\MNG library</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libpng-1.2.31\png.c">
+    <ClCompile Include="..\src\libpng-1.2.40\png.c">
       <Filter>Source Files\BAG Source Files\PNG Library</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libpng-1.2.31\pngerror.c">
+    <ClCompile Include="..\src\libpng-1.2.40\pngerror.c">
       <Filter>Source Files\BAG Source Files\PNG Library</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libpng-1.2.31\pnggccrd.c">
+    <ClCompile Include="..\src\libpng-1.2.40\pnggccrd.c">
       <Filter>Source Files\BAG Source Files\PNG Library</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libpng-1.2.31\pngget.c">
+    <ClCompile Include="..\src\libpng-1.2.40\pngget.c">
       <Filter>Source Files\BAG Source Files\PNG Library</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libpng-1.2.31\pngmem.c">
+    <ClCompile Include="..\src\libpng-1.2.40\pngmem.c">
       <Filter>Source Files\BAG Source Files\PNG Library</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libpng-1.2.31\pngpread.c">
+    <ClCompile Include="..\src\libpng-1.2.40\pngpread.c">
       <Filter>Source Files\BAG Source Files\PNG Library</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libpng-1.2.31\pngread.c">
+    <ClCompile Include="..\src\libpng-1.2.40\pngread.c">
       <Filter>Source Files\BAG Source Files\PNG Library</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libpng-1.2.31\pngrio.c">
+    <ClCompile Include="..\src\libpng-1.2.40\pngrio.c">
       <Filter>Source Files\BAG Source Files\PNG Library</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libpng-1.2.31\pngrtran.c">
+    <ClCompile Include="..\src\libpng-1.2.40\pngrtran.c">
       <Filter>Source Files\BAG Source Files\PNG Library</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libpng-1.2.31\pngrutil.c">
+    <ClCompile Include="..\src\libpng-1.2.40\pngrutil.c">
       <Filter>Source Files\BAG Source Files\PNG Library</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libpng-1.2.31\pngset.c">
+    <ClCompile Include="..\src\libpng-1.2.40\pngset.c">
       <Filter>Source Files\BAG Source Files\PNG Library</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libpng-1.2.31\pngtrans.c">
+    <ClCompile Include="..\src\libpng-1.2.40\pngtrans.c">
       <Filter>Source Files\BAG Source Files\PNG Library</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libpng-1.2.31\pngvcrd.c">
+    <ClCompile Include="..\src\libpng-1.2.40\pngvcrd.c">
       <Filter>Source Files\BAG Source Files\PNG Library</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libpng-1.2.31\pngwio.c">
+    <ClCompile Include="..\src\libpng-1.2.40\pngwio.c">
       <Filter>Source Files\BAG Source Files\PNG Library</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libpng-1.2.31\pngwrite.c">
+    <ClCompile Include="..\src\libpng-1.2.40\pngwrite.c">
       <Filter>Source Files\BAG Source Files\PNG Library</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libpng-1.2.31\pngwtran.c">
+    <ClCompile Include="..\src\libpng-1.2.40\pngwtran.c">
       <Filter>Source Files\BAG Source Files\PNG Library</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libpng-1.2.31\pngwutil.c">
+    <ClCompile Include="..\src\libpng-1.2.40\pngwutil.c">
       <Filter>Source Files\BAG Source Files\PNG Library</Filter>
     </ClCompile>
     <ClCompile Include="..\src\memlib\sharemem.c">
@@ -1182,10 +1182,10 @@
     <CustomBuild Include="..\src\imglib\plotasm.asm">
       <Filter>Source Files\BAG.image Source Files\Assembly</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\src\libpng-1.2.31\png.h">
+    <CustomBuild Include="..\src\libpng-1.2.40\png.h">
       <Filter>Source Files\BAG Source Files\PNG Library\Headers</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\src\libpng-1.2.31\pngconf.h">
+    <CustomBuild Include="..\src\libpng-1.2.40\pngconf.h">
       <Filter>Source Files\BAG Source Files\PNG Library\Headers</Filter>
     </CustomBuild>
     <CustomBuild Include="..\src\procreglib\interface.conf">

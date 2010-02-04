@@ -123,10 +123,16 @@ TYPELIB_PROC( void,      EmptyDataList )( PDATALIST *ppdl );
 		namespace link_stack {
 #endif
 TYPELIB_PROC( PLINKSTACK,  CreateLinkStackEx)( DBG_VOIDPASS );
+         // creates a link stack with maximum entries - any extra entries are pushed off the bottom into NULL
+TYPELIB_PROC( PLINKSTACK,     CreateLinkStackLimitedEx        )( int max_entries  DBG_PASS );
+#define CreateLinkStackLimited(n) CreateLinkStackLimitedEx(n DBG_SRC)
 TYPELIB_PROC( void,        DeleteLinkStackEx)( PLINKSTACK *pls DBG_PASS);
 TYPELIB_PROC( PLINKSTACK,  PushLinkEx       )( PLINKSTACK *pls, POINTER p DBG_PASS);
 TYPELIB_PROC( POINTER,     PopLink          )( PLINKSTACK *pls );
 TYPELIB_PROC( POINTER,     PeekLink         )( PLINKSTACK *pls );
+// thought about adding these, but decided on creating a limited stack instead.
+//TYPELIB_PROC( POINTER,     StackLength      )( PLINKSTACK *pls );
+//TYPELIB_PROC( POINTER,     PopLinkEx        )( PLINKSTACK *pls, int position );
 
 #define CreateLinkStack()  CreateLinkStackEx( DBG_VOIDSRC ) 
 #define DeleteLinkStack(p) DeleteLinkStackEx((p) DBG_SRC)

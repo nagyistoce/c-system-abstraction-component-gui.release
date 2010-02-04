@@ -1,4 +1,3 @@
-//#define LL_HOOK
 /****************
  * Some performance concerns regarding high numbers of layered windows...
  * every 1000 windows causes 2 - 12 millisecond delays...
@@ -28,6 +27,7 @@
 #endif
 
 #include <stdhdrs.h>
+/* again, this should be moved to stdhdrs so we get timeGetTime() */
 #include <sqlgetoption.h>
 #include <deadstart.h>
 #include <stdio.h>
@@ -1145,20 +1145,19 @@ LRESULT CALLBACK
 				}
 			}
 		}
-		//lprintf( WIDE("Keyhook mesasage... %08x %08x"), wParam, lParam );
+		if( l.flags.bLogKeyEvent )
+			lprintf( WIDE("Keyhook mesasage... %08x %08x"), wParam, lParam );
 		//lprintf( WIDE("hWndFocus is %p"), hWndFocus );
 		if( hWndFocus == l.hWndInstance )
 		{
 #ifdef LOG_FOCUSEVENTS
-			lprintf( WIDE("hwndfocus is something...") );
+			if( l.flags.bLogKeyEvent )
+				lprintf( WIDE("hwndfocus is something...") );
 #endif
 			hVid = l.hVidFocused;
 		}
 		else
 		{
-#ifdef LOG_FOCUSEVENTS
-			lprintf( WIDE("hVid from focus") );
-#endif
 			hVid = (PVIDEO) GetWindowLong (hWndFocus, WD_HVIDEO);
 			{
 				INDEX idx;
@@ -1176,7 +1175,8 @@ LRESULT CALLBACK
 				hVid = NULL;
 			}
 		}
-      //lprintf( WIDE("hvid is %p"), hVid );
+		if( l.flags.bLogKeyEvent )
+			lprintf( WIDE("hvid is %p"), hVid );
       if(hVid)
       {
          /*
@@ -1247,9 +1247,14 @@ LRESULT CALLBACK
 				if( hVideo && hVideo->pKeyProc )
 				{
 					hVideo->flags.event_dispatched = 1;
-					//lprintf( WIDE("Dispatched KEY!") );
+					if( l.flags.bLogKeyEvent )
+						lprintf( WIDE("Dispatched KEY!") );
 					if( hVideo->flags.key_dispatched )
+					{
+						if( l.flags.bLogKeyEvent )
+							lprintf( "already dispatched, delay it." );
 						EnqueLink( &hVideo->pInput, (POINTER)key );
+					}
 					else
 					{
 						hVideo->flags.key_dispatched = 1;
@@ -1257,32 +1262,60 @@ LRESULT CALLBACK
 						{
 							if( l.flags.bLogKeyEvent )
 								lprintf( "Dispatching key %08lx", key );
-							dispatch_handled = hVideo->pKeyProc( hVideo->dwKeyData, key );
-							//lprintf( "Result of dispatch was %ld", dispatch_handled );
-							if( FindLink( &l.pActiveList, hVideo ) == INVALID_INDEX )
-								break;
+                     if( keymod & 6 )
+								if( HandleKeyEvents( KeyDefs, key )  )
+								{
+                           lprintf( "Sent global first." );
+									dispatch_handled = 1;
+								}
 
 							if( !dispatch_handled )
 							{
+								// previously this would then dispatch the key event...
+								// but we want to give priority to handled keys.
+								dispatch_handled = hVideo->pKeyProc( hVideo->dwKeyData, key );
 								if( l.flags.bLogKeyEvent )
-									lprintf( WIDE("Local Keydefs Dispatch key : %p %08lx"), hVideo, key );
-								if( hVideo && !HandleKeyEvents( hVideo->KeyDefs, key ) )
+									lprintf( "Result of dispatch was %ld", dispatch_handled );
+								if( FindLink( &l.pActiveList, hVideo ) == INVALID_INDEX )
+									break;
+
+								if( !dispatch_handled )
 								{
 									if( l.flags.bLogKeyEvent )
-										lprintf( WIDE("Global Keydefs Dispatch key : %08lx"), key );
-									if( FindLink( &l.pActiveList, hVideo ) == INVALID_INDEX )
-										break;
-									if( !HandleKeyEvents( KeyDefs, key ) )
+										lprintf( WIDE("Local Keydefs Dispatch key : %p %08lx"), hVideo, key );
+									if( hVideo && !HandleKeyEvents( hVideo->KeyDefs, key ) )
 									{
-										// previously this would then dispatch the key event...
-										// but we want to give priority to handled keys.
+										if( l.flags.bLogKeyEvent )
+											lprintf( WIDE("Global Keydefs Dispatch key : %08lx"), key );
+										if( FindLink( &l.pActiveList, hVideo ) == INVALID_INDEX )
+										{
+											if( l.flags.bLogKeyEvent )
+												lprintf( "lost window..." );
+											break;
+										}
 									}
 								}
 							}
+							if( !dispatch_handled )
+							{
+								if( !(keymod & 6) )
+									if( HandleKeyEvents( KeyDefs, key )  )
+									{
+										dispatch_handled = 1;
+									}
+							}
 							if( FindLink( &l.pActiveList, hVideo ) == INVALID_INDEX )
+							{
+								if( l.flags.bLogKeyEvent )
+									lprintf( "lost active window." );
 								break;
+							}
 							key = (_32)DequeLink( &hVideo->pInput );
+							if( l.flags.bLogKeyEvent )
+								lprintf( "key from deque : %p", key );
 						} while( key );
+						if( l.flags.bLogKeyEvent )
+							lprintf( "completed..." );
 						hVideo->flags.key_dispatched = 0;
 					}
 					hVideo->flags.event_dispatched = 0;
@@ -1291,6 +1324,9 @@ LRESULT CALLBACK
 				{
 					HandleKeyEvents( KeyDefs, key ); /* global events, if no keyproc */
 				}
+			else
+				if( l.flags.bLogKeyEvent )
+					lprintf( "Not active window?" );
 		   //else
 			//	lprintf( "Failed to find active window..." );
 		}
@@ -1304,27 +1340,30 @@ LRESULT CALLBACK
 				}
 #endif
 		}
-   // do we REALLY have to call the next hook?!
-   // I mean windows will just fuck us in the next layer....
-	if( ( code < 0 )|| !dispatch_handled )
+		// do we REALLY have to call the next hook?!
+		// I mean windows will just fuck us in the next layer....
+		//lprintf( "%d %d", code, dispatch_handled );
+		if( ( code < 0 )|| !dispatch_handled )
+		{
+			PTHREAD thread = MakeThread();
+			INDEX idx;
+			PTHREAD check_thread;
+			LIST_FORALL( l.threads, idx, PTHREAD, check_thread )
 			{
-				PTHREAD thread = MakeThread();
-				INDEX idx;
-				PTHREAD check_thread;
-				LIST_FORALL( l.threads, idx, PTHREAD, check_thread )
+				if( check_thread == thread )
 				{
-					if( check_thread == thread )
-					{
-						LRESULT result;
-						//lprintf( "Chained to next hook...(2)" );
-						result = CallNextHookEx ( (HHOOK)GetLink( &l.keyhooks, idx ), code, wParam, lParam);
-						//lprintf( "and result is %d", result );
-						return result;
-					}
-					//else
-					//   lprintf( "skipping thread %p", check_thread );
+					LRESULT result;
+					if( l.flags.bLogKeyEvent )
+						lprintf( "Chained to next hook...(2)" );
+					result = CallNextHookEx ( (HHOOK)GetLink( &l.keyhooks, idx ), code, wParam, lParam);
+					if( l.flags.bLogKeyEvent )
+						lprintf( "and result is %d", result );
+					return result;
 				}
+				//else
+				//   lprintf( "skipping thread %p", check_thread );
 			}
+		}
 	}
 	//lprintf( "Finished keyhook..." );
 	return 1; // stop handling - zero allows continuation...
@@ -1336,8 +1375,8 @@ LRESULT CALLBACK
 				LPARAM lParam     // keystroke-message information
 			  )
 {
+	int dispatch_handled = 0;
 	{
-		int dispatch_handled = 0;
 		PVIDEO hVid;
 		int key, scancode, keymod = 0;
       int vkcode;
@@ -1351,7 +1390,9 @@ LRESULT CALLBACK
 		aThisClass = (ATOM) GetClassLong (hWndFocus, GCW_ATOM);
 
 		if( l.flags.bLogKeyEvent )
-			lprintf( "KeyHook2 %d %08lx %08lx", code, wParam, lParam );
+			lprintf( "KeyHook2 %d %08lx %d %d %d %d %p"
+					 , code, wParam
+					 , kbhook->vkCode, kbhook->scanCode, kbhook->flags, kbhook->time, kbhook->dwExtraInfo );
 
       /*
 		if (aThisClass != l.aClass && hWndFocus != l.hWndInstance )
@@ -1404,10 +1445,8 @@ LRESULT CALLBACK
 				hVid = NULL;
 			}
 		}
-      //lprintf( WIDE("hvid is %p"), hVid );
-      if(hVid)
-      {
-         /*
+		{
+			/*
           // I think this is upside down...
           struct {
           BIT_FIELD  base  : 8;
@@ -1435,11 +1474,15 @@ LRESULT CALLBACK
 
          if (key & 0x80000000)   // test keydown...
 			{
+				if( l.flags.bLogKeyEvent )
+               lprintf( "keydown" );
             l.kbd.key[vkcode] |= 0x80;   // set this bit (pressed)
             l.kbd.key[vkcode] ^= 1;   // toggle this bit...
          }
          else
          {
+				if( l.flags.bLogKeyEvent )
+					lprintf( "keyup" );
             l.kbd.key[vkcode] &= ~0x80;  //(unpressed)
 			}
 
@@ -1468,99 +1511,128 @@ LRESULT CALLBACK
          else
             l.mouse_b &= ~MK_CONTROL;
          if((l.kbd.key[VK_LMENU]|l.kbd.key[VK_RMENU]|l.kbd.key[KEY_ALT]) & 0x80)
-         {
+			{
+
             key |= 0x40000000;
             l.mouse_b |= MK_ALT;
             keymod |= 4;
          }
          else
-            l.mouse_b &= ~MK_ALT;
-#ifndef USE_IPC_MESSAGE_QUEUE_TO_GATHER_EVENTS
-		{
-			PVIDEO hVideo = hVid;
-         //lprintf( "..." );
-			if( FindLink( &l.pActiveList, hVideo ) != INVALID_INDEX )
-				if( hVideo && hVideo->pKeyProc )
-				{
-					hVideo->flags.event_dispatched = 1;
-					//lprintf( WIDE("Dispatched KEY!") );
-					if( hVideo->flags.key_dispatched )
-						EnqueLink( &hVideo->pInput, (POINTER)key );
-					else
-					{
-						hVideo->flags.key_dispatched = 1;
-						do
-						{
-							if( l.flags.bLogKeyEvent )
-								lprintf( "Dispatching key %08lx", key );
-							dispatch_handled = hVideo->pKeyProc( hVideo->dwKeyData, key );
-							//lprintf( "Result of dispatch was %ld", dispatch_handled );
-							if( FindLink( &l.pActiveList, hVideo ) == INVALID_INDEX )
-								break;
+				l.mouse_b &= ~MK_ALT;
 
-							if( !dispatch_handled )
+			if( l.flags.bLogKeyEvent )
+				lprintf( "keymod is %d from (%d,%d,%d)", keymod
+						 , (l.kbd.key[VK_LMENU]|l.kbd.key[VK_RMENU]|l.kbd.key[KEY_ALT])
+						 , (l.kbd.key[VK_LCONTROL]|l.kbd.key[VK_RCONTROL]|l.kbd.key[KEY_CTRL])
+						 , (l.kbd.key[VK_LSHIFT]|l.kbd.key[VK_RSHIFT]|l.kbd.key[KEY_SHIFT])
+						 );
+		}
+
+		//lprintf( WIDE("hvid is %p"), hVid );
+      if(hVid)
+		{
+#ifndef USE_IPC_MESSAGE_QUEUE_TO_GATHER_EVENTS
+			{
+				PVIDEO hVideo = hVid;
+				//lprintf( "..." );
+				if( FindLink( &l.pActiveList, hVideo ) != INVALID_INDEX )
+					if( hVideo && hVideo->pKeyProc )
+					{
+						hVideo->flags.event_dispatched = 1;
+						//lprintf( WIDE("Dispatched KEY!") );
+						if( hVideo->flags.key_dispatched )
+							EnqueLink( &hVideo->pInput, (POINTER)key );
+						else
+						{
+							hVideo->flags.key_dispatched = 1;
+							do
 							{
-								if( l.flags.bLogKeyEvent )
-									lprintf( WIDE("Local Keydefs Dispatch key : %p %08lx"), hVideo, key );
-								if( hVideo && !HandleKeyEvents( hVideo->KeyDefs, key ) )
+								if( (keymod & 6) )
+								{
+									dispatch_handled = HandleKeyEvents( KeyDefs, key );
+								}
+								if( !dispatch_handled )
 								{
 									if( l.flags.bLogKeyEvent )
-										lprintf( WIDE("Global Keydefs Dispatch key : %08lx"), key );
-									if( FindLink( &l.pActiveList, hVideo ) == INVALID_INDEX )
-										break;
-									if( !HandleKeyEvents( KeyDefs, key ) )
+										lprintf( "Dispatching key %08lx", key );
+									dispatch_handled = hVideo->pKeyProc( hVideo->dwKeyData, key );
+								}
+								if( l.flags.bLogKeyEvent )
+									lprintf( "Result of dispatch was %ld", dispatch_handled );
+								if( FindLink( &l.pActiveList, hVideo ) == INVALID_INDEX )
+									break;
+
+								if( !dispatch_handled )
+								{
+									if( l.flags.bLogKeyEvent )
+										lprintf( WIDE("Local Keydefs Dispatch key : %p %08lx"), hVideo, key );
+									if( hVideo && !HandleKeyEvents( hVideo->KeyDefs, key ) )
 									{
-										// previously this would then dispatch the key event...
-										// but we want to give priority to handled keys.
+										if( l.flags.bLogKeyEvent )
+											lprintf( WIDE("Global Keydefs Dispatch key : %08lx"), key );
+										if( FindLink( &l.pActiveList, hVideo ) == INVALID_INDEX )
+											break;
+
+										// if had ctrl or alt, keymod will be 2 or 4... and dispatched above
+										if( !(keymod & 6) )
+											if( !HandleKeyEvents( KeyDefs, key ) )
+											{
+												// previously this would then dispatch the key event...
+												// but we want to give priority to handled keys.
+											}
 									}
 								}
-							}
-							if( FindLink( &l.pActiveList, hVideo ) == INVALID_INDEX )
-								break;
-							key = (_32)DequeLink( &hVideo->pInput );
-						} while( key );
-						hVideo->flags.key_dispatched = 0;
+								if( FindLink( &l.pActiveList, hVideo ) == INVALID_INDEX )
+									break;
+								key = (_32)DequeLink( &hVideo->pInput );
+							} while( key );
+							hVideo->flags.key_dispatched = 0;
+						}
+						hVideo->flags.event_dispatched = 0;
 					}
-					hVideo->flags.event_dispatched = 0;
-				}
-				else
-				{
-               //lprintf( "calling global events." );
-					HandleKeyEvents( KeyDefs, key ); /* global events, if no keyproc */
-				}
-		   //else
-			//	lprintf( "Failed to find active window..." );
-		}
+					else
+					{
+						//lprintf( "calling global events." );
+						dispatch_handled = HandleKeyEvents( KeyDefs, key ); /* global events, if no keyproc */
+					}
+				//else
+				//	lprintf( "Failed to find active window..." );
+			}
 #else
-				{
-					_32 Msg[2];
-					Msg[0] = (_32)hVid;
-					Msg[1] = key;
-               //lprintf( WIDE("Dispatch key from raw handler into event system.") );
-					//lprintf( "..." );
-					SendServiceEvent( 0, l.dwMsgBase + MSG_KeyMethod, Msg, sizeof( Msg ) );
-				}
+			{
+				_32 Msg[2];
+				Msg[0] = (_32)hVid;
+				Msg[1] = key;
+				//lprintf( WIDE("Dispatch key from raw handler into event system.") );
+				//lprintf( "..." );
+				SendServiceEvent( 0, l.dwMsgBase + MSG_KeyMethod, Msg, sizeof( Msg ) );
+			}
 #endif
+		}
+		else
+		{
+			dispatch_handled = HandleKeyEvents( KeyDefs, key );
 		}
 		//lprintf( "code:%d handled:%d", code, dispatch_handled );
 		// do we REALLY have to call the next hook?!
 		// I mean windows will just fuck us in the next layer....
 		if( ( code < 0 )|| !dispatch_handled )
+		{
+			PTHREAD thread = MakeThread();
+			INDEX idx;
+			PTHREAD check_thread;
+			LIST_FORALL( l.threads, idx, PTHREAD, check_thread )
 			{
-				PTHREAD thread = MakeThread();
-				INDEX idx;
-				PTHREAD check_thread;
-				LIST_FORALL( l.threads, idx, PTHREAD, check_thread )
+				if( check_thread == thread )
 				{
-					if( check_thread == thread )
-					{
-						//lprintf( "Chained to next hook..." );
-						return CallNextHookEx ( (HHOOK)GetLink( &l.ll_keyhooks, idx ), code, wParam, lParam);
-					}
+					if( l.flags.bLogKeyEvent )
+						lprintf( "Chained to next hook... %08x %08x", wParam, lParam );
+					return CallNextHookEx ( (HHOOK)GetLink( &l.ll_keyhooks, idx ), code, wParam, lParam);
 				}
 			}
+		}
 	}
-	return 1; // stop handling - zero allows continuation...
+	return dispatch_handled; // stop handling - zero allows continuation...
 }
 
 #endif
@@ -1756,14 +1828,20 @@ int IsVidThread( void )
 
 void Redraw( PVIDEO hVideo )
 {
-	if( IsVidThread() )
+	if( IsThisThread( hVideo->pThreadWnd ) )
+		//if( IsVidThread() )
 	{
+#ifdef LOG_RECT_UPDATE
 		lprintf( "..." );
+#endif
 		SendApplicationDraw( hVideo );
 	}
 	else
 	{
+
+#ifdef LOG_RECT_UPDATE
 		lprintf( "Posting invalidate rect..." );
+#endif
 		InvalidateRect( hVideo->hWndOutput, NULL, FALSE );
 	}
 }
@@ -2061,7 +2139,8 @@ WM_DROPFILES
 					hVideo->flags.bFocused = 0;
 					// clear keyboard state...
 					{
-						MemSet( &l.kbd, 0, sizeof( l.kbd ) );
+                  if( !l.flags.bUseLLKeyhook )
+							MemSet( &l.kbd, 0, sizeof( l.kbd ) );
 						MemSet( &hVideo->kbd, 0, sizeof( hVideo->kbd ) );
 					}
 					if ( hVideo->pLoseFocus && !hVideo->flags.bHidden )
@@ -2512,7 +2591,7 @@ WM_DROPFILES
 		}
 		if( l.last_mouse_update )
 		{
-			if( ( l.last_mouse_update + 1000 ) < GetTickCount() )
+			if( ( l.last_mouse_update + 1000 ) < timeGetTime() )
 			{
             if( !l.flags.mouse_on ) // mouse is off...
 					l.last_mouse_update = 0;
@@ -2541,7 +2620,7 @@ WM_DROPFILES
 			}
 			if( hVideo->flags.bIdleMouse )
 			{
-				l.last_mouse_update = GetTickCount();
+				l.last_mouse_update = timeGetTime();
 #ifdef LOG_MOUSE_HIDE_IDLE
 				lprintf( "Tick ... %d", l.last_mouse_update );
 #endif
@@ -2700,9 +2779,9 @@ WM_DROPFILES
 		if( l.flags.mouse_on && l.last_mouse_update )
 		{
 #ifdef LOG_MOUSE_HIDE_IDLE
-			lprintf( "Pending mouse away... %d", GetTickCount() - ( l.last_mouse_update ) );
+			lprintf( "Pending mouse away... %d", timeGetTime() - ( l.last_mouse_update ) );
 #endif
-			if( ( l.last_mouse_update + 1000 ) < GetTickCount() )
+			if( ( l.last_mouse_update + 1000 ) < timeGetTime() )
 			{
 				int x;
 #ifdef LOG_MOUSE_HIDE_IDLE
@@ -2742,19 +2821,18 @@ WM_DROPFILES
 					AddLink( &l.threads, me );
 					AddIdleProc( (int(CPROC*)(PTRSZVAL))ProcessDisplayMessages, 0 );
 					lprintf( "No thread %x, adding hook and thread.", GetCurrentThreadId() );
-#ifdef LL_HOOK
-					AddLink( &l.ll_keyhooks,
-						added = SetWindowsHookEx(WH_KEYBOARD_LL, (HOOKPROC)KeyHook2
-									  , GetModuleHandle(TARGETNAME), 0 /*GetCurrentThreadId()*/
-									  )
-							 );
-#else
-					AddLink( &l.keyhooks, 
-						added = SetWindowsHookEx(WH_KEYBOARD, (HOOKPROC)KeyHook
-									  , NULL /*GetModuleHandle(TARGETNAME)*/, GetCurrentThreadId()
-									  )
-							 );
-#endif
+               if( l.flags.bUseLLKeyhook )
+						AddLink( &l.ll_keyhooks,
+								  added = SetWindowsHookEx(WH_KEYBOARD_LL, (HOOKPROC)KeyHook2
+																  , GetModuleHandle(TARGETNAME), 0 /*GetCurrentThreadId()*/
+																  )
+								 );
+               else
+						AddLink( &l.keyhooks,
+								  added = SetWindowsHookEx(WH_KEYBOARD, (HOOKPROC)KeyHook
+																  , NULL /*GetModuleHandle(TARGETNAME)*/, GetCurrentThreadId()
+																  )
+								 );
 				}
 			}
 			pcs = (LPCREATESTRUCT) lParam;
@@ -2811,6 +2889,7 @@ WM_DROPFILES
 				hVideo->pWindowPos.cy -= hVideo->pWindowPos.y;
 				// should maybe check here... but this better be the same window handle...
 				hVideo->hWndOutput = hWnd;
+				hVideo->pThreadWnd = MakeThread();
 
 				CreateDrawingSurface (hVideo);
 				hVideo->flags.bReady = TRUE;
@@ -2872,6 +2951,7 @@ RENDER_PROC (BOOL, CreateWindowStuffSizedAt) (PVIDEO hVideo, int x, int y,
 			l.hVidCore = (PVIDEO)Allocate (sizeof (VIDEO));
 			MemSet (l.hVidCore, 0, sizeof (VIDEO));
 			l.hVidCore->hWndOutput = (HWND)l.hWndInstance;
+			l.hVidCore->pThreadWnd = MakeThread();
 		}
       //Log ("Created master window...");
    }
@@ -3383,18 +3463,17 @@ PTRSZVAL CPROC VideoThreadProc (PTHREAD thread)
 #ifdef LOG_STARTUP
 	lprintf( "Video Thread Proc %x, adding hook and thread.", GetCurrentThreadId() );
 #endif
-#ifdef LL_HOOK
-	AddLink( &l.ll_keyhooks,
-			  SetWindowsHookEx (WH_KEYBOARD_LL, (HOOKPROC)KeyHook2
-									 ,GetModuleHandle(TARGETNAME), 0 /*GetCurrentThreadId()*/
-									 ) );
-#else
-	AddLink( &l.keyhooks,
-			  SetWindowsHookEx(WH_KEYBOARD, (HOOKPROC)KeyHook
-									, NULL /*GetModuleHandle(TARGETNAME)*/, GetCurrentThreadId()
-									)
-			 );
-#endif
+   if( l.flags.bUseLLKeyhook )
+		AddLink( &l.ll_keyhooks,
+				  SetWindowsHookEx (WH_KEYBOARD_LL, (HOOKPROC)KeyHook2
+										 ,GetModuleHandle(TARGETNAME), 0 /*GetCurrentThreadId()*/
+										 ) );
+   else
+		AddLink( &l.keyhooks,
+				  SetWindowsHookEx(WH_KEYBOARD, (HOOKPROC)KeyHook
+										, NULL /*GetModuleHandle(TARGETNAME)*/, GetCurrentThreadId()
+										)
+				 );
 	{
       // creat the thread's message queue so that when we set
       // dwthread, it's going to be a valid target for
@@ -3511,8 +3590,8 @@ PRIORITY_ATEXIT( RemoveKeyHook, 100 )
 		}
       else
 		{
-			_32 start = GetTickCount() + 100;
-			while( ( start > GetTickCount() )&&
+			_32 start = timeGetTime() + 100;
+			while( ( start > timeGetTime() )&&
 				l.bThreadRunning )
 			{
 				Relinquish();
@@ -3527,7 +3606,9 @@ PRIORITY_ATEXIT( RemoveKeyHook, 100 )
 RENDER_PROC (char, GetKeyText) (int key)
 {
    int c;
-   char ch[5];
+	char ch[5];
+	if( key & KEY_MOD_DOWN )
+      return 0;
 	key ^= 0x80000000;
 
    c =
@@ -3591,18 +3672,17 @@ LOGICAL DoOpenDisplay( PVIDEO hNextVideo )
 			AddLink( &l.threads, MakeThread() );
          // add a secondidle proc so a second pass to GetMessage can be called.
 			AddIdleProc( (int(CPROC*)(PTRSZVAL))ProcessDisplayMessages, 0 );
-#ifdef LL_HOOK
-			AddLink( &l.ll_keyhooks, added =
-					  SetWindowsHookEx (WH_KEYBOARD_LL, (HOOKPROC)KeyHook2
-											 ,GetModuleHandle(TARGETNAME), 0/*GetCurrentThreadId()*/
-											 ) );
-#else
-			AddLink( &l.keyhooks,
-					  added = SetWindowsHookEx(WH_KEYBOARD, (HOOKPROC)KeyHook
-													  , NULL /*GetModuleHandle(TARGETNAME)*/, GetCurrentThreadId()
-													  )
-					 );
-#endif
+			if( l.flags.bUseLLKeyhook )
+				AddLink( &l.ll_keyhooks, added =
+						  SetWindowsHookEx (WH_KEYBOARD_LL, (HOOKPROC)KeyHook2
+												 ,GetModuleHandle(TARGETNAME), 0/*GetCurrentThreadId()*/
+												 ) );
+         else
+				AddLink( &l.keyhooks,
+						  added = SetWindowsHookEx(WH_KEYBOARD, (HOOKPROC)KeyHook
+														  , NULL /*GetModuleHandle(TARGETNAME)*/, GetCurrentThreadId()
+														  )
+						 );
 #endif
 #endif
 #ifdef __cplusplus_clr
@@ -3677,9 +3757,9 @@ LOGICAL DoOpenDisplay( PVIDEO hNextVideo )
 		}
 		if( hNextVideo )
 		{
-			_32 timeout = GetTickCount() + 500000;
+			_32 timeout = timeGetTime() + 500000;
 			hNextVideo->thread = GetMyThreadID();
-			while (!hNextVideo->flags.bReady && timeout > GetTickCount())
+			while (!hNextVideo->flags.bReady && timeout > timeGetTime())
 			{
 				// need to do this on the possibility that
 				// thIS thread did create this window...
@@ -3891,10 +3971,10 @@ RENDER_PROC (void, CloseDisplay) (PVIDEO hVideo)
 		}
 #else
 	  {
-		  _32 fail_time = GetTickCount() + 500;
-		while (l.bThreadRunning && hVideo->flags.bReady && !bEventThread && (fail_time < GetTickCount()))
+		  _32 fail_time = timeGetTime() + 500;
+		while (l.bThreadRunning && hVideo->flags.bReady && !bEventThread && (fail_time < timeGetTime()))
          Idle();
-		if(!(fail_time < GetTickCount()))
+		if(!(fail_time < timeGetTime()))
 		{
 			//lprintf( "Failed to wait for close of display....(well we might have caused it somewhere in back hsack... return now k?" );
 		}
@@ -4149,8 +4229,9 @@ RENDER_PROC (void, SetRedrawHandler) (PVIDEO hVideo,
 		//lprintf( WIDE("Sending redraw for %p"), hVideo );
 		if( hVideo->flags.bShown )
 		{
-			lprintf( "Invalida.." );
-			InvalidateRect( hVideo->hWndOutput, NULL, FALSE );
+         Redraw( hVideo );
+			//lprintf( "Invalida.." );
+			//InvalidateRect( hVideo->hWndOutput, NULL, FALSE );
 			//SendServiceEvent( 0, l.dwMsgBase + MSG_RedrawMethod, &hVideo, sizeof( hVideo ) );
 		}
 		//hVideo->pRedrawCallback (hVideo->dwRedrawData, (PRENDERER) hVideo);
@@ -4353,8 +4434,8 @@ RENDER_PROC (void, HideDisplay) (PVIDEO hVideo)
 				}
 		}
 		{
-         _32 shortwait = GetTickCount() + 250;
-			while( !hVideo->flags.bHidden && shortwait > GetTickCount() )
+         _32 shortwait = timeGetTime() + 250;
+			while( !hVideo->flags.bHidden && shortwait > timeGetTime() )
 			{
             IdleFor( 10 );
 			}
@@ -4647,7 +4728,7 @@ RENDER_PROC (void, DisableMouseOnIdle) (PVIDEO hVideo, LOGICAL bEnable )
 		{
 			SetTimer( (HWND)hVideo->hWndOutput, 100, 100, NULL );
 			hVideo->idle_timer_id = SetTimer( hVideo->hWndOutput, 100, 100, NULL );
-         l.last_mouse_update = GetTickCount(); // prime the hider.
+         l.last_mouse_update = timeGetTime(); // prime the hider.
 			hVideo->flags.bIdleMouse = bEnable;
 		}
 		else // disabling...
@@ -4807,20 +4888,21 @@ PRIORITY_PRELOAD( VideoRegisterInterface, VIDLIB_PRELOAD_PRIORITY )
 	   WIDE("video")
 #endif
 	   , GetDisplayInterface, DropDisplayInterface );
-	BindEventToKey( NULL, KEY_F4, KEY_MOD_ALT, DefaultExit, 0 );
+	BindEventToKey( NULL, KEY_F4, KEY_MOD_RELEASE|KEY_MOD_ALT, DefaultExit, 0 );
    //EnableLoggingOutput( TRUE );
 #ifndef __NO_OPTIONS__
-	l.flags.bOptimizeHide = SACK_GetProfileIntEx( "SACK", "Video Render/Optimize Hide with SWP_NOCOPYBITS", l.UpdateLayeredWindowIndirect?1:0, TRUE );
+	l.flags.bOptimizeHide = SACK_GetProfileIntEx( "SACK", "Video Render/Optimize Hide with SWP_NOCOPYBITS", 0, TRUE );
    if( l.UpdateLayeredWindow )
 		l.flags.bLayeredWindowDefault = SACK_GetProfileIntEx( GetProgramName(), "SACK/Video Render/Default windows are layered", 0, TRUE )?TRUE:FALSE;
 	else
       l.flags.bLayeredWindowDefault = 0;
 	l.flags.bLogWrites = SACK_GetProfileIntEx( GetProgramName(), "SACK/Video Render/Log Video Output", 0, TRUE );
+	l.flags.bUseLLKeyhook = SACK_GetProfileIntEx( GetProgramName(), "SACK/Video Render/Use Low Level Keyhook", 0, TRUE );
 #else
 	if( l.UpdateLayeredWindowIndirect )
 	{
       // ug - looks like I have to check if aero enabled?!
-		l.flags.bOptimizeHide = 1;
+		l.flags.bOptimizeHide = 0;
 	}
 #endif
 }

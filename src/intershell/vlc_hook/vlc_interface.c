@@ -46,7 +46,7 @@ void CPROC Cleaner( PTRSZVAL psv )
 	INDEX idx;
 	LIST_FORALL( l.vlc_releases, idx, struct vlc_release *, release )
 	{
-		if( ( release->tick + 250 ) < GetTickCount() )
+		if( ( release->tick + 250 ) < tickGetTick() )
 		{
 			ReleaseInstance( release->pmyi );
          SetLink( &l.vlc_releases, idx, NULL );
@@ -263,7 +263,7 @@ static void CPROC PlayerEvent( const libvlc_event_t *event, void *user )
 		{
 			struct vlc_release *vlc_release = New( struct vlc_release );
 			vlc_release->pmyi = pmyi;
-         vlc_release->tick = GetTickCount();
+         vlc_release->tick = timeGetTime();
 			AddLink( &l.vlc_releases, vlc_release );
 		}
 		pmyi->flags.bDone = 1;

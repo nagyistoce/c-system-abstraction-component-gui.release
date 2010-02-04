@@ -45,6 +45,8 @@ typedef struct HVIDEO_tag
    char *pTitle; // window title... need this if we draw manually anyhow
 #ifdef _WIN32
 	HWND hWndOutput;
+   // this is the thread that created the hwndoutput (events get dispatched to this.)
+   PTHREAD pThreadWnd;
 	// do opengl rendering to this... then move from window to window the updated stuff for layered window openGL junk.
    HWND hWndOutputFake;
 

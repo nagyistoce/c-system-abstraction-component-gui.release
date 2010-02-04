@@ -55,7 +55,7 @@ extern OPTION_GLOBAL og;
 //#define OPTION_ROOT_VALUE INVALID_INDEX
 #define OPTION_ROOT_VALUE 0
 
-INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const char *pBranch, const char *pValue, int bCreate )
+INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const char *pBranch, const char *pValue, int bCreate DBG_PASS )
 //#define GetOptionIndex( f,b,v ) GetOptionIndexEx( OPTION_ROOT_VALUE, f, b, v, FALSE )
 {
    const char **start = NULL;
@@ -160,9 +160,9 @@ INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const ch
 		}
 
 		{
-         INDEX IDName = SQLReadNameTable(odbc,namebuf,OPTION_NAME,"name_id");
+         INDEX IDName = SQLReadNameTable(odbc,namebuf,OPTION_NAME,"name_id" );
 
-			PushSQLQueryEx(odbc);
+			PushSQLQueryExEx(odbc DBG_RELAY );
          snprintf( query, sizeof( query )
                  , WIDE("select option_id from "OPTION_MAP" where parent_option_id=%ld and name_id=%d")
                  , parent
@@ -193,7 +193,7 @@ INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const ch
 #endif
 					parent = ID;
 					//lprintf( WIDE("Adding new option to family tree... ") );
-					FamilyTreeAddChild( GetOptionTree( odbc ), (POINTER)(ID+1), (PTRSZVAL)StrDup( namebuf ) );
+					FamilyTreeAddChild( GetOptionTree( odbc ), (POINTER)(ID+1), (PTRSZVAL)SaveText( namebuf ) );
                PopODBCEx( odbc );
                continue; // get out of this loop, continue outer.
             }
@@ -216,7 +216,7 @@ INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const ch
 				//else
             //   value = INVALID_INDEX;
             //sscanf( result, WIDE("%lu"), &parent );
-            FamilyTreeAddChild( GetOptionTree( odbc ), (POINTER)(parent+1), (PTRSZVAL)StrDup( namebuf ) );
+            FamilyTreeAddChild( GetOptionTree( odbc ), (POINTER)(parent+1), (PTRSZVAL)SaveText( namebuf ) );
          }
          PopODBCEx( odbc );
       }
@@ -227,7 +227,7 @@ INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const ch
 
 //------------------------------------------------------------------------
 
-_32 NewGetOptionStringValue( PODBC odbc, INDEX optval, char *buffer, _32 len )
+_32 NewGetOptionStringValue( PODBC odbc, INDEX optval, char *buffer, _32 len DBG_PASS )
 {
    char query[256];
    CTEXTSTR result = NULL;

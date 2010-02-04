@@ -122,27 +122,37 @@ SQLGETOPTION_PROC( void, CreateOptionDatabaseEx )( PODBC odbc )
 			{
 				table = GetFieldsInSQLEx( option_exception, FALSE DBG_SRC );
 				CheckODBCTable( odbc, table, CTO_MERGE );
+				DestroySQLTable( table );
 				table = GetFieldsInSQLEx( option_map, FALSE DBG_SRC );
 				CheckODBCTable( odbc, table, CTO_MERGE );
+				DestroySQLTable( table );
 				table = GetFieldsInSQLEx( option_name, FALSE DBG_SRC );
 				CheckODBCTable( odbc, table, CTO_MERGE );
+				DestroySQLTable( table );
 				table = GetFieldsInSQLEx( option_values, FALSE DBG_SRC );
 				CheckODBCTable( odbc, table, CTO_MATCH );
+				DestroySQLTable( table );
 				table = GetFieldsInSQLEx( systems, FALSE DBG_SRC );
 				CheckODBCTable( odbc, table, CTO_MERGE );
+				DestroySQLTable( table );
 			}
 			else
 			{
 				table = GetFieldsInSQLEx( option2_exception, FALSE DBG_SRC );
 				CheckODBCTable( odbc, table, CTO_MERGE );
+				DestroySQLTable( table );
 				table = GetFieldsInSQLEx( option2_map, FALSE DBG_SRC );
 				CheckODBCTable( odbc, table, CTO_MERGE );
+				DestroySQLTable( table );
 				table = GetFieldsInSQLEx( option2_name, FALSE DBG_SRC );
 				CheckODBCTable( odbc, table, CTO_MERGE );
+				DestroySQLTable( table );
 				table = GetFieldsInSQLEx( option2_values, FALSE DBG_SRC );
 				CheckODBCTable( odbc, table, CTO_MATCH );
+				DestroySQLTable( table );
 				table = GetFieldsInSQLEx( option2_blobs, FALSE DBG_SRC );
 				CheckODBCTable( odbc, table, CTO_MERGE );
+				DestroySQLTable( table );
 			}
 			tree->flags.bCreated = 1;
 		}
@@ -184,7 +194,8 @@ SQLGETOPTION_PROC( void, CreateOptionDatabase )( void )
 			size_t len;
 			TEXTSTR out = NewArray( TEXTCHAR, len = ( strlen( loadpath ) + strlen( global_sqlstub_data->Option.info.pDSN ) + 2 ) );
 			if( ( pathchr( global_sqlstub_data->Option.info.pDSN ) == global_sqlstub_data->Option.info.pDSN )
-				|| global_sqlstub_data->Option.info.pDSN[1] == ':' )
+				|| global_sqlstub_data->Option.info.pDSN[1] == ':'
+				|| !strchr( global_sqlstub_data->Option.info.pDSN, '.' ) )
 			{
 				snprintf( out, len, "%s", global_sqlstub_data->Option.info.pDSN );
 			}
@@ -258,12 +269,12 @@ void InitMachine( void )
 //#define OPTION_ROOT_VALUE INVALID_INDEX
 #define OPTION_ROOT_VALUE 0
 
-static INDEX GetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const char *pBranch, const char *pValue, int bCreate )
+static INDEX GetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const char *pBranch, const char *pValue, int bCreate DBG_PASS )
 //#define GetOptionIndex( f,b,v ) GetOptionIndexEx( OPTION_ROOT_VALUE, f, b, v, FALSE )
 {
 	POPTION_TREE tree = GetOptionTreeEx( odbc );
 	if( tree->flags.bNewVersion )
-		return NewGetOptionIndexExx( odbc, parent, file, pBranch, pValue, bCreate );
+		return NewGetOptionIndexExx( odbc, parent, file, pBranch, pValue, bCreate DBG_RELAY );
 	{
 		const char **start = NULL;
 		char namebuf[256];
@@ -402,7 +413,7 @@ static INDEX GetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, cons
 #endif
 						parent = ID;
 						//lprintf( WIDE("Adding new option to family tree... ") );
-						FamilyTreeAddChild( GetOptionTree( odbc ), (POINTER)(ID+1), (PTRSZVAL)StrDup( namebuf ) );
+						FamilyTreeAddChild( GetOptionTree( odbc ), (POINTER)(ID+1), (PTRSZVAL)SaveText( namebuf ) );
 						PopODBCEx( odbc );
 						continue; // get out of this loop, continue outer.
 					}
@@ -425,7 +436,7 @@ static INDEX GetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, cons
 					//else
 					//   value = INVALID_INDEX;
 					//sscanf( result, WIDE("%lu"), &parent );
-					FamilyTreeAddChild( GetOptionTree( odbc ), (POINTER)(parent+1), (PTRSZVAL)StrDup( namebuf ) );
+					FamilyTreeAddChild( GetOptionTree( odbc ), (POINTER)(parent+1), (PTRSZVAL)SaveText( namebuf ) );
 				}
 				PopODBCEx( odbc );
 			}
@@ -435,10 +446,10 @@ static INDEX GetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, cons
 	return parent;
 }
 
-INDEX GetOptionIndexEx( INDEX parent, const char *file, const char *pBranch, const char *pValue, int bCreate )
+INDEX GetOptionIndexEx( INDEX parent, const char *file, const char *pBranch, const char *pValue, int bCreate DBG_PASS )
 {
 	InitMachine();
-   return GetOptionIndexExx( og.Option, parent, file, pBranch, pValue, bCreate );
+   return GetOptionIndexExx( og.Option, parent, file, pBranch, pValue, bCreate DBG_RELAY );
 }
 //------------------------------------------------------------------------
 
@@ -552,12 +563,12 @@ INDEX DuplicateValue( INDEX iOriginalValue, INDEX iNewValue )
 
 //------------------------------------------------------------------------
 
-_32 GetOptionStringValueEx( PODBC odbc, INDEX optval, char *buffer, _32 len )
+_32 GetOptionStringValueEx( PODBC odbc, INDEX optval, char *buffer, _32 len DBG_PASS )
 {
 	POPTION_TREE tree = GetOptionTreeEx( odbc );
 	if( tree->flags.bNewVersion )
 	{
-      return NewGetOptionStringValue( odbc, optval, buffer, len );
+      return NewGetOptionStringValue( odbc, optval, buffer, len DBG_RELAY );
 	}
 	else
 	{
@@ -615,7 +626,7 @@ _32 GetOptionStringValueEx( PODBC odbc, INDEX optval, char *buffer, _32 len )
 
 _32 GetOptionStringValue( INDEX optval, char *buffer, _32 len )
 {
-	return GetOptionStringValueEx( og.Option, optval, buffer, len );
+	return GetOptionStringValueEx( og.Option, optval, buffer, len DBG_SRC );
 }
 
 int GetOptionBlobValueOdbc( PODBC odbc, INDEX optval, char **buffer, _32 *len )
@@ -654,10 +665,10 @@ int GetOptionBlobValue( INDEX optval, char **buffer, _32 *len )
 
 //------------------------------------------------------------------------
 
-LOGICAL GetOptionIntValue( INDEX optval, int *result_value )
+LOGICAL GetOptionIntValue( INDEX optval, int *result_value DBG_PASS )
 {
    char value[3];
-   if( GetOptionStringValueEx( og.Option, optval, value, sizeof( value ) ) != INVALID_INDEX )
+   if( GetOptionStringValueEx( og.Option, optval, value, sizeof( value ) DBG_RELAY ) != INVALID_INDEX )
    {
       if( value[0] == 'y' || value[0] == 'Y' )
          *result_value = 1;
@@ -876,17 +887,21 @@ int SQLPromptINIValue(
 
 //------------------------------------------------------------------------
 
-SQLGETOPTION_PROC( int, SACK_GetPrivateProfileStringEx )( CTEXTSTR pSection
-                                                 , CTEXTSTR pOptname
-                                                 , CTEXTSTR pDefaultbuf
-                                                 , char *pBuffer
-                                                 , _32 nBuffer
-																 , CTEXTSTR pININame
-																 , LOGICAL bQuiet )
+SQLGETOPTION_PROC( int, SACK_GetPrivateProfileStringExx )( CTEXTSTR pSection
+																		  , CTEXTSTR pOptname
+																		  , CTEXTSTR pDefaultbuf
+																		  , char *pBuffer
+																		  , _32 nBuffer
+																		  , CTEXTSTR pININame
+																		  , LOGICAL bQuiet
+																			DBG_PASS
+																		  )
 {
 	EnterCriticalSec( &og.cs_option );
 	{
 		INDEX optval = GetOptionIndex( pININame, pSection, pOptname );
+      // maybe do an if( l.flags.bLogOptionsRead )
+      //lprintf( "Getting option [%s] %s %s", pSection, pOptname, pININame );
 		if( optval == INVALID_INDEX )
 		{
 			// issue dialog
@@ -895,7 +910,7 @@ SQLGETOPTION_PROC( int, SACK_GetPrivateProfileStringEx )( CTEXTSTR pSection
 			else
 				strncpy( pBuffer, pDefaultbuf, nBuffer );
 			// create the option branch since it doesn't exist...
-			optval = GetOptionIndexEx( OPTION_ROOT_VALUE, pININame, pSection, pOptname, TRUE );
+			optval = GetOptionIndexEx( OPTION_ROOT_VALUE, pININame, pSection, pOptname, TRUE DBG_RELAY );
 			{
 				int x = SetOptionStringValue( optval, pBuffer ) != INVALID_INDEX;
 				LeaveCriticalSec( &og.cs_option );
@@ -905,7 +920,7 @@ SQLGETOPTION_PROC( int, SACK_GetPrivateProfileStringEx )( CTEXTSTR pSection
 		}
 		else
 		{
-			int x = GetOptionStringValueEx( og.Option, GetOptionValueIndexEx( og.Option, optval ), pBuffer, nBuffer ) != INVALID_INDEX;
+			int x = GetOptionStringValueEx( og.Option, GetOptionValueIndexEx( og.Option, optval ), pBuffer, nBuffer DBG_RELAY ) != INVALID_INDEX;
 			LeaveCriticalSec( &og.cs_option );
 			return x;
 		}
@@ -914,6 +929,19 @@ SQLGETOPTION_PROC( int, SACK_GetPrivateProfileStringEx )( CTEXTSTR pSection
 
 	return FALSE;
 }
+
+SQLGETOPTION_PROC( int, SACK_GetPrivateProfileStringEx )( CTEXTSTR pSection
+																		  , CTEXTSTR pOptname
+																		  , CTEXTSTR pDefaultbuf
+																		  , char *pBuffer
+																		  , _32 nBuffer
+																		  , CTEXTSTR pININame
+																		  , LOGICAL bQuiet
+																		  )
+{
+   return SACK_GetPrivateProfileStringExx( pSection, pOptname, pDefaultbuf, pBuffer, nBuffer, pININame, bQuiet DBG_SRC );
+}
+
 SQLGETOPTION_PROC( int, SACK_GetPrivateProfileString )( CTEXTSTR pSection
                                                  , CTEXTSTR pOptname
                                                  , CTEXTSTR pDefaultbuf
@@ -931,7 +959,9 @@ SQLGETOPTION_PROC( S_32, SACK_GetPrivateProfileIntEx )( CTEXTSTR pSection, CTEXT
    char defaultbuf[32];
    sprintf( defaultbuf, WIDE("%ld"), nDefault );
    if( SACK_GetPrivateProfileStringEx( pSection, pOptname, defaultbuf, buffer, sizeof( buffer ), pININame, bQuiet ) )
-   {
+	{
+		if( buffer[0] == 'Y' || buffer[0] == 'y' )
+         return 1;
       return atoi( buffer );
    }
    return nDefault;
@@ -962,7 +992,7 @@ SQLGETOPTION_PROC( int, SACK_GetProfileString )( CTEXTSTR pSection, CTEXTSTR pOp
 
 SQLGETOPTION_PROC( int, SACK_GetProfileBlobOdbc )( PODBC odbc, CTEXTSTR pSection, CTEXTSTR pOptname, char **pBuffer, _32 *pnBuffer )
 {
-   INDEX optval = GetOptionIndexExx( odbc, OPTION_ROOT_VALUE, NULL, pSection, pOptname, FALSE );
+   INDEX optval = GetOptionIndexExx( odbc, OPTION_ROOT_VALUE, NULL, pSection, pOptname, FALSE DBG_SRC );
    if( optval == INVALID_INDEX )
    {
       return FALSE;
@@ -999,7 +1029,7 @@ SQLGETOPTION_PROC( S_32, SACK_GetProfileInt )( CTEXTSTR pSection, CTEXTSTR pOptn
 SQLGETOPTION_PROC( int, SACK_WritePrivateProfileString )( CTEXTSTR pSection, CTEXTSTR pName, CTEXTSTR pValue, CTEXTSTR pINIFile )
 {
    INDEX optval;
-   optval = GetOptionIndexEx( OPTION_ROOT_VALUE, pINIFile, pSection, pName, TRUE );
+   optval = GetOptionIndexEx( OPTION_ROOT_VALUE, pINIFile, pSection, pName, TRUE DBG_SRC );
    if( optval == INVALID_INDEX )
    {
       lprintf( WIDE("Creation of path failed!") );
@@ -1038,7 +1068,7 @@ SQLGETOPTION_PROC( S_32, SACK_WriteProfileInt )( CTEXTSTR pSection, CTEXTSTR pNa
 SQLGETOPTION_PROC( int, SACK_WriteProfileBlobOdbc )( PODBC odbc, CTEXTSTR pSection, CTEXTSTR pOptname, char *pBuffer, _32 nBuffer )
 {
    INDEX optval;
-   optval = GetOptionIndexExx( odbc, OPTION_ROOT_VALUE, NULL, pSection, pOptname, TRUE );
+   optval = GetOptionIndexExx( odbc, OPTION_ROOT_VALUE, NULL, pSection, pOptname, TRUE DBG_SRC );
    if( optval == INVALID_INDEX )
    {
       lprintf( WIDE("Creation of path failed!") );
@@ -1069,7 +1099,7 @@ SQLGETOPTION_PROC( int, SACK_WritePrivateProfileExceptionString )( CTEXTSTR pSec
                                                             , _32 to   // SQLTIME
                                                             , CTEXTSTR pSystemName )
 {
-   INDEX optval = GetOptionIndexEx( OPTION_ROOT_VALUE, pINIFile, pSection, pName, TRUE );
+   INDEX optval = GetOptionIndexEx( OPTION_ROOT_VALUE, pINIFile, pSection, pName, TRUE DBG_SRC );
    if( optval == INVALID_INDEX )
    {
       lprintf( WIDE("Creating of path failed!") );
