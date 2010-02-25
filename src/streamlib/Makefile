@@ -12,8 +12,8 @@ ifdef __WINDOWS__
 #MORELIBS+=xvidcore
 #SRCS+=v4w
 CXFLAGS+=-D_OBJC_NO_COM
-SYSLIBS+=wsock32 vfw32 
-MORE_LITERAL_LIBS=bag.image.plugin
+SYSLIBS+=vfw32 
+#MORE_LITERAL_LIBS=bag.image.plugin
 else
 #SRCS+=v4l
 SYSLIBS+=m
@@ -56,7 +56,7 @@ ifdef __WINDOWS__
 #MORELIBS+=xvidcore
 #SRCS2+=v4w
 CXFLAGS2+=-D_OBJC_NO_COM
-SYSLIBS2+=wsock32 vfw32 
+SYSLIBS2+=vfw32 
 else
 #SRCS+=v4l
 SYSLIBS2+=m

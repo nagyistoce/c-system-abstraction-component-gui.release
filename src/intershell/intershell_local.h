@@ -288,7 +288,7 @@ MENU_GLOBAL g;
 #endif
 
 PMENU_BUTTON CreateSomeControl( PSI_CONTROL pc_canvas, int x, int y, int w, int h
-										, char *name );
+										, CTEXTSTR name );
 void DestroyButton( PMENU_BUTTON button );
 
 

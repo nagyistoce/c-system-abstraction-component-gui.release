@@ -174,7 +174,10 @@ static LOGICAL DoPingExx( CTEXTSTR pstrHost
       if( pResult )
 			pResult += sprintf( pResult, WIDE("Uhmm bad things happened for sockraw!\n") );
 		else
-         lprintf( WIDE("Uhmm bad things happened for sockraw!\n") );
+			lprintf( WIDE("Uhmm bad things happened for sockraw!\n") );
+		rawSocket = OpenSocket( TRUE, FALSE, TRUE );
+		if( rawSocket == SOCKET_ERROR )
+		{
        if( WSAGetLastError() == 10013 )
        {
            if( pResult )
@@ -187,7 +190,8 @@ static LOGICAL DoPingExx( CTEXTSTR pstrHost
            if( pResult )
                pResult = ReportError( pResult, WIDE("socket()"));
        }
-       return FALSE;
+		 return FALSE;
+		}
    }
 
    // Setup destination socket address

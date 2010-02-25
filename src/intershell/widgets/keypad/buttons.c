@@ -467,8 +467,8 @@ void LoadButtonTheme( void )
 			l.default_theme.buttons.iMask = NULL;
 		}
 
-		retval =  SACK_GetPrivateProfileString(szTheme,"GLARE","images/glare.png"
-														,szBuffer, sizeof(szBuffer), gIniFileName);
+		retval =  SACK_GetPrivateProfileStringEx(szTheme,"GLARE","images/glare.png"
+														,szBuffer, sizeof(szBuffer), gIniFileName, TRUE);
 		if (strncmp(szBuffer, WIDE("NULL"), 4)  )
 		{
 			l.default_theme.buttons.iGlare = LoadImageFile( szBuffer );
@@ -480,8 +480,8 @@ void LoadButtonTheme( void )
 			l.default_theme.buttons.iGlare = NULL;
 		}
 
-		retval =  SACK_GetPrivateProfileString(szTheme,"PRESSED","images/ridge_down.png"
-														,szBuffer, sizeof(szBuffer), gIniFileName);
+		retval =  SACK_GetPrivateProfileStringEx(szTheme,"PRESSED","images/ridge_down.png"
+														,szBuffer, sizeof(szBuffer), gIniFileName, TRUE);
 		if (strncmp(szBuffer, WIDE("NULL"), 4)  )
 		{
 			l.default_theme.buttons.iPressed = LoadImageFile( szBuffer );
@@ -493,8 +493,8 @@ void LoadButtonTheme( void )
 			l.default_theme.buttons.iPressed = NULL;
 		}
 
-		retval =  SACK_GetPrivateProfileString(szTheme,"NORMAL","images/ridge_up.png"
-														,szBuffer, sizeof(szBuffer), gIniFileName);
+		retval =  SACK_GetPrivateProfileStringEx(szTheme,"NORMAL","images/ridge_up.png"
+														,szBuffer, sizeof(szBuffer), gIniFileName, TRUE);
 		if (strncmp(szBuffer, WIDE("NULL"), 4)  )
 		{
 			l.default_theme.buttons.iNormal = LoadImageFile( szBuffer );
@@ -506,8 +506,8 @@ void LoadButtonTheme( void )
 			l.default_theme.buttons.iNormal = NULL;
 		}
 
-		l.default_theme.buttons.color =  SACK_GetPrivateProfileInt(szTheme,"Color",0x63F00013,gIniFileName);
-		l.default_theme.buttons.style =  SACK_GetPrivateProfileInt(szTheme,"Style",0, gIniFileName);
+		l.default_theme.buttons.color =  SACK_GetPrivateProfileIntEx(szTheme,"Color",0x63F00013,gIniFileName, TRUE);
+		l.default_theme.buttons.style =  SACK_GetPrivateProfileIntEx(szTheme,"Style",0, gIniFileName, TRUE);
 		l.flags.theme_loaded = 1;
 	}
 #endif

@@ -103,7 +103,7 @@ VARIABLE variables[] = { { "Current User", .flags={1,0},.data={.string_value=&pa
 static PLIST extern_variables;
 
 
-
+#undef CreateLabelVariableEx
 PVARIABLE CreateLabelVariableEx( CTEXTSTR name, enum label_variable_types type, CPOINTER data, PTRSZVAL psv )
 {
 	if( name && name[0] )

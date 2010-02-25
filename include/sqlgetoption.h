@@ -64,7 +64,7 @@ SQLGETOPTION_PROC( void, EnumOptionsEx )( PODBC odbc, INDEX parent
 					 , int (CPROC *Process)(PTRSZVAL psv, CTEXTSTR name, _32 ID, int flags )
                 , PTRSZVAL psvUser );
 
-SQLGETOPTION_PROC( _32, GetOptionStringValueEx )( PODBC odbc, INDEX optval, char *buffer, _32 len );
+SQLGETOPTION_PROC( _32, GetOptionStringValueEx )( PODBC odbc, INDEX optval, char *buffer, _32 len DBG_PASS );
 SQLGETOPTION_PROC( _32, GetOptionStringValue )( INDEX optval, char *buffer, _32 len );
 SQLGETOPTION_PROC( INDEX, GetOptionValueIndex )( INDEX ID );
 SQLGETOPTION_PROC( INDEX, GetOptionValueIndexEx )( PODBC odbc, INDEX ID );

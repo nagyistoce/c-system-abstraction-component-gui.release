@@ -269,7 +269,7 @@ LOGICAL CPROC StopProgram( PTASK_INFO task )
 		if( !GenerateConsoleCtrlEvent( CTRL_BREAK_EVENT, task->pi.dwProcessId ) )
 		{
 			lprintf( "Failed to send CTRL_BREAK_EVENT %d", GetLastError() );
-         return FALSE;
+         	return FALSE;
 		}
 	}
    return TRUE;

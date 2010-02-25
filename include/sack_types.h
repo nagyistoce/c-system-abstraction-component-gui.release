@@ -571,7 +571,7 @@ typedef S_64          *PS_64;
 //#  pragma pragnoteonly("Setting PTRSZVAL to 32 bits... pointers are this size?" )
 # endif 
 #endif
-#if defined( __LINUX64__ )
+#if defined( __LINUX64__ ) || defined( _WIN64 )
 typedef _64             PTRSIZEVAL;
 typedef _64             PTRSZVAL;
 #else
@@ -842,9 +842,9 @@ _LINKLIST_NAMESPACE
 
 typedef struct LinkBlock
 {
-   _32     Cnt;
-   _32     Lock;
-   POINTER pNode[1];
+	_32     Cnt;
+	_32     Lock;
+	POINTER pNode[1];
 } LIST, *PLIST;
 
 _LINKLIST_NAMESPACE_END
@@ -865,39 +865,40 @@ struct DataBlock
 
 typedef struct LinkStack
 {
-   _32     Top;
-   _32     Cnt;
-   _32     Lock;  // thread interlock using InterlockedExchange semaphore
-   POINTER pNode[1];
+	_32     Top;
+	_32     Cnt;
+	_32     Lock;  // thread interlock using InterlockedExchange semaphore
+	_32     Max;
+	POINTER pNode[1];
 } LINKSTACK, *PLINKSTACK;
 
 typedef struct DataListStack
 {
-   _32     Top; // next avail...
-   _32     Cnt;
-   _32     Lock;  // thread interlock using InterlockedExchange semaphore
-   _32     Size;
-   _8      data[1];
+	_32     Top; // next avail...
+	_32     Cnt;
+	_32     Lock;  // thread interlock using InterlockedExchange semaphore
+	_32     Size;
+	_8      data[1];
 } DATASTACK, *PDATASTACK;
 
 typedef struct LinkQueue
 {
-   _32     Top;
-   _32     Bottom;
-   _32     Cnt;
-   _32     Lock;  // thread interlock using InterlockedExchange semaphore
-   POINTER pNode[2]; // need two to have distinct empty/full conditions
+	_32     Top;
+	_32     Bottom;
+	_32     Cnt;
+	_32     Lock;  // thread interlock using InterlockedExchange semaphore
+	POINTER pNode[2]; // need two to have distinct empty/full conditions
 } LINKQUEUE, *PLINKQUEUE;
 
 typedef struct DataQueue
 {
-   _32     Top;
-   _32     Bottom;
-   _32     Cnt;
-   _32     Lock;  // thread interlock using InterlockedExchange semaphore
-   _32     Size;
-   _32     ExpandBy;
-   _8      data[1];
+	_32     Top;
+	_32     Bottom;
+	_32     Cnt;
+	_32     Lock;  // thread interlock using InterlockedExchange semaphore
+	_32     Size;
+	_32     ExpandBy;
+	_8      data[1];
 } DATAQUEUE, *PDATAQUEUE;
 
 _CONTAINER_NAMESPACE_END

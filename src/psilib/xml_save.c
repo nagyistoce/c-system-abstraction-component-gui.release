@@ -54,15 +54,7 @@ void WriteCommonData( PCOMMON pc )
 		genxAddAttribute( l.current_context->aType, (constUtf8)GetRegisteredValue( buf, WIDE("Type") ) );
 		sprintf( buf, WIDE("%") _32f WIDE(",") WIDE("%") _32f, pc->original_rect.x, pc->original_rect.y );
 		genxAddAttribute( l.current_context->aPosition, (constUtf8)buf );
-		if( !pc->parent )
-		{
-			if( pc->flags.bInitial )
-				sprintf( buf, WIDE("%") _32f WIDE(",") WIDE("%") _32f, pc->rect.width, pc->rect.height );
-			else
-				sprintf( buf, WIDE("%") _32f WIDE(",") WIDE("%") _32f, pc->surface_rect.width, pc->surface_rect.height );
-		}
-		else
-			sprintf( buf, WIDE("%") _32f WIDE(",") WIDE("%") _32f, pc->original_rect.width, pc->original_rect.height );
+		sprintf( buf, WIDE("%") _32f WIDE(",") WIDE("%") _32f, pc->original_rect.width, pc->original_rect.height );
 		genxAddAttribute( l.current_context->aSize, (constUtf8)buf );
 		sprintf( buf, WIDE("%") _32fx WIDE(""), pc->BorderType );
 		genxAddAttribute( l.current_context->aBorder, (constUtf8)buf );

@@ -32,8 +32,8 @@ struct sack_option_global_tag {
    CRITICALSECTION cs_option;
 };
 
-INDEX GetOptionIndexEx( INDEX parent, const char *file, const char *pBranch, const char *pValue, int bCreate );
-#define GetOptionIndex( f,b,v ) GetOptionIndexEx( OPTION_ROOT_VALUE, f, b, v, FALSE )
+INDEX GetOptionIndexEx( INDEX parent, const char *file, const char *pBranch, const char *pValue, int bCreate DBG_PASS );
+#define GetOptionIndex( f,b,v ) GetOptionIndexEx( OPTION_ROOT_VALUE, f, b, v, FALSE DBG_SRC )
 
 INDEX SetOptionValueEx( PODBC odbc, INDEX optval, INDEX iValue );
 INDEX SetOptionValue( INDEX optval, INDEX iValue );
@@ -50,8 +50,8 @@ POPTION_TREE GetOptionTreeEx( PODBC odbc );
 PFAMILYTREE* GetOptionTree( PODBC odbc );
 
 
-INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const char *pBranch, const char *pValue, int bCreate );
-_32 NewGetOptionStringValue( PODBC odbc, INDEX optval, char *buffer, _32 len );
+INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const char *pBranch, const char *pValue, int bCreate DBG_PASS );
+_32 NewGetOptionStringValue( PODBC odbc, INDEX optval, char *buffer, _32 len DBG_PASS );
 INDEX NewCreateValue( PODBC odbc, INDEX value, CTEXTSTR pValue );
 
 void NewEnumOptions( PODBC odbc, INDEX parent

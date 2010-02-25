@@ -272,15 +272,15 @@ SQLSTUB_PROC( TEXTCHAR *,EscapeSQLStringEx )( PODBC odbc, CTEXTSTR name DBG_PASS
 #define EscapeSQLString(odbc, s) EscapeSQLStringEx( odbc, s DBG_SRC )
 //SQLSTUB_PROC( CTEXTSTR ,EscapeString )( CTEXTSTR name );
 // the following functions return an allcoated buffer which the application must Release()
-SQLSTUB_PROC( TEXTSTR ,EscapeBinaryEx )( CTEXTSTR blob, _32 bloblen DBG_PASS );
+SQLSTUB_PROC( TEXTSTR ,EscapeBinaryEx )( CTEXTSTR blob, PTRSZVAL bloblen DBG_PASS );
 #define EscapeBinary(b,bl) EscapeBinaryEx(b,bl DBG_SRC )
 //SQLSTUB_PROC( CTEXTSTR ,EscapeBinary )( CTEXTSTR blob, _32 bloblen );
 
-SQLSTUB_PROC( TEXTSTR,EscapeSQLBinaryEx )( PODBC odbc, CTEXTSTR blob, _32 bloblen DBG_PASS );
+SQLSTUB_PROC( TEXTSTR,EscapeSQLBinaryEx )( PODBC odbc, CTEXTSTR blob, PTRSZVAL bloblen DBG_PASS );
 #define EscapeSQLBinary(odbc,blob,len) EscapeSQLBinaryEx( odbc,blob,len DBG_SRC )
 
 SQLSTUB_PROC( TEXTSTR ,RevertEscapeString )( CTEXTSTR name );
-SQLSTUB_PROC( TEXTSTR ,RevertEscapeBinary )( CTEXTSTR blob, _32 *bloblen );
+SQLSTUB_PROC( TEXTSTR ,RevertEscapeBinary )( CTEXTSTR blob, PTRSZVAL *bloblen );
 SQLSTUB_PROC( TEXTSTR , DeblobifyString )( CTEXTSTR blob, TEXTSTR buffer, int buflen );
 
 SQLSTUB_PROC( int, ConvertDBTimeString )( CTEXTSTR timestring

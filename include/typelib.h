@@ -123,10 +123,16 @@ TYPELIB_PROC( void,      EmptyDataList )( PDATALIST *ppdl );
 		namespace link_stack {
 #endif
 TYPELIB_PROC( PLINKSTACK,  CreateLinkStackEx)( DBG_VOIDPASS );
+         // creates a link stack with maximum entries - any extra entries are pushed off the bottom into NULL
+TYPELIB_PROC( PLINKSTACK,     CreateLinkStackLimitedEx        )( int max_entries  DBG_PASS );
+#define CreateLinkStackLimited(n) CreateLinkStackLimitedEx(n DBG_SRC)
 TYPELIB_PROC( void,        DeleteLinkStackEx)( PLINKSTACK *pls DBG_PASS);
 TYPELIB_PROC( PLINKSTACK,  PushLinkEx       )( PLINKSTACK *pls, POINTER p DBG_PASS);
 TYPELIB_PROC( POINTER,     PopLink          )( PLINKSTACK *pls );
 TYPELIB_PROC( POINTER,     PeekLink         )( PLINKSTACK *pls );
+// thought about adding these, but decided on creating a limited stack instead.
+//TYPELIB_PROC( POINTER,     StackLength      )( PLINKSTACK *pls );
+//TYPELIB_PROC( POINTER,     PopLinkEx        )( PLINKSTACK *pls, int position );
 
 #define CreateLinkStack()  CreateLinkStackEx( DBG_VOIDSRC ) 
 #define DeleteLinkStack(p) DeleteLinkStackEx((p) DBG_SRC)
@@ -237,8 +243,8 @@ typedef struct MsgDataHandle *PMSGHANDLE;
 
 // messages sent - the first dword of them must be
 // a message ID.
-typedef void (CPROC *MsgQueueReadCallback)( PTRSZVAL psv, CPOINTER p, _32 sz );
-TYPELIB_PROC( PMSGHANDLE, CreateMsgQueue )( CTEXTSTR name, _32 size
+typedef void (CPROC *MsgQueueReadCallback)( PTRSZVAL psv, CPOINTER p, PTRSZVAL sz );
+TYPELIB_PROC( PMSGHANDLE, CreateMsgQueue )( CTEXTSTR name, PTRSZVAL size
                                                       , MsgQueueReadCallback Read
                                                       , PTRSZVAL psvRead );
 TYPELIB_PROC( PMSGHANDLE, OpenMsgQueue )( CTEXTSTR name
@@ -256,11 +262,11 @@ TYPELIB_PROC( void, DeleteMsgQueue )( PMSGHANDLE **ppmh );
 #define MSGQUE_ERROR_EABORT 5
 // result is the size of the message, or 0 if no message.
 // -1 if some other error?
-TYPELIB_PROC( int, DequeMsgEx )( PMSGHANDLE pmh, _32 *MsgID, POINTER buffer, _32 msgsize, _32 options DBG_PASS );
+TYPELIB_PROC( int, DequeMsgEx )( PMSGHANDLE pmh, _32 *MsgID, POINTER buffer, PTRSZVAL msgsize, _32 options DBG_PASS );
 #define DequeMsg(q,b,s,i,o) DequeMsgEx(q,b,s,i,o DBG_SRC )
-TYPELIB_PROC( int, PeekMsgEx )( PMSGHANDLE pmh, _32 MsgID, POINTER buffer, _32 msgsize, _32 options DBG_PASS );
+TYPELIB_PROC( int, PeekMsgEx )( PMSGHANDLE pmh, _32 MsgID, POINTER buffer, PTRSZVAL msgsize, _32 options DBG_PASS );
 #define PeekMsg(q,b,s,i,o) PeekMsgEx(q,b,s,i,o DBG_SRC )
-TYPELIB_PROC( int, EnqueMsgEx )( PMSGHANDLE pmh, POINTER buffer, _32 msgsize, _32 options DBG_PASS );
+TYPELIB_PROC( int, EnqueMsgEx )( PMSGHANDLE pmh, POINTER buffer, PTRSZVAL msgsize, _32 options DBG_PASS );
 #define EnqueMsg(q,b,s,o) EnqueMsgEx(q,b,s,o DBG_SRC )
 TYPELIB_PROC( int, IsMsgQueueEmpty )( PMSGHANDLE pmh );
 

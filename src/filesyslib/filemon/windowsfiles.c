@@ -102,7 +102,7 @@ PTRSZVAL CPROC MonitorFileThread( PTHREAD pThread )
 {
    PMONITOR monitor = (PMONITOR)GetThreadParam( pThread );
 	DWORD dwResult;
-	monitor->DoScanTime = GetTickCount() - 1; // scan next tick
+	monitor->DoScanTime = timeGetTime() - 1; // scan next tick
 	monitor->hChange = FindFirstChangeNotification( monitor->directory
 																 , FALSE
 																 , FILE_NOTIFY_CHANGE_FILE_NAME
@@ -141,7 +141,7 @@ PTRSZVAL CPROC MonitorFileThread( PTHREAD pThread )
                break;
 				}
             if( !monitor->DoScanTime )
-					monitor->DoScanTime = GetTickCount() - 1;
+					monitor->DoScanTime = timeGetTime() - 1;
         }
         //else if( dwResult == WAIT_TIMEOUT )
 		  //{

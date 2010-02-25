@@ -18,13 +18,15 @@ PSI_MOUSE_NAMESPACE
 
 //---------------------------------------------------------------------------
 
-static void DrawHotSpot( PCOMMON pc, P_IMAGE_POINT bias, P_IMAGE_POINT point, int hot )
+	static void DrawHotSpotEx( PCOMMON pc, P_IMAGE_POINT bias, P_IMAGE_POINT point, int hot DBG_PASS )
+#define DrawHotSpot(pc,bias,point,hot) DrawHotSpotEx(pc,bias,point,hot DBG_SRC)
 {
     Image surface = pc->Window;
     do_hline( surface, bias[1] + point[1] - SPOT_SIZE, bias[0] + point[0] - SPOT_SIZE, bias[0] + point[0] + SPOT_SIZE, Color( 0, 0, 0 ) );
     do_hline( surface, bias[1] + point[1] + SPOT_SIZE, bias[0] + point[0] - SPOT_SIZE, bias[0] + point[0] + SPOT_SIZE, Color( 0, 0, 0 ) );
     do_vline( surface, bias[0] + point[0] - SPOT_SIZE, bias[1] + point[1] - SPOT_SIZE, bias[1] + point[1] + SPOT_SIZE, Color( 0, 0, 0 ) );
-    do_vline( surface, bias[0] + point[0] + SPOT_SIZE, bias[1] + point[1] - SPOT_SIZE, bias[1] + point[1] + SPOT_SIZE, Color( 0, 0, 0 ) );
+	 do_vline( surface, bias[0] + point[0] + SPOT_SIZE, bias[1] + point[1] - SPOT_SIZE, bias[1] + point[1] + SPOT_SIZE, Color( 0, 0, 0 ) );
+    //_lprintf(DBG_RELAY)( "color %d %d %d %d %d %d", bias[0], bias[1], point[0], point[1], surface->width, surface->height );
     BlatColor( surface
               , bias[0] + point[0] - (SPOT_SIZE-1)
               , bias[1] + point[1] - (SPOT_SIZE-1)
@@ -36,7 +38,8 @@ static void DrawHotSpot( PCOMMON pc, P_IMAGE_POINT bias, P_IMAGE_POINT point, in
 
 //---------------------------------------------------------------------------
 
-void DrawHotSpots( PCOMMON pf, PEDIT_STATE pEditState )
+void DrawHotSpotsEx( PCOMMON pf, PEDIT_STATE pEditState DBG_PASS )
+#define DrawHotSpots(pf,pe) DrawHotSpotsEx(pf,pe DBG_SRC)
 {
 	int n;
 	if( !pEditState->flags.bHotSpotsActive )
@@ -46,11 +49,11 @@ void DrawHotSpots( PCOMMON pf, PEDIT_STATE pEditState )
 #endif
 	for( n = 0; n < 9; n++ )
 	{
-		DrawHotSpot( pf
+		DrawHotSpotEx( pf
 					  , pEditState->bias
 					  , pEditState->hotspot[n]
 					  , ( n+1 == pEditState->flags.fLocked )
-					  );
+					  DBG_RELAY );
 	}
    /* this function updates the surface of a control.... */
    UpdateFrame( pf, 0, 0, pf->surface_rect.width, pf->surface_rect.height );
@@ -697,7 +700,7 @@ static PCOMMON FindControl( PCOMMON pfc, PCOMMON pc, int x, int y, int b )
 #ifdef EDIT_MOUSE_DEBUG
 					Log( WIDE("And now we draw new spots...") );
 #endif
-					DrawHotSpots( pc, &pf->EditState );
+					DrawHotSpots( pf->common, &pf->EditState );
 				}
 			}
 			}
@@ -763,6 +766,7 @@ int CPROC FirstFrameMouse( PPHYSICAL_DEVICE pf, S_32 x, S_32 y, _32 b, int bCall
 #ifdef DETAILED_MOUSE_DEBUG
 				lprintf( WIDE("sizing by %d,%d"), dx, dy );
 #endif
+				pc->flags.bResizedDirty = 1;
             if( pf->flags.bSizing_left )
             {
                 if( pf->flags.bSizing_top )
@@ -814,7 +818,9 @@ int CPROC FirstFrameMouse( PPHYSICAL_DEVICE pf, S_32 x, S_32 y, _32 b, int bCall
 #endif
                     pf->flags.bSizing = 0;
                 }
-            }
+				}
+				//DebugBreak();
+            //SmudgeCommon( pc );
             return TRUE;
         }
         else
