@@ -28,8 +28,6 @@
 #ifdef __cplusplus
 namespace sack {
 	namespace containers {
-		using namespace sack::timers;
-		using namespace sack::memory;
 #endif
 
 
@@ -52,7 +50,7 @@ TYPELIB_PROC( PLIST, DeleteListEx )( PLIST *pList DBG_PASS )
 {
 	PLIST ppList;
 	if( pList &&
-#ifdef __64__
+#ifdef _WIN64
 		( ppList = (PLIST)LockedExchange64( (PVPTRSZVAL)pList, 0 ) )
 #else
 		( ppList = (PLIST)LockedExchange( (PV_32)pList, 0 ) )
@@ -410,13 +408,22 @@ POINTER GetDataItem( PDATALIST *ppdl, INDEX idx )
 namespace link_stack {
 #endif
 
+TYPELIB_PROC( PLINKSTACK,     CreateLinkStackLimitedEx        )( int max_entries  DBG_PASS )
+{
+	PLINKSTACK pls;
+	pls = (PLINKSTACK)AllocateEx( sizeof( LINKSTACK ) DBG_RELAY );
+	pls->Top = 0;
+	pls->Cnt = 0;
+	pls->Lock = 0;
+	pls->Max = max_entries;
+	return pls;
+}
+
+//--------------------------------------------------------------------------
+
 TYPELIB_PROC( PLINKSTACK, CreateLinkStackEx )( DBG_VOIDPASS )
 {
-   PLINKSTACK pls;
-   pls = (PLINKSTACK)AllocateEx( sizeof( LINKSTACK ) DBG_RELAY );
-   pls->Top = 0;
-   pls->Cnt = 0;
-   return pls;
+	return CreateLinkStackLimitedEx( 0 DBG_RELAY );
 }
 
 //--------------------------------------------------------------------------
@@ -425,8 +432,8 @@ TYPELIB_PROC( void, DeleteLinkStackEx )( PLINKSTACK *pls DBG_PASS )
 {
 	if( pls && *pls )
 	{
-	   ReleaseEx( *pls DBG_RELAY );
-   	*pls = 0;
+		ReleaseEx( *pls DBG_RELAY );
+		*pls = 0;
 	}
 }
 
@@ -435,46 +442,47 @@ TYPELIB_PROC( void, DeleteLinkStackEx )( PLINKSTACK *pls DBG_PASS )
 TYPELIB_PROC( POINTER, PeekLink )( PLINKSTACK *pls )
 {
 	// should lock - but it's fast enough?
-   POINTER p = NULL;
-   if( pls && *pls && (*pls)->Top )
-      p = (*pls)->pNode[(*pls)->Top-1];
-   return p;
+	POINTER p = NULL;
+	if( pls && *pls && (*pls)->Top )
+		p = (*pls)->pNode[(*pls)->Top-1];
+	return p;
 }
 
 //--------------------------------------------------------------------------
 
 TYPELIB_PROC( POINTER, PopLink )( PLINKSTACK *pls )
 {
-   POINTER p = NULL;
-   if( pls && *pls && (*pls)->Top )
-   {
-      (*pls)->Top--;
-      p = (*pls)->pNode[(*pls)->Top];
+	POINTER p = NULL;
+	if( pls && *pls && (*pls)->Top )
+	{
+		(*pls)->Top--;
+		p = (*pls)->pNode[(*pls)->Top];
 #ifdef _DEBUG
-      (*pls)->pNode[(*pls)->Top] = (POINTER)0x1BEDCAFE; // trash the old one.
+		(*pls)->pNode[(*pls)->Top] = (POINTER)0x1BEDCAFE; // trash the old one.
 #endif
-   }
-   return p;
+	}
+	return p;
 }
 
 //--------------------------------------------------------------------------
 
 static PLINKSTACK ExpandStackEx( PLINKSTACK *stack, int entries DBG_PASS )
 {
-   PLINKSTACK pNewStack;
-   if( *stack )
+	PLINKSTACK pNewStack;
+	if( *stack )
 		entries += (*stack)->Cnt;
-   pNewStack = (PLINKSTACK)AllocateEx( my_offsetof( stack, pNode[entries] ) DBG_RELAY );
-   if( *stack )
-   {
-      MemCpy( pNewStack->pNode, (*stack)->pNode, (*stack)->Cnt * sizeof(POINTER) );
-      pNewStack->Top = (*stack)->Top;
-      ReleaseEx( (*stack) DBG_RELAY );
-   }
+	pNewStack = (PLINKSTACK)AllocateEx( my_offsetof( stack, pNode[entries] ) DBG_RELAY );
+	if( *stack )
+	{
+		MemCpy( pNewStack->pNode, (*stack)->pNode, (*stack)->Cnt * sizeof(POINTER) );
+		pNewStack->Top = (*stack)->Top;
+		ReleaseEx( (*stack) DBG_RELAY );
+	}
    else
-      pNewStack->Top = 0;
-   pNewStack->Cnt = entries;
-   *stack = pNewStack;
+		pNewStack->Top = 0;
+	pNewStack->Cnt = entries;
+	pNewStack->Max = (*stack)?(*stack)->Max:0;
+	*stack = pNewStack;
    return pNewStack;
 }
 
@@ -488,8 +496,14 @@ TYPELIB_PROC( PLINKSTACK, PushLinkEx )( PLINKSTACK *pls, POINTER p DBG_PASS )
    if( !*pls ||
        (*pls)->Top == (*pls)->Cnt )
    {
-      ExpandStackEx( pls, 1 DBG_RELAY );
-   }
+		ExpandStackEx( pls, ((*pls)?((*pls)->Max):0)+8 DBG_RELAY );
+	}
+   if( (*pls)->Max )
+		if( ((*pls)->Top) >= (*pls)->Max )
+		{
+			MemCpy( (*pls)->pNode, (*pls)->pNode + 1, (*pls)->Top - 1 );
+			(*pls)->Top--;
+		}
    (*pls)->pNode[(*pls)->Top] = p;
    (*pls)->Top++;
    return (*pls);
@@ -923,7 +937,7 @@ TYPELIB_PROC( PDATAQUEUE, PrequeDataEx )( PDATAQUEUE *ppdq, POINTER link DBG_PAS
 	if( link )
 	{
 		tmp = pdq->Bottom - 1;
-		if( tmp < 0 )
+		if( tmp > 0x80000000 )
 			tmp += pdq->Cnt;
 		if( tmp == pdq->Top ) // collided with self...
 		{

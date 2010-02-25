@@ -343,7 +343,8 @@ void SQLSetFeedbackHandler( void (CPROC*HandleSQLFeedback)(CTEXTSTR message) )
 #ifdef LOG_COLLECTOR_STATES
 		static int collectors;
 #endif
-PCOLLECT CreateCollector( _32 SourceID, PODBC odbc, LOGICAL bTemporary )
+static PCOLLECT CreateCollectorEx( _32 SourceID, PODBC odbc, LOGICAL bTemporary DBG_PASS )
+#define CreateCollector(s,o,t) CreateCollectorEx( s,o,t DBG_SRC )
 {
 	PCOLLECT pCollect;
    LOGICAL pushed;
@@ -397,7 +398,7 @@ PCOLLECT CreateCollector( _32 SourceID, PODBC odbc, LOGICAL bTemporary )
 			return pCollect;
 		}
 	}
-	pCollect = (PCOLLECT)Allocate( sizeof( COLLECT ) );
+	pCollect = (PCOLLECT)AllocateEx( sizeof( COLLECT ) DBG_RELAY );
 #ifdef LOG_COLLECTOR_STATES
 	lprintf( "New collector is %p", pCollect );
 #endif
@@ -406,7 +407,7 @@ PCOLLECT CreateCollector( _32 SourceID, PODBC odbc, LOGICAL bTemporary )
 	pCollect->fields = NULL;
 	pCollect->lastop = LAST_NONE;
 	pCollect->odbc = odbc;
-	pCollect->pvt_out = VarTextCreate();
+	pCollect->pvt_out = VarTextCreateEx( DBG_VOIDRELAY );
 	pCollect->pvt_result = VarTextCreate();
 	pCollect->pvt_errorinfo = VarTextCreate();
 	pCollect->SourceID = SourceID;
@@ -3049,7 +3050,7 @@ int PushSQLQueryExEx( PODBC odbc DBG_PASS )
 #ifdef LOG_COLLECTOR_STATES
 		lprintf( "creating collector..." );
 #endif
-		CreateCollector( 0, odbc, FALSE );
+		CreateCollectorEx( 0, odbc, FALSE DBG_RELAY );
       odbc->collection->flags.bPushed = 1;
 #ifdef LOG_COLLECTOR_STATES
 		_lprintf(DBG_RELAY)( WIDE("pushing the query onto stack... creating new state.") );
@@ -3502,9 +3503,10 @@ void SQLBeginService( void )
 //int main( void )
 {
 	InitLibrary();
-   LoadComplete();
    // provide task interface
+#ifndef __NO_MSGSVR__
 	g.SQLMsgBase = RegisterServiceHandler( WIDE("SQL"), SQLServiceHandler );
+#endif
    // load local schedulable tasks...
 	LoadTasks();
    // should probably add some options about what exactly

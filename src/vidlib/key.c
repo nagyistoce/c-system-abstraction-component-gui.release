@@ -39,9 +39,9 @@ RENDER_PROC( _32, KeyDown )( PVIDEO hVideo, int c )
 			if( hVideo->kbd.key[c] & 0x80 )  // if key IS hit
 			{
 				hVideo->kbd.keyupdown[c] |= KEYISDOWN;  // keydown was not also true...
-				if( ( hVideo->kbd.keytime[c] + 250 ) <= GetTickCount() )
+				if( ( hVideo->kbd.keytime[c] + 250 ) <= timeGetTime() )
 					hVideo->kbd.keydouble[c] = TRUE;
-				hVideo->kbd.keytime[c] = GetTickCount();
+				hVideo->kbd.keytime[c] = timeGetTime();
 			}
 			else
 			{
@@ -61,9 +61,9 @@ RENDER_PROC( _32, KeyDown )( PVIDEO hVideo, int c )
 			if( l.kbd.key[c] & 0x80 )  // if key IS hit
 			{
 				l.kbd.keyupdown[c] |= KEYISDOWN;  // keydown was not also true...
-				if( ( l.kbd.keytime[c] + 250 ) <= GetTickCount() )
+				if( ( l.kbd.keytime[c] + 250 ) <= timeGetTime() )
 					l.kbd.keydouble[c] = TRUE;
-				l.kbd.keytime[c] = GetTickCount();
+				l.kbd.keytime[c] = timeGetTime();
 			}
 			else
 			{
@@ -90,9 +90,9 @@ RENDER_PROC( int, KeyUp )(  PVIDEO hVideo, int c )
 			if( !(hVideo->kbd.key[c] & 0x80) )  // if key IS hit
 			{
 				hVideo->kbd.keyupdown[c] |= KEYISUP;  // keydown was not also true...
-				if( ( hVideo->kbd.keytime[c] + 250 ) <= GetTickCount() )
+				if( ( hVideo->kbd.keytime[c] + 250 ) <= timeGetTime() )
 					hVideo->kbd.keydouble[c] = TRUE;
-				hVideo->kbd.keytime[c] = GetTickCount();
+				hVideo->kbd.keytime[c] = timeGetTime();
 			}
 			else
 			{
@@ -112,9 +112,9 @@ RENDER_PROC( int, KeyUp )(  PVIDEO hVideo, int c )
 			if( !(l.kbd.key[c] & 0x80) )  // if key IS hit
 			{
 				l.kbd.keyupdown[c] |= KEYISUP;  // keydown was not also true...
-				if( ( l.kbd.keytime[c] + 250 ) <= GetTickCount() )
+				if( ( l.kbd.keytime[c] + 250 ) <= timeGetTime() )
 					l.kbd.keydouble[c] = TRUE;
-				l.kbd.keytime[c] = GetTickCount();
+				l.kbd.keytime[c] = timeGetTime();
 			}
 			else
 			{

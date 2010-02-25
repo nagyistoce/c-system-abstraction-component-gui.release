@@ -51,7 +51,8 @@ SYSLOG_NONE     =   -1 // disable any log output.
 ,SYSLOG_CALLBACK    = 5
 ,SYSLOG_AUTO_FILE = SYSLOG_FILE + 100
 };
-#if defined( _DEBUG ) && !defined( NO_LOGGING )
+
+#if !defined( NO_LOGGING )
 #define DO_LOGGING
 #endif
 // this was forced, force no_logging off...
@@ -142,23 +143,10 @@ enum system_logging_option_list {
 // and that extra parenthesis exist after this... therefore the remaining
 // expression must be ignored... thereofre when defining a NULL function
 // this will result in other warnings, about ignored, or meaningless expressions
-#ifdef JIM_BUILD
-#define JIM 0
-#else
-#ifdef BAG
-// okay only demote SACK/BAG jim debuglevels
-#define JIM 100
-#else
-// I dunno just a little louder for external things
-// that use lprintf?
-#define JIM 0// make my logging messages just that much quieter.
-#endif
-#endif
-
 # if defined( DO_LOGGING )
-#  define vlprintf      _vxlprintf(LOG_NOISE+JIM DBG_SRC)
-#  define lprintf       _xlprintf(LOG_NOISE+JIM DBG_SRC)
-#  define _lprintf(DBG_VOIDRELAY)       _xlprintf(LOG_NOISE+JIM DBG_RELAY)
+#  define vlprintf      _vxlprintf(LOG_NOISE DBG_SRC)
+#  define lprintf       _xlprintf(LOG_NOISE DBG_SRC)
+#  define _lprintf(DBG_VOIDRELAY)       _xlprintf(LOG_NOISE DBG_RELAY)
 #  define xlprintf(level)       _xlprintf(level DBG_SRC)
 #  define vxlprintf(level)       _vxlprintf(level DBG_SRC)
 # else

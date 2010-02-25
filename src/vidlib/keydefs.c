@@ -222,7 +222,10 @@ RENDER_PROC( int, HandleKeyEvents )( PKEYDEFINE pKeyDefs, _32 key )
 	int keymod = KEY_MOD(key);
 #ifdef LOG_KEY_EVENTS
    if( l.flags.bLogKeyEvent )
-	lprintf( WIDE("Key event for %08lx ... %d %s %s %s"), key, keycode, keymod&1?"SHIFT":"", keymod&2?"CTRL":"", keymod&4?"ALT":"" );
+		lprintf( WIDE("Key event for %08lx ... %d %s %s %s")
+				 , key
+				 , keycode
+				 , keymod&1?"SHIFT":"", keymod&2?"CTRL":"", keymod&4?"ALT":"" );
 #endif
 	if( pKeyDefs[keycode].mod[keymod].flags.bFunction )
 	{
@@ -275,10 +278,14 @@ RENDER_PROC( int, HandleKeyEvents )( PKEYDEFINE pKeyDefs, _32 key )
                return 0;
 			}
 		}
+		if( l.flags.bLogKeyEvent )
+			lprintf( "Probably handled..." );
 		// for consistancy better just say we handled this key
 		return 1;
 	}
-   return 0;
+	if( l.flags.bLogKeyEvent )
+		lprintf( "not handled..." );
+	return 0;
 }
 
 RENDER_NAMESPACE_END

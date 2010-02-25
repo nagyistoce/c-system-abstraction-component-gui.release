@@ -147,7 +147,7 @@ SQLSTUB_PROC( INDEX, GetLastInsertIDEx)( CTEXTSTR table, CTEXTSTR col DBG_PASS )
 #undef EscapeBinary
 #undef EscapeString
 
-SQLSTUB_PROC( TEXTSTR,EscapeSQLBinaryEx )( PODBC odbc, CTEXTSTR blob, _32 bloblen DBG_PASS )
+SQLSTUB_PROC( TEXTSTR,EscapeSQLBinaryEx )( PODBC odbc, CTEXTSTR blob, PTRSZVAL bloblen DBG_PASS )
 {
 	int type_mysql = 1;
 
@@ -220,13 +220,13 @@ SQLSTUB_PROC( TEXTSTR,EscapeSQLBinaryEx )( PODBC odbc, CTEXTSTR blob, _32 bloble
 	return result;
 }
 
-SQLSTUB_PROC( TEXTSTR,EscapeBinaryEx )( CTEXTSTR blob, _32 bloblen DBG_PASS )
+SQLSTUB_PROC( TEXTSTR,EscapeBinaryEx )( CTEXTSTR blob, PTRSZVAL bloblen DBG_PASS )
 {
    return EscapeSQLBinaryEx( NULL, blob, bloblen DBG_RELAY );
 }
 
 
-SQLSTUB_PROC( TEXTCHAR *,EscapeBinary )( CTEXTSTR blob, _32 bloblen )
+SQLSTUB_PROC( TEXTCHAR *,EscapeBinary )( CTEXTSTR blob, PTRSZVAL bloblen )
 {
 	return EscapeBinaryEx( blob, bloblen DBG_SRC );
 }
@@ -330,7 +330,7 @@ TEXTSTR DeblobifyString( CTEXTSTR blob, TEXTSTR outbuf, int outbuflen  )
 
 //---------------------------------------------------------------------------
 
-TEXTSTR RevertEscapeBinary( CTEXTSTR blob, _32 *bloblen )
+TEXTSTR RevertEscapeBinary( CTEXTSTR blob, PTRSZVAL *bloblen )
 {
 	TEXTCHAR *tmpnamebuf, *result;
 	int n;
@@ -710,6 +710,7 @@ void DestroySQLTable( PTABLE table )
 		}
 		Release( (POINTER)table->keys.key[n].name );
 	}
+   Release( (POINTER)table->name );
 	Release( (POINTER)table->fields.field );
 	Release( (POINTER)table->keys.key );
 	Release( table );

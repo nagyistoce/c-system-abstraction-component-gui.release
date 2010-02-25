@@ -17,6 +17,8 @@
 #include "widgets/include/banner.h"
 #include <filesys.h>
 #include <text_label.h> // InterShell substitution proc
+#include "../intershell_export.h"
+#include "../intershell_registry.h"
 #include "tasks.h"
 
 static struct {
@@ -441,7 +443,6 @@ OnCreateMenuButton( WIDE("Task") )( struct menu_button_tag *button )
 	LinkThing( l.tasklist, task );
 	task->button = button;
 	InterShell_SetButtonStyle( button, "bicolor square" );
-	InterShell_SetButtonStyle( button, "bicolor square" );
 	return (PTRSZVAL)task;
 }
 //---------------------------------------------------------------------------
@@ -544,6 +545,7 @@ void EditTaskProperties( PTRSZVAL psv, PSI_CONTROL parent_frame, LOGICAL bVisual
 	int done = 0;
 	char menuname[256];
 	{
+		pTask->button = InterShell_GetCurrentButton();
 		SetCommonButtons( frame, &done, &okay );
       if( bVisual )
 			SetCommonButtonControls( frame );
@@ -784,7 +786,7 @@ void RunATask( PLOAD_TASK pTask, int bWaitInRoutine )
 		}
 	}
 	lprintf( WIDE("Launching program... %s in %s"), pTask->pTask, pTask->pPath );
-	pTask->last_lauch_time = GetTickCount();
+	pTask->last_lauch_time = timeGetTime();
 	pTask->launch_count++;
 	{
 		char buffer1[256];
@@ -949,7 +951,7 @@ void CPROC TaskEnded( PTRSZVAL psv, PTASK_INFO task_ended )
 				pTask->flags.bRestart &&
 				( l.flags.bExit != 2 ) )
 			{
-				if( ( pTask->last_lauch_time + 2000 ) > GetTickCount() )
+				if( ( pTask->last_lauch_time + 2000 ) > timeGetTime() )
 				{
 					lprintf( WIDE("Task spawning too fast, disabling auto spawn.") );
                pTask->flags.bRestart = 0;
@@ -1030,10 +1032,10 @@ static void KillSpawnedPrograms( void )
             if( bIcon )
 				{
                HWND still_here;
-					_32 TickDelay = GetTickCount() + 250;
+					_32 TickDelay = timeGetTime() + 250;
 					// give it a little time before just killing it.
 					while( ( still_here = FindWindow( WIDE("AlertAgentIcon"), progname ) ) &&
-							( TickDelay > GetTickCount() ) )
+							( TickDelay > timeGetTime() ) )
 						Relinquish();
 					if( !still_here )
                   closed = TRUE;
@@ -1055,7 +1057,7 @@ static void KillSpawnedPrograms( void )
 					snprintf( progname, sizeof( progname ), "%s.instance.lock", basename );
 					{
 						POINTER mem_lock;
-						_32 size = 0;
+						PTRSZVAL size = 0;
 						mem_lock = OpenSpace( progname
 												  , NULL
 													//, WIDE("memory.delete")
@@ -1199,7 +1201,7 @@ void CPROC PressDosKey( PTRSZVAL psv, _32 key )
 	static int reset2 = 0;
 	static int reset3 = 0;
 	static int reset4 = 0;
-	if( _tick < ( ( tick = GetTickCount() ) - 2000 ) )
+	if( _tick < ( ( tick = timeGetTime() ) - 2000 ) )
 	{
       reset4 = 0;
       reset3 = 0;
@@ -1959,4 +1961,42 @@ OnLoadControl( WIDE("Task Util/Set Resolution") )( PCONFIG_HANDLER pch, PTRSZVAL
 	AddConfigurationMethod( pch, WIDE("Launch at %i by %i"), SetLaunchResolution2 );
 }
 
+
+static LOGICAL OnDropAccept( "Add Task Button" )( CTEXTSTR file, int x, int y )
+{
+	if( StrCaseStr( file, ".exe" )
+		||StrCaseStr( file, ".bat" )
+		||StrCaseStr( file, ".com" )
+		||StrCaseStr( file, ".cmd" ) )
+	{
+		PTRSZVAL psv = InterShell_CreateControl( "Task", x, y, 5, 3 );
+		PLOAD_TASK pTask = (PLOAD_TASK)psv;
+		if( pTask )
+		{
+			int argc;
+			char **argv;
+			char *pathend;
+         char *ext;
+			ParseIntoArgs( (char*)file, &argc, &argv );
+			pathend = (char*)pathrchr( argv[0] );
+			if( pathend )
+				pathend[0] = 0;
+			else
+            pathend = argv[0];
+			StrCpyEx( pTask->pTask, pathend+1, 256 );
+			ext = strrchr( pathend+1, '.' );
+			if( ext )
+				ext[0] = 0;
+
+         SetTaskName( pTask, pathend+1 );
+			StrCpyEx( pTask->pPath, argv[0], 256 );
+
+			pTask->pArgs = argv;
+
+
+		}
+      return 1;
+	}
+   return 0;
+}
 

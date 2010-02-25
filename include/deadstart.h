@@ -78,7 +78,7 @@ DEADSTART_PROC( void, MarkRootDeadstartComplete )( void );
 DEADSTART_PROC( void, DispelDeadstart )( void );
 #endif
 
-#if defined( __cplusplus) 
+#if defined( __cplusplus) || defined( _WIN64 )
 
 #define PRIORITY_PRELOAD(name,priority) static void name(void); \
    static class schedule_##name {   \
@@ -470,8 +470,7 @@ void name( void) \
 //------------------------------------------------------------------------------------
 // WIN32 MSVC
 //------------------------------------------------------------------------------------
-#elif defined( _MSC_VER )
-
+#elif defined( _MSC_VER ) && defined( _WIN32 )
 //#define PRELOAD(name) __declspec(allocate(".CRT$XCAA")) void CPROC name(void)
 
 //#pragma section(".CRT$XCA",long,read)
@@ -483,14 +482,10 @@ void name( void) \
 
 /////// also the variables to be put into these segments
 #if defined( __cplusplus_cli )
-#if defined( __cplusplus_cli )
 #define LOG_ERROR(n) System::Console::WriteLine( gcnew System::String(n) + gcnew System::String( myname) ) )
 #else
 #define LOG_ERROR(n) SystemLog( n )
-#endif
 
-
-#else
 #define _STARTSEG_ ".CRT$XIZ"
 #define _STARTSEG2_ ".CRT$XCZ"
 #define _ENDSEG_ ".CRT$YIZ"

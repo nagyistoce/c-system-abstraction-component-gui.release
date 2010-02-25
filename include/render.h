@@ -264,6 +264,9 @@ typedef void (CPROC*_3DUpdateCallback)( PTRSZVAL psvUser );
     RENDER_PROC( void , SetApplicationIcon)  (Image Icon); //
     // these would be better named ScreenSize
     RENDER_PROC( void , GetDisplaySize)      ( _32 *width, _32 *height );
+	 RENDER_PROC (void, GetDisplaySizeEx) ( int nDisplay
+													  , S_32 *x, S_32 *y
+													  , _32 *width, _32 *height);
     RENDER_PROC( void , SetDisplaySize)      ( _32 width, _32 height );
 
     // Preferred method is to call Idle() or IdleFor(n)
@@ -396,6 +399,8 @@ RENDER_PROC( _32, ReadDisplayEx )( PRENDERER pRenderer, TEXTSTR buffer, _32 maxl
 #define ReadDisplayLine(r,b,len)  ReadDisplayEx(r,b,len,TRUE)
 
 
+RENDER_PROC( void, IssueUpdateLayeredEx )( PRENDERER hVideo, LOGICAL bContent, S_32 x, S_32 y, _32 w, _32 h DBG_PASS );
+
 
 #ifndef KEY_STRUCTURE_DEFINED
 typedef void (CPROC*KeyTriggerHandler)(PTRSZVAL,_32 keycode);
@@ -523,6 +528,9 @@ typedef struct render_interface_tag
 #ifdef __WINDOWS__
 	RENDER_PROC_PTR( HWND, GetNativeHandle )( PRENDERER video );
 #endif
+		 RENDER_PROC_PTR (void, GetDisplaySizeEx) ( int nDisplay
+														  , S_32 *x, S_32 *y
+														  , _32 *width, _32 *height);
 
 } *PRENDER_INTERFACE, RENDER_INTERFACE;
 

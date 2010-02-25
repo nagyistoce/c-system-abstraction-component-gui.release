@@ -25,11 +25,16 @@ SACK_NAMESPACE
 #define GreenVal(color) (((color) >> 8) & 0xFF)
 #define BlueVal(color)  (((color) >> 16) & 0xFF)
 #else
-#define Color( r,g,b ) (((_32)( ((_8)(b))|((_16)((_8)(g))<<8))|(((_32)((_8)(r))<<16)))|0xFF000000)
-#define AColor( r,g,b,a ) (((_32)( ((_8)(b))|((_16)((_8)(g))<<8))|(((_32)((_8)(r))<<16)))|((a)<<24))
-#define SetAlpha( rgb, a ) ( ((rgb)&0xFFFFFF) | ( (a)<<24 ) )
-#define SetGreen( rgb, g ) ( ((rgb)&0xFFFF00FF) | ( ((g)&0xFF)<<8 ) )
-#define GLColor( c )  (((c)&0xFF00FF00)|(((c)&0xFF0000)>>16)|(((c)&0xFF)<<16))
+#ifdef _WIN64
+#define AND_FF 0xFF
+#else
+#define AND_FF
+#endif
+#define Color( r,g,b ) (((_32)( ((_8)((b)AND_FF))|((_16)((_8)((g)AND_FF))<<8))|(((_32)((_8)((r)AND_FF))<<16)))|0xFF000000)
+#define AColor( r,g,b,a ) (((_32)( ((_8)((b)AND_FF))|((_16)((_8)((g)AND_FF))<<8))|(((_32)((_8)((r)AND_FF))<<16)))|(((a)AND_FF)<<24))
+#define SetAlpha( rgb, a ) ( ((rgb)&0x00FFFFFF) | ( (a)<<24 ) )
+#define SetGreen( rgb, g ) ( ((rgb)&0xFFFF00FF) | ( ((g)0x0000FF)<<8 ) )
+#define GLColor( c )  (((c)&0xFF00FF00)|(((c)&0xFF0000)>>16)|(((c)&0x0000FF)<<16))
 #define AlphaVal(color) (((color) >> 24) & 0xFF)
 #define RedVal(color)   (((color) >> 16) & 0xFF)
 #define GreenVal(color) (((color) >> 8) & 0xFF)

@@ -264,6 +264,7 @@ void UpdateButtonExx( PMENU_BUTTON button, int bEndingEdit DBG_PASS )
 				//lprintf( "Show control!.. final fixup? ");
 				InvokeShowControl( button );
 			}
+			//lprintf( "Show control!.. final fixup? ");
 			//bShow = 1;
 			RevealCommon( QueryGetControl( button ) );
 		}
@@ -318,13 +319,13 @@ void UpdateButtonExx( PMENU_BUTTON button, int bEndingEdit DBG_PASS )
 }
 
 // added pc_canvas very late to supprot shellgetnamedpage
-void RestorePage( PSI_CONTROL pc_canvas, PCanvasData canvas, PPAGE_DATA page, int bFull )
+void RestorePageEx( PSI_CONTROL pc_canvas, PCanvasData canvas, PPAGE_DATA page, int bFull, int was_active )
 {
 	PPAGE_DATA prior;
 	INDEX idx;
    //int failures = 0;
 	PMENU_BUTTON control;
-	lprintf( WIDE("restore page...") );
+	//_lprintf(DBG_RELAY)( WIDE("restore page... %d"), was_active );
 	if( g.flags.multi_edit )
 	{
 		if( page->frame )  // why wouldn't a page have a frame?
@@ -335,35 +336,41 @@ void RestorePage( PSI_CONTROL pc_canvas, PCanvasData canvas, PPAGE_DATA page, in
 	prior = canvas->current_page;
 	do
 	{
+		//lprintf( "page set to %p", page );
 		canvas->current_page = page;
 		if( !InvokePageChange() ) // some method rejected page access.
 		{
-         if( !prior )
+			if( !prior )
 			{
 				page = ShellGetNamedPage( pc_canvas, "next" );
 				if( !page || page == canvas->default_page )
 				{
-               BannerMessage( "Failure to find an accessable page, exiting." );
+					BannerMessage( "Failure to find an accessable page, exiting." );
 					exit(0);
 				}
 			}
+			//lprintf( "page set to %p", prior );
 			canvas->current_page = prior;
 			if( prior && !InvokePageChange() ) // some method rejected page access.
 			{
 				// we have to be sure we can be on this page too, since we 'left'
 				// that is we went to another page..
-            canvas->current_page = prior = NULL;
+				//lprintf( "page set to %p", NULL );
+				canvas->current_page = prior = NULL;
 			}
 		}
 	} while( !canvas->current_page );
-	if( canvas->current_page )
+	if( was_active )
 	{
-		canvas->current_page->flags.bActive = 1;
-		LIST_FORALL( canvas->current_page->controls, idx, PMENU_BUTTON, control )
+		if( canvas->current_page )
 		{
-			// full flag will cause the control to get reinitialized
-			// all parameters will get set.
-			UpdateButtonEx( control, bFull );
+			canvas->current_page->flags.bActive = 1;
+			LIST_FORALL( canvas->current_page->controls, idx, PMENU_BUTTON, control )
+			{
+				// full flag will cause the control to get reinitialized
+				// all parameters will get set.
+				UpdateButtonEx( control, bFull );
+			}
 		}
 	}
 }
@@ -408,18 +415,22 @@ static void CPROC ChooseAnimation( PTRSZVAL psv, PSI_CONTROL button )
 
 //-------------------------------------------------------------------------
 
-void HidePageEx( PSI_CONTROL pc_canvas )
+void HidePageExx( PSI_CONTROL pc_canvas DBG_PASS )
 {
 	ValidatedControlData( PCanvasData, menu_surface.TypeID, canvas, pc_canvas );
 	if( g.flags.multi_edit )
 	{
 		return;
 	}
-	if( canvas && canvas->current_page )
+	if( canvas && canvas->current_page
+//		&& canvas->current_page->flags.bActive
+	  )
 	{
 		INDEX idx;
 		PMENU_BUTTON control;
 		PPAGE_DATA page;
+		if( !canvas->current_page->flags.bActive )
+         _lprintf(DBG_RELAY)( "hiding a non active page" );
 		if( canvas->current_page )
 			canvas->current_page->flags.bActive = 0;
 		if( canvas->pPageMenu )
@@ -427,24 +438,27 @@ void HidePageEx( PSI_CONTROL pc_canvas )
 		if( canvas->current_page )
 		{
 			page = canvas->current_page;
-			lprintf( "Hiding a page... hiding all controls... controls have the option to cause themselves to show... " );
+			//lprintf( "Hiding a page... hiding all controls... controls have the option to cause themselves to show... " );
 			LIST_FORALL( page->controls, idx, PMENU_BUTTON, control )
 			{
 				HideCommon( QueryGetControl( control ) );
 			}
 		}
-		canvas->current_page = NULL;
+		//_lprintf(DBG_RELAY)( "page set to %p", NULL );
+		//canvas->current_page = NULL;
 	}
 }
 
 //-------------------------------------------------------------------------
 
-void ChangePages( PSI_CONTROL pc_canvas, PPAGE_DATA page )
+void ChangePagesEx( PSI_CONTROL pc_canvas, PPAGE_DATA page DBG_PASS )
 {
 	PCanvasData canvas = GetCanvas( pc_canvas );
 	// page becomes the new current page... the current page
 	// is disabled, adn the new page reenabled..
 	static BIT_FIELD bChanging; // : 1; // already changing a page.
+	int active;
+
 	if( bChanging )
 	{
       xlprintf(LOG_ALWAYS)( "Page change dropped, was already changing pages" );
@@ -465,14 +479,25 @@ void ChangePages( PSI_CONTROL pc_canvas, PPAGE_DATA page )
 	   bChanging = FALSE;
 		return;
 	}
+
    //DumpFrameContents( g.frame );
 	//lprintf( WIDE("-------------------------------------- ChangePages -------------------------------------") );
    bChanging = TRUE;
 	if( !g.flags.bPageUpdateDisabled )
 		EnableCommonUpdates( pc_canvas, FALSE );
-	HidePageEx( pc_canvas );
-	//canvas->current_page = page;
-	RestorePage( pc_canvas, canvas, page, FALSE );
+
+	{
+		int was_active;
+      //_lprintf(DBG_RELAY)( "%p ", canvas->current_page );
+		if( !canvas->current_page || ( canvas->current_page && canvas->current_page->flags.bActive ) )
+			was_active = 1;
+		else
+			was_active = 0;
+		HidePageEx( pc_canvas );
+		//canvas->current_page = page;
+		RestorePageEx( pc_canvas, canvas, page, FALSE, was_active);
+	}
+
 	//lprintf( WIDE("================ SOMETHING SHOULD HAPPEN HERE ===========================") );
 	// I dunno about all this....
 	if( !g.flags.bPageUpdateDisabled )
@@ -848,6 +873,7 @@ void CreateNewPage( PSI_CONTROL pc_canvas, PCanvasData canvas )
 		page->grid.nPartsX = canvas->current_page->grid.nPartsX;
 		page->grid.nPartsY = canvas->current_page->grid.nPartsY;
 		AddPage( canvas, page );
+	lprintf( "page set to %p", page );
 		canvas->current_page = page;
 		//SaveButtonConfig( pc_canvas );
 	}

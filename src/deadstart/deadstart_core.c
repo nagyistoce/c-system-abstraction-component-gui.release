@@ -264,7 +264,8 @@ void InvokeDeadstart( void )
 	PSTARTUP_PROC proc;
 	//if( !bInitialDone /*|| bDispatched*/ )
 	//   return;
-   bSuspend = 0; // if invoking, no longer suspend.
+	InitLocal();
+   	bSuspend = 0; // if invoking, no longer suspend.
 #ifdef __WINDOWS__
 	if( !bInitialDone && !bDispatched )
 	{
@@ -282,7 +283,11 @@ void InvokeDeadstart( void )
 		}
 	}
 #endif
-#ifdef __64__
+
+#ifdef _WIN64
+#define __64__
+#endif
+#ifdef _WIN64
 	while( proc = (PSTARTUP_PROC)LockedExchange64( (PVPTRSZVAL)&proc_schedule, NULL ) )
 #else
 		while( proc = (PSTARTUP_PROC)LockedExchange( (PVPTRSZVAL)&proc_schedule, NULL ) )
@@ -296,8 +301,10 @@ void InvokeDeadstart( void )
 			//proc_schedule = NULL;
 			if( proc->proc
 #ifndef __LINUX__
-#if 1 ||  __WATCOMC__ >= 1280
+#if  __WATCOMC__ >= 1280
 				&& !IsBadCodePtr( (int(STDCALL*)(void))proc->proc )
+#elif defined( _WIN64 )
+				&& !IsBadCodePtr( (FARPROC)proc->proc )
 #else
 //				&& !IsBadCodePtr( (int STDCALL(*)(void))proc->proc )
 #endif
@@ -550,7 +557,7 @@ void InvokeExits( void )
 // procedures shouldn't be added as a property of shutdown.
    //bugBreak();
 	while(
-#ifdef __64__
+#ifdef _WIN64
 			( proc = (PSHUTDOWN_PROC)LockedExchange64( (PV_64)&shutdown_proc_schedule, 0 ) ) != NULL
 #else
 			( proc = (PSHUTDOWN_PROC)LockedExchange( (PV_32)&shutdown_proc_schedule, 0 ) ) != NULL
@@ -579,7 +586,7 @@ void InvokeExits( void )
 			// don't release this stuff... memory might be one of the autoexiters.
 			if( proc->proc
 #ifndef __LINUX__
-				&& !IsBadCodePtr( (int(STDCALL*)(void))proc->proc )
+				&& !IsBadCodePtr( (FARPROC)proc->proc )
 #endif
 			  )
 			{

@@ -235,7 +235,7 @@ void AddIndexKey( PTABLE table, PTEXT *word, int has_name, int primary, int uniq
 
 //----------------------------------------------------------------------
 
-int GetTableColumns( PTABLE table, PTEXT *word )
+int GetTableColumns( PTABLE table, PTEXT *word DBG_PASS )
 {
 	if( !*word)
 		return FALSE;
@@ -286,6 +286,7 @@ int GetTableColumns( PTABLE table, PTEXT *word )
 						lprintf( "PRIMARY keyword without KEY keyword is invalid." );
 						DebugBreak();
 					}
+					Release( name );
 				}
 				else if( StrCaseCmp( name, "UNIQUE" ) == 0 )
 				{
@@ -296,11 +297,13 @@ int GetTableColumns( PTABLE table, PTEXT *word )
 						(*word) = NEXTLINE( *word );
 					}
 					AddIndexKey( table, word, 1, 0, 1 );
+					Release( name );
 				}
 				else if( ( StrCaseCmp( name, "INDEX" ) == 0 )
 					   || ( StrCaseCmp( name, "KEY" ) == 0 ) )
 				{
 					AddIndexKey( table, word, 1, 0, 0 );
+					Release( name );
 				}
 				else
 				{
@@ -456,6 +459,7 @@ PTABLE GetFieldsInSQLEx( CTEXTSTR cmd, int writestate DBG_PASS )
             str[n] = ' ';
 	}
 	pParsed = TextParse( tmp, WIDE("\'\"\\({[<>]}):@%/,;!?=*&$^~#`"), WIDE(" \t\n\r" ), 1, 1 DBG_RELAY );
+   LineRelease( tmp );
 	//{
 	//   PTEXT outline = DumpText( pParsed );
 	//	fprintf( stderr, "%s", GetText( outline ) );
@@ -476,7 +480,7 @@ PTABLE GetFieldsInSQLEx( CTEXTSTR cmd, int writestate DBG_PASS )
 			}
 			else
 			{
-				if( !GetTableColumns( pTable, &pWord ) )
+				if( !GetTableColumns( pTable, &pWord DBG_SRC ) )
 				{
 					DestroySQLTable( pTable );
 					pTable = NULL;

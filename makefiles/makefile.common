@@ -478,6 +478,7 @@ endif
 ifdef INDIRECT_BUILD
 define std_obj_from_cpp
 $(call OBJNAME,$(1),$(2)/$(RINTDEST)/%): $(call filterpath,$(2))%.cpp;$$(call std_obj_from_cpp_commands)
+$(call OBJNAME,$(1),$(2)/$(RINTDEST)/%): $(call filterpath,$(2))%.cc;$$(call std_obj_from_cpp_commands)
 endef
 else
 define std_obj_from_cpp

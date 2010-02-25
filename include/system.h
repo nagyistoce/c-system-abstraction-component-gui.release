@@ -68,7 +68,7 @@ SYSTEM_PROC( PTASK_INFO, LaunchProgramEx )( CTEXTSTR program, CTEXTSTR path, PCT
 SYSTEM_PROC( PTASK_INFO, LaunchProgram )( CTEXTSTR program, CTEXTSTR path, PCTEXTSTR  args );
 SYSTEM_PROC( PTRSZVAL, TerminateProgram )( PTASK_INFO task );
 SYSTEM_PROC( void, SetProgramUserData )( PTASK_INFO task, PTRSZVAL psv );
-SYSTEM_PROC( PTRSZVAL, StopProgram )( PTASK_INFO task ); // generate a Ctrl-C to the task.
+SYSTEM_PROC( LOGICAL, StopProgram )( PTASK_INFO task ); // generate a Ctrl-C to the task.
 SYSTEM_PROC( TEXTSTR, GetArgsString )( PCTEXTSTR pArgs );
 SYSTEM_PROC( _32, GetTaskExitCode )( PTASK_INFO task );
 

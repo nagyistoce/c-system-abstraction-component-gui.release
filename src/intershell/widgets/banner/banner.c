@@ -3,12 +3,14 @@
 //#define USE_RENDER_INTERFACE banner_local.pdi
 //#define USE_IMAGE_INTERFACE banner_local.pii
 //#endif
+#include <stdhdrs.h>
 #include <render.h>
 #include <sharemem.h>
 #include <controls.h>
 #include <timers.h>
 #include <idle.h>
 #include <psi.h>
+#include <sqlgetoption.h>
 
 #define BANNER_DEFINED
 #include "../include/banner.h"
@@ -76,27 +78,28 @@ static void InitBannerFrame( void )
 {
 	if( !banner_local.flags.bInited )
 	{
+      TEXTCHAR font[256];
 		InvokeDeadstart(); // register my control please... (fucking optimizations)
 #ifndef __cplusplus_cli
 		banner_local.pii = GetImageInterface();
 		banner_local.pdi = GetDisplayInterface();
 #endif
 		GetDisplaySize( &banner_local.w, &banner_local.h );
-		banner_local.font = RenderFontFile( WIDE("arialbd.ttf")
+		SACK_GetProfileStringEx( "SACK/Widgets/Banner", "Default Font", "arialbd.ttf", font, sizeof( font ), TRUE );
+		banner_local.font = RenderFontFile( font
 									  , banner_local.w / 30, banner_local.h/20
 									  , 3 );
 		if( !banner_local.font )
-			banner_local.font = RenderFontFile( WIDE("fonts/arialbd.ttf")
+		{
+			SACK_GetProfileStringEx( "SACK/Widgets/Banner", "Alternate Font", "fonts/arialbd.ttf", font, sizeof( font ), TRUE );
+			banner_local.font = RenderFontFile( font
 										  , banner_local.w / 30, banner_local.h/20
 														 , 3 );
+		}
 
-		banner_local.explorer_font = RenderFontFile( WIDE("arialbd.ttf")
+		banner_local.explorer_font = RenderFontFile( font
 									  , banner_local.w / 60, banner_local.h/40
 									  , 3 );
-		if( !banner_local.explorer_font )
-			banner_local.explorer_font = RenderFontFile( WIDE("fonts/arialbd.ttf")
-										  , banner_local.w / 60, banner_local.h/40
-										  , 3 );
 		banner_local.flags.bInited = TRUE;
 	}
 }
@@ -390,64 +393,34 @@ int CreateBannerExtended( PRENDERER parent, PBANNER *ppBanner, CTEXTSTR text, in
 	banner_local._w = banner_local.w;
 	banner_local._h = banner_local.h;
 	x = 0;
-   y = 0;
+	y = 0;
 	banner->textcolor = textcolor?textcolor:0xFF0d0d0d;
 	banner->basecolor = basecolor?basecolor:0x01135393;
-	GetDisplaySize( &banner_local.w, &banner_local.h );
 
-	w = banner_local.w;
-   h = banner_local.h;
+	GetDisplaySizeEx( display, &x, &y, &w, &h );
 
-   if( display )
-	{
-		TEXTSTR teststring = NewArray( TEXTCHAR, 20 );
-		int xpos = 0;
-		//int idx;
-		int i;
-		DISPLAY_DEVICE dev;
-		DEVMODE dm;
-		dm.dmSize = sizeof( DEVMODE );
-		dev.cb = sizeof( DISPLAY_DEVICE );
-		snprintf( teststring, 20, "\\\\.\\DISPLAY%d", display );
-		for( i = 0;
-			 EnumDisplayDevices( NULL // all devices
-									 , i
-									 , &dev
-									 , 0 // dwFlags
-									 ); i++ )
-		{
-			if( StrCaseCmp( teststring, dev.DeviceName ) == 0 )
-			{
-
-				if( EnumDisplaySettings( dev.DeviceName, ENUM_CURRENT_SETTINGS, &dm ) )
-				{
-					x = dm.dmPosition.x;
-					y = dm.dmPosition.y;
-               w = dm.dmPelsWidth;
-               h = dm.dmPelsHeight;
-				}
-				else
-					lprintf( "Found display name, but enum current settings failed? %s", teststring );
-			}
-		}
-	}
 
 
 	if( lines || cols )
 	{
+      TEXTCHAR font[256];
 		if( !lines )
 			lines = 20;
 		if( !cols )
 			cols = 30;
-		banner_local.custom_font = RenderFontFile( WIDE("arialbd.ttf")
+      SACK_GetProfileStringEx( "SACK/Widgets/Banner", "Default Font", "arialbd.ttf", font, sizeof( font ), TRUE );
+		banner_local.custom_font = RenderFontFile( font
 															  , w /cols
 															  , h/lines
 															  , 3 );
 		if( !banner_local.custom_font )
-			banner_local.custom_font = RenderFontFile( WIDE("fonts/arialbd.ttf")
+		{
+			SACK_GetProfileStringEx( "SACK/Widgets/Banner", "Alternate Font", "fonts/arialbd.ttf", font, sizeof( font ), TRUE );
+			banner_local.custom_font = RenderFontFile( font
 																  , w /cols
 																  , h/lines
 																  , 3 );
+		}
 	}
 	else
 	{
@@ -498,12 +471,14 @@ int CreateBannerExtended( PRENDERER parent, PBANNER *ppBanner, CTEXTSTR text, in
 		lprintf( WIDE("Using exisiting banner text (created twice? ohohoh count!)") );
 #endif
 		//if( banner_local._w != banner_local.w || banner_local._h != banner_local.h )
+#if 0
 			MoveSizeCommon( banner->frame
 							  , (options & BANNER_EXPLORER)?EXPLORER_BANNER_X:x
 							  , (options & BANNER_EXPLORER)?EXPLORER_BANNER_Y:y
 							  , (options & BANNER_EXPLORER)?EXPLORER_BANNER_WIDTH:w
 							  , ((options & BANNER_EXPLORER))?EXPLORER_BANNER_HEIGHT:h
 							  );
+#endif
 		EnableCommonUpdates( banner->frame, FALSE );
 		bUpdateLocked = TRUE;
 		SetCommonText( banner->frame, text );
@@ -663,7 +638,7 @@ void SetBannerText( PBANNER banner, char *text )
 void CPROC BannerTimeout( PTRSZVAL ppsv )
 {
 	PBANNER *ppBanner = (PBANNER*)ppsv;
-   int delta = (int)(*ppBanner)->timeout - (int)GetTickCount();
+   int delta = (int)(*ppBanner)->timeout - (int)timeGetTime();
 	//PBANNER banner = ppBanner?(*ppBanner):NULL;
 	if( delta < 0 )
 	{
@@ -708,7 +683,7 @@ void SetBannerOptionsEx( PBANNER *ppBanner, _32 flags, _32 extra  )
 		banner->flags = flags;
 		if( flags & BANNER_TIMEOUT )
 		{
-			banner->timeout = GetTickCount() + extra;
+			banner->timeout = timeGetTime() + extra;
 			if( !banner->timer )
 			{
 				banner->timer = AddTimerEx( extra, 0, BannerTimeout, (PTRSZVAL)ppBanner );

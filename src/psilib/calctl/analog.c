@@ -192,8 +192,9 @@ void DrawAnalogClock( PSI_CONTROL pc )
 	if( clock )
 	{
 		PANALOG_CLOCK analog = clock->analog_clock;
-		Redraw( analog->render );
-      //DrawClock( analog );
+      Image surface = GetControlSurface( pc );
+		//Redraw( analog->render );
+      DrawClock( surface, analog );
 	}
 }
 void MakeClockAnalogEx( PSI_CONTROL pc, CTEXTSTR imagename, struct clock_image_thing *description )
@@ -231,6 +232,7 @@ void MakeClockAnalogEx( PSI_CONTROL pc, CTEXTSTR imagename, struct clock_image_t
 			SetSpriteHotspot( analog->minute_hand, 20, 179 );
 			SetSpriteHotspot( analog->hour_hand, 20, 179 );
 
+         if( 0 )
 			{
 				Image surface = GetControlSurface( pc );
 				PRENDERER r = GetFrameRenderer( GetFrame( pc ) );

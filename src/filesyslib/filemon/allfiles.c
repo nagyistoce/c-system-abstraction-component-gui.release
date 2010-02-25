@@ -178,7 +178,7 @@ FILEMONITOR_PROC( PFILEMON, AddMonitoredFile )( PCHANGEHANDLER Change, CTEXTSTR 
 		newfile->lastknownsize    = 0;
       if( l.flags.bLog ) lprintf( WIDE("Setting monitor do scan time - new file monitor") );
 		monitor->DoScanTime =
-			newfile->ScannedAt = GetTickCount() + monitor->scan_delay;
+			newfile->ScannedAt = timeGetTime() + monitor->scan_delay;
 		AddBinaryNode( Change->filelist, newfile, (PTRSZVAL)newfile->filename );
       BalanceBinaryTree( Change->filelist );
 //      AddLink( &Change->filelist, newfile );
@@ -311,7 +311,7 @@ PTRSZVAL CPROC ScanFile( PTRSZVAL psv, INDEX idx, POINTER *item )
 				{
 					//Log1( WIDE("File %s changed"), filemon->name );
 				}
-				filemon->ScannedAt = GetTickCount() + Change->monitor->scan_delay;
+				filemon->ScannedAt = timeGetTime() + Change->monitor->scan_delay;
 				if( l.flags.bLog ) lprintf( WIDE("file changed Setting monitor do scan time - new file monitor") );
 				Change->monitor->DoScanTime = filemon->ScannedAt;
 				//Log( WIDE("A file changed... setting file's change time at now plus delay") );
@@ -331,7 +331,7 @@ PTRSZVAL CPROC ScanFile( PTRSZVAL psv, INDEX idx, POINTER *item )
 	if( !Change->flags.bInitial &&
 	    !filemon->flags.bToDelete &&
 		 filemon->ScannedAt &&
-		 filemon->ScannedAt < GetTickCount() )
+		 filemon->ScannedAt < timeGetTime() )
 	{
 		//Log(" File didn't change - but it did before..." );
 		if( l.flags.bLog ) Log1( WIDE("Enque (pend) filemon for a change...%s"), filemon->name );
@@ -384,7 +384,7 @@ FILEMONITOR_PROC( void, MonitorForgetAll )( PMONITOR monitor )
 	}
 	if( l.flags.bLog ) lprintf( WIDE("Setting monitor do scan time - forget all files") );
 
-	monitor->DoScanTime = GetTickCount() - 1;
+	monitor->DoScanTime = timeGetTime() - 1;
 	LeaveCriticalSec( &monitor->cs );
 }
 
@@ -519,8 +519,8 @@ void EndMonitorFiles( void )
 void DoScan( PMONITOR monitor )
 {
 	// in critical section...
-   //lprintf( WIDE("Tick...%s %d %d"), monitor->directory, GetTickCount(), monitor->DoScanTime );
-	if( monitor->DoScanTime && ( GetTickCount() > monitor->DoScanTime ) ) 
+   //lprintf( WIDE("Tick...%s %d %d"), monitor->directory, timeGetTime(), monitor->DoScanTime );
+	if( monitor->DoScanTime && ( timeGetTime() > monitor->DoScanTime ) ) 
 	{
       //Log( WIDE("Doing a scan...") );
 		monitor->DoScanTime = 0;
@@ -534,11 +534,11 @@ void DoScan( PMONITOR monitor )
       //Log( WIDE("Dispatch Changes... ") );
 		if( !monitor->flags.bUserInterruptedChanges )
 		{
-         if( monitor->DoScanTime < GetTickCount() )
+         if( monitor->DoScanTime < timeGetTime() )
 				DispatchChanges( monitor ); // announce any modified files..
 			else
 			{
-				if( l.flags.bLog ) lprintf( WIDE("Changes require further delay... %") _32f WIDE(""), monitor->DoScanTime - GetTickCount() );
+				if( l.flags.bLog ) lprintf( WIDE("Changes require further delay... %") _32f WIDE(""), monitor->DoScanTime - timeGetTime() );
 			}
 		}
 		else
@@ -600,8 +600,8 @@ FILEMONITOR_PROC( PCHANGEHANDLER, AddExtendedFileChangeCallback )( PMONITOR moni
 		Change->HandleChangeEx = HandleChange;
       Change->monitor        = monitor;
 		LinkThing( monitor->ChangeHandlers, Change );
-      if( l.flags.bLog ) Log1( WIDE("Setting scan time to %d"), GetTickCount() - 1 );
-		monitor->DoScanTime = GetTickCount() + monitor->scan_delay;
+      if( l.flags.bLog ) Log1( WIDE("Setting scan time to %d"), timeGetTime() - 1 );
+		monitor->DoScanTime = timeGetTime() + monitor->scan_delay;
       LeaveCriticalSec( &monitor->cs );
       return Change;
 	}
@@ -633,8 +633,8 @@ FILEMONITOR_PROC( PCHANGEHANDLER, AddFileChangeCallback )( PMONITOR monitor
 		Change->HandleChange   = HandleChange;
       Change->monitor        = monitor;
 		LinkThing( monitor->ChangeHandlers, Change );
-      if( l.flags.bLog ) Log1( WIDE("Setting scan time to %d"), GetTickCount() - 1 );
-		monitor->DoScanTime = GetTickCount() + monitor->scan_delay;
+      if( l.flags.bLog ) Log1( WIDE("Setting scan time to %d"), timeGetTime() - 1 );
+		monitor->DoScanTime = timeGetTime() + monitor->scan_delay;
       LeaveCriticalSec( &monitor->cs );
       return Change;
 	}

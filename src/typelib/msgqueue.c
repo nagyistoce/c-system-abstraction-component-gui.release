@@ -159,13 +159,13 @@ typedef struct MsgDataHandle
 // in this case size is the size of the queue, there
 // is no expansion possible...
 // this should be created such that it is at least 3 * largest message
-TYPELIB_PROC( PMSGHANDLE, CreateMsgQueue )( CTEXTSTR name, _32 size
+TYPELIB_PROC( PMSGHANDLE, CreateMsgQueue )( CTEXTSTR name, PTRSZVAL size
 													  , MsgQueueReadCallback Read
 														, PTRSZVAL psvRead )
 {
-   PMSGHANDLE pmh;
+   	PMSGHANDLE pmh;
 	PMSGQUEUE pmq;
-	_32 dwSize = size + sizeof( MSGQUEUE );
+	PTRSZVAL dwSize = size + sizeof( MSGQUEUE );
 	_32 bCreated;
 #ifdef __LINUX__
 	TEXTCHAR tmpname[128];
@@ -214,7 +214,7 @@ TYPELIB_PROC( PMSGHANDLE, OpenMsgQueue )( CTEXTSTR name
 {
 	PMSGHANDLE pmh;
 	PMSGQUEUE pmq;
-	_32 dwSize = 0;
+	PTRSZVAL dwSize = 0;
 	_32 bCreated;
 #ifdef __LINUX__
 	char tmpname[128];
@@ -473,7 +473,7 @@ static int ScanForWaiting( PMSGQUEUE pmq, _32 msg )
 
 //--------------------------------------------------------------------------
 
-TYPELIB_PROC( int, EnqueMsgEx )( PMSGHANDLE pmh,  POINTER msg, _32 size, _32 opts DBG_PASS )
+TYPELIB_PROC( int, EnqueMsgEx )( PMSGHANDLE pmh,  POINTER msg, PTRSZVAL size, _32 opts DBG_PASS )
 {
 	if( pmh )
 	{
@@ -650,7 +650,7 @@ TYPELIB_PROC( int, IsMsgQueueEmpty )( PMSGHANDLE pmh )
 // if this thread id known, you may change the MsgID
 // being waited for, which will result in this waking up
 // and reading for the new ID...
-TYPELIB_PROC( int, DequeMsgEx )( PMSGHANDLE pmh, _32 *MsgID, POINTER result, _32 size, _32 options DBG_PASS )
+TYPELIB_PROC( int, DequeMsgEx )( PMSGHANDLE pmh, _32 *MsgID, POINTER result, PTRSZVAL size, _32 options DBG_PASS )
 {
 	PMSGQUEUE pmq = pmh->pmq;
 	int p;

@@ -1932,7 +1932,7 @@ void DoDumpFrameContents( int level, PSI_CONTROL pc )
 {
 	while( pc )
 	{
-		lprintf( WIDE("%*.*s") WIDE("Control %d(%d)%p at (%") _32fs WIDE(",%") _32fs WIDE(")-(%") _32f WIDE(",%") _32f WIDE(") (%") _32fs WIDE(",%") _32fs WIDE(")-(%") _32f WIDE(",%") _32f WIDE(") (%s %s %s %s)" )
+		lprintf( WIDE("%*.*s") WIDE("Control %d(%d)%p at (%") _32fs WIDE(",%") _32fs WIDE(")-(%") _32f WIDE(",%") _32f WIDE(") (%") _32fs WIDE(",%") _32fs WIDE(")-(%") _32f WIDE(",%") _32f WIDE(") (%s %s %s %s) '%s' [%s]" )
 				 , level*3,level*3,WIDE("----------------------------------------------------------------")
               , pc->nID, pc->nType, pc
 				 , pc->rect.x, pc->rect.y, pc->rect.width, pc->rect.height
@@ -1944,6 +1944,8 @@ void DoDumpFrameContents( int level, PSI_CONTROL pc )
 				 , pc->flags.bDirty?WIDE("dirty"):WIDE("d")
 				 , pc->flags.bNoUpdate?WIDE("NoUpdate"):WIDE("nu")
 				 , pc->flags.bHidden?WIDE("hidden"):WIDE("h")
+				 , pc->caption.text?GetText(pc->caption.text):""
+				 , pc->pTypeName
 				 );
 
 		if( pc->child )
@@ -2018,8 +2020,10 @@ void CPROC FrameRedraw( PTRSZVAL psvFrame, PRENDERER psvSelf )
 #endif
    pc->flags.bShown = 1;
 	GetCurrentDisplaySurface(pf);
-	if( pc->flags.bDirty )
+	if( pc->flags.bDirty || pc->flags.bResizedDirty )
 	{
+		pc->flags.bResizedDirty = 0;
+      pc->flags.bDirty = 1;
 #ifdef DEBUG_UPDAATE_DRAW
 		Log( WIDE("Redraw frame...") );
 #endif
@@ -2069,7 +2073,11 @@ void CPROC FrameRedraw( PTRSZVAL psvFrame, PRENDERER psvSelf )
 		{
 			//lprintf( WIDE("Recomputing border...") );
 			// fix up surface rect.
-			SetCommonBorder( pc, pc->BorderType );
+			{
+            extern void UpdateSurface( PSI_CONTROL pc );
+            UpdateSurface( pc );
+			}
+			//SetCommonBorder( pc, pc->BorderType );
 			if( pc->DrawBorder )
 			{
 #ifdef DEBUG_BORDER_DRAWING
@@ -2801,7 +2809,7 @@ static void InvokeControlHidden( PSI_CONTROL pc )
 static void InvokeControlRevealed( PSI_CONTROL pc )
 {
 	void (CPROC *OnReveal)(PSI_CONTROL);
-	TEXTCHAR keyname[32];
+	TEXTCHAR keyname[40];
 	PCLASSROOT data = NULL;
    CTEXTSTR name;
    snprintf( keyname, sizeof( keyname ), WIDE("/psi/control/%d/reveal_control"), pc->nType );
@@ -2870,8 +2878,8 @@ PSI_PROC( void, RevealCommonEx )( PSI_CONTROL pc DBG_PASS )
 		{
 			if( revealed )
 			{
-            if( !pc->device )
-					SmudgeCommon( pc );
+            //if( !pc->device )
+				SmudgeCommon( pc );
 				//UpdateCommon( pc );
 			}
 		}
@@ -3148,9 +3156,15 @@ PSI_PROC( void, SizeCommon )( PSI_CONTROL pc, _32 width, _32 height )
 		PEDIT_STATE pEditState;
 		S_32 delw, delh;
 
+		pc->original_rect.width = width;
+		pc->original_rect.height = height;
 		if( !pc->parent && pc->device && pc->device->pActImg )
 		{
-			lprintf( WIDE("Enlarging size...") );
+			// we now have this accuragely handled.
+			//  rect is active (with frame)
+			//  oroginal_rect is the size it was before having to extend it
+         /// somwehere between original_rect changes and rect changes surface_rect is recomputed
+			//lprintf( WIDE("Enlarging size...") );
 			width += FrameBorderX(pc->BorderType);
 			height += FrameBorderY(pc, pc->BorderType, GetText( pc->caption.text ) );
 		}
@@ -3172,22 +3186,26 @@ PSI_PROC( void, SizeCommon )( PSI_CONTROL pc, _32 width, _32 height )
 		}
 		pc->rect.width = width;
 		pc->rect.height = height;
-		pc->original_rect.width = width;
-      pc->original_rect.height = height;
+      // original shall be before possible frame exapansion... did need to update it though.
+		//pc->original_rect.width = width;
+      //pc->original_rect.height = height;
 
-		if( !pc->parent && pc->device && pc->device->pActImg )
+		//if( !pc->parent && pc->device && pc->device->pActImg )
 		{
-         lprintf( WIDE("Enlarging size...") );
-			pc->rect.width += FrameBorderX(pc->BorderType);
-			pc->rect.height += FrameBorderY(pc, pc->BorderType, GetText( pc->caption.text ) );
-			pc->original_rect.width += FrameBorderX(pc->BorderType);
-			pc->original_rect.height += FrameBorderY(pc, pc->BorderType, GetText( pc->caption.text ) );
+         // was laready enlarged.
+         //lprintf( WIDE("Enlarging size...") );
+			//pc->rect.width += FrameBorderX(pc->BorderType);
+			//pc->rect.height += FrameBorderY(pc, pc->BorderType, GetText( pc->caption.text ) );
+			//pc->original_rect.width += FrameBorderX(pc->BorderType);
+			//pc->original_rect.height += FrameBorderY(pc, pc->BorderType, GetText( pc->caption.text ) );
 		}
 
 		ResizeImage( pc->Window, width, height );
-		ResizeImage( pc->Surface
-					  , pc->surface_rect.width += delw
-					  , pc->surface_rect.height += delh );
+
+		{
+				extern void UpdateSurface( PCOMMON pc );
+				UpdateSurface( pc );
+		}
 
 		if( pFrame && !pFrame->flags.bNoUpdate )
 		{
