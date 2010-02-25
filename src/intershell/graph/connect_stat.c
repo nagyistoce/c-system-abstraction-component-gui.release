@@ -270,7 +270,7 @@ void CPROC ClientReceive( PCLIENT pc, POINTER buffer, int size )
 			PTCP_SAMPLE sample;
          sample = GetFromSet( TCP_SAMPLE, &tcp_data->samples );
 			sample->dropped = dropped;
-			sample->tick = GetTickCount();
+			sample->tick = timeGetTime();
 			sample->cpu_tick_delta = tick - min_tick_in_packet;
 			lprintf( "hrm tick %p %Ld %Ld %Ld", pc, tick, min_tick_in_packet, tick-min_tick_in_packet );
 		}

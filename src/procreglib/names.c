@@ -345,7 +345,7 @@ static void CPROC KillName( POINTER user, PTRSZVAL key )
 //---------------------------------------------------------------------------
 
 // p would be the global space, but it's also already set in it's correct spot
-static void CPROC InitGlobalSpace( POINTER p, _32 size )
+static void CPROC InitGlobalSpace( POINTER p, PTRSZVAL size )
 {
 	(*(struct procreg_local_tag*)p).Names = (PTREEDEF)GetFromSet( TREEDEF, &(*(struct procreg_local_tag*)p).TreeNodes );
 	(*(struct procreg_local_tag*)p).Names->Magic = MAGIC_TREE_NUMBER;
@@ -1358,9 +1358,9 @@ PROCREG_PROC( PCLASSROOT, RegisterClassAlias )( CTEXTSTR original, CTEXTSTR alia
 PROCREG_PROC( PTRSZVAL, RegisterDataTypeEx )( PCLASSROOT root
 												 , CTEXTSTR classname
 												 , CTEXTSTR name
-												 , INDEX size
-												 , void (CPROC *Open)(POINTER,_32)
-												 , void (CPROC *Close)(POINTER,_32) )
+												 , PTRSZVAL size
+												 , void (CPROC *Open)(POINTER,PTRSZVAL)
+												 , void (CPROC *Close)(POINTER,PTRSZVAL) )
 {
 	PTREEDEF class_root = GetClassTreeEx( root, (PCLASSROOT)classname, NULL, TRUE );
 	if( class_root )
@@ -1388,9 +1388,9 @@ PROCREG_PROC( PTRSZVAL, RegisterDataTypeEx )( PCLASSROOT root
 
 PROCREG_PROC( PTRSZVAL, RegisterDataType )( CTEXTSTR classname
 												 , CTEXTSTR name
-												 , INDEX size
-												 , void (CPROC *Open)(POINTER,_32)
-												 , void (CPROC *Close)(POINTER,_32) )
+												 , PTRSZVAL size
+												 , void (CPROC *Open)(POINTER,PTRSZVAL)
+												 , void (CPROC *Close)(POINTER,PTRSZVAL) )
 {
    return RegisterDataTypeEx( l.Names, classname, name, size, Open, Close );
 }
@@ -1402,13 +1402,13 @@ PROCREG_PROC( PTRSZVAL, MakeRegisteredDataTypeEx)( PCLASSROOT root
 																 , CTEXTSTR name
 																 , CTEXTSTR instancename
 																 , POINTER data
-																 , _32 datasize
+																 , PTRSZVAL datasize
 																 )
 {
 	PTREEDEF class_root = GetClassTree( root, (PCLASSROOT)classname );
 	if( class_root )
 	{
-      TEXTCHAR buf[256];
+      	TEXTCHAR buf[256];
 		PNAME pName = (PNAME)FindInBinaryTree( class_root->Tree, (PTRSZVAL)DressName( buf, name ));
 		if( !pName )
 			pName = (PNAME)RegisterDataTypeEx( root, classname, name, datasize, NULL, NULL );
@@ -1857,14 +1857,14 @@ ATEXIT( DeleteRegistry )
    //DoDeleteRegistry( l.root );
 }
 
-void RegisterAndCreateGlobalWithInit( POINTER *ppGlobal, _32 global_size, CTEXTSTR name, void (CPROC*Open)(POINTER,_32) )
+void RegisterAndCreateGlobalWithInit( POINTER *ppGlobal, PTRSZVAL global_size, CTEXTSTR name, void (CPROC*Open)(POINTER,PTRSZVAL) )
 {
 	POINTER *ppGlobalMain;
 	POINTER p;
 
 	if( ppGlobal == (POINTER*)&procreg_local_data )
 	{
-		_32 size = global_size;
+		PTRSZVAL size = global_size;
 		_32 created;
 		TEXTCHAR spacename[32];
 		if( procreg_local_data != NULL )
@@ -1966,7 +1966,7 @@ void RegisterAndCreateGlobalWithInit( POINTER *ppGlobal, _32 global_size, CTEXTS
 	}
 }
 
-void RegisterAndCreateGlobal( POINTER *ppGlobal, _32 global_size, CTEXTSTR name )
+void RegisterAndCreateGlobal( POINTER *ppGlobal, PTRSZVAL global_size, CTEXTSTR name )
 {
    RegisterAndCreateGlobalWithInit( ppGlobal, global_size, name, NULL );
 }

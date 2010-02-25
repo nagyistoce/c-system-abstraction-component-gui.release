@@ -161,7 +161,7 @@ void LogSHA1Ex( char *leader, PSIZE_FILE file DBG_PASS)
 
 void DoSHA1( PSIZE_FILE file )
 {
-	_32 size = 0;
+	PTRSZVAL size = 0;
 	TEXTCHAR filename[256];
 	SHA1Context Sha1Context;
 	POINTER memmap;

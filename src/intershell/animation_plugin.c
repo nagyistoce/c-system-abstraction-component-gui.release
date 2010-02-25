@@ -1,3 +1,4 @@
+#if 0
 #include <sack_types.h>
 #include <deadstart.h>
 #include "intershell_local.h"
@@ -283,3 +284,5 @@ void PlayAnimation(PSI_CONTROL control)
 		}
 	}
 }
+
+#endif

@@ -1,6 +1,11 @@
 # __NO_SQL__ can be defined to eliminate SQL depandnacies (unixodbc, sqlite)
 # __NO_OPTIONS__ can be defined to remove option gui dependancy
 
+#__NO_MSGSVR__=1 can be defined to remove message service - internally I no longer auto use it.  With options Enabled, then construct will ask for optiont o auto load which may trigger service initialization
+#export __NO_MSGSVR__
+
+#$(warning Auto enabling __NO_MSGSVR__)
+
 # comment this out to build sqlite into sack.
 #__EXTERNAL_SQLITE__=1 $(warning this needs some work... like actually loading/filling the interface)
 
@@ -112,7 +117,8 @@ SRCS= src/deadstart/deadlib      \
  src/typelib/spacetree           \
  src/typelib/text                \
  src/timerlib/timers             \
- src/msgsvr/client/client        \
+ $(if $(__NO_MSGSVR__),,src/msgsvr/client/client  \
+                          src/msgsvr/summoner/construct  ) \
  src/fractionlib/fractions       \
  src/configlib/configscript      \
  src/procreglib/names            \
@@ -133,7 +139,6 @@ SRCS= src/deadstart/deadlib      \
  src/systemlib/spawntask         \
  src/vectlib/vectlib             \
  src/sha1lib/sha1                \
- src/msgsvr/summoner/construct   \
  src/idlelib/idle                \
  $(if $(__NO_SQL__),,src/SQLlib/sqlstub              \
  src/SQLlib/sqlutil              \
@@ -148,7 +153,7 @@ MORE_TARGETS+=$(if $(__NO_SQL__),,$(if $(USE_SQLITE),$(SACK_BASE)/include/sqlite
 
 
 
-SYSLIBS=$(if $(__WINDOWS__),odbc32 wsock32 iphlpapi, m odbc)
+SYSLIBS=$(if $(__WINDOWS__),odbc32 wsock32 iphlpapi winmm, m odbc)
 CXFLAGS:=$(CXFLAGS) $(if $(__NO_SQL__),,-DUSE_ODBC) $(if $(__EXTERNAL_SQLITE__),-DUSE_SQLITE_INTERFACE)
 
 
@@ -167,7 +172,8 @@ CXFLAGS:=$(CXFLAGS) -DMEM_LIBRARY_SOURCE       \
     -DVECTOR_LIBRARY_SOURCE        \
     -DSHA1_SOURCE                  \
     -DCONSTRUCT_SOURCE             \
-    -DSQLPROXY_LIBRARY_SOURCE \
+    -DSQLPROXY_LIBRARY_SOURCE      \
+    $(if $(__NO_MSGSVR__),-D__NO_MSGSVR__,) \
     $(if $(__NO_SQL__),\
     	-D__NO_SQL__ -D__NO_OPTIONS__\
     	,$(if $(__NO_OPTIONS__),-D__NO_OPTIONS__,-DSQLGETOPTION_SOURCE)) \

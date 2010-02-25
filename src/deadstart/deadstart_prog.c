@@ -25,8 +25,12 @@ SACK_DEADSTART_NAMESPACE
 	}/* do_schedul_##name*/;     \
 	static void _##name(void)
 //PRIORITY_PRELOAD(name,DEADSTART_PRELOAD_PRIORITY)
-#elif defined( __cplusplus )
-#define PRELOAD(name) MAGIC_PRIORITY_PRELOAD(name,DEADSTART_PRELOAD_PRIORITY)
+#  elif defined( __cplusplus )
+   static class schedule_name {   \
+	  public:schedule_name() {  \
+	InvokeDeadstart();  \
+	  }  \
+	} do_schedul_name;     
 #  else
 #    if (_MSC_VER==1300)
 #      define PRELOAD(name) static void name(void); \
@@ -51,12 +55,14 @@ void RunExits( void )
 }
 
 // this one is used when a library is loaded.
+#ifndef _WIN64
 PRELOAD( RunDeadstart )
 {
 	atexit( RunExits );
 	InvokeDeadstart(); // call everthing which is logged within SACK to dispatch back to registree's
 	MarkRootDeadstartComplete();
 }
+#endif
 SACK_DEADSTART_NAMESPACE_END
 
 //#endif

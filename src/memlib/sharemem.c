@@ -50,7 +50,7 @@
 #include <procreg.h>
 #include "sharestruc.h"
 #include <sqlgetoption.h>
-
+#include <ctype.h>
 #ifdef __cplusplus
 namespace sack {
 	namespace memory {
@@ -79,8 +79,8 @@ typedef struct space_tracking_structure {
 	} flags;
 	int hFile;
 #endif
-	_32 dwSmallSize;
-   DeclareLink( struct space_tracking_structure );
+   	PTRSZVAL dwSmallSize;
+   	DeclareLink( struct space_tracking_structure );
 } SPACE, *PSPACE;
 
 typedef struct space_pool_structure {
@@ -336,24 +336,27 @@ MEM_PROC( PTRSZVAL, LockedExchange )( PVPTRSZVAL p, PTRSZVAL val )
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-MEM_PROC( void, MemSet )( POINTER p, _32 n, _32 sz )
+#ifdef _MSC_VER
+#include <intrin.h>
+#endif
+MEM_PROC( void, MemSet )( POINTER p, _BLOCK_MAX_SIZE_TYPE n, _BLOCK_MAX_SIZE_TYPE sz )
 {
 #if defined( _MSC_VER ) && !defined( __NO_WIN32API__ )
-      _asm mov ecx, sz;
-      _asm mov eax, n;
-      _asm mov edi, p;
-      _asm cld;
-      _asm mov   edx, ecx;
-      _asm shr 	ecx, 2;
-      _asm rep 	stosd;
-      _asm test 	edx, 2
-      _asm jz 	store_one;
-      _asm stosw;
-store_one:
-      _asm test 	edx,1
-      _asm jz 	store_none;
-      _asm stosb;
-store_none: ;
+#if defined( _WIN64 )
+	__stosq( (_64*)p, n, sz/8 );
+	if( sz & 4 )
+		(*(_32*)( ((PTRSZVAL)p) + sz - (sz&7) ) ) = n;
+	if( sz & 2 )
+		(*(_16*)( ((PTRSZVAL)p) + sz - (sz&3) ) ) = n;
+	if( sz & 1 )
+		(*(_8*)( ((PTRSZVAL)p) + sz - (sz&1) ) ) = n;
+#else
+	__stosd( (_32*)p, n, sz / 4 );
+	if( sz & 2 )
+		(*(_16*)( ((PTRSZVAL)p) + sz - (sz&3) ) ) = n;
+	if( sz & 1 )
+		(*(_8*)( ((PTRSZVAL)p) + sz - (sz&1) ) ) = n;
+#endif
 #else
    memset( p, n, sz );
 #endif
@@ -361,9 +364,19 @@ store_none: ;
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-MEM_PROC( void, MemCpy )( POINTER pTo, CPOINTER pFrom, _32 sz )
+MEM_PROC( void, MemCpy )( POINTER pTo, CPOINTER pFrom, _BLOCK_MAX_SIZE_TYPE sz )
 {
 #if defined( _MSC_VER ) && !defined( __NO_WIN32API__ )
+
+#if   defined( _WIN64 )
+	__movsq( (_64*)pTo, (_64*)pFrom, sz/8 );
+	if( sz & 4 )
+		(*(_32*)( ((PTRSZVAL)pTo) + sz - (sz&7) ) ) = (*(_32*)( ((PTRSZVAL)pFrom) + sz - (sz&7) ) );
+	if( sz & 2 )
+		(*(_16*)( ((PTRSZVAL)pTo) + sz - (sz&3) ) ) = (*(_16*)( ((PTRSZVAL)pFrom) + sz - (sz&3) ) );
+	if( sz & 1 )
+		(*(_8*)( ((PTRSZVAL)pTo) + sz - (sz&1) ) ) = (*(_8*)( ((PTRSZVAL)pFrom) + sz - (sz&1) ) );
+#else
       _asm mov   ecx, sz;
       _asm mov   edi, pTo;
       _asm mov   esi, pFrom;
@@ -378,27 +391,28 @@ test_2:
       _asm test edx, 2;
       _asm jz test_end;
       _asm movsw;
-test_end: ;
+	test_end: ;
+#endif
 #else
 	memcpy( pTo, pFrom, sz );
 #endif
 }
 
-MEM_PROC( int, MemCmp )( CPOINTER pOne, CPOINTER pTwo, _32 sz )
+MEM_PROC( int, MemCmp )( CPOINTER pOne, CPOINTER pTwo, _BLOCK_MAX_SIZE_TYPE sz )
 {
 	return memcmp( pOne, pTwo, sz );
 }
 #else
 #ifdef __STATIC__
 extern _32  LockedExchange( PV_32 p, _32 val );
-extern void MemSet( POINTER p, _32 n, _32 sz );
-extern void MemCpy( POINTER to, CPOINTER from, _32 sz );
-extern int MemCmp( CPOINTER p1, CPOINTER p2, _32 sz );
+extern void MemSet( POINTER p, _BLOCK_MAX_SIZE_TYPE n, _BLOCK_MAX_SIZE_TYPE sz );
+extern void MemCpy( POINTER to, CPOINTER from, _BLOCK_MAX_SIZE_TYPE sz );
+extern int MemCmp( CPOINTER p1, CPOINTER p2, _BLOCK_MAX_SIZE_TYPE sz );
 #else
 MEM_PROC(  _32,  LockedExchange )( PV_32 p, _32 val );
-MEM_PROC(  void, MemSet )( POINTER p, _32 n, _32 sz );
-MEM_PROC(  void, MemCpy )( POINTER to, CPOINTER from, _32 sz );
-MEM_PROC(  int, MemCmp )( CPOINTER to, CPOINTER from, _32 sz );
+MEM_PROC(  void, MemSet )( POINTER p, _BLOCK_MAX_SIZE_TYPE n, _BLOCK_MAX_SIZE_TYPE sz );
+MEM_PROC(  void, MemCpy )( POINTER to, CPOINTER from, _BLOCK_MAX_SIZE_TYPE sz );
+MEM_PROC(  int, MemCmp )( CPOINTER to, CPOINTER from, _BLOCK_MAX_SIZE_TYPE sz );
 #endif
 #endif
 
@@ -622,8 +636,6 @@ static void DumpSection( PCRITICALSECTION pcs )
 #ifdef __cplusplus
 }; // namespace memory {
 	namespace timers { // begin timer namespace
-		using namespace sack::memory;
-		using namespace sack::logging;
 
 #endif
 MEM_PROC( _32, CriticalSecOwners )( PCRITICALSECTION pcs )
@@ -1037,7 +1049,7 @@ void InitSharedMemory( void )
 #endif
 		g.bInit = TRUE;  // onload was definatly a zero.
 		{
-			_32 dwSize = sizeof( SPACEPOOL );
+			_BLOCK_MAX_SIZE_TYPE dwSize = sizeof( SPACEPOOL );
 			g.pSpacePool = (PSPACEPOOL)OpenSpace( NULL, NULL, &dwSize );
 			if( g.pSpacePool )
 			{
@@ -1085,7 +1097,7 @@ static PSPACE AddSpace( PSPACE pAddAfter
 							 , int hFile
 							 , int hMem
 #endif
-							 , POINTER pMem, _32 dwSize, int bLink )
+							 , POINTER pMem, _BLOCK_MAX_SIZE_TYPE dwSize, int bLink )
 {
 	PSPACEPOOL psp;
 	PSPACEPOOL _psp = NULL;
@@ -1227,7 +1239,7 @@ MEM_PROC( void, CloseSpace )( POINTER pMem )
 
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( _32, GetSpaceSize )( POINTER pMem )
+MEM_PROC( _BLOCK_MAX_SIZE_TYPE, GetSpaceSize )( POINTER pMem )
 {
 	PSPACE ps;
 	ps = FindSpace( pMem );
@@ -1237,16 +1249,16 @@ MEM_PROC( _32, GetSpaceSize )( POINTER pMem )
 }
 
 #if defined( __LINUX__ ) && !defined( __CYGWIN__ )
-_32 GetFileSize( int fd )
+_BLOCK_MAX_SIZE_TYPE GetFileSize( int fd )
 {
-	 _32 len = lseek( fd, 0, SEEK_END );
+	 _BLOCK_MAX_SIZE_TYPE len = lseek( fd, 0, SEEK_END );
 	 lseek( fd, 0, SEEK_SET );
 	 return len;
 }
 
 #endif
 //------------------------------------------------------------------------------------------------------
-MEM_PROC( POINTER, OpenSpaceExx )( CTEXTSTR pWhat, CTEXTSTR pWhere, _32 address, P_32 dwSize, P_32 bCreated )
+MEM_PROC( POINTER, OpenSpaceExx )( CTEXTSTR pWhat, CTEXTSTR pWhere, PTRSZVAL address, P_BLOCK_MAX_SIZE_TYPE dwSize, P_32 bCreated )
 {
 	POINTER pMem = NULL;
 	//static _32 bOpening;
@@ -1275,8 +1287,8 @@ MEM_PROC( POINTER, OpenSpaceExx )( CTEXTSTR pWhat, CTEXTSTR pWhere, _32 address,
 						  , 0, 0 );
 			if( pMem == (POINTER)-1 )
 			{
-				lprintf( "Something bad about this region sized %"_32f, *dwSize );
-            DebugBreak();
+				lprintf( "Something bad about this region sized %p", *dwSize );
+            	DebugBreak();
 			}
 			//lprintf( WIDE("Clearing anonymous mmap %") _32f WIDE(""), *dwSize );
 			MemSet( pMem, 0, *dwSize );
@@ -1288,10 +1300,10 @@ MEM_PROC( POINTER, OpenSpaceExx )( CTEXTSTR pWhat, CTEXTSTR pWhere, _32 address,
 		else if( pWhat )
 		{
 			int len;
-         len = snprintf( NULL, 0, WIDE("/tmp/.shared.%s"), pWhat );
-         filename = (char*)Allocate( len + 1 );
+         	len = snprintf( NULL, 0, WIDE("/tmp/.shared.%s"), pWhat );
+         	filename = (char*)Allocate( len + 1 );
 			snprintf( filename, len+1, WIDE("/tmp/.shared.%s"), pWhat );
-         bTemp = TRUE;
+         	bTemp = TRUE;
 		}
 
 
@@ -1334,7 +1346,7 @@ MEM_PROC( POINTER, OpenSpaceExx )( CTEXTSTR pWhat, CTEXTSTR pWhere, _32 address,
 			}
 			if( exists )
 			{
-				if( GetFileSize( fd ) < (_32)*dwSize )
+				if( GetFileSize( fd ) < (_BLOCK_MAX_SIZE_TYPE)*dwSize )
 				{
 				   // expands the file...
 					ftruncate( fd, *dwSize );
@@ -1391,13 +1403,12 @@ MEM_PROC( POINTER, OpenSpaceExx )( CTEXTSTR pWhat, CTEXTSTR pWhere, _32 address,
 			hMem = CreateFileMapping( INVALID_HANDLE_VALUE, NULL
 											, PAGE_READWRITE
 											 |SEC_COMMIT
-											, 0, *dwSize
+											, (*dwSize)>>32 // dwSize is sometimes 64 bit... this should be harmless
+											, (*dwSize) & (0xFFFFFFFF)
 											, pWhat ); // which should be NULL... but is consistant
 			if( !hMem )
 			{
-#ifdef DEBUG_OPEN_SPACE
-				ODS( WIDE("Failed to allocate pagefile memory?!") );
-#endif
+				lprintf( "Failed to allocate pagefile memory?! %p %d", *dwSize, GetLastError() );
 			}
 			else
 			{
@@ -1483,13 +1494,13 @@ MEM_PROC( POINTER, OpenSpaceExx )( CTEXTSTR pWhat, CTEXTSTR pWhere, _32 address,
 			{
 				readonly = 0;
 #ifdef DEBUG_OPEN_SPACE
-				lprintf( WIDE("file is still invalid(alreadyexist?)... new size is %d %d on %p"), *dwSize, FILE_GRAN, hFile );
+				lprintf( WIDE("file is still invalid(alreadyexist?)... new size is %d %d on %p"), (*dwSize), FILE_GRAN, hFile );
 #endif
 				hMem = CreateFileMapping( hFile // is INVALID_HANDLE_VALUE, but is consistant
 												, NULL
 												, (readonly?PAGE_READONLY:PAGE_READWRITE)
 												 /*|SEC_COMMIT|SEC_NOCACHE*/
-												, 0, *dwSize
+												, 0, (*dwSize)
 												, pWhat );
 				if( hMem )
 				{
@@ -1507,12 +1518,14 @@ MEM_PROC( POINTER, OpenSpaceExx )( CTEXTSTR pWhat, CTEXTSTR pWhere, _32 address,
 
 			if( GetLastError() == ERROR_ALREADY_EXISTS )
 			{
+				LARGE_INTEGER lSize;
+				GetFileSizeEx( hFile, &lSize );
 			// mark status for memory... dunno why?
 				// in theory this is a memory image of valid memory already...
 #ifdef DEBUG_OPEN_SPACE
 				lprintf( WIDE("Getting existing size of region...") );
 #endif
-				if( GetFileSize( hFile, NULL ) < (_32)*dwSize )
+				if( lSize.QuadPart < (*dwSize) )
 				{
 #ifdef DEBUG_OPEN_SPACE
 					lprintf( WIDE("Expanding file to size requested.") );
@@ -1525,9 +1538,7 @@ MEM_PROC( POINTER, OpenSpaceExx )( CTEXTSTR pWhat, CTEXTSTR pWhere, _32 address,
 #ifdef DEBUG_OPEN_SPACE
 					lprintf( WIDE("Setting size to size of file (which was larger..") );
 #endif
-					(*dwSize) = GetFileSize( hFile, NULL );
-				   //SetFilePointer( hFile, 0, NULL, FILE_END );
-				   // SetEndOfFile( hFile );
+					(*dwSize) = lSize.QuadPart;
 				}
 				if( bCreated )
 					(*bCreated) = 1;
@@ -1542,7 +1553,7 @@ MEM_PROC( POINTER, OpenSpaceExx )( CTEXTSTR pWhat, CTEXTSTR pWhere, _32 address,
 				if( bCreated )
 					(*bCreated) = 0;
 			}
-			(*dwSize) = GetFileSize( hFile, NULL );
+			//(*dwSize) = GetFileSize( hFile, NULL );
 #ifdef DEBUG_OPEN_SPACE
 			lprintf( WIDE("%s Readonly? %d  hFile %d"), pWhat, readonly, hFile );
 #endif
@@ -1595,10 +1606,11 @@ MEM_PROC( POINTER, OpenSpaceExx )( CTEXTSTR pWhat, CTEXTSTR pWhere, _32 address,
 	}
 	else
 	{
+		if( bCreated && !(*bCreated) && ((*dwSize) == 0) ) 
 		{
 			MEMORY_BASIC_INFORMATION meminfo;
 			VirtualQuery( pMem, &meminfo, sizeof( meminfo ) );
-			(*dwSize) = (_32)meminfo.RegionSize;
+			(*dwSize) = meminfo.RegionSize;
 #ifdef DEBUG_OPEN_SPACE
 			lprintf( WIDE("Fixup memory size to %ld %s:%s(reported by system on view opened)")
 					 , *dwSize, pWhat?pWhat:"ANON", pWhere?pWhere:"ANON" );
@@ -1618,7 +1630,7 @@ MEM_PROC( POINTER, OpenSpaceExx )( CTEXTSTR pWhat, CTEXTSTR pWhere, _32 address,
 
 //------------------------------------------------------------------------------------------------------
 #undef OpenSpaceEx
-MEM_PROC( POINTER, OpenSpaceEx )( CTEXTSTR pWhat, CTEXTSTR pWhere, _32 address, P_32 dwSize )
+MEM_PROC( POINTER, OpenSpaceEx )( CTEXTSTR pWhat, CTEXTSTR pWhere, PTRSZVAL address, P_BLOCK_MAX_SIZE_TYPE dwSize )
 {
 	_32 bCreated;
 	return OpenSpaceExx( pWhat, pWhere, address, dwSize, &bCreated );
@@ -1626,13 +1638,13 @@ MEM_PROC( POINTER, OpenSpaceEx )( CTEXTSTR pWhat, CTEXTSTR pWhere, _32 address, 
 
 //------------------------------------------------------------------------------------------------------
 #undef OpenSpace
-MEM_PROC( POINTER, OpenSpace )( CTEXTSTR pWhat, CTEXTSTR pWhere, P_32 dwSize )
+MEM_PROC( POINTER, OpenSpace )( CTEXTSTR pWhat, CTEXTSTR pWhere, P_BLOCK_MAX_SIZE_TYPE dwSize )
 {
 	return OpenSpaceEx( pWhat, pWhere, 0, dwSize );
 }
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( int, InitHeap)( PMEM pMem, _32 dwSize )
+MEM_PROC( int, InitHeap)( PMEM pMem, PTRSZVAL dwSize )
 {
 	//pMem->dwSize = *dwSize - MEM_SIZE;
 	// size of the PMEM block is all inclusive (from pMem(0) to pMem(dwSize))
@@ -1692,7 +1704,7 @@ MEM_PROC( int, InitHeap)( PMEM pMem, _32 dwSize )
 
 //------------------------------------------------------------------------------------------------------
 
-PMEM DigSpace( TEXTSTR pWhat, TEXTSTR pWhere, P_32 dwSize )
+PMEM DigSpace( TEXTSTR pWhat, TEXTSTR pWhere, P_BLOCK_MAX_SIZE_TYPE dwSize )
 {
 	 PMEM pMem = (PMEM)OpenSpace( pWhat, pWhere, dwSize );
 
@@ -1714,7 +1726,7 @@ PMEM DigSpace( TEXTSTR pWhat, TEXTSTR pWhere, P_32 dwSize )
 
 //------------------------------------------------------------------------------------------------------
 
-int ExpandSpace( PMEM pHeap, _32 dwAmount )
+int ExpandSpace( PMEM pHeap, _BLOCK_MAX_SIZE_TYPE dwAmount )
 {
 	PSPACE pspace = FindSpace( (POINTER)pHeap ), pnewspace;
 	PMEM pExtend;
@@ -1752,7 +1764,7 @@ static PMEM GrabMemEx( PMEM pMem DBG_PASS )
 		// use default heap...
 		if( !XCHG( &g.bMemInstanced, TRUE ) )
 		{
-			_32 MinSize = SYSTEM_CAPACITY;
+			_BLOCK_MAX_SIZE_TYPE MinSize = SYSTEM_CAPACITY;
 			// generic internal memory, unnamed, unshared, unsaved
 			g.pMemInstance = pMem = DigSpace( NULL, NULL, &MinSize );
 			if( !pMem )
@@ -1810,7 +1822,7 @@ static void DropMemEx( PMEM pMem DBG_PASS )
 
 //------------------------------------------------------------------------------------------------------
 
-POINTER HeapAllocateEx( PMEM pHeap, _32 dwSize DBG_PASS )
+POINTER HeapAllocateEx( PMEM pHeap, _BLOCK_MAX_SIZE_TYPE dwSize DBG_PASS )
 {
 	PCHUNK pc;
 	PMEM pMem, pCurMem = NULL;
@@ -1830,8 +1842,13 @@ POINTER HeapAllocateEx( PMEM pHeap, _32 dwSize DBG_PASS )
 	if( !pHeap )
 		pHeap = g.pMemInstance;
 	pMem = GrabMem( pHeap );
+#ifdef _WIN64
+	dwSize += 7; // fix size to allocate at least _32s which
+	dwSize &= 0xFFFFFFFFFFFFFFF8;
+#else
 	dwSize += 3; // fix size to allocate at least _32s which
 	dwSize &= 0xFFFFFFFC;
+#endif
 
 #ifdef _DEBUG
 	if( !g.bDisableDebug )
@@ -1909,21 +1926,24 @@ search_for_free_memory:
 	}
 	if( !pc )
 	{
-		DropMem( pCurMem );
-      pCurMem = NULL;
 		if( dwSize < SYSTEM_CAPACITY )
 		{
-			if( ExpandSpace( pHeap, SYSTEM_CAPACITY ) )
+			if( ExpandSpace( pMem, SYSTEM_CAPACITY ) )
 				goto search_for_free_memory;
 		}
 		else
 		{
-			if( ExpandSpace( pHeap, dwSize + CHUNK_SIZE + MEM_SIZE ) )
+			// after 1 allocation, need a free chunk at end...
+			// and let's just have a couple more to spaere.
+			if( ExpandSpace( pMem, dwSize + (CHUNK_SIZE*4) + MEM_SIZE ) )
 			{
             //lprintf( WIDE("Creating a new expanded space...") );
 				goto search_for_free_memory;
 			}
 		}
+		DropMem( pCurMem );
+      	pCurMem = NULL;
+		
 #ifdef _DEBUG
 		if( !g.bDisableDebug )
 			ODS( WIDE("Remaining space in memory block is insufficient.  Please EXPAND block."));
@@ -1960,17 +1980,17 @@ search_for_free_memory:
 
 //------------------------------------------------------------------------------------------------------
 #undef AllocateEx
-MEM_PROC( POINTER, AllocateEx )( _32 dwSize DBG_PASS )
+MEM_PROC( POINTER, AllocateEx )( _BLOCK_MAX_SIZE_TYPE dwSize DBG_PASS )
 {
 	return HeapAllocateEx( g.pMemInstance, dwSize DBG_RELAY );
 }
 
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( POINTER, HeapReallocateEx )( PMEM pHeap, POINTER source, _32 size DBG_PASS )
+MEM_PROC( POINTER, HeapReallocateEx )( PMEM pHeap, POINTER source, _BLOCK_MAX_SIZE_TYPE size DBG_PASS )
 {
 	POINTER dest;
-	_32 min;
+	_BLOCK_MAX_SIZE_TYPE min;
 
 	dest = HeapAllocateEx( pHeap, size DBG_RELAY );
 	if( source )
@@ -1992,10 +2012,10 @@ MEM_PROC( POINTER, HeapReallocateEx )( PMEM pHeap, POINTER source, _32 size DBG_
 
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( POINTER, HeapPreallocateEx )( PMEM pHeap, POINTER source, _32 size DBG_PASS )
+MEM_PROC( POINTER, HeapPreallocateEx )( PMEM pHeap, POINTER source, _BLOCK_MAX_SIZE_TYPE size DBG_PASS )
 {
 	POINTER dest;
-	_32 min;
+	_BLOCK_MAX_SIZE_TYPE min;
 
 	dest = HeapAllocateEx( pHeap, size DBG_RELAY );
 	if( source )
@@ -2022,14 +2042,14 @@ MEM_PROC( POINTER, HeapMoveEx )( PMEM pNewHeap, POINTER source DBG_PASS )
 
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( POINTER, ReallocateEx )( POINTER source, _32 size DBG_PASS )
+MEM_PROC( POINTER, ReallocateEx )( POINTER source, _BLOCK_MAX_SIZE_TYPE size DBG_PASS )
 {
 	return HeapReallocateEx( g.pMemInstance, source, size DBG_RELAY );
 }
 
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( POINTER, PreallocateEx )( POINTER source, _32 size DBG_PASS )
+MEM_PROC( POINTER, PreallocateEx )( POINTER source, _BLOCK_MAX_SIZE_TYPE size DBG_PASS )
 {
 	return HeapPreallocateEx( g.pMemInstance, source, size DBG_RELAY );
 }
@@ -2081,7 +2101,7 @@ static void Bubble( PMEM pMem )
 
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( _32, SizeOfMemBlock )( CPOINTER pData )
+MEM_PROC( _BLOCK_MAX_SIZE_TYPE, SizeOfMemBlock )( CPOINTER pData )
 {
 	if( pData )
 	{
@@ -2095,7 +2115,7 @@ MEM_PROC( _32, SizeOfMemBlock )( CPOINTER pData )
 
 MEM_PROC( POINTER, MemDupEx )( CPOINTER thing DBG_PASS )
 {
-	_32 size = SizeOfMemBlock( thing );
+	_BLOCK_MAX_SIZE_TYPE size = SizeOfMemBlock( thing );
 	POINTER result;
 	result = AllocateEx( size DBG_RELAY );
 	MemCpy( result, thing, size );
@@ -2901,7 +2921,7 @@ MEM_PROC( TEXTSTR, StrDupEx )( CTEXTSTR original DBG_PASS )
 {
 	if( original )
 	{
-		int len = (int)strlen( original ) + 1;
+		_BLOCK_MAX_SIZE_TYPE len = (_BLOCK_MAX_SIZE_TYPE)strlen( original ) + 1;
 		TEXTCHAR *result = (TEXTCHAR*)AllocateEx( len DBG_RELAY );
 		MemCpy( result, original, len );
 		return result;

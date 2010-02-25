@@ -401,15 +401,24 @@ static PTEXT CPROC FilterLines( POINTER *scratch, PTEXT buffer )
 			if( chardata[n] == '\n' ||
 				chardata[n] == '\r' )
 			{
-				if( chardata[n] == '\n' && end )
+				if( chardata[n] == '\n' )
 				{
+               end = 1;
+					n++; // include this character.
 					//lprintf( WIDE("BLANK LINE - CONSUMED") );
+					break;
+				}
+				if( end ) // \r\r is two lines too
+				{
 					break;
 				}
 				end = 1;
 			}
 			else if( end )
+			{
+				// any other character... after a \r.. don't include the character.
 				break;
+			}
 		}
 		total_length += n - thisskip;
 		if( end )
@@ -498,6 +507,7 @@ static PTEXT CPROC FilterTerminators( POINTER *scratch, PTEXT buffer )
 		{
 			TEXTSTR chardata = GetText( buffer );
 			int length = GetTextSize( buffer );
+         //LogBinary( chardata, length );
 			do
 			{
 				modified = 0;
@@ -1509,16 +1519,18 @@ int IsMultiWordVar( PCONFIG_ELEMENT pce, PTEXT *start )
 			 lprintf( "is alright - gathered to end of line ok." );
 #endif
 	 }
-	 if( !pWords )
-       pWords = SegCreate(0);
-    pWords->format.position.spaces = 0;
+	 //if( !pWords )
+    //   pWords = SegCreate(0);
     if( pWords )
-    {
-		 PTEXT out = BuildLine( pWords );
-		 TEXTSTR buf = StrDup( GetText( out ) );
-		 LineRelease( out );
-		 LineRelease( pWords );
-		 pce->data[0].multiword.pWords = buf;
+	 {
+		 pWords->format.position.spaces = 0;
+		 {
+			 PTEXT out = BuildLine( pWords );
+			 TEXTSTR buf = StrDup( GetText( out ) );
+			 LineRelease( out );
+			 LineRelease( pWords );
+			 pce->data[0].multiword.pWords = buf;
+		 }
 		 return TRUE;
     }
     return FALSE;
@@ -1528,64 +1540,68 @@ int IsMultiWordVar( PCONFIG_ELEMENT pce, PTEXT *start )
 
 int IsPathVar( PCONFIG_ELEMENT pce, PTEXT *start )
 {
-    PTEXT pWords = NULL;
-    if( pce->type != CONFIG_PATH )
-        return FALSE;
-    if( pce->data[0].multiword.pWords )
-    {
-        Release( pce->data[0].multiword.pWords );
-		  pce->data[0].multiword.pWords = NULL;
-	 }
-    while( *start &&
-			 !IsAnyVar( pce->data[0].multiword.pEnd, start ) )
-    {
-        pWords = SegAppend( pWords, SegDuplicate( *start ) );
-        *start = NEXTLINE( *start );
-    }
-    pWords->format.position.spaces = 0;
-    if( pWords )
-    {
-        PTEXT out = BuildLine( pWords );
-        TEXTSTR buf = NewArray( TEXTCHAR, GetTextSize( out ) + 1 );
-        strcpy( buf, GetText( out ) );
-        LineRelease( out );
-        LineRelease( pWords );
-        pce->data[0].multiword.pWords = buf;
-        return TRUE;
-    }
-    return FALSE;
+	PTEXT pWords = NULL;
+	if( pce->type != CONFIG_PATH )
+		return FALSE;
+	if( pce->data[0].multiword.pWords )
+	{
+		Release( pce->data[0].multiword.pWords );
+		pce->data[0].multiword.pWords = NULL;
+	}
+	while( *start &&
+			!IsAnyVar( pce->data[0].multiword.pEnd, start ) )
+	{
+		pWords = SegAppend( pWords, SegDuplicate( *start ) );
+		*start = NEXTLINE( *start );
+	}
+	if( pWords )
+	{
+		pWords->format.position.spaces = 0;
+		{
+			PTEXT out = BuildLine( pWords );
+			TEXTSTR buf = NewArray( TEXTCHAR, GetTextSize( out ) + 1 );
+			strcpy( buf, GetText( out ) );
+			LineRelease( out );
+			LineRelease( pWords );
+			pce->data[0].multiword.pWords = buf;
+		}
+		return TRUE;
+	}
+	return FALSE;
 }
 
 //---------------------------------------------------------------------
 
 int IsFileVar( PCONFIG_ELEMENT pce, PTEXT *start )
 {
-    PTEXT pWords = NULL;
-    if( pce->type != CONFIG_FILE )
-        return FALSE;
-    if( pce->data[0].multiword.pWords )
-    {
-        Release( pce->data[0].multiword.pWords );
-		  pce->data[0].multiword.pWords = NULL;
-	 }
-    while( *start &&
-			 !IsAnyVar( pce->data[0].multiword.pEnd, start ) )
-    {
-        pWords = SegAppend( pWords, SegDuplicate( *start ) );
-        *start = NEXTLINE( *start );
-    }
-    pWords->format.position.spaces = 0;
-    if( pWords )
-    {
-        PTEXT out = BuildLine( pWords );
-        TEXTSTR buf = NewArray( TEXTCHAR, GetTextSize( out ) + 1 );
-        strcpy( buf, GetText( out ) );
-        LineRelease( out );
-        LineRelease( pWords );
-        pce->data[0].multiword.pWords = buf;
-        return TRUE;
-    }
-    return FALSE;
+	PTEXT pWords = NULL;
+	if( pce->type != CONFIG_FILE )
+		return FALSE;
+	if( pce->data[0].multiword.pWords )
+	{
+		Release( pce->data[0].multiword.pWords );
+		pce->data[0].multiword.pWords = NULL;
+	}
+	while( *start &&
+			!IsAnyVar( pce->data[0].multiword.pEnd, start ) )
+	{
+		pWords = SegAppend( pWords, SegDuplicate( *start ) );
+		*start = NEXTLINE( *start );
+	}
+	if( pWords )
+	{
+		pWords->format.position.spaces = 0;
+		{
+			PTEXT out = BuildLine( pWords );
+			TEXTSTR buf = NewArray( TEXTCHAR, GetTextSize( out ) + 1 );
+			strcpy( buf, GetText( out ) );
+			LineRelease( out );
+			LineRelease( pWords );
+			pce->data[0].multiword.pWords = buf;
+		}
+		return TRUE;
+	}
+	return FALSE;
 }
 
 //---------------------------------------------------------------------
@@ -1605,19 +1621,21 @@ int IsFilePathVar( PCONFIG_ELEMENT pce, PTEXT *start )
     {
         pWords = SegAppend( pWords, SegDuplicate( *start ) );
         *start = NEXTLINE( *start );
-    }
-    pWords->format.position.spaces = 0;
-    if( pWords )
-    {
-        PTEXT out = BuildLine( pWords );
-        TEXTSTR buf = NewArray( TEXTCHAR, GetTextSize( out ) + 1 );
-        strcpy( buf, GetText( out ) );
-        LineRelease( out );
-        LineRelease( pWords );
-        pce->data[0].multiword.pWords = buf;
-        return TRUE;
-    }
-    return FALSE;
+	 }
+	 if( pWords )
+	 {
+		 pWords->format.position.spaces = 0;
+		 {
+			 PTEXT out = BuildLine( pWords );
+			 TEXTSTR buf = NewArray( TEXTCHAR, GetTextSize( out ) + 1 );
+			 strcpy( buf, GetText( out ) );
+			 LineRelease( out );
+			 LineRelease( pWords );
+			 pce->data[0].multiword.pWords = buf;
+		 }
+		 return TRUE;
+	 }
+	 return FALSE;
 }
 
 //---------------------------------------------------------------------
@@ -1639,10 +1657,13 @@ int IsAddressVar( PCONFIG_ELEMENT pce, PTEXT *start )
 	}
    if( pWords )
 	{
-		PTEXT pText = BuildLine( pWords );
-		LineRelease( pWords );
-		pce->data[0].psaSockaddr = CreateSockAddress( (CTEXTSTR)GetText( pText ), 0 );
-		LineRelease( pText );
+		pWords->format.position.spaces = 0;
+		{
+			PTEXT pText = BuildLine( pWords );
+			LineRelease( pWords );
+			pce->data[0].psaSockaddr = CreateSockAddress( (CTEXTSTR)GetText( pText ), 0 );
+			LineRelease( pText );
+		}
       return TRUE;
 	}
 	return FALSE;

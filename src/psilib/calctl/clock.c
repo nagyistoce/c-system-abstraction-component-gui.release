@@ -130,8 +130,9 @@ static int CPROC DrawClock( PCOMMON pc )
 
 		if( pClk->analog_clock )
 		{
-         lprintf( "Draw." );
+         //lprintf( "Draw." );
 			DrawAnalogClock( pc );
+         return 1;
 		}
 
 		if( text && StrCmp( text, GetText( szNow ) ) == 0 )

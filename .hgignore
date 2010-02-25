@@ -24,3 +24,11 @@ static_release-.*$
 memory.dump$
 /p$
 .aps$
+glob:include/sexpat/sexpat_external.h
+glob:include/png/pngconf.h
+glob:include/sqlite3.h
+glob:include/zlib/zconf.h
+glob:include/genxml/genx.h
+glob:include/png/png.h
+glob:include/zlib/zlib.h
+glob:include/sexpat/sexpat.h

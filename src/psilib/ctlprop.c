@@ -162,7 +162,7 @@ int FillControlIDList( CTEXTSTR root, PSI_CONTROL listbox, PSI_CONTROL pc, int l
 
 void InitFrameControls( PSI_CONTROL pcFrame, PSI_CONTROL pc )
 {
-   TEXTCHAR buffer[128];
+	TEXTCHAR buffer[128];
 	SetControlText( GetControl( pcFrame, LABEL_CAPTION ), WIDE("Caption") );
 	SetControlText( GetControl( pcFrame, LABEL_X ), WIDE("X") );
 	SetControlText( GetControl( pcFrame, LABEL_Y ), WIDE("Y") );
@@ -298,10 +298,12 @@ PSI_PROC( int, EditControlProperties )( PCOMMON control )
 				pSheet = ParseXMLFrame( control_property_frame_xml, sizeof( control_property_frame_xml ) );
             if( !pSheet )
 					pSheet = LoadXMLFrame( WIDE("Common Edit.Frame") );
+            //DumpFrameContents( pSheet );
 				bAnotherLayer--;
 			}
          if( pSheet )
 			{
+            //lprintf( "****************" );
             InitFrameControls( pSheet, control );
 			}
 			else
@@ -311,14 +313,14 @@ PSI_PROC( int, EditControlProperties )( PCOMMON control )
 										  , PROP_HEIGHT, BORDER_NONE|BORDER_WITHIN, NULL );
 				if( pSheet )
 				{
-					TEXTCHAR buffer[32];
+					TEXTCHAR buffer[256];
 					MakeTextControl( pSheet, PROP_PAD, 05, 58, 14, TXT_STATIC, WIDE("Caption"), 0 );
 					MakeTextControl( pSheet, PROP_PAD, 21, 58, 14, TXT_STATIC, WIDE("X"), 0 );
 					MakeTextControl( pSheet, PROP_PAD, 37, 58, 14, TXT_STATIC, WIDE("Y"), 0 );
 					MakeTextControl( pSheet, PROP_PAD, 53, 58, 14, TXT_STATIC, WIDE("Width"), 0 );
 					MakeTextControl( pSheet, PROP_PAD, 69, 58, 14, TXT_STATIC, WIDE("Height"), 0 );
 					MakeTextControl( pSheet, PROP_PAD, 85, 58, 14, TXT_STATIC, WIDE("ID"), 0 );
-					MakeTextControl( pSheet, PROP_PAD, 91, 58, 14, TXT_STATIC, WIDE("ID Name"), 0 );
+					MakeTextControl( pSheet, PROP_PAD, 101, 58, 14, TXT_STATIC, WIDE("ID Name"), 0 );
 					sprintf( buffer, WIDE("%s"), GetText( control->caption.text ) );
 					MakeEditControl( pSheet, PROP_PAD + PROP_PAD + 58, 04, PROP_WIDTH-10-(58+5), 14, EDT_CAPTION, buffer, 0 );
 					sprintf( buffer, WIDE("%")_32fs WIDE(""), control->rect.x );
@@ -331,11 +333,12 @@ PSI_PROC( int, EditControlProperties )( PCOMMON control )
 					MakeEditControl( pSheet, PROP_PAD + PROP_PAD + 58, 68, 56, 14, EDT_HEIGHT, buffer, 0 );
 					sprintf( buffer, WIDE("%d"), control->nID );
 					MakeEditControl( pSheet, PROP_PAD + PROP_PAD + 58, 84, 56, 14, EDT_ID, buffer, 0 );
-					sprintf( buffer, WIDE("%s"), control->pIDName );
+					snprintf( buffer, sizeof( buffer ), WIDE("%s"), control->pIDName );
 					MakeEditControl( pSheet, PROP_PAD + PROP_PAD + 58, 84, 56, 14, EDT_IDNAME, buffer, 0 );
-               MakeListBox( pSheet, PROP_PAD, 100, 400, 200, LISTBOX_IDS, 0 );
+               MakeListBox( pSheet, PROP_PAD, 117, 400, 200, LISTBOX_IDS, 0 );
                //SaveXMLFrame( pSheet, WIDE("Common Edit.Frame") );
 					InitFrameControls( pSheet, control );
+					//DumpFrameContents( pSheet );
 				}
  			}
          //DebugBreak();
@@ -366,6 +369,7 @@ PSI_PROC( int, EditControlProperties )( PCOMMON control )
 			AddCommonButtons( pf, &pEditProps->bDone, &pEditProps->bOkay );
 			DisplayFrame( pf );
          //EditFrame( pf, TRUE );
+			//DumpFrameContents( pf );
 			CommonWait( pf );
 			if( pEditProps->bOkay )
 			{

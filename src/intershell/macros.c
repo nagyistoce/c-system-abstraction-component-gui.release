@@ -424,7 +424,7 @@ void WriteMacroButton( CTEXTSTR leader, FILE *file, PTRSZVAL psv )
 			fprintf( file, "%sMacro Element \'%s\'\n", leader?leader:"", element->button->pTypeName );
 			DumpGeneric( file, element->button ); /* begins another sub configuration... */
 			fprintf( file, "%smacro element done\n", leader?leader:"" );
-			fprintf( file, "%sMacro Element Text \'%s\'\n", leader?leader:"", element->button->text );
+			//fprintf( file, "%sMacro Element Text \'%s\'\n", leader?leader:"", element->button->text );
 		}
 		fprintf( file, "%smacro element list done\n", leader?leader:"" );
 	}
@@ -514,7 +514,7 @@ OnLoadControl( MACRO_BUTTON_NAME )( PCONFIG_HANDLER pch, PTRSZVAL psv )
 {
    AddConfigurationMethod( pch, "Macro Element \'%m\'", LoadMacroElements );
    //AddConfigurationMethod( pch, "Macro Element Text \'%m\'", LoadMacroElementText );
-	AddConfigurationMethod( InterShell_GetCurrentConfigHandler(), "Macro Element Text \'%m\'", LoadMacroElementText );
+	//AddConfigurationMethod( InterShell_GetCurrentConfigHandler(), "Macro Element Text \'%m\'", LoadMacroElementText );
 	AddConfigurationMethod( InterShell_GetCurrentConfigHandler(), "Macro Element List Done", FinishMacro );
 }
 
@@ -550,11 +550,11 @@ OnSaveCommon( "Startup Macro" )( FILE *file )
 OnLoadCommon( "Startup Macro" )( PCONFIG_HANDLER pch )
 {
 	AddConfigurationMethod( pch, "Startup Macro Element \'%m\'", LoadMacroElements );
-	AddConfigurationMethod( pch, "Startup Macro Element Text \'%m\'", LoadMacroElementText );
+	//AddConfigurationMethod( pch, "Startup Macro Element Text \'%m\'", LoadMacroElementText );
    AddConfigurationMethod( pch, "Startup Macro Element List Done", FinishMacro );
 	
 	AddConfigurationMethod( pch, "Shutdown Macro Element Text \'%m\'", LoadMacroElementText );
-	AddConfigurationMethod( pch, "Shutdown Macro Element \'%m\'", LoadMacroElements );
+	//AddConfigurationMethod( pch, "Shutdown Macro Element \'%m\'", LoadMacroElements );
 	AddConfigurationMethod( pch, "Shutdown Macro Element List Done", FinishMacro );
 }
 

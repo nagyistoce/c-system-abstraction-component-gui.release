@@ -8,6 +8,7 @@
 //#include <vidlib.h>
 
 //#define DEBUG_BORDER_DRAWING
+//#define QUICK_DEBUG_BORDER_FLAGS
 
 PSI_NAMESPACE
 // define this to prevent multiple definition to application 
@@ -274,6 +275,7 @@ typedef struct common_control_frame
 		_32 bChildDirty : 1; // needs DrawThySelf called... // collect these, so a master level draw can be done down. only if a control or it's child is dirty.
 		_32 bRestoring : 1; // there is a frame caption update (with flush to display) which needs to be locked....
 		_32 bShown : 1; // got at least one frame redraw event (focus happens before first draw)
+		_32 bResizedDirty : 1;
 
 	} flags;
 
@@ -349,7 +351,9 @@ void CPROC DrawThinnerFrameInvertedImage( Image pc );
 void GetCurrentDisplaySurface( PPHYSICAL_DEVICE device );
 _MOUSE_NAMESPACE
 void SetupHotSpots( PEDIT_STATE pEditState );
-void DrawHotSpots( PCOMMON pf, PEDIT_STATE pEditState );
+void DrawHotSpotsEx( PCOMMON pf, PEDIT_STATE pEditState DBG_PASS );
+#define DrawHotSpots(pf,pe) DrawHotSpotsEx(pf,pe DBG_SRC)
+//void DrawHotSpots( PCOMMON pf, PEDIT_STATE pEditState );
 _MOUSE_NAMESPACE_END
 void SmudgeSomeControls( PCOMMON pc, P_IMAGE_RECTANGLE pRect );
 void DetachFrameFromRenderer( PCOMMON pc );

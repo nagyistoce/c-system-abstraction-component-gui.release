@@ -81,7 +81,8 @@ SQLGETOPTION_PROC( void, EnumOptions )( INDEX parent
 }
 static int CPROC CopyRoot( PTRSZVAL iNewRoot, CTEXTSTR name, _32 ID, int flags )
 {
-	INDEX iCopy = GetOptionIndexEx( iNewRoot, NULL, name, NULL, TRUE );
+	// iNewRoot is at its source an INDEX
+	INDEX iCopy = GetOptionIndexEx( (INDEX)iNewRoot, NULL, name, NULL, TRUE DBG_SRC );
 	INDEX iValue = GetOptionValueIndex( ID );
    if( iValue != INVALID_INDEX )
 		SetOptionValue( iCopy, DuplicateValue( iValue, iCopy ) );
@@ -103,7 +104,7 @@ SQLGETOPTION_PROC( void, DuplicateOptionEx )( PODBC odbc, INDEX iRoot, CTEXTSTR 
 	if( SQLQueryf( og.Option, &result, WIDE("select parent_node_id from option_map where node_id=%ld"), iRoot ) && result )
 	{
 		iParent = atoi( result );
-		iNewName = GetOptionIndexEx( iParent, NULL, pNewName, NULL, TRUE );
+		iNewName = GetOptionIndexEx( iParent, NULL, pNewName, NULL, TRUE DBG_SRC );
 		EnumOptions( iRoot, CopyRoot, iNewName );
 	}
 }

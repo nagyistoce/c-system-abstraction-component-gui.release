@@ -1642,7 +1642,7 @@ PSI_CONTROL GetItemListbox( PLISTITEM pli )
 #include <psi.h>
 static CONTROL_REGISTRATION
 listbox = { LISTBOX_CONTROL_NAME
-			 , { {110, 73}, sizeof( LISTBOX ), BORDER_INVERT_THIN }
+			 , { {110, 73}, sizeof( LISTBOX ), BORDER_INVERT_THIN|BORDER_NOCAPTION }
 			 , InitListBox
 			 , NULL
 			 , RenderListBox

@@ -200,8 +200,9 @@ static void CPROC RemovePlugin( PTRSZVAL psv, PSI_CONTROL button )
 		}
       DeleteList( &plugin->pLoadOn );
 		Release( (TEXTSTR)plugin->plugin_mask );
-      Release( plugin );
-		DeleteListItem( list, pli );
+		Release( plugin );
+ 		DeleteListItem( list, pli );
+		l.current_plugin = NULL; // clean this up after the config handlers above...
 	}
 }
 //-------------------------------------------------------------------------------

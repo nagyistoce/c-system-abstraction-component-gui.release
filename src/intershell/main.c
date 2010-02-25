@@ -32,7 +32,9 @@
 //#define DEBUG_SCALED_BLOT
 #include "widgets/include/banner.h"
 #include <psi.h>
+#include "pages.h"
 #include "intershell_security.h"
+#include "intershell_registry.h"
 #include "menu_real_button.h"
 #include "sprites.h"
 #ifndef __NO_ANIMATION__
@@ -114,6 +116,7 @@ void InterShell_Reveal( void )
 		g.flags.bShowCanvas = 1;
 		return;
 	}
+	//lprintf( "Restoring..." );
 	//if( g.flags.bShowCanvas )
 	{
 		InterShell_DisablePageUpdate( FALSE );
@@ -1131,20 +1134,19 @@ static void CPROC AllPresses( PTRSZVAL psv, PKEY_BUTTON key )
 	}
 
 	{
-		PCanvasData canvas = GetCanvas( NULL );
-		GenerateSprites( GetFrameRenderer( g.single_frame ), PARTX(button->x) + (PARTW(button->x,button->w) /2), PARTY(button->y) + (PARTH(button->y,button->h)/2));
+		//PCanvasData canvas = GetCanvas( NULL );
+		//GenerateSprites( GetFrameRenderer( g.single_frame ), PARTX(button->x) + (PARTW(button->x,button->w) /2), PARTY(button->y) + (PARTH(button->y,button->h)/2));
 	}
 
 
 	if( button->original_keypress )
 		button->original_keypress( button->psvUser );
+	//lprintf( "Restore should have happened..." );
 	if( button->pPageName )
 	{
-		if( !button->flags.bIgnorePageChange )
+		if( button->canvas && !button->flags.bIgnorePageChange )
 		{
-			//DebugBreak();
-			if( !button->canvas )
-				DebugBreak();
+			//lprintf( "Changing pages, but only virtually don't activate the page always" );
 			ShellSetCurrentPageEx( button->canvas->pc_canvas, button->pPageName );
 		}
 		button->flags.bIgnorePageChange = 0;
@@ -1377,7 +1379,7 @@ PMENU_BUTTON CreateInvisibleControl( char *name )
 }
 
 PMENU_BUTTON CreateSomeControl( PSI_CONTROL pc_canvas, int x, int y, int w, int h
-							   , char *name )
+							   , CTEXTSTR name )
 {
 	PMENU_BUTTON button = CreateButton();
 	PMENU_BUTTON prior = configure_key_dispatch.button;
@@ -1404,6 +1406,12 @@ PMENU_BUTTON CreateSomeControl( PSI_CONTROL pc_canvas, int x, int y, int w, int 
    //lprintf( "..." );
 	configure_key_dispatch.button = prior;
 	return button;
+}
+
+PTRSZVAL  InterShell_CreateControl( CTEXTSTR type, int x, int y, int w, int h )
+{
+	PMENU_BUTTON button = CreateSomeControl( g.single_frame, x, y, w, h, type );
+   return button->psvUser;
 }
 
 
@@ -2672,6 +2680,7 @@ void CPROC DrawEditGlare( PTRSZVAL psv, Image surface )
 
 int CPROC DrawFrameBackground( PCOMMON pf )
 {
+   //lprintf( "----------g.flags.bPageUpdateDisabled %d", g.flags.bPageUpdateDisabled );
 	if( !g.flags.bPageUpdateDisabled )
 	{
 		ValidatedControlData( PCanvasData, menu_surface.TypeID, canvas, pf );
@@ -2681,7 +2690,7 @@ int CPROC DrawFrameBackground( PCOMMON pf )
 		//GetPageSize( pf, &w, &h );
 		//if( g.flags.multi_edit )
 		current_page = canvas->current_page;
-
+      //lprintf( "--- AM DRAWING BACKGROUND" );
 		// update the canvas's dimensions...
 		////////-s-s-s-s
 		if( (( canvas->width != surface->width )&& canvas->width ) ||
@@ -2882,11 +2891,7 @@ int CPROC DrawFrameBackground( PCOMMON pf )
 		}
 #endif
 	}
-	//else
-	//   DebugBreak();
-	//EnableFrameUpdates( canvas->frame, FALSE );
-	//else
-	lprintf( "Done with a pass of drawing the canvas background... but the controls are still being revealed oh when?" );
+	//lprintf( "Done with a pass of drawing the canvas background... but the controls are still being revealed oh when?" );
 	return TRUE;
 }
 
@@ -3732,7 +3737,7 @@ void SetupSystemsListAndGlobalSingleFrame(void )
 	}
 #endif
 #ifndef __NO_OPTIONS__
-	g.flags.multi_edit = SACK_GetProfileInt( GetProgramName(), "Intershell Layout/Windowed mode (not full screen)", 0 );
+	g.flags.multi_edit = SACK_GetProfileIntEx( GetProgramName(), "Intershell Layout/Windowed mode (not full screen)", 0, TRUE );
 #endif
 	SetBlotMethod( BLOT_C );
 	GetDisplaySize( &g.width, &g.height );
@@ -3748,45 +3753,20 @@ void SetupSystemsListAndGlobalSingleFrame(void )
 #ifndef __NO_OPTIONS__
 #  ifndef __LINUX__
 	{
-		int display = SACK_GetProfileInt( GetProgramName(), "Intershell Layout/Use Screen Number", 0 );
+		int display = SACK_GetProfileIntEx( GetProgramName(), "Intershell Layout/Use Screen Number", 0, TRUE );
 		if( display > 0 )
 		{
-			TEXTSTR teststring = NewArray( TEXTCHAR, 20 );
-         int xpos = 0;
-			//int idx;
-			int i;
-			DISPLAY_DEVICE dev;
-			DEVMODE dm;
-			dm.dmSize = sizeof( DEVMODE );
-			dev.cb = sizeof( DISPLAY_DEVICE );
-			snprintf( teststring, 20, "\\\\.\\DISPLAY%d", display );
-			for( i = 0;
-				 EnumDisplayDevices( NULL // all devices
-										 , i
-										 , &dev
-										 , 0 // dwFlags
-										 ); i++ )
-			{
-				if( StrCaseCmp( teststring, dev.DeviceName ) == 0 )
-				{
-
-					if( EnumDisplaySettings( dev.DeviceName, ENUM_CURRENT_SETTINGS, &dm ) )
-					{
-						xpos = dm.dmPosition.x;
-						xpos += dm.dmPosition.x;
-						g.single_frame = MakeControl( NULL, menu_surface.TypeID
-															 , dm.dmPosition.x, dm.dmPosition.y
-															 , dm.dmPelsWidth, dm.dmPelsHeight, 0 );
-					}
-					else
-                  lprintf( "Found display name, but enum current settings failed? %s", teststring );
-				}
-			}
+			_32 w, h;
+			S_32 x, y;
+         GetDisplaySizeEx( display, &x, &y, &w, &h );
+			g.single_frame = MakeControl( NULL, menu_surface.TypeID
+												 , x, y
+												 , w, h, 0 );
 		}
 	}
 #  endif
 	if( !g.single_frame )
-		if( SACK_GetProfileInt( GetProgramName(), "Intershell Layout/Use Custom Positioning", 0 ) )
+		if( SACK_GetProfileIntEx( GetProgramName(), "Intershell Layout/Use Custom Positioning", 0, TRUE ) )
 		{
 			int x = SACK_GetProfileInt( GetProgramName(), "Intershell Layout/X Position", 0 );
 			int y = SACK_GetProfileInt( GetProgramName(), "Intershell Layout/Y Position", 0 );
@@ -3798,7 +3778,7 @@ void SetupSystemsListAndGlobalSingleFrame(void )
 
 		}
 		else
-			if( SACK_GetProfileInt( GetProgramName(), "Intershell Layout/Use Second Display(horizontal)", 0 ) )
+			if( SACK_GetProfileIntEx( GetProgramName(), "Intershell Layout/Use Second Display(horizontal)", 0, TRUE ) )
 				g.single_frame = MakeControl( NULL, menu_surface.TypeID, g.width, 0, g.width, g.height, 0 );
 			else
 				if( g.flags.bSpanDisplay )
@@ -3941,8 +3921,6 @@ int CommonInitCanvas( PSI_CONTROL pc_canvas, PCanvasData canvas )
 		g.single_frame = pc_canvas;
 	}
 
-	//ChangePages( pc_canvas, canvas->default_page );
-
 	g.flags.bExit = 0;
 
 	if( !canvas->pPageMenu )
@@ -4005,17 +3983,48 @@ int CommonInitCanvas( PSI_CONTROL pc_canvas, PCanvasData canvas )
 //#if 0
 static void OnHideCommon( WIDE( "menu canvas" ) )( PSI_CONTROL pc )
 {
-	lprintf( "A control's hide has been invoked and that control is a cavnas... hide controls on my page." );
+	//lprintf( "A control's hide has been invoked and that control is a cavnas... hide controls on my page." );
 	HidePageEx( pc );
 }
 
 static void OnRevealCommon( WIDE( "menu canvas" ) )( PSI_CONTROL pc )
 {
-	lprintf( "Restoring page..." );
+	//lprintf( "Restoring page..." );
 	RestoreCurrentPage( pc );
-	lprintf( "restored page..." );
+	//lprintf( "restored page..." );
 }
 //#endif
+
+void CPROC AcceptFiles( PSI_CONTROL pc, CTEXTSTR file, S_32 x, S_32 y )
+{
+	ValidatedControlData( PCanvasData, menu_surface.TypeID, canvas, pc );
+
+	static int bInvoked;
+   int px, py;
+	CTEXTSTR name;
+	PCLASSROOT data = NULL;
+	if( bInvoked )
+		return;
+	bInvoked = TRUE;
+
+//#define PARTOFX(xc) ( ( xc ) * canvas->current_page->grid.nPartsX ) / canvas->width
+//#define PARTOFY(yc) ( ( yc ) * canvas->current_page->grid.nPartsY ) / canvas->height
+	px = PARTOFX( x );
+	py = PARTOFY( y );
+					
+	for( name = GetFirstRegisteredName( TASK_PREFIX "/common/Drop Accept", &data );
+		name;
+		name = GetNextRegisteredName( &data ) )
+	{
+		LOGICAL (CPROC *f)(CTEXTSTR, int,int);
+		//snprintf( rootname, sizeof( rootname ), TASK_PREFIX "/common/save common/%s", name );
+		f = GetRegisteredProcedure2( (CTEXTSTR)data, LOGICAL, name, (CTEXTSTR, int,int) );
+		if( f )
+			if( f(file,px,py) )
+            break;
+	}
+   bInvoked = FALSE;
+}
 
 int CPROC InitMasterFrame( PCOMMON pc )
 {
@@ -4026,14 +4035,15 @@ int CPROC InitMasterFrame( PCOMMON pc )
 		//parent = GetFrame( pc );
 		//if( parent )
 		{
-			int displays_wide = SACK_GetProfileInt( GetProgramName(), "Intershell Layout/Expected displays wide", 1 );
-			int displays_high = SACK_GetProfileInt( GetProgramName(), "Intershell Layout/Expected displays highs", 1 );
+			int displays_wide = SACK_GetProfileIntEx( GetProgramName(), "Intershell Layout/Expected displays wide", 1, TRUE );
+			int displays_high = SACK_GetProfileIntEx( GetProgramName(), "Intershell Layout/Expected displays highs", 1, TRUE );
 			Image surface = GetControlSurface( pc );
 			canvas->pc_canvas = pc; // self reference
 			canvas->width = surface->width;
 			canvas->height = surface->height;
 			canvas->current_page =  (PPAGE_DATA)Allocate( sizeof( *canvas->current_page ) );
 			MemSet( canvas->current_page, 0, sizeof( *canvas->current_page ) );
+         canvas->current_page->flags.bActive = 1;
 			canvas->width_scale.denominator = displays_wide * 1024;
 			canvas->width_scale.numerator =  surface->width;
 			canvas->height_scale.denominator = displays_high * 768;
@@ -4052,6 +4062,7 @@ int CPROC InitMasterFrame( PCOMMON pc )
 			AddLink( &g.frames, pc );
 			CommonInitCanvas( pc, canvas );
 		}
+      AddCommonAcceptDroppedFiles( pc, AcceptFiles );
 		//else
 		//	canvas->current_page = parent->current_page;
 	}
@@ -4186,7 +4197,8 @@ PSI_CONTROL OpenPageFrame( PPAGE_DATA page )
 			{
 				//PRENDERER renderer;
 				Image image = GetControlSurface( page_frame );
-				canvas->renderer = OpenDisplaySizedAt( g.flags.bTransparent?DISPLAY_ATTRIBUTE_LAYERED:0, image->width, image->height, image->x, image->y );
+				canvas->renderer = OpenDisplaySizedAt( g.flags.bTransparent?DISPLAY_ATTRIBUTE_LAYERED:0
+																 , image->width, image->height, image->x, image->y );
             SetRendererTitle( canvas->renderer, "Canvas" );
 				AttachFrameToRenderer( page_frame, canvas->renderer );
 			}
@@ -4296,24 +4308,26 @@ ATEXIT_PRIORITY( ExitMisc, ATEXIT_PRIORITY_DEFAULT + 1 )
 		INDEX idx2;
 		if( !g.flags.multi_edit )
 		{
-			InterShell_DisablePageUpdate( TRUE );
-			//EnableFrameUpdates( g.single_frame, FALSE );
-			LIST_FORALL( g.all_pages, idx2, PPAGE_DATA, page )
+			if( SACK_GetProfileIntEx( GetProgramName(), "Destroy Controls at exit", 0, TRUE ) )
 			{
-				ChangePages( g.single_frame, page );
-				LIST_FORALL( page->controls, idx, PMENU_BUTTON, button )
+				InterShell_DisablePageUpdate( TRUE );
+				LIST_FORALL( g.all_pages, idx2, PPAGE_DATA, page )
 				{
-					DestroyButton( button );
+					ChangePages( g.single_frame, page );
+					LIST_FORALL( page->controls, idx, PMENU_BUTTON, button )
+					{
+						DestroyButton( button );
+					}
+					if( page->frame != g.single_frame )
+					{
+						DestroyFrame( &page->frame );
+					}
+					else
+						page->frame = NULL;
 				}
-				if( page->frame != g.single_frame )
-				{
-					DestroyFrame( &page->frame );
-				}
-				else
-					page->frame = NULL;
+				InterShell_DisablePageUpdate( TRUE );
+				//DestroyFrame( &g.single_frame );
 			}
-			InterShell_DisablePageUpdate( TRUE );
-			//DestroyFrame( &g.single_frame );
 		}
 		else
 		{
@@ -4501,10 +4515,10 @@ int restart( void )
 		PCanvasData canvas = GetCanvas( g.single_frame );
 		if( canvas )
 		{
-			lprintf( "Making sure we start from NO Page, in case the first page is protected..." );
-			lprintf( "Should we have a rule for default forward, backward, first, last?  From NULL? from another?" );
+			//lprintf( "Making sure we start from NO Page, in case the first page is protected..." );
+			//lprintf( "Should we have a rule for default forward, backward, first, last?  From NULL? from another?" );
 			HidePageEx( g.single_frame );
-			//canvas->current_page = NULL;
+			canvas->current_page = NULL;
 			ChangePages( g.single_frame, canvas->default_page );
 		}
 	do
@@ -4621,24 +4635,24 @@ PRIORITY_PRELOAD( LoadingMessage, DEFAULT_PRELOAD_PRIORITY+3 )
 #if defined( __WINDOWS__ )
 PRIORITY_PRELOAD( ProgramLock, DEFAULT_PRELOAD_PRIORITY+2 )
 {
-	_32 size = 0;
+	PTRSZVAL size = 0;
 	char lockname[256];
 	TEXTCHAR resource_path[256];
 	snprintf( lockname, sizeof( lockname ), "%s.instance.lock", GetProgramName() );
 #ifndef __NO_OPTIONS__
-	g.flags.bSQLConfig = SACK_GetProfileInt( GetProgramName(), "Use SQL Configuration", 1 );
+	g.flags.bSQLConfig = SACK_GetProfileIntEx( GetProgramName(), "Use SQL Configuration", 1, TRUE );
 	SACK_GetProfileStringEx( "InterShell", "Default resource path"
 								, ""
 								, resource_path
 								  , sizeof( resource_path ), TRUE );
-	SACK_GetProfileString( GetProgramName(), "resource path"
+	SACK_GetProfileStringEx( GetProgramName(), "resource path"
 #ifdef __LINUX__
 							 , resource_path[0]?resource_path:"~"
 #else
 							 , resource_path[0]?resource_path:"."
 #endif
 							 , resource_path
-							 , sizeof( resource_path ) );
+							 , sizeof( resource_path ), TRUE );
 #ifdef _WIN32
 	if( !SetCurrentPath( resource_path ) )
 	{
@@ -4688,8 +4702,9 @@ PRIORITY_PRELOAD( ProgramLock, DEFAULT_PRELOAD_PRIORITY+2 )
 void CPROC LoadAPlugin( PTRSZVAL psv, CTEXTSTR name, int flags )
 {
 	char msg[256];
-	snprintf( msg, sizeof( msg ), "Loading Plugin...\n%s", name );
+	snprintf( msg, sizeof( msg ), "Loading Plugin: %s", name );
 	SystemLog( msg );
+	snprintf( msg, sizeof( msg ), "Loading Plugin...\n%s", name );
 	BannerNoWait( msg );
 	if( pathchr( name ) )
 	{
@@ -4705,8 +4720,9 @@ void CPROC LoadAPlugin( PTRSZVAL psv, CTEXTSTR name, int flags )
 		}
 	}
 	LoadFunction( name, NULL );
-	snprintf( msg, sizeof( msg ), "Loaded Plugin...\n%s", name );
+	snprintf( msg, sizeof( msg ), "Loaded Plugin: %s", name );
 	SystemLog( msg );
+	snprintf( msg, sizeof( msg ), "Loaded Plugin...\n%s", name );
 	BannerNoWait( msg );
 }
 
@@ -4791,9 +4807,9 @@ PUBLIC( int, Main)( int argc, char **argv, int bConsole )
 	//DumpRegisteredNames();
 	//SetAllocateLogging( TRUE );
 #ifndef __NO_OPTIONS__
-	g.flags.bTopmost = SACK_GetProfileInt( GetProgramName(), "Intershell Layout/Display Topmost", 0 );
-   g.flags.bTransparent = SACK_GetProfileInt( GetProgramName(), "Intershell Layout/Display is transparent", 0 );
-   g.flags.bSpanDisplay = SACK_GetProfileInt( GetProgramName(), "Intershell Layout/Use Both Displays(horizontal)", 0 );
+	g.flags.bTopmost = SACK_GetProfileIntEx( GetProgramName(), "Intershell Layout/Display Topmost", 0, TRUE );
+   g.flags.bTransparent = SACK_GetProfileIntEx( GetProgramName(), "Intershell Layout/Display is transparent", 1, TRUE );
+   g.flags.bSpanDisplay = SACK_GetProfileIntEx( GetProgramName(), "Intershell Layout/Use Both Displays(horizontal)", 0, TRUE );
 #endif
 	//SystemLogTime( SYSLOG_TIME_CPU| SYSLOG_TIME_DELTA );
 
@@ -5031,7 +5047,7 @@ GetCommonButtonControls
 , ClearPageList							
 , InterShell_DisablePageUpdate					
 , RestoreCurrentPage						
-, HidePageEx								
+, HidePageExx
 , InterShell_DisableButtonPageChange			
 , CreateLabelVariable					
 , CreateLabelVariableEx					
@@ -5061,7 +5077,8 @@ GetCommonButtonControls
 																 , InterShell_GetCurrentButton
 																 , InterShell_SetButtonFontName
 																 , InterShell_GetPhysicalButton
-                                                 , InterShell_SetButtonHighlight
+																				 , InterShell_SetButtonHighlight
+                                                             , InterShell_CreateControl
 };
 
 POINTER CPROC LoadInterShellInterface( void )

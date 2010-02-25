@@ -212,7 +212,7 @@ PSI_CONTROL LoadXMLFrameOverEx( PSI_CONTROL parent, CTEXTSTR file DBG_PASS )
 	POINTER buffer;
    CTEXTSTR _file; // temp storage for prior value(create frame in place, allow moving later)
 	TEXTSTR tmp = NULL;
-	_32 size;
+	PTRSZVAL size;
    PSI_CONTROL frame;
 #  ifdef USE_INTERFACES
 	if( !g.MyImageInterface )

@@ -861,8 +861,8 @@ void LoadButtonConfig( PSI_CONTROL pc_canvas, TEXTSTR filename )
 		if( g.flags.forceload )
 		{
 			FILE *file;
-			_32 size = 0;
-        		 _32 real_file_size = 0;
+			PTRSZVAL size = 0;
+        		 PTRSZVAL real_file_size = 0;
 			POINTER mem = OpenSpace( NULL, filename, &size );
 			if( mem && size )
 			{
@@ -924,10 +924,10 @@ void LoadButtonConfig( PSI_CONTROL pc_canvas, TEXTSTR filename )
 #ifndef __ARM__
 		if( g.flags.restoreload )
 		{
-			_32 size = 0;
+			PTRSZVAL size = 0;
 			POINTER mem = OpenSpace( NULL, filename, &size );
 			FILE *file;
-			_32 real_file_size = 0;
+			PTRSZVAL real_file_size = 0;
 			if( mem && size )
 			{
 				file = fopen( filename, "rb" );
@@ -1582,7 +1582,7 @@ void SaveButtonConfig( PSI_CONTROL pc_canvas, char *filename )
 	if( g.flags.bSQLConfig )
 		if( !g.flags.local_config )
 		{
-			_32 size = 0;
+			PTRSZVAL size = 0;
 			POINTER mem = OpenSpace( NULL, filename, &size );
 			if( mem && size )
 			{

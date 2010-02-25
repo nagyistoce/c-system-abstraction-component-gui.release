@@ -1,5 +1,10 @@
 #include <stdhdrs.h>
 #include <sack_types.h>
+#ifdef __cplusplus
+#ifdef __WATCOMC__
+#include <io.h>
+#endif
+#endif
 #include <pssql.h>
 
 char *strings[] = { "CRAETE TABLE blah"

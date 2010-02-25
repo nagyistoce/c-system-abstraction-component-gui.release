@@ -220,7 +220,7 @@ void PingResult( PTRSZVAL psv, _32 dwIP, CTEXTSTR name, int min, int max, int av
 		result->drop = dropped;
       dropped = 0;
 		result->hops = hops;
-		result->tick = GetTickCount();
+		result->tick = timeGetTime();
 		//lprintf( "Added a result. at %ld %p %ld %ld %ld %ld %ld"
 		//		 , result->tick, result
 		//		 , min, max, avg, drop, hops, dwIP, result->tick);
@@ -838,7 +838,7 @@ OnDestroyControl( "Ping Status Graph" )( PTRSZVAL psv )
 void DrawLine( Image image, GRAPH graph, GRAPH_LINE line )
 {
 	_32 tick;
-	_32 max_tick = GetTickCount();
+	_32 max_tick = timeGetTime();
 	_32 min_tick = max_tick - graph->timespan;
    _32 tick_err, tick_del;
 	_32 width, height;

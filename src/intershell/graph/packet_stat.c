@@ -219,7 +219,7 @@ static void CPROC ClientReceive( PCLIENT pc, POINTER buffer, int size, SOCKADDR 
 		{
 			UDP_SAMPLE sample;
 			sample.dropped = dropped;
-			sample.tick = GetTickCount();
+			sample.tick = timeGetTime();
 			sample.cpu_tick_delta = tick - l.client_buffer[0];
          lprintf( "hrm tick %Ld %Ld %Ld", tick, min_tick_in_packet, tick-min_tick_in_packet );
          EnqueData( &udp_data->queue, &sample );

@@ -13,16 +13,6 @@ OnKeyPressEvent( "VLC/button" )( PTRSZVAL psv )
 	PMENU_BUTTON button = (PMENU_BUTTON)psv;
    PSI_CONTROL pc_button = InterShell_GetButtonControl( button );
 	PRENDERER renderer = GetButtonAnimationLayer( pc_button );
-   if( n == 0 )
-		PlayItemOn( renderer, "M:/tmp/videos/crapshor1024.mpg" );
-   if( n == 1 )
-	PlayItemOn( renderer, "M:/tmp/videos/ElvisHor1024.mpg" );
-   if( n == 2 )
-	PlayItemOn( renderer, "M:/tmp/videos/HelloHor1024.mpg" );
-   if( n == 3 )
-	PlayItemOn( renderer, "M:/tmp/videos/SeattlesBestHor1024.mpg" );
-   if( n == 4 )
-		PlayItemOn( renderer, "M:/tmp/videos/SuperMonPartyHor1024.mpg" );
 	n++;
 	if( n == 5 )
       n = 0;
@@ -61,7 +51,7 @@ OnGetControl( "VLC/Player")(PTRSZVAL psv )
 OnShowControl( "VLC/Player" )(PTRSZVAL psv )
 {
    PVLC vlc = (PVLC)psv;
-	PlayItemIn( (PSI_CONTROL)psv, "dshow://" );
+	vlc->vlc = PlayItemInEx( vlc->pc, "screen://", "--screen-fps=10" );
 
 }
 
