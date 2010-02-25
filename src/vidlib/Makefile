@@ -19,7 +19,7 @@ LITERAL_LIBNAME1=$(if $(FORCE_NO_INTERFACE),,$(if $(STATIC),,bag.video.plugin))
 #DEFNAME1=video.def
 MORELIBS1=bag
 MORE_LITERAL_LIBS1=bag.image.plugin
-SYSLIBS1= gdi32 user32 opengl32 glu32
+SYSLIBS1= gdi32 user32 opengl32 glu32 winmm
 #endif
 SRCS1=vidlib viddll key opengl keydefs
 CXFLAGS1=-D_OPENGL_ENABLED -DVIDEO_LIBRARY_SOURCE -DRENDER_LIBRARY_SOURCE -DBAG $(if $(__NO_OPTIONS__),-D__NO_OPTIONS__,) 
@@ -39,7 +39,7 @@ SRCS2=vidlib viddll key keydefs
 
 MORELIBS2=$(MORELIBS1)
 MORE_LITERAL_LIBS2=$(MORE_LITERAL_LIBS1)
-SYSLIBS2= gdi32 user32
+SYSLIBS2= gdi32 user32 winmm
 
 
 LIBNAME3=bag.video

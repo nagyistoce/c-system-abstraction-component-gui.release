@@ -6,27 +6,27 @@ static CONTROL_REGISTRATION calendar;
 
 typedef struct {
 	struct {
-		_32 bShowMonth : 1;
-		_32 bStuff : 1;
-		_32 bMonth: 1;
-		_32 bWeek : 1;
-		_32 bDays : 1;
-		_32 bNow : 1;
+		BIT_FIELD bShowMonth : 1;
+		BIT_FIELD bStuff : 1;
+		BIT_FIELD bMonth: 1;
+		BIT_FIELD bWeek : 1;
+		BIT_FIELD bDays : 1;
+		BIT_FIELD bNow : 1;
 	} flags;
 
 } CALENDER, *PCALENDAR;
 
 
 
-
 #if 0
-int CPROC DrawCalender( void )
+int CPROC DrawCalender( PSI_CONTROL pc )
 {
 	// stuff...
 	ValidatedControlData( PCALENDAR, calendar.nType, pCal, pc );
 	if( pCal )
 	{
 		Image surface = GetCommonSurface( pc );
+
 		if( pCal->flags.bMonth )
 		{
 		}
@@ -42,10 +42,13 @@ int CPROC DrawCalender( void )
 			{
 			}
 		}
+
+		{
+
+		}
 	}
 
 }
-
 
 
 

@@ -333,7 +333,7 @@ PROCREG_PROC( int, GetRegisteredIntValue )( CTEXTSTR name_class, CTEXTSTR name )
 PROCREG_PROC( int, GetRegisteredIntValue )( PCLASSROOT name_class, CTEXTSTR name );
 #endif
 
-typedef void (CPROC*OpenCloseNotification)( POINTER, _32 );
+typedef void (CPROC*OpenCloseNotification)( POINTER, PTRSZVAL );
 #define PUBLIC_DATA( public, struct, open, close )    \
 	PRELOAD( Data_##open##_##close ) { \
 	RegisterDataType( WIDE("system/data/structs")  \
@@ -350,7 +350,7 @@ typedef void (CPROC*OpenCloseNotification)( POINTER, _32 );
    (type*)CreateRegisteredDataType( WIDE("system/data/structs"), public, instname )
 PROCREG_PROC( PTRSZVAL, RegisterDataType )( CTEXTSTR classname
 												 , CTEXTSTR name
-												 , INDEX size
+												 , PTRSZVAL size
 												 , OpenCloseNotification open
 												 , OpenCloseNotification close );
 PROCREG_PROC( PTRSZVAL, CreateRegisteredDataType)( CTEXTSTR classname
@@ -360,7 +360,7 @@ PROCREG_PROC( PTRSZVAL, CreateRegisteredDataType)( CTEXTSTR classname
 PROCREG_PROC( PTRSZVAL, RegisterDataTypeEx )( PCLASSROOT root
 													, CTEXTSTR classname
 													, CTEXTSTR name
-													, INDEX size
+													, PTRSZVAL size
 													, OpenCloseNotification Open
 													, OpenCloseNotification Close );
 
@@ -467,12 +467,12 @@ PROCREG_PROC( int, ReleaseRegisteredFunctionEx )( PCLASSROOT root
 				// created, so that that instance may be reloaded again, otherwise the
 				// data in the main application is used... actually we should depreicate the dynamic
 // loading part, and just register the type.
-PROCREG_PROC( void, RegisterAndCreateGlobal )( POINTER *ppGlobal, _32 global_size, CTEXTSTR name );
+PROCREG_PROC( void, RegisterAndCreateGlobal )( POINTER *ppGlobal, PTRSZVAL global_size, CTEXTSTR name );
 #define SimpleRegisterAndCreateGlobal( name ) 	RegisterAndCreateGlobal( (POINTER*)&name, sizeof( *name ), #name )
 // Init routine is called, otherwise a 0 filled space is returned.
 // Init routine is passed the pointer to the global and the size of the global block
 // the global data block is zero initialized.
-PROCREG_PROC( void, RegisterAndCreateGlobalWithInit )( POINTER *ppGlobal, _32 global_size, CTEXTSTR name, void (CPROC*Init)(POINTER,_32) );
+PROCREG_PROC( void, RegisterAndCreateGlobalWithInit )( POINTER *ppGlobal, PTRSZVAL global_size, CTEXTSTR name, void (CPROC*Init)(POINTER,PTRSZVAL) );
 #define SimpleRegisterAndCreateGlobalWithInit( name,init ) 	RegisterAndCreateGlobalWithInit( (POINTER*)&name, sizeof( *name ), #name, init )
 
 /* a tree dump will result with dictionary names that may translate automatically. */

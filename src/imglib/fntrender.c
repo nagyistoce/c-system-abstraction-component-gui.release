@@ -937,7 +937,7 @@ try_another_default:
 
 	if( !renderer->face )
 	{
-		_32 size = 0;
+		PTRSZVAL size = 0;
 
 		renderer->font_memory = OpenSpace( NULL, file, &size );
 
@@ -1184,10 +1184,13 @@ Font InternalRenderFont( _32 nFamily
 
 void DestroyFont( Font *font )
 {
-	xlprintf( LOG_ALWAYS )( WIDE("font destruction is NOT implemented, this WILL result in a memory leak!!!!!!!") );
 	if( font )
 	{
-		(*font) = NULL;
+		if( *font )
+		{
+   		xlprintf( LOG_ALWAYS )( WIDE("font destruction is NOT implemented, this WILL result in a memory leak!!!!!!!") );
+			(*font) = NULL;
+		}
 	}
 
    // need to find this resource...

@@ -34,7 +34,8 @@
 #define THREAD_STRUCTURE_DEFINED
 
 #include <stdhdrs.h> // Sleep()
-
+// sorry if this causes problems...
+// maybe promote this include into stdhdrs when this fails to compile
 
 #include <sack_types.h>
 #include <deadstart.h>
@@ -57,11 +58,11 @@ namespace sack {
 
 //#define LOG_CREATE_EVENT_OBJECT
 //#define LOG_THREAD
-//#define LOG_LATENCY
 //#define LOG_SLEEPS
 
 // - define this to log when timers were delayed in scheduling...
-//#define LOG_LATENCY_LIGHT
+//198#define LOG_LATENCY_LIGHT
+//#define LOG_LATENCY
 
 //#define LOG_INSERTS
 //#define LOG_DISPATCH
@@ -83,6 +84,10 @@ struct timer_tag
 	_32 ID;
 	void (CPROC*callback)(PTRSZVAL user);
 	PTRSZVAL userdata;
+#ifdef _DEBUG
+	CTEXTSTR pFile;
+   int nLine;
+#endif
 };
 typedef struct timer_tag TIMER, *PTIMER;
 
@@ -553,13 +558,17 @@ TIMER_PROC( void, WakeableSleepEx )( _32 n DBG_PASS )
 		if( WaitForSingleObject( pThread->hEvent
 									  , n==SLEEP_FOREVER?INFINITE:(n) ) != WAIT_TIMEOUT )
 		{
-			//lprintf( WIDE("Woke up- reset event") );
+#ifdef LOG_LATENCY
+			_lprintf(DBG_RELAY)( WIDE("Woke up- reset event") );
+#endif
 			ResetEvent( pThread->hEvent );
 			//if( n == SLEEP_FOREVER )
 			//   DebugBreak();
 		}
-		//else
-		//lprintf( WIDE("Timed out from %d"), n );
+#ifdef LOG_LATENCY
+		else
+			_lprintf(DBG_RELAY)( WIDE("Timed out from %d"), n );
+#endif
 #else
 		{
 #ifdef _NO_SEMTIMEDOP_
@@ -1212,7 +1221,7 @@ static int CPROC ProcessTimers( PTRSZVAL psvForce )
 			// had no timers - but NOW either we woke up by default...
 			// OR - we go kicked awake - so mark the beginning of known time.
 			//Log( WIDE("Re-synch first tick...") );
-			g.last_tick = GetTickCount();
+			g.last_tick = timeGetTime();//GetTickCount();
 		}
 		// add and delete new/old timers here... 
 		// should be the next event after sleeping (low var-sleep top const-sleep)
@@ -1233,7 +1242,7 @@ static int CPROC ProcessTimers( PTRSZVAL psvForce )
 			g.del_timer = 0;
 		}
 		// get the time now....
-		newtick = g.this_tick = GetTickCount();
+		newtick = g.this_tick = timeGetTime();//GetTickCount();
 #ifdef LOG_LATENCY
 		Log3( WIDE("total - Tick: %u Last: %u  delta: %u"), g.this_tick, g.last_tick, g.this_tick-g.last_tick );
 #endif
@@ -1247,8 +1256,13 @@ static int CPROC ProcessTimers( PTRSZVAL psvForce )
 				( (S_32)( newtick - g.last_tick ) >= timer->delta ) )
 		{
 #ifdef LOG_LATENCY
-			Log4( WIDE("Tick: %u Last: %u  delta: %u Timerdelta: %u")
-				 , g.this_tick, g.last_tick, g.this_tick-g.last_tick, timer->delta );
+#ifdef _DEBUG
+			_xlprintf( 1, timer->pFile, timer->nLine )( WIDE("Tick: %u Last: %u  delta: %u Timerdelta: %u")
+					  , g.this_tick, g.last_tick, g.this_tick-g.last_tick, timer->delta );
+#else
+			lprintf( WIDE("Tick: %u Last: %u  delta: %u Timerdelta: %u")
+					  , g.this_tick, g.last_tick, g.this_tick-g.last_tick, timer->delta );
+#endif
 #endif
          // also enters csGrab... should be ok.
 			GrabTimer( timer );
@@ -1345,18 +1359,28 @@ static int CPROC ProcessTimers( PTRSZVAL psvForce )
 					 );
 #endif
 				g.last_sleep = ( timer->delta - ( g.this_tick - g.last_tick ) );
-				if( g.last_sleep < 1 )
+				if( g.last_sleep < 0 )
+				{
+               lprintf( "next pending sleep is %d", g.last_sleep );
 					g.last_sleep = 1;
+				}
 #ifdef LOG_LATENCY
 				Log1( WIDE("Sleeping %d"), g.last_sleep );
 #endif
 				if( !psvForce )
 					return 1;
+				if( g.last_sleep )
+				{
 #ifdef __LINUX__
 				TimerWakeableSleep( g.last_sleep );
 #else
-				WakeableSleep( g.last_sleep );
+#ifdef _DEBUG
+				WakeableSleepEx( g.last_sleep, timer->pFile, timer->nLine );
+#else
+				WakeableSleepEx( g.last_sleep );
 #endif
+#endif
+				}
 				if( g.flags.bExited )
 					return -1;
 		 }
@@ -1379,7 +1403,7 @@ PTRSZVAL CPROC ThreadProc( PTHREAD pThread )
 	//Log( WIDE("Permanently lock timers - indicates that thread is running...") );
 	g.lock_timers = 1;
 	//Log( WIDE("Get first tick") );
-	g.last_tick = GetTickCount();
+	g.last_tick = timeGetTime();//GetTickCount();
 	while( ProcessTimers( 1 ) );
 	Log( WIDE("Timer thread is exiting...") );
 	return 0;
@@ -1412,6 +1436,10 @@ TIMER_PROC( _32, AddTimerExx )( _32 start, _32 frequency, void (CPROC*callback)(
 	timer->callback = callback;
 	timer->ID = g.timerID++;
 	timer->userdata = user;
+#ifdef _DEBUG
+	timer->pFile = pFile;
+	timer->nLine = nLine;
+#endif
 	if( !g.pTimerThread )
 	{
 		 //Log( WIDE("Starting \")a\" timer thread!!!!" );
@@ -1573,7 +1601,7 @@ TIMER_PROC( LOGICAL, EnterCriticalSecEx )( PCRITICALSECTION pcs DBG_PASS )
 	int d;
 	THREAD_ID prior = 0;
 #ifdef _DEBUG
-   _32 curtick = GetTickCount();
+   _32 curtick = timeGetTime();//GetTickCount();
 #endif
 #ifdef LOG_DEBUG_CRITICAL_SECTIONS
 	_lprintf( DBG_RELAY )( "Enter critical section %p %"_64fx, pcs, GetMyThreadID() );
@@ -1586,13 +1614,13 @@ TIMER_PROC( LOGICAL, EnterCriticalSecEx )( PCRITICALSECTION pcs DBG_PASS )
 			// lock critical failed - couldn't update.
 			Relinquish();
 #ifdef _DEBUG
-			if( ( curtick+2000) < GetTickCount() )
+			if( ( curtick+2000) < timeGetTime() )//GetTickCount() )
 			{
-				xlprintf(1)( "Timeout during critical section wait for lock.  No lock should take more than 1 task cycle %ld %ld", curtick, GetTickCount() );
+				xlprintf(1)( "Timeout during critical section wait for lock.  No lock should take more than 1 task cycle %ld %ld", curtick, timeGetTime() );//GetTickCount() );
 				DebugBreak();
 				return FALSE;
 			}
-			curtick = GetTickCount();
+			curtick = timeGetTime();//GetTickCount();
 #endif
 		}
 		else if( d == 0 )
@@ -1607,7 +1635,7 @@ TIMER_PROC( LOGICAL, EnterCriticalSecEx )( PCRITICALSECTION pcs DBG_PASS )
 				lprintf( WIDE("Allowed to retry section entry, woken up...") );
 #endif
 #ifdef _DEBUG
-				curtick = GetTickCount();
+				curtick = timeGetTime();//GetTickCount();
 #endif
 			}
 			else
@@ -1630,14 +1658,14 @@ TIMER_PROC( LOGICAL, LeaveCriticalSecEx )( PCRITICALSECTION pcs DBG_PASS )
 {
 	THREAD_ID dwCurProc = GetMyThreadID();
 #ifdef _DEBUG
-   _32 curtick = GetTickCount();
+   _32 curtick = timeGetTime();//GetTickCount();
 #endif
 #ifdef LOG_DEBUG_CRITICAL_SECTIONS
    _xlprintf( LOG_NOISE, DBG_VOIDRELAY )( "Begin leave critical section %p %llx", pcs, GetMyThreadID() );
 #endif
 	while( LockedExchange( &pcs->dwUpdating, 1 ) 
 #ifdef _DEBUG
-			&& ( (curtick+2000) > GetTickCount() )
+			&& ( (curtick+2000) > timeGetTime() )//GetTickCount() )
 #endif
 	)
 	{
@@ -1647,7 +1675,7 @@ TIMER_PROC( LOGICAL, LeaveCriticalSecEx )( PCRITICALSECTION pcs DBG_PASS )
 		Relinquish();
 	}
 #ifdef _DEBUG
-	if( (curtick+2000) < GetTickCount() )
+	if( (curtick+2000) < timeGetTime() )//GetTickCount() )
 	{
 		lprintf( "Timeout during critical section wait for lock.  No lock should take more than 1 task cycle" );
 		DebugBreak(); 
@@ -1728,6 +1756,13 @@ TIMER_PROC( void, DeleteCriticalSec )( PCRITICALSECTION pcs )
 
 #ifdef __LINUX__
 TIMER_PROC( _32, GetTickCount )( void )
+{
+	struct timeval time;
+	gettimeofday( &time, 0 );
+	return (time.tv_sec * 1000) + (time.tv_usec / 1000);
+}
+
+TIMER_PROC( _32, timeGetTime )( void )
 {
 	struct timeval time;
 	gettimeofday( &time, 0 );

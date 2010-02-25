@@ -478,7 +478,8 @@ static void Cut( PEDIT pe, PTEXT *caption )
 
 CUSTOM_CONTROL_KEY( KeyEditControl, ( PCOMMON pc, _32 key ) )
 {
-   ValidatedControlData( PEDIT, EDIT_FIELD, pe, pc );
+	ValidatedControlData( PEDIT, EDIT_FIELD, pe, pc );
+   int used_key = 0;
 	char ch;
 	if( !pe || pe->flags.bReadOnly )
 		return 0;
@@ -533,6 +534,7 @@ CUSTOM_CONTROL_KEY( KeyEditControl, ( PCOMMON pc, _32 key ) )
 					}
 					SmudgeCommon( pc );
 				}
+            used_key = 1;
 				break;
 			}
 		case KEY_RIGHT:
@@ -564,6 +566,7 @@ CUSTOM_CONTROL_KEY( KeyEditControl, ( PCOMMON pc, _32 key ) )
 					}
 					SmudgeCommon( pc );
 				}
+            used_key = 1;
 				break;
 			}
 		case KEY_END:
@@ -589,6 +592,7 @@ CUSTOM_CONTROL_KEY( KeyEditControl, ( PCOMMON pc, _32 key ) )
 			}
 			pe->cursor_pos = pe->nCaptionUsed;
 			SmudgeCommon( pc );
+			used_key = 1;
 			break;
 		case KEY_HOME:
 			if( key & KEY_SHIFT_DOWN )
@@ -613,6 +617,7 @@ CUSTOM_CONTROL_KEY( KeyEditControl, ( PCOMMON pc, _32 key ) )
 			}
 			pe->cursor_pos = 0;
 			SmudgeCommon( pc );
+			used_key = 1;
 			break;
 		case KEY_DELETE:
 			if( pe->select_start >= 0 && pe->select_end >= 0 )
@@ -624,6 +629,7 @@ CUSTOM_CONTROL_KEY( KeyEditControl, ( PCOMMON pc, _32 key ) )
 				CutEditText( pe, &pc->caption.text );
 			}
 			SmudgeCommon( pc );
+			used_key = 1;
 			break;
 		case KEY_BACKSPACE:
 			//Log( WIDE("Backspace?!") );
@@ -639,12 +645,15 @@ CUSTOM_CONTROL_KEY( KeyEditControl, ( PCOMMON pc, _32 key ) )
 				}
 			}
 			SmudgeCommon( pc );
+			used_key = 1;
 			break;
 		case KEY_ESCAPE:
 			InvokeDefault( (PCONTROL)pc, INV_CANCEL );
+			used_key = 1;
 			break;
 		case KEY_ENTER:
 			InvokeDefault( (PCONTROL)pc, INV_OKAY );
+			used_key = 1;
 			break;
 		default:
 			//Log2( WIDE("Got Key: %08x(%c)"), key, key & 0xFF );
@@ -658,11 +667,12 @@ CUSTOM_CONTROL_KEY( KeyEditControl, ( PCOMMON pc, _32 key ) )
 				InsertAChar( pe, &pc->caption.text, ch );
 				SmudgeCommon( pc );
 				//printf( WIDE("Key: %d(%c)\n"), ch,ch );
+				used_key = 1;
 			}
 			break;
 		}
 	}
-	return 1;
+	return used_key;
 }
 
 //---------------------------------------------------------------------------
@@ -781,7 +791,7 @@ int CPROC InitEditControl( PCOMMON pc )
 #include <psi.h>
 CONTROL_REGISTRATION
 edit_control = { EDIT_FIELD_NAME
-					, { {73, 21}, sizeof( EDIT ), BORDER_INVERT_THIN }
+					, { {73, 21}, sizeof( EDIT ), BORDER_INVERT_THIN|BORDER_NOCAPTION }
 					, InitEditControl
 					, NULL
 					, DrawEditControl

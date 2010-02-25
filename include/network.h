@@ -430,10 +430,11 @@ public:
 	{
 		if( pc ) sack::network::SetClientKeepAlive( pc, bTrue );
 	}
-	inline _32 GetLong( int l )
+	inline PTRSZVAL GetLong( int l )
 	{
-		if( pc ) return GetNetworkLong( pc, l );
-      return 0;
+		if( pc ) 
+			return GetNetworkLong( pc, l );
+      	return 0;
 	}
 }NETWORK;
 

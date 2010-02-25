@@ -88,7 +88,7 @@ struct complex_args
 static int CPROC CopyRoot( PTRSZVAL psvArgs, CTEXTSTR name, _32 ID, int flags )
 {
    struct complex_args *args = (struct complex_args*)psvArgs;
-	INDEX iCopy = GetOptionIndexEx( args->iNewRoot, NULL, name, NULL, TRUE );
+	INDEX iCopy = GetOptionIndexEx( args->iNewRoot, NULL, name, NULL, TRUE DBG_SRC );
 	NewDuplicateValue( args->odbc, ID, iCopy );
 
 	{
@@ -111,7 +111,7 @@ void NewDuplicateOption( PODBC odbc, INDEX iRoot, CTEXTSTR pNewName )
 		struct complex_args args;
 		iParent = atoi( result );
 		SQLEndQuery( odbc );
-		iNewName = GetOptionIndexEx( iParent, NULL, pNewName, NULL, TRUE );
+		iNewName = GetOptionIndexEx( iParent, NULL, pNewName, NULL, TRUE DBG_SRC );
 		args.iNewRoot = iNewName;
 		args.odbc = odbc;
 		NewEnumOptions( args.odbc, iRoot, CopyRoot, (PTRSZVAL)&args );

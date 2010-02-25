@@ -171,7 +171,8 @@ INTERSHELL_PROC_PTR( void, ClearPageList )( void );
 // disable updates on the page, disable updating of buttons...
 INTERSHELL_PROC_PTR( void, InterShell_DisablePageUpdate )( LOGICAL bDisable );
 INTERSHELL_PROC_PTR( void, RestoreCurrentPage )( PSI_CONTROL pc_canvas );
-INTERSHELL_PROC_PTR( void, HidePageEx )( PSI_CONTROL pc_canvas );
+INTERSHELL_PROC_PTR( void, HidePageExx )( PSI_CONTROL pc_canvas DBG_PASS);
+#define HidePageEx2(page) HidePageExx( page DBG_SRC )
 
 
 
@@ -264,6 +265,7 @@ INTERSHELL_PROC_PTR( PMENU_BUTTON, InterShell_GetPhysicalButton )( PMENU_BUTTON 
 
 INTERSHELL_PROC_PTR( void, InterShell_SetButtonHighlight )( PMENU_BUTTON button, LOGICAL bEnable );
 
+INTERSHELL_PROC_PTR( PTRSZVAL,  InterShell_CreateControl )( CTEXTSTR type, int x, int y, int w, int h );
 
 };  //struct intershell_interface {
 
@@ -364,7 +366,7 @@ INTERSHELL_PROC( void, ClearPageList )( void );
 // disable updates on the page, disable updating of buttons...
 INTERSHELL_PROC( void, InterShell_DisablePageUpdate )( LOGICAL bDisable );
 INTERSHELL_PROC( void, RestoreCurrentPage )( PSI_CONTROL pc_canvas );
-INTERSHELL_PROC( void, HidePageEx )( PSI_CONTROL pc_canvas );
+INTERSHELL_PROC( void, HidePageExx )( PSI_CONTROL pc_canvas DBG_PASS);
 
 
 
@@ -443,6 +445,7 @@ INTERSHELL_PROC( PMENU_BUTTON, InterShell_GetCurrentLoadingControl )( void );
 INTERSHELL_PROC( LOGICAL, BeginSubConfiguration )( char *control_type_name, const char *end_type_name );
 INTERSHELL_PROC( CTEXTSTR, EscapeMenuString )( CTEXTSTR string );
 
+INTERSHELL_PROC( PTRSZVAL,  InterShell_CreateControl )( CTEXTSTR type, int x, int y, int w, int h );
 
 
 
@@ -471,6 +474,7 @@ PRIORITY_PRELOAD( InitInterShellInterface, DEFAULT_PRELOAD_PRIORITY - 3)
 #endif
 
 #ifndef INTERSHELL_SOURCE
+#define InterShell_CreateControl                                ( !InterShell )?0:InterShell->InterShell_CreateControl
 #define  GetCommonButtonControls                               if( InterShell )InterShell->GetCommonButtonControls 
 #define  SetCommonButtonControls							   if( InterShell )InterShell->SetCommonButtonControls 
 #define  RestartMenu										   if( InterShell )InterShell->RestartMenu 
@@ -504,7 +508,7 @@ PRIORITY_PRELOAD( InitInterShellInterface, DEFAULT_PRELOAD_PRIORITY - 3)
 #define  ClearPageList										   if( InterShell )InterShell->ClearPageList 
 #define  InterShell_DisablePageUpdate								   if( InterShell )InterShell->InterShell_DisablePageUpdate 
 #define  RestoreCurrentPage									   if( InterShell )InterShell->RestoreCurrentPage 
-#define  HidePageEx											   if( InterShell )InterShell->HidePageEx 
+#define  HidePageExx											   if( InterShell )InterShell->HidePageExx
 #define  InterShell_DisableButtonPageChange						   if( InterShell )InterShell->InterShell_DisableButtonPageChange 
 #define  CreateLabelVariable								  ( !InterShell )?NULL:InterShell->CreateLabelVariable
 #define  CreateLabelVariableEx								   ( !InterShell )?NULL:InterShell->CreateLabelVariableEx
@@ -542,7 +546,9 @@ PRIORITY_PRELOAD( InitInterShellInterface, DEFAULT_PRELOAD_PRIORITY - 3)
 
 
 
-
+#ifndef HidePageEx
+#define HidePageEx(page) HidePageExx( page DBG_SRC )
+#endif
 
 
 #endif

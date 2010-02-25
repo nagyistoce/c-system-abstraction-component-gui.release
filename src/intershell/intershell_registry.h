@@ -121,6 +121,10 @@
 
 #define OnInterShellShutdown( name ) \
       DefineRegistryMethod(TASK_PREFIX,InterShellShutdown,"common","intershell shutdown",name"_on_intershell_shutdown",void,(void))
+
+#define OnDropAccept(name) \
+	__DefineRegistryMethod(TASK_PREFIX,DropAccept,"common","Drop Accept",name"_on_drop_accept",LOGICAL,(CTEXTSTR,int,int),__LINE__)
+
 //GETALL_REGISTERED( WIDE("issue_pos/common/common_config") )
 
 #define GETALL_REGISTERED( root,type,args )	{          \

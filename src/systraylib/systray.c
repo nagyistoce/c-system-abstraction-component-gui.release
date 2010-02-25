@@ -115,6 +115,8 @@ int APIENTRY IconMessageHandler( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 			UnregisterIcon();
 			PostQuitMessage( 0 );
 			exit(0);
+		case 0xFFFF:
+			break;
 		default:
 			{
 				int fidx = LOWORD(wParam) - (MNU_EXIT + 1);

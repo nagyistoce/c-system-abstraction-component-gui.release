@@ -129,6 +129,9 @@ LIBMAIN_END();
 PRIORITY_ATEXIT( CleanSyslog, ATEXIT_PRIORITY_SYSLOG )
 {
 	enum syslog_types _logtype = logtype;
+	if( ( _logtype == SYSLOG_AUTO_FILE && file ) || ( _logtype != SYSLOG_AUTO_FILE && _logtype == SYSLOG_NONE ) )
+		lprintf( WIDE( "Final log - syslog closed." ) );
+   return;
 	pProgramName = NULL; // this was dynamic allocated memory, and it is now gone.
 	if( ( _logtype == SYSLOG_AUTO_FILE && file ) || ( _logtype != SYSLOG_AUTO_FILE && _logtype == SYSLOG_NONE ) )
 		lprintf( WIDE( "Final log - syslog closed." ) );
@@ -219,30 +222,45 @@ _64 GetCPUTick(void )
 		{
 			bCPUTickWorks = 0;
 			cpu_tick_freq = 1;
-			tick_bias = lasttick - ( GetTickCount() * 1000 );
+			tick_bias = lasttick - ( timeGetTime()/*GetTickCount()*/ * 1000 );
          tick = lasttick + 1; // more than prior, but no longer valid.
 		}
       lasttick = tick;
 		return tick;
-#elif defined( _MSC_VER )
+#elif defined( _MSC_VER ) 
 #ifdef _M_CEE_PURE
 	  //return System::DateTime::now;
 	  return 0;
 #else
+#   if defined( _WIN64 )
+	    _64 tick = __rdtsc();
+#   else
 		_64 tick;
 		_asm rdtsc;
 		_asm mov dword ptr [tick], eax;
 		_asm mov dword ptr [tick + 4], edx;
+#   endif
 		if( !lasttick )
 			lasttick = tick;
 		else if( tick < lasttick )
 		{
 			bCPUTickWorks = 0;
 			cpu_tick_freq = 1;
-			tick_bias = lasttick - ( GetTickCount() * 1000 );
-         tick = lasttick + 1; // more than prior, but no longer valid.
+			tick_bias = lasttick - ( timeGetTime()/*GetTickCount()*/ * 1000 );
+         	tick = lasttick + 1; // more than prior, but no longer valid.
 		}
-      lasttick = tick;
+      	lasttick = tick;
+		return tick;
+		if( !lasttick )
+			lasttick = tick;
+		else if( tick < lasttick )
+		{
+			bCPUTickWorks = 0;
+			cpu_tick_freq = 1;
+			tick_bias = lasttick - ( timeGetTime()/*GetTickCount()*/ * 1000 );
+         	tick = lasttick + 1; // more than prior, but no longer valid.
+		}
+      	lasttick = tick;
 		return tick;
 #endif
 #elif defined( GCC ) && !defined( __arm__ )
@@ -257,7 +275,7 @@ _64 GetCPUTick(void )
 		{
 			bCPUTickWorks = 0;
 			cpu_tick_freq = 1;
-			tick_bias = lasttick - ( GetTickCount() * 1000 );
+			tick_bias = lasttick - ( timeGetTime()/*GetTickCount()*/ * 1000 );
          tick.tick = lasttick + 1; // more than prior, but no longer valid.
 		}
       lasttick = tick.tick;
@@ -266,7 +284,7 @@ _64 GetCPUTick(void )
 		DebugBreak();
 #endif
 	}
-	return tick_bias + (GetTickCount() * 1000);
+	return tick_bias + (timeGetTime()/*GetTickCount()*/ * 1000);
 }
 
 _64 GetCPUFrequency( void )
@@ -276,9 +294,9 @@ _64 GetCPUFrequency( void )
 		_64 cpu_tick, _cpu_tick;
 		_32 tick, _tick;
       cpu_tick = _cpu_tick = GetCPUTick();
-		tick = _tick = GetTickCount();
+		tick = _tick = timeGetTime()/*GetTickCount()*/;
 		cpu_tick_freq = 0;
-		while( bCPUTickWorks && ( ( tick = GetTickCount() ) - _tick ) < 250 );
+		while( bCPUTickWorks && ( ( tick = timeGetTime()/*GetTickCount()*/ ) - _tick ) < 250 );
 		{
 			cpu_tick = GetCPUTick();
 		}
@@ -310,11 +328,25 @@ void SetDefaultName( char *extra )
 #ifndef __NO_OPTIONS__
 static void LoadOptions( char *filename )
 {
+	if( SACK_GetProfileIntEx( GetProgramName(), "SACK/Logging/Enable File Log"
+#ifdef _DEBUG
+                           , 1
+#else
+									, 0
+#endif
+									, TRUE ) )
+	{
+		logtype = SYSLOG_AUTO_FILE;
+		flags.bLogOpenAppend = 0;
+		flags.bLogOpenBackup = 1;
+		flags.bLogSourceFile = 1;
+		flags.bLogProgram = 0;
+	}
    // this overrides options with options available from SQL database.
 	if( SACK_GetProfileIntEx( GetProgramName(), "SACK/Logging/Default Log Location is current directory", 0, TRUE ) )
 	{
 		// override filepath, if log exception.
-		TEXTSTR program = StrDup( filename );
+		TEXTSTR program = strdup( filename );
 		TEXTCHAR buffer[256];
 		GetCurrentPath( buffer, sizeof( buffer ) );
 		snprintf( filepath, sizeof( filepath ), "%s/%s", buffer, program );
@@ -329,7 +361,7 @@ static void LoadOptions( char *filename )
 		SACK_GetProfileStringEx( GetProgramName(), "SACK/Logging/Default Log Location", "", buffer, sizeof( buffer ), TRUE );
 		if( buffer[0] )
 		{
-			TEXTSTR program = StrDup( filename );
+			TEXTSTR program = strdup( filename );
 			snprintf( filepath, sizeof( filepath ), "%s/%s", buffer, program );
 			SetDefaultName( NULL );
 			Release( program );
@@ -390,7 +422,7 @@ PRIORITY_PRELOAD( InitSyslog, SYSLOG_PRELOAD_PRIORITY )
 	}
 #  ifdef UNICODE
    //lprintf( "This will be bad." ); ... not really it's allocated in non (tmp) heap
-	pProgramName = StrDup( filename );
+	pProgramName = strdup( filename );
 #  else
 	pProgramName = strdup( filename );
 #  endif
@@ -424,7 +456,7 @@ PRIORITY_PRELOAD( InitSyslog, SYSLOG_PRELOAD_PRIORITY )
 			pb++;
 		}
 #  ifdef UNICODE
-		pProgramName = StrDup( pb );
+		pProgramName = strdup( pb );
 #  else
 		pProgramName = strdup( pb );
 #  endif
@@ -581,7 +613,7 @@ static TEXTCHAR *GetTimeHigh( void )
 		st.wMilliseconds -= _st.wMilliseconds;
 		if( st.wMilliseconds & 0x8000 )
 		{
-			st.wMilliseconds += 1000;
+			st.wMilliseconds = (st.wMilliseconds+1000) & 0xFFFF;
 			st.wSecond--;
 		}
 		st.wSecond -= _st.wSecond;
@@ -1218,12 +1250,19 @@ static INDEX CPROC _real_vlprintf ( CTEXTSTR format, va_list args )
 		TEXTCHAR threadid[32];
 
 		if( !buffers )
-			buffers = CreateLinkQueue();
+		{
+         int n;
+			buffers = CreateLinkQueue() ;
+			for( n = 0; n < 64; n++ )
+				EnqueLink( &buffers, (POINTER)1 );
+			for( n = 0; n < 64; n++ )
+            DequeLink( &buffers );
+		}
 
 		buffer = (TEXTCHAR*)DequeLink( &buffers );
 		if( !buffer )
 		{
-			buffer = NewArray( TEXTCHAR, 4096 );
+			buffer = (TEXTCHAR*)malloc( 4096 );//NewArray( TEXTCHAR, 4096 );
 		}
 
 		if( logtime[0] )

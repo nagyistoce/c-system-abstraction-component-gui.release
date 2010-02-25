@@ -64,9 +64,13 @@ void DestroyPageID( PSI_CONTROL pc_canvas, _32 ID ); // MNU_DESTROY_PAGE ID (min
 void UnDestroyPageID( PSI_CONTROL pc_canvas, _32 ID ); // MNU_DESTROY_PAGE ID (minus base)
 
 void AddPage( PCanvasData canvas, PPAGE_DATA page );
-void RestorePage( PSI_CONTROL pc_canvas, PCanvasData canvas, PPAGE_DATA page, int bFull );
+//void RestorePageExx( PSI_CONTROL pc_canvas, PCanvasData canvas, PPAGE_DATA page, int bFull, int active DBG_PASS);
+//#define RestorePageEx(pc,c,p,f,a) RestorePageExx( pc,c,p,f,a DBG_SRC)
+void RestorePageEx( PSI_CONTROL pc_canvas, PCanvasData canvas, PPAGE_DATA page, int bFull, int active);
+#define RestorePage(pc,c,p,f) RestorePageEx(pc,c,p,f,1)
 PPAGE_DATA GetPageFromFrame( PSI_CONTROL frame );
-void ChangePages( PSI_CONTROL pc_canvas, PPAGE_DATA page );
+void ChangePagesEx( PSI_CONTROL pc_canvas, PPAGE_DATA page DBG_PASS);
+#define ChangePages(pc,p) ChangePagesEx(pc,p DBG_SRC)
 
 void InsertStartupPage( PSI_CONTROL pc_canvas, CTEXTSTR page_name );
 // this is actually insert page...
