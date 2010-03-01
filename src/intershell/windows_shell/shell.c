@@ -1,7 +1,7 @@
 
 #include <stdhdrs.h>
-#include <intershell_registry.h>
-#include "widgets/include/buttons.h"
+#include "../intershell_registry.h"
+#include "../widgets/include/buttons.h"
 
 
 // file associations can be done via
@@ -138,3 +138,8 @@ OnCreateMenuButton( "Windows->Start" )( PMENU_BUTTON button )
 }
 #endif
 
+#ifdef __WATCOMC__
+PUBLIC( void, ExportThis_POINTS_DOWN )()
+{
+}
+#endif

@@ -368,31 +368,17 @@ MEM_PROC( void, MemCpy )( POINTER pTo, CPOINTER pFrom, _BLOCK_MAX_SIZE_TYPE sz )
 {
 #if defined( _MSC_VER ) && !defined( __NO_WIN32API__ )
 
-#if   defined( _WIN64 )
+#ifdef _WIN64
 	__movsq( (_64*)pTo, (_64*)pFrom, sz/8 );
 	if( sz & 4 )
 		(*(_32*)( ((PTRSZVAL)pTo) + sz - (sz&7) ) ) = (*(_32*)( ((PTRSZVAL)pFrom) + sz - (sz&7) ) );
+#else
+	__movsd( (_32*)pTo, (_32*)pFrom, sz/4 );
+#endif
 	if( sz & 2 )
 		(*(_16*)( ((PTRSZVAL)pTo) + sz - (sz&3) ) ) = (*(_16*)( ((PTRSZVAL)pFrom) + sz - (sz&3) ) );
 	if( sz & 1 )
 		(*(_8*)( ((PTRSZVAL)pTo) + sz - (sz&1) ) ) = (*(_8*)( ((PTRSZVAL)pFrom) + sz - (sz&1) ) );
-#else
-      _asm mov   ecx, sz;
-      _asm mov   edi, pTo;
-      _asm mov   esi, pFrom;
-      _asm cld;
-      _asm mov   edx, ecx;
-      _asm shr   ecx, 2;
-      _asm rep   movsd;
-      _asm test  edx,1;
-      _asm jz    test_2;
-      _asm movsb;
-test_2:
-      _asm test edx, 2;
-      _asm jz test_end;
-      _asm movsw;
-	test_end: ;
-#endif
 #else
 	memcpy( pTo, pFrom, sz );
 #endif

@@ -95,11 +95,7 @@ PROCREG_NAMESPACE
 	// as valid as this is.
 	typedef struct tree_def_tag *PCLASSROOT;
 #else
-#ifdef PROCREG_SOURCE
-	typedef struct tree_def_tag *PCLASSROOT;
-#else
 	typedef CTEXTSTR PCLASSROOT;
-#endif
 #endif
 
 	typedef void (CPROC *PROCEDURE)(void);

@@ -26,7 +26,8 @@
 #ifndef SQLITE_API
 //#include <sqlite3.h>
 // PTRSZVAL type... so we can convert pointers to int sensibly.
-#include <sack_types.h>
+#define _INCLUDE_NLS
+#include <stdhdrs.h>
 
 #ifdef __USE_SACK_ALLOCATOR__
 #include <sharemem.h>
@@ -33724,6 +33725,7 @@ int sqlite3_max_blobsize = 0;
 ** Release the memory associated with the given stack level.  This
 ** leaves the Mem.flags field in an inconsistent state.
 */
+#undef Release
 #define Release(P) if((P)->flags&MEM_Dyn){ sqlite3VdbeMemRelease(P); }
 
 /*

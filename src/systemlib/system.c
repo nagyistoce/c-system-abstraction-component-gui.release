@@ -39,7 +39,9 @@ static struct {
 	struct system_local_flags{
 		BIT_FIELD bLog : 1;
 	} flags;
-} l;
+} local_systemlib;
+
+#define l local_systemlib
 
 CTEXTSTR OSALOT_GetEnvironmentVariable(CTEXTSTR name)
 {
@@ -116,17 +118,7 @@ void OSALOT_PrependEnvironmentVariable(CTEXTSTR name, CTEXTSTR value)
 #endif
 }
 
-PRELOAD( SetupSystemOptions )
-{
-#ifndef __NO_OPTIONS__
-	l.flags.bLog = SACK_GetProfileIntEx( GetProgramName(), "SACK/System/Enable Logging", 0, TRUE );
-#endif
-}
-
-#ifdef __WATCOM_CPLUSPLUS__
-#pragma initialize 36
-#endif
-PRIORITY_PRELOAD( SetupPath, OSALOT_PRELOAD_PRIORITY )
+static void SetupSystemServices( void )
 {
 #ifdef _WIN32
 	{
@@ -236,6 +228,24 @@ PRIORITY_PRELOAD( SetupPath, OSALOT_PRELOAD_PRIORITY )
 	}
 #endif
 }
+
+#ifdef __WATCOM_CPLUSPLUS__
+#pragma initialize 36
+#endif
+PRIORITY_PRELOAD( SetupPath, OSALOT_PRELOAD_PRIORITY )
+{
+   SetupSystemServices();
+}
+
+#ifndef __NO_OPTIONS__
+PRELOAD( SetupSystemOptions )
+{
+	l.flags.bLog = SACK_GetProfileIntEx( GetProgramName(), "SACK/System/Enable Logging", 0, TRUE );
+}
+#endif
+
+
+
 //--------------------------------------------------------------------------
 
 #ifdef WIN32
@@ -586,6 +596,9 @@ SYSTEM_PROC( generic_function, LoadFunctionExx )( CTEXTSTR libname, CTEXTSTR fun
 			break;
 		library = library->next;
 	}
+   // don't really NEED anything else, in case we need to start before deadstart invokes.
+	if( !l.load_path )
+		SetupSystemServices();
 	if( !library )
 	{
 		size_t maxlen = strlen( l.load_path ) + 1 + strlen( libname ) + 1;

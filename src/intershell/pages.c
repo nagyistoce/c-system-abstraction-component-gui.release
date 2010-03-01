@@ -889,18 +889,22 @@ void RenamePage( PSI_CONTROL pc_canvas )
 							 , pc_canvas ) )
 	{
 		PPAGE_DATA page = GetPageFromFrame( pc_canvas );
-		if( page == canvas->default_page )
+		if( page )
 		{
-			InsertStartupPage( pc_canvas, pagename );
-			if( g.flags.multi_edit )
+			if( page == canvas->default_page )
 			{
-				DisplayFrame( canvas->current_page->frame );
+				InsertStartupPage( pc_canvas, pagename );
+				if( g.flags.multi_edit )
+				{
+					DisplayFrame( canvas->current_page->frame );
 			}
-		}
-		else
-		{
-			Release( (POINTER)page->title );
-			page->title = StrDup( pagename );
+			}
+			else
+			{
+				if( page->title )
+					Release( (POINTER)page->title );
+				page->title = StrDup( pagename );
+			}
 		}
 		//SaveButtonConfig( pc_canvas );
 	}

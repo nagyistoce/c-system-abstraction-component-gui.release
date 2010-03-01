@@ -1,16 +1,6 @@
 #ifndef GLOBAL_STRUCTURE_DEFINED
 #define GLOBAL_STRUCTURE_DEFINED
 
-#ifdef __cplusplus_cli
-#  undef USE_INTERFACES
-#else
-#  ifdef FORCE_NO_INTERFACE
-#    undef USE_INTERFACES
-#  else
-#    define USE_INTERFACES
-#  endif
-#endif
-
 #define g global_psi_structure
 #ifndef PSI_SERVICE
 #  ifndef FORCE_NO_INTERFACE
@@ -20,6 +10,16 @@
 #  endif
 #endif
 #include <image.h>
+
+#ifdef __cplusplus_cli
+#  undef USE_INTERFACES
+#else
+#  ifdef FORCE_NO_INTERFACE
+#    undef USE_INTERFACES
+#  else
+#    define USE_INTERFACES
+#  endif
+#endif
 
 #ifndef PSI_SERVICE
 #  ifndef FORCE_NO_INTERFACE

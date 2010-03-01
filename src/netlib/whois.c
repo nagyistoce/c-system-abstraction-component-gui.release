@@ -1,3 +1,4 @@
+#include <stdhdrs.h>
 #define LIBRARY_DEF
 #include <stdio.h>
 #ifdef __LINUX__

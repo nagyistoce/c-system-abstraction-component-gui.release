@@ -165,7 +165,7 @@ void SetOptionDatabaseOption( PODBC odbc, int bNewVersion )
    POPTION_TREE node = GetOptionTreeEx( odbc );
 	if( node )
 	{
-      node->flags.bCreated = FALSE;
+		node->flags.bCreated = FALSE;
 		node->flags.bNewVersion = bNewVersion;
       CreateOptionDatabaseEx( odbc );
 	}
@@ -910,7 +910,16 @@ SQLGETOPTION_PROC( int, SACK_GetPrivateProfileStringExx )( CTEXTSTR pSection
 		{
 			// issue dialog
 			if( !bQuiet )
-				SQLPromptINIValue( pSection, pOptname, pDefaultbuf, pBuffer, nBuffer, pININame );
+			{
+				if( og.flags.bPromptDefault )
+				{
+					SQLPromptINIValue( pSection, pOptname, pDefaultbuf, pBuffer, nBuffer, pININame );
+				}
+				else
+				{
+					strncpy( pBuffer, pDefaultbuf, nBuffer );			
+				}
+			}
 			else
 				strncpy( pBuffer, pDefaultbuf, nBuffer );
 			// create the option branch since it doesn't exist...

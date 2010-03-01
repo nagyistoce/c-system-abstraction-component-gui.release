@@ -1,0 +1,16 @@
+
+
+
+SET( ZLIB_SRCS  adler32 compress crc32 gzio uncompr deflate trees  
+           zutil inflate inftrees  inffast infback 
+#           infblock infcodes infutil
+   )
+   
+
+FOREACH( SRC ${ZLIB_SRCS} )
+	LIST(APPEND ZLIB_SOURCE ${ZBASEDIR}/${SRC})
+ENDFOREACH()
+include_directories( ${ZBASEDIR} )
+
+
+

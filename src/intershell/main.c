@@ -3031,7 +3031,7 @@ static int ProcessContextMenu( PCanvasData canvas, PSI_CONTROL pc, S_32 px, S_32
 								CreateNewPage(canvas->edit_glare_frame, canvas);
 								break;
 							case MNU_RENAME_PAGE:
-								RenamePage( canvas->edit_glare_frame );
+								RenamePage( canvas->pc_canvas );
 								break;
 							case MNU_EDIT_DONE:
 								AbortConfigureKeys( canvas->pc_canvas, 0 );
@@ -4649,7 +4649,7 @@ PRIORITY_PRELOAD( ProgramLock, DEFAULT_PRELOAD_PRIORITY+2 )
 #ifdef __LINUX__
 							 , resource_path[0]?resource_path:"~"
 #else
-							 , resource_path[0]?resource_path:"."
+							 , resource_path[0]?resource_path:"../resources"
 #endif
 							 , resource_path
 							 , sizeof( resource_path ), TRUE );

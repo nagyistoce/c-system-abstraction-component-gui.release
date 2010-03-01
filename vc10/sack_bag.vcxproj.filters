@@ -193,6 +193,9 @@
     <Filter Include="Source Files\BAG.video Source Files\Headers">
       <UniqueIdentifier>{b1d03307-fcd0-4870-9a16-b6cef45c7933}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\BAG Source Files\SNMP Library\Headers">
+      <UniqueIdentifier>{dd739fc8-7ca7-48e8-b738-9f96de1ee65c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\configlib\configscript.c">
@@ -1129,6 +1132,9 @@
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\snmp\libsnmp.h">
+      <Filter>Source Files\BAG Source Files\SNMP Library\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

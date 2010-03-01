@@ -3,7 +3,7 @@
 #ifdef FIX_BROKEN_TYPECASTS
 #warning haha err
 #endif
-
+#include <stdint.h>
 #ifdef _MSC_VER
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x501
@@ -68,14 +68,25 @@ using namespace System;
 #define FILEMONITOR_SOURCE
 #define VECTOR_LIBRARY_SOURCE
 #define SHA1_SOURCE
-#define JPEG_SOURCE
-#define __PNG_LIBRARY_SOURCE__
 #define GENX_SOURCE
 #define SEXPAT_SOURCE
 #define CONSTRUCT_SOURCE
 #define SQLPROXY_LIBRARY_SOURCE
-#define FREETYPE_SOURCE
-#define FT2_BUILD_LIBRARY
+
+#ifdef _MSC_VER
+
+#define FORCE_NO_INTERFACE
+
+#ifndef JPEG_SOURCE
+#error projects were not generated with CMAKE, and JPEG_SORUCE needs to be defined
+#endif
+//#define JPEG_SOURCE
+//#define __PNG_LIBRARY_SOURCE__
+//#define FT2_BUILD_LIBRARY   // freetype is internal
+//#define FREETYPE_SOURCE		// build Dll Export
+#endif
+#define MNG_BUILD_DLL
+
 //MSVC#define WIN32
 #define BAG
 
@@ -93,7 +104,6 @@ using namespace System;
 
 #define VIDEO_LIBRARY_SOURCE
 #define RENDER_LIBRARY_SOURCE
-#define MNG_BUILD_DLL
 #ifndef __NO_WIN32API__
 #define _OPENGL_ENABLED
 #endif
@@ -354,17 +364,23 @@ typedef int pid_t;
 #define PACKED
 #endif
 
-#if defined( __LINUX__ ) || defined( __CYGWIN__ )
+#if defined( __GNUC__ )
+#ifndef STDPROC
 #define STDPROC
+#endif
+#ifndef STDCALL
 #define STDCALL // for IsBadCodePtr which isn't a linux function...
-#ifndef __CYGWIN__
-#define WINAPI
-#define PASCAL
+#endif
+#ifndef WINAPI
+//#define WINAPI
+#endif
+#ifndef PASCAL
+//#define PASCAL
 #endif
 #define CALLBACKPROC( type, name ) type name
 #define DYNAMIC_EXPORT
 #define DYNAMIC_IMPORT extern
-#define PUBLIC(type,name) type name
+#define PUBLIC(type,name) EXPORT_METHOD type CPROC name
 #define LIBMAIN() static int LibraryEntrance( void ) __attribute__((constructor)); static int LibraryEntrance( void )
 #define LIBEXIT() static int LibraryExit( void )     __attribute__((destructor)); static int LibraryExit( void )
 #define LIBMAIN_END()
@@ -547,30 +563,11 @@ typedef unsigned int  BIT_FIELD;
 #define PACKED
 #endif
 
-#if defined( BCC16 )
-#pragma warning _64 bit types are not supported... using _32
-typedef unsigned long _64;
-typedef long S_64;
-#elif defined( GCC ) || defined( __LCC__ ) || defined( __WATCOMC__ ) || defined( __DMC__ )
-typedef unsigned  long long   _64;
-typedef signed  long long   S_64;
-#elif defined( BCC32 ) || defined( __BORLAND__ ) || defined( _MSC_VER )
-typedef unsigned  __int64  _64;
-typedef signed  __int64      S_64;
-#else
-#error unknown declaration for _64 type.
-#endif
-typedef _64              *P_64;
-typedef S_64          *PS_64;
-#if defined( BCC16 ) 
-//#pragma warning "Setting PTRSZVAL to 32 bits... pointers are this size?"
-#else 
-# if defined( __LCC__ ) || defined( GCC ) && !defined( __PPCCPP__ )
-//#  warning "Setting PTRSZVAL to 32 bits... pointers are this size?"
-# else
-//#  pragma pragnoteonly("Setting PTRSZVAL to 32 bits... pointers are this size?" )
-# endif 
-#endif
+typedef uint64_t _64;
+typedef int64_t  S_64;
+typedef S_64 *PS_64;
+
+
 #if defined( __LINUX64__ ) || defined( _WIN64 )
 typedef _64             PTRSIZEVAL;
 typedef _64             PTRSZVAL;

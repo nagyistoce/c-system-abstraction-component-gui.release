@@ -2055,15 +2055,15 @@ int VarTextLength( PVARTEXT pvt )
 int vvtprintf( PVARTEXT pvt, CTEXTSTR format, va_list args )
 {
 	int len;
-#if defined( __LINUX__ ) || defined( _MSC_VER )
+#if defined( __GNUC__ ) || defined( _MSC_VER )
 	{
-#ifdef __LINUX__
+#ifdef __GNUC__
 		va_list tmp_args;
 		va_copy( tmp_args, args );
 #endif
 		// len returns number of characters (not NUL)
 		len = vsnprintf( NULL, 0, format
-#ifdef __LINUX__
+#ifdef __GNUC__
 							, tmp_args
 #else
 							, args
@@ -2071,7 +2071,7 @@ int vvtprintf( PVARTEXT pvt, CTEXTSTR format, va_list args )
 							);
 		if( !len ) // nothign to add... we'll get stuck looping if this is not checked.
 			return 0;
-#ifdef __LINUX__
+#ifdef __GNUC__
       va_end( tmp_args );
 #endif
 		// allocate +1 for length with NUL
@@ -2115,8 +2115,11 @@ int vvtprintf( PVARTEXT pvt, CTEXTSTR format, va_list args )
 		} while( len >= destlen );
 	}
 #else
+	// uhmm not sure what state this is then...
 	{
 		do {
+			if( strcmp( format, "%s" ) == 0 && pvt->collect_used==7)
+            DebugBreak();
 			len = vsnprintf( pvt->collect_text + pvt->collect_used
 								, pvt->collect_avail - pvt->collect_used
 								, format, args );

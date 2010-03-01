@@ -197,7 +197,7 @@ void RegisterPriorityStartupProc( void (*proc)(void), CTEXTSTR func,int priority
 	void name(void)
 #    endif
 #  endif
-#elif defined( __LINUX__ )
+#elif defined( __GNUC__ )
 #    define PRELOAD(name) void name( void ) __attribute__((constructor)); \
 void name( void )
 #endif
@@ -334,8 +334,7 @@ void MarkRootDeadstartComplete( void )
 	l.flags.bLog = SACK_GetProfileIntEx( "SACK/Deadstart", "Logging Enabled?", 0, TRUE );
 #endif
 }
-
-#if defined( GCC )
+#if defined( __GNUC__ )
 
 #ifndef __cplusplus
 static void RegisterStartups( void ) __attribute__((constructor));

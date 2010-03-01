@@ -2,10 +2,10 @@
 #include <sack_types.h>
 #include <deadstart.h>
 #ifndef TARGET_LABEL
-//#error WTF!
+#error WTF!
 #endif
 
-#ifdef GCC
+#ifdef __GNUC__
 #define paste(a,b) a##b
 #define paste2(a,b) paste(a,b)
 #define DeclareList(n) paste2(n,TARGET_LABEL)

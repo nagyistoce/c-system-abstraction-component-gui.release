@@ -12,7 +12,6 @@
 #endif
 
 typedef struct CanvasData  CanvasData, *PCanvasData;
-typedef struct page_data_tag PAGE_DATA, *PPAGE_DATA;
 
 
 
