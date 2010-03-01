@@ -6,7 +6,7 @@
 #include "deadstart.c"
 #endif
 
-#if defined( GCC )
+#if defined( __GNUC__ )
 #ifndef __cplusplus
 #include <stdhdrs.h>
 #include <deadstart.h>

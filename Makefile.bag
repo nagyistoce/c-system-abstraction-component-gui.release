@@ -49,6 +49,11 @@ MORE_TARGETS=$(FINALDEST)$(DATAPATH)/$(DEST_SUFFIX)/interface.conf $(FINALDEST)$
 endif
 
 ifndef __WINDOWS__
+
+ifeq '$(shell uname)' 'MINGW32_NT-6.0'
+__WINDOWS__=1
+export __WINDOWS__
+endif
 ifeq '$(shell uname)' ''
 __WINDOWS__=1
 export __WINDOWS__
@@ -173,6 +178,7 @@ CXFLAGS:=$(CXFLAGS) -DMEM_LIBRARY_SOURCE       \
     -DSHA1_SOURCE                  \
     -DCONSTRUCT_SOURCE             \
     -DSQLPROXY_LIBRARY_SOURCE      \
+    $(if $(NEED_FREETYPE),-DFT2_BUILD_LIBRARY,) \
     $(if $(__NO_MSGSVR__),-D__NO_MSGSVR__,) \
     $(if $(__NO_SQL__),\
     	-D__NO_SQL__ -D__NO_OPTIONS__\
@@ -185,8 +191,10 @@ CXFLAGS:=$(CXFLAGS) -DMEM_LIBRARY_SOURCE       \
 #RSRCS=src/systraylib/systray
 RSRCS=$(if $(STATIC),,all_resources)
 
+
+
 ifndef __NO_GUI__
-ifeq '$(shell uname)' ''
+ifeq '$(__WINDOWS__)' '1'
 NEED_FREETYPE=1
 NEED_MNG=0
 #$(if $(CPLUSPLUS_BUILD),,1)
@@ -245,7 +253,6 @@ ifndef __NO_GUI__
 ########### ZLIB SRCS ##############
 ZBASEDIR=src/zlib-1.2.3
 include $(ZBASEDIR)/Makefile.bag.part
-
 endif
 endif
 ########### JPEG SRCS ##############
@@ -340,7 +347,7 @@ FT_SRCS=autofit/autofit \
      base/ftxf86 
 
 FT_INCLUDEPATH=$(FBASEDIR)/../include
-CXFLAGS+=-DFT2_BUILD_LIBRARY 
+CXFLAGS+=-DFT2_BUILD_LIBRARY -DFREETYPE_SOURCE
 INCLUDEDIRS+=$(FT_INCLUDEPATH)
 
 SRCS+=$(foreach src,$(FT_SRCS),$(FBASEDIR)/$(src))

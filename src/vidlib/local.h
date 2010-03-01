@@ -1,5 +1,21 @@
 #define l local_video_common
 
+#ifdef MINGW_SUX
+typedef struct tagUPDATELAYEREDWINDOWINFO {
+    DWORD               cbSize;
+    HDC                 hdcDst;
+    POINT CONST         *pptDst;
+    SIZE CONST          *psize;
+    HDC                 hdcSrc;
+    POINT CONST         *pptSrc;
+    COLORREF            crKey;
+    BLENDFUNCTION CONST *pblend;
+    DWORD               dwFlags;
+    RECT CONST          *prcDirty;
+} UPDATELAYEREDWINDOWINFO;
+
+#endif
+
 typedef struct vidlib_local_tag
 {
 	struct {

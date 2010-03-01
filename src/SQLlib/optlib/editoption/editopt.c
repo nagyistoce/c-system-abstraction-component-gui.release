@@ -194,7 +194,7 @@ int EditOptions( void )
 		list = MakeListBox( frame, 5, 5, LIST_SIZE, 310, LST_OPTIONMAP, 0 );
 		SetListboxIsTree( list, TRUE );
 		SetSelChangeHandler( list, OptionSelectionChanged, NULL );
-      SetListItemOpenHandler( list, HandleItemOpened, NULL );
+      	SetListItemOpenHandler( list, HandleItemOpened, NULL );
 		MakeEditControl( frame, RIGHT_START, 35, 175, 25, EDT_OPTIONVALUE, WIDE("blah"), 0 );
 
 
@@ -221,9 +221,6 @@ int EditOptions( void )
 
 int main( int argc, char **argv )
 {
-	//SetSystemLog( SYSLOG_FILE, stdout );
-   SystemLogTime( SYSLOG_TIME_HIGH|SYSLOG_TIME_DELTA );
-	SetAllocateDebug( TRUE );
 	if( argc > 1 )
 	{
 		PODBC o;

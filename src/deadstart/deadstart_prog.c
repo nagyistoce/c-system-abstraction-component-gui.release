@@ -42,7 +42,7 @@ SACK_DEADSTART_NAMESPACE
 	void name(void)
 #    endif
 #  endif
-#elif defined( __LINUX__ )
+#elif defined( __GNUC__ )
 #    define PRELOAD(name) void name( void ) __attribute__((constructor)); \
 void name( void )
 #endif

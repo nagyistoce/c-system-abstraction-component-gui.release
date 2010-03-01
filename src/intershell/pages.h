@@ -8,11 +8,10 @@
 //#endif
 
 
-#include "intershell_button.h"
 #include <colordef.h>
 #include <image.h>
 #include <controls.h>
-//#include "intershell_global.h"
+#include "intershell_button.h"
 
 /*
 struct page_layout_tag
@@ -63,13 +62,13 @@ void SetCurrentPageID( PSI_CONTROL pc_canvas, _32 ID ); // MNU_CHANGE_PAGE ID (m
 void DestroyPageID( PSI_CONTROL pc_canvas, _32 ID ); // MNU_DESTROY_PAGE ID (minus base)
 void UnDestroyPageID( PSI_CONTROL pc_canvas, _32 ID ); // MNU_DESTROY_PAGE ID (minus base)
 
-void AddPage( PCanvasData canvas, PPAGE_DATA page );
-//void RestorePageExx( PSI_CONTROL pc_canvas, PCanvasData canvas, PPAGE_DATA page, int bFull, int active DBG_PASS);
+void AddPage( PCanvasData canvas, struct page_data_tag * page );
+//void RestorePageExx( PSI_CONTROL pc_canvas, PCanvasData canvas, struct page_data_tag * page, int bFull, int active DBG_PASS);
 //#define RestorePageEx(pc,c,p,f,a) RestorePageExx( pc,c,p,f,a DBG_SRC)
-void RestorePageEx( PSI_CONTROL pc_canvas, PCanvasData canvas, PPAGE_DATA page, int bFull, int active);
+void RestorePageEx( PSI_CONTROL pc_canvas, PCanvasData canvas, struct page_data_tag * page, int bFull, int active);
 #define RestorePage(pc,c,p,f) RestorePageEx(pc,c,p,f,1)
-PPAGE_DATA GetPageFromFrame( PSI_CONTROL frame );
-void ChangePagesEx( PSI_CONTROL pc_canvas, PPAGE_DATA page DBG_PASS);
+struct page_data_tag * GetPageFromFrame( PSI_CONTROL frame );
+void ChangePagesEx( PSI_CONTROL pc_canvas, struct page_data_tag * page DBG_PASS);
 #define ChangePages(pc,p) ChangePagesEx(pc,p DBG_SRC)
 
 void InsertStartupPage( PSI_CONTROL pc_canvas, CTEXTSTR page_name );

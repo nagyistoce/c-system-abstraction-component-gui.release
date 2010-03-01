@@ -4,6 +4,7 @@
 #include <deadstart.h>
 #include "run.h"
 
+#ifndef LOAD_LIBNAME
 #ifdef MILK_PROGRAM
 #define MODE 0
 #define LOAD_LIBNAME "milk.core"
@@ -11,6 +12,7 @@
 #ifdef INTERSHELL_PROGRAM
 #define MODE 0
 #define LOAD_LIBNAME "InterShell.core.dll"
+#endif
 #endif
 
 
@@ -26,10 +28,6 @@ int APIENTRY WinMain( HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmdLine, int nCm
 #else
 int main( int argc, char **argv )
 {
-	//CTEXTSTR lpCmdLine = GetCommandLine();
-	//char *cmdline, *p, *outline;
-	//char *argline;
-
 #endif
 	{
    int arg_offset = 1;
@@ -37,17 +35,19 @@ int main( int argc, char **argv )
 	MainFunction Main;
 	BeginFunction Begin;
 	StartFunction Start;
-   CTEXTSTR libname;
+	CTEXTSTR libname;
 #ifdef MEMORY_DEBUG_LOG
    // define memory_debug to enable memory logging at the pre-first-load level.
 	SetAllocateLogging( TRUE );
 #endif
+#ifndef LOAD_LIBNAME
 	if( argc > 1 )
 	{
 		hModule = LoadFunction( libname = argv[1], NULL );
 		if( hModule )
          arg_offset++;
 	}
+#endif
 
 	if( !hModule )
 	{

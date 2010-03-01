@@ -112,7 +112,7 @@ typedef struct {
 #endif
 
 /* compare _MSC_VER to some constant when you fail to compile here... and this will define missing structure */
-#if ( (__WATCOMC__ <= 1250 ) || defined __LINUX__ ) && !defined( _MSC_VER ) && !defined( __CYGWIN__ )
+#if ( (__WATCOMC__ <= 1250 ) || defined __LINUX__ ) && !defined( _MSC_VER ) && !defined( __CYGWIN__ ) && !defined( _WINGDI_H)
 //#if (WINVER >= 0x0500)
 typedef struct {
         _32        bV5Size;

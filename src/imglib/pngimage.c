@@ -14,7 +14,7 @@
 #ifdef _MSC_VER 
 #define PNG_INTERNAL
 #endif
-#if defined( __LINUX__ ) || defined( __CYGWIN__ )
+#if defined( __GNUC__ ) || defined( __LINUX__ ) || defined( __CYGWIN__ )
 #include <zlib.h>
 #include <pngconf.h>
 #include <png.h>

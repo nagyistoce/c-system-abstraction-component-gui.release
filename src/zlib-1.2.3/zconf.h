@@ -12,7 +12,7 @@
  * Define ZLIB_DLL Always.
  * include Sack_types for IMPORT_METHOD and EXPORT_METHOD
  */
- #include <sack_types.h>
+ #include <stdhdrs.h>
 #define ZLIB_DLL
 
 /*

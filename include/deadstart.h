@@ -120,9 +120,6 @@ DEADSTART_PROC( void, DispelDeadstart )( void );
 //------------------------------------------------------------------------------------
 #elif defined( __WATCOMC__ )
 #pragma off (check_stack)
-#if defined( _MSC_VER )
-#error both watcom and MSC_VER?!?!?!
-#endif
 /* code taken from openwatcom/bld/watcom/h/rtinit.h */
 typedef unsigned char   __type_rtp;
 typedef unsigned short  __type_pad;
@@ -221,7 +218,7 @@ static void name(void); static void name##_x_(void);\
 //------------------------------------------------------------------------------------
 // Linux
 //------------------------------------------------------------------------------------
-#elif defined( __LINUX__ )
+#elif defined( __GNUC__ )
 
 /* code taken from openwatcom/bld/watcom/h/rtinit.h */
 typedef unsigned char   __type_rtp;
@@ -246,7 +243,7 @@ struct rt_init // structure placed in XI/YI segment
                           //   completed entries
     __type_rtp  scheduled; // has this been scheduled? (0 if no)
     __type_rtp  priority; // - priority (0-highest 255-lowest)
-#if defined( __LINUX64__ ) ||defined( __arm__ )
+#if defined( __LINUX64__ ) ||defined( __arm__ )||defined( __GNUC__ )
 #define INIT_PADDING ,{0}
 	 char padding[1]; // need this otherwise it's 23 bytes and that'll be bad.
 #else

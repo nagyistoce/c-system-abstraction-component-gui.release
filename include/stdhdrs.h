@@ -5,6 +5,8 @@
 #define STANDARD_HEADERS_INCLUDED 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
+
 // apparently we don't use this anymore...
 //#include <process.h> // also has a getenv defined..
 

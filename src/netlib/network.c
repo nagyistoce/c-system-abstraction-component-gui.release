@@ -1809,7 +1809,7 @@ NETWORK_PROC( SOCKADDR *,CreateAddress_hton)( _32 dwIP,_16 nHisPort)
 }
 
 //---------------------------------------------------------------------------
-#if !defined( __WINDOWS__ ) && !defined( __CYGWIN__ )
+#if defined( __LINUX__ ) && !defined( __CYGWIN__ )
  #define UNIX_PATH_MAX    108
 
 struct sockaddr_un {

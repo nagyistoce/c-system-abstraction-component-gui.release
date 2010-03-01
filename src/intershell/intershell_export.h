@@ -2,6 +2,7 @@
 #define InterShell_EXPORT
 #include <sack_types.h>
 #include <genxml/genx.h>
+#include <configscript.h>
 #define _DEFINE_INTERFACE
 
 //!defined(__STATIC__) &&
@@ -23,8 +24,8 @@
 
 //#include "intershell_local.h"
 #include "intershell_button.h"
-#include "text_label.h"
-#include "fonts.h"
+
+typedef struct page_data_tag PAGE_DATA, *PPAGE_DATA;
 
 
 // pabel label is actually just a text label thing... 

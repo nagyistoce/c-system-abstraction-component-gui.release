@@ -16,33 +16,24 @@
 #define COMPUTE_CPU_FREQUENCY
 
 //#undef UNICODE
-#ifdef BCC16
-#include <winsock.h>
-#else
-#include <loadsock.h>
-#endif
 
 #ifdef __LCC__
 #include <intrinsics.h>
-#endif
-#ifdef BCC16
-#include <time.h>
 #endif
 
 #ifdef __UNIX__
 #include <unistd.h>
 #include <sys/time.h>
 #include <time.h>
-#include <sharemem.h> // is bad read ptr
 #include <stdarg.h>
 #endif
 
 #include <stdhdrs.h>
+#include <loadsock.h>
 #ifdef __WINDOWS__
 #include <io.h> // unlink
 #endif
 #include <stdio.h>
-#include <sack_types.h>
 #include <deadstart.h>
 
 #include <idle.h>

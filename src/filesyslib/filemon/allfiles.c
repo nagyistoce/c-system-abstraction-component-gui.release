@@ -15,6 +15,10 @@
 //#include <windunce.h>
 #endif
 
+#if defined( __WINDOWS__ ) && !defined( S_IFDIR )
+#include <sys/stat.h>
+#endif
+
 #include <time.h>
 
 #include <signal.h>

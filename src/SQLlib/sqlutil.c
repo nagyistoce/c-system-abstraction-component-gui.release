@@ -155,7 +155,11 @@ SQLSTUB_PROC( TEXTSTR,EscapeSQLBinaryEx )( PODBC odbc, CTEXTSTR blob, PTRSZVAL b
 	unsigned int n;
 	int targetlen;
 
-	if( odbc && ( odbc->flags.bSQLite || odbc->flags.bSQLite_native ) )
+	if( odbc && ( odbc->flags.bSQLite
+#ifdef USE_SQLITE
+					 || odbc->flags.bSQLite_native
+#endif
+					) )
       type_mysql = 0;
 
 	if( type_mysql )

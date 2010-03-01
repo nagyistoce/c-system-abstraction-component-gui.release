@@ -1671,6 +1671,7 @@ void ReleaseODBC( PODBC odbc )
 void CloseDatabase( PODBC odbc )
 {
 	ReleaseODBC( odbc );
+#ifdef USE_SQLITE
 	if( odbc->flags.bSQLite_native )
 	{
 		int err = sqlite3_close( odbc->db );
@@ -1679,7 +1680,9 @@ void CloseDatabase( PODBC odbc )
          lprintf( "sqlite3 returned %d on close...", err );
 		}
 	}
-	else if( odbc->hdbc )
+	else
+#endif
+		if( odbc->hdbc )
 	{
 		SQLFreeHandle( SQL_HANDLE_ENV, odbc->env );
 		odbc->env = NULL;
@@ -1768,7 +1771,7 @@ int __DoSQLCommandEx( PODBC odbc, PCOLLECT collection DBG_PASS )
 		rc3 = sqlite3_prepare_v2( odbc->db, GetText( cmd ), -1, &collection->stmt, &tail );
 		if( rc3 )
 		{
-			_lprintf(DBG_RELAY)( "Result of prepare failed? %s at [%s]", sqlite3_errmsg(odbc->db), tail );
+			_lprintf(DBG_RELAY)( "Result of prepare failed? %s at [%s] in [%s]", sqlite3_errmsg(odbc->db), tail, GetText(cmd) );
 			vtprintf( collection->pvt_errorinfo, sqlite3_errmsg(odbc->db) );
 			if( EnsureLogOpen(odbc ) )
 			{
@@ -2702,7 +2705,7 @@ int __DoSQLQueryEx( PODBC odbc, PCOLLECT collection, CTEXTSTR query DBG_PASS )
 			if( strncmp( tmp, "no such table", 13 ) == 0 )
             vtprintf( collection->pvt_errorinfo, "(S0002)" );
 			vtprintf( collection->pvt_errorinfo, "%s", tmp );
-			_lprintf(DBG_RELAY)( "Result of prepare failed? %s at-or near [%s]", tmp, tail );
+			_lprintf(DBG_RELAY)( "Result of prepare failed? %s at-or near [%s] in [%s]", tmp, tail, query );
 			if( EnsureLogOpen(odbc ) )
 			{
 				fprintf( g.pSQLLog, WIDE("#SQLITE ERROR:%s\n"), tmp );
