@@ -1,7 +1,7 @@
 
 #include <stdhdrs.h>
 #include <sharemem.h>
-#include <sexpat/sexpat.h>
+#include <../src/sexpat/expat.h>
 #include <configscript.h>
 #include <filesys.h>
 #include "controlstruc.h"

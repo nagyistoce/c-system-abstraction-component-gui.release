@@ -54,14 +54,12 @@ SET( INTERSHELL_SDK
   intershell_button.h
 )
 
-
 INSTALL( 
   FILES
     ${INTERSHELL_SDK}
   DESTINATION
-    include/InterShell
+    include/${CMAKE_PROJECT_NAME}/InterShell
 )
-
 
 add_subdirectory( vlc_hook )
 add_subdirectory( windows_shell )
@@ -77,6 +75,11 @@ add_subdirectory( wshell )
 
 
 
+
+if( C++ )
+  set( CMAKE_C_COMPILER "${CMAKE_CXX_COMPILER}" )
+  set( CMAKE_C_COMPILE_OBJECT "${CMAKE_CXX_COMPILE_OBJECT}" )
+endif()
 
 
 

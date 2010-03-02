@@ -23,7 +23,7 @@
 #ifdef XML_BUILDING_EXPAT
 #include "expat_external.h"
 #else
-#include "sexpat/sexpat_external.h"
+#include "../src/sexpat/expat_external.h"
 #endif
 //#endif
 

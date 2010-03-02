@@ -1,7 +1,11 @@
 #ifndef LOADSAVE_EVOMENU_DEFINED
 #define LOADSAVE_EVOMENU_DEFINED
 #include "intershell_local.h"
+#ifdef SACK_CORE_BUILD
+#include <../genx/genx.h>
+#else
 #include <genxml/genx.h>
+#endif
 #include <configscript.h>
 
 void LoadButtonConfig( PSI_CONTROL pc_canvas, TEXTSTR filename );

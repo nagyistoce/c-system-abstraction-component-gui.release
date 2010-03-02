@@ -1,7 +1,4 @@
 
-
-
-
 # something like, 
 # if !(MAKE_DEV)
 
@@ -54,7 +51,6 @@ skelhdr.h
 spacetree.h
 sql_support.h
 sqlgetoption.h
-# sqlite3.h
 sqloptint.h
 stdhdrs.h
 strlib.hpp
@@ -67,6 +63,8 @@ vectlib.h
 vectypes.h
 vidlib.h
 )
+
+# sqlite3.h
 
 SET( VIDLIB_HEADERS 
 vidlib/keydef.h
@@ -90,50 +88,52 @@ psi/shadewell.h
 psi/slider.h
 )
 
+if( CMAKE_PROJECT_NAME )
 INSTALL( 
   FILES
     ${SACK_HEADERS}
   DESTINATION
-    ${HEADER_INSTALL_PREFIX}/${BASE_PROJECT_NAME}
+    include/${CMAKE_PROJECT_NAME}
 )
 
 INSTALL( 
   FILES
     ${VIDLIB_HEADERS}
   DESTINATION
-    ${HEADER_INSTALL_PREFIX}/${BASE_PROJECT_NAME}/vidlib
+    include/${CMAKE_PROJECT_NAME}/vidlib
 )
 INSTALL( 
   FILES
     ${IMGLIB_HEADERS}
   DESTINATION
-    ${HEADER_INSTALL_PREFIX}/${BASE_PROJECT_NAME}/imglib
+    include/${CMAKE_PROJECT_NAME}/imglib
 )
 INSTALL( 
   FILES
     ${PSI_HEADERS}
   DESTINATION
-    ${HEADER_INSTALL_PREFIX}/${BASE_PROJECT_NAME}/psi
+    include/${CMAKE_PROJECT_NAME}/psi
 )
 
 INSTALL( 
   FILES
     ${SACK_GENX_HEADERS}
   DESTINATION
-    ${HEADER_INSTALL_PREFIX}/${BASE_PROJECT_NAME}/genx
+    include/${CMAKE_PROJECT_NAME}/genx
 )
 
 INSTALL( 
   FILES
     ${SACK_SEXPAT_HEADERS}
   DESTINATION
-    ${HEADER_INSTALL_PREFIX}/${BASE_PROJECT_NAME}/sexpat
+    include/${CMAKE_PROJECT_NAME}/sexpat
 )
 
 INSTALL( 
   FILES
     ${SYS_IPC_HEADERS}
   DESTINATION
-    ${HEADER_INSTALL_PREFIX}/${BASE_PROJECT_NAME}/sys
+    include/${CMAKE_PROJECT_NAME}/sys
 )
 
+endif()

@@ -208,6 +208,7 @@ typedef struct global_tag {
 
 	struct {
 		BIT_FIELD bDisableMemoryLogging : 1;
+		BIT_FIELD bLogUnhandled : 1;
 	} flags;
 } GLOBAL;
 
@@ -223,8 +224,10 @@ PRELOAD( InitGlobalConfig2 )
 {
 #ifdef __NO_OPTIONS__
 	g.flags.bDisableMemoryLogging = 1;
+	g.flags.bLogUnhandled = 0;
 #else
 	g.flags.bDisableMemoryLogging = SACK_GetProfileIntEx( GetProgramName(), "SACK/Config Script/Disable Memory Logging", 1, TRUE );
+	g.flags.bLogUnhandled = SACK_GetProfileIntEx( "SACK/Config Script", "Log Unhandled if no application handler", 0, TRUE );
 #endif
 }
 
@@ -1910,9 +1913,7 @@ CONFIGSCR_PROC( int, ProcessConfigurationFile )( PCONFIG_HANDLER pch, CTEXTSTR n
 									pch->Unhandled( pch->psvUser, GetText( pLine ) );
 								else
 								{
-#ifndef __NO_OPTIONS__
-									if( SACK_GetProfileIntEx( "SACK/Config Script", "Log Unhandled if no application handler", 0, TRUE ) )
-#endif
+									if( g.flags.bLogUnhandled )
 										xlprintf(LOG_NOISE)( WIDE("Unknown Configuration Line(No unhandled proc): %s"), GetText( pLine ) );
 								}
 

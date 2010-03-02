@@ -29,10 +29,15 @@ static const _POINT __Z = {ZERO, ZERO,  ONE};
 #if (DIMENSIONS > 3 )
 static const _POINT __W = {ZERO, ZERO, ZERO, ONE};
 #endif
-MATHLIB_DEXPORT const PC_POINT _0 = (PC_POINT)&__0[0];
-MATHLIB_DEXPORT const PC_POINT _X = (PC_POINT)&__X[0];
-MATHLIB_DEXPORT const PC_POINT _Y = (PC_POINT)&__Y[0];
-MATHLIB_DEXPORT const PC_POINT _Z = (PC_POINT)&__Z[0];
+#if defined( __GNUC__  ) && defined( __cplusplus )
+#define PRE_EXTERN extern
+#else
+#define PRE_EXTERN
+#endif
+PRE_EXTERN MATHLIB_DEXPORT const PC_POINT _0 = (PC_POINT)&__0[0];
+PRE_EXTERN MATHLIB_DEXPORT const PC_POINT _X = (PC_POINT)&__X[0];
+PRE_EXTERN MATHLIB_DEXPORT const PC_POINT _Y = (PC_POINT)&__Y[0];
+PRE_EXTERN MATHLIB_DEXPORT const PC_POINT _Z = (PC_POINT)&__Z[0];
 #if (DIMENSIONS > 3 )
 const PC_POINT _W = (PC_POINT)&__W;
 #endif
@@ -51,7 +56,7 @@ const TRANSFORM __I = { { { 1, 0, 0, 0 }
 //							 , NULL // callbacks
   //                    , NULL // userdata
 };
-MATHLIB_DEXPORT const PCTRANSFORM _I = &__I;
+PRE_EXTERN MATHLIB_DEXPORT const PCTRANSFORM _I = &__I;
 
 
 //----------------------------------------------------------------

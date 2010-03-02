@@ -1,11 +1,11 @@
 
-ZLIB_DESTINCLUDE=$(SACK_BASE)/include/zlib
-MORE_TARGETS+=$(ZLIB_DESTINCLUDE)/zlib.h $(ZLIB_DESTINCLUDE)/zconf.h
+#ZLIB_DESTINCLUDE=$(SACK_BASE)/include/zlib
+#MORE_TARGETS+=$(ZLIB_DESTINCLUDE)/zlib.h $(ZLIB_DESTINCLUDE)/zconf.h
 
 ZLIB_SRCS= adler32 compress crc32 gzio uncompr deflate trees  \
            zutil inflate inftrees  inffast infback 
 #           infblock infcodes infutil
 SRCS+=$(foreach src,$(ZLIB_SRCS),$(ZBASEDIR)/$(src))
-INCLUDEDIRS+=$(ZLIB_DESTINCLUDE)
+#INCLUDEDIRS+=$(ZLIB_DESTINCLUDE)
 
 

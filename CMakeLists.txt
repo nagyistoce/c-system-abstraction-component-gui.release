@@ -1,33 +1,35 @@
 cmake_minimum_required(VERSION 2.8)
 
-set( CMAKE_VERBOSE_MAKEFILE  1 )
-message( ${CMAKE_GENERATOR} )
+#set( CMAKE_VERBOSE_MAKEFILE  1 )
+#message( ${CMAKE_GENERATOR} )
 
-if( ${CMAKE_GENERATOR}="MinGW Makefile" )
+set(CMAKE_BUILD_TYPE "Debug" CACHE STRING
+      "Set build type")
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+               "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 
-endif()
 
 if( ${CMAKE_GENERATOR} MATCHES "Watcom WMake" )
+ SET( CFLAGS "-bd" )
 if( CMAKE_BUILD_TYPE MATCHES "Debug" )
   SET( CMAKE_C_FLAGS_DEBUG  "${CMAKE_C_FLAGS_DEBUG} -d2" )
   #SET( CMAKE_C_FLAGS_DEBUG  "-d2 -od -oe=0 -bm -zld -zq  /fp5 /fpi87 -st -s" )
   set( CMAKE_C_LINK_EXECUTABLE   "${CMAKE_C_LINK_EXECUTABLE} debug all" )
   add_definitions( -D_DEBUG )
-  message( ${CMAKE_C_LINK_EXECUTABLE} )
 endif()
 
 set(WIN32_VERSION "0x0500" CACHE STRING
       "Set minimum windows build version")
   set_property(CACHE WIN32_VERSION PROPERTY STRINGS
                "0x0500" "0x0400")
-
-
 add_definitions( -D_WIN32_WINNT=${WIN32_VERSION} )
 
 endif( ${CMAKE_GENERATOR} MATCHES "Watcom WMake" )
 
 
 project( SACK )
+
+
 set( SACK_BASE ${PROJECT_SOURCE_DIR} )
 set( CMAKE_MODULE_PATH ${SACK_SOURCE_DIR}/makefiles/cmake )
 set( DEST_DIR ${sack_BINARY_DIR}/dest )
@@ -55,7 +57,6 @@ OPTION( __ARM__ "Enable specific arm-linux features (disable __WINDOWS__)" OFF )
 OPTION( USE_ODBC "Use Odbc" 1 )
 OPTION( USE_OPTIONS "Use Option Code all internal option usage (and don't include option code)" 1 )
 OPTION( USING_OLD_MINGW "MinGW Has NO UpdateLayeredWindow" 1 )
-OPTION( IS_WINDOWS "Is Windows" 1 )
 OPTION( USE_SQLITE "Use SQLITE" 1 )
 OPTION( __NO_GUI__ "No GUI or image parts" 0 )
 OPTION( NEED_JPEG "Build internal jpeg lib (with suitable exports to link against)" 0 )
@@ -85,6 +86,9 @@ else ( UNIX )
 #        set( SDL_LIBRARIES SDL SDL SDLmain SDL_gfx SDL_image SDL_ttf )
 #        set( SDL_INCLUDE_DIR "c:/tools/unix/mingw/include/SDL" )
 endif ( UNIX )
+
+add_definitions( -DSACK_CORE_BUILD )
+
 
 LINK_LIBRARIES( odbc32 )
 
@@ -130,27 +134,56 @@ add_definitions(
 
 endif( USE_ODBC )
 
+# this is where external image libraries are added for windows native builds
 include( Externals.cmake )
 
+
+if( NOT C++ )
   if( ${CMAKE_COMPILER_IS_GNUCC} ) 
   SET( FIRST_GCC_LIBRARY_SOURCE ${SACK_BASE}/src/deadstart/deadstart_list.c ) 
   SET( FIRST_GCC_PROGRAM_SOURCE ${SACK_BASE}/src/deadstart/deadstart_list.c ) 
   SET( LAST_GCC_LIBRARY_SOURCE ${SACK_BASE}/src/deadstart/deadstart_lib.c ${SACK_BASE}/src/deadstart/deadstart_end.c ) 
   SET( LAST_GCC_PROGRAM_SOURCE ${SACK_BASE}/src/deadstart/deadstart_prog.c ${SACK_BASE}/src/deadstart/deadstart_end.c ) 
   endif()
-  if( ${MSVC} ) 
-  #SET( FIRST_GCC_LIBRARY_SOURCE ${SACK_BASE}/src/deadstart/deadstart_list.c ) 
-  #SET( FIRST_GCC_PROGRAM_SOURCE ${SACK_BASE}/src/deadstart/deadstart_list.c ) 
-  #SET( LAST_GCC_LIBRARY_SOURCE ${SACK_BASE}/src/deadstart/deadstart_lib.c ${SACK_BASE}/src/deadstart/deadstart_end.c ) 
+  if( ${MSVC}${WATCOM} ) 
+  message( "Setting program deadstart." )
   SET( LAST_GCC_PROGRAM_SOURCE ${SACK_BASE}/src/deadstart/deadstart_prog.c ) 
   endif()
+else()
+  if( ${CMAKE_COMPILER_IS_GNUCC} ) 
+  # gcc I still need this, otherwise a program needs to InvokeDeadstarts()
+  SET( LAST_GCC_PROGRAM_SOURCE ${SACK_BASE}/src/deadstart/deadstart_prog.c ) 
+  endif()
+endif()
 
 
   add_definitions( -D_DEBUG )
-  
+
+set( ASM_SOURCES
+  src/imglib/ImageFile.asm
+  src/imglib/alphamac.asm
+  src/imglib/blatcolor.asm
+  src/imglib/blotdirasm.asm
+  src/imglib/blotdirmac.asm
+  src/imglib/blotdirmshadeasm.asm
+  src/imglib/blotdirshadeasm.asm
+  src/imglib/blotscaasm.asm
+  src/imglib/blotscamac.asm
+  src/imglib/blotscamshadeasm.asm
+  src/imglib/blotscashadeasm.asm
+  src/imglib/blotshademac.asm
+  src/imglib/lineasm.asm
+  src/imglib/mmx.asm
+  src/imglib/plotasm.asm
+)
+
+set ( CONFIGURATION
+  src/procreglib/interface.conf
+)
 
 set(SOURCES 
   ${FIRST_GCC_LIBRARY_SOURCE}
+  all_resources.rc
   src/sysloglib/syslog.c
   src/memlib/sharemem.c
   src/typelib/binarylist.c
@@ -165,7 +198,6 @@ set(SOURCES
   src/msgsvr/client/client.c
   src/fractionlib/fractions.c
   src/configlib/configscript.c
-  src/procreglib/interface.conf
   src/procreglib/names.c
   src/netlib/network.c
   src/netlib/net_winsock2.c
@@ -191,22 +223,10 @@ set(SOURCES
   src/sexpat/xmlparse.c
   src/sexpat/xmlrole.c
   src/sexpat/xmltok.c
-  src/imglib/ImageFile.asm
-  src/imglib/alphamac.asm
   src/imglib/alphastab.c
   src/imglib/alphatab.c
-  src/imglib/blatcolor.asm
-  src/imglib/blotdirasm.asm
   src/imglib/blotdirect.c
-  src/imglib/blotdirmac.asm
-  src/imglib/blotdirmshadeasm.asm
-  src/imglib/blotdirshadeasm.asm
-  src/imglib/blotscaasm.asm
   src/imglib/blotscaled.c
-  src/imglib/blotscamac.asm
-  src/imglib/blotscamshadeasm.asm
-  src/imglib/blotscashadeasm.asm
-  src/imglib/blotshademac.asm
   src/imglib/bmpimage.c
   src/imglib/fntcache.c
   src/imglib/fntrender.c
@@ -217,11 +237,8 @@ set(SOURCES
   src/imglib/interface.c
   src/imglib/jpgimage.c
   src/imglib/line.c
-  src/imglib/lineasm.asm
   src/imglib/lucidaconsole.c
   src/imglib/math.c
-  src/imglib/mmx.asm
-  src/imglib/plotasm.asm
   src/imglib/pngimage.c
   src/imglib/sprite_common.c
   src/imglib/sprite.c
@@ -254,9 +271,9 @@ set(SOURCES
   ${OPTION_SOURCE}
   ${ODBC_SOURCE}
   ${JPEG_SOURCE}
+  ${ZLIB_SOURCE}
   ${PNG_SOURCE}
   ${FREETYPE_SOURCE}
-  ${ZLIB_SOURCE}
   ${LAST_GCC_LIBRARY_SOURCE}
 )
 
@@ -272,17 +289,21 @@ add_definitions(
 endif()
 
 
-if( IS_WINDOWS )
+if( __WINDOWS__ )
 add_definitions( 
   -D__WINDOWS__
 )
 LIST(APPEND SOURCES
    src/netlib/net_winsock2.c
 )
-endif( IS_WINDOWS)
+endif(__WINDOWS__)
 
+if( C++ )
+set_source_files_properties( ${SOURCES} PROPERTIES LANGUAGE "CXX" )
+endif()
 
 add_library( sack_bag SHARED ${SOURCES} )
+add_definitions( -DSACK_CORE_BUILD )
 
 #SET_TARGET_PROPERTIES( sack_bag properties 
 SET_TARGET_PROPERTIES(sack_bag PROPERTIES
@@ -304,6 +325,7 @@ if( NOT NEED_FREETYPE )
 target_link_libraries( sack_bag freetype  )
 endif()
 
+
 if( NOT SACK_ONLY OR BUILD_INTERSHELL )
 add_subdirectory( src/intershell )
 add_subdirectory( src/SQLlib/optlib/editoption )
@@ -314,4 +336,6 @@ add_subdirectory( data )
 endif()
 
 install_default_dest( sack_bag )
+
+
 

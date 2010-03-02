@@ -100,21 +100,6 @@ static int bCPUTickWorks = 1; // assume this works, until it fails
 static _64 tick_bias;
 
 //----------------------------------------------------------------------------
-//#if !defined(__STATIC__) && ( defined( _WIN32 ) || defined( BCC16 ) )
-#ifndef BAG
-#ifndef __STATIC__
-LIBMAIN()
-{
-	return 1;
-}
-LIBEXIT()
-{
-	return 1;
-}
-LIBMAIN_END();
-#endif
-#endif
-
 
 // we should really wait until the very end to cleanup?
 PRIORITY_ATEXIT( CleanSyslog, ATEXIT_PRIORITY_SYSLOG )

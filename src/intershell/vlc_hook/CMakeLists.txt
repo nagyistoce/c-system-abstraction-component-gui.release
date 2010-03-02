@@ -27,3 +27,8 @@ install_default_dest( ${PROJECT_NAME} )
 add_subdirectory( test )
 add_subdirectory( intershell )
 
+if( C++ )
+  set( CMAKE_C_COMPILER "${CMAKE_CXX_COMPILER}" )
+  set( CMAKE_C_COMPILE_OBJECT "${CMAKE_CXX_COMPILE_OBJECT}" )
+endif()
+

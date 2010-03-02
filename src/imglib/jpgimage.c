@@ -54,7 +54,7 @@
 #define XMD_H // lie.  This allows IN32 to be defined by jpeglib. (CYGWIN HACK)
 #endif
 #define JDCT_DEFAULT JDCT_FLOAT  // use floating-point for decompression
-#if defined( __WINDOWS__ ) && !defined( __CYGWIN__ )
+#if defined( __WINDOWS__ ) && !defined( __GNUC__ )
 #include <jpeg/jpeglib.h>
 #include <jpeg/jerror.h>
 #else

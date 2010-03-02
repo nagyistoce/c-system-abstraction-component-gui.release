@@ -61,3 +61,9 @@ OnHideControl( "VLC/Player" )(PTRSZVAL psv )
 	StopItem(  vlc->vlc );
 
 }
+
+#ifdef __WATCOMC__
+PUBLIC( void, ExportThis )( void )
+{
+}
+#endif
