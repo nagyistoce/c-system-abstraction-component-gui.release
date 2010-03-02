@@ -24,3 +24,7 @@ add_executable(${PROJECT} WIN32 ${SOURCES})
 target_link_libraries( ${PROJECT} sack_bag )
 install_default_dest( ${PROJECT} )
 
+if( C++ )
+  set( CMAKE_C_COMPILER "${CMAKE_CXX_COMPILER}" )
+  set( CMAKE_C_COMPILE_OBJECT "${CMAKE_CXX_COMPILE_OBJECT}" )
+endif()

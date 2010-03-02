@@ -17,7 +17,8 @@
 #define AddAttr( attr, format, ... ) { char tmp[256]; snprintf( tmp, sizeof( tmp ), format,## __VA_ARGS__ ); genxAddAttribute( attr, (constUtf8)tmp ); }
 
 #include <filesys.h> // pathrchr
-#include <sexpat/sexpat.h>
+#include <../sexpat/expat.h>
+//#include <sexpat/sexpat.h>
 #include "intershell_local.h"
 #include "resource.h"
 #include <pssql.h>

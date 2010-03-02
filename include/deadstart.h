@@ -52,17 +52,6 @@ SACK_DEADSTART_NAMESPACE
 #define DEFAULT_PRELOAD_PRIORITY (DEADSTART_PRELOAD_PRIORITY-1)
 #define DEADSTART_PRELOAD_PRIORITY 70
 
-#ifdef __WATCOMC__
-#define default_name_for_deadstart_runner "RunDeadstart_"
-#endif
-#ifdef _MSC_VER
-#define default_name_for_deadstart_runner "_RunDeadstart"
-#endif
-#if defined( __CYGWIN__ )
-#define default_name_for_deadstart_runner "RunDeadstart"
-#endif
-
-
 // proc, proc_name, priority DEADSTART_PRIORTY_,unused to hack in self reference of static symbol
 // this will trick most compilers.
 // uses a compiler-native function (not cproc)
@@ -141,37 +130,12 @@ struct rt_init // structure placed in XI/YI segment
 /* end code taken from openwatcom/bld/watcom/h/rtinit.h */
 
 
-/* in the main program is a routine which is referenced in dynamic mode...
- need to redo this macro in the case of static linking...
-
- */
-
-//------------------------------------------------------------------------------------
-//  WIN32 basic methods... on wait
-//------------------------------------------------------------------------------------
-
-
-#ifdef _legacy_reverse_link_app_
-#define InvokeDeadstart() do {                                              \
-	TEXTCHAR myname[256];HMODULE mod;GetModuleFileName( NULL, (LPSTR)myname, sizeof( myname ) );\
-	mod=LoadLibrary((LPSTR)myname);if(mod){        \
-   void(*rsp)(void); \
-	if((rsp=((void(*)(void))(GetProcAddress( mod, default_name_for_deadstart_runner))))){rsp();}else{lprintf( WIDE("Hey failed to get proc %d"), GetLastError() );}\
-	FreeLibrary( mod); }} while(0)
-#endif
-
-//------------------------------------------------------------------------------------
-// MSVC Starup/atexit registration methods...
-//------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------
 // watcom
 //------------------------------------------------------------------------------------
-#ifdef __WATCOMC__
 //void RegisterStartupProc( void (*proc)(void) );
 
 
-#ifdef __cplusplus
-#else
 #define PRIORITY_PRELOAD(name,priority) static void schedule_##name(void); static void name(void); \
 	static struct rt_init __based(__segname("XI")) name##_ctor_label={0,(DEADSTART_PRELOAD_PRIORITY-1),schedule_##name}; \
 	static void schedule_##name(void) {                 \
@@ -184,7 +148,7 @@ struct rt_init // structure placed in XI/YI segment
 	RegisterPriorityShutdownProc( name,#name,priority,&name##_dtor_label,__FILE__,__LINE__ );\
 	}                                       \
 	static void name(void)
-#endif
+
 // syslog runs preload at priority 65
 // message service runs preload priority 66
 // deadstart itself tries to run at priority 70 (after all others have registered)
@@ -198,8 +162,6 @@ struct rt_init // structure placed in XI/YI segment
 // however this routine is only triggered in windows by calling
 // BAG_Exit(nn) which is aliased to replace exit(n) automatically
 
-#ifdef __cplusplus
-#else
 #define PRIORITY_ATEXIT(name,priority) ATEXIT_PRIORITY( name,priority)
 /*
 static void name(void); static void name##_x_(void);\
@@ -207,14 +169,12 @@ static void name(void); static void name##_x_(void);\
 	static void name##_x_(void) { char myname[256];myname[0]=*(CTEXTSTR)&name##_dtor_label;GetModuleFileName(NULL,myname,sizeof(myname));name(); } \
 	static void name(void)
   */
-#endif
 #define ROOT_ATEXIT(name) ATEXIT_PRIORITY(name,ATEXIT_PRIORITY_ROOT)
 #define ATEXIT(name)      PRIORITY_ATEXIT(name,ATEXIT_PRIORITY_DEFAULT)
 // if priority_atexit is used with priority 0 - the proc is scheduled into
 // atexit, and exit() is then invoked.
 //#define PRIORITY_ATEXIT(name,priority) ATEXIT_PRIORITY(name,priority )
 
-#endif
 //------------------------------------------------------------------------------------
 // Linux
 //------------------------------------------------------------------------------------

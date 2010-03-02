@@ -17759,7 +17759,7 @@ SQLITE_PRIVATE void *sqlite3WinDlsym(void *pHandle, const char *zSymbol){
 #else
   /* All other windows platforms expect GetProcAddress() to take
   ** an Ansi string regardless of the _UNICODE setting */
-  return GetProcAddress((HMODULE)pHandle, zSymbol);
+  return (void*)GetProcAddress((HMODULE)pHandle, zSymbol);
 #endif
 }
 SQLITE_PRIVATE int sqlite3WinDlclose(void *pHandle){

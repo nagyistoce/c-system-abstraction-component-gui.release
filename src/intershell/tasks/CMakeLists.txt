@@ -24,3 +24,7 @@ install_default_dest_binary( ${PROJECT_NAME} )
 
 add_subdirectory( frames )
 
+if( C++ )
+  set( CMAKE_C_COMPILER "${CMAKE_CXX_COMPILER}" )
+  set( CMAKE_C_COMPILE_OBJECT "${CMAKE_CXX_COMPILE_OBJECT}" )
+endif()

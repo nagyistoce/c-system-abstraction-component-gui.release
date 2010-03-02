@@ -1058,22 +1058,6 @@ void InitSharedMemory( void )
 }
 
 //------------------------------------------------------------------------------------------------------
-#ifndef BAG
-#if !defined(__STATIC__) && defined( _WIN32 )
-// must keep LibMain for LCC-Win32
-LIBMAIN()
-{
-	return 1;
-}
-LIBEXIT()
-{
-	return 1;
-}
-LIBMAIN_END();
-#endif
-#endif
-
-//------------------------------------------------------------------------------------------------------
 // private
 static PSPACE AddSpace( PSPACE pAddAfter
 #if defined( __WINDOWS__ ) || defined( __CYGWIN__ )

@@ -1,7 +1,11 @@
 #ifndef InterShell_EXPORT
 #define InterShell_EXPORT
 #include <sack_types.h>
+#ifdef SACK_CORE_BUILD
+#include <../genx/genx.h>
+#else
 #include <genxml/genx.h>
+#endif
 #include <configscript.h>
 #define _DEFINE_INTERFACE
 

@@ -1,6 +1,6 @@
 #include <stdhdrs.h>
 #include <sharemem.h>
-#include <genxml/genx.h>
+#include <../src/genx/genx.h>
 #include "controlstruc.h"
 #include <filedotnet.h>
 PSI_XML_NAMESPACE

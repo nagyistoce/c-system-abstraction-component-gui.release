@@ -161,13 +161,13 @@ MORE_TARGETS+=$(if $(__NO_SQL__),,$(if $(USE_SQLITE),$(SACK_BASE)/include/sqlite
 SYSLIBS=$(if $(__WINDOWS__),odbc32 wsock32 iphlpapi winmm, m odbc)
 CXFLAGS:=$(CXFLAGS) $(if $(__NO_SQL__),,-DUSE_ODBC) $(if $(__EXTERNAL_SQLITE__),-DUSE_SQLITE_INTERFACE)
 
-
+    #-DPROCREG_SOURCE               \
+    
 CXFLAGS:=$(CXFLAGS) -DMEM_LIBRARY_SOURCE       \
     -DSYSLOG_SOURCE                \
     -D_TYPELIBRARY_SOURCE          \
     -DTIMER_SOURCE -DIDLE_SOURCE   \
     -DCLIENTMSG_SOURCE             \
-    -DPROCREG_SOURCE               \
     -DFRACTION_SOURCE              \
     -DNETWORK_SOURCE               \
     -DCONFIGURATION_LIBRARY_SOURCE \
@@ -252,6 +252,7 @@ ifeq '$(NEED_ZLIB)' '1'
 ifndef __NO_GUI__
 ########### ZLIB SRCS ##############
 ZBASEDIR=src/zlib-1.2.3
+INCLUDEDIRS+=$(SACK_BASE)/$(ZBASEDIR)
 include $(ZBASEDIR)/Makefile.bag.part
 endif
 endif
@@ -280,7 +281,7 @@ DLIBSRCS= jdapimin jdapistd jdtrans jdatasrc \
 # These objectfiles are included in libjpeg.lib
 SRCS+=$(foreach src,$(CLIBSRCS) $(COMSRCS) $(DLIBSRCS),$(JBASEDIR)/$(src))
 CXFLAGS+= -DJPEG_SOURCE
-INCLUDEDIRS+=$(SACK_BASE)/include/jpeg $(SACK_BASE)/src/jpeg-6b
+INCLUDEDIRS+=$(SACK_BASE)/src/jpeg-6b
 endif
 endif
 ########### PNG SRCS ##############

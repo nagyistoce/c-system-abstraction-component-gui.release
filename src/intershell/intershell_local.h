@@ -349,6 +349,9 @@ void PublicAddCommonButtonConfig( PMENU_BUTTON button );
 void FixupButtonEx( PMENU_BUTTON button DBG_PASS );
 void FlushToKey( PMENU_BUTTON button );
 
+void SetMacroResult( int allow_continue );
+
+
 #include "intershell_registry.h"
 
 #endif

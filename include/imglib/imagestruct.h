@@ -59,11 +59,6 @@ struct ImageFile_tag
    int y;
    int width;   // desired height and width may not be actual cause of
 	int height;  // resizing of parent image....
-#ifdef __cplusplus
-#ifndef __WATCOMC__ // watcom limits protections in structs to protected and public
-private:
-#endif
-#endif
    int actual_x; // need this for sub images - otherwise is irrelavent
    int actual_y;
    int actual_width;  /// Width of image.
@@ -80,6 +75,11 @@ private:
 	int eff_maxx; // effective max - maximum coordinate...
 	int eff_maxy; // effective
 	IMAGE_RECTANGLE auxrect;
+#ifdef __cplusplus
+#ifndef __WATCOMC__ // watcom limits protections in structs to protected and public
+private:
+#endif
+#endif
 #ifdef _OPENGL_DRIVER
    /* gl context? */
 	int glSurface;

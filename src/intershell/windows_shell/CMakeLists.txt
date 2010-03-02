@@ -21,3 +21,8 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 target_link_libraries( ${PROJECT_NAME} sack_bag )
 install_default_dest_binary( ${PROJECT_NAME} )
 
+if( C++ )
+  set( CMAKE_C_COMPILER "${CMAKE_CXX_COMPILER}" )
+  set( CMAKE_C_COMPILE_OBJECT "${CMAKE_CXX_COMPILE_OBJECT}" )
+endif()
+

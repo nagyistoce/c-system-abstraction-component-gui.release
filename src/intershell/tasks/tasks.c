@@ -2000,3 +2000,8 @@ static LOGICAL OnDropAccept( "Add Task Button" )( CTEXTSTR file, int x, int y )
    return 0;
 }
 
+#ifdef __WATCOMC__
+PUBLIC( void, ExportThis )( void )
+{
+}
+#endif
