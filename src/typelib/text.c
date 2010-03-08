@@ -280,7 +280,7 @@ PTEXT SegCreateFrom_64Ex( S_64 value DBG_PASS )
 {
    PTEXT pResult;
    pResult = SegCreateEx( 32 DBG_RELAY);
-	pResult->data.size = snprintf( pResult->data.data, 32, WIDE("%lld"), value );
+	pResult->data.size = snprintf( pResult->data.data, 32, WIDE("%"_64f), value );
    return pResult;
 }
 

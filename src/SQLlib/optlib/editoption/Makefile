@@ -4,7 +4,7 @@ LINK_MINIMAL=1
 
 PROGNAME=editoptions
 SRCS=editopt
-SUBSYSTEM=windows
+#SUBSYSTEM=windows
 #MORELIBS=bag.psi 
 
 

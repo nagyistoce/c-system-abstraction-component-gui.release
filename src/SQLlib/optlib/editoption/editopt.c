@@ -219,8 +219,16 @@ int EditOptions( void )
    return 1;
 }
 
+#ifdef _MSC_VER
+int APIENTRY WinMain( HINSTANCE hInst, HINSTANCE hInstPrev, LPSTR lpCmd, int nCmdShow )
+{
+	int argc;
+	char **argv;
+	ParseIntoArgs( lpCmd, &argc, &argv );
+#else
 int main( int argc, char **argv )
 {
+#endif
 	if( argc > 1 )
 	{
 		PODBC o;

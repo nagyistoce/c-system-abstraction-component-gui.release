@@ -832,7 +832,7 @@ MEM_PROC( S_32, EnterCriticalSecNoWaitEx )( PCRITICALSECTION pcs, THREAD_ID *pri
 #endif
 		//nEntry--;
 	}
-	//lprintf( WIDE("Enter section : %lld\n"),tick2-tick );
+	//lprintf( WIDE("Enter section : %"PRIdFAST64"\n"),tick2-tick );
 	return 0;
 }
 

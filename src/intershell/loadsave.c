@@ -1214,8 +1214,8 @@ void XML_DumpGeneric( genxWriter w, PMENU_BUTTON button )
 
 	genxStartElement( generic_dump_region );
 
-   AddAttr( location, "%lld,%lld", button->x, button->y );
-   AddAttr( size, "%lld,%lld", button->x, button->y );
+   AddAttr( location, "%"_64f",%"_64f, button->w, button->h );
+   AddAttr( size, "%"_64fs",%"_64fs, button->x, button->y );
    AddAttr( control_type, "%s", button->pTypeName );
 
 	if( button->pTypeName )
@@ -1327,11 +1327,7 @@ void SaveAPage( FILE *file, PPAGE_DATA page )
 	LIST_FORALL( page->controls, idx, PMENU_BUTTON, button )
 	{
 		fprintf( file
-#ifdef _MSC_VER
-				 , WIDE("control generic %s at %lld,%lld sized %lld,%lld\n")
-#else
-				 , WIDE("control generic %s at %Ld,%Ld sized %Ld,%Ld\n")
-#endif
+				 , WIDE("control generic %s at %"_64fs",%"_64fs" sized %"_64f",%"_64f"\n")
 				 , button->pTypeName
 				 , button->x, button->y
 				 , button->w, button->h );

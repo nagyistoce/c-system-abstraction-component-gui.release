@@ -20,6 +20,13 @@
 #ifndef PNGCONF_H
 #define PNGCONF_H
 
+
+/* Added for SACK Compilation */
+#ifdef SACK_BAG_EXPORTS
+#define PNG_INTERNAL
+#endif
+
+
 #define PNG_1_2_X
 
 /*
@@ -1356,15 +1363,12 @@ typedef z_stream FAR *  png_zstreamp;
 #  define PNG_IMPEXP
 #endif
 
-/* Added for SACK Compilation */
-#ifdef BAG
 #  define PNG_DLL
 #  ifdef PNG_INTERNAL
 #    define PNG_IMPEXP EXPORT_METHOD
 #  else
 #    define PNG_IMPEXP IMPORT_METHOD
 #  endif
-#endif
 /******************************/
 
 #if defined(PNG_DLL) || defined(_DLL) || defined(__DLL__ ) || \

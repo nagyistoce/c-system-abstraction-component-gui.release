@@ -9,9 +9,12 @@
 #define _WIN32_WINNT 0x501
 #endif
 
-#ifndef __WINDOWS__
-#define __WINDOWS__
-#endif
+// force windows on __MSVC
+#  ifndef __WINDOWS__
+#    define __WINDOWS__
+#  endif
+
+
 #endif
 
 #ifdef __cplusplus_cli
@@ -45,21 +48,23 @@ using namespace System;
 #      define XML_UNICODE_WCHAR_T
 #      define XML_UNICODE
 #    endif
+
 #ifndef TARGETNAME
 #  define TARGETNAME "sack_bag.dll" //$(TargetFileName)
 #endif
-#ifndef __cplusplus_cli 
+
+#ifndef __cplusplus_cli
 // cli mode, we use this directly, and build the exports in sack_bag.dll directly
 #else
 #define LIBRARY_DEADSTART
 #endif
+
 #define MEM_LIBRARY_SOURCE
 #define SYSLOG_SOURCE
 #define _TYPELIBRARY_SOURCE
 #define TIMER_SOURCE
 #define IDLE_SOURCE
 #define CLIENTMSG_SOURCE
-#define PROCREG_SOURCE
 #define FRACTION_SOURCE
 #define NETWORK_SOURCE
 #define CONFIGURATION_LIBRARY_SOURCE
@@ -68,14 +73,19 @@ using namespace System;
 #define FILEMONITOR_SOURCE
 #define VECTOR_LIBRARY_SOURCE
 #define SHA1_SOURCE
-#define GENX_SOURCE
-#define SEXPAT_SOURCE
 #define CONSTRUCT_SOURCE
+#define PROCREG_SOURCE
 #define SQLPROXY_LIBRARY_SOURCE
 
-#ifdef _MSC_VER
+#  ifndef __NO_SQL__
+#    ifndef __NO_OPTIONS__
+#define SQLGETOPTION_SOURCE
+#    endif
+#endif
 
 #define FORCE_NO_INTERFACE
+
+#ifdef _MSC_VER
 
 #ifndef JPEG_SOURCE
 #error projects were not generated with CMAKE, and JPEG_SORUCE needs to be defined
@@ -85,16 +95,16 @@ using namespace System;
 //#define FT2_BUILD_LIBRARY   // freetype is internal
 //#define FREETYPE_SOURCE		// build Dll Export
 #endif
+
 #define MNG_BUILD_DLL
 
 //MSVC#define WIN32
-#define BAG
+//#define BAG
 
 //MSVC//#define WIN32
 //MSVC//#define _DEBUG
 //MSVC#define _WINDOWS
 //MSVC#define _USRDLL
-#define SQLGETOPTION_SOURCE
 #define BAGIMAGE_EXPORTS
 #define IMAGE_LIBRARY_SOURCE
 #define SYSTRAY_LIBRARAY
@@ -107,7 +117,6 @@ using namespace System;
 #ifndef __NO_WIN32API__
 #define _OPENGL_ENABLED
 #endif
-#define SQLITE_SOURCE
 // define a type that is a public name struct type... 
 // good thing that typedef and struct were split
 // during the process of port to /clr option.
@@ -129,13 +138,6 @@ using namespace System;
 
 #endif
 #endif
-
-#ifdef SACK_BAG_DEFINED
-// use this to override default export of 'image' and 'render' interfaces registered.
-#define SACK_BAG_EXPORTS
-#endif
-
-
 
 #ifndef MY_TYPES_INCLUDED
 #define MY_TYPES_INCLUDED
@@ -565,6 +567,7 @@ typedef unsigned int  BIT_FIELD;
 
 typedef uint64_t _64;
 typedef int64_t  S_64;
+typedef _64 *P_64;
 typedef S_64 *PS_64;
 
 
@@ -632,8 +635,11 @@ typedef const void *CPOINTER;
 
 //------------------------------------------------------
 // formatting macro defintions for [vsf]printf output of the above types
+#ifndef _MSC_VER
+#include <inttypes.h>
+#endif
 
-#ifdef __LINUX64__
+#if defined( __LINUX64__ ) || defined( _WIN64 )
 #define _32f   WIDE("u")
 #define _32fx   WIDE("x")
 #define _32fX   WIDE("X")
@@ -668,7 +674,13 @@ typedef const void *CPOINTER;
 #define _64fx   WIDE("Lx")
 #define _64fX   WIDE("LX")
 #define _64fs   WIDE("Ld")
-#else
+#elif defined( __GNUC__ )
+#define _64f    PRIu64
+#define _64fx   PRIxFAST64
+#define _64fX   PRIXFAST64
+#define _64fs   PRIdFAST64
+
+#else // defined( _MSC_VER )
 #define _64f    WIDE("llu")
 #define _64fx   WIDE("llx")
 #define _64fX   WIDE("llX")
@@ -973,16 +985,10 @@ is_deadstart_complete( void );
 
 //DYNAMIC_EXPORT void Exit( int code );
 //#define exit(n) Exit(n)
-#ifdef BAG_EXIT_DEFINED
+#ifdef SACK_BAG_EXPORTS
 EXPORT_METHOD
 #else
-#  ifndef BAG
-#    ifndef __STATIC__
-	IMPORT_METHOD
-#    endif
-#  else
-extern
-#  endif
+IMPORT_METHOD
 #endif
 	void BAG_Exit( int code );
 #define exit(n) BAG_Exit(n)

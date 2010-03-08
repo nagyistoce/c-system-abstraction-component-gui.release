@@ -3,7 +3,7 @@
 #include <ctype.h>
 #include <psi.h>
 #include <sharemem.h>
-#include <../../../../../trunk/work/dekware/cards/cards.h>
+#include <../../../../trunk/work/dekware/cards/cards.h>
 #include "intershell_registry.h"
 #include <procreg.h>
 #undef StrDup
@@ -266,6 +266,11 @@ PRELOAD( InitGame )
 					l.card_image[s*13+f] = LoadImageFile( filename );
 				}
 			fclose( file );
+		}
+		else
+		{
+         Release( l.card_image );
+			l.card_image = NULL;
 		}
 	}
 

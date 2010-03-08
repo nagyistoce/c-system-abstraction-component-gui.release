@@ -1,6 +1,6 @@
 
 if( NOT __NO_GUI__ )
-message( "using gui" )
+
 if( NEED_JPEG )
 SET( JBASEDIR src/jpeg-6b )
 SET( SYSDEPMEM jmemnobs )
@@ -25,7 +25,9 @@ FOREACH( SRC ${CLIBSRCS} ${COMSRCS} ${DLIBSRCS} )
   LIST( APPEND JPEG_SOURCE ${JBASEDIR}/${SRC} )
 ENDFOREACH( SRC )
 add_definitions( -DJPEG_SOURCE )
-include_directories( ${SACK_BASE}/include/jpeg ${SACK_BASE}/src/jpeg-6b )
+# ya, this is sorta redundant... should fix that someday.
+include_directories( ${SACK_BASE}/src/jpeg-6b/jpeg ${SACK_BASE}/src/jpeg-6b )
+
 #message( adding ${JPEG_SOURCE} )
 endif()
 

@@ -32,18 +32,6 @@
 
 #include <sha1.h>
 
-#ifndef __STATIC__
-#if defined( BCC16 ) || defined( WIN32 )
-#include <sack_types.h>
-#include <deadstart.h>
-#ifndef BAG
-LIBMAIN(){	return 1; }
-LIBEXIT(){ return 1; }
-LIBMAIN_END();
-#endif
-#endif
-#endif
-
 /*
  *  Define the SHA1 circular left shift macro
  */

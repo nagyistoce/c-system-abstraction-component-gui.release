@@ -909,7 +909,7 @@ TIMER_PROC( PTHREAD, MakeThread )( void )
 		InitWakeup( pThread );
 		g.lock_thread_create = 0;
 #ifdef LOG_THREAD
-		Log3( WIDE("Created thread address: %p %llx at %p")
+		Log3( WIDE("Created thread address: %p %"PRIxFAST64" at %p")
 			 , pThread->proc, pThread->thread_ident, pThread );
 #endif
 	}
@@ -1661,7 +1661,7 @@ TIMER_PROC( LOGICAL, LeaveCriticalSecEx )( PCRITICALSECTION pcs DBG_PASS )
    _32 curtick = timeGetTime();//GetTickCount();
 #endif
 #ifdef LOG_DEBUG_CRITICAL_SECTIONS
-   _xlprintf( LOG_NOISE, DBG_VOIDRELAY )( "Begin leave critical section %p %llx", pcs, GetMyThreadID() );
+   _xlprintf( LOG_NOISE, DBG_VOIDRELAY )( "Begin leave critical section %p %"PRIxFAST64, pcs, GetMyThreadID() );
 #endif
 	while( LockedExchange( &pcs->dwUpdating, 1 ) 
 #ifdef _DEBUG

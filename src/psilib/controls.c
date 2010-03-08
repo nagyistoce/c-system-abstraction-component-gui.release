@@ -419,7 +419,7 @@ void GetMyInterface( void )
 			g.MyImageInterface = (PIMAGE_INTERFACE)GetInterface( WIDE("real_image") );
 		if( !g.MyImageInterface )
 		{
-#ifndef BAG
+#ifndef XBAG
 			if( is_deadstart_complete() )
 #endif
 			{
@@ -443,11 +443,7 @@ void GetMyInterface( void )
 			g.MyDisplayInterface = (PRENDER_INTERFACE)GetInterface( WIDE("video") );
 		if( !g.MyDisplayInterface )
 		{
-#ifndef BAG
-			if( is_deadstart_complete() )
-#endif
 			{
-				DumpRegisteredNames();
 #ifndef __WINDOWS__
 				fprintf( stderr, "Failed to get 'render' interface.  PSI interfaces failing execution." );
 #endif
