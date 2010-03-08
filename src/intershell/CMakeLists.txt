@@ -27,17 +27,19 @@ ${LAST_GCC_LIBRARY_SOURCE}
 )
 
 
+if( C++ )
+set_source_files_properties( ${SOURCES} PROPERTIES LANGUAGE "CXX" )
+endif()
 
 add_library( ${PROJECT_NAME} SHARED ${SOURCES} )
 
 string( REGEX REPLACE "(.*)\\.(.*)" "\\1_\\2" TARGET_LABEL ${PROJECT_NAME} )
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   DEFINE_SYMBOL INTERSHELL_SOURCE
-                  COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL} -D__NO_ANIMATION__"
+                  COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL} -D__NO_ANIMATION__ ${LibraryExtraFlags}"
 )
 
-
-target_link_libraries( ${PROJECT_NAME} sack_widgets sack_bag )
+target_link_libraries( ${PROJECT_NAME} sack_widgets ${SACK_LIBRARY} )
 install_default_dest_binary( ${PROJECT_NAME} )
 
 include_directories( 
@@ -71,16 +73,6 @@ set( CMAKE_SHARED_LIBRARY_SUFFIX "" )
 set( CMAKE_SHARED_LIBRARY_PREFIX "" )
 add_subdirectory( shell )
 add_subdirectory( wshell )
-
-
-
-
-
-if( C++ )
-  set( CMAKE_C_COMPILER "${CMAKE_CXX_COMPILER}" )
-  set( CMAKE_C_COMPILE_OBJECT "${CMAKE_CXX_COMPILE_OBJECT}" )
-endif()
-
 
 
 

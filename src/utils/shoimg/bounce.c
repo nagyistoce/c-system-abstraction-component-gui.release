@@ -313,7 +313,7 @@ int main( int argc, char **argv )
 														  , y //0
 											 );
       AddTimer( 33, tick, 0 );
-      lprintf( WIDE("Entered main at %lld"), a );
+      lprintf( WIDE("Entered main at %"PTRSZVALfx), a );
 		SetRedrawHandler( display, Output, 0 );
 		UpdateDisplay( display );
 		ClearImageTo( GetDisplayImage( display ), 0xFF000000 );

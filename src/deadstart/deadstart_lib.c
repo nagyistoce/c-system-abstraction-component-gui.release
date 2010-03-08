@@ -18,9 +18,6 @@ static void RegisterStartups( void ) __attribute__((constructor));
 // this ensures that the libraries registration (if any)
 // is definatly done to the main application
 //(the one place for doing the work)
-#ifndef LIBRARY_DEADSTART
-void ctor_RunStartups( void ) __attribute__((constructor));
-#endif
 
 
 static int Registered;

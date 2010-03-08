@@ -1,6 +1,6 @@
 //#define DEFINE_DEFAULT_IMAGE_INTERFACE
 //#define USE_RENDER_INTERFACE l.r
-//#define DEBUG_LOCK_UNLOCK
+#define DEBUG_LOCK_UNLOCK
 
 #define INVERT_DATA
 #define VLC_INTERFACE_SOURCE
@@ -283,6 +283,7 @@ static void CPROC PlayerEvent( const libvlc_event_t *event, void *user )
 static int CPROC lock( PTRSZVAL psv, void **something )
 {
 	struct my_vlc_interface *pmyi = (struct my_vlc_interface*)psv;
+   lprintf( "LOCK." );
 	if( pmyi->flags.direct_output )
 	{
 		CDATA *data;

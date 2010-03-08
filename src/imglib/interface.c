@@ -137,7 +137,7 @@ static void CPROC _ImageDropImageInterface( POINTER p )
 {
 }
 #ifndef __STATIC__
-#if !(defined( SACK_BAG_DEFINED ) && defined( __LINUX__ ))
+#if !(defined( SACK_BAG_EXPORTS ) && defined( __LINUX__ ))
 IMAGE_PROC( void, DropImageInterface )( PIMAGE_INTERFACE p )
 {
    _ImageDropImageInterface(p );

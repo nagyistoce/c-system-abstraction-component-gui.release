@@ -6,7 +6,7 @@
 
 //#define DEBUG_GLOBAL_REGISTRATION
 #define REGISTRY_STRUCTURE_DEFINED
-#define PROCREG_SOURCE
+//#define PROCREG_SOURCE
 // include this first so we can have the namespace...
 #include <procreg.h>
 #undef REGISTRY_STRUCTURE_DEFINED

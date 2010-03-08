@@ -47,18 +47,10 @@ SACK_DEADSTART_NAMESPACE
 void name( void )
 #endif
 
-// no special decoration needed.
-
-void RunExits( void )
-{
-	InvokeExits();
-}
-
 // this one is used when a library is loaded.
 #ifndef _WIN64
 PRELOAD( RunDeadstart )
 {
-	atexit( RunExits );
 	InvokeDeadstart(); // call everthing which is logged within SACK to dispatch back to registree's
 	MarkRootDeadstartComplete();
 }

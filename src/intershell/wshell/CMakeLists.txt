@@ -3,28 +3,22 @@
 
 cmake_minimum_required(VERSION 2.8)
 
-set( PROJECT InterShell_window )
-project( ${PROJECT} )
+project( InterShell_window )
 
 
 set(SOURCES 
    ../../utils/runner/runwin.c 
 )
 
-include_directories( 
-  M:/sack/include
-)
-
-
 add_definitions( 
 	-DLOAD_LIBNAME="${CMAKE_SHARED_LIBRARY_PREFIX}InterShell.core${CMAKE_SHARED_LIBRARY_SUFFIX}" -DMODE=0
 )
 
-add_executable(${PROJECT} WIN32 ${SOURCES})
-target_link_libraries( ${PROJECT} sack_bag )
-install_default_dest( ${PROJECT} )
-
 if( C++ )
-  set( CMAKE_C_COMPILER "${CMAKE_CXX_COMPILER}" )
-  set( CMAKE_C_COMPILE_OBJECT "${CMAKE_CXX_COMPILE_OBJECT}" )
+set_source_files_properties( ${SOURCES} PROPERTIES LANGUAGE "CXX" )
 endif()
+
+add_executable(${PROJECT_NAME} WIN32 ${SOURCES})
+target_link_libraries( ${PROJECT_NAME}  ${SACK_LIBRARY} )
+install_default_dest( ${PROJECT_NAME} )
+

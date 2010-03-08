@@ -5095,6 +5095,7 @@ PRELOAD( RegisterInterShellInterface )
 	RegisterInterface( "InterShell", LoadInterShellInterface, UnloadInterShellInterface );
 	if( SACK_GetProfileIntEx( GetProgramName(), "Alias InterShell for MILK", 1, TRUE) )
 	{
+		RegisterClassAlias( "system/interfaces/InterShell", "system/interfaces/MILK");
 		RegisterClassAlias( "InterShell", "MILK" );
 		RegisterClassAlias( "sack/widgets", "altanik/widgets" );
 	}
