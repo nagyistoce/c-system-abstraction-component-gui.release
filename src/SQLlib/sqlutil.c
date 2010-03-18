@@ -552,8 +552,8 @@ SQLSTUB_PROC( int, SQLCreateTableEx )( PODBC odbc, CTEXTSTR filename, CTEXTSTR t
 		{
 			if( !pathchr( filename ) )
 			{
-            CTEXTSTR path = OSALOT_GetEnvironmentVariable( "MY_LOAD_PATH" );
-				snprintf( sec_file, sizeof( sec_file ), "%s/%s", path, filename );
+            CTEXTSTR path = OSALOT_GetEnvironmentVariable( WIDE( "MY_LOAD_PATH" ) );
+				snprintf( sec_file, sizeof( sec_file ), WIDE( "%s/%s" ), path, filename );
             Fopen( file, sec_file, WIDE("rt") );
 			}
 		}
@@ -624,12 +624,12 @@ SQLSTUB_PROC( int, SQLCreateTableEx )( PODBC odbc, CTEXTSTR filename, CTEXTSTR t
 										trailer[0] != ' ' &&
 										trailer[0] != '\t' )
 									trailer++;
-								sprintf( line, WIDE("%*.*s%s%s")
+								snprintf( line, sizeof( line ), WIDE("%*.*s%s%s")
 										 , (int)(tabname - p), (int)(tabname - p), p
 										 , templatename
 										 , trailer
 										 );
-								strcpy( buf, line );
+								StrCpy( buf, line );
 								gathering = TRUE;
 							}
 							else
@@ -640,7 +640,7 @@ SQLSTUB_PROC( int, SQLCreateTableEx )( PODBC odbc, CTEXTSTR filename, CTEXTSTR t
 					}
 					if( gathering )
 					{
-						nOfs += sprintf( cmd + nOfs, WIDE("%s "), p );
+						nOfs += snprintf( cmd + nOfs, sizeof( cmd ) - nOfs, WIDE("%s "), p );
 						if( done )
 						{
 							if( options & CTO_DROP )
@@ -679,7 +679,7 @@ SQLSTUB_PROC( int, SQLCreateTableEx )( PODBC odbc, CTEXTSTR filename, CTEXTSTR t
 		else
 		{
 			lprintf( WIDE("Unable to open templatefile: %s or %s/%s"), filename
-					 , OSALOT_GetEnvironmentVariable( "MY_LOAD_PATH" )
+					 , OSALOT_GetEnvironmentVariable( WIDE( "MY_LOAD_PATH" ) )
                  , filename );
 
 		}
@@ -730,7 +730,7 @@ void DumpSQLTable( PTABLE table )
 	lprintf( "Table name: %s", table->name );
 	for( n = 0; n < table->fields.count; n++ )
 	{
-		lprintf( "Column %d '%s' [%s] [%s]"
+		lprintf( WIDE( "Column %d '%s' [%s] [%s]" )
               , n
 				 ,( (POINTER)table->fields.field[n].name )
 				 ,( (POINTER)table->fields.field[n].type )
@@ -743,10 +743,10 @@ void DumpSQLTable( PTABLE table )
 	}
 	for( n = 0; n < table->keys.count; n++ )
 	{
-		lprintf( "Key %s", table->keys.key[n].name?table->keys.key[n].name:"<NONAME>" );
+		lprintf( WIDE( "Key %s" ), table->keys.key[n].name?table->keys.key[n].name:WIDE( "<NONAME>" ) );
 		for( m = 0; table->keys.key[n].colnames[m] && m < MAX_KEY_COLUMNS; m++ )
 		{
-			lprintf( "Key part = %s"
+			lprintf( WIDE( "Key part = %s" )
 					 , ( (POINTER)table->keys.key[n].colnames[m] )
 					 );
 		}
@@ -1272,7 +1272,7 @@ retry:
 				// all read, but one row at a time is read from the database.
 				if( !retry )
 				{
-					strcpy( cmd, WIDE("select * from `%s`") );
+					StrCpy( cmd, WIDE("select * from `%s`") );
 					retry++;
 					goto retry;
 				}
@@ -1298,13 +1298,13 @@ retry:
 							&&  strstr( table->fields.field[n].extra, "auto_increment" ) )
 						{
 							if( auto_increment_column )
-								lprintf( "SQLITE ERROR: Failure will happen - more than one auto_increment" );
+								lprintf( WIDE( "SQLITE ERROR: Failure will happen - more than one auto_increment" ) );
 							auto_increment_column = table->fields.field[n].name;
-							vtprintf( pvtCreate, WIDE("%s`%s` %s%s")
+							vtprintf( pvtCreate, WIDE( "%s`%s` %s%s" )
 									  , first?WIDE(""):WIDE(",")
 									  , table->fields.field[n].name
-									  , "INTEGER" //table->fields.field[n].type
-									  , " PRIMARY KEY"
+									  , WIDE( "INTEGER" ) //table->fields.field[n].type
+									  , WIDE( " PRIMARY KEY" )
 									  );
 						}
 						else
@@ -1312,12 +1312,12 @@ retry:
 							CTEXTSTR unsigned_word;
 							if(  table->fields.field[n].extra
 								&& (unsigned_word=StrStr( table->fields.field[n].extra
-								                        , "unsigned" )) )
+								                        , WIDE( "unsigned" ) )) )
 							{
 								TEXTSTR extra = StrDup( table->fields.field[n].extra );
 								int len = StrLen( unsigned_word + 8 ); 
 								// use same buffer allocated to write into...
-								snprintf( extra, strlen( table->fields.field[n].extra ), "%*.*s%*.*s"
+								snprintf( extra, strlen( table->fields.field[n].extra ), WIDE( "%*.*s%*.*s" )
 								       , (int)(unsigned_word-table->fields.field[n].extra)
 								       , (int)(unsigned_word-table->fields.field[n].extra)
 									   , table->fields.field[n].extra
@@ -1367,12 +1367,12 @@ retry:
 							{
 								if( table->keys.key[n].colnames[1] )
 								{
-									lprintf( "SQLITE ERROR: Complex PRIMARY KEY promoting to UNIQUE" );
+									lprintf( WIDE( "SQLITE ERROR: Complex PRIMARY KEY promoting to UNIQUE" ) );
 									vtprintf( pvtCreate, WIDE("%sUNIQUE `primary` (")
 											  , first?WIDE(""):WIDE(",") );
 								}
 								if( strcmp( auto_increment_column, table->keys.key[n].colnames[0] ) )
-									lprintf( "SQLITE ERROR: auto_increment column was not the PRMIARY KEY" );
+									lprintf( WIDE( "SQLITE ERROR: auto_increment column was not the PRMIARY KEY" ) );
 								else
 								{
 									// ignore key
@@ -1470,7 +1470,7 @@ retry:
 				}
 				txt_cmd = VarTextGet( pvtCreate );
 				if( f_odbc )
-					fprintf( f_odbc, "%s;\n", GetText( txt_cmd ) );
+					fprintf( f_odbc, WIDE( "%s;\n" ), GetText( txt_cmd ) );
 				else
 					SQLCommand( odbc, GetText( txt_cmd ) );
 				LineRelease( txt_cmd );

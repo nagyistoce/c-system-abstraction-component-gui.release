@@ -169,7 +169,7 @@ FILEMONITOR_PROC( PMONITOR, MonitorFiles )( CTEXTSTR directory, int scan_delay )
     if( l.flags.bLog ) Log1( WIDE("Going to start monitoring changes to: %s"), directory );
     monitor = (PMONITOR)Allocate( sizeof( MONITOR ) );
     MemSet( monitor, 0, sizeof( MONITOR ) );
-	 strcpy( monitor->directory, directory );
+	 StrCpyEx( monitor->directory, directory, sizeof( monitor->directory )/sizeof(TEXTCHAR) );
 	 //strcpy( monitor->mask, mask );
 	 monitor->scan_delay = scan_delay;
     monitor->free_scan_delay = 5000;

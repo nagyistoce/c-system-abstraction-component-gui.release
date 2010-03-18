@@ -116,14 +116,14 @@ IMAGE_INTERFACE RealImageInterface = {
 												 , SetSpriteHotspot
 												 , SetSpritePosition
                                      , UnmakeSprite
-                                     , GetGlobalFonts
+//                                     , GetGlobalFonts
 };
 
 #undef GetImageInterface
 #undef DropImageInterface
 static POINTER CPROC _ImageGetImageInterface( void )
 {
-   RealImageInterface._global_font_data = GetGlobalFonts();
+   //RealImageInterface._global_font_data = GetGlobalFonts();
    return &RealImageInterface;
 }
 
@@ -153,7 +153,11 @@ PRIORITY_PRELOAD( ImageRegisterInterface, IMAGE_PRELOAD_PRIORITY )
 #ifdef SACK_BAG_EXPORTS
 #define NAME WIDE("image")
 #else
+#ifdef UNDER_CE
+#define NAME WIDE("image")
+#else
 #define NAME WIDE("real_image")
+#endif
 #endif
 
 	RegisterInterface( NAME, _ImageGetImageInterface, _ImageDropImageInterface );

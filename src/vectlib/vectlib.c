@@ -302,12 +302,12 @@ P_POINT project( P_POINT pr, PC_POINT onto, PC_POINT project )
 {
 #ifdef _MSC_VER
 	if( _isnan( pt->m[0][0] ) )
-		lprintf( "blah" );
+		lprintf( WIDE( "blah" ) );
 #endif
 	SetPoint( pt->m[3], t );
 #ifdef _MSC_VER
 	if( _isnan( pt->m[0][0] ) )
-		lprintf( "blah" );
+		lprintf( WIDE( "blah" ) );
 #endif
 }
 
@@ -523,14 +523,14 @@ void RotateAroundMast( PTRANSFORM pt, RCOORD amount )
 #ifdef _MSC_VER
 	if( _isnan( pt->m[0][0] ) )
 	{
-		lprintf( "blah" );
+		lprintf( WIDE( "blah" ) );
 	}
 #endif
 	RotateYaw( pt->m, amount );
 #ifdef _MSC_VER
 	if( _isnan( pt->m[0][0] ) )
 	{
-		lprintf( "blah" );
+		lprintf( WIDE( "blah" ) );
 	}
 #endif
 
@@ -662,7 +662,7 @@ REALFUNC( Apply, ( PCTRANSFORM pt, P_POINT dest, PC_POINT src ), (pt, dest, src 
 	}
 #ifdef _MSC_VER
 	if( _isnan( t.m[0][0] ) )
-		lprintf( "blah" );
+		lprintf( WIDE( "blah" ) );
 #endif
    MemCpy( ptd->m, t.m, sizeof( t.m ) );
 }
@@ -786,7 +786,7 @@ void InvokeCallbacks( PTRANSFORM pt )
       callback( (PTRSZVAL)GetLink( &pt->userdata, idx ), pt );
 	#ifdef _MSC_VER
 	if( _isnan( pt->m[0][0] ) )
-		lprintf( "blah" );
+		lprintf( WIDE( "blah" ) );
 #endif
 }
 }
@@ -810,7 +810,7 @@ void InvokeCallbacks( PTRANSFORM pt )
 	if( _isnan( pt->m[0][0] ) )
 	{
 		return;
-		lprintf( "blah" );
+		lprintf( WIDE( "blah" ) );
 	}
 #endif
 	{
@@ -833,7 +833,7 @@ void InvokeCallbacks( PTRANSFORM pt )
 						static _64 now_cpu;
 						_64 delta_cpu = ( last_tick_cpu - (now_cpu = GetCPUTick() ) )
 							- ( ( now - tick_cpu ) * tick_freq_cpu );
-						RCOORD delta2 = ( delta_cpu * 1000 ) / ( tick_freq_cpu * 33 );
+						RCOORD delta2 = ( (RCOORD)delta_cpu * 1000 ) / ( (RCOORD)tick_freq_cpu * 33 );
 						pt->time_scale = ONE / (RCOORD)( delta2 );
 			//					//);
 						tick_cpu = now;
@@ -853,9 +853,9 @@ void InvokeCallbacks( PTRANSFORM pt )
 					// scalar would be 2
 					pt->time_scale = ( ONE * (RCOORD)delta2 );
 					if( pt->time_scale < 6e-14 )
-						lprintf( "Blah" );
+						lprintf( WIDE( "Blah" ) );
 					//* target * delta/(1000/30)*/) ) * (1024.0f);
-					//lprintf( "scalar is %g %d", scalar, delta );
+					//lprintf( WIDE( "scalar is %g %d" ), scalar, delta );
 
 				}
 				pt->last_tick = now;
@@ -870,7 +870,7 @@ void InvokeCallbacks( PTRANSFORM pt )
 	}
 #ifdef _MSC_VER
 	if( _isnan( pt->m[0][0] ) )
-		lprintf( "blah" );
+		lprintf( WIDE( "blah" ) );
 #endif
 	//add( v, pt->speed, pt->accel );
 	addscaled( pt->speed, pt->speed, pt->accel, pt->time_scale );
@@ -887,30 +887,30 @@ void InvokeCallbacks( PTRANSFORM pt )
 		+ v[2] * pt->m[2][2];
 #ifdef _MSC_VER
    	if( _isnan( pt->m[0][0] ) )
-			lprintf( "blah" );
+			lprintf( WIDE( "blah" ) );
 #endif
    // include time scale for rotation also...
 	if( pt->rotation[0] || pt->rotation[1] || pt->rotation[2] )
 	{
 		VECTOR  r;
-		//lprintf( WIDE("Time scale is not applied") );
+		//lprintf( WIDE(WIDE( "Time scale is not applied" )) );
 		addscaled( pt->rotation, pt->rotation, pt->rot_accel, pt->time_scale );
 		scale( r, pt->rotation, pt->time_scale );
 
 		RotateRelV( pt, r );
 #ifdef _MSC_VER
    	if( _isnan( pt->m[0][0] ) )
-			lprintf( "blah" );
+			lprintf( WIDE( "blah" ) );
 #endif
 	}
 #ifdef _MSC_VER
 	if( _isnan( pt->m[0][0] ) )
-		lprintf( "blah" );
+		lprintf( WIDE( "blah" ) );
 #endif
 	InvokeCallbacks( pt );
 #ifdef _MSC_VER
 	if( _isnan( pt->m[0][0] ) )
-		lprintf( "blah" );
+		lprintf( WIDE( "blah" ) );
 #endif
 }
 
@@ -1107,22 +1107,22 @@ void GetGLMatrix( PTRANSFORM pt, PMATRIX out )
 #define SPRINTF sprintf
 #else
 #define PRINTF lprintf
-#define SPRINTF sprintf
+#define SPRINTF(a,b,...) snprintf(a,sizeof(a),b,##__VA_ARGS__)
 #endif
 
 
-void PrintVectorEx( char *lpName, PCVECTOR v DBG_PASS )
+void PrintVectorEx( TEXTCHAR *lpName, PCVECTOR v DBG_PASS )
 {
    _xlprintf( 1 DBG_RELAY )( WIDE("Vector  %s = <%lg, %lg, %lg> %lg"),
             lpName, v[0], v[1], v[2], Length( v ) );
 }
 #undef PrintVector
-void PrintVector( char *lpName, PCVECTOR v )
+void PrintVector( TEXTCHAR *lpName, PCVECTOR v )
 {
    PrintVectorEx( lpName, v DBG_SRC );
 }
 
- void PrintVectorStdEx( char *lpName, VECTOR v DBG_PASS )
+ void PrintVectorStdEx( TEXTCHAR *lpName, VECTOR v DBG_PASS )
 {
    TEXTCHAR byBuffer[256];
    SPRINTF( byBuffer, WIDE("Vector  %s = <%lg, %lg, %lg> %lg\n"),
@@ -1131,19 +1131,19 @@ void PrintVector( char *lpName, PCVECTOR v )
 }
 
 #undef PrintVectorStd
- void PrintVectorStd( char *lpName, VECTOR v )
+ void PrintVectorStd( TEXTCHAR *lpName, VECTOR v )
 {
    PrintVectorStdEx( lpName, v DBG_SRC );
 }
 
 #undef PrintMatrix
-void PrintMatrix( char *lpName, MATRIX m )
+void PrintMatrix( TEXTCHAR *lpName, MATRIX m )
 #define PrintMatrix(m) PrintMatrix( #m, m )
 {
    PrintMatrixEx( lpName, m DBG_SRC );
 }
 
-void PrintMatrixEx( char *lpName, MATRIX m DBG_PASS )
+void PrintMatrixEx( TEXTCHAR *lpName, MATRIX m DBG_PASS )
 {
    _xlprintf( 1 DBG_RELAY )( WIDE("Vector  %s = <%lg, %lg, %lg, %lg> %lg"),
             lpName, m[0][0], m[0][1], m[0][2], m[0][3], Length( m[0] ) );
@@ -1156,11 +1156,11 @@ void PrintMatrixEx( char *lpName, MATRIX m DBG_PASS )
    {
 	   VECTOR v;
 	   crossproduct( v, m[1], m[2] );
-	   PrintVector( "cross1", v );
+	   PrintVector( WIDE( "cross1" ), v );
 	   crossproduct( v, m[2], m[0] );
-	   PrintVector( "cross2", v );
+	   PrintVector( WIDE( "cross2" ), v );
 	   crossproduct( v, m[0], m[1] );
-	   PrintVector( "cross3", v );
+	   PrintVector( WIDE( "cross3" ), v );
    }
 }
 

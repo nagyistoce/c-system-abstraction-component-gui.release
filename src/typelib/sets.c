@@ -44,7 +44,7 @@ void DeleteSet( GENERICSET **ppSet )
  	if( !ppSet )
  		return;
  	pSet = *ppSet;
-	if( bLog ) lprintf( "Deleted set %p", pSet );
+	if( bLog ) lprintf( WIDE( "Deleted set %p" ), pSet );
 	while( pSet )
 	{
 		GENERICSET *next;
@@ -141,7 +141,7 @@ PGENERICSET GetFromSetPoolEx( GENERICSET **pSetSet, int setsetsizea, int setunit
 				set = set->next;
 		}
 	}
-	if( bLog ) _lprintf( DBG_RELAY )( "Unit result: %p", unit );
+	if( bLog ) _lprintf( DBG_RELAY )( WIDE( "Unit result: %p" ), unit );
 	return (PGENERICSET)unit;
 }
 
@@ -195,7 +195,7 @@ static POINTER GetSetMemberExx( GENERICSET **pSet, INDEX nMember, int setsize, i
 		(*bUsed) = 0;
 	else
 		(*bUsed) = 1;
-   if( bLog ) _lprintf(DBG_RELAY)( "Resulting unit %p",  ((PTRSZVAL)(set->bUsed))
+   if( bLog ) _lprintf(DBG_RELAY)( WIDE( "Resulting unit %p" ),  ((PTRSZVAL)(set->bUsed))
 						+ ( ( (maxcnt +31) / 32 ) * 4 ) // skip over the bUsed bitbuffer
 						+ nMember * unitsize );
 	return (void*)( ((PTRSZVAL)(set->bUsed))
@@ -296,7 +296,7 @@ void DeleteFromSetExx( GENERICSET *pSet, void *unit, int unitsize, int max DBG_P
 	if( bLog ) _lprintf(DBG_RELAY)( WIDE("Deleting from  %p of %p "), pSet, unit );
 	while( pSet )
 	{
-		if( bLog ) lprintf( "range to check is %p(%d) to %p(%d)"
+		if( bLog ) lprintf( WIDE( "range to check is %p(%d) to %p(%d)" )
 				 ,	  ((PTRSZVAL)(pSet->bUsed) + ofs )
 			     ,(nUnit >= ((PTRSZVAL)(pSet->bUsed) + ofs ))
 				  , ((PTRSZVAL)(pSet->bUsed) + ofs + unitsize*max )

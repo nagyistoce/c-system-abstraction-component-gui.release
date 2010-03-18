@@ -766,9 +766,9 @@
       slash       = original_name;
       new_name[0] = '\0';
     }
-
-    ft_strcat( new_name, insertion );
-    ft_strcat( new_name, slash );
+	snprintf( new_name, new_length + 1, "%s%s", insertion, slash );
+    //ft_strcat( new_name, insertion );
+    //ft_strcat( new_name, slash );
 
     return new_name;
   }

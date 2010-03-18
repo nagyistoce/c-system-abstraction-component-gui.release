@@ -31,7 +31,7 @@ PSI_PROC( void, SetFrameInitProc )( PCOMMON pFrame, ControlInitProc InitProc, PT
 TEXTCHAR *GetBorderTypeString( _32 BorderType )
 {
 	static TEXTCHAR string[256];
-   sprintf( string, WIDE("0x%")_32fX WIDE(""), BorderType );
+   snprintf( string, sizeof( string ), WIDE("0x%")_32fX WIDE(""), BorderType );
    return string;
 }
 

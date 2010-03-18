@@ -1897,7 +1897,7 @@
       if ( bdf_get_font_property( p->font, "FONT_ASCENT" ) == 0 )
       {
         p->font->font_ascent = p->font->bbx.ascent;
-        ft_sprintf( nbuf, "%hd", p->font->bbx.ascent );
+        snprintf( nbuf, sizeof( nbuf ), "%hd", p->font->bbx.ascent );
         error = _bdf_add_property( p->font, (char *)"FONT_ASCENT", nbuf );
         if ( error )
           goto Exit;
@@ -1909,7 +1909,7 @@
       if ( bdf_get_font_property( p->font, "FONT_DESCENT" ) == 0 )
       {
         p->font->font_descent = p->font->bbx.descent;
-        ft_sprintf( nbuf, "%hd", p->font->bbx.descent );
+        snprintf( nbuf, sizeof( nbuf ), "%hd", p->font->bbx.descent );
         error = _bdf_add_property( p->font, (char *)"FONT_DESCENT", nbuf );
         if ( error )
           goto Exit;

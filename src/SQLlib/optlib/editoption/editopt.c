@@ -119,20 +119,20 @@ PUBLIC( int, InitOptionList )( PTRSZVAL psv, PCONTROL pc, _32 ID )
 
 static void CPROC OptionSelectionChanged( PTRSZVAL psvUser, PCONTROL pc, PLISTITEM hli )
 {
-   char buffer[512];
+	char buffer[512];
 	PNODE_DATA pnd = (PNODE_DATA)GetItemData( hli );
 	last_option = pnd->ID_Option;
-   last_node = pnd;
+	last_node = pnd;
 	if( pnd->ID_Value != INVALID_INDEX )
 	{
-      lprintf( WIDE("Set value to real value.") );
+		lprintf( WIDE("Set value to real value.") );
 		GetOptionStringValue( pnd->ID_Value, buffer, sizeof( buffer ) );
-      strcpy( last_value, buffer );
+		StrCpy( last_value, buffer );
 		SetCommonText( GetNearControl( pc, EDT_OPTIONVALUE ), buffer );
 	}
 	else
 	{
-      lprintf( WIDE("Set to blank value - no value on branch.") );
+		lprintf( WIDE("Set to blank value - no value on branch.") );
 		last_value[0] = 0;
 		SetCommonText( GetNearControl( pc, EDT_OPTIONVALUE ), WIDE("") );
 	}

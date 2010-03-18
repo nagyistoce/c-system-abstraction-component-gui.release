@@ -46,6 +46,10 @@
 #define SACK_SYSTEM_NAMESPACE_END
 #endif
 
+#ifndef UNDER_CE
+#define HAVE_ENVIRONMENT
+#endif
+
 SACK_SYSTEM_NAMESPACE
 
 typedef struct task_info_tag *PTASK_INFO;
@@ -64,12 +68,23 @@ SYSTEM_PROC( PTASK_INFO, LaunchPeerProgramExx )( CTEXTSTR program, CTEXTSTR path
 																DBG_PASS
 															  );
 
-SYSTEM_PROC( PTASK_INFO, LaunchProgramEx )( CTEXTSTR program, CTEXTSTR path, PCTEXTSTR args, TaskEnd EndNotice, PTRSZVAL psv );
-SYSTEM_PROC( PTASK_INFO, LaunchProgram )( CTEXTSTR program, CTEXTSTR path, PCTEXTSTR  args );
+SYSTEM_PROC( PTASK_INFO, LaunchProgramEx )( CTEXTSTR program, TEXTSTR path, PCTEXTSTR args, TaskEnd EndNotice, PTRSZVAL psv );
+SYSTEM_PROC( PTASK_INFO, LaunchProgram )( CTEXTSTR program, TEXTSTR path, PCTEXTSTR  args );
 SYSTEM_PROC( PTRSZVAL, TerminateProgram )( PTASK_INFO task );
 SYSTEM_PROC( void, SetProgramUserData )( PTASK_INFO task, PTRSZVAL psv );
-SYSTEM_PROC( LOGICAL, StopProgram )( PTASK_INFO task ); // generate a Ctrl-C to the task.
+
+// generate a Ctrl-C to the task.
+// maybe also signal systray icon
+// maybe also signal process.lock region
+// maybe end process?
+// maybe then terminate process?
+SYSTEM_PROC( LOGICAL, StopProgram )( PTASK_INFO task ); 
+
+// ctextstr as its own type is a pointer so a
+//  PcTextStr is a pointer to strings -
+//   char ** - returns a quoted string if args have spaces (and escape quotes in args?)
 SYSTEM_PROC( TEXTSTR, GetArgsString )( PCTEXTSTR pArgs );
+
 SYSTEM_PROC( _32, GetTaskExitCode )( PTASK_INFO task );
 
 
@@ -96,15 +111,16 @@ SYSTEM_PROC( generic_function, LoadPrivateFunctionEx )( CTEXTSTR libname, CTEXTS
 // this is a pointer pointer - being that generic_fucntion is
 // a pointer...
 SYSTEM_PROC( int, UnloadFunctionEx )( generic_function* DBG_PASS );
+#ifdef HAVE_ENVIRONMENT
 SYSTEM_PROC( CTEXTSTR, OSALOT_GetEnvironmentVariable )(CTEXTSTR name);
 SYSTEM_PROC( void, OSALOT_AppendEnvironmentVariable )(CTEXTSTR name, CTEXTSTR value);
 SYSTEM_PROC( void, OSALOT_PrependEnvironmentVariable )(CTEXTSTR name, CTEXTSTR value);
-
+#endif
 /* this needs to have 'GetCommandLine()' passed to it.
  * Otherwise, the command line needs to have the program name, and arguments passed in the string
  * the parameter to winmain has the program name skipped
  */
-SYSTEM_PROC( void, ParseIntoArgs )( char *lpCmdLine, int *pArgc, char ***pArgv );
+SYSTEM_PROC( void, ParseIntoArgs )( TEXTCHAR *lpCmdLine, int *pArgc, TEXTCHAR ***pArgv );
 
 #define UnloadFunction(p) UnloadFunctionEx(p DBG_SRC )
 

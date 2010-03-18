@@ -67,12 +67,12 @@ DEADSTART_PROC( void, MarkRootDeadstartComplete )( void );
 DEADSTART_PROC( void, DispelDeadstart )( void );
 #endif
 
-#if defined( __cplusplus) || defined( _WIN64 )
+#if ( defined( __cplusplus) || defined( _WIN64 ) ) && 0 
 
 #define PRIORITY_PRELOAD(name,priority) static void name(void); \
    static class schedule_##name {   \
      public:schedule_##name() {    \
-	RegisterPriorityStartupProc( name,#name,priority,(void*)this,__FILE__,__LINE__ );\
+	RegisterPriorityStartupProc( name,#name,priority,(void*)this,WIDE__FILE__,__LINE__ );\
 	  }  \
 	} do_schedul_##name;     \
 	static void name(void)
@@ -86,14 +86,14 @@ DEADSTART_PROC( void, DispelDeadstart )( void );
 #define ATEXIT_PRIORITY(name,priority) static void name(void); \
    static class schedule_##name {   \
      public:schedule_##name() {    \
-	RegisterPriorityShutdownProc( name,#name,priority,(void*)this,__FILE__,__LINE__ );\
+	RegisterPriorityShutdownProc( name,#name,priority,(void*)this,WIDE__FILE__,__LINE__ );\
 	  }  \
 	} do_schedul_##name;     \
 	static void name(void)
 #define PRIORITY_ATEXIT(name,priority) static void name(void); \
    static class shutdown_##name {   \
 	public:shutdown_##name() {    \
-   RegisterPriorityShutdownProc( name,#name,priority,(void*)this,__FILE__,__LINE__ );\
+   RegisterPriorityShutdownProc( name,#name,priority,(void*)this,WIDE__FILE__,__LINE__ );\
 	/*name(); / * call on destructor of static object.*/ \
 	  }  \
 	} do_shutdown_##name;     \
@@ -139,13 +139,13 @@ struct rt_init // structure placed in XI/YI segment
 #define PRIORITY_PRELOAD(name,priority) static void schedule_##name(void); static void name(void); \
 	static struct rt_init __based(__segname("XI")) name##_ctor_label={0,(DEADSTART_PRELOAD_PRIORITY-1),schedule_##name}; \
 	static void schedule_##name(void) {                 \
-	RegisterPriorityStartupProc( name,#name,priority,&name##_ctor_label,__FILE__,__LINE__ );\
+	RegisterPriorityStartupProc( name,#name,priority,&name##_ctor_label,WIDE__FILE__,__LINE__ );\
 	}                                       \
 	static void name(void)
 #define ATEXIT_PRIORITY(name,priority) static void schedule_exit_##name(void); static void name(void); \
 	static struct rt_init __based(__segname("XI")) name##_dtor_label={0,69,schedule_exit_##name}; \
 	static void schedule_exit_##name(void) {                                              \
-	RegisterPriorityShutdownProc( name,#name,priority,&name##_dtor_label,__FILE__,__LINE__ );\
+	RegisterPriorityShutdownProc( name,#name,priority,&name##_dtor_label,WIDE__FILE__,__LINE__ );\
 	}                                       \
 	static void name(void)
 
@@ -235,7 +235,7 @@ struct rt_init // structure placed in XI/YI segment
 #define PRIORITY_PRELOAD(name,priority) static void name(void); \
    static class schedule_##name {   \
      public:schedule_##name() {    \
-	        RegisterPriorityStartupProc( name,#name,priority,this,__FILE__,__LINE__ );\
+	        RegisterPriorityStartupProc( name,#name,priority,this,WIDE__FILE__,__LINE__ );\
     }\
 	} do_schedul_##name;     \
 	static void name(void)
@@ -248,7 +248,7 @@ struct rt_init // structure placed in XI/YI segment
 #define ATEXIT_PRIORITY(name,priority) static void name(void); \
    static class schedule_##name {   \
      public:schedule_##name() {    \
-        RegisterPriorityShutdownProc( name,#name,priority,this,__FILE__,__LINE__ ); \
+        RegisterPriorityShutdownProc( name,#name,priority,this,WIDE__FILE__,__LINE__ ); \
       }\
 	} do_schedul_##name;     \
 	static void name(void)
@@ -260,7 +260,7 @@ struct rt_init // structure placed in XI/YI segment
 	  __attribute__((section("deadstart_list"))) \
 	={0,0,pr INIT_PADDING    \
 	 ,__LINE__,name         \
-	 ,__FILE__        \
+	 ,WIDE__FILE__        \
 	,#name        \
 	JUNKINIT(name)}; \
 	static void name(void)
@@ -269,7 +269,7 @@ typedef void(*atexit_priority_proc)(void (*)(void),CTEXTSTR,int,CTEXTSTR,int);
 #define PRIORITY_ATEXIT(name,priority) static void name(void); static void atexit##name(void) __attribute__((constructor));  \
 void atexit##name(void)                                                  \
 {                                                                        \
-	RegisterPriorityShutdownProc(name,#name,priority,NULL,__FILE__,__LINE__);                          \
+	RegisterPriorityShutdownProc(name,#name,priority,NULL,WIDE__FILE__,__LINE__);                          \
 }                                                                          \
 void name(void)
 #endif
@@ -346,7 +346,7 @@ struct rt_init // structure placed in XI/YI segment
 	mod=LoadLibrary(myname);DebugBreak();if(mod){\
    typedef void (*x)(void);void(*rsp)( x,const CTEXTSTR,int,const CTEXTSTR,int); \
 	if((rsp=((void(*)(void(*)(void),const CTEXTSTR,int,const CTEXTSTR,int))(GetProcAddress( mod, WIDE("RegisterPriorityStartupProc"))))))\
-	{rsp( name,#name,priority,__FILE__,__LINE__ );}}\
+	{rsp( name,#name,priority,WIDE__FILE__,__LINE__ );}}\
      FreeLibrary( mod); \
     }\
 	} do_schedul_##name;     \
@@ -364,7 +364,7 @@ struct rt_init // structure placed in XI/YI segment
 	mod=LoadLibrary(myname);if(mod){\
    typedef void (*x)(void);void(*rsp)( x,const CTEXTSTR,int,const CTEXTSTR,int); \
 	if((rsp=((void(*)(void(*)(void),const CTEXTSTR,int,const CTEXTSTR,int))(GetProcAddress( mod, WIDE("RegisterPriorityShutdownProc"))))))\
-	{rsp( name,#name,priority,__FILE__,__LINE__ );}}\
+	{rsp( name,#name,priority,WIDE__FILE__,__LINE__ );}}\
      FreeLibrary( mod); \
       }\
 	} do_schedul_##name;     \
@@ -381,8 +381,8 @@ void atexit##name(void)                                                  \
 	mod=LoadLibrary(myname);if(mod){\
    typedef void (*x)(void);void(*rsp)( x,const CTEXTSTR,int,const CTEXTSTR,int); \
 	if((rsp=((void(*)(void(*)(void),const CTEXTSTR,int,const CTEXTSTR,int))(GetProcAddress( mod, WIDE("RegisterPriorityShutdownProc"))))))\
-	 {rsp( name,#name,priority,__FILE__,__LINE__ );}\
-	 else atexit_failed##name(name,priority,#name,__FILE__,__LINE__);        \
+	 {rsp( name,#name,priority,WIDE__FILE__,__LINE__ );}\
+	 else atexit_failed##name(name,priority,#name,WIDE__FILE__,__LINE__);        \
 	}\
      FreeLibrary( mod); \
 	}             \
@@ -393,7 +393,7 @@ void name( void) \
 	  __attribute__((section("deadstart_list"))) \
 	={0,0,pr INIT_PADDING    \
 	 ,__LINE__,name         \
-	 ,__FILE__        \
+	 ,WIDE__FILE__        \
 	,#name        \
 	JUNKINIT(name)}; \
 	static void name(void)
@@ -459,7 +459,7 @@ void name( void) \
 
 #define PRIORITY_PRELOAD(name,priority) static void name(void); \
 	static int schedule_##name(void) {                 \
-	RegisterPriorityStartupProc( name,#name,priority,0/*chance to use label to reference*/,__FILE__,__LINE__ );\
+	RegisterPriorityStartupProc( name,WIDE(#name),priority,0/*chance to use label to reference*/,WIDE__FILE__,__LINE__ );\
 	return 0; \
 	}                                       \
 	/*static __declspec(allocate(_STARTSEG_)) void (CPROC*pointer_##name)(void) = schedule_##name;*/ \
@@ -470,7 +470,7 @@ void name( void) \
 #define ATEXIT_PRIORITY(name,priority) static void schedule_exit_##name(void); static void name(void); \
 	static struct rt_init __based(__segname("XI")) name##_dtor_label={0,69,schedule_exit_##name}; \
 	static void schedule_exit_##name(void) {                                              \
-	RegisterPriorityShutdownProc( name,#name,priority,&name##_dtor_label,__FILE__,__LINE__ );\
+	RegisterPriorityShutdownProc( name,#name,priority,&name##_dtor_label,WIDE__FILE__,__LINE__ );\
 	}                                       \
 */
 
@@ -493,8 +493,8 @@ void atexit##name(void)                                                  \
 	/*lprintf( WIDE("Do pr_atexit %s"), #name ); */                             \
 	f=(atexit_priority_proc)GetProcAddress( hMod = LoadLibrary( NULL )    \
 										  , WIDE("RegisterShutdownProc") );              \
-	if(f) f(name,priority,#name,__FILE__,__LINE__);                          \
-	else atexit_failed##name(name,priority,#name,__FILE__,__LINE__);        \
+	if(f) f(name,priority,WIDE(#name),WIDE__FILE__,__LINE__);                          \
+	else atexit_failed##name(name,priority,WIDE(#name),WIDE__FILE__,__LINE__);        \
    FreeLibrary(hMod); /*optional*/                                         \
 }                                                                          \
 void name(void)

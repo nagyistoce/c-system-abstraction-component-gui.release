@@ -7,7 +7,9 @@
 #include <system.h>
 #include <idle.h>
 #ifdef __WINDOWS__
+#ifndef UNDER_CE
 #include <io.h> // unlink
+#endif
 // need PVIDEO internals, so we can generate kind-close keystrokes
 #include <vidlib/vidstruc.h>
 #endif
@@ -72,12 +74,13 @@ LOGICAL MainCanvasStillHidden( void )
 	{
       yes = TRUE;
 	}
-	lprintf( "Still hidden is %s", yes?"yes":"no" );
+	lprintf( WIDE("Still hidden is %s"), yes?WIDE("yes"):WIDE("no") );
    return yes;
 }
 
 
 #ifdef __WINDOWS__
+#ifndef UNDER_CE
 DEVMODE devmode; // the original mode that this as called with
 /* Utility routine for SetResolution */
 static void SetWithFindMode( LPDEVMODE mode, int bRestoreOnCrash )
@@ -99,7 +102,7 @@ static void SetWithFindMode( LPDEVMODE mode, int bRestoreOnCrash )
 		)
 	{
 
-		lprintf( "Found mode: %d %dx%d %d @%d"
+		lprintf( WIDE("Found mode: %d %dx%d %d @%d")
 				 , idx
 				 , check.dmPelsWidth
 				 , check.dmPelsHeight
@@ -124,14 +127,14 @@ static void SetWithFindMode( LPDEVMODE mode, int bRestoreOnCrash )
 						   check.dmDisplayFrequency == 1
 						  )
 						{
-							lprintf( " ---- Updating best to current ---- " );
+							lprintf( WIDE(" ---- Updating best to current ---- ") );
 							best = check;
 						}
 					}
 				}
 				else
 				{
-					lprintf( " ---- Updating best to ccheck ---- " );
+					lprintf( WIDE(" ---- Updating best to ccheck ---- ") );
 					best = check;
 					best_set = 1;
 				}
@@ -163,57 +166,57 @@ static void SetWithFindMode( LPDEVMODE mode, int bRestoreOnCrash )
 																		  )) != DISP_CHANGE_SUCCESSFUL ) {
 				if( best_set && ( result == DISP_CHANGE_RESTART ) )
 				{
-               //system( "rebootnow.exe" );
-					//SimpleMessageBox( NULL, "Restart?", "Must RESTART for Resolution change to apply :(" );
-					lprintf( "Result indicates Forced Restart to change modes." );
+               //system( WIDE("rebootnow.exe") );
+					//SimpleMessageBox( NULL, WIDE("Restart?"), WIDE("Must RESTART for Resolution change to apply :(") );
+					lprintf( WIDE("Result indicates Forced Restart to change modes.") );
 					break;
 				}
 				mode->dmBitsPerPel = 32;
-				lprintf( "Last failure %d %d", result, GetLastError() );
+				lprintf( WIDE("Last failure %d %d"), result, GetLastError() );
 				if ( (result=ChangeDisplaySettings(mode
 															 , flags // on program exit/original mode is restored.
 															 )) != DISP_CHANGE_SUCCESSFUL ) {
 					if( result == DISP_CHANGE_RESTART )
 					{
-						//SimpleMessageBox( NULL, "Restart?", "Must RESTART for Resolution change to apply :(" );
-						lprintf( "Result indicates Forced Restart to change modes." );
+						//SimpleMessageBox( NULL, WIDE("Restart?"), WIDE("Must RESTART for Resolution change to apply :(") );
+						lprintf( WIDE("Result indicates Forced Restart to change modes.") );
                   break;
 					}
 					mode->dmBitsPerPel = 24;
-					lprintf( "Last failure %d %d", result, GetLastError() );
+					lprintf( WIDE("Last failure %d %d"), result, GetLastError() );
 					if ( (result=ChangeDisplaySettings(mode
 																 , flags // on program exit/original mode is restored.
 																 )) != DISP_CHANGE_SUCCESSFUL ) {
 						if( result == DISP_CHANGE_RESTART )
 						{
-							//SimpleMessageBox( NULL, "Restart?", "Must RESTART for Resolution change to apply :(" );
-							lprintf( "Result indicates Forced Restart to change modes." );
+							//SimpleMessageBox( NULL, WIDE("Restart?"), WIDE("Must RESTART for Resolution change to apply :(") );
+							lprintf( WIDE("Result indicates Forced Restart to change modes.") );
 							break;
 						}
 						mode->dmBitsPerPel = 16;
-						lprintf( "Last failure %d %d", result, GetLastError() );
+						lprintf( WIDE("Last failure %d %d"), result, GetLastError() );
 						if ( (result=ChangeDisplaySettings(mode
 														, flags // on program exit/original mode is restored.
 																	 )) != DISP_CHANGE_SUCCESSFUL ) {
 
 							if( result == DISP_CHANGE_RESTART )
 							{
-								//SimpleMessageBox( NULL, "Restart?", "Must RESTART for Resolution change to apply :(" );
-								lprintf( "Result indicates Forced Restart to change modes." );
+								//SimpleMessageBox( NULL, WIDE("Restart?"), WIDE("Must RESTART for Resolution change to apply :(") );
+								lprintf( WIDE("Result indicates Forced Restart to change modes.") );
 								break;
 							}
 							//char msg[256];
-							lprintf( WIDE("Failed to change resolution to %d by %d (16,24 or 32 bit) %d %d")
+							lprintf( WIDE(WIDE("Failed to change resolution to %d by %d (16,24 or 32 bit) %d %d"))
 									 , mode->dmPelsWidth
 									 , mode->dmPelsHeight
 									 , result
 									 , GetLastError() );
 							//MessageBox( NULL, msg
-							//			 , WIDE("Resolution Failed"), MB_OK );
+							//			 , WIDE(WIDE("Resolution Failed")), MB_OK );
 						}
 						else
 						{
-							lprintf( "Success setting 16 bit %d %d"
+							lprintf( WIDE("Success setting 16 bit %d %d")
 									 , mode->dmPelsWidth
 									 , mode->dmPelsHeight );
 							break;
@@ -221,7 +224,7 @@ static void SetWithFindMode( LPDEVMODE mode, int bRestoreOnCrash )
 					}
 					else
 					{
-						lprintf( "Success setting 24 bit %d %d"
+						lprintf( WIDE("Success setting 24 bit %d %d")
 								 , mode->dmPelsWidth
 								 , mode->dmPelsHeight );
 						break;
@@ -229,7 +232,7 @@ static void SetWithFindMode( LPDEVMODE mode, int bRestoreOnCrash )
 				}
 				else
 				{
-					lprintf( "Success setting 32 bit %d %d"
+					lprintf( WIDE("Success setting 32 bit %d %d")
 							 , mode->dmPelsWidth
 							 , mode->dmPelsHeight );
 					break;
@@ -237,7 +240,7 @@ static void SetWithFindMode( LPDEVMODE mode, int bRestoreOnCrash )
 			}
 			else
 			{
-				lprintf( "Success setting enumerated bestfit %d %d"
+				lprintf( WIDE("Success setting enumerated bestfit %d %d")
 						 , mode->dmPelsWidth
 						 , mode->dmPelsHeight );
 				break;
@@ -246,9 +249,11 @@ static void SetWithFindMode( LPDEVMODE mode, int bRestoreOnCrash )
 	}
 }
 #endif
+#endif
 
 void SetResolution( PLOAD_TASK task, _32 w, _32 h )
 {
+#ifndef UNDER_CE
 #ifdef __WINDOWS__
 	DEVMODE settings;
 	PPAGE_DATA page;
@@ -257,20 +262,20 @@ void SetResolution( PLOAD_TASK task, _32 w, _32 h )
 	{
 		if( task )
 		{
-         lprintf( "Adding task that hides the frame." );
+         lprintf( WIDE("Adding task that hides the frame.") );
 			AddLink( &l.tasks_that_hid_main_canvas, task );
 		}
       InterShell_Hide();
 	}
 	else
-      lprintf( "Failed to get current page?!" );
+      lprintf( WIDE("Failed to get current page?!") );
 	{
 		//_32 w, h;
       devmode.dmSize = sizeof( devmode );
       EnumDisplaySettings( NULL, ENUM_CURRENT_SETTINGS, &devmode );
 		//GetDisplaySize( &w, &h );
 		{
-			FILE *file = fopen( "last.resolution", "wb" );
+			FILE *file = fopen( WIDE("last.resolution"), WIDE("wb") );
 			if( file )
 			{
 				fwrite( &devmode, 1, sizeof( devmode ), file );
@@ -292,11 +297,12 @@ void SetResolution( PLOAD_TASK task, _32 w, _32 h )
    SetWithFindMode( &settings, TRUE /* we do want to restore on rpogram crahs */);
 
 #endif
+#endif
 }
-
 void ResetResolution( PLOAD_TASK task )
 {
-   lprintf( "RESET RESOLUTION" );
+   lprintf( WIDE("RESET RESOLUTION") );
+#ifndef UNDER_CE
 #ifdef __WINDOWS__
    if( task )
 	{
@@ -309,13 +315,15 @@ void ResetResolution( PLOAD_TASK task )
 	if( !task || task->flags.bLaunchAt )
 	{
       DEVMODE oldmode;
-		FILE *file = fopen( "last.resolution", "rb" );
+		FILE *file = fopen( WIDE("last.resolution"), WIDE("rb") );
 		if( file )
 		{
 			fread( &oldmode, 1, sizeof( oldmode ), file );
 			fclose( file );
 			SetWithFindMode( &oldmode, TRUE );
-			unlink( "last.resolution" );
+#ifndef UNDER_CE
+			unlink( WIDE("last.resolution") );
+#endif
 		}
 		else
 		{
@@ -323,17 +331,18 @@ void ResetResolution( PLOAD_TASK task )
 											  , 0 //CDS_FULLSCREEN // on program exit/original mode is restored.
 											  ) == DISP_CHANGE_SUCCESSFUL ) {
 
-				lprintf( "Success Reset Resolution" );
+				lprintf( WIDE("Success Reset Resolution") );
 			}
 			else
-            lprintf( "Fail reset resolution" );
+	            lprintf( WIDE("Fail reset resolution") );
 		}
 		//EnableCommonUpdates( page->frame, TRUE );
 		Sleep( 250 ); // give resolution a little time to settle...
 	}
 	InterShell_DisablePageUpdate( FALSE );
-	lprintf( "Calling InterShell_Reveal..." );
+	lprintf( WIDE("Calling InterShell_Reveal...") );
 	InterShell_Reveal();
+#endif
 #endif
 }
 
@@ -343,74 +352,76 @@ PRELOAD( RegisterTaskControls )
 	{
 		_32 w, h;
 		{
-			FILE *file = fopen( "last.resolution", "rb" );
+			FILE *file = fopen( WIDE("last.resolution"), WIDE("rb") );
 			if( file )
 			{
 				fread( &w, 1, sizeof( w ), file );
 				fread( &h, 1, sizeof( h ), file );
             fclose( file );
 				SetResolution( NULL, w, h );
-            unlink( "last.resolution" );
+#ifndef UNDER_CE
+            unlink( WIDE("last.resolution") );
+#endif
 			}
 		}
 	}
-   EasyRegisterResource( "InterShell/tasks", TXT_TASK_NAME, EDIT_FIELD_NAME );
-   EasyRegisterResource( "InterShell/tasks", TXT_TASK_PATH, EDIT_FIELD_NAME );
-   EasyRegisterResource( "InterShell/tasks", TXT_TASK_ARGS, EDIT_FIELD_NAME );
-   EasyRegisterResource( "InterShell/tasks", EDIT_TASK_LAUNCH_X, EDIT_FIELD_NAME );
-   EasyRegisterResource( "InterShell/tasks", EDIT_TASK_LAUNCH_Y, EDIT_FIELD_NAME );
-   EasyRegisterResource( "InterShell/tasks", LISTBOX_AUTO_TASKS          , LISTBOX_CONTROL_NAME );
-	EasyRegisterResource( "InterShell/tasks", BUTTON_EDIT_TASK_PROPERTIES , NORMAL_BUTTON_NAME );
-	EasyRegisterResource( "InterShell/tasks", BUTTON_CREATE_AUTO_TASK     , NORMAL_BUTTON_NAME );
-	EasyRegisterResource( "InterShell/tasks", BUTTON_DESTROY_AUTO_TASK     , NORMAL_BUTTON_NAME );
+   EasyRegisterResource( WIDE("InterShell/tasks"), TXT_TASK_NAME, EDIT_FIELD_NAME );
+   EasyRegisterResource( WIDE("InterShell/tasks"), TXT_TASK_PATH, EDIT_FIELD_NAME );
+   EasyRegisterResource( WIDE("InterShell/tasks"), TXT_TASK_ARGS, EDIT_FIELD_NAME );
+   EasyRegisterResource( WIDE("InterShell/tasks"), EDIT_TASK_LAUNCH_X, EDIT_FIELD_NAME );
+   EasyRegisterResource( WIDE("InterShell/tasks"), EDIT_TASK_LAUNCH_Y, EDIT_FIELD_NAME );
+   EasyRegisterResource( WIDE("InterShell/tasks"), LISTBOX_AUTO_TASKS          , LISTBOX_CONTROL_NAME );
+	EasyRegisterResource( WIDE("InterShell/tasks"), BUTTON_EDIT_TASK_PROPERTIES , NORMAL_BUTTON_NAME );
+	EasyRegisterResource( WIDE("InterShell/tasks"), BUTTON_CREATE_AUTO_TASK     , NORMAL_BUTTON_NAME );
+	EasyRegisterResource( WIDE("InterShell/tasks"), BUTTON_DESTROY_AUTO_TASK     , NORMAL_BUTTON_NAME );
 
-   EasyRegisterResource( "InterShell/tasks", CHECKBOX_RESTART            , RADIO_BUTTON_NAME );
-   EasyRegisterResource( "InterShell/tasks", CHECKBOX_EXCLUSIVE          , RADIO_BUTTON_NAME );
-   EasyRegisterResource( "InterShell/tasks", CHECKBOX_BACKGROUND         , RADIO_BUTTON_NAME );
-   EasyRegisterResource( "InterShell/tasks", CHECKBOX_LAUNCH_CALLER_READY, RADIO_BUTTON_NAME );
-	EasyRegisterResource( "InterShell/tasks", CHECKBOX_CALLER_WAIT        , RADIO_BUTTON_NAME );
-	EasyRegisterResource( "InterShell/tasks", CHECKBOX_ONE_TIME_LAUNCH    , RADIO_BUTTON_NAME );
-   EasyRegisterResource( "InterShell/tasks", CHECKBOX_CAPTURE_OUTPUT     , RADIO_BUTTON_NAME );
+   EasyRegisterResource( WIDE("InterShell/tasks"), CHECKBOX_RESTART            , RADIO_BUTTON_NAME );
+   EasyRegisterResource( WIDE("InterShell/tasks"), CHECKBOX_EXCLUSIVE          , RADIO_BUTTON_NAME );
+   EasyRegisterResource( WIDE("InterShell/tasks"), CHECKBOX_BACKGROUND         , RADIO_BUTTON_NAME );
+   EasyRegisterResource( WIDE("InterShell/tasks"), CHECKBOX_LAUNCH_CALLER_READY, RADIO_BUTTON_NAME );
+	EasyRegisterResource( WIDE("InterShell/tasks"), CHECKBOX_CALLER_WAIT        , RADIO_BUTTON_NAME );
+	EasyRegisterResource( WIDE("InterShell/tasks"), CHECKBOX_ONE_TIME_LAUNCH    , RADIO_BUTTON_NAME );
+   EasyRegisterResource( WIDE("InterShell/tasks"), CHECKBOX_CAPTURE_OUTPUT     , RADIO_BUTTON_NAME );
 
-	EasyRegisterResource( "InterShell/tasks", LISTBOX_ALLOW_RUN_ON    , LISTBOX_CONTROL_NAME );
-	EasyRegisterResource( "InterShell/tasks", EDIT_SYSTEM_NAME    , EDIT_FIELD_NAME );
-   EasyRegisterResource( "InterShell/tasks", BTN_ADD_SYSTEM     , NORMAL_BUTTON_NAME );
-   EasyRegisterResource( "InterShell/tasks", BTN_REMOVE_SYSTEM     , NORMAL_BUTTON_NAME );
-   EasyRegisterResource( "InterShell/tasks", EDIT_TASK_FRIENDLY_NAME, EDIT_FIELD_NAME );
+	EasyRegisterResource( WIDE("InterShell/tasks"), LISTBOX_ALLOW_RUN_ON    , LISTBOX_CONTROL_NAME );
+	EasyRegisterResource( WIDE("InterShell/tasks"), EDIT_SYSTEM_NAME    , EDIT_FIELD_NAME );
+   EasyRegisterResource( WIDE("InterShell/tasks"), BTN_ADD_SYSTEM     , NORMAL_BUTTON_NAME );
+   EasyRegisterResource( WIDE("InterShell/tasks"), BTN_REMOVE_SYSTEM     , NORMAL_BUTTON_NAME );
+   EasyRegisterResource( WIDE("InterShell/tasks"), EDIT_TASK_FRIENDLY_NAME, EDIT_FIELD_NAME );
 
 	{
 		l.shell = CreateTask( NULL );
 		l.shell->flags.bNonExclusive = 1;
-		StrCpy( l.shell->pName, "Command Shell" );
-		StrCpy( l.shell->pTask, "cmd.exe" );
-		StrCpy( l.shell->pPath, "." );
+		StrCpy( l.shell->pName, WIDE("Command Shell") );
+		StrCpy( l.shell->pTask, WIDE("cmd.exe") );
+		StrCpy( l.shell->pPath, WIDE(".") );
 	}
 	{
 		l.power_shell = CreateTask( NULL );
 		l.power_shell->flags.bNonExclusive = 1;
-		StrCpy( l.power_shell->pName, "Power Shell" );
-		StrCpy( l.power_shell->pTask, "%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\PowerShell.exe" );
-		StrCpy( l.power_shell->pPath, "." );
+		StrCpy( l.power_shell->pName, WIDE("Power Shell") );
+		StrCpy( l.power_shell->pTask, WIDE("%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\PowerShell.exe") );
+		StrCpy( l.power_shell->pPath, WIDE(".") );
 	}
 	{
 		l.power_shell_ise = CreateTask( NULL );
 		l.power_shell_ise->flags.bNonExclusive = 1;
-		StrCpy( l.power_shell_ise->pName, "Power Shell ISE" );
-		StrCpy( l.power_shell_ise->pTask, "%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\PowerShell_ise.exe" );
-		StrCpy( l.power_shell_ise->pPath, "." );
+		StrCpy( l.power_shell_ise->pName, WIDE("Power Shell ISE") );
+		StrCpy( l.power_shell_ise->pTask, WIDE("%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\PowerShell_ise.exe") );
+		StrCpy( l.power_shell_ise->pPath, WIDE(".") );
 	}
 	{
 		l.windows_shell = CreateTask( NULL );
 		l.windows_shell->flags.bNonExclusive = 1;
-		StrCpy( l.windows_shell->pName, "Explorer" );
-		StrCpy( l.windows_shell->pTask, "explorer.exe" );
-		StrCpy( l.windows_shell->pPath, "." );
+		StrCpy( l.windows_shell->pName, WIDE("Explorer") );
+		StrCpy( l.windows_shell->pTask, WIDE("explorer.exe") );
+		StrCpy( l.windows_shell->pPath, WIDE(".") );
 	}
 
 
 #if 0
 #define EasyAlias( x, y )   \
-	RegisterClassAlias( "psi/resources/intershell/tasks/"y"/"#x, "psi/resources/application/"y"/" #x )
+	RegisterClassAlias( WIDE("psi/resources/intershell/tasks/")y WIDE("/")WIDE(#x), WIDE("psi/resources/application/")y WIDE("/") WIDE(#x) )
    // migration path...
    EasyAlias( CHECKBOX_RESTART            , RADIO_BUTTON_NAME );
    EasyAlias( CHECKBOX_EXCLUSIVE          , RADIO_BUTTON_NAME );
@@ -426,7 +437,7 @@ PLOAD_TASK CPROC CreateTask( struct menu_button_tag *button )
 {
 	PLOAD_TASK task = New( LOAD_TASK );
 	MemSet( task, 0, sizeof( LOAD_TASK ) );
-	strcpy( task->pPath, WIDE(".") );
+	StrCpyEx( task->pPath, WIDE("."), sizeof( task->pPath )/sizeof(TEXTCHAR) );
 	task->spawns = CreateList();
 	LinkThing( l.tasklist, task );
    //task->button = button;
@@ -437,12 +448,12 @@ OnCreateMenuButton( WIDE("Task") )( struct menu_button_tag *button )
 {
 	PLOAD_TASK task = New( LOAD_TASK );
 	MemSet( task, 0, sizeof( LOAD_TASK ) );
-	strcpy( task->pPath, WIDE(".") );
+	StrCpyEx( task->pPath, WIDE("."), sizeof( task->pPath )/sizeof(TEXTCHAR) );
 	task->spawns = CreateList();
 	task->flags.bButton = 1;
 	LinkThing( l.tasklist, task );
 	task->button = button;
-	InterShell_SetButtonStyle( button, "bicolor square" );
+	InterShell_SetButtonStyle( button, WIDE("bicolor square") );
 	return (PTRSZVAL)task;
 }
 //---------------------------------------------------------------------------
@@ -491,9 +502,9 @@ char *GetTaskArgs( PLOAD_TASK pTask )
 	for( n = 1; pTask->pArgs && pTask->pArgs[n]; n++ )
 	{
 		if( StrChr( pTask->pArgs[n], ' ' ) )
-			len += snprintf( args + len, sizeof( args ) - len , WIDE("%s\"%s\""), n>1?" ":"", pTask->pArgs[n] );
+			len += snprintf( args + len, sizeof( args ) - len , WIDE("%s\"%s\""), n>1?WIDE(" "):WIDE(""), pTask->pArgs[n] );
 		else
-			len += snprintf( args + len, sizeof( args ) - len , WIDE("%s%s"), n>1?" ":"", pTask->pArgs[n] );
+			len += snprintf( args + len, sizeof( args ) - len , WIDE("%s%s"), n>1?WIDE(" "):WIDE(""), pTask->pArgs[n] );
 	}
    return args;
 }
@@ -502,7 +513,7 @@ char *GetTaskArgs( PLOAD_TASK pTask )
 
 void SetTaskName( PLOAD_TASK pTask, char *p )
 {
-	strcpy( pTask->pName, p );
+	StrCpyEx( pTask->pName, p, sizeof( pTask->pName ) );
 	if( pTask->button )
 		InterShell_SetButtonText( pTask->button, p );
 }
@@ -554,9 +565,9 @@ void EditTaskProperties( PTRSZVAL psv, PSI_CONTROL parent_frame, LOGICAL bVisual
 		SetControlText( GetControl( frame, TXT_TASK_NAME ), pTask->pTask );
 		SetControlText( GetControl( frame, TXT_TASK_PATH ), pTask->pPath );
 		SetControlText( GetControl( frame, TXT_TASK_ARGS ), GetTaskArgs( pTask ) );
-      snprintf( menuname, sizeof(menuname), "%ld", pTask->launch_width );
+      snprintf( menuname, sizeof(menuname), WIDE("%ld"), pTask->launch_width );
       SetControlText( GetControl( frame, EDIT_TASK_LAUNCH_X ), menuname );
-      snprintf( menuname, sizeof(menuname), "%ld", pTask->launch_height );
+      snprintf( menuname, sizeof(menuname), WIDE("%ld"), pTask->launch_height );
 		SetControlText( GetControl( frame, EDIT_TASK_LAUNCH_Y ), menuname );
 		SetCheckState( GetControl( frame, CHECKBOX_RESTART ), pTask->flags.bRestart );
 		SetCheckState( GetControl( frame, CHECKBOX_EXCLUSIVE ), !pTask->flags.bNonExclusive );
@@ -668,7 +679,7 @@ void EditTaskProperties( PTRSZVAL psv, PSI_CONTROL parent_frame, LOGICAL bVisual
 	DestroyFrame( &frame );
 }
 
-OnEditControl( "Task" )( PTRSZVAL psv, PSI_CONTROL parent_frame )
+OnEditControl( WIDE("Task") )( PTRSZVAL psv, PSI_CONTROL parent_frame )
 {
 	EditTaskProperties( psv, parent_frame, TRUE );
    return psv;
@@ -771,7 +782,7 @@ void RunATask( PLOAD_TASK pTask, int bWaitInRoutine )
 		{
 			if( pTask->flags.bOneLaunch )
 			{
-            //lprintf( "Task is already spawned, leave." );
+            //lprintf( WIDE("Task is already spawned, leave.") );
 				return;
 			}
 			lprintf( WIDE("Re-hide frame - tasks still running.") );
@@ -807,6 +818,7 @@ void RunATask( PLOAD_TASK pTask, int bWaitInRoutine )
 		else
          args = NULL;
 		pTask->flags.bStarting = 1;
+#ifndef UNDER_CE
 		if( pTask->flags.bCaptureOutput )
 		{
 			task = LaunchPeerProgram( taskname
@@ -817,6 +829,7 @@ void RunATask( PLOAD_TASK pTask, int bWaitInRoutine )
 											, (PTRSZVAL)pTask );
 		}
 		else
+#endif
 			task = LaunchProgramEx( taskname, path, (PCTEXTSTR)args, TaskEnded, (PTRSZVAL)pTask );
 		Release( (POINTER)taskname );
 		Release( (POINTER)path );
@@ -871,7 +884,7 @@ void RunATask( PLOAD_TASK pTask, int bWaitInRoutine )
 				} while( task );
 			}
 			else
-            lprintf( "Skipping in-button wait..." );
+            lprintf( WIDE("Skipping in-button wait...") );
 		}
 	}
 	else
@@ -915,7 +928,7 @@ void CPROC TaskEnded( PTRSZVAL psv, PTASK_INFO task_ended )
 
 	LIST_FORALL( pTask->spawns, idx, PTASK_INFO, task )
 	{
-      //lprintf( "looking at task %p task %p", pTask, task );
+      //lprintf( WIDE("looking at task %p task %p"), pTask, task );
 		if( task_ended == task )
 		{
 			//DebugBreak();
@@ -942,7 +955,7 @@ void CPROC TaskEnded( PTRSZVAL psv, PTASK_INFO task_ended )
          // especially if we're shutting down.
 			if( l.flags.bExit == 2 )
 			{
-            lprintf( "Shutting down... why do we crash after this?!" );
+            lprintf( WIDE("Shutting down... why do we crash after this?!") );
 				return;
 			}
 			// exclusive task runs hiding the menu... and only runs once.
@@ -981,7 +994,7 @@ void CPROC TaskEnded( PTRSZVAL psv, PTASK_INFO task_ended )
 //---------------------------------------------------------------------------
 
 // should get auto innited to button proc...
-OnKeyPressEvent( WIDE( "Task" ) )( PTRSZVAL psv )
+OnKeyPressEvent(  WIDE("Task") )( PTRSZVAL psv )
 {
 	//PLOAD_TASK pTask = (PLOAD_TASK)psv;
 	RunATask( (PLOAD_TASK)psv, InterShell_IsButtonVirtual( ((PLOAD_TASK)psv)->button ) );
@@ -1019,14 +1032,14 @@ static void KillSpawnedPrograms( void )
 					filename++;
 				else
                filename = fullname;
-				snprintf( progname, sizeof( progname ), "AlertAgentIcon:%s", filename );
+				snprintf( progname, sizeof( progname ), WIDE("AlertAgentIcon:%s"), filename );
 				if( ( hWnd = FindWindow( WIDE("AlertAgentIcon"), progname ) )
 					||( ( p = strrchr( progname, '.' ) )
 					  , (p)?p[0]=0:0
 					  , hWnd = FindWindow( WIDE("AlertAgentIcon"), progname ) ) )
 				{
                bIcon = TRUE;
-               lprintf( "Found by alert tray icon... closing." );
+               lprintf( WIDE("Found by alert tray icon... closing.") );
 					SendMessage( hWnd, WM_COMMAND, /*MNU_EXIT*/1000, 0 );
 				}
             if( bIcon )
@@ -1047,14 +1060,14 @@ static void KillSpawnedPrograms( void )
 					TEXTSTR name = StrDup( InterShell_TranslateLabelText( NULL, buffer, sizeof( buffer ), tasks->pTask ) );
 					CTEXTSTR basename = name;
 					TEXTSTR ext;
-					ext = (TEXTSTR)StrCaseStr( basename, ".exe" );
+					ext = (TEXTSTR)StrCaseStr( basename, WIDE(".exe") );
 					if( ext )
 						ext[0] = 0;
 					ext = (TEXTSTR)pathrchr( basename );
 					if( ext )
 						basename = ext + 1;
-               lprintf( "Attempting to find [%s]", basename );
-					snprintf( progname, sizeof( progname ), "%s.instance.lock", basename );
+               lprintf( WIDE("Attempting to find [%s]"), basename );
+					snprintf( progname, sizeof( progname ), WIDE("%s.instance.lock"), basename );
 					{
 						POINTER mem_lock;
 						PTRSZVAL size = 0;
@@ -1089,12 +1102,12 @@ static void KillSpawnedPrograms( void )
 }
 
 
-OnInterShellShutdown( "DOKillSpawnedPrograms" )(void)
+OnInterShellShutdown( WIDE("DOKillSpawnedPrograms") )(void)
 {
-	BannerNoWait( "Ending Tasks..." );
+	BannerNoWait( WIDE("Ending Tasks...") );
 	l.flags.bExit = 2; // magic number indicating we're quitting for sure.
 	KillSpawnedPrograms();
-	BannerNoWait( "Ended Task...." );
+	BannerNoWait( WIDE("Ended Task....") );
 }
 
 //---------------------------------------------------------------------------
@@ -1171,7 +1184,7 @@ PTRSZVAL CPROC WaitForCallerThread( PTHREAD thread )
 }
 #endif
 
-OnFinishAllInit( "tasks" )( void )
+OnFinishAllInit( WIDE("tasks") )( void )
 {
 	//if( LaunchAutoTasks( 0 ) )
    //   RemoveBannerEx( NULL DBG_SRC );
@@ -1292,7 +1305,7 @@ void CPROC PressDosKey( PTRSZVAL psv, _32 key )
 
 }
 
-OnFinishInit( "TasksShellKeys" )( void )
+OnFinishInit( WIDE("TasksShellKeys") )( void )
 //PRELOAD( SetTaskKeys )
 {
 	BindEventToKey( NULL, KEY_D, KEY_MOD_ALT, PressDosKey, (PTRSZVAL)'D' );
@@ -1332,7 +1345,7 @@ PTRSZVAL CPROC SetTaskPath( PTRSZVAL psv, arg_list args )
 	PSV_PARAM;
    //lprintf( "Setting path on task %p", psv );
 	if( pTask )
-		strcpy( pTask->pPath, text );
+		StrCpyEx( pTask->pPath, text, sizeof( pTask->pPath ) );
    return psv;
 }
 
@@ -1343,7 +1356,7 @@ PTRSZVAL CPROC SetTaskTask( PTRSZVAL psv, arg_list args )
 	PARAM( args, char *, text );
    PSV_PARAM;
 	if( pTask )
-		strcpy( pTask->pTask, text );
+		StrCpyEx( pTask->pTask, text, sizeof( pTask->pTask ) );
    return psv;
 }
 
@@ -1475,7 +1488,7 @@ PTRSZVAL CPROC BeginButtonTaskInfo( PTRSZVAL psv, arg_list args )
 
 void AddTaskConfigs( PCONFIG_HANDLER pch )
 {
-   //lprintf( "Adding configuration handling for a task...." );
+   //lprintf( WIDE("Adding configuration handling for a task....") );
 	AddConfigurationMethod( pch, WIDE("name=%m"), ConfigSetTaskName );
 	AddConfigurationMethod( pch, WIDE("path=%m"), SetTaskPath );
 	AddConfigurationMethod( pch, WIDE("program=%m"), SetTaskTask );
@@ -1502,7 +1515,7 @@ PTRSZVAL  CPROC FinishConfigTask( PTRSZVAL psv, arg_list args )
 /* place holder for common subconfiguration start. */
 OnLoadControl( WIDE("TaskInfo") )( PCONFIG_HANDLER pch, PTRSZVAL psv )
 {
-   lprintf( "Begin sub for task..." );
+   lprintf( WIDE("Begin sub for task...") );
    AddTaskConfigs( pch );
 }
 
@@ -1513,7 +1526,7 @@ OnLoadControl( WIDE("Task") )( PCONFIG_HANDLER pch, PTRSZVAL psv )
 	//BeginSubConfiguration( WIDE( "TaskInfo" ), WIDE("Task Done") );
 }
 
-OnInterShellShutdown( WIDE( "Task" ) )( void )
+OnInterShellShutdown( WIDE("Task") )( void )
 {
 	KillSpawnedPrograms();
 }
@@ -1605,7 +1618,9 @@ PTRSZVAL CPROC SetWaitForCaller( PTRSZVAL psv, arg_list args )
 PTRSZVAL CPROC AddAdditionalPath( PTRSZVAL psv, arg_list args )
 {
 	PARAM( args, CTEXTSTR, path );
+#ifdef HAVE_ENVIRONMENT
 	OSALOT_AppendEnvironmentVariable( WIDE( "PATH" ), path );
+#endif
    l.more_path = StrDup( path );
    return psv;
 }
@@ -1613,7 +1628,9 @@ PTRSZVAL CPROC AddAdditionalPath( PTRSZVAL psv, arg_list args )
 PTRSZVAL CPROC AddPrependPath( PTRSZVAL psv, arg_list args )
 {
 	PARAM( args, CTEXTSTR, path );
+#ifdef HAVE_ENVIRONMENT
 	OSALOT_PrependEnvironmentVariable( WIDE( "PATH" ), path );
+#endif
    l.less_path = StrDup( path );
    return psv;
 }
@@ -1664,12 +1681,12 @@ static void DumpTask( FILE *file, PLOAD_TASK pTask, int sub )
 			fprintf( file, WIDE("launch at 0 by 0\n"), pTask->launch_width, pTask->launch_height );
 
 		//if( !pTask->flags.bButton )
-		fprintf( file, WIDE("restart %s\n"), pTask->flags.bRestart?"Yes":"No" );
-		fprintf( file, WIDE("non-exclusive %s\n"), pTask->flags.bNonExclusive?"Yes":"No" );
-		fprintf( file, WIDE("background %s\n"), pTask->flags.bBackground?"Yes":"No" );
-		fprintf( file, WIDE("one time %s\n"), pTask->flags.bOneLaunch?"Yes":"No" );
-		fprintf( file, WIDE("Capture task output?%s\n" ), pTask->flags.bCaptureOutput?"Yes":"No" );
-		fprintf( file, WIDE("Force Hide Display?%s\n" ), pTask->flags.bHideCanvas?"Yes":"No" );
+		fprintf( file, WIDE("restart %s\n"), pTask->flags.bRestart?WIDE("Yes"):WIDE("No") );
+		fprintf( file, WIDE("non-exclusive %s\n"), pTask->flags.bNonExclusive?WIDE("Yes"):WIDE("No") );
+		fprintf( file, WIDE("background %s\n"), pTask->flags.bBackground?WIDE("Yes"):WIDE("No") );
+		fprintf( file, WIDE("one time %s\n"), pTask->flags.bOneLaunch?WIDE("Yes"):WIDE("No") );
+		fprintf( file, WIDE("Capture task output?%s\n" ), pTask->flags.bCaptureOutput?WIDE("Yes"):WIDE("No") );
+		fprintf( file, WIDE("Force Hide Display?%s\n" ), pTask->flags.bHideCanvas?WIDE("Yes"):WIDE("No") );
 		{
 			INDEX idx;
          CTEXTSTR sysname;
@@ -1756,7 +1773,7 @@ OnSaveCommon( WIDE("Tasks") )( FILE *file )
 			fprintf( file, WIDE( "<path more=\"%s\">\n" ), l.more_path );
 		if( l.less_path )
 			fprintf( file, WIDE( "<path less=\"%s\">\n" ), l.less_path );
-		fprintf( file, WIDE( "wait for caller? %s\n\n" ), l.flags.wait_for_caller?"yes":"no" );
+		fprintf( file, WIDE( "wait for caller? %s\n\n" ), l.flags.wait_for_caller?WIDE("yes"):WIDE("no") );
 
 }
 
@@ -1772,10 +1789,10 @@ void CPROC EditAutoTaskProperties( PTRSZVAL psv, PSI_CONTROL button )
       char buf[256];
 		PLOAD_TASK task = (PLOAD_TASK)GetItemData( pli );
 		EditTaskProperties( (PTRSZVAL)task, button, FALSE );
-		snprintf( buf, sizeof( buf ), "%s%s%s"
+		snprintf( buf, sizeof( buf ), WIDE("%s%s%s")
 				  , GetTaskName( task )
-				  , task->flags.bLaunchWhenCallerUp?"[CALLER]":""
-				  , task->flags.bRestart?"[RESTART]":"" );
+				  , task->flags.bLaunchWhenCallerUp?WIDE("[CALLER]"):WIDE("")
+				  , task->flags.bRestart?WIDE("[RESTART]"):WIDE("") );
 		SetItemText( pli, buf );
 	}
 }
@@ -1787,13 +1804,13 @@ void CPROC CreateAutoTaskProperties( PTRSZVAL psv, PSI_CONTROL button )
 	EditTaskProperties( (PTRSZVAL)task, button, FALSE );
 	// validate task, and perhaps destroy it?
 	if( !task->pName[0] )
-		strcpy( task->pName, "NO PROGRAM" );
+		StrCpy( task->pName, WIDE("NO PROGRAM") );
 	{
       char buf[256];
-		snprintf( buf, sizeof( buf ), "%s%s%s"
+		snprintf( buf, sizeof( buf ), WIDE("%s%s%s")
 				  , GetTaskName( task )
-				  , task->flags.bLaunchWhenCallerUp?"[CALLER]":""
-				  , task->flags.bRestart?"[RESTART]":"" );
+				  , task->flags.bLaunchWhenCallerUp?WIDE("[CALLER]"):WIDE("")
+				  , task->flags.bRestart?WIDE("[RESTART]"):WIDE("") );
 		SetItemData( AddListItem( GetNearControl( button, LISTBOX_AUTO_TASKS ), buf ), (PTRSZVAL)task );
 	}
    AddLink( &l.autoload, task );
@@ -1812,9 +1829,9 @@ void CPROC DestroyAutoTaskProperties( PTRSZVAL psv, PSI_CONTROL button )
 }
 
 
-OnGlobalPropertyEdit( "Tasks" )( PSI_CONTROL parent )
+OnGlobalPropertyEdit( WIDE("Tasks") )( PSI_CONTROL parent )
 {
-	PSI_CONTROL frame = LoadXMLFrame( "CommonTaskProperties.isFrame" );
+	PSI_CONTROL frame = LoadXMLFrame( WIDE("CommonTaskProperties.isFrame") );
 	if( frame )
 	{
 		int okay = 0;
@@ -1830,18 +1847,18 @@ OnGlobalPropertyEdit( "Tasks" )( PSI_CONTROL parent )
 				PLOAD_TASK task;
             INDEX idx;
 				char buf[256];
-				SetItemData( AddListItem( list, "Command Shell" ), (PTRSZVAL)l.shell );
+				SetItemData( AddListItem( list, WIDE("Command Shell") ), (PTRSZVAL)l.shell );
 #ifdef __WINDOWS__
-				SetItemData( AddListItem( list, "Explorer" ), (PTRSZVAL)l.windows_shell );
-				SetItemData( AddListItem( list, "Power Shell" ), (PTRSZVAL)l.power_shell );
-				SetItemData( AddListItem( list, "Power Shell ISE" ), (PTRSZVAL)l.power_shell_ise );
+				SetItemData( AddListItem( list, WIDE("Explorer") ), (PTRSZVAL)l.windows_shell );
+				SetItemData( AddListItem( list, WIDE("Power Shell") ), (PTRSZVAL)l.power_shell );
+				SetItemData( AddListItem( list, WIDE("Power Shell ISE") ), (PTRSZVAL)l.power_shell_ise );
 #endif
 				LIST_FORALL( l.autoload, idx, PLOAD_TASK, task )
 				{
-					snprintf( buf, sizeof( buf ), "%s%s%s"
+					snprintf( buf, sizeof( buf ), WIDE("%s%s%s")
 							  , GetTaskName( task )
-							  , task->flags.bLaunchWhenCallerUp?"[CALLER]":""
-							  , task->flags.bRestart?"[RESTART]":"" );
+							  , task->flags.bLaunchWhenCallerUp?WIDE("[CALLER]"):WIDE("")
+							  , task->flags.bRestart?WIDE("[RESTART]"):WIDE("") );
                SetItemData( AddListItem( list, buf ), (PTRSZVAL)task );
 				}
 			}
@@ -1863,7 +1880,7 @@ OnGlobalPropertyEdit( "Tasks" )( PSI_CONTROL parent )
 	}
 }
 
-static void OnCloneControl( "Task" )( PTRSZVAL psvNew, PTRSZVAL psvOriginal )
+static void OnCloneControl( WIDE("Task") )( PTRSZVAL psvNew, PTRSZVAL psvOriginal )
 {
    PLOAD_TASK pNewTask = (PLOAD_TASK)psvNew;
 	PLOAD_TASK pOriginalTask = (PLOAD_TASK)psvOriginal;
@@ -1889,7 +1906,7 @@ struct resolution_button
    PMENU_BUTTON button;
 };
 
-OnKeyPressEvent( "Task Util/Set Resolution" )( PTRSZVAL psv )
+OnKeyPressEvent( WIDE("Task Util/Set Resolution") )( PTRSZVAL psv )
 {
 	struct resolution_button *resbut = (struct resolution_button *)psv;
    if( resbut->width && resbut->height )
@@ -1898,7 +1915,7 @@ OnKeyPressEvent( "Task Util/Set Resolution" )( PTRSZVAL psv )
       ResetResolution( NULL );
 }
 
-OnCreateMenuButton( "Task Util/Set Resolution" )( PMENU_BUTTON button )
+OnCreateMenuButton( WIDE("Task Util/Set Resolution") )( PMENU_BUTTON button )
 {
 	struct resolution_button *resbut = New( struct resolution_button );
 	resbut->width = 0;
@@ -1907,7 +1924,7 @@ OnCreateMenuButton( "Task Util/Set Resolution" )( PMENU_BUTTON button )
    return (PTRSZVAL)resbut;
 }
 
-OnEditControl( "Task Util/Set Resolution" )( PTRSZVAL psv, PSI_CONTROL parent_frame )
+OnEditControl( WIDE("Task Util/Set Resolution") )( PTRSZVAL psv, PSI_CONTROL parent_frame )
 {
 	PCOMMON frame = LoadXMLFrame( WIDE( "task.resolution.isframe" ) );
 	int okay = 0;
@@ -1917,9 +1934,9 @@ OnEditControl( "Task Util/Set Resolution" )( PTRSZVAL psv, PSI_CONTROL parent_fr
 	{
       char buffer[15];
 		SetCommonButtons( frame, &done, &okay );
-      snprintf( buffer, sizeof( buffer ), "%ld", resbut->width );
+      snprintf( buffer, sizeof( buffer ), WIDE("%ld"), resbut->width );
       SetControlText( GetControl( frame, EDIT_TASK_LAUNCH_X ), buffer );
-      snprintf( buffer, sizeof( buffer ), "%ld", resbut->height );
+      snprintf( buffer, sizeof( buffer ), WIDE("%ld"), resbut->height );
       SetControlText( GetControl( frame, EDIT_TASK_LAUNCH_Y ), buffer );
       DisplayFrameOver( frame, parent_frame );
 		CommonWait( frame );
@@ -1935,7 +1952,7 @@ OnEditControl( "Task Util/Set Resolution" )( PTRSZVAL psv, PSI_CONTROL parent_fr
    return psv;
 }
 
-OnSaveControl( "Task Util/Set Resolution" )( FILE *file, PTRSZVAL psv )
+OnSaveControl( WIDE("Task Util/Set Resolution") )( FILE *file, PTRSZVAL psv )
 {
    struct resolution_button *resbut = (struct resolution_button *)psv;
 	fprintf( file, WIDE("launch at %d by %d\n"), resbut->width, resbut->height );
@@ -1962,14 +1979,14 @@ OnLoadControl( WIDE("Task Util/Set Resolution") )( PCONFIG_HANDLER pch, PTRSZVAL
 }
 
 
-static LOGICAL OnDropAccept( "Add Task Button" )( CTEXTSTR file, int x, int y )
+static LOGICAL OnDropAccept( WIDE("Add Task Button") )( CTEXTSTR file, int x, int y )
 {
-	if( StrCaseStr( file, ".exe" )
-		||StrCaseStr( file, ".bat" )
-		||StrCaseStr( file, ".com" )
-		||StrCaseStr( file, ".cmd" ) )
+	if( StrCaseStr( file, WIDE(".exe") )
+		||StrCaseStr( file, WIDE(".bat") )
+		||StrCaseStr( file, WIDE(".com") )
+		||StrCaseStr( file, WIDE(".cmd") ) )
 	{
-		PTRSZVAL psv = InterShell_CreateControl( "Task", x, y, 5, 3 );
+		PTRSZVAL psv = InterShell_CreateControl( WIDE("Task"), x, y, 5, 3 );
 		PLOAD_TASK pTask = (PLOAD_TASK)psv;
 		if( pTask )
 		{

@@ -9,4 +9,4 @@ SRCS1A =  png  pngset  pngget  pngrutil  pngtrans  pngwutil
 SRCS1B =  pngmem  pngpread  pngread  pngerror  pngwrite
 SRCS1C =  pngrtran  pngwtran  pngrio  pngwio
 SRCS+=$(foreach src,$(SRCS1A) $(SRCS1B) $(SRCS1C),$(PBASEDIR)/$(src))
-CXFLAGS+= -D__PNG_LIBRARY_SOURCE__
+CXFLAGS+= -D__PNG_LIBRARY_SOURCE__ -DPNG_INTERNAL

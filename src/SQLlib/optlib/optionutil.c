@@ -41,7 +41,7 @@ SQLGETOPTION_PROC( void, EnumOptionsEx )( PODBC odbc, INDEX parent
 		PushSQLQueryEx( og.Option ); // any subqueries will of course clean themselves up.
 		snprintf( query
 				  , sizeof( query )
-				  , WIDE("select node_id,m.name_id,value_id,n.name")
+				  , "select node_id,m.name_id,value_id,n.name"
 					" from option_map as m"
 					" join option_name as n on n.name_id=m.name_id"
 					" where parent_node_id=%ld"

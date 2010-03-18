@@ -39,7 +39,7 @@ typedef struct CanvasData  CanvasData, *PCanvasData;
 #define GLARE_FLAG_SHADE 2
 
 typedef struct glare_set{
-	char *name;
+	TEXTCHAR *name;
 	struct {
 		BIT_FIELD bMultiShadeBackground : 1;
 		BIT_FIELD bShadeBackground : 1;
@@ -314,7 +314,7 @@ PSI_CONTROL OpenPageFrame( PPAGE_DATA page ); // used for multi edit to open eac
 
 PGLARE_SET GetGlareSet( CTEXTSTR name );
 
-PMENU_BUTTON CreateInvisibleControl( char *name );
+PMENU_BUTTON CreateInvisibleControl( TEXTCHAR *name );
 void ConfigureKeyEx( PCanvasData parent, PMENU_BUTTON button );
 void ConfigureKeyExx( PCanvasData parent, PMENU_BUTTON button, int bWaitComplete, int bIgnorePrivate );
 

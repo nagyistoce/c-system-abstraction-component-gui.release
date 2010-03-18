@@ -496,7 +496,7 @@ static void CPROC ResizeScrollbar( PCOMMON pc )
 		S_32 width = 15;
 		ScaleCoords( (PCOMMON)pc, &width, NULL );
 		// resize the scrollbar accordingly...
-      lprintf( "Getting a resize on the scrollbar..." );
+		//lprintf( WIDE( "Getting a resize on the scrollbar..." ) );
 		if( psb->attr & SCROLL_HORIZONTAL )
 		{
 			MoveSizeCommon( psb->pcTopButton, 0, 0

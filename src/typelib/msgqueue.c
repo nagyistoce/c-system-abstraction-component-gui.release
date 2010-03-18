@@ -159,7 +159,7 @@ typedef struct MsgDataHandle
 // in this case size is the size of the queue, there
 // is no expansion possible...
 // this should be created such that it is at least 3 * largest message
-TYPELIB_PROC( PMSGHANDLE, CreateMsgQueue )( CTEXTSTR name, PTRSZVAL size
+TYPELIB_PROC( PMSGHANDLE, SackCreateMsgQueue )( CTEXTSTR name, PTRSZVAL size
 													  , MsgQueueReadCallback Read
 														, PTRSZVAL psvRead )
 {
@@ -208,7 +208,7 @@ TYPELIB_PROC( PMSGHANDLE, CreateMsgQueue )( CTEXTSTR name, PTRSZVAL size
 // in this case size is the size of the queue, there
 // is no expansion possible...
 // this should be created such that it is at least 3 * largest message
-TYPELIB_PROC( PMSGHANDLE, OpenMsgQueue )( CTEXTSTR name
+TYPELIB_PROC( PMSGHANDLE, SackOpenMsgQueue )( CTEXTSTR name
 													 , MsgQueueReadCallback Read
 													 , PTRSZVAL psvRead )
 {
@@ -242,11 +242,11 @@ TYPELIB_PROC( PMSGHANDLE, OpenMsgQueue )( CTEXTSTR name
 	// so if the second open results before the create
 	// always increment this - otherwise the create open will
 	// obliterate the second opener's presense.
-	strcpy( pmq->name, name?name:WIDE("Anonymous") );
+	StrCpy( pmq->name, name?name:WIDE("Anonymous") );
 	pmq->Cnt++;
 	if( bCreated )
 	{
-      lprintf( WIDE("OpenMsgQueue should never result with a created queue!") );
+      lprintf( WIDE("SackOpenMsgQueue should never result with a created queue!") );
       DebugBreak();
 		//pmq->Size = size;
 	}
@@ -773,8 +773,8 @@ TYPELIB_PROC( int, DequeMsgEx )( PMSGHANDLE pmh, _32 *MsgID, POINTER result, PTR
 				CollapseWaiting( pmq, LastMsgID );
 				if( (*MsgID) == INVALID_INDEX ) 
 				{
-					lprintf( "Aborting waiting read..." );
-					errno = MSGQUE_ERROR_EABORT;
+					lprintf( WIDE( "Aborting waiting read..." ) );
+					SetLastError( MSGQUE_ERROR_EABORT );
 					break;
 				}
 				//pmq->waiting = prior;
@@ -791,8 +791,8 @@ TYPELIB_PROC( int, DequeMsgEx )( PMSGHANDLE pmh, _32 *MsgID, POINTER result, PTR
 #ifndef DISABLE_MSGQUE_LOGGING
 				lprintf( WIDE("[%s] NOWAIT option selected... resulting NOMSG."), pmq->name );
 #endif
-				errno = MSGQUE_ERROR_NOMSG;
-            LeaveCriticalSecEx( &pmq->cs DBG_SOURCE );
+				SetLastError( MSGQUE_ERROR_NOMSG );
+	            LeaveCriticalSecEx( &pmq->cs DBG_SOURCE );
 				return -1;
 			}
 		}
@@ -964,7 +964,7 @@ TYPELIB_PROC( int, DequeMsgEx )( PMSGHANDLE pmh, _32 *MsgID, POINTER result, PTR
 			if( options & MSGQUE_NOWAIT )
 			{
 				lprintf( WIDE("Retunign - not looping...err uhh...") );
-				errno = MSGQUE_ERROR_NOMSG;
+				SetLastError( MSGQUE_ERROR_NOMSG );
 				LeaveCriticalSecEx( &pmq->cs DBG_SOURCE );
 				return -1;
 			}
@@ -985,7 +985,7 @@ TYPELIB_PROC( int, DequeMsgEx )( PMSGHANDLE pmh, _32 *MsgID, POINTER result, PTR
 #endif
 	if( !p )
 	{
-		errno = MSGQUE_ERROR_NOMSG;
+		SetLastError( MSGQUE_ERROR_NOMSG );
 		return -1;
 	}
 	return p - sizeof( MsgID );

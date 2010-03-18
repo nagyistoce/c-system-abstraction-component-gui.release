@@ -66,7 +66,7 @@ OnEditControl( PAGE_CHANGER_NAME )( PTRSZVAL psv, PSI_CONTROL parent_frame )
 				// save properties from controls...
 				GetCommonButtonControls( frame );
 				{
-					char buffer[128];
+					TEXTCHAR buffer[128];
 					int i,o;
 					for( i = o = 0; buffer[i]; i++,o++ )
 					{

@@ -59,10 +59,12 @@ TEXTSTR GetCurrentPath( TEXTSTR path, int len )
 {
 	if( !path )
 		return 0;
+#ifndef UNDER_CE
 #ifdef _WIN32
 	GetCurrentDirectory( len, path );
 #else
 	getcwd( path, len );
+#endif
 #endif
 	return path;
 }
@@ -185,11 +187,18 @@ FILESYS_PROC( int, SetCurrentPath )( CTEXTSTR path )
 {
 	if( !path )
 		return 0;
+#ifndef UNDER_CE
+  lprintf( WIDE( "Set CurrentPath: %s" ), path );
+   SetDefaultFilePath( path );
 #ifdef _WIN32
 	return SetCurrentDirectory( path );
 #else
 	return !chdir( path );
 #endif	
+#else
+   SetDefaultFilePath( path );
+#endif
+	return 0;
 }
 
 FILESYS_NAMESPACE_END

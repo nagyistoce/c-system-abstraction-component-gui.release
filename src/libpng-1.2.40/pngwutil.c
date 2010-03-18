@@ -1636,11 +1636,11 @@ png_write_sCAL(png_structp png_ptr, int unit, double width, double height)
    {
       wchar_t wc_buf[32];
       size_t wc_len;
-      swprintf(wc_buf, TEXT("%12.12e"), width);
+      //swprintf(wc_buf, TEXT("%12.12e"), width);
       wc_len = wcslen(wc_buf);
       WideCharToMultiByte(CP_ACP, 0, wc_buf, -1, buf + 1, wc_len, NULL, NULL);
       total_len = wc_len + 2;
-      swprintf(wc_buf, TEXT("%12.12e"), height);
+      //swprintf(wc_buf, TEXT("%12.12e"), height);
       wc_len = wcslen(wc_buf);
       WideCharToMultiByte(CP_ACP, 0, wc_buf, -1, buf + total_len, wc_len,
          NULL, NULL);

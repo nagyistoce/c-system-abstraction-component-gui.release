@@ -635,7 +635,7 @@ static PTEXT GatherLineEx( PTEXT *pOutput, INDEX *pIndex, int bInsert, int bSave
        , maxlen = 0;
    PTEXT pReturn = NULL;
    PTEXT pDelete = NULL;
-   _8 character;
+   TEXTCHAR character;
    TEXTCHAR *output;
 
    if( !pOutput ) // must supply a holder for partial collection...

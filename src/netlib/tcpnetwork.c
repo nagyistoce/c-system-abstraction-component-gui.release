@@ -45,7 +45,9 @@ return 0;
 #include <timers.h>
 #include "netstruc.h"
 #include <network.h>
+#ifndef UNDER_CE
 #include <fcntl.h>
+#endif
 #include <idle.h>
 #ifdef __UNIX__
 #include <unistd.h>
@@ -158,15 +160,20 @@ void AcceptClient(PCLIENT pListen)
    if( IsValid(pNewClient->Socket) )
    { // and we get one from the accept...
 #ifdef _WIN32
+#  ifdef USE_WSA_EVENTS
+	pNewClient->event = WSACreateEvent();
+	WSAEventSelect( pNewClient->Socket, pNewClient->event, FD_READ|FD_WRITE|FD_CLOSE );
+#  else
       if( WSAAsyncSelect( pNewClient->Socket,g.ghWndNetwork,SOCKMSG_TCP,
                                FD_READ | FD_WRITE | FD_CLOSE))
       { // if there was a select error...
          Log(" Accept select Error");
          InternalRemoveClientEx( pNewClient, TRUE, FALSE );
          LeaveCriticalSec( &pNewClient->csLock );
-   	   pNewClient = NULL;
+         pNewClient = NULL;
       }
       else
+#  endif
 #else
       // yes this is an ugly transition from the above dangling
       // else...
@@ -260,6 +267,10 @@ NETWORK_PROC( PCLIENT, CPPOpenTCPListenerAddrEx )(SOCKADDR *pAddr
       return NULL;
    }
 #ifdef _WIN32
+#  ifdef USE_WSA_EVENTS
+	pListen->event = WSACreateEvent();
+	WSAEventSelect( pListen->Socket, pListen->event, FD_ACCEPT|FD_CLOSE );
+#  else
    if( WSAAsyncSelect( pListen->Socket, g.ghWndNetwork,
                        SOCKMSG_TCP, FD_ACCEPT|FD_CLOSE ) )
 	{
@@ -269,6 +280,7 @@ NETWORK_PROC( PCLIENT, CPPOpenTCPListenerAddrEx )(SOCKADDR *pAddr
 		LeaveCriticalSec( &pListen->csLock );
 		return NULL;
    }
+#  endif
 #else
 	{
 		int t = TRUE;
@@ -309,6 +321,11 @@ NETWORK_PROC( PCLIENT, CPPOpenTCPListenerAddrEx )(SOCKADDR *pAddr
 	pListen->psvConnect = psvConnect;
 	pListen->dwFlags |= CF_CPPCONNECT;
 	LeaveCriticalSec( &pListen->csLock );
+
+   // make sure to schedule this socket for events (connect)
+#ifdef USE_WSA_EVENTS
+	SetEvent( g.event );
+#endif
 #ifdef __LINUX__
 	WakeThread( g.pThread );
 #endif
@@ -392,6 +409,10 @@ static PCLIENT InternalTCPClientAddrExx(SOCKADDR *lpAddr,
         {
             int err;
 #ifdef _WIN32
+#  ifdef USE_WSA_EVENTS
+			pResult->event = WSACreateEvent();
+			WSAEventSelect( pResult->Socket, pResult->event, FD_ACCEPT|FD_CLOSE );
+#  else
 			if( WSAAsyncSelect( pResult->Socket,g.ghWndNetwork,SOCKMSG_TCP,
                                 FD_READ|FD_WRITE|FD_CLOSE|FD_CONNECT) )
 			{
@@ -401,6 +422,7 @@ static PCLIENT InternalTCPClientAddrExx(SOCKADDR *lpAddr,
 				pResult = NULL;
 				goto LeaveNow;
 			}
+#  endif
 #else
             {
                 int t = TRUE;
@@ -459,14 +481,21 @@ static PCLIENT InternalTCPClientAddrExx(SOCKADDR *lpAddr,
 					Log( WIDE("Connected before we even get a chance to wait") );
 #endif
 				}
+
+
+				//Log( WIDE("Leaving Client's critical section") );
+				LeaveCriticalSec( &pResult->csLock ); // allow main thread to process
+
+				// socket should now get scheduled for events, after unlocking it?
+#ifdef USE_WSA_EVENTS
+				SetEvent( g.event );
+#endif
 #ifdef __UNIX__
 				{
 					//kill( (_32)(g.pThread->ThreadID), SIGHUP );
                WakeThread( g.pThread );
             }
 #endif
-				//Log( WIDE("Leaving Client's critical section") );
-            LeaveCriticalSec( &pResult->csLock ); // allow main thread to process
             if( !pConnectComplete )
             {
                 int Start, bProcessing = 0;
@@ -498,7 +527,7 @@ static PCLIENT InternalTCPClientAddrExx(SOCKADDR *lpAddr,
 		    }
 		    else
 		    {
-			lprintf( "Spin wait for connect" );
+			lprintf( WIDE( "Spin wait for connect" ) );
         		Relinquish();
 		    }
                 }
@@ -871,7 +900,7 @@ NETWORK_PROC( int, doReadExx)(PCLIENT lpClient,POINTER lpBuffer,int nBytes, LOGI
 		{
 			if( lpClient->read.ReadComplete )  // and there's a read complete callback available
 			{
-            lprintf( "Read complete with 0 bytes immediate..." );
+            lprintf( WIDE( "Read complete with 0 bytes immediate..." ) );
 				lpClient->read.ReadComplete( lpClient, lpBuffer, 0 );
 			}
 		}
@@ -1021,24 +1050,24 @@ int TCPWriteEx(PCLIENT pc DBG_PASS)
 
                     return TRUE;
                 }
-                {
-			_lprintf(DBG_RELAY)(WIDE(" Network Send Error: %5d(buffer:%p ofs: %") _32f WIDE("  Len: %") _32f WIDE(")"),
-               	          WSAGetLastError(),
-            	             pc->lpFirstPending->buffer.c,
-         	                pc->lpFirstPending->dwUsed,
-      	                   pc->lpFirstPending->dwAvail );
-               if( WSAGetLastError() == 10057 // ENOTCONN
-                 ||WSAGetLastError() == 10014 // EFAULT
+					 {
+						 _lprintf(DBG_RELAY)(WIDE(" Network Send Error: %5d(buffer:%p ofs: %") _32f WIDE("  Len: %") _32f WIDE(")"),
+													WSAGetLastError(),
+													pc->lpFirstPending->buffer.c,
+													pc->lpFirstPending->dwUsed,
+													pc->lpFirstPending->dwAvail );
+						 if( WSAGetLastError() == 10057 // ENOTCONN
+							 ||WSAGetLastError() == 10014 // EFAULT
 #ifdef __UNIX__
-                   || WSAGetLastError() == EPIPE
+							 || WSAGetLastError() == EPIPE
 #endif
-                 )
-	            {
-            		InternalRemoveClient( pc );
-					}
-         	   //LeaveCriticalSec( &pc->csLock );
-      	      return FALSE; // get out of here!
-   	      }
+							)
+						 {
+							 InternalRemoveClient( pc );
+						 }
+						 //LeaveCriticalSec( &pc->csLock );
+						 return FALSE; // get out of here!
+					 }
 	      }
       	else if (!nSent)  // other side closed.
 	      {
@@ -1103,7 +1132,10 @@ int TCPWriteEx(PCLIENT pc DBG_PASS)
 				{
 					 if( !(pc->dwFlags & CF_WRITEPENDING) )
 					 {
-                   pc->dwFlags |= CF_WRITEPENDING;
+						 pc->dwFlags |= CF_WRITEPENDING;
+#ifdef USE_WSA_EVENTS
+						 SetEvent( g.event );
+#endif
 #ifdef __UNIX__
 						 //kill( (_32)(g.pThread->ThreadID), SIGHUP );
                    WakeThread( g.pThread );

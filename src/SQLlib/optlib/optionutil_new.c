@@ -44,7 +44,7 @@ void NewEnumOptions( PODBC odbc
 	PushSQLQueryEx( odbc ); // any subqueries will of course clean themselves up.
 	snprintf( query
 			  , sizeof( query )
-			  , WIDE("select option_id,n.name ")
+			  , "select option_id,n.name "
 				"from "OPTION_MAP" as m "
 				"join "OPTION_NAME" as n on n.name_id=m.name_id "
 				"where parent_option_id=%ld "
@@ -106,7 +106,7 @@ void NewDuplicateOption( PODBC odbc, INDEX iRoot, CTEXTSTR pNewName )
 	CTEXTSTR result = NULL;
 	INDEX iNewName;
 	SetSQLLoggingDisable( odbc, TRUE );
-	if( SQLQueryf( odbc, &result, WIDE("select parent_option_id from ")OPTION_MAP WIDE(" where option_id=%ld"), iRoot ) && result )
+	if( SQLQueryf( odbc, &result, "select parent_option_id from " OPTION_MAP " where option_id=%ld", iRoot ) && result )
 	{
 		struct complex_args args;
 		iParent = atoi( result );
@@ -125,10 +125,10 @@ static void NewFixOrphanedBranches( void )
 	PLIST options = CreateList();
 	CTEXTSTR *result = NULL;
 	CTEXTSTR result2 = NULL;
-	SQLQuery( og.Option, WIDE("select count(*) from "OPTION_MAP""), &result2 );
+	SQLQuery( og.Option, "select count(*) from " OPTION_MAP, &result2 );
    // expand the options list to max extent real quickk....
 	SetLink( &options, atoi( result2 ) + 1, 0 );
-	for( SQLRecordQuery( og.Option, WIDE("select option_id,parent_option_id from ")OPTION_MAP, NULL, &result, NULL );
+	for( SQLRecordQuery( og.Option, "select option_id,parent_option_id from "OPTION_MAP, NULL, &result, NULL );
 		  result;
 		  FetchSQLRecord( og.Option, &result ) )
 	{
@@ -155,7 +155,7 @@ static void NewFixOrphanedBranches( void )
 					deleted = 1;
 					//lprintf( WIDE("node %ld has parent id %ld which does not exist."), idx, parent-1 );
 					SetLink( &options, idx, NULL );
-					SQLCommandf( og.Option, WIDE("delete from ")OPTION_MAP WIDE(" where option_id=%ld"), idx );
+					SQLCommandf( og.Option, "delete from "OPTION_MAP " where option_id=%ld", idx );
 				}
 			}
 		}while( deleted );
@@ -167,9 +167,9 @@ static void NewFixOrphanedBranches( void )
 void NewDeleteOption( PODBC odbc, INDEX iRoot )
 {
 	SetSQLLoggingDisable( odbc, TRUE );
-	SQLCommandf( odbc, WIDE("delete from ")OPTION_MAP WIDE(" where option_id=%ld"), iRoot );
-	SQLCommandf( odbc, WIDE("delete from ")OPTION_VALUES WIDE(" where option_id=%ld"), iRoot );
-	SQLCommandf( odbc, WIDE("delete from ")OPTION_BLOBS WIDE(" where option_id=%ld"), iRoot );
+	SQLCommandf( odbc, "delete from "OPTION_MAP " where option_id=%ld", iRoot );
+	SQLCommandf( odbc, "delete from "OPTION_VALUES " where option_id=%ld", iRoot );
+	SQLCommandf( odbc, "delete from "OPTION_BLOBS " where option_id=%ld", iRoot );
    NewFixOrphanedBranches();
 	SetSQLLoggingDisable( odbc, FALSE );
 }

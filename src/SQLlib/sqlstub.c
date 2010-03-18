@@ -133,7 +133,7 @@ enum {
 typedef struct update_task_def UPDATE_TASK, *PUPDATE_TASK;
 struct update_task_def
 {
-   char name[256];
+   TEXTCHAR name[256];
    // perhaps this should be PODBC primary PODBC backup
    // so we know where we're copying to/from on the update task.
    void (CPROC *PrimaryRecovered)( PODBC,PODBC );
@@ -172,8 +172,8 @@ void SQLiteGetLastInsertID(sqlite3_context*onwhat,int n,sqlite3_value**something
 {
 	static TEXTCHAR str[20];
 	PODBC odbc = (PODBC)sqlite3_user_data(onwhat);
-	snprintf( str, sizeof( str ), "%Ld", sqlite3_last_insert_rowid( odbc->db ) );
-	printf( "x = %s", str );
+	snprintf( str, sizeof( str ), WIDE( "%Ld" ), sqlite3_last_insert_rowid( odbc->db ) );
+	printf( WIDE( "x = %s" ), str );
 	sqlite3_result_text( onwhat, str, (int)(sizeof( str[0] ) * StrLen( str )), 0 );
 }
 
@@ -264,8 +264,11 @@ int rc = sqlite3_create_function(
 			//mem_routines.xInit = SimpleInit;
 			//mem_routines.xShutdown = SimpleShutdown;
 			mem_routines.pAppData = &mem_routines;
-
+#if SQLITE_VERSION_NUMBER >= 3006023
+			sqlite3_db_config( odbc->db, SQLITE_CONFIG_MALLOC, &mem_routines );
+#else
 			sqlite3_config( SQLITE_CONFIG_MALLOC, &mem_routines );
+#endif
 		}
 #endif
 	}
@@ -278,55 +281,55 @@ static void DumpODBCInfo( PODBC odbc )
 {
 	if( g.odbc && odbc != g.odbc )
 	{
-		lprintf( "GLBOAL ODBC:" );
+		lprintf( WIDE( "GLBOAL ODBC:" ) );
 		DumpODBCInfo( g.odbc );
 	}
 	if( !odbc )
       return;
 #if defined( USE_SQLITE ) || defined( USE_SQLITE_INTERFACE )
-	lprintf( "odbc->db = %p", odbc->db );
+	lprintf( WIDE( "odbc->db = %p" ), odbc->db );
 #endif
 #ifdef USE_ODBC
-	lprintf( "odbc->env = %p", odbc->env );
-	lprintf( "odbc->hdbc = %p", odbc->hdbc );
+	lprintf( WIDE( "odbc->env = %p" ), odbc->env );
+	lprintf( WIDE( "odbc->hdbc = %p" ), odbc->hdbc );
 #endif
-	lprintf( "Last native error code: %d", odbc->native );
-	lprintf( "odbc flags = %s %s %s %s %s %s"
-		, odbc->flags.bConnected?"[Connected]":"[Not Connected]"
-		, odbc->flags.bAccess ?"[MS Access]":"[]"
-		, odbc->flags.bSQLite?"[SQLite]":"[]"
-		, odbc->flags.bPushed?"[PendingPush]":"[]"
+	lprintf( WIDE( "Last native error code: %d" ), odbc->native );
+	lprintf( WIDE( "odbc flags = %s %s %s %s %s %s" )
+		, odbc->flags.bConnected?WIDE("[Connected]"):WIDE("[Not Connected]")
+		, odbc->flags.bAccess ?WIDE("[MS Access]"):WIDE("[]")
+		, odbc->flags.bSQLite?WIDE("[SQLite]"):WIDE("[]")
+		, odbc->flags.bPushed?WIDE("[PendingPush]"):WIDE("[]")
 #if defined( USE_SQLITE ) || defined( USE_SQLITE_INTERFACE )
-		, odbc->flags.bSQLite_native?"[Native SQLite]":"[Not Native SQLite]"
+		, odbc->flags.bSQLite_native?WIDE("[Native SQLite]"):WIDE("[Not Native SQLite]")
 #else
-		, "[]"
+		, WIDE("[]")
 #endif
 #ifdef USE_ODBC
-		, odbc->flags.bODBC?"[ODBC]":"[Not ODBC]"
+		, odbc->flags.bODBC?WIDE("[ODBC]"):WIDE("[Not ODBC]")
 #else
-		, "[]"
+		, WIDE("[]")
 #endif
 		);
-	lprintf( "Collection(s)..." );
+	lprintf( WIDE("Collection(s)...") );
 	{
 		PCOLLECT c;
 		for( c = odbc->collection; c; c = c->next )
 		{
-			lprintf( "----------" );
-			lprintf( "\tflags: %s %s %s %s %s"
+			lprintf( WIDE( "----------" ) );
+			lprintf( WIDE( "\tflags: %s %s %s %s %s" )
 					 , c->flags.bBuildResultArray?"Result Array":"Result String"
 					 , c->flags.bDynamic?"Dynamic":"Static"
-					 , c->flags.bTemporary?"Temporary":"QueryResult"
-					 , c->flags.bPushed?"Pushed":"Auto"
-					 , c->flags.bEndOfFile?"EOF":"more"
+					 , c->flags.bTemporary?"Temporary":WIDE( "QueryResult" )
+					 , c->flags.bPushed?"Pushed":WIDE( "Auto" )
+					 , c->flags.bEndOfFile?"EOF":WIDE( "more" )
 					 );
-			lprintf( "\tCommand: %s"
+			lprintf( WIDE( "\tCommand: %s" )
 					 , GetText( VarTextPeek( c->pvt_out ) )
 					 );
-			lprintf( "\tResult: %s"
+			lprintf( WIDE( "\tResult: %s" )
 					 , GetText( VarTextPeek( c->pvt_result ) )
 					 );
-			lprintf( "\tErr Info: %s"
+			lprintf( WIDE( "\tErr Info: %s" )
 					 , GetText( VarTextPeek( c->pvt_errorinfo ) )
 					 );
 		}
@@ -459,14 +462,14 @@ PTEXT CPROC TranslateINICrypt( PTEXT buffer )
 PTRSZVAL CPROC SetPrimaryDSN( PTRSZVAL psv, arg_list args )
 {
 	PARAM( args, CTEXTSTR, pDSN );
-	strcpy( g.Primary.info.pDSN, pDSN );
+	g.Primary.info.pDSN = StrDup( pDSN );
 	return psv;
 }
 
 PTRSZVAL CPROC SetOptionDSN( PTRSZVAL psv, arg_list args )
 {
 	PARAM( args, CTEXTSTR, pDSN );
-	strcpy( g.Option.info.pDSN, pDSN );
+	g.Option.info.pDSN = StrDup( pDSN );
 	return psv;
 }
 
@@ -474,7 +477,7 @@ PTRSZVAL CPROC SetOptionDSN( PTRSZVAL psv, arg_list args )
 PTRSZVAL CPROC SetBackupDSN( PTRSZVAL psv, arg_list args )
 {
 	PARAM( args, CTEXTSTR, pDSN );
-	strcpy( g.Backup.info.pDSN, pDSN );
+	g.Backup.info.pDSN = StrDup( pDSN );
 	return psv;
 }
 
@@ -482,7 +485,7 @@ PTRSZVAL CPROC SetBackupDSN( PTRSZVAL psv, arg_list args )
 PTRSZVAL CPROC SetUser( PTRSZVAL psv, arg_list args )
 {
 	PARAM( args, CTEXTSTR, pUser );
-	strcpy( g.Primary.info.pID, pUser );
+	StrCpyEx( g.Primary.info.pID, pUser, sizeof( g.Primary.info.pID ) / sizeof( TEXTCHAR ) );
 	return psv;
 }
 
@@ -490,7 +493,7 @@ PTRSZVAL CPROC SetUser( PTRSZVAL psv, arg_list args )
 PTRSZVAL CPROC SetPassword( PTRSZVAL psv, arg_list args )
 {
 	PARAM( args, CTEXTSTR, pPassword );
-	strcpy( g.Primary.info.pPASSWORD, pPassword );
+	StrCpy( g.Primary.info.pPASSWORD, pPassword );
 	return psv;
 }
 
@@ -516,7 +519,7 @@ PTRSZVAL CPROC SetRequireConnection( PTRSZVAL psv, arg_list args )
 PTRSZVAL CPROC SetBackupUser( PTRSZVAL psv, arg_list args )
 {
 	PARAM( args, CTEXTSTR, pUser );
-	strcpy( g.Backup.info.pID, pUser );
+	StrCpy( g.Backup.info.pID, pUser );
 	return psv;
 }
 
@@ -524,7 +527,7 @@ PTRSZVAL CPROC SetBackupUser( PTRSZVAL psv, arg_list args )
 PTRSZVAL CPROC SetBackupPassword( PTRSZVAL psv, arg_list args )
 {
 	PARAM( args, CTEXTSTR, pPassword );
-	strcpy( g.Backup.info.pPASSWORD, pPassword );
+	StrCpy( g.Backup.info.pPASSWORD, pPassword );
 	return psv;
 }
 
@@ -566,7 +569,7 @@ LOGICAL EnsureLogOpen( PODBC odbc )
 				if( attempt )
 					snprintf( logname, sizeof( logname ), "sql%d.log", attempt );
 				else
-					strcpy( logname, WIDE("sql.log") );
+					StrCpy( logname, WIDE("sql.log") );
 				attempt++;
 				// this is going to be more hassle to conserve
 				// than benefit merits.
@@ -592,7 +595,7 @@ void InitLibrary( void )
 		if( g.feedback_handler ) g.feedback_handler( WIDE("Loading ODBC") );
 		CreateCollector( 0, &g.Primary, FALSE );
 		CreateCollector( 0, &g.Backup, FALSE );
-      strcpy( g.Option.info.pDSN, "option.db" );
+      	g.Option.info.pDSN = StrDup( "option.db" );
 		{
 			PCONFIG_HANDLER pch = CreateConfigurationHandler();
 			AddConfigurationMethod( pch, WIDE("Option DSN=%m"), SetOptionDSN );
@@ -1424,7 +1427,7 @@ PODBC ConnectToDatabaseEx( CTEXTSTR DSN, LOGICAL bRequireConnection )
 	InitLibrary();
 	pODBC = New( ODBC );
 	MemSet( pODBC, 0, sizeof( ODBC ) );
-	strcpy( pODBC->info.pDSN, DSN );
+	pODBC->info.pDSN = StrDup( DSN );
 	pODBC->flags.bForceConnection = bRequireConnection;
 	// source ID is not known...
 	// is probably static link to library, rather than proxy operation
@@ -1682,13 +1685,15 @@ void CloseDatabase( PODBC odbc )
 	}
 	else
 #endif
-		if( odbc->hdbc )
+#ifdef USE_ODBC
+	if( odbc->hdbc )
 	{
 		SQLFreeHandle( SQL_HANDLE_ENV, odbc->env );
 		odbc->env = NULL;
 		SQLFreeHandle( SQL_HANDLE_DBC, odbc->hdbc );
 		odbc->hdbc = NULL;
 	}
+#endif
 	Release( odbc );
 }
 
@@ -1768,7 +1773,7 @@ int __DoSQLCommandEx( PODBC odbc, PCOLLECT collection DBG_PASS )
 		const char *tail;
 	retry:
 		// can get back what was not used when parsing...
-		rc3 = sqlite3_prepare_v2( odbc->db, GetText( cmd ), -1, &collection->stmt, &tail );
+		rc3 = sqlite3_prepare_v2( odbc->db, GetText( cmd ), GetTextSize( cmd ) * sizeof(TEXTCHAR), &collection->stmt, &tail );
 		if( rc3 )
 		{
 			_lprintf(DBG_RELAY)( "Result of prepare failed? %s at [%s] in [%s]", sqlite3_errmsg(odbc->db), tail, GetText(cmd) );
@@ -2581,6 +2586,8 @@ int GetSQLResult( CTEXTSTR *result )
 
 int __DoSQLQueryEx( PODBC odbc, PCOLLECT collection, CTEXTSTR query DBG_PASS )
 {
+	int querylen;
+	PTEXT tmp = NULL;
 	int retry = 0;
 	RETCODE rc;
 #if defined( USE_SQLITE ) || defined( USE_SQLITE_INTERFACE )
@@ -2660,12 +2667,15 @@ int __DoSQLQueryEx( PODBC odbc, PCOLLECT collection, CTEXTSTR query DBG_PASS )
 	}
 #endif
 	// try and get query from collector if NULL
-	if( !query ) 
-		query = GetText( VarTextPeek( collection->pvt_out ) );
-	else
+	if( query ) 
 	{
 		VarTextEmpty( collection->pvt_out );
 		vtprintf( collection->pvt_out, "%s", query );
+	}
+	{
+		tmp = VarTextPeek( collection->pvt_out );
+		query = GetText( tmp );
+		querylen = GetTextSize( tmp );
 	}
 	if( !query )
 	{
@@ -2696,7 +2706,7 @@ int __DoSQLQueryEx( PODBC odbc, PCOLLECT collection, CTEXTSTR query DBG_PASS )
 	{
 		const char *tail;
 		// can get back what was not used when parsing...
-		rc3 = sqlite3_prepare_v2( odbc->db, query, -1, &collection->stmt, &tail );
+		rc3 = sqlite3_prepare_v2( odbc->db, query, querylen*sizeof(query[0]), &collection->stmt, &tail );
 		if( rc3 )
 		{
 			const char *tmp;
@@ -2786,8 +2796,8 @@ int __DoSQLQueryEx( PODBC odbc, PCOLLECT collection, CTEXTSTR query DBG_PASS )
 			  GenerateResponce( collection, WM_SQL_RESULT_ERROR );
 			  //DestroyCollector( collection );
 			  return retry ;
-		  }
-	  }
+		}
+	}
 #endif
 	//lprintf( WIDE("Get result ...") );
 	retry = __GetSQLResult( odbc, collection, FALSE );
@@ -3197,7 +3207,7 @@ SQLSTUB_PROC( int, vSQLInsert )( PODBC odbc, CTEXTSTR table, va_list args )
 			if( making_columns || !sql_insert.flags.batch || !VarTextPeek( sql_insert.pvt_columns ) )
 			{
             making_columns = 1;
-				vtprintf( sql_insert.pvt_columns, "%s%s", first?"":",", varname );
+				vtprintf( sql_insert.pvt_columns, WIDE( "%s%s" ), first?WIDE( "" ):WIDE( "," ), varname );
 			}
 
 			quote = va_arg( args, int );
@@ -3205,16 +3215,16 @@ SQLSTUB_PROC( int, vSQLInsert )( PODBC odbc, CTEXTSTR table, va_list args )
 			if( quote == 2)
 			{
 				vtprintf( sql_insert.pvt_values, WIDE("%s%d")
-					, first?"":","
+					, first?WIDE( "" ):WIDE( "," )
 					, (int)(PTRSZVAL)varval // this generates an error - typecast to different size.  This is probably okay... but that means we needed to have it push a 8 byte value here ...
 					);
 			}
 			else
 				vtprintf( sql_insert.pvt_values, WIDE("%s%s%s%s")
-				, first?"":","
-				, quote?open_quote_string:""
+				, first?WIDE( "" ):WIDE( "," )
+				, quote?open_quote_string:WIDE( "" )
 				, varval
-				, quote?close_quote_string:""
+				, quote?close_quote_string:WIDE( "" )
 				);
 			first = 0;
 		}
@@ -3326,17 +3336,17 @@ static void LoadTasks( void )
    int n;
    for( n = 1; ;n++ )
    {
-      char taskid[32];
-      char updatetask[256];
+      TEXTCHAR taskid[32];
+      TEXTCHAR updatetask[256];
 
-		sprintf( taskid, WIDE("Task%d"), n );
+		snprintf( taskid, sizeof( taskid ), WIDE("Task%d"), n );
       updatetask[0] = 0;
       //OptGetPrivateProfileString( WIDE("Recovery Update"), taskid, WIDE(""), updatetask, sizeof( updatetask ), SQL_INI );
       if( updatetask[0] )
       {
          PUPDATE_TASK task = (PUPDATE_TASK)Allocate( sizeof( UPDATE_TASK ) );
          lprintf( WIDE("Task: \'%s\'"), updatetask );
-         strcpy( task->name, updatetask );
+         StrCpy( task->name, updatetask );
          task->PrimaryRecovered = (void(CPROC *)(PODBC,PODBC))LoadFunction( task->name, WIDE("_PrimaryRecovered") );
          // it better never be  a post _ which implies register convention
          //if( !task->PrimaryRecovered )

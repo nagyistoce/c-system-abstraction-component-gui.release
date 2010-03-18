@@ -143,7 +143,7 @@ RENDER_PROC( PKEYDEFINE, CreateKeyBinder )( void )
 {
 	PKEYDEFINE KeyDef = (PKEYDEFINE)Allocate( sizeof( KEYDEFINE ) * 256 );
 	MemSet( KeyDef, 0, sizeof( KEYDEFINE ) * 256 );
-   return KeyDef;
+	return KeyDef;
 }
 
 RENDER_PROC( void, DestroyKeyBinder )( PKEYDEFINE pKeyDef )
@@ -246,13 +246,13 @@ RENDER_PROC( int, HandleKeyEvents )( PKEYDEFINE pKeyDefs, _32 key )
 			{
 #ifdef LOG_KEY_EVENTS
 				if( l.flags.bLogKeyEvent )
-					lprintf("extended key method configured" );
+					lprintf(WIDE( "extended key method configured" ) );
 #endif
 				if( pKeyDefs[keycode].mod[keymod].data.extended_key_trigger )
 				{
 #ifdef LOG_KEY_EVENTS
 					if( l.flags.bLogKeyEvent )
-						lprintf("extended key method configured" );
+						lprintf(WIDE( "extended key method configured" ) );
 #endif
 					pKeyDefs[keycode].mod[keymod].data.extended_key_trigger( pKeyDefs[keycode].mod[keymod].extended_key_psv
 																							, key );
@@ -264,13 +264,13 @@ RENDER_PROC( int, HandleKeyEvents )( PKEYDEFINE pKeyDefs, _32 key )
 			{
 #ifdef LOG_KEY_EVENTS
 				if( l.flags.bLogKeyEvent )
-					lprintf("not extended key method" );
+					lprintf(WIDE( "not extended key method" ) );
 #endif
 				if( pKeyDefs[keycode].mod[keymod].data.trigger )
 				{
 #ifdef LOG_KEY_EVENTS
 					if( l.flags.bLogKeyEvent )
-						lprintf("extended key method configured" );
+						lprintf(WIDE( "extended key method configured" ) );
 #endif
 					pKeyDefs[keycode].mod[keymod].data.trigger( pKeyDefs[keycode].mod[keymod].psv, key );
 				}
@@ -279,12 +279,12 @@ RENDER_PROC( int, HandleKeyEvents )( PKEYDEFINE pKeyDefs, _32 key )
 			}
 		}
 		if( l.flags.bLogKeyEvent )
-			lprintf( "Probably handled..." );
+			lprintf( WIDE( "Probably handled..." ) );
 		// for consistancy better just say we handled this key
 		return 1;
 	}
 	if( l.flags.bLogKeyEvent )
-		lprintf( "not handled..." );
+		lprintf( WIDE( "not handled..." ) );
 	return 0;
 }
 

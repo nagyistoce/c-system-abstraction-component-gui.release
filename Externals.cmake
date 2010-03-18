@@ -2,23 +2,23 @@
 if( NOT __NO_GUI__ )
 
 if( NEED_JPEG )
-SET( JBASEDIR src/jpeg-6b )
+SET( JBASEDIR src/jpeg-8a )
 SET( SYSDEPMEM jmemnobs )
 
 # library object files common to compression and decompression
-SET( COMSRCS  jcomapi jutils jerror jmemmgr ${SYSDEPMEM} )
+SET( COMSRCS  jaricom jcomapi jutils jerror jmemmgr ${SYSDEPMEM} )
 
 # compression library object files
-SET( CLIBSRCS  jcapimin jcapistd jctrans jcparam jdatadst 
+SET( CLIBSRCS jcarith jcapimin jcapistd jctrans jcparam jdatadst 
         jcinit jcmaster jcmarker jcmainct jcprepct 
-        jccoefct jccolor jcsample jchuff jcphuff 
+        jccoefct jccolor jcsample jchuff 
         jcdctmgr jfdctfst jfdctflt jfdctint )
 
 # decompression library object files
-SET( DLIBSRCS  jdapimin jdapistd jdtrans jdatasrc 
-        jdmaster jdinput jdmarker jdhuff jdphuff 
+SET( DLIBSRCS jdarith jdapimin jdapistd jdtrans jdatasrc 
+        jdmaster jdinput jdmarker jdhuff 
         jdmainct jdcoefct jdpostct jddctmgr jidctfst 
-        jidctflt jidctint jidctred jdsample jdcolor 
+        jidctflt jidctint jdsample jdcolor 
         jquant1 jquant2 jdmerge )
 # These objectfiles are included in libjpeg.lib
 FOREACH( SRC ${CLIBSRCS} ${COMSRCS} ${DLIBSRCS} )
@@ -26,27 +26,27 @@ FOREACH( SRC ${CLIBSRCS} ${COMSRCS} ${DLIBSRCS} )
 ENDFOREACH( SRC )
 add_definitions( -DJPEG_SOURCE )
 # ya, this is sorta redundant... should fix that someday.
-include_directories( ${SACK_BASE}/src/jpeg-6b/jpeg ${SACK_BASE}/src/jpeg-6b )
+include_directories( ${SACK_BASE}/${JBASEDIR} )
 
-#message( adding ${JPEG_SOURCE} )
+#message( adding ${SACK_BASE}/${JPEG_SOURCE} )
 endif()
 
 
 if( NEED_PNG )
 
  if( NEED_ZLIB )
-  SET( ZBASEDIR src/zlib-1.2.3 )
+  SET( ZBASEDIR src/zlib-1.2.4 )
   include( ${ZBASEDIR}/CMakeLists.part )
  endif( NEED_ZLIB )
 
 
- SET( PBASEDIR src/libpng-1.2.40 )
+ SET( PBASEDIR src/libpng-1.4.1 )
  include( ${PBASEDIR}/CMakeLists.part )
 endif( NEED_PNG )
 
 
 if( NEED_FREETYPE )
-SET( FBASEDIR src/freetype-2.3.7/src )
+SET( FBASEDIR src/freetype-2.3.12/src )
 
 add_definitions( -DFREETYPE_SOURCE -DFT2_BUILD_LIBRARY )
 

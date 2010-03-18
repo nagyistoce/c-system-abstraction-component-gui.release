@@ -128,7 +128,7 @@ local gzFile gz_open (//path, mode, fd)
     if (s->path == NULL) {
         return destroy(s), (gzFile)Z_NULL;
     }
-    strcpy(s->path, path); /* do this early for debugging */
+    StrCpy(s->path, path); /* do this early for debugging */
 
     s->mode = '\0';
     do {
@@ -177,7 +177,7 @@ local gzFile gz_open (//path, mode, fd)
     }
     s->stream.avail_out = Z_BUFSIZE;
 
-    errno = 0;
+    SetLastError( 0 );
     s->file = fd < 0 ? F_OPEN(path, fmode) : (FILE*)fdopen(fd, fmode);
 
     if (s->file == NULL) {
@@ -223,7 +223,10 @@ gzFile ZEXPORT gzdopen (//fd, mode)
     char name[46];      /* allow for up to 128-bit integers */
 
     if (fd < 0) return (gzFile)Z_NULL;
-    sprintf(name, "<fd:%d>", fd); /* for debugging */
+#ifdef UNDER_CE
+#define snprintf StringCbPrintf
+#endif
+    snprintf(name, sizeof( name ), "<fd:%d>", fd); /* for debugging */
 
     return gz_open (name, mode, fd);
 }
@@ -263,7 +266,7 @@ local int get_byte(//s)
 {
     if (s->z_eof) return EOF;
     if (s->stream.avail_in == 0) {
-        errno = 0;
+        SetLastError( 0 );
         s->stream.avail_in = (uInt)fread(s->inbuf, 1, Z_BUFSIZE, s->file);
         if (s->stream.avail_in == 0) {
             s->z_eof = 1;
@@ -299,7 +302,7 @@ local void check_header(//s)
     len = s->stream.avail_in;
     if (len < 2) {
         if (len) s->inbuf[0] = s->stream.next_in[0];
-        errno = 0;
+        SetLastError( 0 );
         len = (uInt)fread(s->inbuf + len, 1, Z_BUFSIZE >> len, s->file);
         if (len == 0 && ferror(s->file)) s->z_err = Z_ERRNO;
         s->stream.avail_in += len;
@@ -448,7 +451,7 @@ int ZEXPORT gzread (//file, buf, len)
         }
         if (s->stream.avail_in == 0 && !s->z_eof) {
 
-            errno = 0;
+            SetLastError( 0 );
             s->stream.avail_in = (uInt)fread(s->inbuf, 1, Z_BUFSIZE, s->file);
             if (s->stream.avail_in == 0) {
                 s->z_eof = 1;
@@ -615,7 +618,7 @@ int ZEXPORTVA gzprintf (gzFile file, const char *format, /* args */ ...)
     for (len = 0; len < sizeof(buf); len++)
         if (buf[len] == 0) break;
 #  else
-    len = vsprintf(buf, format, va);
+    len = vsnprintf(buf, sizeof(buf), format, va);
     va_end(va);
 #  endif
 #else
@@ -624,6 +627,9 @@ int ZEXPORTVA gzprintf (gzFile file, const char *format, /* args */ ...)
     va_end(va);
     len = strlen(buf);
 #  else
+#ifdef UNDER_CE
+	#define vsnprintf StringCbVPrintf
+#endif
     len = vsnprintf(buf, sizeof(buf), format, va);
     va_end(va);
 #  endif
@@ -971,12 +977,15 @@ int ZEXPORT gzclose (//file)
     return destroy((gz_stream*)file);
 }
 
+#ifdef UNDER_CE
+#define zstrerror(errnum) "<No Conversion>" 
+#else
 #ifdef STDC
 #  define zstrerror(errnum) strerror(errnum)
 #else
 #  define zstrerror(errnum) ""
 #endif
-
+#endif
 /* ===========================================================================
      Returns the error message for the last error which occurred on the
    given compressed file. errnum is set to zlib error number. If an
@@ -989,6 +998,7 @@ const char * ZEXPORT gzerror (//file, errnum)
     int *errnum )
 {
     char *m;
+	int len;
     gz_stream *s = (gz_stream*)file;
 
     if (s == NULL) {
@@ -998,17 +1008,15 @@ const char * ZEXPORT gzerror (//file, errnum)
     *errnum = s->z_err;
     if (*errnum == Z_OK) return (const char*)"";
 
-    m = (char*)(*errnum == Z_ERRNO ? zstrerror(errno) : s->stream.msg);
+    m = (char*)(*errnum == Z_ERRNO ? zstrerror(GetLastError()) : s->stream.msg);
 
     if (m == NULL || *m == '\0') m = (char*)ERR_MSG(s->z_err);
 
     TRYFREE(s->msg);
-    s->msg = (char*)ALLOC(strlen(s->path) + strlen(m) + 3);
+    s->msg = (char*)ALLOC(len =(strlen(s->path) + strlen(m) + 3));
     if (s->msg == Z_NULL) return (const char*)ERR_MSG(Z_MEM_ERROR);
-    strcpy(s->msg, s->path);
-    strcat(s->msg, ": ");
-    strcat(s->msg, m);
-    return (const char*)s->msg;
+	snprintf( s->msg, len, "%s: %s", s->path, m );
+    (const char*)s->msg;
 }
 
 /* ===========================================================================

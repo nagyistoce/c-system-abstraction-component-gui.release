@@ -55,7 +55,7 @@ struct page_data_tag
 };
 
 
-#define PAGE_CHANGER_NAME "page/Page Changer"
+#define PAGE_CHANGER_NAME WIDE("page/Page Changer")
 //#define PAGE_TITLE_NAME "page/Show Title"
 
 void SetCurrentPageID( PSI_CONTROL pc_canvas, _32 ID ); // MNU_CHANGE_PAGE ID (minus base)

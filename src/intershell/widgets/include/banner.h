@@ -59,7 +59,7 @@ BANNER_PROC( void, SetBannerOptionsEx )( PBANNER*, _32 flags, _32 extra );
 // will clear the ppBanner originally passed... so that becomes
 // the wait state variable...
 // results false if no banner to wait for.
-BANNER_PROC( void, SetBannerText )( PBANNER banner, char *text );
+BANNER_PROC( void, SetBannerText )( PBANNER banner, TEXTCHAR *text );
 BANNER_PROC( int, WaitForBanner )( PBANNER banner );
 BANNER_PROC( int, WaitForBannerEx )( PBANNER *banner );
 #define WaitForBanner(b) WaitForBannerEx( &(b) )

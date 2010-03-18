@@ -110,9 +110,9 @@ typedef struct ControlRegistration_tag {
 #define ValidatedControlData(type,id,result,com) type result = (((com)&&(ControlType(com)==(id)))?ControlData(type,com):NULL)
 
 #define OnHideCommon(name) \
-	__DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,WIDE("psi"),HideCommon,WIDE("control"),name "/hide_control",PASTE(name,WIDE("hide_control")),void,(PSI_CONTROL),__LINE__)
+	__DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,WIDE("psi"),HideCommon,WIDE("control"),name WIDE("/hide_control"),PASTE(name,WIDE("hide_control")),void,(PSI_CONTROL),__LINE__)
 #define OnRevealCommon(name) \
-	__DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,WIDE("psi"),RevealCommon,WIDE("control"),name "/reveal_control",WIDE("reveal_control"),void,(PSI_CONTROL),__LINE__)
+	__DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,WIDE("psi"),RevealCommon,WIDE("control"),name WIDE("/reveal_control"),WIDE("reveal_control"),void,(PSI_CONTROL),__LINE__)
 
 #define OnCreateCommon(name)  \
 	__DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,WIDE("psi"),unused_name,WIDE("control"),name WIDE("/rtti"),WIDE("init"),int,(PSI_CONTROL), __LINE__)

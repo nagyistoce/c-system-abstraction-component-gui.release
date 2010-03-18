@@ -888,7 +888,7 @@ PSI_PROC( int, GetListboxMultiSelect )( PSI_CONTROL ); // returns only multisele
 PSI_PROC( void, ResetList)( PSI_CONTROL pc );
 // put an item at end of list.
 PSI_PROC( PLISTITEM, AddListItem)( PSI_CONTROL pc, const CTEXTSTR text );
-PSI_PROC( PLISTITEM, AddListItemEx)( PSI_CONTROL pc, int nLevel, const CTEXTSTR text );
+PSI_PROC( PLISTITEM, AddListItemEx)( PSI_CONTROL pc, int nLevel, CTEXTSTR text );
 // put an item after a known item... NULL to add at head of list.
 PSI_PROC( PLISTITEM, InsertListItem)( PSI_CONTROL pc, PLISTITEM pAfter, CTEXTSTR text );
 PSI_PROC( PLISTITEM, InsertListItemEx)( PSI_CONTROL pc, PLISTITEM pAfter, int nLevel, CTEXTSTR text );
@@ -1028,17 +1028,17 @@ USE_SHEETS_NAMESPACE
 
 
 //------- Misc Controls (and widgets) --------
-	PSI_PROC( void, SimpleMessageBox )( PSI_CONTROL parent, const CTEXTSTR title, const CTEXTSTR content );
+	PSI_PROC( void, SimpleMessageBox )( PSI_CONTROL parent, CTEXTSTR title, CTEXTSTR content );
 // result is the address of a user buffer to read into, reslen is the size of that buffer.
 // question is put above the question... pAbove is the window which this one should be placed above (lock-stacked)
 PSI_PROC( int, SimpleUserQuery )( TEXTSTR result, int reslen, CTEXTSTR question, PCOMMON pAbove );
 
 PSI_PROC( void, RegisterResource )( CTEXTSTR appname, CTEXTSTR resource_name, int ID, int resource_name_range, CTEXTSTR type_name );
 // assuming one uses a
-#define SimpleRegisterResource( name, typename ) RegisterResource( "application", #name, name, 1, typename );
-#define EasyRegisterResource( domain, name, typename ) RegisterResource( domain, #name, name, 1, typename );
-#define EasyRegisterResourceRange( domain, name, range, typename ) RegisterResource( domain, #name, name, range, typename );
-#define SimpleRegisterAppResource( name, typename, class ) RegisterResource( "application/" class, #name, name, 1, typename );
+#define SimpleRegisterResource( name, typename ) RegisterResource( WIDE("application"), WIDE(#name), name, 1, typename );
+#define EasyRegisterResource( domain, name, typename ) RegisterResource( domain, WIDE(#name), name, 1, typename );
+#define EasyRegisterResourceRange( domain, name, range, typename ) RegisterResource( domain, WIDE(#name), name, range, typename );
+#define SimpleRegisterAppResource( name, typename, class ) RegisterResource( WIDE("application/") class, WIDE(#name), name, 1, typename );
 
 //------- INI Prompt for option library (static)
 #ifdef __STATIC__

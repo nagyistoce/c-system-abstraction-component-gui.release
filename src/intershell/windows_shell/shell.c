@@ -67,18 +67,18 @@ PRELOAD( AllowWindowsShell )
 {
 	// Credit to Nicolas Escuder for figuring out how to *Hide the pretteh XP Logon screen*!
 	// Credit also to GeoShell 4.11.8 changelog entry
-	lprintf( "Credit to Nicolas Escuder for figuring out how to *Hide the pretteh XP Logon screen*!" );
-   lprintf( "Credit also to GeoShell version 4.11.8 changelog entry..." );
+	lprintf( WIDE("Credit to Nicolas Escuder for figuring out how to *Hide the pretteh XP Logon screen*!") );
+   lprintf( WIDE("Credit also to GeoShell version 4.11.8 changelog entry...") );
 	// Code borrowed from LiteStep (give it back when we're done using it ^.^).
 	{
-		HANDLE hLogonEvent = OpenEvent( EVENT_MODIFY_STATE, 1, "Global\\msgina: ShellReadyEvent" );    // also: "Global\msgina: ReturnToWelcome"
+		HANDLE hLogonEvent = OpenEvent( EVENT_MODIFY_STATE, 1, WIDE("Global\\msgina: ShellReadyEvent") );    // also: "Global\msgina: ReturnToWelcome"
 
 		if( !hLogonEvent )
 		{
-			lprintf( "Error : %d", GetLastError() );
-			hLogonEvent = OpenEvent( EVENT_MODIFY_STATE, 1, "msgina: ShellReadyEvent" );    // also: "Global\msgina: ReturnToWelcome"
+			lprintf( WIDE("Error : %d"), GetLastError() );
+			hLogonEvent = OpenEvent( EVENT_MODIFY_STATE, 1, WIDE("msgina: ShellReadyEvent") );    // also: "Global\msgina: ReturnToWelcome"
          if( !hLogonEvent )
-				lprintf( "Error : %d", GetLastError() );
+				lprintf( WIDE("Error : %d"), GetLastError() );
 		}
 		SetEvent( hLogonEvent );
 		CloseHandle( hLogonEvent );
@@ -100,16 +100,16 @@ PRELOAD( AllowWindowsShell )
 	}
 }
 
-OnKeyPressEvent( "Windows Logoff" )( PTRSZVAL psv )
+OnKeyPressEvent( WIDE("Windows Logoff") )( PTRSZVAL psv )
 {
-	HANDLE hLogonEvent = OpenEvent( EVENT_MODIFY_STATE, 1, "Global\\msgina: ReturnToWelcome" );
+	HANDLE hLogonEvent = OpenEvent( EVENT_MODIFY_STATE, 1, WIDE("Global\\msgina: ReturnToWelcome") );
 	if( !hLogonEvent )
-      hLogonEvent = OpenEvent( EVENT_MODIFY_STATE, 1, "msgina: ReturnToWelcome" );
+      hLogonEvent = OpenEvent( EVENT_MODIFY_STATE, 1, WIDE("msgina: ReturnToWelcome") );
 	SetEvent( hLogonEvent );
 	CloseHandle( hLogonEvent );
 }
 
-OnCreateMenuButton( "Windows Logoff" )( PMENU_BUTTON button )
+OnCreateMenuButton( WIDE("Windows Logoff") )( PMENU_BUTTON button )
 {
    return 1;
 }
@@ -118,21 +118,21 @@ OnCreateMenuButton( "Windows Logoff" )( PMENU_BUTTON button )
 /* this might be nice to have auto populated start menu
  * based on the original window system stuff... should be easy enough to do...
  */
-OnKeyPressEvent( "Windows Logoff" )( PTRSZVAL psv )
+OnKeyPressEvent( WIDE("Windows Logoff") )( PTRSZVAL psv )
 {
 	PMENU menu;
 	menu = CreatePopup();
    /*
     * if( is98 )
-	 * BuildMenuItemsPopup( menu, "/users/all users/start menu" );
+	 * BuildMenuItemsPopup( menu, WIDE("/users/all users/start menu") );
     * if( isXP )
-    * BuildMenuItemsPopup( menu, "/documents and settings/all users/start menu" );
+    * BuildMenuItemsPopup( menu, WIDE("/documents and settings/all users/start menu") );
     * if( isVista )
-	 * BuildMenuItemsPopup( menu, "/????" );
+	 * BuildMenuItemsPopup( menu, WIDE("/????") );
     */
 }
 
-OnCreateMenuButton( "Windows->Start" )( PMENU_BUTTON button )
+OnCreateMenuButton( WIDE("Windows->Start") )( PMENU_BUTTON button )
 {
    return 1;
 }

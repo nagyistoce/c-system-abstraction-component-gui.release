@@ -244,10 +244,10 @@ typedef struct MsgDataHandle *PMSGHANDLE;
 // messages sent - the first dword of them must be
 // a message ID.
 typedef void (CPROC *MsgQueueReadCallback)( PTRSZVAL psv, CPOINTER p, PTRSZVAL sz );
-TYPELIB_PROC( PMSGHANDLE, CreateMsgQueue )( CTEXTSTR name, PTRSZVAL size
+TYPELIB_PROC( PMSGHANDLE, SackCreateMsgQueue )( CTEXTSTR name, PTRSZVAL size
                                                       , MsgQueueReadCallback Read
                                                       , PTRSZVAL psvRead );
-TYPELIB_PROC( PMSGHANDLE, OpenMsgQueue )( CTEXTSTR name
+TYPELIB_PROC( PMSGHANDLE, SackOpenMsgQueue )( CTEXTSTR name
 													 , MsgQueueReadCallback Read
 													 , PTRSZVAL psvRead );
 TYPELIB_PROC( void, DeleteMsgQueue )( PMSGHANDLE **ppmh );

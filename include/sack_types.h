@@ -3,7 +3,7 @@
 #ifdef FIX_BROKEN_TYPECASTS
 #warning haha err
 #endif
-#include <stdint.h>
+//#include <stdint.h>
 #ifdef _MSC_VER
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x501
@@ -50,7 +50,7 @@ using namespace System;
 #    endif
 
 #ifndef TARGETNAME
-#  define TARGETNAME "sack_bag.dll" //$(TargetFileName)
+#  define TARGETNAME "sack_bag.dll"  //$(TargetFileName)
 #endif
 
 #ifndef __cplusplus_cli
@@ -115,7 +115,8 @@ using namespace System;
 #define VIDEO_LIBRARY_SOURCE
 #define RENDER_LIBRARY_SOURCE
 #ifndef __NO_WIN32API__
-#define _OPENGL_ENABLED
+// this is moved to a CMake option (based on whter it's arm or not right now)
+//#define _OPENGL_ENABLED
 #endif
 // define a type that is a public name struct type... 
 // good thing that typedef and struct were split
@@ -155,9 +156,9 @@ using namespace System;
 #if defined( _MSC_VER )
 // disable pointer conversion warnings - wish I could disable this
 // according to types...
-#pragma warning( disable:4312; disable:4311 )
+//#pragma warning( disable:4312; disable:4311 )
 // disable deprication warnings of snprintf, et al.
-#pragma warning( disable:4996 ) 
+//#pragma warning( disable:4996 )
 #define EMPTY_STRUCT struct { char nothing[]; }
 #endif
 #if defined( __WATCOMC__ )
@@ -166,7 +167,7 @@ using namespace System;
 
 #ifdef __cplusplus
 //#error CPLUSPLUS! yay.
-// could also consider defining 'SACK_NAMESPACE' as 'extern "C"' {' and '..._END' as '}'
+// could also consider defining 'SACK_NAMESPACE' as 'extern "C" ' {' and '..._END' as '}'
 #define SACK_NAMESPACE namespace sack {
 #define SACK_NAMESPACE_END }
 #define _CONTAINER_NAMESPACE namespace containers {
@@ -262,9 +263,9 @@ typedef int pid_t;
 #define PUBLIC(type,name)       type STDPROC _export name
 #ifdef LOG_LIBRARY_ENTER
 #define LIBMAIN() WINPROC(int, LibMain)(HINSTANCE hInstance, WORD wDataSeg, WORD wHeapSize, LPSTR lpCmdLine ) \
-		{ /*Log( WIDE("Library Enter") );*//* here would be if dwReason == process_attach */ {
+		{ /*Log( WIDE("Library Enter" ) );*//* here would be if dwReason == process_attach */ {
 #define LIBEXIT() } /* end if */ } /*endproc*/ \
-	   int STDPROC WEP(int nSystemExit )  { /*Log( WIDE("Library Exit")*/ );
+	   int STDPROC WEP(int nSystemExit )  { /*Log( WIDE("Library Exit" )*/ );
 #else
 #define LIBMAIN() WINPROC(int, LibMain)(HINSTANCE hInstance, WORD wDataSeg, WORD wHeapSize, LPSTR lpCmdLine ) \
 		{ /* here would be if dwReason == process_attach */ {
@@ -323,11 +324,11 @@ typedef int pid_t;
 #define DYNAMIC_IMPORT __declspec(dllimport)
 #ifdef __cplusplus
 #ifdef __cplusplus_cli
-#define PUBLIC(type,name) extern "C" LITERAL_LIB_EXPORT_METHOD type CPROC name
+#define PUBLIC(type,name) extern "C"  LITERAL_LIB_EXPORT_METHOD type CPROC name
 #else
 //#error what the hell!?
-// okay Public functions are meant to be loaded with LoadFuncion( "library", "function name" );
-#define PUBLIC(type,name) extern "C" LITERAL_LIB_EXPORT_METHOD type CPROC name
+// okay Public functions are meant to be loaded with LoadFuncion( "library" , "function name"  );
+#define PUBLIC(type,name) extern "C"  LITERAL_LIB_EXPORT_METHOD type CPROC name
 #endif
 #else
 #define PUBLIC(type,name) LITERAL_LIB_EXPORT_METHOD type CPROC name
@@ -339,27 +340,27 @@ typedef int pid_t;
 #if defined( __WATCOMC__ )
 #define LIBMAIN()   static int __LibMain( HINSTANCE ); PRELOAD( LibraryInitializer ) { \
 	__LibMain( GetModuleHandle(TARGETNAME) );   } \
-	static int __LibMain( HINSTANCE hInstance ) { /*Log( WIDE("Library Enter") );*/
-#define LIBEXIT() } static int LibExit( void ); ATEXIT( LiraryUninitializer ) { LibExit(); } int LibExit(void) { /*Log( WIDE("Library Exit") );*/
+	static int __LibMain( HINSTANCE hInstance ) { /*Log( WIDE("Library Enter" ) );*/
+#define LIBEXIT() } static int LibExit( void ); ATEXIT( LiraryUninitializer ) { LibExit(); } int LibExit(void) { /*Log( WIDE("Library Exit" ) );*/
 #define LIBMAIN_END() }
 #else
 #ifdef TARGETNAME
 #define LIBMAIN()   static int __LibMain( HINSTANCE ); PRELOAD( LibraryInitializer ) { \
 	__LibMain( GetModuleHandle(TARGETNAME) );   } \
-	static int __LibMain( HINSTANCE hInstance ) { /*Log( WIDE("Library Enter") );*/
+	static int __LibMain( HINSTANCE hInstance ) { /*Log( WIDE("Library Enter" ) );*/
 #else
 #define LIBMAIN()   static int __LibMain( HINSTANCE ); PRELOAD( LibraryInitializer ) { \
 	__LibMain( GetModuleHandle (NULL) );   } \
-	static int __LibMain( HINSTANCE hInstance ) { /*Log( WIDE("Library Enter") );*/
+	static int __LibMain( HINSTANCE hInstance ) { /*Log( WIDE("Library Enter" ) );*/
 #endif
-#define LIBEXIT() } static int LibExit( void ); ATEXIT( LiraryUninitializer ) { LibExit(); } int LibExit(void) { /*Log( WIDE("Library Exit") );*/
+#define LIBEXIT() } static int LibExit( void ); ATEXIT( LiraryUninitializer ) { LibExit(); } int LibExit(void) { /*Log( WIDE("Library Exit" ) );*/
 #define LIBMAIN_END() }
 #if 0
 #define LIBMAIN() EXPORT_METHOD WINPROC(int, DllMain)(HINSTANCE hInstance, DWORD dwReason, void *unused ) \
 		{ if( dwReason == DLL_PROCESS_ATTACH ) {\
-			/*Log( WIDE("Library Enter") );*//* here would be if dwReason == process_attach */
+			/*Log( WIDE("Library Enter" ) );*//* here would be if dwReason == process_attach */
 #define LIBEXIT() } /* end if */ if( dwReason == DLL_PROCESS_DETACH ) {  \
-	   									 /*Log( WIDE("Library Exit") );*/
+	   									 /*Log( WIDE("Library Exit" ) );*/
 #define LIBMAIN_END()  } return 1; }
 #endif
 #endif
@@ -413,16 +414,16 @@ typedef int pid_t;
 #ifdef __STATIC__
 #define LIBMAIN() static WINPROC(int, LibMain)(HINSTANCE hInstance, DWORD dwReason, void *unused ) \
 		{ if( dwReason == DLL_PROCESS_ATTACH ) {\
-			/*Log( WIDE("Library Enter") );*//* here would be if dwReason == process_attach */
+			/*Log( WIDE("Library Enter" ) );*//* here would be if dwReason == process_attach */
 #define LIBEXIT() } /* end if */ if( dwReason == DLL_PROCESS_DETACH ) {  \
-	  									 /*Log( WIDE("Library Exit") );*/
+	  									 /*Log( WIDE("Library Exit" ) );*/
 #define LIBMAIN_END()  } return 1; }
 #else
 #define LIBMAIN() WINPROC(int, LibMain)(HINSTANCE hInstance, DWORD dwReason, void *unused ) \
 		{ if( dwReason == DLL_PROCESS_ATTACH ) {\
-			/*Log( WIDE("Library Enter") );*//* here would be if dwReason == process_attach */
+			/*Log( WIDE("Library Enter" ) );*//* here would be if dwReason == process_attach */
 #define LIBEXIT() } /* end if */ if( dwReason == DLL_PROCESS_DETACH ) {  \
-	   									 /*Log( WIDE("Library Exit") );*/
+	   									 /*Log( WIDE("Library Exit" ) );*/
 #define LIBMAIN_END()  } return 1; }
 #endif
 
@@ -435,7 +436,7 @@ typedef int pid_t;
 #define TOCHR(n) #n[0]
 #define TOSTR(n) WIDE(#n)
 #define STRSYM(n) TOSTR(n)
-#define FILELINE  TEXT(__FILE__) WIDE("(") TEXT(STRSYM(__LINE__))WIDE(") : ")
+#define FILELINE  TEXT(__FILE__) WIDE("(" ) TEXT(STRSYM(__LINE__))WIDE(" : " ))
 #if defined( _MSC_VER ) || defined( __PPCCPP__ )
 #define pragnote(msg) message( FILELINE msg )
 #define pragnoteonly(msg) message( msg )
@@ -465,9 +466,9 @@ typedef int pid_t;
 #if defined( _DEBUG ) //&& !defined( __NO_WIN32API__ ) 
 	// these DBG_ formats are commented out from duplication in sharemem.h
 #if defined( __LINUX__ ) && !defined( __PPCCPP__ )
-//#warning "Setting DBG_PASS and DBG_FORWARD to work."
+//#warning "Setting DBG_PASS and DBG_FORWARD to work." 
 #else
-//#pragma pragnoteonly("Setting DBG_PASS and DBG_FORWARD to work" )
+//#pragma pragnoteonly("Setting DBG_PASS and DBG_FORWARD to work"  )
 #endif
 #define DBG_AVAILABLE   1
 #define DBG_SRC         FILELINE_SRC
@@ -482,9 +483,9 @@ typedef int pid_t;
 #define DBG_VARSRC      FILELINE_VARSRC
 #else
 #if defined( __LINUX__ ) && !defined( __PPCCPP__ )
-//#warning "Setting DBG_PASS and DBG_FORWARD to be ignored."
+//#warning "Setting DBG_PASS and DBG_FORWARD to be ignored." 
 #else
-//#pragma pragnoteonly("Setting DBG_PASS and DBG_FORWARD to be ignored" )
+//#pragma pragnoteonly("Setting DBG_PASS and DBG_FORWARD to be ignored"  )
 #endif
 #define DBG_AVAILABLE   0
 #define DBG_SRC 
@@ -565,8 +566,14 @@ typedef unsigned int  BIT_FIELD;
 #define PACKED
 #endif
 
+#if  _MSC_VER > 1000000
+
 typedef uint64_t _64;
 typedef int64_t  S_64;
+#else
+typedef unsigned long long _64;
+typedef long long  S_64;
+#endif
 typedef _64 *P_64;
 typedef S_64 *PS_64;
 
@@ -594,7 +601,11 @@ typedef wchar_t *PX_16;
 #if defined( UNICODE ) || defined( SACK_COM_OBJECT )
 //should also consider revisiting code that was updated for TEXTCHAR to char conversion methods...
 #ifdef _MSC_VER
+#ifdef UNDER_CE
+#define NULTERM 
+#else
 #define NULTERM __nullterminated
+#endif
 #else
 #define NULTERM
 #endif
@@ -640,34 +651,34 @@ typedef const void *CPOINTER;
 #endif
 
 #if defined( __LINUX64__ ) || defined( _WIN64 )
-#define _32f   WIDE("u")
-#define _32fx   WIDE("x")
-#define _32fX   WIDE("X")
-#define _32fs   WIDE("d")
-#define PTRSZVALfs WIDE("llu")
-#define PTRSZVALfx WIDE("llx")
-#define c_32f   "u"
-#define c_32fx   "x"
-#define c_32fX   "X"
-#define c_32fs   "d"
-#define cPTRSZVALfs "llu"
-#define cPTRSZVALfx "llx"
+#define _32f   WIDE("u" )
+#define _32fx   WIDE("x" )
+#define _32fX   WIDE("X" )
+#define _32fs   WIDE("d" )
+#define PTRSZVALfs WIDE("llu" )
+#define PTRSZVALfx WIDE("llx" )
+#define c_32f   "u" 
+#define c_32fx   "x" 
+#define c_32fX   "X" 
+#define c_32fs   "d" 
+#define cPTRSZVALfs "llu" 
+#define cPTRSZVALfx "llx" 
 #else
-#define _32f   WIDE("lu")
-#define _32fx   WIDE("lx")
-#define _32fX   WIDE("lX")
-#define _32fs   WIDE("ld")
-#define PTRSZVALfs WIDE("lu")
-#define PTRSZVALfx WIDE("lx")
-#define c_32f   "lu"
-#define c_32fx   "lx"
-#define c_32fX   "lX"
-#define c_32fs   "ld"
-#define cPTRSZVALfs "lu"
-#define cPTRSZVALfx "lx"
+#define _32f   WIDE("lu" )
+#define _32fx   WIDE("lx" )
+#define _32fX   WIDE("lX" )
+#define _32fs   WIDE("ld" )
+#define PTRSZVALfs WIDE("lu" )
+#define PTRSZVALfx WIDE("lx" )
+#define c_32f   "lu" 
+#define c_32fx   "lx" 
+#define c_32fX   "lX" 
+#define c_32fs   "ld" 
+#define cPTRSZVALfs "lu" 
+#define cPTRSZVALfx "lx" 
 #endif
 
-#define PTRSZVALf WIDE("p")
+#define PTRSZVALf WIDE("p" )
 
 #if defined( __WATCOMC__ ) //|| defined( _MSC_VER )
 #define _64f    WIDE("Lu")
@@ -919,43 +930,6 @@ SACK_NAMESPACE_END
 #include <logging.h>
 #endif
 
-// may consider changing this to P_16 for unicode...
-#ifdef UNICODE
-#ifndef NO_UNICODE_C
-#define strrchr          wcsrchr  
-#define strchr           wcschr
-#define strncpy          wcsncpy
-#define strcpy           wcscpy
-#define strcmp           wcscmp
-
-#define strlen           wcslen
-#define stricmp          wcsicmp
-#define strnicmp         wcsnicmp
-#define stat             _wstat
-#ifdef _MSC_VER
-#ifndef __cplusplus_cli
-#error "okay - no  we don't like unicode please set multibyte charset..."
-#define sprintf          _swprintf
-#define vsnprintf        _vsnwprintf
-#define snprintf         _snwprintf
-#endif
-#endif
-#endif
-#else
-#ifdef _MSC_VER
-#define snprintf _snprintf
-#ifndef __cplusplus_cli
-#if ( _MSC_VER < 1500 )
-// myabe this is required for older stuff... I keep trying to remove these...
-#define	vsnprintf _vsnprintf
-#endif
-#endif
-#endif
-#endif
-
-
-
-
 
 SACK_NAMESPACE
 
@@ -963,7 +937,7 @@ SACK_NAMESPACE
 // this is always statically linked with libraries, so they may contact their
 // core executable to know when it's done loading everyone else also...
 #  ifdef __cplusplus
-extern "C" 
+extern "C"  
 #  endif
 #  if defined( __WINDOWS__ ) && !defined( __STATIC__ )
 #    ifdef __NO_WIN32API__ 

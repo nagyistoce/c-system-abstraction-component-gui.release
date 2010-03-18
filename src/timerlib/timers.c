@@ -10,11 +10,6 @@
  *
  */
 
-#ifdef __WATCOMC__
-// _beginthread
-#include <process.h>
-#endif
-
 
 // this is a method replacement to use PIPEs instead of SEMAPHORES
 // replacement code only affects linux.
@@ -27,7 +22,7 @@
 // for critical section waiting...
 // must be included before memlib..
 
-#undef UNICODE
+//#undef UNICODE
 #define MEMORY_STRUCT_DEFINED
 #define DEFINE_MEMORY_STRUCT
 
@@ -36,6 +31,15 @@
 #include <stdhdrs.h> // Sleep()
 // sorry if this causes problems...
 // maybe promote this include into stdhdrs when this fails to compile
+
+#ifdef __WATCOMC__
+// _beginthread
+#undef exit
+#undef getenv
+// process.h redefines exit
+#include <process.h>
+#endif
+
 
 #include <sack_types.h>
 #include <deadstart.h>
@@ -238,7 +242,7 @@ static void InitWakeup( PTHREAD thread )
 #ifdef _WIN32
 	if( !thread->hEvent )
 	{
-		char name[64];
+		TEXTCHAR name[64];
 		snprintf( name, sizeof(name), WIDE("Thread Signal:%08X:%08X"), (_32)(thread->thread_ident >> 32)
 				 , (_32)(thread->thread_ident & 0xFFFFFFFF) );
 #ifdef LOG_CREATE_EVENT_OBJECT
@@ -430,7 +434,7 @@ TIMER_PROC( void, WakeThreadEx )( PTHREAD thread DBG_PASS )
 	{
 		PTHREAD_EVENT event;
 		INDEX idx;
-		char name[64];
+		TEXTCHAR name[64];
 		snprintf( name, sizeof(name), WIDE("Thread Signal:%08X:%08X"), (_32)(thread->thread_ident >> 32)
 				 , (_32)(thread->thread_ident & 0xFFFFFFFF));
 		LIST_FORALL( g.thread_events, idx, PTHREAD_EVENT, event )
@@ -444,23 +448,23 @@ TIMER_PROC( void, WakeThreadEx )( PTHREAD thread DBG_PASS )
 		if( !event )
 		{
 			event = New( THREAD_EVENT );
-         event->name = StrDup( name );
+			event->name = StrDup( name );
 			event->hEvent = OpenEvent( EVENT_ALL_ACCESS /*EVENT_MODIFY_STATE */, FALSE, name );
-         AddLink( &g.thread_events, event );
+			AddLink( &g.thread_events, event );
 		}
 		if( event->hEvent )
 		{
-         //lprintf( WIDE("event opened successfully... %d"), WaitForSingleObject( hEvent, 0 ) );
-			 if( !SetEvent( event->hEvent ) )
+			//lprintf( WIDE("event opened successfully... %d"), WaitForSingleObject( hEvent, 0 ) );
+			if( !SetEvent( event->hEvent ) )
 				 lprintf( WIDE("Set event FAILED..%d"), GetLastError() );
 			Relinquish(); // may or may not execute other thread before this...
 		}
 		else
 		{
-         lprintf( WIDE("Failed to open that event! %d"), GetLastError() );
+			lprintf( WIDE("Failed to open that event! %d"), GetLastError() );
 			// thread to wake is not ready to be
 			// woken, does not exist, or some other
-         // BAD problem.
+			// BAD problem.
 		}
 	}
 #else
@@ -686,7 +690,7 @@ TIMER_PROC( void, WakeableSleepEx )( _32 n DBG_PASS )
 			{
 				lprintf( WIDE("Still an invalid semaphore? Dang.") );
             fprintf( stderr, WIDE("Out of semaphores.") );
-            exit(0);
+            BAG_Exit(0);
 			}
 		}
 #endif
@@ -1361,7 +1365,7 @@ static int CPROC ProcessTimers( PTRSZVAL psvForce )
 				g.last_sleep = ( timer->delta - ( g.this_tick - g.last_tick ) );
 				if( g.last_sleep < 0 )
 				{
-               lprintf( "next pending sleep is %d", g.last_sleep );
+               lprintf( WIDE( "next pending sleep is %d" ), g.last_sleep );
 					g.last_sleep = 1;
 				}
 #ifdef LOG_LATENCY
@@ -1616,7 +1620,7 @@ TIMER_PROC( LOGICAL, EnterCriticalSecEx )( PCRITICALSECTION pcs DBG_PASS )
 #ifdef _DEBUG
 			if( ( curtick+2000) < timeGetTime() )//GetTickCount() )
 			{
-				xlprintf(1)( "Timeout during critical section wait for lock.  No lock should take more than 1 task cycle %ld %ld", curtick, timeGetTime() );//GetTickCount() );
+				xlprintf(1)( WIDE( "Timeout during critical section wait for lock.  No lock should take more than 1 task cycle %ld %ld" ), curtick, timeGetTime() );//GetTickCount() );
 				DebugBreak();
 				return FALSE;
 			}
@@ -1677,7 +1681,7 @@ TIMER_PROC( LOGICAL, LeaveCriticalSecEx )( PCRITICALSECTION pcs DBG_PASS )
 #ifdef _DEBUG
 	if( (curtick+2000) < timeGetTime() )//GetTickCount() )
 	{
-		lprintf( "Timeout during critical section wait for lock.  No lock should take more than 1 task cycle" );
+		lprintf( WIDE( "Timeout during critical section wait for lock.  No lock should take more than 1 task cycle" ) );
 		DebugBreak(); 
 		return FALSE;
 	}
@@ -1739,7 +1743,7 @@ TIMER_PROC( LOGICAL, LeaveCriticalSecEx )( PCRITICALSECTION pcs DBG_PASS )
 			_lprintf( DBG_RELAY )( "%s", msg );
 		}
 #else
-		_lprintf( DBG_RELAY )( "Sorry - you can't leave a section you don't own... %Lx %Lx", pcs->dwThreadID, dwCurProc );
+		_lprintf( DBG_RELAY )( WIDE("Sorry - you can't leave a section you don't own... %")_64fx WIDE("%")_64fx, pcs->dwThreadID, dwCurProc );
 #endif
 		pcs->dwUpdating = 0;
 		return FALSE;

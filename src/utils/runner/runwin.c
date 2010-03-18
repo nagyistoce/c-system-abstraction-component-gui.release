@@ -17,11 +17,13 @@
 
 
 #if (MODE==0)
-int APIENTRY WinMain( HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmdLine, int nCmdShow )
+int APIENTRY WinMain( HINSTANCE hInst, HINSTANCE hPrev
+						  , LPTSTR lpCmdLine
+						  , int nCmdShow )
 //int main( int argc, char **argv )
 {
 
-	char **argv;
+	TEXTCHAR **argv;
 	int argc;
 	ParseIntoArgs( GetCommandLine(), &argc, &argv );
 
@@ -52,12 +54,14 @@ int main( int argc, char **argv )
 	if( !hModule )
 	{
 #ifdef LOAD_LIBNAME
-		hModule = LoadFunction( libname = LOAD_LIBNAME, NULL );
+		hModule = LoadFunction( libname = _WIDE(LOAD_LIBNAME), NULL );
 		if( !hModule )
 		{
+#ifndef UNDER_CE
 			lprintf( "error: (%ld)%s"
 					 , GetLastError()
 					 , strerror(GetLastError()) );
+#endif
 			return 0;
 		}
 		else
@@ -75,37 +79,37 @@ int main( int argc, char **argv )
 	}
 	{
 
-		Main = (MainFunction)LoadFunction( libname, "_Main" );
+		Main = (MainFunction)LoadFunction( libname, WIDE( "_Main" ) );
 		if( !Main )
-			Main = (MainFunction)LoadFunction( libname, "Main" );
+			Main = (MainFunction)LoadFunction( libname, WIDE( "Main" ) );
 		if( !Main )
-			Main = (MainFunction)LoadFunction( libname, "Main_" );
+			Main = (MainFunction)LoadFunction( libname, WIDE( "Main_" ) );
 		if( Main )
 			Main( argc-arg_offset, argv+arg_offset, MODE );
 		else
 		{
-			Begin = (BeginFunction)LoadFunction( libname, "_Begin" );
+			Begin = (BeginFunction)LoadFunction( libname, WIDE( "_Begin" ) );
 			if( !Begin )
-				Begin = (BeginFunction)LoadFunction( libname, "Begin" );
+				Begin = (BeginFunction)LoadFunction( libname, WIDE( "Begin" ) );
 			if( !Begin )
-				Begin = (BeginFunction)LoadFunction( libname, "Begin_" );
+				Begin = (BeginFunction)LoadFunction( libname, WIDE( "Begin_" ) );
 			if( Begin )
 			{
 				int xlen, ofs, arg;
 				char *x;
-				for( arg = arg_offset, xlen = 0; arg < argc; arg++, xlen += snprintf( NULL, 0, "%s%s", arg?" ":"", argv[arg] ) );
+				for( arg = arg_offset, xlen = 0; arg < argc; arg++, xlen += snprintf( NULL, 0, WIDE( "%s%s" ), arg?WIDE( " " ):WIDE( "" ), argv[arg] ) );
 				x = (char*)malloc( ++xlen );
-				for( arg = arg_offset, ofs = 0; arg < argc; arg++, ofs += snprintf( x + ofs, xlen - ofs, "%s%s", arg?" ":"", argv[arg] ) );
+				for( arg = arg_offset, ofs = 0; arg < argc; arg++, ofs += snprintf( x + ofs, xlen - ofs, WIDE( "%s%s" ), arg?WIDE( " " ):WIDE( "" ), argv[arg] ) );
 				Begin( x, MODE ); // pass console defined in Makefile
 				free( x );
 			}
 			else
 			{
-				Start = (StartFunction)LoadFunction( libname, "_Start" );
+				Start = (StartFunction)LoadFunction( libname, WIDE( "_Start" ) );
 				if( !Start )
-					Start = (StartFunction)LoadFunction( libname, "Start" );
+					Start = (StartFunction)LoadFunction( libname, WIDE( "Start" ) );
 				if( !Start )
-					Start = (StartFunction)LoadFunction( libname, "Start_" );
+					Start = (StartFunction)LoadFunction( libname, WIDE( "Start_" ) );
 				if( Start )
 					Start( );
 			}

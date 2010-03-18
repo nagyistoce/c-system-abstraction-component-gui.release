@@ -35,7 +35,7 @@ using namespace sack::math::fraction;
 #define strnicmp strncasecmp
 #endif
 
-#define CompareText(l1,l2)    ( stricmp( GetText(l1), GetText(l2) ) )
+#define CompareText(l1,l2)    ( StrCaseCmp( GetText(l1), GetText(l2) ) )
 
 // all matches to content are done case insensitive.
 
@@ -247,7 +247,7 @@ void DoInit( void )
 
 //---------------------------------------------------------------------
 
-void LogElement( char *leader, PCONFIG_ELEMENT pce )
+void LogElement( TEXTCHAR *leader, PCONFIG_ELEMENT pce )
 {
     if( !pce )
     {
@@ -318,11 +318,11 @@ void DumpConfigurationEvaluator( PCONFIG_HANDLER pch )
    PCONFIG_ELEMENT pce;
 	LIST_FORALL( pch->ConfigTestRoot.pConstElementList, idx, PCONFIG_ELEMENT, pce )
 	{
-      LogElement( "const", pce );
+      LogElement( WIDE("const"), pce );
 	}
 	LIST_FORALL( pch->ConfigTestRoot.pVarElementList, idx, PCONFIG_ELEMENT, pce )
 	{
-      LogElement( "var", pce );
+      LogElement( WIDE( "var" ), pce );
 	}
 }
 
@@ -363,12 +363,12 @@ static PTEXT CPROC FilterLines( POINTER *scratch, PTEXT buffer )
 		if( text )
 		{
 			LineRelease( buffer );
-         lprintf( "Returning buffer [%s]", GetText( text ) );
+         lprintf( WIDE( "Returning buffer [%s]" ), GetText( text ) );
          return text;
 		}
 		else
 		{
-         lprintf( "Returning buffer [%s]", GetText( buffer ) );
+         lprintf( WIDE( "Returning buffer [%s]" ), GetText( buffer ) );
 			return buffer; // pass it on to others - end of stream..
 		}
 	}
@@ -383,7 +383,7 @@ static PTEXT CPROC FilterLines( POINTER *scratch, PTEXT buffer )
 			Release( scratch[0] );
 			scratch[0] = NULL;
 #ifdef LOG_LINES_READ
-			lprintf( "Returning buffer [%s]", GetText( final ) );
+			lprintf( WIDE( "Returning buffer [%s]" ), GetText( final ) );
 #endif
          return final;
 		}
@@ -396,7 +396,7 @@ static PTEXT CPROC FilterLines( POINTER *scratch, PTEXT buffer )
 		int end = 0;
 		int length = GetTextSize( buffer );
 		CTEXTSTR chardata = GetText( buffer );
-      //lprintf( "Considering buffer %s", GetText( buffer ) + data->skip );
+      //lprintf( WIDE( "Considering buffer %s" ), GetText( buffer ) + data->skip );
 		if( !length )
 			LineRelease( SegGrab( buffer ) );
 		for( n = thisskip; n < length; n++ )
@@ -442,7 +442,7 @@ static PTEXT CPROC FilterLines( POINTER *scratch, PTEXT buffer )
 					len = total_length - ofs;
 				MemCpy( GetText( result ) + ofs
 					, GetText( buffer ) + thisskip
-					, len );
+					, sizeof( TEXTCHAR)*len );
 				ofs += len;
 				n += len;
 				if( ofs < total_length )
@@ -463,7 +463,7 @@ static PTEXT CPROC FilterLines( POINTER *scratch, PTEXT buffer )
 			GetText(result)[total_length] = 0;
 			//lprintf( "Considering buffer %s", GetText( result ) );
 #ifdef LOG_LINES_READ
-			lprintf( "Returning buffer [%s]", GetText( result ) );
+			lprintf( WIDE( "Returning buffer [%s]" ), GetText( result ) );
 #endif
 			return result;
 		}
@@ -584,7 +584,7 @@ static PTEXT CPROC FilterEscapesAndComments( POINTER *scratch, PTEXT pText )
 					switch( text[src] )
 					{
 					case 0:
-                  lprintf( "Continuation at end of line... save this and append next line please." );
+                  lprintf( WIDE( "Continuation at end of line... save this and append next line please." ) );
                   break;
 					default:
 						text[dest++] = text[src];
@@ -639,7 +639,7 @@ static PTEXT get_line(FILE *source /*FOLD00*/
 				{
 				// request any existing data without adding more...
 					newline = filter( GetLinkAddress( filter_data, idx ), newline );
-					//lprintf( "Process line: %s", GetText( newline ) );
+					//lprintf( WIDE( "Process line: %s" ), GetText( newline ) );
                //lprintf( WIDE("after filter %d line = %s"), idx, GetText( newline ) );
 					if( newline )
 						didone = TRUE;
@@ -668,13 +668,13 @@ static PTEXT get_line(FILE *source /*FOLD00*/
 				else
 				{
 					SetTextSize( newline, (_32)readlen );
-					//lprintf( "Process line: %s", GetText( newline ) );
+					//lprintf( WIDE( "Process line: %s" ), GetText( newline ) );
 				}
 
 				LIST_FORALL( filters[0], idx, PTEXT (CPROC *)(POINTER*,PTEXT), filter )
 				{
 					newline = filter( GetLinkAddress( filter_data, idx ), newline );
-					//lprintf( "Process line: %s", GetText( newline ) );
+					//lprintf( WIDE( "Process line: %s" ), GetText( newline ) );
 					if( !newline )
 						break; // get next bit of data ....
 				}
@@ -696,7 +696,7 @@ PTEXT GetConfigurationLine( PCONFIG_HANDLER pConfigHandler )
 									, pConfigHandler->Unhandled?TRUE:FALSE ) ) )
    {
 #if defined( LOG_LINES_READ )
-		lprintf( "Process line: %s", GetText( line ) );
+		lprintf( WIDE( "Process line: %s" ), GetText( line ) );
 #endif
       p = burst( line );
       LineRelease( line );
@@ -1007,7 +1007,7 @@ int IsBooleanVar( PCONFIG_ELEMENT pce, PTEXT *start )
     //Log1( WIDE("Is %s boolean?"), GetText( *start ) );
 #define CmpMin(constlen)  ((len <= (constlen))?(len):0)
 #define NearText(text,const)   ( CmpMin( sizeof( const ) - 1 ) &&      \
-                 ( strnicmp( GetText( text ), const, len ) == 0 ) )
+                 ( StrCaseCmpEx( GetText( text ), const, len ) == 0 ) )
     if( NearText( *start, WIDE("yes") ) ||
         NearText( *start, WIDE("1") ) ||
        NearText( *start, WIDE("on") ) ||
@@ -1514,12 +1514,12 @@ int IsMultiWordVar( PCONFIG_ELEMENT pce, PTEXT *start )
 		 {
 			 LineRelease( pWords );
 			 pWords = NULL;
-			 lprintf( "Ended multi word badly." );
+			 lprintf( WIDE( "Ended multi word badly." ) );
           return FALSE;
 		 }
 #ifdef FULL_TRACE
 		 else
-			 lprintf( "is alright - gathered to end of line ok." );
+			 lprintf( WIDE( "is alright - gathered to end of line ok." ) );
 #endif
 	 }
 	 //if( !pWords )
@@ -1563,7 +1563,7 @@ int IsPathVar( PCONFIG_ELEMENT pce, PTEXT *start )
 		{
 			PTEXT out = BuildLine( pWords );
 			TEXTSTR buf = NewArray( TEXTCHAR, GetTextSize( out ) + 1 );
-			strcpy( buf, GetText( out ) );
+			StrCpy( buf, GetText( out ) );
 			LineRelease( out );
 			LineRelease( pWords );
 			pce->data[0].multiword.pWords = buf;
@@ -1597,7 +1597,7 @@ int IsFileVar( PCONFIG_ELEMENT pce, PTEXT *start )
 		{
 			PTEXT out = BuildLine( pWords );
 			TEXTSTR buf = NewArray( TEXTCHAR, GetTextSize( out ) + 1 );
-			strcpy( buf, GetText( out ) );
+			StrCpy( buf, GetText( out ) );
 			LineRelease( out );
 			LineRelease( pWords );
 			pce->data[0].multiword.pWords = buf;
@@ -1631,7 +1631,7 @@ int IsFilePathVar( PCONFIG_ELEMENT pce, PTEXT *start )
 		 {
 			 PTEXT out = BuildLine( pWords );
 			 TEXTSTR buf = NewArray( TEXTCHAR, GetTextSize( out ) + 1 );
-			 strcpy( buf, GetText( out ) );
+			 StrCpy( buf, GetText( out ) );
 			 LineRelease( out );
 			 LineRelease( pWords );
 			 pce->data[0].multiword.pWords = buf;
@@ -1812,36 +1812,38 @@ CONFIGSCR_PROC( int, ProcessConfigurationFile )( PCONFIG_HANDLER pch, CTEXTSTR n
 {
 	PTEXT line;
 	Fopen( pch->file, name, WIDE("rb") );
+#ifndef UNDER_CE
 	if( !pch->file )
 	{
-      CTEXTSTR workpath = OSALOT_GetEnvironmentVariable( "MY_WORK_PATH" );
+		CTEXTSTR workpath = OSALOT_GetEnvironmentVariable( WIDE( "MY_WORK_PATH" ) );
 		TEXTCHAR pathname[255];
-		sprintf( pathname, WIDE("%s/%s"), workpath, name );
+		snprintf( pathname, sizeof( pathname ), WIDE("%s/%s"), workpath, name );
 		Fopen( pch->file, pathname, WIDE("rb") );
 	}
 	if( !pch->file )
 	{
-      CTEXTSTR workpath = OSALOT_GetEnvironmentVariable( "MY_LOAD_PATH" );
+		CTEXTSTR workpath = OSALOT_GetEnvironmentVariable( WIDE( "MY_LOAD_PATH" ) );
 		TEXTCHAR pathname[255];
-		sprintf( pathname, WIDE("%s/%s"), workpath, name );
+		snprintf( pathname, sizeof( pathname ), WIDE("%s/%s"), workpath, name );
+		Fopen( pch->file, pathname, WIDE("rb") );
+	}
+#endif
+	if( !pch->file )
+	{
+		TEXTCHAR pathname[255];
+		snprintf( pathname, sizeof( pathname ), WIDE("/etc/%s"), name );
 		Fopen( pch->file, pathname, WIDE("rb") );
 	}
 	if( !pch->file )
 	{
 		TEXTCHAR pathname[255];
-		sprintf( pathname, WIDE("/etc/%s"), name );
+		snprintf( pathname, sizeof( pathname ), WIDE("\\ftn3000\\working\\%s"), name );
 		Fopen( pch->file, pathname, WIDE("rb") );
 	}
 	if( !pch->file )
 	{
 		TEXTCHAR pathname[255];
-		sprintf( pathname, WIDE("\\ftn3000\\working\\%s"), name );
-		Fopen( pch->file, pathname, WIDE("rb") );
-	}
-	if( !pch->file )
-	{
-		TEXTCHAR pathname[255];
-		sprintf( pathname, WIDE("C:\\ftn3000\\working\\%s"), name );
+		snprintf( pathname, sizeof( pathname ), WIDE("C:\\ftn3000\\working\\%s"), name );
 		Fopen( pch->file, pathname, WIDE("rb") );
 	}
 	pch->psvUser = psv;
@@ -2116,16 +2118,16 @@ void EndConfiguration( PCONFIG_HANDLER pch )
 		}
 		else
 		{
-         lprintf( "Config was not saved, destroying." );
+			//lprintf( WIDE("Config was not saved, destroying.") );
 			DestroyConfigTest( pch, &pch->ConfigTestRoot, FALSE );
 		}
-      // didn't recover from states list.
-      pch->config_recovered = prior_state->recovered;
+		// didn't recover from states list.
+		pch->config_recovered = prior_state->recovered;
 		pch->ConfigTestRoot = prior_state->ConfigTestRoot;
 		pch->EndProcess = prior_state->EndProcess;
 		pch->Unhandled = prior_state->Unhandled;
 		pch->psvUser = prior_state->psvUser;
-      pch->save_config_as = prior_state->name;
+		pch->save_config_as = prior_state->name;
 	}
 }
 
@@ -2176,7 +2178,7 @@ void AddConfigurationEx( PCONFIG_HANDLER pch, CTEXTSTR format, USER_CONFIG_HANDL
 					 lprintf( WIDE("Configuration error %%v[no type]") );
 				 }
 				 LineRelease( pLine );
-				 lprintf( "Destroy config element %p", pceNew );
+				 lprintf( WIDE( "Destroy config element %p" ), pceNew );
 				 DestroyConfigElement( pch, pceNew );
 				 return;
 			 }

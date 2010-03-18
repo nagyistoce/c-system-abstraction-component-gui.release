@@ -1,4 +1,4 @@
-//#define DEBUG_BANNER_DRAW_UPDATE
+#define DEBUG_BANNER_DRAW_UPDATE
 //#ifndef __cplusplus_cli
 //#define USE_RENDER_INTERFACE banner_local.pdi
 //#define USE_IMAGE_INTERFACE banner_local.pii
@@ -85,13 +85,21 @@ static void InitBannerFrame( void )
 		banner_local.pdi = GetDisplayInterface();
 #endif
 		GetDisplaySize( &banner_local.w, &banner_local.h );
+#ifndef __NO_OPTIONS__
 		SACK_GetProfileStringEx( "SACK/Widgets/Banner", "Default Font", "arialbd.ttf", font, sizeof( font ), TRUE );
+#else
+		StrCpy( font, WIDE( "arialbd.ttf" ) );
+#endif
 		banner_local.font = RenderFontFile( font
 									  , banner_local.w / 30, banner_local.h/20
 									  , 3 );
 		if( !banner_local.font )
 		{
-			SACK_GetProfileStringEx( "SACK/Widgets/Banner", "Alternate Font", "fonts/arialbd.ttf", font, sizeof( font ), TRUE );
+#ifndef __NO_OPTIONS__
+			SACK_GetProfileStringEx( WIDE( "SACK/Widgets/Banner" ), WIDE( "Alternate Font" ), WIDE( "fonts/arialbd.ttf" ), font, sizeof( font ), TRUE );
+#else
+			StrCpy( font, WIDE( "fonts/arialbd.ttf" ) );
+#endif
 			banner_local.font = RenderFontFile( font
 										  , banner_local.w / 30, banner_local.h/20
 														 , 3 );
@@ -111,7 +119,7 @@ static void CPROC SomeChoiceClicked( PTRSZVAL psv, PCONTROL pc )
 	PBANNER banner = (PBANNER)psv;
    int choice = GetControlID( pc );
 #ifdef DEBUG_BANNER_DRAW_UPDATE
-	lprintf( "SOME!" );
+	lprintf( WIDE( "SOME!" ) );
 #endif
 	banner->flags |= (BANNER_CLOSED);
 	switch( choice )
@@ -142,7 +150,7 @@ static void CPROC OkayChoiceClicked( PTRSZVAL psv, PCONTROL pc )
 {
 	PBANNER banner = (PBANNER)psv;
 #ifdef DEBUG_BANNER_DRAW_UPDATE
-	lprintf( "OKAY!" );
+	lprintf( WIDE( "OKAY!" ) );
 #endif
 	banner->flags |= (BANNER_CLOSED|BANNER_OKAY);
 	{
@@ -160,7 +168,7 @@ static void CPROC CancelChoiceClicked( PTRSZVAL psv, PCONTROL pc )
 {
 	PBANNER banner = (PBANNER)psv;
 #ifdef DEBUG_BANNER_DRAW_UPDATE
-	lprintf( "CANCEL!" );
+	lprintf( WIDE( "CANCEL!" ) );
 #endif
 	banner->flags |= (BANNER_CLOSED);
 	{
@@ -174,14 +182,15 @@ static void CPROC CancelChoiceClicked( PTRSZVAL psv, PCONTROL pc )
 
 //--------------------------------------------------------------------------
 
-static int OnKeyCommon( "Large font simple banner" )( PSI_CONTROL pc, _32 key )
+#define BANNER_NAME WIDE("Large font simple banner")
+static int OnKeyCommon( BANNER_NAME )( PSI_CONTROL pc, _32 key )
 {
 	PBANNER *ppBanner = (PBANNER*)GetCommonUserData( pc );
 	PBANNER banner;
 	if( !ppBanner || !(*ppBanner ) )
 		return 0; // no cllick, already closed.
 #ifdef DEBUG_BANNER_DRAW_UPDATE
-	lprintf( "..." );
+	lprintf( WIDE( "..." ) );
 #endif
 	if( IsKeyPressed( key ) )
 	{
@@ -191,7 +200,7 @@ static int OnKeyCommon( "Large font simple banner" )( PSI_CONTROL pc, _32 key )
 			if( KEY_CODE( key ) == KEY_ENTER )
 			{
 #ifdef DEBUG_BANNER_DRAW_UPDATE
-				lprintf( "enter.." );
+				lprintf( WIDE( "enter.." ) );
 #endif
 				if( ( banner->flags & BANNER_OPTION_OKAYCANCEL )
 					&& ( banner->flags & BANNER_OPTION_YESNO ) )
@@ -222,7 +231,7 @@ static int OnKeyCommon( "Large font simple banner" )( PSI_CONTROL pc, _32 key )
 
 //--------------------------------------------------------------------------
 
-static int OnMouseCommon( "Large font simple banner" )
+static int OnMouseCommon( BANNER_NAME )
 //static int CPROC ClickHandler
 ( PCONTROL pc, S_32 x, S_32 y, _32 b )
 {
@@ -255,11 +264,11 @@ static int OnMouseCommon( "Large font simple banner" )
 //--------------------------------------------------------------------------
 
 
-void DrawBannerCaption( PBANNER banner, Image surface, char *caption, CDATA color, int yofs, int height, int left, int explorer )
+void DrawBannerCaption( PBANNER banner, Image surface, TEXTCHAR *caption, CDATA color, int yofs, int height, int left, int explorer )
 {
 	_32 y = 0;
 	_32 w, h, maxw = 0;
-	char *start = caption, *end;
+	TEXTCHAR *start = caption, *end;
 	BlatColor( surface, 0, 0, surface->width, surface->height, banner->basecolor );
 	//ClearImageTo( surface, GetBaseColor( NORMAL ) );
 	GetStringSizeFontEx( caption, strlen( caption ), &maxw, &h
@@ -267,10 +276,10 @@ void DrawBannerCaption( PBANNER banner, Image surface, char *caption, CDATA colo
 	y = yofs - (h/2);
 	while( start )
 	{
-		end = strchr( start, '\n' );
+		end = StrChr( start, '\n' );
 		if( !end )
 		{
-			end = start + strlen(start);
+			end = start + StrLen(start);
 		}
 		w = GetStringSizeFontEx( start, end-start, NULL, &h
 									  , banner_local.custom_font?banner_local.custom_font:explorer?banner_local.explorer_font:banner_local.font );
@@ -304,11 +313,11 @@ void DrawBannerCaption( PBANNER banner, Image surface, char *caption, CDATA colo
 
 //--------------------------------------------------------------------------
 
-static int OnDrawCommon( "Large font simple banner" )
+static int OnDrawCommon( BANNER_NAME )
 //static int CPROC BannerDraw
 ( PCONTROL pc )
 {
-	char caption[256];
+	TEXTCHAR caption[256];
 	PBANNER *ppBanner = (PBANNER*)GetCommonUserData( pc );
 	if( !ppBanner )
 		return 0;
@@ -317,10 +326,10 @@ static int OnDrawCommon( "Large font simple banner" )
 		PBANNER banner = (*ppBanner);
 		if( banner )
 		{
-         Image image = GetControlSurface( pc );
-			GetControlText( pc, caption, sizeof( caption ) );
+			Image image = GetControlSurface( pc );
+			GetControlText( pc, caption, sizeof( caption )/sizeof(TEXTCHAR) );
 #ifdef DEBUG_BANNER_DRAW_UPDATE
-			lprintf( "--------- BANNER DRAW %s -------------", caption );
+			lprintf( WIDE( "--------- BANNER DRAW %s -------------" ), caption );
 #endif
 			DrawBannerCaption( banner, image
 								  , caption
@@ -338,7 +347,7 @@ static int OnDrawCommon( "Large font simple banner" )
 }
 
 #include <psi.h>
-CONTROL_REGISTRATION banner_control = { "Large font simple banner"
+CONTROL_REGISTRATION banner_control = { BANNER_NAME
 												  , { { 0, 0 }, 0
 													 , BORDER_BUMP
 													 | BORDER_NOMOVE
@@ -357,7 +366,7 @@ void CPROC killbanner( PTRSZVAL psv )
 {
 	PBANNER *ppBanner = (PBANNER*)psv;
 	{
-      //lprintf( "killing banner..." );
+      //lprintf( WIDE( "killing banner..." ) );
       RemoveBannerEx( ppBanner DBG_SRC );
 	}
 }
@@ -408,14 +417,22 @@ int CreateBannerExtended( PRENDERER parent, PBANNER *ppBanner, CTEXTSTR text, in
 			lines = 20;
 		if( !cols )
 			cols = 30;
-      SACK_GetProfileStringEx( "SACK/Widgets/Banner", "Default Font", "arialbd.ttf", font, sizeof( font ), TRUE );
+#ifndef __NO_OPTIONS__
+		SACK_GetProfileStringEx( WIDE( "SACK/Widgets/Banner" ), WIDE( "Default Font" ), WIDE( "arialbd.ttf" ), font, sizeof( font ), TRUE );
+#else
+		StrCpy( font, WIDE( "arialbd.ttf" ) );
+#endif
 		banner_local.custom_font = RenderFontFile( font
 															  , w /cols
 															  , h/lines
 															  , 3 );
 		if( !banner_local.custom_font )
 		{
-			SACK_GetProfileStringEx( "SACK/Widgets/Banner", "Alternate Font", "fonts/arialbd.ttf", font, sizeof( font ), TRUE );
+#ifndef __NO_OPTIONS__
+			SACK_GetProfileStringEx( WIDE( "SACK/Widgets/Banner" ), WIDE( "Alternate Font" ), WIDE( "fonts/arialbd.ttf" ), font, sizeof( font ), TRUE );
+#else
+			StrCpy( font, WIDE( "fonts/arialbd.ttf" ) );
+#endif
 			banner_local.custom_font = RenderFontFile( font
 																  , w /cols
 																  , h/lines
@@ -425,7 +442,7 @@ int CreateBannerExtended( PRENDERER parent, PBANNER *ppBanner, CTEXTSTR text, in
 	else
 	{
 		DestroyFont( &banner_local.custom_font );
-      banner_local.custom_font = 0;
+		banner_local.custom_font = 0;
 	}
 
 	if( !banner->renderer )
@@ -533,7 +550,7 @@ int CreateBanner( PRENDERER parent, PBANNER *ppBanner, CTEXTSTR text )
 	retval = CreateBannerEx( parent, ppBanner, text, BANNER_CLICK|BANNER_TIMEOUT, 5000 );
 
 #ifdef DEBUG_BANNER_DRAW_UPDATE
-   lprintf("CreateBanner is done, retval is %d", retval);
+   lprintf(WIDE("CreateBanner is done, retval is %d"), retval);
 #endif
 	return retval;
 }
@@ -559,9 +576,9 @@ void RemoveBannerEx( PBANNER *ppBanner DBG_PASS )
 	banner = ppBanner?(*ppBanner ):(banner_local.banner);
 	//#ifdef DEBUG_BANNER_DRAW_UPDATE
 	{
-		char buf[256];
+		TEXTCHAR buf[256];
 		if( banner )
-			GetControlText( banner->frame, buf, sizeof( buf ) );
+			GetControlText( banner->frame, buf, sizeof( buf )/sizeof(TEXTCHAR) );
 #ifdef DEBUG_BANNER_DRAW_UPDATE
 		_xlprintf(LOG_ALWAYS DBG_RELAY)( WIDE("Remove banner %p %p %d %s")
 												 , banner, banner_local.banner
@@ -621,7 +638,7 @@ void RemoveBannerEx( PBANNER *ppBanner DBG_PASS )
 
 //--------------------------------------------------------------------------
 
-void SetBannerText( PBANNER banner, char *text )
+void SetBannerText( PBANNER banner, TEXTCHAR *text )
 {
 	if( !banner )
 	{
@@ -709,7 +726,7 @@ void SetBannerOptionsEx( PBANNER *ppBanner, _32 flags, _32 extra  )
 												, ( BANNER_WIDTH / 2) - 10
 												, ((BANNER_HEIGHT * 1 ) / 6 ) - 20
 												, 3+IDCANCEL
-												, "Cancel", 0
+												, WIDE( "Cancel" ), 0
 												, SomeChoiceClicked
 												, (PTRSZVAL)banner );
          SetButtonColor( banner->cancel, 0xFf9a051d );
@@ -719,7 +736,7 @@ void SetBannerOptionsEx( PBANNER *ppBanner, _32 flags, _32 extra  )
 											 , ( BANNER_WIDTH / 2) - 10
 											 , ((BANNER_HEIGHT * 1 ) / 6 ) - 20
 											 , 3+IDOK
-											 , "Okay!", 0
+											 , WIDE( "Okay!" ), 0
 											 , SomeChoiceClicked
 											 , (PTRSZVAL)banner );
          SetButtonColor( banner->okay, 0xff18986c );
@@ -728,7 +745,7 @@ void SetBannerOptionsEx( PBANNER *ppBanner, _32 flags, _32 extra  )
 											, ( BANNER_WIDTH / 2) - 10
 											, ((BANNER_HEIGHT * 1 ) / 6 ) - 20
 												, IDCANCEL
-												, "No", 0
+												, WIDE( "No" ), 0
 												, SomeChoiceClicked
 												, (PTRSZVAL)banner );
          SetButtonColor( banner->yes, 0xFf9a051d );
@@ -737,7 +754,7 @@ void SetBannerOptionsEx( PBANNER *ppBanner, _32 flags, _32 extra  )
 										  , ( ( BANNER_HEIGHT * 4 ) / 6 ) - 5 - 10
 											 , ( BANNER_WIDTH / 2) - 10, ((BANNER_HEIGHT * 1 ) / 6 ) - 20
 											 , IDOK
-											 , "Yes", 0
+											 , WIDE( "Yes" ), 0
 											 , SomeChoiceClicked
 											 , (PTRSZVAL)banner );
          SetButtonColor( banner->no, 0xff18986c );
@@ -752,7 +769,7 @@ void SetBannerOptionsEx( PBANNER *ppBanner, _32 flags, _32 extra  )
 												, 5, ( ( BANNER_HEIGHT * 2 ) / 3 ) - 5 - 10
 												, ( BANNER_WIDTH / 2) - 10, ((BANNER_HEIGHT * 1 ) / 3 ) - 20
 												, IDCANCEL
-												, ( flags & BANNER_OPTION_YESNO )?"No":"Cancel", 0
+												, ( flags & BANNER_OPTION_YESNO )?WIDE( "No" ):WIDE( "Cancel" ), 0
 												, CancelChoiceClicked
 												, (PTRSZVAL)banner );
          SetButtonColor( banner->cancel, 0xFf9a051d );
@@ -760,7 +777,7 @@ void SetBannerOptionsEx( PBANNER *ppBanner, _32 flags, _32 extra  )
 											 , 5 + ( BANNER_WIDTH / 2) - 5, ( ( BANNER_HEIGHT * 2 ) / 3 ) - 5 - 10
 											 , ( BANNER_WIDTH / 2) - 10, ((BANNER_HEIGHT * 1 ) / 3 ) - 20
 											 , IDOK
-											 , ( flags & BANNER_OPTION_YESNO )?"Yes":"Okay!", 0
+											 , ( flags & BANNER_OPTION_YESNO )?WIDE( "Yes" ):WIDE( "Okay!" ), 0
 											 , OkayChoiceClicked
 											 , (PTRSZVAL)banner );
          SetButtonColor( banner->okay, 0xff18986c );

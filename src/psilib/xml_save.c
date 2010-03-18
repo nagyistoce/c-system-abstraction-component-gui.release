@@ -50,13 +50,13 @@ void WriteCommonData( PCOMMON pc )
 		l.current_context->pc = pc;
 		genxAddText(l.current_context->w, (constUtf8)"\n");
 		genxStartElement( l.current_context->eControl );
-		sprintf( buf, WIDE("psi/control/%d"), pc->nType );
+		snprintf( buf, sizeof( buf ), WIDE("psi/control/%d"), pc->nType );
 		genxAddAttribute( l.current_context->aType, (constUtf8)GetRegisteredValue( buf, WIDE("Type") ) );
-		sprintf( buf, WIDE("%") _32f WIDE(",") WIDE("%") _32f, pc->original_rect.x, pc->original_rect.y );
+		snprintf( buf, sizeof( buf ), WIDE("%") _32f WIDE(",") WIDE("%") _32f, pc->original_rect.x, pc->original_rect.y );
 		genxAddAttribute( l.current_context->aPosition, (constUtf8)buf );
-		sprintf( buf, WIDE("%") _32f WIDE(",") WIDE("%") _32f, pc->original_rect.width, pc->original_rect.height );
+		snprintf( buf, sizeof( buf ), WIDE("%") _32f WIDE(",") WIDE("%") _32f, pc->original_rect.width, pc->original_rect.height );
 		genxAddAttribute( l.current_context->aSize, (constUtf8)buf );
-		sprintf( buf, WIDE("%") _32fx WIDE(""), pc->BorderType );
+		snprintf( buf, sizeof( buf ), WIDE("%") _32fx WIDE(""), pc->BorderType );
 		genxAddAttribute( l.current_context->aBorder, (constUtf8)buf );
 
 		// Let's not write the number of this ID anymore...
@@ -65,7 +65,7 @@ void WriteCommonData( PCOMMON pc )
 		genxAddAttribute( l.current_context->aIDName, (constUtf8)pc->pIDName );
 		if( pc->flags.bEditLoaded )
 		{
-			sprintf( buf, WIDE("%d"), pc->flags.bNoEdit );
+			snprintf( buf, sizeof( buf ), WIDE("%d"), pc->flags.bNoEdit );
 			genxAddAttribute( l.current_context->aEdit, (constUtf8)buf);
 		}
 
@@ -107,7 +107,7 @@ void WriteCommonData( PCOMMON pc )
 		if( l.current_context->nChildren )
 		{
 			l.current_context->pc = pc;
-			sprintf( buf, WIDE("%") _32f WIDE(""), l.current_context->nChildren );
+			snprintf( buf, sizeof( buf ), WIDE("%") _32f WIDE(""), l.current_context->nChildren );
 			genxAddAttribute( l.current_context->aChildren, (constUtf8)buf );
          l.current_context->nChildren = 0;
 		}
@@ -222,15 +222,15 @@ int SaveXMLFrame( PCOMMON frame, CTEXTSTR file )
 
 		{
 			FILE *out;
-			Fopen( out, l.current_context->name, WIDE("wt") );
+			out = sack_fopen( 0, l.current_context->name, WIDE("wt") );
 			if( out )
 			{
 				PTEXT text = VarTextGet( l.current_vt );
-				fwrite( GetText( text ), sizeof( TEXTCHAR ), GetTextSize( text ), out );
+				sack_fwrite( GetText( text ), sizeof( TEXTCHAR ), GetTextSize( text ), out );
 				LineRelease( text );
 				// this is just a shot hand copy
 				//VarTextDestroy( &l.current_vt );
-				fclose( out );
+				sack_fclose( out );
 			}
 			else
 			{

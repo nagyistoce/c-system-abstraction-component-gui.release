@@ -185,7 +185,7 @@ SQLGETOPTION_PROC( void, CreateOptionDatabase )( void )
          loadpath = ".";
 #endif
 		if( strlen( global_sqlstub_data->Option.info.pDSN ) == 0 )
-         strcpy( global_sqlstub_data->Option.info.pDSN, "option.db" );
+			global_sqlstub_data->Option.info.pDSN = "option.db";
 		//lprintf( "connect to %s[%s]", global_sqlstub_data->Option.info.pDSN, loadpath );
 
 		//if( !pathchr( global_sqlstub_data->Option.info.pDSN )
@@ -515,7 +515,7 @@ INDEX NewDuplicateValue( PODBC odbc, INDEX iOriginalOption, INDEX iNewOption )
 	if( results && results[0] )
 	{
 		snprintf( query, sizeof( query )
-			  , WIDE("replace into "OPTION_VALUES" (option_id,`string`) values (%ld,'%s')")
+			  , "replace into "OPTION_VALUES" (option_id,`string`) values (%ld,'%s')"
 				  , iNewOption, tmp = EscapeSQLBinary( odbc, results[0], strlen( results[0] ) ) );
 		Release( tmp );
       SQLEndQuery( odbc );
@@ -527,7 +527,7 @@ INDEX NewDuplicateValue( PODBC odbc, INDEX iOriginalOption, INDEX iNewOption )
 	if( results && results[0] )
 	{
 		snprintf( query, sizeof( query )
-				  , WIDE("replace into "OPTION_BLOBS" (option_id,`binary`) values (%ld,'%s')")
+				  , "replace into "OPTION_BLOBS" (option_id,`binary`) values (%ld,'%s')"
 				  , iNewOption, tmp = EscapeSQLBinary( odbc, results[0], strlen( results[0] ) ) );
 		Release( tmp );
       SQLEndQuery( odbc );
@@ -552,7 +552,7 @@ INDEX DuplicateValue( INDEX iOriginalValue, INDEX iNewValue )
 		INDEX iNewValue;
 		SetSQLLoggingDisable( og.Option, TRUE );
 		snprintf( query, sizeof( query )
-				  , WIDE("insert into option_values select 0,`string`,`binary` from option_values where value_id=%ld")
+				  , "insert into option_values select 0,`string`,`binary` from option_values where value_id=%ld"
 				  , iOriginalValue );
 		SQLCommand( og.Option, query );
 		iNewValue = FetchLastInsertID(og.Option,NULL,NULL);
@@ -580,7 +580,7 @@ _32 GetOptionStringValueEx( PODBC odbc, INDEX optval, char *buffer, _32 len DBG_
    len--;
 
 	SetSQLLoggingDisable( og.Option, TRUE );
-   snprintf( query, sizeof( query ), WIDE("select override_value_id from option_exception ")
+   snprintf( query, sizeof( query ), "select override_value_id from option_exception "
             "where ( apply_from<=now() or apply_from=0 )"
             "and ( apply_until>now() or apply_until=0 )"
             "and ( system_id=%d or system_id=0 )"
@@ -593,7 +593,7 @@ _32 GetOptionStringValueEx( PODBC odbc, INDEX optval, char *buffer, _32 len DBG_
 	for( SQLQuery( og.Option, query, &result ); result; FetchSQLResult( og.Option, &result ) )
 	{
 		_optval = optval;
-		sscanf( result, "%" _32f, &optval );
+		sscanf( result, WIDE("%") _32f, &optval );
 		if( (!optval) || ( optval == INVALID_INDEX ) )
 			optval = _optval;
 	}
@@ -970,7 +970,7 @@ SQLGETOPTION_PROC( S_32, SACK_GetPrivateProfileIntEx )( CTEXTSTR pSection, CTEXT
 {
    char buffer[32];
    char defaultbuf[32];
-   sprintf( defaultbuf, WIDE("%ld"), nDefault );
+   snprintf( defaultbuf, sizeof( defaultbuf ), WIDE("%ld"), nDefault );
    if( SACK_GetPrivateProfileStringEx( pSection, pOptname, defaultbuf, buffer, sizeof( buffer ), pININame, bQuiet ) )
 	{
 		if( buffer[0] == 'Y' || buffer[0] == 'y' )
@@ -1059,7 +1059,7 @@ SQLGETOPTION_PROC( int, SACK_WritePrivateProfileString )( CTEXTSTR pSection, CTE
 SQLGETOPTION_PROC( S_32, SACK_WritePrivateProfileInt )( CTEXTSTR pSection, CTEXTSTR pName, S_32 value, CTEXTSTR pINIFile )
 {
    char valbuf[32];
-   sprintf( valbuf, WIDE("%ld"), value );
+   snprintf( valbuf, sizeof( valbuf ), WIDE("%ld"), value );
    return SACK_WritePrivateProfileString( pSection, pName, valbuf, pINIFile );
 }
 

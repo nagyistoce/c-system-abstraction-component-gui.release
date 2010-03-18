@@ -339,7 +339,8 @@ IMAGE_PROC( void, BlotImageSizedEx )( ImageFile *pifDest, ImageFile *pifSrc
 {
 #define BROKEN_CODE
    PCDATA po, pi;
-   int  hd, wd, oo, oi;
+   int  hd, wd;
+   _32 oo, oi; // treated as an adder... it is unsigned by math, but still results correct offset?
    static _32 lock;
 	va_list colors;
 	va_start( colors, method );

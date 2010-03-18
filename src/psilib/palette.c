@@ -194,11 +194,11 @@ CUSTOM_CONTROL_MOUSE( PaletteMouse, ( PCOMMON pc, S_32 x, S_32 y, _32 buttons ) 
 	{
 		if( ppcd->psw )
 		{
-			lprintf( WIDE("Setting new mid color... update... ------------------------- ") );
+			//lprintf( WIDE("Setting new mid color... update... ------------------------- ") );
 			ppcd->CurrentColor = SetAlpha( getpixel( GetControlSurface( pc ), x, y )
 												  , ppcd->Alpha );
 			SetShaderControls( ppcd, pc );
-         //SetColorWell( ppcd->pcZoom, c );
+			//SetColorWell( ppcd->pcZoom, c );
 		}
 	}
    return TRUE;
@@ -305,7 +305,12 @@ static void SavePresets( PPICK_COLOR_DATA ppcd )
 			  , green = GreenVal( ppcd->Presets[i] )
 			  , blue = BlueVal( ppcd->Presets[i] )
 			  , alpha = AlphaVal( ppcd->Presets[i] );
-			fprintf( file, WIDE("%d,%d,%d,%d\n"), red, green, blue, alpha );
+#ifdef UNICODE
+			fwprintf
+#else
+			fprintf
+#endif
+				( file, WIDE("%d,%d,%d,%d\n"), red, green, blue, alpha );
 		}
 		fclose( file );
 	}
@@ -778,7 +783,7 @@ int CPROC InitColorWell( PCOMMON pc )
 		ValidatedControlData( PCOLOR_WELL, color_well.TypeID, pcw, pc );
       pcw->color = 0;
 	}
-   return TRUE;
+	return TRUE;
 }
 
 //----------------------------------------------------------------------------
@@ -787,9 +792,9 @@ int CPROC InitShadeWell( PCOMMON pc )
 {
 	SetShadeMin( pc, BASE_COLOR_BLACK );
 	SetShadeMid( pc, BASE_COLOR_DARKGREY );
-   SetShadeMax( pc, BASE_COLOR_WHITE );
+	SetShadeMax( pc, BASE_COLOR_WHITE );
 	SetNoFocus( pc );
-   return TRUE;
+	return TRUE;
 }
 
 //----------------------------------------------------------------------------

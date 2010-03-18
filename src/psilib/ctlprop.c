@@ -321,17 +321,17 @@ PSI_PROC( int, EditControlProperties )( PCOMMON control )
 					MakeTextControl( pSheet, PROP_PAD, 69, 58, 14, TXT_STATIC, WIDE("Height"), 0 );
 					MakeTextControl( pSheet, PROP_PAD, 85, 58, 14, TXT_STATIC, WIDE("ID"), 0 );
 					MakeTextControl( pSheet, PROP_PAD, 101, 58, 14, TXT_STATIC, WIDE("ID Name"), 0 );
-					sprintf( buffer, WIDE("%s"), GetText( control->caption.text ) );
+					snprintf( buffer, sizeof( buffer ), WIDE("%s"), GetText( control->caption.text ) );
 					MakeEditControl( pSheet, PROP_PAD + PROP_PAD + 58, 04, PROP_WIDTH-10-(58+5), 14, EDT_CAPTION, buffer, 0 );
-					sprintf( buffer, WIDE("%")_32fs WIDE(""), control->rect.x );
+					snprintf( buffer, sizeof( buffer ), WIDE("%")_32fs WIDE(""), control->rect.x );
 					MakeEditControl( pSheet, PROP_PAD + PROP_PAD + 58, 20, 56, 14, EDT_X, buffer, 0 );
-					sprintf( buffer, WIDE("%")_32fs WIDE(""), control->rect.y );
+					snprintf( buffer, sizeof( buffer ), WIDE("%")_32fs WIDE(""), control->rect.y );
 					MakeEditControl( pSheet, PROP_PAD + PROP_PAD + 58, 36, 56, 14, EDT_Y, buffer, 0 );
-					sprintf( buffer, WIDE("%")_32f WIDE(""), control->rect.width );
+					snprintf( buffer, sizeof( buffer ), WIDE("%")_32f WIDE(""), control->rect.width );
 					MakeEditControl( pSheet, PROP_PAD + PROP_PAD + 58, 52, 56, 14, EDT_WIDTH, buffer, 0 );
-					sprintf( buffer, WIDE("%")_32f WIDE(""), control->rect.height );
+					snprintf( buffer, sizeof( buffer ), WIDE("%")_32f WIDE(""), control->rect.height );
 					MakeEditControl( pSheet, PROP_PAD + PROP_PAD + 58, 68, 56, 14, EDT_HEIGHT, buffer, 0 );
-					sprintf( buffer, WIDE("%d"), control->nID );
+					snprintf( buffer, sizeof( buffer ), WIDE("%d"), control->nID );
 					MakeEditControl( pSheet, PROP_PAD + PROP_PAD + 58, 84, 56, 14, EDT_ID, buffer, 0 );
 					snprintf( buffer, sizeof( buffer ), WIDE("%s"), control->pIDName );
 					MakeEditControl( pSheet, PROP_PAD + PROP_PAD + 58, 84, 56, 14, EDT_IDNAME, buffer, 0 );
@@ -499,28 +499,28 @@ PSI_PROC( int, EditFrameProperties )( PCOMMON frame, S_32 x, S_32 y )
 			MakeTextControl( pf, PROP_PAD, 53, 58, 12, TXT_STATIC, WIDE("Width"), 0 );
 			MakeTextControl( pf, PROP_PAD, 69, 58, 12, TXT_STATIC, WIDE("Height"), 0 );
 			MakeTextControl( pf, PROP_PAD, 85, 58, 12, TXT_STATIC, WIDE("ID"), 0 );
-			sprintf( buffer, WIDE("%s"), GetText( frame->caption.text ) );
+			snprintf( buffer, sizeof( buffer ), WIDE("%s"), GetText( frame->caption.text ) );
 			MakeEditControl( pf
 								, PROP_PAD + PROP_PAD + 58, 04
 								, PROP_WIDTH-10-(58+5), 14
 								, EDT_CAPTION, buffer, 0 );
-			sprintf( buffer, WIDE("%")_32fs WIDE(""), frame->rect.x );
+			snprintf( buffer, sizeof( buffer ), WIDE("%")_32fs WIDE(""), frame->rect.x );
 			MakeEditControl( pf
 								, PROP_PAD + PROP_PAD + 58, 20
 								, 56, 14, EDT_X, buffer, 0 );
-			sprintf( buffer, WIDE("%")_32fs WIDE(""), frame->rect.y );
+			snprintf( buffer, sizeof( buffer ), WIDE("%")_32fs WIDE(""), frame->rect.y );
 			MakeEditControl( pf
 								, PROP_PAD + PROP_PAD + 58, 36
 								, 56, 14, EDT_Y, buffer, 0 );
-			sprintf( buffer, WIDE("%")_32f WIDE(""), frame->rect.width );
+			snprintf( buffer, sizeof( buffer ), WIDE("%")_32f WIDE(""), frame->rect.width );
 			MakeEditControl( pf
 								, PROP_PAD + PROP_PAD + 58, 52
 								, 56, 14, EDT_WIDTH, buffer, 0 );
-			sprintf( buffer, WIDE("%")_32f WIDE(""), frame->rect.height );
+			snprintf( buffer, sizeof( buffer ), WIDE("%")_32f WIDE(""), frame->rect.height );
 			MakeEditControl( pf
 								, PROP_PAD + PROP_PAD + 58, 68
 								, 56, 14, EDT_HEIGHT, buffer, 0 );
-			sprintf( buffer, WIDE("%d"), frame->nID );
+			snprintf( buffer, sizeof( buffer ), WIDE("%d"), frame->nID );
 			MakeEditControl( pf
 								, PROP_PAD + PROP_PAD + 58, 84
 								, 56, 14, EDT_ID, buffer, 0 );

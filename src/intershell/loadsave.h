@@ -32,7 +32,7 @@ InterShell_PROC( PCONFIG_HANDLER, InterShell_GetCurrentConfigHandler )( void );
 //   other info to save... the method for setting additional configuration methods
 //   is invoked by thisname.
 //   Then end_type_name is the last string which will close the subconfiguration.
-InterShell_PROC( LOGICAL, BeginSubConfiguration )( char *control_type_name, const char *end_type_name );
+InterShell_PROC( LOGICAL, BeginSubConfiguration )( TEXTCHAR *control_type_name, const TEXTCHAR *end_type_name );
 InterShell_PROC( CTEXTSTR, EscapeMenuString )( CTEXTSTR string );
 #endif
 

@@ -133,7 +133,9 @@ static void CPROC InitGlobalData( POINTER p, _32 size )
 {
 	struct global_memory_tag *global = (struct global_memory_tag *)p;
 	global->bLogAllocate = 0;
-
+#ifdef UNDER_CE
+	global->bDisableAutoCheck = 1;
+#endif
 #    ifndef _DEBUG
 	global->bDisableDebug = 1;
 	global->bDisableAutoCheck = 1;
@@ -337,11 +339,14 @@ MEM_PROC( PTRSZVAL, LockedExchange )( PVPTRSZVAL p, PTRSZVAL val )
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef _MSC_VER
+#ifndef UNDER_CE
 #include <intrin.h>
 #endif
-MEM_PROC( void, MemSet )( POINTER p, _BLOCK_MAX_SIZE_TYPE n, _BLOCK_MAX_SIZE_TYPE sz )
+#endif
+
+MEM_PROC( void, MemSet )( POINTER p, PTRSZVAL n, PTRSZVAL sz )
 {
-#if defined( _MSC_VER ) && !defined( __NO_WIN32API__ )
+#if defined( _MSC_VER ) && !defined( __NO_WIN32API__ ) && !defined( UNDER_CE )
 #if defined( _WIN64 )
 	__stosq( (_64*)p, n, sz/8 );
 	if( sz & 4 )
@@ -364,9 +369,9 @@ MEM_PROC( void, MemSet )( POINTER p, _BLOCK_MAX_SIZE_TYPE n, _BLOCK_MAX_SIZE_TYP
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-MEM_PROC( void, MemCpy )( POINTER pTo, CPOINTER pFrom, _BLOCK_MAX_SIZE_TYPE sz )
+MEM_PROC( void, MemCpy )( POINTER pTo, CPOINTER pFrom, PTRSZVAL sz )
 {
-#if defined( _MSC_VER ) && !defined( __NO_WIN32API__ )
+#if defined( _MSC_VER ) && !defined( __NO_WIN32API__ )&& !defined( UNDER_CE )
 
 #ifdef _WIN64
 	__movsq( (_64*)pTo, (_64*)pFrom, sz/8 );
@@ -384,31 +389,33 @@ MEM_PROC( void, MemCpy )( POINTER pTo, CPOINTER pFrom, _BLOCK_MAX_SIZE_TYPE sz )
 #endif
 }
 
-MEM_PROC( int, MemCmp )( CPOINTER pOne, CPOINTER pTwo, _BLOCK_MAX_SIZE_TYPE sz )
+MEM_PROC( int, MemCmp )( CPOINTER pOne, CPOINTER pTwo, PTRSZVAL sz )
 {
 	return memcmp( pOne, pTwo, sz );
 }
 #else
 #ifdef __STATIC__
 extern _32  LockedExchange( PV_32 p, _32 val );
-extern void MemSet( POINTER p, _BLOCK_MAX_SIZE_TYPE n, _BLOCK_MAX_SIZE_TYPE sz );
-extern void MemCpy( POINTER to, CPOINTER from, _BLOCK_MAX_SIZE_TYPE sz );
-extern int MemCmp( CPOINTER p1, CPOINTER p2, _BLOCK_MAX_SIZE_TYPE sz );
+extern void MemSet( POINTER p, PTRSZVAL n, PTRSZVAL sz );
+extern void MemCpy( POINTER to, CPOINTER from, PTRSZVAL sz );
+extern int MemCmp( CPOINTER p1, CPOINTER p2, PTRSZVAL sz );
 #else
 MEM_PROC(  _32,  LockedExchange )( PV_32 p, _32 val );
-MEM_PROC(  void, MemSet )( POINTER p, _BLOCK_MAX_SIZE_TYPE n, _BLOCK_MAX_SIZE_TYPE sz );
-MEM_PROC(  void, MemCpy )( POINTER to, CPOINTER from, _BLOCK_MAX_SIZE_TYPE sz );
-MEM_PROC(  int, MemCmp )( CPOINTER to, CPOINTER from, _BLOCK_MAX_SIZE_TYPE sz );
+MEM_PROC(  void, MemSet )( POINTER p, PTRSZVAL n, PTRSZVAL sz );
+MEM_PROC(  void, MemCpy )( POINTER to, CPOINTER from, PTRSZVAL sz );
+MEM_PROC(  int, MemCmp )( CPOINTER to, CPOINTER from, PTRSZVAL sz );
 #endif
 #endif
 
 TEXTSTR StrCpyEx( TEXTSTR s1, CTEXTSTR s2, int n )
 {
 	int x;
-	for( x = 0; (s1[x]=s2[x]) && x < n; x++ );
+	for( x = 0; x < n && (s1[x]=s2[x]); x++ );
+	s1[n-1] = 0;
 	return s1;
 }
 
+#undef StrCpy
 TEXTSTR StrCpy( TEXTSTR s1, CTEXTSTR s2 )
 {
 	int x;
@@ -810,7 +817,7 @@ MEM_PROC( S_32, EnterCriticalSecNoWaitEx )( PCRITICALSECTION pcs, THREAD_ID *pri
 				}
 				else if( prior && (*prior ) )
 				{
-					lprintf( "prior was set already... no room to store dwThreadWaiting..." );
+					lprintf( WIDE( "prior was set already... no room to store dwThreadWaiting..." ) );
 					DebugBreak();
 				}
 				pcs->dwThreadWaiting = dwCurProc;
@@ -820,7 +827,7 @@ MEM_PROC( S_32, EnterCriticalSecNoWaitEx )( PCRITICALSECTION pcs, THREAD_ID *pri
 		{
 			// else no prior... so don't set the dwthreadwaiting...
 #ifdef DEBUG_CRITICAL_SECTIONS
-			_lprintf(DBG_RELAY)( "No prior... not setting wake ID" );
+			_lprintf(DBG_RELAY)( WIDE( "No prior... not setting wake ID" ) );
 #endif
 		}
       //else
@@ -828,7 +835,7 @@ MEM_PROC( S_32, EnterCriticalSecNoWaitEx )( PCRITICALSECTION pcs, THREAD_ID *pri
 		pcs->dwUpdating = 0;
 #ifdef DEBUG_CRITICAL_SECTIONS
 		if( g.bLogCritical > 0 && g.bLogCritical < 2 )
-			_lprintf(DBG_RELAY)( "Unlocked... for enter" );
+			_lprintf(DBG_RELAY)( WIDE( "Unlocked... for enter" ) );
 #endif
 		//nEntry--;
 	}
@@ -852,7 +859,7 @@ static LOGICAL LeaveCriticalSecNoWakeEx( PCRITICALSECTION pcs DBG_PASS )
 	{
 #ifdef DEBUG_CRITICAL_SECTIONS
 		if( g.bLogCritical > 0 && g.bLogCritical < 2 )
-			lprintf( DBG_FILELINEFMT "Leaving a blank critical section" DBG_RELAY );
+			lprintf( DBG_FILELINEFMT WIDE( "Leaving a blank critical section" ) DBG_RELAY );
 #endif
 		//while( 1 );
 		pcs->dwUpdating = 0;
@@ -860,7 +867,7 @@ static LOGICAL LeaveCriticalSecNoWakeEx( PCRITICALSECTION pcs DBG_PASS )
 	}
 #ifdef DEBUG_CRITICAL_SECTIONS
 	//if( g.bLogCritical > 1 )
-	// lprintf( DBG_FILELINEFMT "Leaving %Lx %Lx %p" DBG_RELAY ,pcs->dwThreadID, dwCurProc, pcs );
+	// lprintf( DBG_FILELINEFMT WIDE( "Leaving %Lx %Lx %p" ) DBG_RELAY ,pcs->dwThreadID, dwCurProc, pcs );
 #endif
 	if( pcs->dwThreadID == dwCurProc )
 	{
@@ -895,7 +902,7 @@ static LOGICAL LeaveCriticalSecNoWakeEx( PCRITICALSECTION pcs DBG_PASS )
 			_xlprintf( 0 DBG_RELAY )( WIDE("Sorry - you can't leave a section owned by %08Lx %08lx %s(%d)...")
 											, pcs->dwThreadID
 											, pcs->dwLocks
-											, (pcs->pFile)?(pcs->pFile):"Unknown", pcs->nLine );
+											, (pcs->pFile)?(pcs->pFile):WIDE( "Unknown" ), pcs->nLine );
          DebugBreak();
 		}
 #else
@@ -911,7 +918,7 @@ static LOGICAL LeaveCriticalSecNoWakeEx( PCRITICALSECTION pcs DBG_PASS )
 	pcs->dwUpdating = 0;
 #ifdef DEBUG_CRITICAL_SECTIONS
 	if( g.bLogCritical > 0 && g.bLogCritical < 2 )
-		_lprintf(DBG_RELAY)( "Unocked %p for leaving...", pcs );
+		_lprintf(DBG_RELAY)( WIDE( "Unocked %p for leaving..." ), pcs );
 #endif
 	return TRUE;
 }
@@ -921,7 +928,7 @@ static LOGICAL LeaveCriticalSecNoWakeEx( PCRITICALSECTION pcs DBG_PASS )
 MEM_PROC( void, InitializeCriticalSec )( PCRITICALSECTION pcs )
 {
 #ifdef DEBUG_CRITICAL_SECTIONS
-	lprintf( "CLEARING CRITICAL SECTION" );
+	lprintf( WIDE( "CLEARING CRITICAL SECTION" ) );
 #endif
 	MemSet( pcs, 0, sizeof( CRITICALSECTION ) );
 	return;
@@ -963,8 +970,8 @@ PRIORITY_ATEXIT(ReleaseAllMemory,ATEXIT_PRIORITY_SHAREMEM)
 {
 #ifndef __LINUX__
 	// actually, under linux, it releases /tmp/.shared files.
-	//lprintf( "No super significant reason to release all memory blocks?" );
-	//lprintf( "Short circuit on memory shutdown." );
+	//lprintf( WIDE( "No super significant reason to release all memory blocks?" ) );
+	//lprintf( WIDE( "Short circuit on memory shutdown." ) );
 	return;
 #else
 	// need to try and close /tmp/.shared region files...  so we only close
@@ -1035,7 +1042,7 @@ void InitSharedMemory( void )
 #endif
 		g.bInit = TRUE;  // onload was definatly a zero.
 		{
-			_BLOCK_MAX_SIZE_TYPE dwSize = sizeof( SPACEPOOL );
+			PTRSZVAL dwSize = sizeof( SPACEPOOL );
 			g.pSpacePool = (PSPACEPOOL)OpenSpace( NULL, NULL, &dwSize );
 			if( g.pSpacePool )
 			{
@@ -1067,7 +1074,7 @@ static PSPACE AddSpace( PSPACE pAddAfter
 							 , int hFile
 							 , int hMem
 #endif
-							 , POINTER pMem, _BLOCK_MAX_SIZE_TYPE dwSize, int bLink )
+							 , POINTER pMem, PTRSZVAL dwSize, int bLink )
 {
 	PSPACEPOOL psp;
 	PSPACEPOOL _psp = NULL;
@@ -1182,7 +1189,7 @@ static void DoCloseSpace( PSPACE ps, int bFinal )
 			{
 				char file[256];
 				char fdname[64];
-				sprintf( fdname, WIDE("/proc/self/fd/%d"), (int)ps->hFile );
+				snprintf( fdname, sizeof(fdname), WIDE("/proc/self/fd/%d"), (int)ps->hFile );
 				file[readlink( fdname, file, sizeof( file ) )] = 0;
 				remove( file );
 			}
@@ -1209,7 +1216,7 @@ MEM_PROC( void, CloseSpace )( POINTER pMem )
 
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( _BLOCK_MAX_SIZE_TYPE, GetSpaceSize )( POINTER pMem )
+MEM_PROC( PTRSZVAL, GetSpaceSize )( POINTER pMem )
 {
 	PSPACE ps;
 	ps = FindSpace( pMem );
@@ -1219,16 +1226,16 @@ MEM_PROC( _BLOCK_MAX_SIZE_TYPE, GetSpaceSize )( POINTER pMem )
 }
 
 #if defined( __LINUX__ ) && !defined( __CYGWIN__ )
-_BLOCK_MAX_SIZE_TYPE GetFileSize( int fd )
+PTRSZVAL GetFileSize( int fd )
 {
-	 _BLOCK_MAX_SIZE_TYPE len = lseek( fd, 0, SEEK_END );
+	 PTRSZVAL len = lseek( fd, 0, SEEK_END );
 	 lseek( fd, 0, SEEK_SET );
 	 return len;
 }
 
 #endif
 //------------------------------------------------------------------------------------------------------
-MEM_PROC( POINTER, OpenSpaceExx )( CTEXTSTR pWhat, CTEXTSTR pWhere, PTRSZVAL address, P_BLOCK_MAX_SIZE_TYPE dwSize, P_32 bCreated )
+MEM_PROC( POINTER, OpenSpaceExx )( CTEXTSTR pWhat, CTEXTSTR pWhere, PTRSZVAL address, PTRSZVAL *dwSize, P_32 bCreated )
 {
 	POINTER pMem = NULL;
 	//static _32 bOpening;
@@ -1316,7 +1323,7 @@ MEM_PROC( POINTER, OpenSpaceExx )( CTEXTSTR pWhat, CTEXTSTR pWhere, PTRSZVAL add
 			}
 			if( exists )
 			{
-				if( GetFileSize( fd ) < (_BLOCK_MAX_SIZE_TYPE)*dwSize )
+				if( GetFileSize( fd ) < (PTRSZVAL)*dwSize )
 				{
 				   // expands the file...
 					ftruncate( fd, *dwSize );
@@ -1364,12 +1371,13 @@ MEM_PROC( POINTER, OpenSpaceExx )( CTEXTSTR pWhat, CTEXTSTR pWhere, PTRSZVAL add
 		return pMem;
 
 #elif defined( _WIN32 )
+#ifndef UNDER_CE
 		HANDLE hFile;
 		HANDLE hMem = NULL;
 		*dwSize = ( ( (*dwSize) + ( FILE_GRAN - 1 ) ) / FILE_GRAN ) * FILE_GRAN;
 		if( !pWhat && !pWhere )
 		{
-
+			//lprintf( "ALLOCATE %Ld", (*dwSize)>>32, 0 );
 			hMem = CreateFileMapping( INVALID_HANDLE_VALUE, NULL
 											, PAGE_READWRITE
 											 |SEC_COMMIT
@@ -1378,7 +1386,14 @@ MEM_PROC( POINTER, OpenSpaceExx )( CTEXTSTR pWhat, CTEXTSTR pWhere, PTRSZVAL add
 											, pWhat ); // which should be NULL... but is consistant
 			if( !hMem )
 			{
-				lprintf( "Failed to allocate pagefile memory?! %p %d", *dwSize, GetLastError() );
+				//lprintf( "Failed to allocate pagefile memory?! %p %d", *dwSize, GetLastError() );
+
+				{
+					POINTER p = malloc( *dwSize );
+					//lprintf(" but we could allocate it %p", p  );
+					LeaveCriticalSecNoWake( &cs );
+					return p;
+				}
 			}
 			else
 			{
@@ -1594,13 +1609,18 @@ MEM_PROC( POINTER, OpenSpaceExx )( CTEXTSTR pWhat, CTEXTSTR pWhere, PTRSZVAL add
 					  //bOpening = FALSE;
 	LeaveCriticalSecNoWake( &cs );
 	return pMem;
+#else
+	if( bCreated )
+      (*bCreated) = 1;
+	return malloc( *dwSize );
+#endif
 #endif
 	}
 }
 
 //------------------------------------------------------------------------------------------------------
 #undef OpenSpaceEx
-MEM_PROC( POINTER, OpenSpaceEx )( CTEXTSTR pWhat, CTEXTSTR pWhere, PTRSZVAL address, P_BLOCK_MAX_SIZE_TYPE dwSize )
+MEM_PROC( POINTER, OpenSpaceEx )( CTEXTSTR pWhat, CTEXTSTR pWhere, PTRSZVAL address, PTRSZVAL *dwSize )
 {
 	_32 bCreated;
 	return OpenSpaceExx( pWhat, pWhere, address, dwSize, &bCreated );
@@ -1608,7 +1628,7 @@ MEM_PROC( POINTER, OpenSpaceEx )( CTEXTSTR pWhat, CTEXTSTR pWhere, PTRSZVAL addr
 
 //------------------------------------------------------------------------------------------------------
 #undef OpenSpace
-MEM_PROC( POINTER, OpenSpace )( CTEXTSTR pWhat, CTEXTSTR pWhere, P_BLOCK_MAX_SIZE_TYPE dwSize )
+MEM_PROC( POINTER, OpenSpace )( CTEXTSTR pWhat, CTEXTSTR pWhere, PTRSZVAL *dwSize )
 {
 	return OpenSpaceEx( pWhat, pWhere, 0, dwSize );
 }
@@ -1674,7 +1694,7 @@ MEM_PROC( int, InitHeap)( PMEM pMem, PTRSZVAL dwSize )
 
 //------------------------------------------------------------------------------------------------------
 
-PMEM DigSpace( TEXTSTR pWhat, TEXTSTR pWhere, P_BLOCK_MAX_SIZE_TYPE dwSize )
+PMEM DigSpace( TEXTSTR pWhat, TEXTSTR pWhere, PTRSZVAL *dwSize )
 {
 	 PMEM pMem = (PMEM)OpenSpace( pWhat, pWhere, dwSize );
 
@@ -1682,7 +1702,7 @@ PMEM DigSpace( TEXTSTR pWhat, TEXTSTR pWhere, P_BLOCK_MAX_SIZE_TYPE dwSize )
 	 {
 		  TEXTCHAR byDebug[256];
 		  // did reference BASE_MEMORY...
-		  sprintf( byDebug, WIDE("Create view of file for memory access failed at ????") );
+		  snprintf( byDebug, sizeof( byDebug), WIDE("Create view of file for memory access failed at ????") );
 		  ODS( byDebug );
 		  CloseSpace( (POINTER)pMem );
 		  return NULL;
@@ -1690,17 +1710,18 @@ PMEM DigSpace( TEXTSTR pWhat, TEXTSTR pWhere, P_BLOCK_MAX_SIZE_TYPE dwSize )
 #ifdef VERBOSE_LOGGING
 	 Log( WIDE("Go to init the heap...") );
 #endif
+	 pMem->dwSize = 0;
 	 InitHeap( pMem, *dwSize );
 	 return pMem;
 }
 
 //------------------------------------------------------------------------------------------------------
 
-int ExpandSpace( PMEM pHeap, _BLOCK_MAX_SIZE_TYPE dwAmount )
+int ExpandSpace( PMEM pHeap, PTRSZVAL dwAmount )
 {
 	PSPACE pspace = FindSpace( (POINTER)pHeap ), pnewspace;
 	PMEM pExtend;
-
+	//lprintf( WIDE("Expanding by %d %d"), dwAmount );
 	pExtend = DigSpace( NULL, NULL, &dwAmount );
 	if( !pExtend )
 	{
@@ -1734,7 +1755,7 @@ static PMEM GrabMemEx( PMEM pMem DBG_PASS )
 		// use default heap...
 		if( !XCHG( &g.bMemInstanced, TRUE ) )
 		{
-			_BLOCK_MAX_SIZE_TYPE MinSize = SYSTEM_CAPACITY;
+			PTRSZVAL MinSize = SYSTEM_CAPACITY;
 			// generic internal memory, unnamed, unshared, unsaved
 			g.pMemInstance = pMem = DigSpace( NULL, NULL, &MinSize );
 			if( !pMem )
@@ -1792,7 +1813,7 @@ static void DropMemEx( PMEM pMem DBG_PASS )
 
 //------------------------------------------------------------------------------------------------------
 
-POINTER HeapAllocateEx( PMEM pHeap, _BLOCK_MAX_SIZE_TYPE dwSize DBG_PASS )
+POINTER HeapAllocateEx( PMEM pHeap, PTRSZVAL dwSize DBG_PASS )
 {
 	PCHUNK pc;
 	PMEM pMem, pCurMem = NULL;
@@ -1950,17 +1971,17 @@ search_for_free_memory:
 
 //------------------------------------------------------------------------------------------------------
 #undef AllocateEx
-MEM_PROC( POINTER, AllocateEx )( _BLOCK_MAX_SIZE_TYPE dwSize DBG_PASS )
+MEM_PROC( POINTER, AllocateEx )( PTRSZVAL dwSize DBG_PASS )
 {
 	return HeapAllocateEx( g.pMemInstance, dwSize DBG_RELAY );
 }
 
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( POINTER, HeapReallocateEx )( PMEM pHeap, POINTER source, _BLOCK_MAX_SIZE_TYPE size DBG_PASS )
+MEM_PROC( POINTER, HeapReallocateEx )( PMEM pHeap, POINTER source, PTRSZVAL size DBG_PASS )
 {
 	POINTER dest;
-	_BLOCK_MAX_SIZE_TYPE min;
+	PTRSZVAL min;
 
 	dest = HeapAllocateEx( pHeap, size DBG_RELAY );
 	if( source )
@@ -1982,10 +2003,10 @@ MEM_PROC( POINTER, HeapReallocateEx )( PMEM pHeap, POINTER source, _BLOCK_MAX_SI
 
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( POINTER, HeapPreallocateEx )( PMEM pHeap, POINTER source, _BLOCK_MAX_SIZE_TYPE size DBG_PASS )
+MEM_PROC( POINTER, HeapPreallocateEx )( PMEM pHeap, POINTER source, PTRSZVAL size DBG_PASS )
 {
 	POINTER dest;
-	_BLOCK_MAX_SIZE_TYPE min;
+	PTRSZVAL min;
 
 	dest = HeapAllocateEx( pHeap, size DBG_RELAY );
 	if( source )
@@ -2012,14 +2033,14 @@ MEM_PROC( POINTER, HeapMoveEx )( PMEM pNewHeap, POINTER source DBG_PASS )
 
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( POINTER, ReallocateEx )( POINTER source, _BLOCK_MAX_SIZE_TYPE size DBG_PASS )
+MEM_PROC( POINTER, ReallocateEx )( POINTER source, PTRSZVAL size DBG_PASS )
 {
 	return HeapReallocateEx( g.pMemInstance, source, size DBG_RELAY );
 }
 
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( POINTER, PreallocateEx )( POINTER source, _BLOCK_MAX_SIZE_TYPE size DBG_PASS )
+MEM_PROC( POINTER, PreallocateEx )( POINTER source, PTRSZVAL size DBG_PASS )
 {
 	return HeapPreallocateEx( g.pMemInstance, source, size DBG_RELAY );
 }
@@ -2071,7 +2092,7 @@ static void Bubble( PMEM pMem )
 
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( _BLOCK_MAX_SIZE_TYPE, SizeOfMemBlock )( CPOINTER pData )
+MEM_PROC( PTRSZVAL, SizeOfMemBlock )( CPOINTER pData )
 {
 	if( pData )
 	{
@@ -2085,7 +2106,7 @@ MEM_PROC( _BLOCK_MAX_SIZE_TYPE, SizeOfMemBlock )( CPOINTER pData )
 
 MEM_PROC( POINTER, MemDupEx )( CPOINTER thing DBG_PASS )
 {
-	_BLOCK_MAX_SIZE_TYPE size = SizeOfMemBlock( thing );
+	PTRSZVAL size = SizeOfMemBlock( thing );
 	POINTER result;
 	result = AllocateEx( size DBG_RELAY );
 	MemCpy( result, thing, size );
@@ -2145,7 +2166,7 @@ POINTER ReleaseEx ( POINTER pData DBG_PASS )
 	{
 #ifdef _DEBUG
 		TEXTCHAR byMsg[256];
-		sprintf( byMsg, WIDE("This Block is NOT within the managed heap! : %p")
+		snprintf( byMsg, sizeof( byMsg ), WIDE("This Block is NOT within the managed heap! : %p")
 						  , pData );
 		ODSEx( byMsg, pFile, nLine );
 #endif
@@ -2395,7 +2416,7 @@ MEM_PROC( void, DebugDumpHeapMemEx )( PMEM pHeap, LOGICAL bVerbose )
 	ODS(WIDE(" ------ Memory Dump ------- ") );
 	{
 		TEXTCHAR byDebug[256];
-		sprintf( byDebug, WIDE("FirstFree : %p"),
+		snprintf( byDebug, sizeof( byDebug ), WIDE("FirstFree : %p"),
 					pMem->pFirstFree );
 		ODS( byDebug );
 	}
@@ -2416,7 +2437,7 @@ MEM_PROC( void, DebugDumpHeapMemEx )( PMEM pHeap, LOGICAL bVerbose )
 				nTotalFree += pc->dwSize;
 				if( bVerbose )
 				{
-					sprintf( byDebug, WIDE("Free at %p size: %") _32f WIDE("(%") _32fx WIDE(") Prior:%p NF:%p"),
+					snprintf( byDebug, sizeof( byDebug ), WIDE("Free at %p size: %") _32f WIDE("(%") _32fx WIDE(") Prior:%p NF:%p"),
 						 pc, pc->dwSize, pc->dwSize,
 						 pc->pPrior,
 						 pc->next );
@@ -2427,7 +2448,7 @@ MEM_PROC( void, DebugDumpHeapMemEx )( PMEM pHeap, LOGICAL bVerbose )
 				nTotalUsed += pc->dwSize;
 				if( bVerbose )
 				{
-					sprintf( byDebug, WIDE("Used at %p size: %") _32f WIDE("(%") _32fx WIDE(") Prior:%p"),
+					snprintf( byDebug, sizeof( byDebug ), WIDE("Used at %p size: %") _32f WIDE("(%") _32fx WIDE(") Prior:%p"),
 						 pc, pc->dwSize, pc->dwSize,
 						 pc->pPrior );
 				}
@@ -2457,7 +2478,7 @@ MEM_PROC( void, DebugDumpHeapMemEx )( PMEM pHeap, LOGICAL bVerbose )
 			}
 		}
 	}
-	sprintf( byDebug, WIDE("Total Free: %d  TotalUsed: %d  TotalChunks: %d TotalMemory:%lu"),
+	snprintf( byDebug, sizeof( byDebug ), WIDE("Total Free: %d  TotalUsed: %d  TotalChunks: %d TotalMemory:%lu"),
 				nTotalFree, nTotalUsed, nChunks,
 				(long unsigned)(nTotalFree + nTotalUsed + nChunks * CHUNK_SIZE) );
 	ODS( byDebug );
@@ -2493,7 +2514,7 @@ MEM_PROC( void, DebugDumpHeapMemFile )( PMEM pHeap, CTEXTSTR pFilename )
 		fprintf( file, WIDE(" ------ Memory Dump ------- \n") );
 		{
 			TEXTCHAR byDebug[256];
-			sprintf( byDebug, WIDE("FirstFree : %p"),
+			snprintf( byDebug, sizeof( byDebug ), WIDE("FirstFree : %p"),
 						pMem->pFirstFree );
 			fprintf( file, WIDE("%s\n"), byDebug );
 		}
@@ -2891,9 +2912,10 @@ MEM_PROC( TEXTSTR, StrDupEx )( CTEXTSTR original DBG_PASS )
 {
 	if( original )
 	{
-		_BLOCK_MAX_SIZE_TYPE len = (_BLOCK_MAX_SIZE_TYPE)strlen( original ) + 1;
-		TEXTCHAR *result = (TEXTCHAR*)AllocateEx( len DBG_RELAY );
-		MemCpy( result, original, len );
+		PTRSZVAL len = (PTRSZVAL)StrLen( original ) + 1;
+		TEXTCHAR *result;
+		result = (TEXTCHAR*)AllocateEx( sizeof(TEXTCHAR)*len  DBG_RELAY );
+		MemCpy( result, original, sizeof(TEXTCHAR)*len );
 		return result;
 	}
 	return NULL;

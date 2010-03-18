@@ -9,6 +9,7 @@
 // otherwise they will be defined in sql.h
 typedef int RETCODE; // sqllite uses a generic int type for result codes
 typedef int SQLSMALLINT;
+typedef unsigned int SQLULEN;
 typedef int SQLINTEGER;
 enum {
 	SQL_HANDLE_DBC
@@ -88,7 +89,7 @@ typedef struct database_info_tag
 	struct {
 		BIT_FIELD  bAutoUser  : 1;
 	} flags;
-	TEXTCHAR pDSN[256];
+	TEXTSTR pDSN;
 	TEXTCHAR pID[64];
 	TEXTCHAR pPASSWORD[64];
 } DB_INFO, *PDB_INFO;

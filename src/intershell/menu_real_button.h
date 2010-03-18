@@ -13,22 +13,22 @@ struct menu_button_tag
 	long long x, y, w, h;
 	//int nType;
 	CDATA color;
-   CDATA secondary_color; // the border color/ring color... secondary status color...
+	CDATA secondary_color; // the border color/ring color... secondary status color...
 	CDATA textcolor;
-   CDATA highlight_color;
-   char *text; // button text...
+	CDATA highlight_color;
+	TEXTCHAR *text; // button text...
 	Font *font_preset;
-   CTEXTSTR font_preset_name; // name of the font used on this control...
-	char pImage[256]; // button image (instead of or in addition to text?)
+	CTEXTSTR font_preset_name; // name of the font used on this control...
+	TEXTCHAR pImage[256]; // button image (instead of or in addition to text?)
 	Image decal_image;
 	_32 decal_horiz_margin;
-   _32 decal_vert_margin;
+	_32 decal_vert_margin;
 #ifndef __NO_ANIMATION__
 	char pAnimation[256]; //button animation
 	PMNG_ANIMATION  decal_animation;
 #endif
 
-	 S_16 decal_alpha;
+	S_16 decal_alpha;
 	union {
 		PKEY_BUTTON key;
 		PSI_CONTROL control;
@@ -48,8 +48,8 @@ struct menu_button_tag
 		BIT_FIELD bNoCreateMethod : 1; // control did not have a create method found.
 	} flags;
 	PTRSZVAL psvUser;
-	char *pTypeName;
-	char *pPageName; // change to this page after invoking the button's keypress method
+	TEXTCHAR *pTypeName;
+	TEXTCHAR *pPageName; // change to this page after invoking the button's keypress method
 	void (CPROC *original_keypress)( PTRSZVAL );
 	struct glare_set *glare_set; // glares used on this button
 
@@ -62,9 +62,9 @@ struct menu_button_tag
    //INDEX iSecurityContext; // index into login_history that identifies the context of this login..
 
 	PPAGE_DATA page;
-   PLIST show_on; // list of CTEXTSTR's that are system names this button is visible on.
+	PLIST show_on; // list of CTEXTSTR's that are system names this button is visible on.
 	PLIST no_show_on; // list of CTEXTSTR's that are system names this button is INvisible on.
 	PCanvasData canvas;
 	PLIST extra_config; // extra lines that are read from config, (for which do not have a plugin loaded), saved here
-   struct menu_button_tag *container_button; // macro elements have this set to their real button, so color updates auto propagate to physical button level.
+	struct menu_button_tag *container_button; // macro elements have this set to their real button, so color updates auto propagate to physical button level.
 };

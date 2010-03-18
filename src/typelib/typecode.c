@@ -36,6 +36,10 @@ namespace sack {
 		namespace list {
 #endif
 		
+#ifdef UNDER_CE
+#define LockedExchange InterlockedExchange
+#endif
+
 TYPELIB_PROC( PLIST, CreateListEx )( DBG_VOIDPASS )
 {
    PLIST pl;

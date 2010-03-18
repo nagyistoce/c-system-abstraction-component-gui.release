@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
 
+set( CMAKE_C_COMPILER_WORKS 1 )
+set( CMAKE_CXX_COMPILER_WORKS 1 )
+
 #set( CMAKE_VERBOSE_MAKEFILE  1 )
 #message( ${CMAKE_GENERATOR} )
 
@@ -13,6 +16,7 @@ if( ${CMAKE_GENERATOR} MATCHES "Watcom WMake" )
 #ENABLE_LANGUAGE(RC)
 ##<FLAGS> flags is not OK.
 #SET(CMAKE_COMPILE_RESOURCE "rc")
+SET( CMAKE_RC_COMPILER "rc" )
 #SET(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> /fo<OBJECT> <SOURCE>  -i${SACK_SOURCE_DIR}")
 
  set( ExtraFlags "${ExtraFlags} -DSEXPAT_SOURCE -DXML_MIN_SIZE /fp5 /fpi87" )
@@ -51,8 +55,9 @@ else()
    endif()
 endif()
 
-SET(VLC_PATH "c:/tools/vlc-1.0.5" CACHE STRING "Base Path of VLC Installation
-1.0.0 and less than 1.1.0" )
+SET(VLC_PATH "c:/tools/vlc-1.0.5" CACHE STRING "Base Path of VLC Installation 1.0.0 and less than 1.1.0" )
+
+SET(BUILD_ELTANIN_ROOT "../eltanin2/BingoUnified" CACHE STRING "If Specified, hook into eltanin build CmakeLists" )
 
 if ( UNIX )
         set( USE_INTERNAL_STANDARDLIBS 0 )
@@ -96,17 +101,27 @@ OPTION( NEED_JPEG "Build internal jpeg lib (with suitable exports to link agains
 OPTION( NEED_PNG "Build internal png lib (with suitable exports to link against)" ${USE_INTERNAL_STANDARDLIBS} )
 OPTION( NEED_FREETYPE "Build internal freetype lib (with suitable exports to link against)" ${USE_INTERNAL_STANDARDLIBS} )
 OPTION( NEED_ZLIB "Build internal zlib lib (with suitable exports to link against)" ${USE_INTERNAL_STANDARDLIBS} )
+OPTION( BUILD_ELTANIN "Hook into building eltanin tree" OFF )
+OPTION( __WINDOWS_ARM_CE__ "Build for windows CE 5.0 ARM" 0 )
 
 OPTION( BUILD_MONOLITHIC "Build one giant library" 1 )
 
+
+if( __ARM__ OR __BUILD_ARM_CE__ )
+add_definitions( -D_WIN32_WCE=0x501 -DUNDER_CE -DWINCE -D_WINDOWS -DARM -D_ARM_ -DWIN32_PLATFORM_WFSP -D_UNICODE -DUNICODE -DPOCKETPC2003_UI_MODEL -DWIN32 )
+else( )
+  if( MSVC )
+    add_definitions( -D_X86_ )
+  endif( MSVC )
+endif()
 
 
 add_definitions( -DSACK_CORE_BUILD )
 
 
-LINK_LIBRARIES( odbc32 )
 
-if( USE_ODBC )
+
+if( USE_ODBC OR USE_SQLITE )
 
 set( ODBC_SOURCES
   src/SQLlib/sqlparse3.c
@@ -114,40 +129,45 @@ set( ODBC_SOURCES
   src/SQLlib/sqlutil.c
   src/SQLlib/sqlwrap.c
 )
+
+ if( USE_ODBC )
 add_definitions( 
   -DUSE_ODBC
 )
+LINK_LIBRARIES( odbc32 )
+ endif( USE_ODBC )
 
-if( USE_OPTIONS )
+ if( USE_OPTIONS )
 SET( OPTION_SOURCE
    src/SQLlib/optlib/getoption.c
    src/SQLlib/optlib/getoption_new.c
    src/SQLlib/optlib/optionutil.c
    src/SQLlib/optlib/optionutil_new.c
    )
-else()
+ else( USE_OPTIONS )
 add_definitions( 
   -D__NO_OPTIONS__
 )
-endif()
+ endif( USE_OPTIONS )
 
+ if( USE_SQLITE )
 SET(SQLITE_SOURCES
    src/sqlite/sqlite3.c
    )
-if( USE_SQLITE )
 add_definitions( 
   -DUSE_SQLITE
 )
 
  set( ExtraFlags "${ExtraFlags} -DSQLITE_SOURCE" )
-endif()
+ endif(USE_SQLITE)
 
-else( USE_ODBC )
+else( USE_ODBC OR USE_SQLITE )
+message( "no options too..." )
 add_definitions( 
   -D__NO_SQL__ -D__NO_OPTIONS__
 )
 
-endif( USE_ODBC )
+endif( USE_ODBC OR USE_SQLITE )
 
 # this is where external image libraries are added for windows native builds
 include( Externals.cmake )
@@ -158,10 +178,9 @@ if( NOT C++ )
   SET( FIRST_GCC_LIBRARY_SOURCE ${SACK_BASE}/src/deadstart/deadstart_list.c ) 
   SET( FIRST_GCC_PROGRAM_SOURCE ${SACK_BASE}/src/deadstart/deadstart_list.c ) 
   SET( LAST_GCC_LIBRARY_SOURCE ${SACK_BASE}/src/deadstart/deadstart_lib.c ${SACK_BASE}/src/deadstart/deadstart_end.c ) 
-  SET( LAST_GCC_PROGRAM_SOURCE ${SACK_BASE}/src/deadstart/deadstart_prog.c ${SACK_BASE}/src/deadstart/deadstart_end.c ) 
+  SET( LAST_GCC_PROGRAM_SOURCE ${SACK_BASE}/src/deadstart/deadstart_lib.c ${SACK_BASE}/src/deadstart/deadstart_prog.c ${SACK_BASE}/src/deadstart/deadstart_end.c ) 
   endif()
   if( ${MSVC}${WATCOM} ) 
-  message( "Setting program deadstart." )
   SET( LAST_GCC_PROGRAM_SOURCE ${SACK_BASE}/src/deadstart/deadstart_prog.c ) 
   endif()
 else()
@@ -213,9 +232,13 @@ set( GENX_SOURCES
 set( VIDLIB_SOURCES
   src/vidlib/key.c
   src/vidlib/keydefs.c
-  src/vidlib/opengl.c
   src/vidlib/vidlib.c
 )
+
+if( NOT __ARM__ )
+set( VIDLIB_SOURCES ${VIDLIB_SOURCES} src/vidlib/opengl.c )
+set( ExtraRenderFlags "${ExtraRenderFlags} -D_OPENGL_ENABLED" )
+endif( NOT __ARM__ )
 
 set( IMAGE_SOURCES
   src/imglib/alphastab.c
@@ -273,7 +296,29 @@ endif()
 
 set( ExtraFlags "${ExtraFlags} -DGENX_SOURCE" )
 
-set(BASE_SOURCES 
+set( SACK_MSG_SERVICES 
+  src/msgsvr/client/client.c
+  src/msgsvr/summoner/construct.c
+  )
+
+if( NOT __ARM__ )
+set(BASE_SOURCES ${BASE_SOURCES} ${SACK_MSG_SERVICES}
+  src/filesyslib/filemon/allfiles.c
+  src/filesyslib/filemon/windowsfiles.c
+  #src/filesyslib/filemon/linuxfiles.c
+  src/netlib/ping.c
+  src/netlib/whois.c
+  src/systemlib/spawntask.c
+
+)
+else()
+set( Extraflags "${ExtraFlags} -D__NO_MSGSVR__" )
+set( CMAKE_C_STANDARD_LIBRARIES_INIT "" )
+endif()
+
+
+
+set(BASE_SOURCES  ${BASE_SOURCES}
   src/sysloglib/syslog.c
   src/memlib/sharemem.c
   src/typelib/binarylist.c
@@ -285,27 +330,21 @@ set(BASE_SOURCES
   src/typelib/typecode.c
   src/timerlib/timers.c
   src/idlelib/idle.c
-  src/msgsvr/client/client.c
   src/fractionlib/fractions.c
   src/configlib/configscript.c
   src/procreglib/names.c
   src/netlib/network.c
   src/netlib/net_winsock2.c
-  src/netlib/ping.c
   src/netlib/tcpnetwork.c
   src/netlib/udpnetwork.c
-  src/netlib/whois.c
-  src/filesyslib/filescan.c
-  src/filesyslib/pathops.c
-  src/filesyslib/filemon/allfiles.c
-  src/filesyslib/filemon/windowsfiles.c
-  src/systemlib/system.c
-  src/systemlib/spawntask.c
   src/systemlib/args.c
-  src/msgsvr/summoner/construct.c
   src/deadstart/deadstart_core.c
   src/vectlib/vectlib.c
   src/sha1lib/sha1.c
+  src/filesyslib/pathops.c
+  src/filesyslib/winfiles.c
+  src/filesyslib/filescan.c
+  src/systemlib/system.c
   ${OPTION_SOURCE}
   ${GENX_SOURCES}
   ${EXPAT_SOURCES}
@@ -359,7 +398,6 @@ add_custom_command( OUTPUT ${PROJECT_BINARY_DIR}/all_resources.res
  ADD_CUSTOM_TARGET( generate_foo DEPENDS ${PROJECT_BINARY_DIR}/all_resources.res)
 endif( NOT WATCOM ) 
 
-
 if( BUILD_MONOLITHIC )
 
 add_library( sack_bag SHARED 
@@ -377,15 +415,26 @@ add_library( sack_bag SHARED
   ${LAST_GCC_LIBRARY_SOURCE} )
 SET_TARGET_PROPERTIES(sack_bag PROPERTIES
                   DEFINE_SYMBOL SACK_BAG_EXPORTS
-                  COMPILE_FLAGS  "-DTARGET_LABEL=sack_bag ${ExtraFlags}"
+                  COMPILE_FLAGS  "-DTARGET_LABEL=sack_bag ${ExtraFlags} ${ExtraRenderFlags}"
+                  
                   )
+                  
+if( __WINDOWS_ARM_CE__ )
+SET_TARGET_PROPERTIES( sack_bag PROPERTIES LINK_LIBRARIES "" )
+endif()
+
 if( WATCOM )
 ADD_DEPENDENCIES( sack_bag generate_foo )
 SET_TARGET_PROPERTIES(sack_bag PROPERTIES LINK_FLAGS "option resource=all_resources.res")
 
 endif()
 set( SACK_LIBRARY sack_bag )
-target_link_libraries( sack_bag wsock32 ws2_32 opengl32 odbc32 winmm iphlpapi)
+
+if( __ARM__ )
+target_link_libraries( sack_bag ws2 mmtimer iphlpapi coredll corelibc.lib)
+else()
+target_link_libraries( sack_bag wsock32 ws2_32 opengl32 winmm iphlpapi)
+endif()
 install_default_dest( sack_bag )
 
 
@@ -404,8 +453,21 @@ SET_TARGET_PROPERTIES(bag PROPERTIES
                   DEFINE_SYMBOL SACK_BAG_EXPORTS
                   COMPILE_FLAGS  "-DTARGET_LABEL=bag ${ExtraFlags}"
 )
-target_link_libraries( bag wsock32 ws2_32 opengl32 odbc32 winmm iphlpapi)
-set( SACK_LIBRARY bag )
+
+if( __WINDOWS_ARM_CE__ )
+SET_TARGET_PROPERTIES( bag PROPERTIES LINK_LIBRARIES "" )
+endif( __WINDOWS_ARM_CE__ )
+
+if( __WINDOWS_ARM_CE__ )
+SET( LINK_LIBRARIES "" )
+endif( __WINDOWS_ARM_CE__ )
+
+if( __ARM__ )
+target_link_libraries( bag ws2 mmtimer iphlpapi coredll corelibc.lib )
+else()
+target_link_libraries( bag wsock32 ws2_32 opengl32 winmm iphlpapi)
+endif()
+set( SACK_LIBRARY bag bag.psi bag.image bag.video bag.externals )
 
 ###########
 
@@ -434,7 +496,7 @@ set( SACK_IMAGE_LIBRARY bag.video )
 add_library( bag.video SHARED ${VIDLIB_SOURCES} )
 SET_TARGET_PROPERTIES(bag.video PROPERTIES
                   DEFINE_SYMBOL VIDEO_LIBRARY_SOURCE
-                  COMPILE_FLAGS  "-DTARGET_LABEL=bag_video -D_OPENGL_ENABLED -DRENDER_LIBRARY_SOURCE"
+                  COMPILE_FLAGS  "-DTARGET_LABEL=bag_video -DRENDER_LIBRARY_SOURCE ${ExtraRenderFlags}"
 )
 target_link_libraries( bag.video bag.image bag )
 set( SACK_VIDEO_LIBRARY bag.video )
@@ -473,14 +535,25 @@ endif()
 
 if( NOT SACK_ONLY OR BUILD_INTERSHELL )
 add_subdirectory( src/intershell )
+if( USE_OPTIONS )
 add_subdirectory( src/SQLlib/optlib/editoption )
+endif( USE_OPTIONS )
 
 # parts of SDK ...
 add_subdirectory( include )
 add_subdirectory( src/utils/runner )
 
 add_subdirectory( data )
+# includes some testdata in tstdisplay...
+# the test programs do not have install targets, but they will end up building...
+add_subdirectory( src/msgsvr/testdisplay )
+
+if( BUILD_ELTANIN )
+add_subdirectory( ${BUILD_ELTANIN_ROOT} eltanin )
+endif( BUILD_ELTANIN )
 
 endif()
 
+
+set( CMAKE_C_STANDARD_LIBRARIES_INIT "" )
 

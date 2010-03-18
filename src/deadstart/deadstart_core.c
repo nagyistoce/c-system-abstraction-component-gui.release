@@ -37,6 +37,11 @@
 #endif
 
 
+#ifdef UNDER_CE
+#define LockedExchange InterlockedExchange
+#endif
+
+
 SACK_DEADSTART_NAMESPACE
 
 #undef PRELOAD
@@ -92,10 +97,14 @@ struct deadstart_local_data_
 	} flags;
 };
 
+#ifdef UNDER_CE 
+static struct deadstart_local_data_ deadstart_local_data;
+#define l (deadstart_local_data)
+#else
 //#ifdef __STATIC__
 static struct deadstart_local_data_ *deadstart_local_data;
 #define l (*deadstart_local_data)
-
+#endif
 
 void RunExits( void )
 {
@@ -104,9 +113,13 @@ void RunExits( void )
 
 static void InitLocal( void )
 {
+#ifndef UNDER_CE 
 	if( !deadstart_local_data )
+#endif
 	{
+#ifndef UNDER_CE 
 		SimpleRegisterAndCreateGlobal( deadstart_local_data );
+#endif
 		atexit( RunExits );
 	}
 }
@@ -120,7 +133,13 @@ static void InitLocal( void )
 // we don't actually do anything with this?
 void RegisterPriorityStartupProc( void (*proc)(void), CTEXTSTR func,int priority, void *use_label, CTEXTSTR file,int line )
 {
-	if( LOG_ALL || deadstart_local_data && l.flags.bLog )
+	if( LOG_ALL ||
+#ifndef UNDER_CE
+		 (deadstart_local_data 
+#else 
+		(1
+#endif
+		&& l.flags.bLog ))
 		lprintf( WIDE("%s@%s(%d) %d register"), func,file,line, priority);
 	InitLocal();
 	procs[nProcs].proc = proc;
@@ -160,10 +179,10 @@ void RegisterPriorityStartupProc( void (*proc)(void), CTEXTSTR func,int priority
 	nProcs++;
 	if( nProcs == 1024 )
 	{
-      lprintf( "Excessive number of startup procs!" );
+		lprintf( WIDE( "Excessive number of startup procs!" ) );
 		DebugBreak();
 	}
-
+	
 	if( bInitialDone && !bSuspend )
 	{
       InvokeDeadstart();
@@ -221,6 +240,7 @@ void ClearDeadstarts( void )
 }
 #endif
 
+#ifndef UNDER_CE
 #  if defined( __WINDOWS__ )
 #    ifndef __cplusplus_cli
 static BOOL WINAPI CtrlC( DWORD dwCtrlType )
@@ -253,7 +273,7 @@ static void CtrlC( int signal )
    exit(3);
 }
 #  endif
-
+#endif
 
 //#ifdef __WINDOWS__
 
@@ -272,6 +292,7 @@ void InvokeDeadstart( void )
 #ifdef __WINDOWS__
 	if( !bInitialDone && !bDispatched )
 	{
+#  ifndef UNDER_CE
 		if( GetConsoleWindow() )
 		{
 #    ifndef __cplusplus_cli
@@ -284,6 +305,7 @@ void InvokeDeadstart( void )
 			//MessageBox( NULL, "!!--!! NO CtrlC", "blah", MB_OK );
 			; // do nothing if we're no actually a console window. this should fix ctrl-c not working in CMD prompts launched by MILK/InterShell
 		}
+#  endif
 	}
 #endif
 
@@ -293,7 +315,13 @@ void InvokeDeadstart( void )
 		while( proc = (PSTARTUP_PROC)LockedExchange( (PVPTRSZVAL)&proc_schedule, 0 ) )
 #endif
 	{
-		if( LOG_ALL || deadstart_local_data && l.flags.bLog )
+		if( LOG_ALL ||
+#ifndef UNDER_CE
+		 (deadstart_local_data 
+#else 
+		(1
+#endif
+		&& l.flags.bLog ))
 			lprintf( WIDE("Dispatch %s@%s(%d)"), proc->func,proc->file,proc->line);
 		//bDispatched = 1;
 		{
@@ -381,7 +409,9 @@ void RegisterStartups( void )
 		{
 			if( !current[0].scheduled )
 			{
+#ifndef UNDER_CE
 				if( LOG_ALL || deadstart_local_data && l.flags.bLog )
+#endif
 					lprintf( WIDE("Register %d %s@%s(%d)"), current->priority, current->funcname, current->file, current->line );
 #  ifdef __CYGWIN__
 #    ifdef DEBUG_CYGWIN_START

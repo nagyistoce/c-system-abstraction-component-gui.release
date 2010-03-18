@@ -991,17 +991,22 @@ PSI_PROC( int, TrackPopup )( PMENU hMenuSub, PCOMMON parent )
 #ifndef TPM_RETURNCMD
 #define TPM_RETURNCMD 256
 #endif
+
+#ifdef UNDER_CE
+#define TPM_RIGHTBUTTON 0
+#endif
+
       nCmd = TrackPopupMenu( (HMENU)hMenuSub, TPM_CENTERALIGN
                                  | TPM_TOPALIGN
-                                 | TPM_RIGHTBUTTON
-                                 | TPM_RETURNCMD
+                                 | TPM_RETURNCMD 
+								 | TPM_RIGHTBUTTON
                                  | TPM_NONOTIFY
                                  ,p.x
                                  ,p.y
                                  ,0
-#pragma message( WIDE("This line must be handled with a good window handle...\n") )
-                                 , hWndLastFocus // hWndController
+                                 , hWndLastFocus 
 								 , NULL);
+								 // hWndController	//("This line must be handled with a good window handle...\n") )
 		if( nCmd == 0 ) // In my world.... 0 means in process, -1 is selected nothing, so we have to translate no selection
          nCmd = -1;
       return nCmd;

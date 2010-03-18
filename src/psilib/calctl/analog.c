@@ -13,6 +13,7 @@
 
 PSI_CLOCK_NAMESPACE 
 
+#define CLOCK_NAME WIDE("Basic Clock Widget")
 extern CONTROL_REGISTRATION clock_control;
 
 
@@ -98,7 +99,7 @@ void DrawClock( Image surface, PANALOG_CLOCK analog )
 	}
 }
 
-static void OnRevealCommon( "Basic Clock Widget" )( PSI_CONTROL pc )
+static void OnRevealCommon( CLOCK_NAME )( PSI_CONTROL pc )
 {
 	ValidatedControlData( PCLOCK_CONTROL, clock_control.TypeID, clock, (PSI_CONTROL)pc );
 	if( clock )
@@ -111,7 +112,7 @@ static void OnRevealCommon( "Basic Clock Widget" )( PSI_CONTROL pc )
 	}
 }
 
-static void OnHideCommon( "Basic Clock Widget" )( PSI_CONTROL pc )
+static void OnHideCommon( CLOCK_NAME )( PSI_CONTROL pc )
 {
 	ValidatedControlData( PCLOCK_CONTROL, clock_control.TypeID, clock, (PSI_CONTROL)pc );
 	if( clock )
@@ -144,13 +145,13 @@ static void MoveSurface( PSI_CONTROL pc )
 }
 
 
-static void OnMoveCommon( "Basic Clock Widget" )( PSI_CONTROL pc, LOGICAL changing )
+static void OnMoveCommon( CLOCK_NAME )( PSI_CONTROL pc, LOGICAL changing )
 {
 	if( !changing )
       MoveSurface( pc );
 }
 
-static void OnMotionCommon( "Basic Clock Widget" )( PSI_CONTROL pc, LOGICAL changing )
+static void OnMotionCommon( CLOCK_NAME )( PSI_CONTROL pc, LOGICAL changing )
 {
 	if( !changing )
       MoveSurface( pc );
@@ -158,7 +159,7 @@ static void OnMotionCommon( "Basic Clock Widget" )( PSI_CONTROL pc, LOGICAL chan
 
 
 
-static void OnSizeCommon( "Basic Clock Widget" )( PSI_CONTROL pc, LOGICAL changing )
+static void OnSizeCommon( CLOCK_NAME )( PSI_CONTROL pc, LOGICAL changing )
 {
 	ValidatedControlData( PCLOCK_CONTROL, clock_control.TypeID, clock, (PSI_CONTROL)pc );
 	if( !changing && clock )
@@ -239,7 +240,7 @@ void MakeClockAnalogEx( PSI_CONTROL pc, CTEXTSTR imagename, struct clock_image_t
 				S_32 x = 0;
 				S_32 y = 0;
 				GetPhysicalCoordinate( pc, &x, &y, FALSE );
-            lprintf( "Making clock uhm... %d %d %d %d over %p", x, y,surface->width
+	            lprintf( WIDE( "Making clock uhm... %d %d %d %d over %p" ), x, y,surface->width
 																	 , surface->height );
 				analog->render = OpenDisplayAboveSizedAt( DISPLAY_ATTRIBUTE_LAYERED
                                                      |DISPLAY_ATTRIBUTE_NO_MOUSE

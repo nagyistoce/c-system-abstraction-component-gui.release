@@ -11,7 +11,7 @@
 
 //
 
-//#define DEBUG_BACKGROUND_UPDATE
+#define DEBUG_BACKGROUND_UPDATE
 
 #define LOG_UPDATE_AND_REFRESH_LEVEL LOG_ALWAYS
 //#define LOG_UPDATE_AND_REFRESH_LEVEL LOG_NEVER
@@ -69,7 +69,7 @@ void CPROC AbortConfigureKeys( PSI_CONTROL pc, _32 keycode );
 PRELOAD( blah )
 {
 #undef SYMNAME
-#define SYMNAME( a,b) EasyRegisterResource( "intershell/visibility", a, b );
+#define SYMNAME( a,b) EasyRegisterResource( WIDE( "intershell/visibility" ), a, b );
 		SYMNAME( LIST_ALLOW_SHOW, LISTBOX_CONTROL_NAME )
 		SYMNAME( LIST_DISALLOW_SHOW, LISTBOX_CONTROL_NAME )
 		SYMNAME( LIST_SYSTEMS, LISTBOX_CONTROL_NAME ) // known systems list
@@ -80,11 +80,11 @@ PRELOAD( blah )
 		SYMNAME( BTN_REMOVE_SYSTEM_FROM_DISALLOW, NORMAL_BUTTON_NAME )
 		SYMNAME( BTN_REMOVE_SYSTEM_FROM_ALLOW, NORMAL_BUTTON_NAME )
 #undef SYMNAME
-#define SYMNAME( a,b) EasyRegisterResource( "intershell/page property", a, b );
+#define SYMNAME( a,b) EasyRegisterResource( WIDE( "intershell/page property" ), a, b );
 		SYMNAME( EDIT_PAGE_GRID_PARTS_X, EDIT_FIELD_NAME )
 		SYMNAME( EDIT_PAGE_GRID_PARTS_Y, EDIT_FIELD_NAME )
 #undef SYMNAME
-#define SYMNAME( a,b) EasyRegisterResource( "intershell/Button General/security", a, b );
+#define SYMNAME( a,b) EasyRegisterResource( WIDE( "intershell/Button General/security" ), a, b );
 		SYMNAME( LISTBOX_SECURITY_MODULE, LISTBOX_CONTROL_NAME );
 		SYMNAME( EDIT_SECURITY, NORMAL_BUTTON_NAME );
 
@@ -112,11 +112,11 @@ void InterShell_Reveal( void )
 	//
 	if( g.flags.bButtonProcessing )
 	{
-		lprintf( "Canvas processing, don't show yet..." );
+		lprintf( WIDE( "Canvas processing, don't show yet..." ) );
 		g.flags.bShowCanvas = 1;
 		return;
 	}
-	//lprintf( "Restoring..." );
+	//lprintf( WIDE( "Restoring..." ) );
 	//if( g.flags.bShowCanvas )
 	{
 		InterShell_DisablePageUpdate( FALSE );
@@ -361,7 +361,7 @@ LOGICAL InterShell_IsButtonVirtual( PMENU_BUTTON button )
 {
 	if( button )
 	{
-		lprintf( "Button is virtual? %d", button->flags.bInvisible );
+		lprintf( WIDE( "Button is virtual? %d" ), button->flags.bInvisible );
 		return button->flags.bInvisible;
 	}
 	return 1;
@@ -370,9 +370,9 @@ LOGICAL InterShell_IsButtonVirtual( PMENU_BUTTON button )
 
 void InvokeDestroy( PMENU_BUTTON button )
 {
-	char rootname[256];
+	TEXTCHAR rootname[256];
 	void (CPROC*f)(PTRSZVAL);
-	snprintf( rootname, sizeof( rootname ), TASK_PREFIX "/control/%s", button->pTypeName );
+	snprintf( rootname, sizeof( rootname ), TASK_PREFIX WIDE( "/control/%s" ), button->pTypeName );
 	f = GetRegisteredProcedure2( rootname, void, WIDE("button_destroy"), (PTRSZVAL) );
 	if( f )
 		f(button->psvUser);
@@ -380,9 +380,9 @@ void InvokeDestroy( PMENU_BUTTON button )
 
 void InvokeShowControl( PMENU_BUTTON button )
 {
-	char rootname[256];
+	TEXTCHAR rootname[256];
 	void (CPROC*f)(PTRSZVAL);
-	snprintf( rootname, sizeof( rootname ), TASK_PREFIX "/control/%s", button->pTypeName );
+	snprintf( rootname, sizeof( rootname ), TASK_PREFIX WIDE( "/control/%s" ), button->pTypeName );
 	f = GetRegisteredProcedure2( rootname, void, WIDE("show_control"), (PTRSZVAL) );
 	if( f )
 		f(button->psvUser);
@@ -399,12 +399,12 @@ void InvokeInterShellShutdown( void )
 
 	InvokeShutdownMacro();
 
-	for( name = GetFirstRegisteredName( TASK_PREFIX "/common/intershell shutdown", &data );
+	for( name = GetFirstRegisteredName( TASK_PREFIX WIDE( "/common/intershell shutdown" ), &data );
 		name;
 		name = GetNextRegisteredName( &data ) )
 	{
 		void (CPROC *f)(void);
-		//snprintf( rootname, sizeof( rootname ), TASK_PREFIX "/common/save common/%s", name );
+		//snprintf( rootname, sizeof( rootname ), TASK_PREFIX WIDE( "/common/save common/%s" ), name );
 		f = GetRegisteredProcedure2( (CTEXTSTR)data, void, name, (void) );
 		if( f )
 			f();
@@ -420,7 +420,7 @@ PCanvasData GetCanvas( PSI_CONTROL pc )
 		if( !canvas )
 		{
 			PSI_CONTROL parent;
-			//lprintf( "Control %p is not a canvas, go to parent, check it..." );
+			//lprintf( WIDE( "Control %p is not a canvas, go to parent, check it..." ) );
 			for( parent = GetCommonParent( pc ); parent; parent = GetCommonParent( parent ) )
 			{
 				ValidatedControlData( PCanvasData, menu_surface.TypeID, _canvas, parent );
@@ -429,7 +429,7 @@ PCanvasData GetCanvas( PSI_CONTROL pc )
 					canvas = _canvas;
 					break;
 				}
-				//lprintf( "Control %p is not a canvas, go to parent, check it..." );
+				//lprintf( WIDE( "Control %p is not a canvas, go to parent, check it..." ) );
 			}
 		}
 		return canvas;
@@ -438,33 +438,33 @@ PCanvasData GetCanvas( PSI_CONTROL pc )
 }
 void InvokeCopyControl( PMENU_BUTTON button )
 {
-	char rootname[256];
+	TEXTCHAR rootname[256];
 	void (CPROC*f)(PTRSZVAL);
-	snprintf( rootname, sizeof( rootname ), TASK_PREFIX "/control/%s", button->pTypeName );
-	f = GetRegisteredProcedure2( rootname, void, "copy_control", (PTRSZVAL) );
+	snprintf( rootname, sizeof( rootname ), TASK_PREFIX WIDE( "/control/%s" ), button->pTypeName );
+	f = GetRegisteredProcedure2( rootname, void, WIDE( "copy_control" ), (PTRSZVAL) );
 	if( f )
 		f( button->psvUser );
 }
 
 void InvokeCloneControl( PMENU_BUTTON button, PMENU_BUTTON original )
 {
-	char rootname[256];
+	TEXTCHAR rootname[256];
 	void (CPROC*f)(PTRSZVAL,PTRSZVAL);
 	// may validate that button->pTypeName == original->pTypeName
 	// due to invokation constraints this would be impossible, until
 	// some other developer mangles stuff.
-	snprintf( rootname, sizeof( rootname ), TASK_PREFIX "/control/%s", button->pTypeName );
-	f = GetRegisteredProcedure2( rootname, void, "clone_control", (PTRSZVAL,PTRSZVAL) );
+	snprintf( rootname, sizeof( rootname ), TASK_PREFIX WIDE( "/control/%s" ), button->pTypeName );
+	f = GetRegisteredProcedure2( rootname, void, WIDE( "clone_control" ), (PTRSZVAL,PTRSZVAL) );
 	if( f )
 		f( button->psvUser, original->psvUser );
 }
 
 void InvokePasteControl( PMENU_BUTTON button )
 {
-	char rootname[256];
+	TEXTCHAR rootname[256];
 	void (CPROC*f)(PTRSZVAL);
-	snprintf( rootname, sizeof( rootname ), TASK_PREFIX "/control/%s", button->pTypeName );
-	f = GetRegisteredProcedure2( rootname, void, "paste_control", (PTRSZVAL));
+	snprintf( rootname, sizeof( rootname ), TASK_PREFIX WIDE( "/control/%s" ), button->pTypeName );
+	f = GetRegisteredProcedure2( rootname, void, WIDE( "paste_control" ), (PTRSZVAL));
 	if( f )
 		f( button->psvUser );
 }
@@ -490,7 +490,7 @@ void DestroyButton( PMENU_BUTTON button )
 
 PSI_CONTROL QueryGetControl( PMENU_BUTTON button )
 {
-	char rootname[256];
+	TEXTCHAR rootname[256];
 	PSI_CONTROL (CPROC*f)(PTRSZVAL);
 	if( !button )
 		return NULL;
@@ -500,7 +500,7 @@ PSI_CONTROL QueryGetControl( PMENU_BUTTON button )
 	{
 		snprintf( rootname
 			, sizeof( rootname )
-			, TASK_PREFIX "/control/%s"
+			, TASK_PREFIX WIDE( "/control/%s" )
 			, button->pTypeName );
 		f = GetRegisteredProcedure2( rootname, PSI_CONTROL, WIDE("get_control"), (PTRSZVAL) );
 		if( f )
@@ -516,12 +516,12 @@ int InvokeFixup( PMENU_BUTTON button )
 {
 	//if( button->flags.bCustom )
 	{
-		char rootname[256];
+		TEXTCHAR rootname[256];
 		void (CPROC*f2)(PTRSZVAL);
 		PMENU_BUTTON prior = configure_key_dispatch.button;
 		//PCanvasData prior_canvas = configure_key_dispatch.canvas;
 		configure_key_dispatch.button = button;
-		snprintf( rootname, sizeof( rootname ), TASK_PREFIX "/control/%s", button->pTypeName );
+		snprintf( rootname, sizeof( rootname ), TASK_PREFIX WIDE( "/control/%s" ), button->pTypeName );
 		f2 = GetRegisteredProcedure2( rootname, void, WIDE("control_fixup"), (PTRSZVAL) );
 		if( f2 )
 		{
@@ -565,7 +565,7 @@ PGLARE_SET GetGlareSet( CTEXTSTR name )
 	return glare_set;
 }
 
-void SetGlareSetFlags( char *name, int flags )
+void SetGlareSetFlags( TEXTCHAR *name, int flags )
 {
 	PGLARE_SET glare_set = GetGlareSet( name );
 	if( glare_set )
@@ -580,12 +580,12 @@ void SetGlareSetFlags( char *name, int flags )
 	}
 }
 
-void MakeGlareSet( char *name, char *glare, char *up, char *down, char *mask )
+void MakeGlareSet( TEXTCHAR *name, TEXTCHAR *glare, TEXTCHAR *up, TEXTCHAR *down, TEXTCHAR *mask )
 {
 	PGLARE_SET glare_set = GetGlareSet( name );
 #define SetGlareName(n)	if( glare_set->n ) \
 	Release( glare_set->n );             \
-	glare_set->n = n?StrDup( n ):(char*)NULL;
+	glare_set->n = n?StrDup( n ):(TEXTCHAR*)NULL;
 	SetGlareName( glare );
 	SetGlareName( up );
 	SetGlareName( down );
@@ -599,17 +599,17 @@ struct glare_set_edit{
 
 PRELOAD( RegisterGlaresetResources )
 {
-	EasyRegisterResource( "intershell/glareset", MNU_EDIT_GLARES, WIDE("Popup Menu") );
-	EasyRegisterResource( "intershell/glareset", LISTBOX_GLARE_SETS, LISTBOX_CONTROL_NAME );
-	EasyRegisterResource( "intershell/glareset", EDIT_GLARESET_GLARE, EDIT_FIELD_NAME );
-	EasyRegisterResource( "intershell/glareset", EDIT_GLARESET_UP, EDIT_FIELD_NAME );
-	EasyRegisterResource( "intershell/glareset", EDIT_GLARESET_DOWN, EDIT_FIELD_NAME );
-	EasyRegisterResource( "intershell/glareset", EDIT_GLARESET_MASK, EDIT_FIELD_NAME );
-	EasyRegisterResource( "intershell/glareset", CHECKBOX_GLARESET_MULTISHADE, RADIO_BUTTON_NAME );
-	EasyRegisterResource( "intershell/glareset", CHECKBOX_GLARESET_SHADE, RADIO_BUTTON_NAME );
-	EasyRegisterResource( "intershell/glareset", CHECKBOX_GLARESET_FIXED, RADIO_BUTTON_NAME );
-	EasyRegisterResource( "intershell/glareset", GLARESET_APPLY_CHANGES, NORMAL_BUTTON_NAME );
-	EasyRegisterResource( "intershell/glareset", GLARESET_CREATE, NORMAL_BUTTON_NAME );
+	EasyRegisterResource( WIDE( "intershell/glareset" ), MNU_EDIT_GLARES, WIDE( "Popup Menu" ) );
+	EasyRegisterResource( WIDE( "intershell/glareset" ), LISTBOX_GLARE_SETS, LISTBOX_CONTROL_NAME );
+	EasyRegisterResource( WIDE( "intershell/glareset" ), EDIT_GLARESET_GLARE, EDIT_FIELD_NAME );
+	EasyRegisterResource( WIDE( "intershell/glareset" ), EDIT_GLARESET_UP, EDIT_FIELD_NAME );
+	EasyRegisterResource( WIDE( "intershell/glareset" ), EDIT_GLARESET_DOWN, EDIT_FIELD_NAME );
+	EasyRegisterResource( WIDE( "intershell/glareset" ), EDIT_GLARESET_MASK, EDIT_FIELD_NAME );
+	EasyRegisterResource( WIDE( "intershell/glareset" ), CHECKBOX_GLARESET_MULTISHADE, RADIO_BUTTON_NAME );
+	EasyRegisterResource( WIDE( "intershell/glareset" ), CHECKBOX_GLARESET_SHADE, RADIO_BUTTON_NAME );
+	EasyRegisterResource( WIDE( "intershell/glareset" ), CHECKBOX_GLARESET_FIXED, RADIO_BUTTON_NAME );
+	EasyRegisterResource( WIDE( "intershell/glareset" ), GLARESET_APPLY_CHANGES, NORMAL_BUTTON_NAME );
+	EasyRegisterResource( WIDE( "intershell/glareset" ), GLARESET_CREATE, NORMAL_BUTTON_NAME );
 }
 
 void CPROC OnGlareSetSelect( PTRSZVAL psv, PSI_CONTROL list, PLISTITEM pli )
@@ -634,7 +634,7 @@ void CPROC ApplyGlareSetChanges( PTRSZVAL psv, PSI_CONTROL button )
 {
 	struct glare_set_edit *params = (struct glare_set_edit*)psv;
 	PGLARE_SET glare_set = params->current;
-	char buffer[256];
+	TEXTCHAR buffer[256];
 #define SetNewGlareImage( gs, var1, var2 )             \
 	if( gs->var1 && stricmp( buffer, gs->var1 ) )      \
 	{                                              \
@@ -668,13 +668,13 @@ void CPROC ApplyGlareSetChanges( PTRSZVAL psv, PSI_CONTROL button )
 
 void CPROC ButtonCreateGlareSet( PTRSZVAL psv, PSI_CONTROL button )
 {
-	char buffer[256];
+	TEXTCHAR buffer[256];
 	if( SimpleUserQuery( buffer, sizeof( buffer ), WIDE( "Enter New Glareset Name" )
 		, button ) )
 	{
 		if( CheckGlareSet( buffer ) )
 		{
-			BannerMessage( "Glare set already exists!" );
+			BannerMessage( WIDE( "Glare set already exists!" ) );
 		}
 		else
 		{
@@ -689,7 +689,7 @@ void CPROC ButtonCreateGlareSet( PTRSZVAL psv, PSI_CONTROL button )
 void EditGlareSets( PSI_CONTROL parent )
 {
 	PSI_CONTROL frame;
-	frame = LoadXMLFrame( "EditGlareSets.isFrame" );
+	frame = LoadXMLFrame( WIDE( "EditGlareSets.isFrame" ) );
 	if( frame )
 	{
 		struct glare_set_edit params;
@@ -735,7 +735,7 @@ CTEXTSTR InterShell_GetSystemName( void )
 }
 
 
-void InterShell_SetButtonStyle( PMENU_BUTTON button, char *style )
+void InterShell_SetButtonStyle( PMENU_BUTTON button, TEXTCHAR *style )
 {
 	if( !button )
 		button = configure_key_dispatch.button;
@@ -754,10 +754,10 @@ static void SetButtonText( PMENU_BUTTON button )
 		if( button->flags.bListbox )
 			return;
 		{
-			char button_text[256];
+			TEXTCHAR button_text[256];
 			// take data in psv and apply to the button appropriately...
 			CTEXTSTR p = InterShell_TranslateLabelText( NULL, button_text, sizeof( button_text ), button->text );
-			char newmenuname[256];
+			TEXTCHAR newmenuname[256];
 			int pos;
 			// Get info from dialog...
 			newmenuname[0] = 'A';
@@ -876,7 +876,7 @@ void FixupButtonEx( PMENU_BUTTON button DBG_PASS )
 	int show;
 	PSI_CONTROL pc_button = QueryGetControl( button );
 	PCanvasData canvas = GetCanvas( GetCommonParent( QueryGetControl( button ) ) );
-   //lprintf( "Button fixup..." );
+   //lprintf( WIDE( "Button fixup..." ) );
 #define LoadImg(n) ((n)?LoadImageFile((TEXTSTR)n):NULL)
 	if( canvas )
 		if( canvas->flags.bEditMode ) // don't do fixup/reveal if editing...
@@ -890,7 +890,7 @@ void FixupButtonEx( PMENU_BUTTON button DBG_PASS )
 #endif
 			return;
 		}
-		//lprintf( "--- updating a button's visual aspects, disable updates..." );
+		//lprintf( WIDE( "--- updating a button's visual aspects, disable updates..." ) );
 		//   AddUse( pc_button );
 		if( !g.flags.bPageUpdateDisabled )
 			EnableCommonUpdates( pc_button, FALSE );
@@ -917,7 +917,7 @@ void FixupButtonEx( PMENU_BUTTON button DBG_PASS )
 				int updated = 0;
 				//TEXTCHAR buf[2566];
 				//GetCurrentPath( buf, sizeof(buf) );
-            //lprintf( "Current path %s", buf );
+            //lprintf( WIDE( "Current path %s" ), buf );
 				// good a time as any to load images for the glare set...
 				if( !glare_set->iGlare && glare_set->glare )
 				{
@@ -966,18 +966,18 @@ void FixupButtonEx( PMENU_BUTTON button DBG_PASS )
 		}
 		if( show )
 		{
-			//lprintf( "-!!!!! ---- reveal?" );
+			//lprintf( WIDE( "-!!!!! ---- reveal?" ) );
 			RevealCommon( pc_button );
 		}
 
 		if( !g.flags.bPageUpdateDisabled )
 		{
-			//lprintf( "allow button to smudge... " );
+			//lprintf( WIDE( "allow button to smudge... " ) );
 			EnableCommonUpdates( pc_button, TRUE );
 			SmudgeCommon( pc_button );
 		}
 		//   DeleteUse( pc_button );
-		//lprintf( "--- updated a button's visual aspects, disable updates..." );
+		//lprintf( WIDE( "--- updated a button's visual aspects, disable updates..." ) );
 }
 
 void InterShell_DisablePageUpdateEx( PSI_CONTROL canvas, LOGICAL bDisable )
@@ -991,7 +991,7 @@ void InterShell_DisablePageUpdate( LOGICAL bDisable )
 	PCanvasData canvas = GetCanvas( g.single_frame );
 	PPAGE_DATA current_page;
 	PMENU_BUTTON control;
-	//lprintf( "------- %s Page Updates ----------", bDisable?"DISABLE":"ENABLE" );
+	//lprintf( WIDE( "------- %s Page Updates ----------" ), bDisable?WIDE( "DISABLE" ):WIDE( "ENABLE" ) );
 	g.flags.bPageUpdateDisabled = bDisable;
 
 	//IJ 05.15.2007
@@ -1045,9 +1045,9 @@ void InterShell_DisablePageUpdate( LOGICAL bDisable )
 
 int InvokeEditEnd( PMENU_BUTTON button )
 {
-	char rootname[256];
+	TEXTCHAR rootname[256];
 	void (CPROC*f)(PTRSZVAL);
-	snprintf( rootname, sizeof( rootname ), TASK_PREFIX "/control/%s", button->pTypeName );
+	snprintf( rootname, sizeof( rootname ), TASK_PREFIX WIDE( "/control/%s" ), button->pTypeName );
 	f = GetRegisteredProcedure2( rootname, void, WIDE("on_menu_edit_end"), (PTRSZVAL) );
 	if( f )
 	{
@@ -1059,7 +1059,7 @@ int InvokeEditEnd( PMENU_BUTTON button )
 
 int QueryShowControl( PMENU_BUTTON button )
 {
-	char rootname[256];
+	TEXTCHAR rootname[256];
 	LOGICAL (CPROC*f)(PTRSZVAL);
 	if( button->page != button->canvas->current_page )
 		return 0;
@@ -1089,7 +1089,7 @@ int QueryShowControl( PMENU_BUTTON button )
 		if( name )
 			return 0;
 	}
-	snprintf( rootname, sizeof( rootname ), TASK_PREFIX "/control/%s", button->pTypeName );
+	snprintf( rootname, sizeof( rootname ), TASK_PREFIX WIDE( "/control/%s" ), button->pTypeName );
 	f = GetRegisteredProcedure2( rootname, LOGICAL, WIDE("query can show"), (PTRSZVAL) );
 	if( f )
 	{
@@ -1101,9 +1101,9 @@ int QueryShowControl( PMENU_BUTTON button )
 
 void InvokeEditBegin( PMENU_BUTTON button )
 {
-	char rootname[256];
+	TEXTCHAR rootname[256];
 	void (CPROC*f)(PTRSZVAL);
-	snprintf( rootname, sizeof( rootname ), TASK_PREFIX "/control/%s", button->pTypeName );
+	snprintf( rootname, sizeof( rootname ), TASK_PREFIX WIDE( "/control/%s" ), button->pTypeName );
 	f = GetRegisteredProcedure2( rootname, void, WIDE("on_menu_edit_begin"), (PTRSZVAL) );
 	if( f )
 		f(button->psvUser);
@@ -1146,7 +1146,7 @@ static void CPROC AllPresses( PTRSZVAL psv, PKEY_BUTTON key )
 	{
 		if( button->canvas && !button->flags.bIgnorePageChange )
 		{
-			//lprintf( "Changing pages, but only virtually don't activate the page always" );
+			//lprintf( WIDE( "Changing pages, but only virtually don't activate the page always" ) );
 			ShellSetCurrentPageEx( button->canvas->pc_canvas, button->pPageName );
 		}
 		button->flags.bIgnorePageChange = 0;
@@ -1168,16 +1168,16 @@ static void CPROC ListBoxSelectionChanged( PTRSZVAL psv, PSI_CONTROL list, PLIST
 {
 	PMENU_BUTTON button = (PMENU_BUTTON)psv;
 	{
-		char rootname[256];
+		TEXTCHAR rootname[256];
 		void (CPROC*f)(PTRSZVAL,PLISTITEM);
-		snprintf( rootname, sizeof( rootname ), TASK_PREFIX "/control/%s", button->pTypeName );
+		snprintf( rootname, sizeof( rootname ), TASK_PREFIX WIDE( "/control/%s" ), button->pTypeName );
 		f = GetRegisteredProcedure2( rootname, void, WIDE("listbox_selection_changed"), (PTRSZVAL,PLISTITEM) );
 		if( f )
 			f(button->psvUser, pli);
 		{
 			CTEXTSTR name;
 			PCLASSROOT data = NULL;
-			snprintf( rootname, sizeof( rootname ), TASK_PREFIX "/control/%s/listbox_selection_changed", button->pTypeName );
+			snprintf( rootname, sizeof( rootname ), TASK_PREFIX WIDE( "/control/%s/listbox_selection_changed" ), button->pTypeName );
 			for( name = GetFirstRegisteredName( rootname, &data );
 				name;
 				name = GetNextRegisteredName( &data ) )
@@ -1195,16 +1195,16 @@ static void CPROC ListBoxDoubleChanged( PTRSZVAL psv, PSI_CONTROL list, PLISTITE
 {
 	PMENU_BUTTON button = (PMENU_BUTTON)psv;
 	{
-		char rootname[256];
+		TEXTCHAR rootname[256];
 		void (CPROC*f)(PTRSZVAL,PLISTITEM);
-		snprintf( rootname, sizeof( rootname ), TASK_PREFIX "/control/%s", button->pTypeName );
+		snprintf( rootname, sizeof( rootname ), TASK_PREFIX WIDE( "/control/%s" ), button->pTypeName );
 		f = GetRegisteredProcedure2( rootname, void, WIDE("listbox_double_changed"), (PTRSZVAL,PLISTITEM) );
 		if( f )
 			f(button->psvUser, pli);
 		{
 			CTEXTSTR name;
 			PCLASSROOT data = NULL;
-			snprintf( rootname, sizeof( rootname ), TASK_PREFIX "/control/%s/listbox_double_changed", button->pTypeName );
+			snprintf( rootname, sizeof( rootname ), TASK_PREFIX WIDE( "/control/%s/listbox_double_changed" ), button->pTypeName );
 			for( name = GetFirstRegisteredName( rootname, &data );
 				name;
 				name = GetNextRegisteredName( &data ) )
@@ -1221,10 +1221,10 @@ static void CPROC ListBoxDoubleChanged( PTRSZVAL psv, PSI_CONTROL list, PLISTITE
 // return FALSE creation method fails.
 static LOGICAL InvokeButtonCreate( PSI_CONTROL pc_canvas, PMENU_BUTTON button, LOGICAL bVisible )
 {
-	char rootname[256];
+	TEXTCHAR rootname[256];
 	ValidatedControlData( PCanvasData, menu_surface.TypeID, canvas, pc_canvas );
 	PTRSZVAL (CPROC*f)(PSI_CONTROL,S_32 x, S_32 y, _32 w, _32 h);
-	snprintf( rootname, sizeof( rootname ), TASK_PREFIX "/control/%s", button->pTypeName );
+	snprintf( rootname, sizeof( rootname ), TASK_PREFIX WIDE( "/control/%s" ), button->pTypeName );
 	button->flags.bNoCreateMethod = TRUE; // assume there's no creator for this control
    //lprintf( "..." );
 	//if( StrCmp( button->pTypeName, "Task" ) == 0 )
@@ -1270,7 +1270,7 @@ static LOGICAL InvokeButtonCreate( PSI_CONTROL pc_canvas, PMENU_BUTTON button, L
 				button->psvUser = f_list( button->control.control );
 				if( !button->psvUser )
 				{
-					lprintf( "User Create failed (return psv=0), hiding control." );
+					lprintf( WIDE( "User Create failed (return psv=0), hiding control." ) );
 					HideCommon( button->control.control );
 					DestroyCommon( &button->control.control );
 					button->flags.bListbox = 0;
@@ -1311,9 +1311,9 @@ static LOGICAL InvokeButtonCreate( PSI_CONTROL pc_canvas, PMENU_BUTTON button, L
 			{
 				{
 					SimplePressHandler handler;
-					char realname[256];
+					TEXTCHAR realname[256];
 					snprintf( realname, sizeof(realname), WIDE("sack/widgets/keypad/press handler/%s"), button->pTypeName );
-#define GetRegisteredProcedure2(nc,rtype,name,args) (rtype (CPROC*)args)GetRegisteredProcedureEx((nc),#rtype, name, #args )
+#define GetRegisteredProcedure2(nc,rtype,name,args) (rtype (CPROC*)args)GetRegisteredProcedureEx((nc),WIDE(#rtype), name, WIDE(#args) )
 
 					handler = GetRegisteredProcedure2( realname, void, WIDE("on_keypress_event"), (PTRSZVAL) );
 					if( handler )
@@ -1360,7 +1360,7 @@ static LOGICAL InvokeButtonCreate( PSI_CONTROL pc_canvas, PMENU_BUTTON button, L
 	return TRUE;
 }
 
-PMENU_BUTTON CreateInvisibleControl( char *name )
+PMENU_BUTTON CreateInvisibleControl( TEXTCHAR *name )
 {
 	if( name )
 	{
@@ -1371,7 +1371,7 @@ PMENU_BUTTON CreateInvisibleControl( char *name )
 		button->pTypeName = StrDup( name );
 		button->font_preset = &g.keyfont;
 		button->font_preset_name = NULL;
-		//lprintf( "Creating a virtual control %s", name );
+		//lprintf( WIDE( "Creating a virtual control %s" ), name );
 		InvokeButtonCreate( NULL, button, FALSE );
 		return button;
 	}
@@ -1394,16 +1394,16 @@ PMENU_BUTTON CreateSomeControl( PSI_CONTROL pc_canvas, int x, int y, int w, int 
 	button->pTypeName = StrDup( name );
 	button->font_preset = &g.keyfont;
 	button->font_preset_name = NULL; 
-	//lprintf( "Creating a control %s on page %s", name, g.current_page->title );
+	//lprintf( WIDE( "Creating a control %s on page %s" ), name, g.current_page->title );
 	{
 		button->page = canvas->current_page;
 		button->canvas = canvas;
 		AddLink( &canvas->current_page->controls, button );
 		InvokeButtonCreate( pc_canvas, button, TRUE );
 	}
-	//lprintf( "Hiding the button that was just created... later it will be asked to show..." );
+	//lprintf( WIDE( "Hiding the button that was just created... later it will be asked to show..." ) );
 	//HideCommon( QueryGetControl( button ) );
-   //lprintf( "..." );
+   //lprintf( WIDE( "..." ) );
 	configure_key_dispatch.button = prior;
 	return button;
 }
@@ -1449,11 +1449,11 @@ PMENU_BUTTON CPROC InterShell_GetCurrentButton( void )
 
 PMENU_BUTTON InterShell_GetPhysicalButton( PMENU_BUTTON button )
 {
-	//lprintf( "Finding container of %p %p", button, button->container_button );
+	//lprintf( WIDE( "Finding container of %p %p" ), button, button->container_button );
 	while( button && button->container_button )
 	{
 		button = button->container_button;
-		//lprintf( "Finding container of %p %p", button, button->container_button );
+		//lprintf( WIDE( "Finding container of %p %p" ), button, button->container_button );
 	}
    return button;
 }       
@@ -1517,7 +1517,7 @@ void InterShell_SetButtonImage( PMENU_BUTTON button, CTEXTSTR name )
 		}
 		// set the new name into name string...
 		if( name )
-			strcpy( button->pImage, name );
+			StrCpyEx( button->pImage, name, sizeof( button->pImage ) );
 		else
 			button->pImage[0] = 0;
 	}
@@ -1755,7 +1755,7 @@ void GetCommonButtonControls( PSI_CONTROL frame )
 	// this should have been set already by SetCommonButtonControls.
 	if( configure_key_dispatch.frame != frame )
 	{
-		lprintf( "Aren't we busted?  isn't there more than one config dialog up?!" );
+		lprintf( WIDE( "Aren't we busted?  isn't there more than one config dialog up?!" ) );
 		DebugBreak();
 	}
 	if( !configure_key_dispatch.button ) // nothing for this to do... nothing ocmmon about it.
@@ -1768,7 +1768,7 @@ void GetCommonButtonControls( PSI_CONTROL frame )
 	configure_key_dispatch.button->textcolor = GetColorFromWell( GetControl( frame, CLR_TEXT_COLOR ) );
 	configure_key_dispatch.button->highlight_color = GetColorFromWell( GetControl( frame, CLR_RING_HIGHLIGHT ) );
 	{
-		char buffer[128];
+		TEXTCHAR buffer[128];
 		PSI_CONTROL list = GetControl( frame, LST_PAGES );
 		buffer[0] = 0; // this should have been cleard by GetItemText, but it's lazy, apparently
 		if( list )
@@ -1778,9 +1778,9 @@ void GetCommonButtonControls( PSI_CONTROL frame )
 			if( strcmp( buffer, WIDE("-- NONE --") ) == 0 )
 				buffer[0] = 0;
 			else if( strcmp( buffer, WIDE("-- Startup Page") ) == 0 )
-				strcpy( buffer, WIDE("first" ) );
+				StrCpy( buffer, WIDE("first" ) );
 			if( strcmp( buffer, WIDE("-- Next") ) == 0 )
-				strcpy( buffer, WIDE("next" ) );
+				StrCpy( buffer, WIDE("next" ) );
 
 			if( configure_key_dispatch.button->pPageName )
 				Release( configure_key_dispatch.button->pPageName );
@@ -1812,7 +1812,7 @@ void GetCommonButtonControls( PSI_CONTROL frame )
 	// IsButtonChecked( GetControl( frame, BTN_BACK_IMAGE ) )
    if( ( pc = GetControl( frame, TXT_IMAGE_NAME) ) )
 	{
-		char buf[256];
+		TEXTCHAR buf[256];
 		GetControlText( pc
 			, buf
 			, sizeof( buf ) );
@@ -1820,7 +1820,7 @@ void GetCommonButtonControls( PSI_CONTROL frame )
 	}
    if( ( pc = GetControl( frame, TXT_IMAGE_V_MARGIN ) ) )
 	{
-		char buf[256];
+		TEXTCHAR buf[256];
 		GetControlText( pc
 			, buf
 						  , sizeof( buf ) );
@@ -1828,7 +1828,7 @@ void GetCommonButtonControls( PSI_CONTROL frame )
 	}
    if( ( pc = GetControl( frame, TXT_IMAGE_H_MARGIN ) ) )
 	{
-		char buf[256];
+		TEXTCHAR buf[256];
 		GetControlText( pc
 			, buf
 						  , sizeof( buf ) );
@@ -1837,7 +1837,7 @@ void GetCommonButtonControls( PSI_CONTROL frame )
 
 #ifndef __NO_ANIMATION__
 	{
-		char buf[256];
+		TEXTCHAR buf[256];
 		GetControlText( GetControl( frame, TXT_ANIMATION_NAME)
 			, buf
 			, sizeof( buf ) );
@@ -1859,7 +1859,7 @@ void GetCommonButtonControls( PSI_CONTROL frame )
 		PSI_CONTROL name_field = GetControl( frame, TXT_CONTROL_TEXT );
 		if( name_field )
 		{
-			char text[256];
+			TEXTCHAR text[256];
 			GetControlText( name_field, text, sizeof( text ) );
 			if( configure_key_dispatch.button->text )
 				Release( configure_key_dispatch.button->text );
@@ -1912,7 +1912,7 @@ static void CPROC AddSystemNameToAllow( PTRSZVAL psv, PSI_CONTROL button )
 {
 	PSI_CONTROL list1, list2;
 	PLISTITEM pli;
-	char buffer[256];
+	TEXTCHAR buffer[256];
 	list1 = GetNearControl( button, LIST_SYSTEMS );
 	list2 = GetNearControl( button, LIST_ALLOW_SHOW );
 	pli = GetSelectedItem( list1 );
@@ -1940,7 +1940,7 @@ static void CPROC RemoveSystemNameAllow( PTRSZVAL psv, PSI_CONTROL button )
 static void CPROC AddSystemNameToDisallow( PTRSZVAL psv, PSI_CONTROL button )
 {
 	PSI_CONTROL list1, list2;
-	char buffer[256];
+	TEXTCHAR buffer[256];
 	PLISTITEM pli;
 	list1 = GetNearControl( button, LIST_SYSTEMS );
 	list2 = GetNearControl( button, LIST_DISALLOW_SHOW );
@@ -2023,7 +2023,7 @@ void SetAllowDisallowControls( void )
 
 static void CPROC ChooseImage( PTRSZVAL psv, PCONTROL pc )
 {
-	char result[256];
+	TEXTCHAR result[256];
 	if( PSI_PickFile( pc, WIDE("."), NULL, result, sizeof( result ), FALSE ) )
 	{
 		SetControlText( GetNearControl( pc, TXT_IMAGE_NAME ), result );
@@ -2032,7 +2032,7 @@ static void CPROC ChooseImage( PTRSZVAL psv, PCONTROL pc )
 #ifndef __NO_ANIMATION__
 static void CPROC ChooseAnimation( PTRSZVAL psv, PCONTROL pc )
 {
-	char result[256];
+	TEXTCHAR result[256];
 	if( PSI_PickFile( pc, WIDE("."), NULL, result, sizeof( result ), FALSE ) )
 	{
 		SetControlText( GetNearControl( pc, TXT_ANIMATION_NAME ), result );
@@ -2040,10 +2040,10 @@ static void CPROC ChooseAnimation( PTRSZVAL psv, PCONTROL pc )
 }
 #endif
 
-char *I(_32 val)
+TEXTCHAR *I(_32 val)
 {
-	static char buf[256];
-	snprintf( buf, sizeof( buf ), "%ld", val );
+	static TEXTCHAR buf[256];
+	snprintf( buf, sizeof( buf ), WIDE( "%ld" ), val );
    return buf;
 }
 
@@ -2190,7 +2190,7 @@ void SetCommonButtonControls( PSI_CONTROL frame )
 void InterShell_EditButton( PSI_CONTROL pc_parent )
 {
 
-	PSI_CONTROL frame = LoadXMLFrameOver( pc_parent, "EditGenericButton.isframe" ); // can use this frame also, just default controls
+	PSI_CONTROL frame = LoadXMLFrameOver( pc_parent, WIDE( "EditGenericButton.isframe" ) ); // can use this frame also, just default controls
 	if( frame )
 	{
 		int okay = 0;
@@ -2215,7 +2215,7 @@ void InterShell_EditButton( PSI_CONTROL pc_parent )
 // uses the currently selected button...
 void InterShell_EditGeneric( PSI_CONTROL pc_parent )
 {
-	PSI_CONTROL frame = LoadXMLFrameOver( pc_parent, "EditGenericControl.isframe" ); // can use this frame also, just default controls
+	PSI_CONTROL frame = LoadXMLFrameOver( pc_parent, WIDE( "EditGenericControl.isframe" ) ); // can use this frame also, just default controls
 	if( frame )
 	{
 		int okay = 0;
@@ -2238,7 +2238,7 @@ void InterShell_EditGeneric( PSI_CONTROL pc_parent )
 // uses the currently selected button...
 void InterShell_EditListbox( PSI_CONTROL pc_parent )
 {
-	PSI_CONTROL frame = LoadXMLFrameOver( pc_parent, "EditGenericListbox.isframe" ); // can use this frame also, just default controls
+	PSI_CONTROL frame = LoadXMLFrameOver( pc_parent, WIDE( "EditGenericListbox.isframe" ) ); // can use this frame also, just default controls
 	if( frame )
 	{
 		PSI_CONTROL list = (PSI_CONTROL)configure_key_dispatch.button->control.control;
@@ -2309,14 +2309,14 @@ PTRSZVAL CPROC ThreadConfigureButton( PTHREAD thread )
 	MemSet( &configure_key_dispatch, 0, sizeof( configure_key_dispatch ) );
 
 	{
-		char rootname[256];
+		TEXTCHAR rootname[256];
 		PTRSZVAL (CPROC*f)(PTRSZVAL,PSI_CONTROL);
 		//EnterCriticalSec( &configure_key_dispatch.cs );
 		while( !button->flags.bInvisible && configure_key_dispatch.button )
 			IdleFor(100);
 		configure_key_dispatch.canvas = canvas;
 		configure_key_dispatch.button = button;
-		snprintf( rootname, sizeof( rootname ), TASK_PREFIX WIDE("/control/%s"), button->pTypeName );
+		snprintf( rootname, sizeof( rootname ), TASK_PREFIX WIDE( "/control/%s" ), button->pTypeName );
 		if( !bIgnorePrivate )
 		{
 			f = GetRegisteredProcedure2( rootname, PTRSZVAL, WIDE("control_edit"), (PTRSZVAL,PSI_CONTROL) );
@@ -2333,7 +2333,7 @@ PTRSZVAL CPROC ThreadConfigureButton( PTHREAD thread )
 			// depricated method...
 			if( !bIgnorePrivate )
 			{
-				snprintf( rootname, sizeof( rootname ), TASK_PREFIX WIDE("/control/%s"), button->pTypeName );
+				snprintf( rootname, sizeof( rootname ), TASK_PREFIX WIDE( "/control/%s" ), button->pTypeName );
 				f = GetRegisteredProcedure2( rootname, PTRSZVAL, WIDE("button_edit"), (PTRSZVAL,PSI_CONTROL) );
 				if( f )
 				{
@@ -2453,7 +2453,7 @@ void CloneCommonButtonProperties( PMENU_BUTTON clone, PMENU_BUTTON  clonebutton 
 	clone->font_preset     = clonebutton->font_preset;
 	clone->font_preset_name = clonebutton->font_preset_name;
 	clone->text            = StrDup( clonebutton->text );
-	strcpy( clone->pImage, clonebutton->pImage );
+	StrCpy( clone->pImage, clonebutton->pImage );
 #ifndef __NO_ANIMATION__
 	strcpy( clone->pAnimation, clonebutton->pAnimation );
 #endif
@@ -2481,7 +2481,7 @@ PMENU_BUTTON GetCloneButton( PCanvasData canvas, int px, int py, int bInvisible 
 			clone = CreateInvisibleControl( g.clonebutton->pTypeName );
 		else
 		{
-			lprintf( "This is where cloned controls are created." );
+			lprintf( WIDE( "This is where cloned controls are created." ) );
 			clone = CreateSomeControl( canvas->current_page->frame
 											 , px //- (g.clonebutton->w/2)
 											 , py //- (g.clonebutton->h/2)
@@ -2541,11 +2541,11 @@ void CPROC DrawEditGlare( PTRSZVAL psv, Image surface )
 			// should use X to capture an image of the current menu config
 			// then during editing we do not have to redraw all controls all the time..
 			ClearImageTo( surface, 0x01000000 );
-			//lprintf( ".... some kinda mystical update here" );
+			//lprintf( WIDE( ".... some kinda mystical update here" ) );
 			//EnableFrameUpdates( pf, FALSE );
 			//ReleaseCommonUse(pf);
 			//EnableFrameUpdates( pf, TRUE );
-			lprintf( ".... some kinda mystical update end here" );
+			lprintf( WIDE( ".... some kinda mystical update end here" ) );
 			//lprintf( WIDE("Continue background") );
 
 			{
@@ -2558,7 +2558,7 @@ void CPROC DrawEditGlare( PTRSZVAL psv, Image surface )
 					int selected = 0;
 					long long x, y;
 					long long w, h;
-					char buttonname[128];
+					TEXTCHAR buttonname[128];
 					{
 						INDEX idx2;
 						PMENU_BUTTON button2;
@@ -2680,7 +2680,7 @@ void CPROC DrawEditGlare( PTRSZVAL psv, Image surface )
 
 int CPROC DrawFrameBackground( PCOMMON pf )
 {
-   //lprintf( "----------g.flags.bPageUpdateDisabled %d", g.flags.bPageUpdateDisabled );
+	lprintf( WIDE( "----------g.flags.bPageUpdateDisabled %d" ), g.flags.bPageUpdateDisabled );
 	if( !g.flags.bPageUpdateDisabled )
 	{
 		ValidatedControlData( PCanvasData, menu_surface.TypeID, canvas, pf );
@@ -2690,7 +2690,7 @@ int CPROC DrawFrameBackground( PCOMMON pf )
 		//GetPageSize( pf, &w, &h );
 		//if( g.flags.multi_edit )
 		current_page = canvas->current_page;
-      //lprintf( "--- AM DRAWING BACKGROUND" );
+      //lprintf( WIDE( "--- AM DRAWING BACKGROUND" ) );
 		// update the canvas's dimensions...
 		////////-s-s-s-s
 		if( (( canvas->width != surface->width )&& canvas->width ) ||
@@ -2739,7 +2739,7 @@ int CPROC DrawFrameBackground( PCOMMON pf )
 		if( current_page )
 		{
 			if( !current_page->background_image && current_page->background )
-				current_page->background_image = LoadImageFile( (char*)current_page->background );
+				current_page->background_image = LoadImageFile( (TEXTCHAR*)current_page->background );
 			if( current_page->background_color )
 				ClearImageTo( surface, current_page->background_color );
 			if( current_page->background_image )
@@ -2786,11 +2786,11 @@ int CPROC DrawFrameBackground( PCOMMON pf )
 			// then during editing we do not have to redraw all controls all the time..
 			static Image x;
 			//Image surface = GetFrameSurface( pf );
-			//lprintf( ".... some kinda mystical update here" );
+			//lprintf( WIDE( ".... some kinda mystical update here" ) );
 			//EnableFrameUpdates( pf, FALSE );
 			//ReleaseCommonUse(pf);
 			//EnableFrameUpdates( pf, TRUE );
-			lprintf( ".... some kinda mystical update end here" );
+			lprintf( WIDE( ".... some kinda mystical update end here" ) );
 			//lprintf( WIDE("Continue background") );
 			if( x )
 			{
@@ -2808,7 +2808,7 @@ int CPROC DrawFrameBackground( PCOMMON pf )
 				{
 					long long x, y;
 					long long w, h;
-					char buttonname[128];
+					TEXTCHAR buttonname[128];
 					//lprintf( WIDE("Drawing at %d,%d..."), button->x, button->y );
 					x = (PARTX( button->x ) + 5); y = (PARTY( button->y ) + 5);
 					w=(PARTW( button->x, button->w )+1 - 10);
@@ -2920,7 +2920,7 @@ static int ProcessContextMenu( PCanvasData canvas, PSI_CONTROL pc, S_32 px, S_32
 					case MNU_EDIT_BEHAVIORS:
 						if( EditControlBehaviors )
 						{
-							BannerMessage( "EditControlBehaviors has been disabled" );
+							BannerMessage( WIDE( "EditControlBehaviors has been disabled" ) );
 							/*
 							 if( canvas->pCurrentControl->flags.bCustom )
 							 EditControlBehaviors( canvas->pCurrentControl->control );
@@ -2972,10 +2972,10 @@ static int ProcessContextMenu( PCanvasData canvas, PSI_CONTROL pc, S_32 px, S_32
 					{
 						if( result >= MNU_CREATE_EXTRA && result <= MNU_CREATE_EXTRA_MAX )
 						{
-							char *name;
+							TEXTCHAR *name;
 							// okay well... get the name from the menu item then?
 							result -= MNU_CREATE_EXTRA;
-							name = (char*)GetLink( &g.extra_types, result );
+							name = (TEXTCHAR*)GetLink( &g.extra_types, result );
 							CreateSomeControl( pc, canvas->selection.x, canvas->selection.y, canvas->selection.w, canvas->selection.h, name );
 						}
 						else switch( result )
@@ -3317,7 +3317,7 @@ retry:
 									, dy = py - g._py;
 								if( ( dx || dy ) && canvas->pCurrentControl )
 								{
-									lprintf(" Moving control %d,%d", dx, dy );
+									lprintf(WIDE( " Moving control %d,%d" ), dx, dy );
 									if( IsSelectionValidEx( canvas
 										, canvas->pCurrentControl
 										, (S_32)canvas->pCurrentControl->x
@@ -3413,7 +3413,7 @@ int CPROC MouseEditGlare( PTRSZVAL psv, S_32 x, S_32 y, _32 b )
 	static _32 _b;
 	static S_32 _x, _y;
 	int px, py;
-   lprintf( "Glare mouse %d %d %d", x, y, b );
+   lprintf( WIDE( "Glare mouse %d %d %d" ), x, y, b );
 #define PARTOFX(xc) ( ( xc ) * canvas->current_page->grid.nPartsX ) / canvas->width
 #define PARTOFY(yc) ( ( yc ) * canvas->current_page->grid.nPartsY ) / canvas->height
 	px = PARTOFX( x );
@@ -3487,7 +3487,7 @@ void CPROC QuitMenu( PSI_CONTROL pc, _32 keycodeUnused )
 	//ValidatedControlData( PCanvasData, menu_surface.TypeID, canvas, pc );
 	lprintf( WIDE("!!!!!!!!!!! QUIT MENU !!!!!!!!!!!!!!!") );
 	g.flags.bExit = 1;
-	BannerTopNoWait( "Shutting down..." );
+	BannerTopNoWait( WIDE( "Shutting down..." ) );
 	InvokeInterShellShutdown();
 	{
 		//PMENU_BUTTON button;
@@ -3624,7 +3624,7 @@ void CPROC CheckMemStats( PTRSZVAL psv )
 	if( f(a)||f(b)||f(c)||f(d))
 	{
 		h(a),h(b),h(c),h(d);
-		lprintf( "---***--- MemStats  free: %"_32f" used: %"_32f" used chunks: %"_32f" free chunks: %"_32f"", a, b, c-d, d );
+		lprintf( WIDE("---***--- MemStats  free: %")_32f WIDE(" used: %")_32f WIDE(" used chunks: %")_32f WIDE(" free chunks: %")_32f, a, b, c-d, d );
 		if( _c != c )
 		{
 			_c = c;
@@ -3635,7 +3635,7 @@ void CPROC CheckMemStats( PTRSZVAL psv )
 #undef h
 }
 
-INTERSHELL_PROC( void, SetButtonTextField )( PMENU_BUTTON pKey, PTEXT_PLACEMENT pField, char *text )
+INTERSHELL_PROC( void, SetButtonTextField )( PMENU_BUTTON pKey, PTEXT_PLACEMENT pField, TEXTCHAR *text )
 {
 	SetKeyTextField( pKey->control.key, pField, text );
 }
@@ -3688,7 +3688,7 @@ void SetupSystemsListAndGlobalSingleFrame(void )
 		// should be a small count...
 		// maybe I don't want this sort of thing here at all?
 #ifndef __NO_SQL__
-		if( DoSQLRecordQuery( "select count(*) from systems", NULL, &result, NULL ) && result )
+		if( DoSQLRecordQuery( WIDE( "select count(*) from systems" ), NULL, &result, NULL ) && result )
 		{
 			int n;
 			g.systems = (struct system_info*)Allocate( sizeof( *g.systems ) * ( atoi( result[0] ) + 1 ) );
@@ -3697,7 +3697,7 @@ void SetupSystemsListAndGlobalSingleFrame(void )
 			g.systems[0].ID = INVALID_INDEX;
 			g.systems[0].next = NULL;
 
-			for( n = 1, DoSQLRecordQuery( "select name from systems", NULL, &result, NULL );
+			for( n = 1, DoSQLRecordQuery( WIDE( "select name from systems" ), NULL, &result, NULL );
 				result;
 				n++, GetSQLRecord( &result ) )
 			{
@@ -3737,7 +3737,7 @@ void SetupSystemsListAndGlobalSingleFrame(void )
 	}
 #endif
 #ifndef __NO_OPTIONS__
-	g.flags.multi_edit = SACK_GetProfileIntEx( GetProgramName(), "Intershell Layout/Windowed mode (not full screen)", 0, TRUE );
+	g.flags.multi_edit = SACK_GetProfileIntEx( GetProgramName(), WIDE( "Intershell Layout/Windowed mode (not full screen)" ), 0, TRUE );
 #endif
 	SetBlotMethod( BLOT_C );
 	GetDisplaySize( &g.width, &g.height );
@@ -3753,7 +3753,7 @@ void SetupSystemsListAndGlobalSingleFrame(void )
 #ifndef __NO_OPTIONS__
 #  ifndef __LINUX__
 	{
-		int display = SACK_GetProfileIntEx( GetProgramName(), "Intershell Layout/Use Screen Number", 0, TRUE );
+		int display = SACK_GetProfileIntEx( GetProgramName(), WIDE( "Intershell Layout/Use Screen Number" ), 0, TRUE );
 		if( display > 0 )
 		{
 			_32 w, h;
@@ -3766,19 +3766,19 @@ void SetupSystemsListAndGlobalSingleFrame(void )
 	}
 #  endif
 	if( !g.single_frame )
-		if( SACK_GetProfileIntEx( GetProgramName(), "Intershell Layout/Use Custom Positioning", 0, TRUE ) )
+		if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "Intershell Layout/Use Custom Positioning" ), 0, TRUE ) )
 		{
-			int x = SACK_GetProfileInt( GetProgramName(), "Intershell Layout/X Position", 0 );
-			int y = SACK_GetProfileInt( GetProgramName(), "Intershell Layout/Y Position", 0 );
-			int _w = SACK_GetProfileInt( GetProgramName(), "Intershell Layout/Width", g.width );
-			int _h = SACK_GetProfileInt( GetProgramName(), "Intershell Layout/Height", g.height );
+			int x = SACK_GetProfileInt( GetProgramName(), WIDE( "Intershell Layout/X Position" ), 0 );
+			int y = SACK_GetProfileInt( GetProgramName(), WIDE( "Intershell Layout/Y Position" ), 0 );
+			int _w = SACK_GetProfileInt( GetProgramName(), WIDE( "Intershell Layout/Width" ), g.width );
+			int _h = SACK_GetProfileInt( GetProgramName(), WIDE( "Intershell Layout/Height" ), g.height );
 			g.width = _w;
 			g.height = _h;
 			g.single_frame = MakeControl( NULL, menu_surface.TypeID, x, y, _w, _h, 0 );
 
 		}
 		else
-			if( SACK_GetProfileIntEx( GetProgramName(), "Intershell Layout/Use Second Display(horizontal)", 0, TRUE ) )
+			if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "Intershell Layout/Use Second Display(horizontal)" ), 0, TRUE ) )
 				g.single_frame = MakeControl( NULL, menu_surface.TypeID, g.width, 0, g.width, g.height, 0 );
 			else
 				if( g.flags.bSpanDisplay )
@@ -3786,7 +3786,7 @@ void SetupSystemsListAndGlobalSingleFrame(void )
 				else
 #endif
 					g.single_frame = MakeControl( NULL, menu_surface.TypeID, 0, 0, g.width, g.height, 0 );
-
+					lprintf( WIDE( "Got single frame. %d,%d" ), g.width, g.height );
 	if( !g.flags.multi_edit )
 	{
 	}
@@ -3800,6 +3800,7 @@ void SetupSystemsListAndGlobalSingleFrame(void )
 		//lprintf( "Not showing multiedit starting form." );
 		//OpenPageFrame( canvas->default_page );
 	}
+					lprintf( WIDE( "Got single frame. %d,%d" ), g.width, g.height );
 }
 
 
@@ -3852,7 +3853,7 @@ void CPROC DoKeyDown( PSI_CONTROL pc, _32 key )
 }
 
 //---------------------------------------------------------------------------
-PMENU MakeControlsMenu( PMENU parent, char *basename, CTEXTSTR priorname )
+PMENU MakeControlsMenu( PMENU parent, TEXTCHAR *basename, CTEXTSTR priorname )
 {
 	static int n = 0;
 	CTEXTSTR name;
@@ -3864,9 +3865,9 @@ PMENU MakeControlsMenu( PMENU parent, char *basename, CTEXTSTR priorname )
 	{
 		PMENU submenu;
 		if( priorname &&
-			( ( strcmp( name, "button_create" ) == 0 ) ||
-			( strcmp( name, "control_create" ) == 0 ) ||
-			( strcmp( name, "listbox_create" ) == 0 ) ) )
+			( ( strcmp( name, WIDE( "button_create" ) ) == 0 ) ||
+			( strcmp( name, WIDE( "control_create" ) ) == 0 ) ||
+			( strcmp( name, WIDE( "listbox_create" ) ) == 0 ) ) )
 		{
 			// okay then add this one...
 			//snprintf( newname, sizeof( newname ), WIDE("%s/%s"), basename, name );
@@ -3874,7 +3875,7 @@ PMENU MakeControlsMenu( PMENU parent, char *basename, CTEXTSTR priorname )
 			{
 				// eat the first two parts - intershell/controls/
 				// create the control name as that...
-				char *controlpath = strchr( basename, '/' );
+				TEXTCHAR *controlpath = strchr( basename, '/' );
 				if( controlpath )
 				{
 					controlpath++;
@@ -3896,7 +3897,7 @@ PMENU MakeControlsMenu( PMENU parent, char *basename, CTEXTSTR priorname )
 		{
 			if( NameHasBranches( &data ) )
 			{
-				char newname[256];
+				TEXTCHAR newname[256];
 				if( !pExtraCreate )
 					pExtraCreate = CreatePopup();
 				snprintf( newname, sizeof( newname ), WIDE("%s/%s"), basename, name );
@@ -3917,7 +3918,7 @@ int CommonInitCanvas( PSI_CONTROL pc_canvas, PCanvasData canvas )
 {
 	if( !g.single_frame )
 	{
-		lprintf( "Half way through init, and now we set single_frame, could not wait for return to creator." );
+		lprintf( WIDE( "Half way through init, and now we set single_frame, could not wait for return to creator." ) );
 		g.single_frame = pc_canvas;
 	}
 
@@ -4012,12 +4013,12 @@ void CPROC AcceptFiles( PSI_CONTROL pc, CTEXTSTR file, S_32 x, S_32 y )
 	px = PARTOFX( x );
 	py = PARTOFY( y );
 					
-	for( name = GetFirstRegisteredName( TASK_PREFIX "/common/Drop Accept", &data );
+	for( name = GetFirstRegisteredName( TASK_PREFIX WIDE( "/common/Drop Accept" ), &data );
 		name;
 		name = GetNextRegisteredName( &data ) )
 	{
 		LOGICAL (CPROC *f)(CTEXTSTR, int,int);
-		//snprintf( rootname, sizeof( rootname ), TASK_PREFIX "/common/save common/%s", name );
+		//snprintf( rootname, sizeof( rootname ), TASK_PREFIX WIDE( "/common/save common/%s" ), name );
 		f = GetRegisteredProcedure2( (CTEXTSTR)data, LOGICAL, name, (CTEXTSTR, int,int) );
 		if( f )
 			if( f(file,px,py) )
@@ -4035,21 +4036,31 @@ int CPROC InitMasterFrame( PCOMMON pc )
 		//parent = GetFrame( pc );
 		//if( parent )
 		{
-			int displays_wide = SACK_GetProfileIntEx( GetProgramName(), "Intershell Layout/Expected displays wide", 1, TRUE );
-			int displays_high = SACK_GetProfileIntEx( GetProgramName(), "Intershell Layout/Expected displays highs", 1, TRUE );
+			int displays_wide = 
+#ifndef __NO_OPTIONS__
+				SACK_GetProfileIntEx( GetProgramName(), WIDE( "Intershell Layout/Expected displays wide" ), 1, TRUE );
+#else 
+				1;
+#endif
+			int displays_high = 
+#ifndef __NO_OPTIONS__
+				SACK_GetProfileIntEx( GetProgramName(), WIDE( "Intershell Layout/Expected displays highs" ), 1, TRUE );
+#else 
+				1;
+#endif
 			Image surface = GetControlSurface( pc );
 			canvas->pc_canvas = pc; // self reference
 			canvas->width = surface->width;
 			canvas->height = surface->height;
 			canvas->current_page =  (PPAGE_DATA)Allocate( sizeof( *canvas->current_page ) );
 			MemSet( canvas->current_page, 0, sizeof( *canvas->current_page ) );
-         canvas->current_page->flags.bActive = 1;
+			canvas->current_page->flags.bActive = 1;
 			canvas->width_scale.denominator = displays_wide * 1024;
 			canvas->width_scale.numerator =  surface->width;
 			canvas->height_scale.denominator = displays_high * 768;
 			canvas->height_scale.numerator = surface->height;
 			// current page is set to default page here (usually)
-         // this sets the initial page with no config to 40x40 squares
+			// this sets the initial page with no config to 40x40 squares
 			canvas->current_page->grid.nPartsX = 
 				canvas->nPartsX =  displays_wide * 40;
 			canvas->current_page->grid.nPartsY = 
@@ -4062,7 +4073,7 @@ int CPROC InitMasterFrame( PCOMMON pc )
 			AddLink( &g.frames, pc );
 			CommonInitCanvas( pc, canvas );
 		}
-      AddCommonAcceptDroppedFiles( pc, AcceptFiles );
+		AddCommonAcceptDroppedFiles( pc, AcceptFiles );
 		//else
 		//	canvas->current_page = parent->current_page;
 	}
@@ -4078,9 +4089,9 @@ int CPROC PageFocusChanged( PSI_CONTROL pc, LOGICAL bFocused )
 		{
 			canvas->current_page = GetPageFromFrame( pc );
 			if( canvas->current_page )
-				lprintf( "*** New current page: %s", canvas->current_page->title?canvas->current_page->title:"[StartupPage]" );
+				lprintf( WIDE( "*** New current page: %s" ), canvas->current_page->title?canvas->current_page->title:WIDE( "[StartupPage]" ) );
 			else
-				lprintf( "*** FAULT not a frame of a page..." );
+				lprintf( WIDE( "*** FAULT not a frame of a page..." ) );
 			//g.single_frame = pc;
 		}
 		//canvas->frame = pc;
@@ -4151,7 +4162,7 @@ int CPROC ShellKey( PSI_CONTROL pc, _32 key )
 	return 0;
 }
 
-CONTROL_REGISTRATION menu_surface = { "Menu Canvas"
+CONTROL_REGISTRATION menu_surface = { WIDE( "Menu Canvas" )
 , { { 512, 460 }, sizeof( CanvasData ), BORDER_WANTMOUSE|BORDER_NONE|BORDER_NOMOVE|BORDER_FIXED }
 , InitMasterFrame
 , NULL
@@ -4161,7 +4172,7 @@ CONTROL_REGISTRATION menu_surface = { "Menu Canvas"
 , NULL, NULL,NULL,NULL,NULL,NULL
 , PageFocusChanged
 };
-CONTROL_REGISTRATION menu_edit_glare = { "Edit Glare"
+CONTROL_REGISTRATION menu_edit_glare = { WIDE( "Edit Glare" )
 , { { 512, 460 }, 0, BORDER_WANTMOUSE|BORDER_NONE|BORDER_NOMOVE|BORDER_FIXED }
 , NULL //InitMasterFrame
 , NULL
@@ -4191,7 +4202,7 @@ PSI_CONTROL OpenPageFrame( PPAGE_DATA page )
 			xofs += 25;
 			yofs += 25;
 			//SetCommonUserData( page_frame, (PTRSZVAL)page );
-			SetCommonText( page_frame, page->title?page->title:"Default Page" );
+			SetCommonText( page_frame, page->title?page->title:WIDE( "Default Page" ) );
 			SetCommonBorder( page_frame, BORDER_NORMAL );
 
 			{
@@ -4199,7 +4210,7 @@ PSI_CONTROL OpenPageFrame( PPAGE_DATA page )
 				Image image = GetControlSurface( page_frame );
 				canvas->renderer = OpenDisplaySizedAt( g.flags.bTransparent?DISPLAY_ATTRIBUTE_LAYERED:0
 																 , image->width, image->height, image->x, image->y );
-            SetRendererTitle( canvas->renderer, "Canvas" );
+				SetRendererTitle( canvas->renderer, WIDE( "Canvas" ) );
 				AttachFrameToRenderer( page_frame, canvas->renderer );
 			}
 			DisplayFrame( page_frame );
@@ -4213,13 +4224,15 @@ PSI_CONTROL OpenPageFrame( PPAGE_DATA page )
 				PRENDERER renderer;
 				BindEventToKey( renderer = GetFrameRenderer( page_frame ), KEY_X, KEY_MOD_ALT, GoodQuitMenu, 0 );
 				BindEventToKey( renderer, KEY_F4, KEY_MOD_ALT, GoodQuitMenu, 0 );
+#ifndef UNDER_CE
 #ifdef __WINDOWS__
 				(((PRENDERER)g.mem_lock)[0]) = renderer[0];
+#endif
 #endif
 			}
 			//canvas->page = page;
 			page->frame = page_frame;
-			lprintf( "Page %p is frame %p", page, page_frame );
+			lprintf( WIDE( "Page %p is frame %p" ), page, page_frame );
 			canvas->flags.bSuperMode = TRUE;
 			return page_frame;
 		}
@@ -4308,7 +4321,11 @@ ATEXIT_PRIORITY( ExitMisc, ATEXIT_PRIORITY_DEFAULT + 1 )
 		INDEX idx2;
 		if( !g.flags.multi_edit )
 		{
+#ifndef __NO_OPTIONS__
 			if( SACK_GetProfileIntEx( GetProgramName(), "Destroy Controls at exit", 0, TRUE ) )
+#else
+			if(0)
+#endif
 			{
 				InterShell_DisablePageUpdate( TRUE );
 				LIST_FORALL( g.all_pages, idx2, PPAGE_DATA, page )
@@ -4342,7 +4359,7 @@ ATEXIT_PRIORITY( ExitMisc, ATEXIT_PRIORITY_DEFAULT + 1 )
 	}
 }
 
-OnKeyPressEvent( WIDE("Quit POS") )( PTRSZVAL psv )
+OnKeyPressEvent( WIDE( "Quit POS" ) )( PTRSZVAL psv )
 //void CPROC QuitPOS( PTRSZVAL psv, PKEY_BUTTON key )
 {
 	BannerNoWait( WIDE("Exiting...") );
@@ -4360,12 +4377,12 @@ OnKeyPressEvent( WIDE("Quit POS") )( PTRSZVAL psv )
 	}
 }
 
-OnKeyPressEvent( WIDE("InterShell/Show Names" ) )( PTRSZVAL psv )
+OnKeyPressEvent( WIDE( "InterShell/Show Names" ) )( PTRSZVAL psv )
 //void CPROC QuitPOS( PTRSZVAL psv, PKEY_BUTTON key )
 {
 	DumpRegisteredNames();
 }
-OnCreateMenuButton( WIDE("InterShell/Show Names") )( PMENU_BUTTON button )
+OnCreateMenuButton( WIDE( "InterShell/Show Names" ) )( PMENU_BUTTON button )
 {
 	//SetKeyPressEvent( button->control.key , QuitPOS, 0 );
 	button->color = BASE_COLOR_ORANGE;
@@ -4374,7 +4391,7 @@ OnCreateMenuButton( WIDE("InterShell/Show Names") )( PMENU_BUTTON button )
 	button->glare_set = GetGlareSet( WIDE("bicolor square") );
 	return 1;
 }
-OnCreateMenuButton( WIDE("Quit POS") )( PMENU_BUTTON button )
+OnCreateMenuButton( WIDE( "Quit POS" ) )( PMENU_BUTTON button )
 {
 	//SetKeyPressEvent( button->control.key , QuitPOS, 0 );
 	button->color = BASE_COLOR_RED;
@@ -4388,7 +4405,7 @@ void InvokeFinishAllInit( void )
 {
 	CTEXTSTR name;
 	PCLASSROOT data = NULL;
-	for( name = GetFirstRegisteredName( TASK_PREFIX "/common/finish all init", &data );
+	for( name = GetFirstRegisteredName( TASK_PREFIX WIDE( "/common/finish all init" ), &data );
 		name;
 		name = GetNextRegisteredName( &data ) )
 	{
@@ -4404,12 +4421,12 @@ void InvokeFinishInit( void )
 	CTEXTSTR name;
 	PCLASSROOT data = NULL;
 	//DumpRegisteredNames();
-	for( name = GetFirstRegisteredName( TASK_PREFIX "/common/finish init", &data );
+	for( name = GetFirstRegisteredName( TASK_PREFIX WIDE( "/common/finish init" ), &data );
 		name;
 		name = GetNextRegisteredName( &data ) )
 	{
 		void (CPROC*f)(void);
-		//snprintf( rootname, sizeof( rootname ), TASK_PREFIX "/common/save common/%s", name );
+		//snprintf( rootname, sizeof( rootname ), TASK_PREFIX WIDE( "/common/save common/%s" ), name );
 		f = GetRegisteredProcedure2( (CTEXTSTR)data, void, name, (void) );
 		if( f )
 			f();
@@ -4417,7 +4434,7 @@ void InvokeFinishInit( void )
 	if( g.pSelectionMenu )
 	{
 		PMENU pExtraCreate;
-		pExtraCreate = MakeControlsMenu( g.pSelectionMenu, TASK_PREFIX "/control", NULL );
+		pExtraCreate = MakeControlsMenu( g.pSelectionMenu, TASK_PREFIX WIDE( "/control" ), NULL );
 		//AppendPopupItem( canvas->pSelectionMenu, MF_STRING|MF_POPUP, (PTRSZVAL)canvas->pPageMenu, WIDE("Change Page") );
 		//AppendPopupItem( canvas->pSelectionMenu, MF_STRING|MF_POPUP, (PTRSZVAL)canvas->pPageDestroyMenu, WIDE("Destroy Page") );
 		//AppendPopupItem( canvas->pSelectionMenu, MF_STRING|MF_POPUP, (PTRSZVAL)canvas->pPageUndeleteMenu, WIDE("Undestroy Page") );
@@ -4429,7 +4446,7 @@ void InvokeFinishInit( void )
 		int n = 0;
 		CTEXTSTR name;
 		PCLASSROOT data = NULL;
-		for( name = GetFirstRegisteredName( TASK_PREFIX "/common/global properties", &data );
+		for( name = GetFirstRegisteredName( TASK_PREFIX WIDE( "/common/global properties" ), &data );
 			name;
 			name = GetNextRegisteredName( &data ) )
 		{
@@ -4448,7 +4465,7 @@ void InvokeFinishInit( void )
 	{
 		CTEXTSTR name;
 		PCLASSROOT data = NULL;
-		for( name = GetFirstRegisteredName( TASK_PREFIX "/common/Edit Security", &data );
+		for( name = GetFirstRegisteredName( TASK_PREFIX WIDE( "/common/Edit Security" ), &data );
 			name;
 			name = GetNextRegisteredName( &data ) )
 		{
@@ -4533,9 +4550,11 @@ int restart( void )
 				, g.flags.bTransparent?DISPLAY_ATTRIBUTE_LAYERED:0
 				, image->width, image->height
 				, image->x, image->y );
-			SetRendererTitle( canvas->renderer, "Canvas Behind Banner" );
+			SetRendererTitle( canvas->renderer, WIDE( "Canvas Behind Banner" ) );
+#ifndef UNDER_CE
 #ifdef __WINDOWS__
 			(((PRENDERER)g.mem_lock)[0]) = canvas->renderer[0];
+#endif
 #endif
 
 #ifdef USE_EDIT_GLARE
@@ -4561,7 +4580,7 @@ int restart( void )
 			PBANNER banner = NULL;
 			// this has to wait... until... 
 			// the first rendering pass is done... cause we're behind it...
-			lprintf( " ---------- remove banner --------" ) ;// 
+			lprintf( WIDE( " ---------- remove banner --------" ) ) ;// 
 			RemoveBannerEx( &banner DBG_SRC );
 		}
 		if( first_restart )
@@ -4581,7 +4600,7 @@ int restart( void )
 			while( !g.flags.bExit )
 			{
 				//ProcessControlMessages();					 
-				lprintf("Waiting to exit..." );
+				lprintf(WIDE( "Waiting to exit..." ) );
 				WakeableSleep( 10000 );
 				//Relinquish();
 			}
@@ -4603,7 +4622,7 @@ int restart( void )
 			//{
 			//	DestroyButton( button );
 			//}
-			xlprintf(LOG_ALWAYS)( "!!!\n!!!\n!!!! Cleanup NEEDS to be finished!!! \n!!!\n!!!\n" );
+			xlprintf(LOG_ALWAYS)( WIDE( "!!!\n!!!\n!!!! Cleanup NEEDS to be finished!!! \n!!!\n!!!\n" ) );
 			//DestroyFrame( &g.frame );
 		}
 	}
@@ -4626,39 +4645,47 @@ static void CPROC HandleSQLFeedback( CTEXTSTR message )
 PRIORITY_PRELOAD( LoadingMessage, DEFAULT_PRELOAD_PRIORITY+3 )
 {
 	BannerNoWait( WIDE("Loading...") );
-	//void SQLSetFeedbackHandler( void (CPROC*HandleSQLFeedback*)(char *message) );
+	//void SQLSetFeedbackHandler( void (CPROC*HandleSQLFeedback*)(TEXTCHAR *message) );
 #ifndef __NO_SQL__
 	SQLSetFeedbackHandler( HandleSQLFeedback );
 #endif
 }
 
+#ifndef UNDER_CE
 #if defined( __WINDOWS__ )
 PRIORITY_PRELOAD( ProgramLock, DEFAULT_PRELOAD_PRIORITY+2 )
 {
 	PTRSZVAL size = 0;
-	char lockname[256];
+	TEXTCHAR lockname[256];
 	TEXTCHAR resource_path[256];
 	snprintf( lockname, sizeof( lockname ), "%s.instance.lock", GetProgramName() );
 #ifndef __NO_OPTIONS__
 	g.flags.bSQLConfig = SACK_GetProfileIntEx( GetProgramName(), "Use SQL Configuration", 1, TRUE );
 	SACK_GetProfileStringEx( "InterShell", "Default resource path"
-								, ""
-								, resource_path
+								  , ""
+								  , resource_path
 								  , sizeof( resource_path ), TRUE );
 	SACK_GetProfileStringEx( GetProgramName(), "resource path"
 #ifdef __LINUX__
-							 , resource_path[0]?resource_path:"~"
+								  , resource_path[0]?resource_path:"~"
 #else
-							 , resource_path[0]?resource_path:"../resources"
+								  , resource_path[0]?resource_path:"../resources"
 #endif
-							 , resource_path
-							 , sizeof( resource_path ), TRUE );
+								  , resource_path
+								  , sizeof( resource_path ), TRUE );
+
 #ifdef _WIN32
+#ifdef UNDER_CE
+   SetDefaultFilePath( resource_path );
+#else
+   SetDefaultFilePath( resource_path );
+   //Set
 	if( !SetCurrentPath( resource_path ) )
 	{
 		MakePath( resource_path );
 		SetCurrentPath( resource_path );
 	}
+#endif
 #else
 	if( !SetCurrentPath( resource_path ) )
 	{
@@ -4699,30 +4726,34 @@ PRIORITY_PRELOAD( ProgramLock, DEFAULT_PRELOAD_PRIORITY+2 )
 #endif
 }
 #endif
+#endif
+
 void CPROC LoadAPlugin( PTRSZVAL psv, CTEXTSTR name, int flags )
 {
-	char msg[256];
-	snprintf( msg, sizeof( msg ), "Loading Plugin: %s", name );
+	TEXTCHAR msg[256];
+	snprintf( msg, sizeof( msg ), WIDE( "Loading Plugin: %s" ), name );
 	SystemLog( msg );
-	snprintf( msg, sizeof( msg ), "Loading Plugin...\n%s", name );
+	snprintf( msg, sizeof( msg ), WIDE( "Loading Plugin...\n%s" ), name );
 	BannerNoWait( msg );
+#ifdef HAVE_ENVIRONMENT
 	if( pathchr( name ) )
 	{
 		// if loading a plugin from a path, add that path to the PATH
-		char *tmp = StrDup( name );
-		CTEXTSTR old_environ = OSALOT_GetEnvironmentVariable( "PATH" );
+		TEXTCHAR *tmp = StrDup( name );
+		CTEXTSTR old_environ = OSALOT_GetEnvironmentVariable( WIDE( "PATH" ) );
 		// safe conversion.
-		char *trim = (char*)pathrchr( tmp );
+		TEXTCHAR *trim = (TEXTCHAR*)pathrchr( tmp );
 		trim[0] = 0;
-		if( !strstr( old_environ, tmp ) )
+		if( !StrStr( old_environ, tmp ) )
 		{
-			OSALOT_PrependEnvironmentVariable( "PATH", tmp );
+			OSALOT_PrependEnvironmentVariable( WIDE( "PATH" ), tmp );
 		}
 	}
+#endif
 	LoadFunction( name, NULL );
-	snprintf( msg, sizeof( msg ), "Loaded Plugin: %s", name );
+	snprintf( msg, sizeof( msg ), WIDE( "Loaded Plugin: %s" ), name );
 	SystemLog( msg );
-	snprintf( msg, sizeof( msg ), "Loaded Plugin...\n%s", name );
+	snprintf( msg, sizeof( msg ), WIDE( "Loaded Plugin...\n%s" ), name );
 	BannerNoWait( msg );
 }
 
@@ -4731,28 +4762,32 @@ void LoadInterShellPlugins( CTEXTSTR mypath, CTEXTSTR mask )
 	TEXTCHAR filename[256];
 	POINTER info = NULL;
 	int bLocalPath = 0;
-	char *ext;
+	TEXTCHAR *ext;
 	if( !mypath )
 	{
+#ifdef HAVE_ENVIRONMENT
 		mypath = StrDup( getenv( WIDE("MY_LOAD_PATH") ) );
+#else
+		mypath = StrDup( GetProgramPath() );
+#endif
 		bLocalPath = TRUE;
 	}
-	lprintf( "Read line from file: %s", mask );
+	lprintf( WIDE( "Read line from file: %s" ), mask );
 	if( !(mask[0] == '/') && !(mask[0] == '\\') && !(mask[1] == ':' ) )
-		snprintf( filename, sizeof( filename ), "%s/%s", mypath, mask );
+		snprintf( filename, sizeof( filename ), WIDE( "%s/%s" ), mypath, mask );
 	else
-		snprintf( filename, sizeof( filename ), "%s", mask );
+		snprintf( filename, sizeof( filename ), WIDE( "%s" ), mask );
 
 	// save conversion
-	ext = (char*)pathrchr( filename );
+	ext = (TEXTCHAR*)pathrchr( filename );
 	if( ext )
 		ext[0] = 0;
 	else
 	{
 		ext = filename;
-		strcpy( filename, "." );
+		StrCpyEx( filename, WIDE( "." ), sizeof( filename ) );
 	}
-	lprintf( "Scanning as [%s] [%s]", filename, ext+1 );
+	lprintf( WIDE( "Scanning as [%s] [%s]" ), filename, ext+1 );
 	while( ScanFiles( filename, ext+1, &info, LoadAPlugin, 0, 0 ) );
 	if( bLocalPath )
 		Release( (POINTER)mypath );
@@ -4764,11 +4799,11 @@ void LoadInterShellPlugins( CTEXTSTR mypath, CTEXTSTR mask )
 PRIORITY_PRELOAD( LoadExtra, DEADSTART_PRELOAD_PRIORITY + 5 ) // low priority... lower than most should think of.
 {
 	{
-		char buf[256];
+		TEXTCHAR buf[256];
 		// this is done before main... preloaded plugins were the standard once upon a time.
-		snprintf( buf, sizeof( buf ), "%s.config", GetProgramName() );
+		snprintf( buf, sizeof( buf ), WIDE( "%s.config" ), GetProgramName() );
 		g.config_filename = StrDup( buf );
-		//g.config_filename = "intershell.config";
+		//g.config_filename = WIDE( "intershell.config" );
 	}
 }
 
@@ -4776,15 +4811,15 @@ PRIORITY_PRELOAD( LoadExtra, DEADSTART_PRELOAD_PRIORITY + 5 ) // low priority...
 #ifdef DEKWARE_PLUGIN
 PTRSZVAL CPROC MenuThread( PTHREAD thread )
 {
-	char *argv[] = { NULL };
+	TEXTCHAR *argv[] = { NULL };
 	int argc = 1;
 #else
-//int main( int argc, char **argv )
+//int main( int argc, TEXTCHAR **argv )
 //{
 //PUBLIC( int, Start)( void )
-PUBLIC( int, Main)( int argc, char **argv, int bConsole )
+PUBLIC( int, Main)( int argc, TEXTCHAR **argv, int bConsole )
 {
-	//char *argv[] = { NULL };
+	//TEXTCHAR *argv[] = { NULL };
 	//int argc = 1;
 #endif
 
@@ -4818,10 +4853,10 @@ PUBLIC( int, Main)( int argc, char **argv, int bConsole )
 	SetManualAllocateCheck( TRUE );
 	BannerNoWait( WIDE("Starting...") );
 	{
-		char buf[256];
-		snprintf( buf, sizeof( buf ), "%s.config", GetProgramName() );
+		TEXTCHAR buf[256];
+		snprintf( buf, sizeof( buf ), WIDE( "%s.config" ), GetProgramName() );
 		g.config_filename = StrDup( buf );
-		//g.config_filename = "intershell.config";
+		//g.config_filename = WIDE( "intershell.config" );
 	}
 	{
 		int n;
@@ -4851,10 +4886,10 @@ PUBLIC( int, Main)( int argc, char **argv, int bConsole )
 			}
 			else
 			{
-				char *varval;
+				TEXTCHAR *varval;
 				if( ( varval = strchr( argv[n], '=' ) ) )
 				{
-					char *varname = argv[n];
+					TEXTCHAR *varname = argv[n];
 					varval[0] = 0;
 					varval++;
 					SetVariable( varname, varval );
@@ -4872,12 +4907,12 @@ PUBLIC( int, Main)( int argc, char **argv, int bConsole )
 	}
 	if( g.flags.restoreload )
 	{
-		char *ext;
+		TEXTCHAR *ext;
 		ext = strrchr( g.config_filename, '.' );
-		if( !ext || strnicmp( ext, ".AutoConfigBackup", 17 ) )
+		if( !ext || strnicmp( ext, WIDE( ".AutoConfigBackup" ), 17 ) )
 		{
-			char msg[256];
-			snprintf( msg, sizeof( msg ), "%s\nINVALID Configuration Name to Restore\nShould be like *.AutoConfigBackup*"
+			TEXTCHAR msg[256];
+			snprintf( msg, sizeof( msg ), WIDE( "%s\nINVALID Configuration Name to Restore\nShould be like *.AutoConfigBackup*" )
 				, g.config_filename );
 			BannerMessage( msg );
 			return -1;
@@ -4929,7 +4964,7 @@ namespace InterShell
 				render = MakeDisplayFrom( (HWND)((int)handle) );
 				RECT r;
 				GetClientRect( (HWND)((int)handle), &r );
-				this_frame = MakeNamedControl( NULL, "Menu Canvas", 0, 0
+				this_frame = MakeNamedControl( NULL, WIDE( "Menu Canvas" ), 0, 0
 						, r.right-r.left+1, r.bottom-r.top+1, -1 );
 				AttachFrameToRenderer( this_frame, render );
 				DisplayFrame( this_frame );
@@ -4970,7 +5005,7 @@ namespace InterShell
 			size_t convertedChars = 0;
 			size_t  sizeInBytes = ((string->Length + 1) * 2);
 			errno_t err = 0;
-			char    *ch = NewArray(TEXTCHAR,sizeInBytes);
+			TEXTCHAR    *ch = NewArray(TEXTCHAR,sizeInBytes);
 
 
 			err = wcstombs_s(&convertedChars, 
@@ -4982,7 +5017,7 @@ namespace InterShell
 		void  Load( System::String^ string )
 		{
 			pin_ptr<const wchar_t> wch = PtrToStringChars(string);
-			char    *ch = WcharConvert( wch );			
+			TEXTCHAR    *ch = WcharConvert( wch );			
 			LoadButtonConfig( this_frame, ch );
 
 			BannerNoWait( WIDE("Finish Config...") );
@@ -5000,9 +5035,9 @@ namespace InterShell
 
 		}
 
-		char*  GetCanvasConfig( PSI_CONTROL canvas )
+		TEXTCHAR*  GetCanvasConfig( PSI_CONTROL canvas )
 		{
-			return "default_intershell.config";
+			return WIDE( "default_intershell.config" );
 		}
 	};
 }
@@ -5092,21 +5127,23 @@ void CPROC UnloadInterShellInterface( POINTER p )
 
 PRELOAD( RegisterInterShellInterface )
 {
-	RegisterInterface( "InterShell", LoadInterShellInterface, UnloadInterShellInterface );
-	if( SACK_GetProfileIntEx( GetProgramName(), "Alias InterShell for MILK", 1, TRUE) )
+	RegisterInterface( WIDE( "InterShell" ), LoadInterShellInterface, UnloadInterShellInterface );
+#ifndef __NO_OPTIONS__
+	if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "Alias InterShell for MILK" ), 1, TRUE) )
+#endif
 	{
-		RegisterClassAlias( "system/interfaces/InterShell", "system/interfaces/MILK");
-		RegisterClassAlias( "InterShell", "MILK" );
-		RegisterClassAlias( "sack/widgets", "altanik/widgets" );
+		RegisterClassAlias( WIDE( "system/interfaces/InterShell" ), WIDE( "system/interfaces/MILK" ));
+		RegisterClassAlias( WIDE( "InterShell" ), WIDE( "MILK" ) );
+		RegisterClassAlias( WIDE( "sack/widgets" ), WIDE( "altanik/widgets" ) );
 	}
 }
 
-OnKeyPressEvent( "InterShell/Debug Memory" )( PTRSZVAL psv )
+OnKeyPressEvent( WIDE( "InterShell/Debug Memory" ) )( PTRSZVAL psv )
 {
 	DebugDumpMem();
 }
 
-OnCreateMenuButton( "InterShell/Debug Memory" )( PMENU_BUTTON button )
+OnCreateMenuButton( WIDE( "InterShell/Debug Memory" ) )( PMENU_BUTTON button )
 {
 	return 1;
 }

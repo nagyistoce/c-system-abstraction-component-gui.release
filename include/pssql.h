@@ -69,17 +69,6 @@
 
 SQL_NAMESPACE
 
-#ifdef _MSC_VER
-#ifndef __NO_SQL__
-#ifndef USE_SQLITE
-#define USE_SQLITE
-#endif
-#ifndef USE_ODBC
-#define USE_ODBC
-#endif
-#endif
-#endif
-
 
 #define SQLPROXY_PROC SQLSTUB_PROC
 typedef struct odbc_handle_tag *PODBC, ODBC;

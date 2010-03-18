@@ -58,7 +58,7 @@ int PrintChar( int bits, int charnum, PCHARACTER character, int height )
 	int  outwidth;
 	TEXTCHAR charid[64];
 	char *data = (char*)character->data;
-	sprintf( charid, WIDE("_char_%d"), charnum );
+	snprintf( charid, sizeof( charid ), WIDE("_char_%d"), charnum );
 
 	#define LINEPAD WIDE("                  ")
 	if( bits == 8 )
@@ -213,7 +213,7 @@ void DumpFontFile( CTEXTSTR name, Font font_to_dump )
 	PFONT font = (PFONT)font_to_dump;
 	if( font )
 	{
-		Fopen( output, name, WIDE("wt") );
+		output = sack_fopen( 0, name, WIDE("wt") );
 		if( output )
 		{
 			PrintLeadin(  (font->flags&3)==1?2
@@ -232,7 +232,7 @@ void DumpFontFile( CTEXTSTR name, Font font_to_dump )
 				}
 			}
 			PrintFontTable( font->name, font );
-			fclose( output );
+			sack_fclose( output );
 		}
 	}
 	else
@@ -922,7 +922,7 @@ try_another_default:
 			renderer->nWidth = nWidth;
 			renderer->nHeight = nHeight;
 			renderer->flags = flags;
-			renderer->file = StrDup( file );
+			renderer->file = sack_prepend_path( 0, file );
 			AddLink( &fonts, renderer );
 		}
 		else
@@ -939,7 +939,12 @@ try_another_default:
 	{
 		PTRSZVAL size = 0;
 
-		renderer->font_memory = OpenSpace( NULL, file, &size );
+		renderer->font_memory = 
+#ifdef UNDER_CE
+			NULL;
+#else
+			OpenSpace( NULL, file, &size );
+#endif
 
 		if( renderer->font_memory )
 		{
@@ -964,11 +969,12 @@ try_another_default:
 #else
 			CTEXTSTR file = renderer->file;
 #endif
-			//lprintf( WIDE("Using file access font...") );
+			lprintf( WIDE("Using file access font...") );
 			error = FT_New_Face( fg.library
 									 , file
 									 , 0
 									 , &renderer->face );
+         lprintf( "Result %d", error );
 #ifdef __cplusplus_cli
 			Release( file );
 #endif
@@ -1262,14 +1268,15 @@ Font RenderFontFileEx( CTEXTSTR file, _32 width, _32 height, _32 flags, P_32 siz
 	Font font = InternalRenderFontFile( file, (S_16)(width&0x7FFF), (S_16)(height&0x7FFF), flags );
 	if( font && size && pFontData )
 	{
+      int chars;
 		PRENDER_FONTDATA pResult = (PRENDER_FONTDATA)Allocate( (*size)
 														= sizeof( RENDER_FONTDATA )
-														+ strlen( file ) + 1 );
+														+ (chars = strlen( file ) + 1)*sizeof(TEXTCHAR) );
 		pResult->magic = MAGIC_RENDER_FONT;
 		pResult->nHeight = height;
 		pResult->nWidth = width;
 		pResult->flags = flags;
-		strcpy( pResult->filename, file );
+		StrCpyEx( pResult->filename, file, chars );
 		(*pFontData) = (POINTER)pResult;
 		SetFontRendererData( font, pResult, (*size) );
 	}

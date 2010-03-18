@@ -336,14 +336,14 @@ void CutEditText( PEDIT pe, PTEXT *caption )
     pe->select_end = -1;
 }
 
-static void InsertAChar( PEDIT pe, PTEXT *caption, char ch )
+static void InsertAChar( PEDIT pe, PTEXT *caption, TEXTCHAR ch )
 {
 	if( (pe->nCaptionUsed+1) >= pe->nCaptionSize )
 	{
 		PTEXT newtext;
 		pe->nCaptionSize += 16;
 		newtext = SegCreate( pe->nCaptionSize );
-		strncpy( GetText( newtext ), GetText( *caption )
+		StrCpyEx( GetText( newtext ), GetText( *caption )
 				 , pe->nCaptionUsed );
 		SetTextSize( newtext, pe->nCaptionUsed );
 		GetText( newtext )[pe->nCaptionUsed] = 0;
@@ -450,10 +450,17 @@ static void Copy( PEDIT pe, PTEXT *caption )
 {
 	TEXTCHAR data[1024];
 	GetMarkedText( pe, caption, data, sizeof( data ) );
+#ifndef UNDER_CE
 	if( data[0] && OpenClipboard(NULL) )
 	{
 		size_t nLen = strlen( data ) + 1;
-		HGLOBAL mem = GlobalAlloc( GMEM_MOVEABLE, nLen );
+		HGLOBAL mem = GlobalAlloc( 
+#ifndef _ARM_
+			GMEM_MOVEABLE
+#else
+				0
+#endif
+			, nLen );
 		MemCpy( GlobalLock( mem ), data, nLen );
 		GlobalUnlock( mem );
 		EmptyClipboard();
@@ -461,6 +468,7 @@ static void Copy( PEDIT pe, PTEXT *caption )
 		CloseClipboard();
 		GlobalFree( mem );
 	}
+#endif
 }
 
 //---------------------------------------------------------------------------

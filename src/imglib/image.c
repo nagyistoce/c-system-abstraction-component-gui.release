@@ -1,7 +1,9 @@
 #define IMAGE_LIBRARY_SOURCE
 #define IMAGE_MAIN
 #ifdef _MSC_VER
+#ifndef UNDER_CE
 #include <emmintrin.h>
+#endif
 // intrinsics
 #endif
 
@@ -627,7 +629,7 @@ IMAGE_PROC( void, UnmakeImageFileEx )( ImageFile *pif DBG_PASS)
 Image DecodeMemoryToImage( P_8 buf, _32 size )
 {
 	Image file = NULL;
-	//lprintf( WIDE("Attempting to decode an image...") );
+	lprintf( WIDE("Attempting to decode an image...") );
 #ifdef DO_PNG
   if( !file )
         file = ImagePngFile( buf, size );
@@ -666,8 +668,9 @@ IMAGE_PROC( ImageFile*, ImageLoadImageFileEx )(  CTEXTSTR filename DBG_PASS )
    _32 size;
    P_8 buf;
    ImageFile* file = NULL;
-   FILE* fp;
-   Fopen ( fp, filename, WIDE("rb"));
+	FILE* fp;
+
+   fp = sack_fopen( 0, filename, WIDE("rb"));
 #if 0
    {
       char path[280];
@@ -678,12 +681,12 @@ IMAGE_PROC( ImageFile*, ImageLoadImageFileEx )(  CTEXTSTR filename DBG_PASS )
    if (!fp)
       return NULL;
 
-   fseek (fp, 0, SEEK_END);
+   size = sack_fseek (fp, 0, SEEK_END);
    size = ftell (fp);
-   fseek (fp, 0, SEEK_SET);
+   sack_fseek (fp, 0, SEEK_SET);
    buf = (_8*) AllocateEx( size + 1 DBG_RELAY );
-   fread (buf, 1, size + 1, fp);
-   fclose (fp);
+   sack_fread (buf, 1, size + 1, fp);
+   sack_fclose (fp);
 
    // printf(" so far okay - %d (%d)\n", buf, size );
 
@@ -884,7 +887,7 @@ IMAGE_PROC( void, BlatColor )( ImageFile *pifDest, S_32 x, S_32 y, _32 w, _32 h,
    int  oo;
 	if( !pifDest || !pifDest->image )
 	{
-      lprintf( "No dest, or no dest image." );
+		lprintf( WIDE( "No dest, or no dest image." ) );
 		return;
 	}
 
@@ -906,7 +909,7 @@ IMAGE_PROC( void, BlatColor )( ImageFile *pifDest, S_32 x, S_32 y, _32 w, _32 h,
 		r2.height = pifDest->height;
 		if( !IntersectRectangle( &r, &r1, &r2 ) )
 		{
-			lprintf( "blat color is out of bounds (%"_32fs",%"_32fs")x(%"_32f",%"_32f") (%"_32fs",%"_32fs")x(%"_32f",%"_32f")"
+			lprintf( WIDE("blat color is out of bounds (%")_32fs WIDE(",%")_32fs WIDE(")x(%")_32f WIDE(",%")_32f WIDE(") (%")_32fs WIDE(",%")_32fs WIDE(")x(%")_32f WIDE(",%")_32f WIDE(")")
 				, x, y, w, h
 				, r2.x, r2.y, r2.width, r2.height );
 			return;
@@ -950,7 +953,7 @@ IMAGE_PROC( void, BlatColorAlpha )( ImageFile *pifDest, S_32 x, S_32 y, _32 w, _
 
 	if( !pifDest || !pifDest->image )
 	{
-      lprintf( "No dest, or no dest image." );
+		lprintf( WIDE( "No dest, or no dest image." ) );
 
 		return;
 	}
@@ -970,7 +973,7 @@ IMAGE_PROC( void, BlatColorAlpha )( ImageFile *pifDest, S_32 x, S_32 y, _32 w, _
       r2.height = pifDest->height;
 		if( !IntersectRectangle( &r, &r1, &r2 ) )
 		{
-         lprintf( "Blat color out of bounds" );
+			lprintf( WIDE( "Blat color out of bounds" ) );
 			return;
 		}
 #ifdef DEBUG_BLATCOLOR

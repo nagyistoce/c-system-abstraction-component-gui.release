@@ -141,7 +141,7 @@ const char * ZEXPORT zError(//err)
      * errno.  We define it as a global variable to simplify porting.
      * Its value is always 0 and should not be used.
      */
-    int errno = 0;
+    //int errno = 0;
 #endif
 
 #ifndef HAVE_MEMCPY

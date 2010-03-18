@@ -7,13 +7,13 @@
 #include "resource.h"
 #include "fonts.h"
 
-#define MACRO_BUTTON_NAME "Macro"
+#define MACRO_BUTTON_NAME WIDE( "Macro" )
 
 
 
 typedef struct macro_element{
 	DeclareLink( struct macro_element );
-   //char *name; // name to apply for macro // use button->text instead.
+   //TEXTCHAR *name; // name to apply for macro // use button->text instead.
 	PMENU_BUTTON button;
 	struct {
 		BIT_FIELD allow_continue : 1; // support for external macro elements to control macro execution.
@@ -50,16 +50,16 @@ enum {
 PRELOAD( RegisterMacroDialogResources )
 {
 
-	EasyRegisterResource( "intershell/macros", LIST_CONTROL_TYPES, LISTBOX_CONTROL_NAME );
-	EasyRegisterResource( "intershell/macros", BUTTON_ADD_CONTROL, NORMAL_BUTTON_NAME );
-	EasyRegisterResource( "intershell/macros", BUTTON_ELEMENT_CONFIGURE, NORMAL_BUTTON_NAME );
-	EasyRegisterResource( "intershell/macros", BUTTON_ELEMENT_UP, NORMAL_BUTTON_NAME );
-	EasyRegisterResource( "intershell/macros", BUTTON_ELEMENT_DOWN, NORMAL_BUTTON_NAME );
-	EasyRegisterResource( "intershell/macros", BUTTON_ELEMENT_REMOVE, NORMAL_BUTTON_NAME );
-	EasyRegisterResource( "intershell/macros", BUTTON_ELEMENT_CLONE, NORMAL_BUTTON_NAME );
-	EasyRegisterResource( "intershell/macros", LIST_MACRO_ELEMENTS, LISTBOX_CONTROL_NAME );
+	EasyRegisterResource( WIDE( "intershell/macros" ), LIST_CONTROL_TYPES, LISTBOX_CONTROL_NAME );
+	EasyRegisterResource( WIDE( "intershell/macros" ), BUTTON_ADD_CONTROL, NORMAL_BUTTON_NAME );
+	EasyRegisterResource( WIDE( "intershell/macros" ), BUTTON_ELEMENT_CONFIGURE, NORMAL_BUTTON_NAME );
+	EasyRegisterResource( WIDE( "intershell/macros" ), BUTTON_ELEMENT_UP, NORMAL_BUTTON_NAME );
+	EasyRegisterResource( WIDE( "intershell/macros" ), BUTTON_ELEMENT_DOWN, NORMAL_BUTTON_NAME );
+	EasyRegisterResource( WIDE( "intershell/macros" ), BUTTON_ELEMENT_REMOVE, NORMAL_BUTTON_NAME );
+	EasyRegisterResource( WIDE( "intershell/macros" ), BUTTON_ELEMENT_CLONE, NORMAL_BUTTON_NAME );
+	EasyRegisterResource( WIDE( "intershell/macros" ), LIST_MACRO_ELEMENTS, LISTBOX_CONTROL_NAME );
 #define EasyAlias( x, y )   \
-	RegisterClassAlias( "psi/resources/intershell/macros/"y"/"#x, "psi/resources/application/"y"/" #x )
+	RegisterClassAlias( WIDE( "psi/resources/intershell/macros/" )y WIDE( "/" )WIDE(#x), WIDE( "psi/resources/application/" ) y WIDE( "/" ) WIDE(#x) )
    // migration path...
 	EasyAlias(LIST_CONTROL_TYPES, LISTBOX_CONTROL_NAME );
 	EasyAlias(BUTTON_ADD_CONTROL, NORMAL_BUTTON_NAME );
@@ -104,7 +104,7 @@ static void CPROC AddButtonType( PTRSZVAL psv, PSI_CONTROL control )
 	PMACRO_BUTTON button = (PMACRO_BUTTON)psv;
 	PSI_CONTROL list = GetNearControl( control, LIST_CONTROL_TYPES );
 	PLISTITEM pli = GetSelectedItem( list );
-	char *name = (char*)GetItemData( pli );
+	TEXTCHAR *name = (TEXTCHAR*)GetItemData( pli );
 	if( pli && button )
 	{
 		PMACRO_ELEMENT pme = New( MACRO_ELEMENT );
@@ -114,7 +114,7 @@ static void CPROC AddButtonType( PTRSZVAL psv, PSI_CONTROL control )
 		if( pme->button )
 		{
 			pme->button->container_button = button->button;
-			//lprintf( "Setting container of %p to %p", pme->button, button->button );
+			//lprintf( WIDE( "Setting container of %p to %p" ), pme->button, button->button );
 
 			LinkLast( button->elements, PMACRO_ELEMENT, pme );
 			{
@@ -153,7 +153,7 @@ int FillControlsList( PSI_CONTROL control, int nLevel, CTEXTSTR basename, CTEXTS
       pvt = VarTextCreate();
 		vtprintf( pvt, WIDE("%s/%s"), basename, name );
 		if( priorname &&
-			( strcmp( name, "button_create" ) == 0 ) )
+			( strcmp( name, WIDE( "button_create" ) ) == 0 ) )
 		{
          // okay then add this one...
 			//snprintf( newname, sizeof( newname ), WIDE("%s/%s"), basename, name );
@@ -200,7 +200,7 @@ static void CPROC MoveElementUp( PTRSZVAL psv, PSI_CONTROL control )
 		PMACRO_ELEMENT _prior = ((PMACRO_ELEMENT)pme->me);
 		if( (PTRSZVAL)&pme->next != (PTRSZVAL)pme )
 		{
-			lprintf( "Failure, structure definition does not have DeclareLink() as first member." );
+			lprintf( WIDE( "Failure, structure definition does not have DeclareLink() as first member." ) );
 			DebugBreak();
 		}
 		if( _prior != (PMACRO_ELEMENT)(&button->elements) )
@@ -223,7 +223,7 @@ static void CPROC MoveElementDown( PTRSZVAL psv, PSI_CONTROL control )
 		PMACRO_ELEMENT _next = NextThing( pme );
 		if( (PTRSZVAL)&pme->next != (PTRSZVAL)pme )
 		{
-			lprintf( "Failure, structure definition does not have DeclareLink() as first member." );
+			lprintf( WIDE( "Failure, structure definition does not have DeclareLink() as first member." ) );
 			DebugBreak();
 		}
 		if( _next && pme )
@@ -258,7 +258,7 @@ static void CPROC ConfigureElement( PTRSZVAL psv, PSI_CONTROL control )
 			}
 			else
 			{
-            SimpleMessageBox( control, "Failed to get canvas\nAborting element edit", "General Failure" );
+            SimpleMessageBox( control, WIDE( "Failed to get canvas\nAborting element edit" ), WIDE( "General Failure" ) );
 			}
 		}
 	}
@@ -282,7 +282,7 @@ static void CPROC MoveElementRemove( PTRSZVAL psv, PSI_CONTROL control )
 
 static void ConfigureMacroButton( PMACRO_BUTTON button, PSI_CONTROL parent )
 {
-	PSI_CONTROL frame = LoadXMLFrameOver( parent, "ConfigureMacroButton.isFrame" );
+	PSI_CONTROL frame = LoadXMLFrameOver( parent, WIDE( "ConfigureMacroButton.isFrame" ) );
 	if( frame )
 	{
 		int okay = 0;
@@ -293,7 +293,7 @@ static void ConfigureMacroButton( PMACRO_BUTTON button, PSI_CONTROL parent )
 			PSI_CONTROL list;
 			SetListboxIsTree( list = GetControl( frame, LIST_CONTROL_TYPES ), 1 );
 			ResetList( list );
-			FillControlsList( list, 1, TASK_PREFIX "/control", NULL );
+			FillControlsList( list, 1, TASK_PREFIX WIDE( "/control" ), NULL );
 			SetCommonButtonControls( frame );
 			SetButtonPushMethod( GetControl( frame, BUTTON_ADD_CONTROL ), AddButtonType, (PTRSZVAL)button );
 			//SetButtonPushMethod( GetControl( frame, BUTTON_EDIT_CONTROL ), AddButtonType, (PTRSZVAL)button );
@@ -353,7 +353,7 @@ void InvokeMacroButton( PMACRO_BUTTON button )
 		/* this should not happen, if it does, a macro contains a macro, and this should be handled.
 		 Make sure we have a current local state so setmacroresult may work
 		 */
-      lprintf( "A macro triggered a macro... or a second macro was triggered while the first ran." );
+      lprintf( WIDE( "A macro triggered a macro... or a second macro was triggered while the first ran." ) );
 		DebugBreak();
 	}
 	current_invoke_state.macro = button;
@@ -421,12 +421,12 @@ void WriteMacroButton( CTEXTSTR leader, FILE *file, PTRSZVAL psv )
 		PMACRO_ELEMENT element;
 		for( element = button->elements; element; element = NextThing( element ) )
 		{
-			fprintf( file, "%sMacro Element \'%s\'\n", leader?leader:"", element->button->pTypeName );
+			fprintf( file, WIDE( "%sMacro Element \'%s\'\n" ), leader?leader:WIDE( "" ), element->button->pTypeName );
 			DumpGeneric( file, element->button ); /* begins another sub configuration... */
-			fprintf( file, "%smacro element done\n", leader?leader:"" );
-			//fprintf( file, "%sMacro Element Text \'%s\'\n", leader?leader:"", element->button->text );
+			fprintf( file, WIDE( "%smacro element done\n" ), leader?leader:WIDE( "" ) );
+			//fprintf( file, WIDE( "%sMacro Element Text \'%s\'\n" ), leader?leader:WIDE( "" ), element->button->text );
 		}
-		fprintf( file, "%smacro element list done\n", leader?leader:"" );
+		fprintf( file, WIDE( "%smacro element list done\n" ), leader?leader:WIDE( "" ) );
 	}
 }
 
@@ -437,7 +437,7 @@ OnSaveControl( MACRO_BUTTON_NAME )( FILE *file, PTRSZVAL psv )
 
 static PTRSZVAL CPROC LoadMacroElementText( PTRSZVAL psv, arg_list args )
 {
-	PARAM( args, char *, name );
+	PARAM( args, TEXTCHAR *, name );
 	PMACRO_BUTTON pmb = (PMACRO_BUTTON)psv;
 	PMACRO_ELEMENT element;;
 	if( !pmb )
@@ -459,14 +459,14 @@ static PTRSZVAL CPROC LoadMacroElementText( PTRSZVAL psv, arg_list args )
 		}
 		else
 		{
-         SimpleMessageBox( NULL, "FATALITY", "Failed to find macro element during macro load!" );
-			lprintf( "Failed to find element during macro load!" );
+         SimpleMessageBox( NULL, WIDE( "FATALITY" ), WIDE( "Failed to find macro element during macro load!" ) );
+			lprintf( WIDE( "Failed to find element during macro load!" ) );
 		}
 	}
 	else
 	{
-		SimpleMessageBox( NULL, "FATALITY", "Invalid macro button when loading element text!" );
-      lprintf( "Invalid macro button when loading element text!" );
+		SimpleMessageBox( NULL, WIDE( "FATALITY" ), WIDE( "Invalid macro button when loading element text!" ) );
+      lprintf( WIDE( "Invalid macro button when loading element text!" ) );
 	}
 	return psv;
 }
@@ -474,7 +474,7 @@ static PTRSZVAL CPROC LoadMacroElementText( PTRSZVAL psv, arg_list args )
 static PTRSZVAL CPROC LoadMacroElements( PTRSZVAL psv, arg_list args )
 {
 	PMACRO_BUTTON pmb = (PMACRO_BUTTON)psv;
-	PARAM( args, char *, name );
+	PARAM( args, TEXTCHAR *, name );
 	PMACRO_ELEMENT element = New( MACRO_ELEMENT );
 	if( !pmb )
 		if( l.finished_startup )
@@ -486,14 +486,14 @@ static PTRSZVAL CPROC LoadMacroElements( PTRSZVAL psv, arg_list args )
 	element->button = CreateInvisibleControl( name );
 	if( element->button )
 	{
-		//lprintf( "Setting container of %p to %p", element->button, pmb->button );
+		//lprintf( WIDE( "Setting container of %p to %p" ), element->button, pmb->button );
 		element->button->container_button = pmb->button;
 		LinkLast( pmb->elements, PMACRO_ELEMENT, element );
-		if( !BeginSubConfiguration( name, (pmb==&l.startup)?"Startup macro element done":"macro element done" ) )
+		if( !BeginSubConfiguration( name, (pmb==&l.startup)?WIDE( "Startup macro element done" ):WIDE( "macro element done" ) ) )
 			PublicAddCommonButtonConfig( element->button );
 		SetCurrentLoadingButton( element->button );
 	}
-   //lprintf( "Resulting with psv %08x", element->button->psvUser );
+   //lprintf( WIDE( "Resulting with psv %08x" ), element->button->psvUser );
 	return element->button->psvUser;
 }
 
@@ -512,19 +512,19 @@ static PTRSZVAL CPROC FinishMacro( PTRSZVAL psv, arg_list args )
 
 OnLoadControl( MACRO_BUTTON_NAME )( PCONFIG_HANDLER pch, PTRSZVAL psv )
 {
-   AddConfigurationMethod( pch, "Macro Element \'%m\'", LoadMacroElements );
-   //AddConfigurationMethod( pch, "Macro Element Text \'%m\'", LoadMacroElementText );
-	//AddConfigurationMethod( InterShell_GetCurrentConfigHandler(), "Macro Element Text \'%m\'", LoadMacroElementText );
-	AddConfigurationMethod( InterShell_GetCurrentConfigHandler(), "Macro Element List Done", FinishMacro );
+   AddConfigurationMethod( pch, WIDE( "Macro Element \'%m\'" ), LoadMacroElements );
+   //AddConfigurationMethod( pch, WIDE( "Macro Element Text \'%m\'" ), LoadMacroElementText );
+	//AddConfigurationMethod( InterShell_GetCurrentConfigHandler(), WIDE( "Macro Element Text \'%m\'" ), LoadMacroElementText );
+	AddConfigurationMethod( InterShell_GetCurrentConfigHandler(), WIDE( "Macro Element List Done" ), FinishMacro );
 }
 
-OnGlobalPropertyEdit( "Startup Macro")( PSI_CONTROL parent )
+OnGlobalPropertyEdit( WIDE( "Startup Macro" ))( PSI_CONTROL parent )
 {
 	// calling this direct causes a break for lack 
 	// of a g.configure_key... okay?
 	ConfigureMacroButton( &l.startup, parent );
 }
-OnGlobalPropertyEdit( "Shutdown Macro")( PSI_CONTROL parent )
+OnGlobalPropertyEdit( WIDE( "Shutdown Macro" ))( PSI_CONTROL parent )
 {
 	// calling this direct causes a break for lack 
 	// of a g.configure_key... okay?
@@ -541,21 +541,21 @@ void InvokeShutdownMacro( void )
 	InvokeMacroButton( &l.shutdown );
 }
 
-OnSaveCommon( "Startup Macro" )( FILE *file )
+OnSaveCommon( WIDE( "Startup Macro" ) )( FILE *file )
 {
-	WriteMacroButton( "Startup ", file, (PTRSZVAL)&l.startup );
-	WriteMacroButton( "Shutdown ", file, (PTRSZVAL)&l.startup );
+	WriteMacroButton( WIDE( "Startup " ), file, (PTRSZVAL)&l.startup );
+	WriteMacroButton( WIDE( "Shutdown " ), file, (PTRSZVAL)&l.startup );
 }
 
-OnLoadCommon( "Startup Macro" )( PCONFIG_HANDLER pch )
+OnLoadCommon( WIDE( "Startup Macro" ) )( PCONFIG_HANDLER pch )
 {
-	AddConfigurationMethod( pch, "Startup Macro Element \'%m\'", LoadMacroElements );
-	//AddConfigurationMethod( pch, "Startup Macro Element Text \'%m\'", LoadMacroElementText );
-   AddConfigurationMethod( pch, "Startup Macro Element List Done", FinishMacro );
+	AddConfigurationMethod( pch, WIDE( "Startup Macro Element \'%m\'" ), LoadMacroElements );
+	//AddConfigurationMethod( pch, WIDE( "Startup Macro Element Text \'%m\'" ), LoadMacroElementText );
+   AddConfigurationMethod( pch, WIDE( "Startup Macro Element List Done" ), FinishMacro );
 	
-	AddConfigurationMethod( pch, "Shutdown Macro Element Text \'%m\'", LoadMacroElementText );
-	//AddConfigurationMethod( pch, "Shutdown Macro Element \'%m\'", LoadMacroElements );
-	AddConfigurationMethod( pch, "Shutdown Macro Element List Done", FinishMacro );
+	AddConfigurationMethod( pch, WIDE( "Shutdown Macro Element Text \'%m\'" ), LoadMacroElementText );
+	//AddConfigurationMethod( pch, WIDE( "Shutdown Macro Element \'%m\'" ), LoadMacroElements );
+	AddConfigurationMethod( pch, WIDE( "Shutdown Macro Element List Done" ), FinishMacro );
 }
 
 static void OnCloneControl( MACRO_BUTTON_NAME )( PTRSZVAL psvNew, PTRSZVAL psvOriginal )
@@ -569,12 +569,12 @@ static void OnCloneControl( MACRO_BUTTON_NAME )( PTRSZVAL psvNew, PTRSZVAL psvOr
 		{
 			PMACRO_ELEMENT new_element = New( MACRO_ELEMENT );
 			new_element->me = NULL;
-         new_element->next = NULL;
+			new_element->next = NULL;
 			new_element->button = CreateInvisibleControl( element->button->pTypeName );
 			if( new_element->button )
 			{
 				new_element->button->container_button = pmbNew->button;
-				//lprintf( "Setting container of %p to %p", new_element->button, pmbNew->button );
+				//lprintf( WIDE( "Setting container of %p to %p" ), new_element->button, pmbNew->button );
 
 				CloneCommonButtonProperties( new_element->button, element->button );
 				InvokeCloneControl( new_element->button, element->button );

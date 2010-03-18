@@ -7,14 +7,14 @@
 
 SACK_SYSTEM_NAMESPACE
 
-SYSTEM_PROC( void, ParseIntoArgs )( char *lpCmdLine, int *pArgc, char ***pArgv )
+SYSTEM_PROC( void, ParseIntoArgs )( TEXTCHAR *lpCmdLine, int *pArgc, TEXTCHAR ***pArgv )
 {
-	char *args = lpCmdLine;
-	char  *p;
-	char **pp;
-   char argc; // result variable, count is a temp counter...
-   char **argv; // result variable, pp is a temp pointer
-	char quote = 0;
+	TEXTCHAR *args = lpCmdLine;
+	TEXTCHAR  *p;
+	TEXTCHAR **pp;
+   TEXTCHAR argc; // result variable, count is a temp counter...
+   TEXTCHAR **argv; // result variable, pp is a temp pointer
+	TEXTCHAR quote = 0;
 	int count = 0;
 	int lastchar;
 	lastchar = ' '; // auto continue spaces...
@@ -58,10 +58,10 @@ SYSTEM_PROC( void, ParseIntoArgs )( char *lpCmdLine, int *pArgc, char ***pArgv )
       count++;
 	if( count )
 	{
-		char *start;
+		TEXTCHAR *start;
 		lastchar = ' '; // auto continue spaces...
       //lprintf( "Array is %d (+2?)", count );
-		pp = argv = NewArray( char*, count + 2 );
+		pp = argv = NewArray( TEXTCHAR*, count + 2 );
 		argc = count - 2;
 		p = args;
 		quote = 0;
@@ -83,7 +83,7 @@ SYSTEM_PROC( void, ParseIntoArgs )( char *lpCmdLine, int *pArgc, char ***pArgv )
 					p[0] = quote;
 					quote = 0;
 					start = NULL;
-               lastchar = ' ';
+					lastchar = ' ';
 				}
 			}
 			else
@@ -125,8 +125,8 @@ SYSTEM_PROC( void, ParseIntoArgs )( char *lpCmdLine, int *pArgc, char ***pArgv )
 			(*pArgc) = 0;
 		if( pArgv )
 		{
-			(*pArgv) = NewArray( char*, 1 );
-         (*pArgv)[0] = NULL;
+			(*pArgv) = NewArray( TEXTCHAR*, 1 );
+			(*pArgv)[0] = NULL;
 		}
 	}
 }

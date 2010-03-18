@@ -135,7 +135,7 @@ PROCREG_PROC( PCLASSROOT, GetClassRoot )( PCLASSROOT class_name );
 PROCREG_PROC( PCLASSROOT, GetClassRootEx )( PCLASSROOT root, PCLASSROOT name_class );
 #endif
 
-PROCREG_PROC( void, SetInterfaceConfigFile )( char *filename );
+PROCREG_PROC( void, SetInterfaceConfigFile )( TEXTCHAR *filename );
 
 
 // data is a &(POINTER data = NULL);
@@ -235,8 +235,8 @@ PROCREG_PROC( PROCEDURE, GetRegisteredProcedureExxx )( PCLASSROOT root
 																	 , CTEXTSTR parms
 																	 );
 #define GetRegisteredProcedureExx(root,nc,rt,n,a) ((rt (CPROC*)a)GetRegisteredProcedureExxx(root,nc,_WIDE(#rt),n,_WIDE(#a)))
-#define GetRegisteredProcedure2(nc,rtype,name,args) (rtype (CPROC*)args)GetRegisteredProcedureEx((nc),#rtype, name, #args )
-#define GetRegisteredProcedureNonCPROC(nc,rtype,name,args) (rtype (*)args)GetRegisteredProcedureEx((nc),#rtype, name, #args )
+#define GetRegisteredProcedure2(nc,rtype,name,args) (rtype (CPROC*)args)GetRegisteredProcedureEx((nc),WIDE(#rtype), name, WIDE(#args) )
+#define GetRegisteredProcedureNonCPROC(nc,rtype,name,args) (rtype (*)args)GetRegisteredProcedureEx((nc),WIDE(#rtype), name, WIDE(#args) )
 
 PROCREG_PROC( PROCEDURE, GetRegisteredProcedureEx )( PCLASSROOT name_class
 																	, CTEXTSTR returntype
@@ -293,7 +293,7 @@ PROCREG_PROC( LOGICAL, RegisterFunctionExx )( CTEXTSTR root
 #define RegisterFunctionExx(r,nc,pn,rt,proc,args,lib,rn) RegisterFunctionExx(r,nc,pn,rt,proc,args,lib,rn DBG_SRC)
 #define RegisterFunctionEx( root,proc,rt,pn,a) RegisterFunctionExx( root,NULL,pn,rt,(PROCEDURE)(proc),a,NULL,NULL )
 #ifndef TARGETNAME 
-#define TARGETNAME "sack"
+#define TARGETNAME WIDE("sack")
 #endif
 #define RegisterFunction( nc,proc,rt,pn,a) RegisterFunctionExx( (PCLASSROOT)NULL,nc,pn,rt,(PROCEDURE)(proc),a,TARGETNAME,NULL )
 
@@ -401,7 +401,7 @@ PROCREG_PROC( int, ReleaseRegisteredFunctionEx )( PCLASSROOT root
 	PRELOAD( paste(Register##name##Button,line) ) {  \
 	SimpleRegisterMethod( task WIDE("/") classtype, paste(name,line)  \
 	, _WIDE(#returntype), methodname, _WIDE(#argtypes) ); \
-   RegisterValue( task "/" classtype "/" methodname, "Description", desc ); \
+   RegisterValue( task WIDE("/") classtype WIDE("/") methodname, "Description", desc ); \
 }                                                                          \
 	static returntype CPROC paste(name,line)
 
@@ -418,7 +418,6 @@ PROCREG_PROC( int, ReleaseRegisteredFunctionEx )( PCLASSROOT root
 
 #define __DefineRegistryMethod(task,name,classtype,classbase,methodname,returntype,argtypes,line)   \
 	___DefineRegistryMethod(task,name,classtype,classbase,methodname,returntype,argtypes,line)
-
 
 #define _DefineRegistryMethod(task,name,classtype,classbase,methodname,returntype,argtypes,line)   \
 	static returntype __DefineRegistryMethod(task,name,classtype,classbase,methodname,returntype,argtypes,line)
@@ -464,12 +463,12 @@ PROCREG_PROC( int, ReleaseRegisteredFunctionEx )( PCLASSROOT root
 				// data in the main application is used... actually we should depreicate the dynamic
 // loading part, and just register the type.
 PROCREG_PROC( void, RegisterAndCreateGlobal )( POINTER *ppGlobal, PTRSZVAL global_size, CTEXTSTR name );
-#define SimpleRegisterAndCreateGlobal( name ) 	RegisterAndCreateGlobal( (POINTER*)&name, sizeof( *name ), #name )
+#define SimpleRegisterAndCreateGlobal( name ) 	RegisterAndCreateGlobal( (POINTER*)&name, sizeof( *name ), WIDE(#name) )
 // Init routine is called, otherwise a 0 filled space is returned.
 // Init routine is passed the pointer to the global and the size of the global block
 // the global data block is zero initialized.
 PROCREG_PROC( void, RegisterAndCreateGlobalWithInit )( POINTER *ppGlobal, PTRSZVAL global_size, CTEXTSTR name, void (CPROC*Init)(POINTER,PTRSZVAL) );
-#define SimpleRegisterAndCreateGlobalWithInit( name,init ) 	RegisterAndCreateGlobalWithInit( (POINTER*)&name, sizeof( *name ), #name, init )
+#define SimpleRegisterAndCreateGlobalWithInit( name,init ) 	RegisterAndCreateGlobalWithInit( (POINTER*)&name, sizeof( *name ), WIDE(#name), init )
 
 /* a tree dump will result with dictionary names that may translate automatically. */
 /* This has been exported as a courtesy for StrDup.

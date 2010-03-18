@@ -3,6 +3,9 @@
 
 #if defined( _WIN32 ) || defined( __CYGWIN__ )
 //#ifndef __cplusplus_cli
+#ifdef UNDER_CE
+#define USE_WSA_EVENTS
+#endif
 #include <winsock2.h>
 #include <sack_types.h>
 #ifdef __CYGWIN__

@@ -1,3 +1,4 @@
+#include <stdhdrs.h>
 #include <sharemem.h>
 #include <stdio.h>
 
@@ -17,9 +18,9 @@ typedef struct accumulator_tag *PACCUMULATOR;
 typedef struct accumulator_tag
 {
 	S_64 value;
-   S_64 dec_base; // inversion factor for decimal application...
+	S_64 dec_base; // inversion factor for decimal application...
 	_64 decimal;
-   PVARTEXT pvt_text; // a handle-any-case type text collector...
+	PVARTEXT pvt_text; // a handle-any-case type text collector...
 	struct {
 		_32 bDecimal : 1; // whether or not accumulator has a decimal.
 		_32 bHaveDecimal : 1; // whether decimal has been entered...
@@ -29,8 +30,8 @@ typedef struct accumulator_tag
 	struct accumulator_tag *next;
 	struct accumulator_tag **me;
 	void (*Updated)( PTRSZVAL psv, PACCUMULATOR accum );
-   PTRSZVAL psvUpdated;
-   char name[];
+	PTRSZVAL psvUpdated;
+	TEXTCHAR name[];
 } ACCUMULATOR;
 
 
@@ -69,9 +70,9 @@ void KeyIntoAccumulator( PACCUMULATOR accum, S_32 val, _32 base )
 	*/
 	if( accum->flags.bText )
 	{
-      vtprintf( accum->pvt_text, "%d", val );
+      vtprintf( accum->pvt_text, WIDE( "%d" ), val );
 	}
-   else
+	else
 	{
 		accum->value *= base;
 		accum->value += val;
@@ -84,9 +85,9 @@ void KeyDecimalIntoAccumulator( PACCUMULATOR accum )
 {
 	if( accum->flags.bText )
 	{
-      KeyTextIntoAccumulator( accum, "." );
+      KeyTextIntoAccumulator( accum, WIDE( "." ) );
 	}
-   else if( accum->flags.bDecimal )
+	else if( accum->flags.bDecimal )
 	{
 		if( !accum->flags.bHaveDecimal )
 		{
@@ -106,7 +107,7 @@ void ClearAccumulatorDigit( PACCUMULATOR accum, _32 base )
 {
 	if( accum->flags.bText )
 	{
-      KeyTextIntoAccumulator( accum, "\b" );
+      KeyTextIntoAccumulator( accum, WIDE( "\b" ) );
 	}
 	else
 	{
@@ -138,11 +139,11 @@ PACCUMULATOR AddAcummulator( PACCUMULATOR accum_dest, PACCUMULATOR accum_source 
 		if( accum_source->flags.bText )
 		{
 			PTEXT text = VarTextPeek( accum_source->pvt_text );
-         vtprintf( accum_dest->pvt_text, "%s", GetText( text ) );
+         vtprintf( accum_dest->pvt_text, WIDE( "%s" ), GetText( text ) );
 		}
 		else
 		{
-         vtprintf( accum_dest->pvt_text, "%Ld", accum_source->value );
+         vtprintf( accum_dest->pvt_text, WIDE( "%Ld" ), accum_source->value );
 		}
 	}
 	else
@@ -161,12 +162,12 @@ PACCUMULATOR TransferAccumluator( PACCUMULATOR accum_dest, PACCUMULATOR accum_so
 		if( accum_source->flags.bText )
 		{
 			PTEXT text = VarTextGet( accum_source->pvt_text );
-			vtprintf( accum_dest->pvt_text, "%s", accum_source->pvt_text );
+			vtprintf( accum_dest->pvt_text, WIDE( "%s" ), accum_source->pvt_text );
          Release( text );
 		}
 		else
 		{
-         vtprintf( accum_dest->pvt_text, "%Ld", accum_source->value );
+         vtprintf( accum_dest->pvt_text, WIDE( "%Ld" ), accum_source->value );
 			accum_source->value = 0;
 		}
 	}
@@ -184,7 +185,7 @@ PACCUMULATOR TransferAccumluator( PACCUMULATOR accum_dest, PACCUMULATOR accum_so
 
 int GetAccumulatorText( PACCUMULATOR accum, char *text, int nLen )
 {
-   int len = 0;
+	int len = 0;
 	if( accum->flags.bText )
 	{
 		PTEXT result = VarTextPeek( accum->pvt_text );
@@ -200,7 +201,7 @@ int GetAccumulatorText( PACCUMULATOR accum, char *text, int nLen )
 				  , accum->value % 100 );
 	else
 		len = snprintf( text, nLen, WIDE("%Ld"), accum->value );
-   return len;
+	return len;
 }
 
 PACCUMULATOR GetAccumulator( CTEXTSTR name, _32 flags )
@@ -252,12 +253,13 @@ PACCUMULATOR GetAccumulator( CTEXTSTR name, _32 flags )
 	}
 	if( !accum )
 	{
-		accum = (PACCUMULATOR)HeapAllocate( pHeap, sizeof( ACCUMULATOR ) + strlen( name ) + 1 );
-      strcpy( accum->name, name );
+      int len;
+		accum = (PACCUMULATOR)HeapAllocate( pHeap, ( sizeof( ACCUMULATOR ) + (len = strlen( name ) + 1 ) ) * sizeof( TEXTCHAR ) );
+		StrCpyEx( accum->name, name, len );
 		accum->value = 0;
-      if( flags & ACCUM_DOLLARS )
+		if( flags & ACCUM_DOLLARS )
 			accum->flags.bDollars = 1;
-      else
+		else
 			accum->flags.bDollars = 0;
 		if( flags & ACCUM_DECIMAL )
 			accum->flags.bDecimal = 1;
@@ -266,12 +268,12 @@ PACCUMULATOR GetAccumulator( CTEXTSTR name, _32 flags )
 
 		if( flags & ACCUM_TEXT )
 		{
-         accum->pvt_text = VarTextCreate();
+			accum->pvt_text = VarTextCreate();
 			accum->flags.bText = 1;
 		}
 		else
 		{
-         accum->pvt_text = NULL;
+			accum->pvt_text = NULL;
 			accum->flags.bText = 0;
 		}
 		accum->Updated = NULL;

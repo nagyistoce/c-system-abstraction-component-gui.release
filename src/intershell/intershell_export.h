@@ -134,7 +134,7 @@ INTERSHELL_PROC_PTR( void, InterShell_SetButtonFont )( PMENU_BUTTON button, Font
 // this result can be used for controls that are not really buttons to get the common
 // properties of the font being used for this control...
 INTERSHELL_PROC_PTR( Font*, InterShell_GetCurrentButtonFont )( void );
-INTERSHELL_PROC_PTR( void, InterShell_SetButtonStyle )( PMENU_BUTTON button, char *style );
+INTERSHELL_PROC_PTR( void, InterShell_SetButtonStyle )( PMENU_BUTTON button, TEXTCHAR *style );
 INTERSHELL_PROC_PTR( void, InterShell_SaveCommonButtonParameters )( FILE *file );
 INTERSHELL_PROC_PTR( CTEXTSTR, InterShell_GetSystemName )( void );
 //INTERSHELL_PROC_PTR( void, UpdateButtonEx )( PMENU_BUTTON button, int bEndingEdit );
@@ -209,7 +209,7 @@ INTERSHELL_PROC_PTR( void, GetPageSize )( P_32 width, P_32 height );
 //-----------------------------------------------------
 // layout members which have a position x, y, font, text and color of their own
 // may be created on buttons.  They are displayed below the lense/ridge[up/down] and above the background.
-INTERSHELL_PROC_PTR( void, SetButtonTextField )( PMENU_BUTTON pKey, PTEXT_PLACEMENT pField, char *text );
+INTERSHELL_PROC_PTR( void, SetButtonTextField )( PMENU_BUTTON pKey, PTEXT_PLACEMENT pField, TEXTCHAR *text );
 INTERSHELL_PROC_PTR( PTEXT_PLACEMENT, AddButtonLayout )( PMENU_BUTTON pKey, int x, int y, Font *font, CDATA color, _32 flags );
 
 
@@ -255,7 +255,7 @@ INTERSHELL_PROC_PTR( PCONFIG_HANDLER, InterShell_GetCurrentConfigHandler )( void
 //   other info to save... the method for setting additional configuration methods
 //   is invoked by thisname.
 //   Then end_type_name is the last string which will close the subconfiguration.
-INTERSHELL_PROC_PTR( LOGICAL, BeginSubConfiguration )( char *control_type_name, const char *end_type_name );
+INTERSHELL_PROC_PTR( LOGICAL, BeginSubConfiguration )( TEXTCHAR *control_type_name, const TEXTCHAR *end_type_name );
 INTERSHELL_PROC_PTR( CTEXTSTR, EscapeMenuString )( CTEXTSTR string );
 INTERSHELL_PROC_PTR( PMENU_BUTTON, InterShell_GetCurrentLoadingControl )( void );
 
@@ -329,7 +329,7 @@ INTERSHELL_PROC( void, InterShell_SetButtonFont )( PMENU_BUTTON button, Font *fo
 // THis function returns the font of the current button being edited...
 // this result can be used for controls that are not really buttons to get the common
 // properties of the font being used for this control...
-INTERSHELL_PROC( void, InterShell_SetButtonStyle )( PMENU_BUTTON button, char *style );
+INTERSHELL_PROC( void, InterShell_SetButtonStyle )( PMENU_BUTTON button, TEXTCHAR *style );
 INTERSHELL_PROC( void, InterShell_SaveCommonButtonParameters )( FILE *file );
 INTERSHELL_PROC( CTEXTSTR, InterShell_GetSystemName )( void );
 //INTERSHELL_PROC( void, UpdateButtonEx )( PMENU_BUTTON button, int bEndingEdit );
@@ -403,7 +403,7 @@ INTERSHELL_PROC( void, GetPageSize )( P_32 width, P_32 height );
 //-----------------------------------------------------
 // layout members which have a position x, y, font, text and color of their own
 // may be created on buttons.  They are displayed below the lense/ridge[up/down] and above the background.
-INTERSHELL_PROC( void, SetButtonTextField )( PMENU_BUTTON pKey, PTEXT_PLACEMENT pField, char *text );
+INTERSHELL_PROC( void, SetButtonTextField )( PMENU_BUTTON pKey, PTEXT_PLACEMENT pField, TEXTCHAR *text );
 INTERSHELL_PROC( PTEXT_PLACEMENT, AddButtonLayout )( PMENU_BUTTON pKey, int x, int y, Font *font, CDATA color, _32 flags );
 
 
@@ -447,7 +447,7 @@ INTERSHELL_PROC( PMENU_BUTTON, InterShell_GetCurrentLoadingControl )( void );
 //   other info to save... the method for setting additional configuration methods
 //   is invoked by thisname.
 //   Then end_type_name is the last string which will close the subconfiguration.
-INTERSHELL_PROC( LOGICAL, BeginSubConfiguration )( char *control_type_name, const char *end_type_name );
+INTERSHELL_PROC( LOGICAL, BeginSubConfiguration )( TEXTCHAR *control_type_name, const TEXTCHAR *end_type_name );
 INTERSHELL_PROC( CTEXTSTR, EscapeMenuString )( CTEXTSTR string );
 
 INTERSHELL_PROC( PTRSZVAL,  InterShell_CreateControl )( CTEXTSTR type, int x, int y, int w, int h );

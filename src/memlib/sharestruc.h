@@ -58,7 +58,7 @@ PREFIX_PACKED struct chunk_tag
 	// which is < ( CHUNK_SIZE + nMinAllocate )
 	// real size is then dwSize - dwPad.
    // this is actually where the end of block tag(s) should begin!
-	_BLOCK_MAX_SIZE_TYPE dwSize;  // limited to allocating 4 billion bytes...
+	PTRSZVAL dwSize;  // limited to allocating 4 billion bytes...
 	struct chunk_tag *pPrior;         // save some math backwards...
 	struct memory_block_tag * pRoot;  // pointer to master allocation struct (pMEM)
    DeclareLink( struct chunk_tag );
@@ -72,7 +72,7 @@ typedef PREFIX_PACKED struct chunk_tag CHUNK, *PCHUNK;
 
 struct memory_block_tag
 {
-	_BLOCK_MAX_SIZE_TYPE dwSize;
+	PTRSZVAL dwSize;
    	_32 dwHeapID; // unique value 0xbab1f1ea (baby flea);
 	// lock between multiple processes/threads
 	CRITICALSECTION cs;

@@ -147,7 +147,9 @@ struct NetworkClient
 	LOGICAL        bDraining;    // byte sink functions.... JAB:980202
 	LOGICAL        bDrainExact;  // length does not matter - read until one empty read.
 	int            nDrainLength;
-
+#if defined( USE_WSA_EVENTS )
+   WSAEVENT event;
+#endif
 	CRITICALSECTION csLock;      // per client lock.
 	PTHREAD pWaiting; // Thread which is waiting for a result...
 	PendingBuffer RecvPending, FirstWritePending; // current incoming buffer
@@ -199,6 +201,9 @@ LOCATION struct network_global_data{
 	INDEX udp_protocol;
 	INDEX tcp_protocolv6;
 	INDEX udp_protocolv6;
+#endif
+#if defined( USE_WSA_EVENTS )
+   WSAEVENT event;
 #endif
 }
 *global_network_data; // aka 'g'

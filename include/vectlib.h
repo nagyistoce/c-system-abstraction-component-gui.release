@@ -135,12 +135,12 @@ typedef struct orthoarea_tag {
 MATHLIB_EXPORT P_POINT Invert( P_POINT a );
 //#define Invert( a ) { a[0] = -a[0], a[1]=-a[1], a[2]=-a[2]; }
 
-MATHLIB_EXPORT void PrintVectorEx( char *lpName, PCVECTOR v DBG_PASS );
-#define PrintVector(v) PrintVectorEx( #v, v DBG_SRC )
-MATHLIB_EXPORT void PrintVectorStdEx( char *lpName, VECTOR v DBG_PASS );
-#define PrintVectorStd(v) PrintVectorStd( #v, v DBG_SRC )
-MATHLIB_EXPORT void PrintMatrixEx( char *lpName, MATRIX m DBG_PASS );
-#define PrintMatrix(m) PrintMatrixEx( #m, m DBG_SRC )
+MATHLIB_EXPORT void PrintVectorEx( TEXTCHAR *lpName, PCVECTOR v DBG_PASS );
+#define PrintVector(v) PrintVectorEx( WIDE(#v), v DBG_SRC )
+MATHLIB_EXPORT void PrintVectorStdEx( TEXTCHAR *lpName, VECTOR v DBG_PASS );
+#define PrintVectorStd(v) PrintVectorStd( WIDE(#v), v DBG_SRC )
+MATHLIB_EXPORT void PrintMatrixEx( TEXTCHAR *lpName, MATRIX m DBG_PASS );
+#define PrintMatrix(m) PrintMatrixEx( WIDE(#m), m DBG_SRC )
 
 typedef struct transform_tag *PTRANSFORM, TRANSFORM;
 typedef const TRANSFORM *PCTRANSFORM;

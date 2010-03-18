@@ -13,7 +13,10 @@
 #ifndef FILESYSTEM_UTILS_DEFINED
 #define FILESYSTEM_UTILS_DEFINED
 #include <sack_types.h>
-
+#include <fcntl.h>
+#ifndef _MSC_VER
+#include <io.h>
+#endif
 #if defined( BCC16 )
 #if !defined(__STATIC__)
 #define FILESYS_PROC(type,name) type _far _pascal _export name
@@ -102,6 +105,71 @@ FILESYS_PROC( int, IsPath )( CTEXTSTR path );
 
 FILESYS_PROC( _64, GetFileWriteTime )( CTEXTSTR name ); // last modification time.
 FILESYS_PROC( LOGICAL, SetFileWriteTime)( CTEXTSTR name, _64 filetime ); // last modification time.
+
+//--------------------- Windows-CE File Extra Support ----------
+
+FILESYS_PROC( void, SetDefaultFilePath )( CTEXTSTR path );
+FILESYS_PROC( int, SetGroupFilePath )( CTEXTSTR group, CTEXTSTR path );
+FILESYS_PROC( TEXTSTR, sack_prepend_path )( int group, CTEXTSTR filename );
+
+
+FILESYS_PROC( int, GetFileGroup )( CTEXTSTR groupname, CTEXTSTR default_path );
+
+FILESYS_PROC( _32, GetSizeofFile )( TEXTCHAR *name, P_32 unused );
+FILESYS_PROC( _32, GetFileTimeAndSize )( CTEXTSTR name
+													, LPFILETIME lpCreationTime
+													,  LPFILETIME lpLastAccessTime
+													,  LPFILETIME lpLastWriteTime
+													, int *IsDirectory
+													);
+
+
+// can use 0 as filegroup default - single 'current working directory'
+#define _NO_OLDNAMES
+//#ifdef UNDER_CE
+# ifndef O_RDONLY
+
+
+#define O_RDONLY       0x0000  /* open for reading only */
+#define O_WRONLY       0x0001  /* open for writing only */
+#define O_RDWR         0x0002  /* open for reading and writing */
+#define O_APPEND       0x0008  /* writes done at eof */
+
+#define O_CREAT        0x0100  /* create and open file */
+#define O_TRUNC        0x0200  /* open and truncate */
+#define O_EXCL         0x0400  /* open only if file doesn't already exist */
+
+
+#  ifndef S_IRUSR
+#define S_IRUSR 1
+#define S_IWUSR 2
+#  endif
+//# endif
+#endif
+
+FILESYS_PROC( int, sack_open )( int group, CTEXTSTR filename, int opts, ... );
+FILESYS_PROC( int, sack_creat )( int group, CTEXTSTR file, int opts, ... );
+FILESYS_PROC( int, sack_close )( int file_handle );
+FILESYS_PROC( int, sack_lseek )( int file_handle, int pos, int whence );
+FILESYS_PROC( int, sack_read )( int file_handle, POINTER buffer, int size );
+FILESYS_PROC( int, sack_write )( int file_handle, POINTER buffer, int size );
+
+FILESYS_PROC( FILE*, sack_fopen )( int group, CTEXTSTR filename, CTEXTSTR opts );
+FILESYS_PROC( int, sack_fclose )( FILE *file_file );
+FILESYS_PROC( int, sack_fseek )( FILE *file_file, int pos, int whence );
+FILESYS_PROC( int, sack_fread )( POINTER buffer, int size, int count,FILE *file_file );
+FILESYS_PROC( int, sack_fwrite )( POINTER buffer, int size, int count,FILE *file_file );
+
+FILESYS_PROC( int, sack_unlink )( CTEXTSTR filename );
+FILESYS_PROC( int, sack_rename )( CTEXTSTR file_source, CTEXTSTR new_name );
+
+#define open(a,...) sack_open(0,a,##__VA_ARGS__)
+#define lseek(a,b,c) sack_lseek(a,b,c)
+
+#if UNICODE
+#define fprintf fwprintf
+#define fputs fputws
+#endif
 
 
 #ifdef __LINUX__

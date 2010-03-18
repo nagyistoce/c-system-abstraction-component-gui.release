@@ -70,9 +70,11 @@ typedef struct vidlib_local_tag
 	PLIST ll_keyhooks;
    CRITICALSECTION csList;
 	//HHOOK hKeyHook;
+#ifndef _ARM_
 #ifdef __WINDOWS__
 	BOOL (WINAPI *UpdateLayeredWindow)(HWND,HDC,POINT*,SIZE*,HDC,POINT*,COLORREF,BLENDFUNCTION*,DWORD);
 	BOOL (WINAPI *UpdateLayeredWindowIndirect )(HWND hWnd, const UPDATELAYEREDWINDOWINFO *pULWInfo);
+#endif
 #endif
    _32 last_mouse_update; // last tick the mouse moved.
 } LOCAL;

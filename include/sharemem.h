@@ -60,33 +60,30 @@ namespace memory {
 //#define __mem_ns__ sack::memory::
 #endif
 
-typedef PTRSZVAL _BLOCK_MAX_SIZE_TYPE;
-typedef PTRSZVAL* P_BLOCK_MAX_SIZE_TYPE;
-	
 typedef struct memory_block_tag* PMEM;
 
 // what is an abstract name for the memory mapping handle...
 // where is a filename for the filebacking of the shared memory
-// DigSpace( WIDE("Picture Memory"), WIDE("Picture.mem"), 100000 );
+// DigSpace( WIDE(TEXT( "Picture Memory" )), WIDE(TEXT( "Picture.mem" )), 100000 );
 
 // raw shared file view...
-MEM_PROC( POINTER, OpenSpace )( CTEXTSTR pWhat, CTEXTSTR pWhere, _BLOCK_MAX_SIZE_TYPE *dwSize );
+MEM_PROC( POINTER, OpenSpace )( CTEXTSTR pWhat, CTEXTSTR pWhere, PTRSZVAL *dwSize );
 
 // an option to specify a requested address would be MOST handy...
-//MEM_PROC( POINTER, OpenSpaceEx )( TEXTSTR pWhat, TEXTSTR pWhere, _BLOCK_MAX_SIZE_TYPE address, _BLOCK_MAX_SIZE_TYPE *dwSize );
+//MEM_PROC( POINTER, OpenSpaceEx )( TEXTSTR pWhat, TEXTSTR pWhere, PTRSZVAL address, PTRSZVAL *dwSize );
 MEM_PROC( POINTER, OpenSpaceExx )( CTEXTSTR pWhat, CTEXTSTR pWhere, PTRSZVAL address
-	, P_BLOCK_MAX_SIZE_TYPE dwSize, P_32 bCreated );
+	, PTRSZVAL *dwSize, P_32 bCreated );
 #define OpenSpaceEx( what,where,address,psize) OpenSpaceExx( what,where,address,psize,NULL )
 
 MEM_PROC( void, CloseSpace )( POINTER pMem );
 MEM_PROC( void, CloseSpaceEx )( POINTER pMem, int bFinal );
-MEM_PROC( _BLOCK_MAX_SIZE_TYPE, GetSpaceSize )( POINTER pMem );
+MEM_PROC( PTRSZVAL, GetSpaceSize )( POINTER pMem );
 
 // even if pMem is just a POINTER returned from OpenSpace
 // this will create a valid heap pointer.
 // will result TRUE if a valid heap is present
 // will result FALSE if heap is not able to init (has content)
-MEM_PROC( int, InitHeap)( PMEM pMem, _BLOCK_MAX_SIZE_TYPE dwSize );
+MEM_PROC( int, InitHeap)( PMEM pMem, PTRSZVAL dwSize );
 
 // not sure about this one - perhaps with custom heaps
 // we DEFINATLY need to disallow auto-additions
@@ -102,11 +99,12 @@ MEM_PROC( void, DebugDumpHeapMemFile )( PMEM pHeap, CTEXTSTR pFilename );
 MEM_PROC( void, DebugDumpMemFile )( CTEXTSTR pFilename );
 
 #ifdef GCC
-MEM_PROC( POINTER, HeapAllocateEx )( PMEM pHeap, _BLOCK_MAX_SIZE_TYPE nSize DBG_PASS ) __attribute__((malloc));
-MEM_PROC( POINTER, AllocateEx )( _BLOCK_MAX_SIZE_TYPE nSize DBG_PASS ) __attribute__((malloc));
+MEM_PROC( POINTER, HeapAllocateEx )( PMEM pHeap, PTRSZVAL nSize DBG_PASS ) __attribute__((malloc));
+MEM_PROC( POINTER, AllocateEx )( PTRSZVAL nSize DBG_PASS ) __attribute__((malloc));
 #else
-MEM_PROC( POINTER, HeapAllocateEx )( PMEM pHeap, _BLOCK_MAX_SIZE_TYPE nSize DBG_PASS );
-MEM_PROC( POINTER, AllocateEx )( _BLOCK_MAX_SIZE_TYPE nSize DBG_PASS );
+
+MEM_PROC( POINTER, HeapAllocateEx )( PMEM pHeap, PTRSZVAL nSize DBG_PASS );
+MEM_PROC( POINTER, AllocateEx )( PTRSZVAL nSize DBG_PASS );
 #endif
 
 #define New(type) ((type*)Allocate(sizeof(type)))
@@ -124,9 +122,9 @@ MEM_PROC( POINTER, AllocateEx )( _BLOCK_MAX_SIZE_TYPE nSize DBG_PASS );
 #else
 #define Delete(type,thing) (Release((POINTER)(thing)))
 #endif
-#define HeapAllocate(heap, n) HeapAllocateEx( (heap), (_BLOCK_MAX_SIZE_TYPE)(n) DBG_SRC )
+#define HeapAllocate(heap, n) HeapAllocateEx( (heap), (PTRSZVAL)(n) DBG_SRC )
 #define Allocate( n ) HeapAllocateEx( (PMEM)0, (n) DBG_SRC )
-//MEM_PROC( POINTER, AllocateEx )( _BLOCK_MAX_SIZE_TYPE nSize DBG_PASS );
+//MEM_PROC( POINTER, AllocateEx )( PTRSZVAL nSize DBG_PASS );
 //#define Allocate(n) AllocateEx(n DBG_SRC )
 MEM_PROC( POINTER, GetFirstUsedBlock )( PMEM pHeap );
 
@@ -136,20 +134,20 @@ MEM_PROC( POINTER, ReleaseEx )( POINTER pData DBG_PASS ) ;
 MEM_PROC( POINTER, HoldEx )( POINTER pData DBG_PASS  );
 #define Hold(p) HoldEx(p DBG_SRC )
 
-MEM_PROC( POINTER, HeapReallocateEx )( PMEM pHeap, POINTER source, _BLOCK_MAX_SIZE_TYPE size DBG_PASS );
+MEM_PROC( POINTER, HeapReallocateEx )( PMEM pHeap, POINTER source, PTRSZVAL size DBG_PASS );
 #define HeapReallocate(heap,p,sz) HeapReallocateEx( (heap),(p),(sz) DBG_SRC )
-MEM_PROC( POINTER, ReallocateEx )( POINTER source, _BLOCK_MAX_SIZE_TYPE size DBG_PASS );
+MEM_PROC( POINTER, ReallocateEx )( POINTER source, PTRSZVAL size DBG_PASS );
 #define Reallocate(p,sz) ReallocateEx( (p),(sz) DBG_SRC )
 
-MEM_PROC( POINTER, HeapPreallocateEx )( PMEM pHeap, POINTER source, _BLOCK_MAX_SIZE_TYPE size DBG_PASS );
+MEM_PROC( POINTER, HeapPreallocateEx )( PMEM pHeap, POINTER source, PTRSZVAL size DBG_PASS );
 #define HeapPreallocate(heap,p,sz) HeapPreallocateEx( (heap),(p),(sz) DBG_SRC )
-MEM_PROC( POINTER, PreallocateEx )( POINTER source, _BLOCK_MAX_SIZE_TYPE size DBG_PASS );
+MEM_PROC( POINTER, PreallocateEx )( POINTER source, PTRSZVAL size DBG_PASS );
 #define Preallocate(p,sz) PreallocateEx( (p),(sz) DBG_SRC )
 
 MEM_PROC( POINTER, HeapMoveEx )( PMEM pNewHeap, POINTER source DBG_PASS );
 #define HeapMove(h,s) HeapMoveEx( (h), (s) DBG_SRC )
 
-MEM_PROC( _BLOCK_MAX_SIZE_TYPE, SizeOfMemBlock )( CPOINTER pData );
+MEM_PROC( PTRSZVAL, SizeOfMemBlock )( CPOINTER pData );
 
 MEM_PROC( LOGICAL, Defragment )( POINTER *ppMemory );
 
@@ -178,18 +176,25 @@ MEM_PROC( _32, LockedIncrement )( P_32 p );
 MEM_PROC( _32, LockedDecrement )( P_32 p );
 
 #ifdef __cplusplus
+// like also __if_assembly__
 extern "C" {
 #endif
 
+//#ifdef UNDER_CE
+//#define LockedExchange InterlockedExchange
+//#define MemSet memset
+//#define MemCpy memcpy
+//#else
 MEM_PROC( _32, LockedExchange )( PV_32 p, _32 val );
-MEM_PROC( void, MemSet )( POINTER p, _BLOCK_MAX_SIZE_TYPE n, _BLOCK_MAX_SIZE_TYPE sz );
+MEM_PROC( void, MemSet )( POINTER p, PTRSZVAL n, PTRSZVAL sz );
 #define _memset_ MemSet
-MEM_PROC( void, MemCpy )( POINTER pTo, CPOINTER pFrom, _BLOCK_MAX_SIZE_TYPE sz );
+MEM_PROC( void, MemCpy )( POINTER pTo, CPOINTER pFrom, PTRSZVAL sz );
 #define _memcpy_ MemCpy
-MEM_PROC( int, MemCmp )( CPOINTER pOne, CPOINTER pTwo, _BLOCK_MAX_SIZE_TYPE sz );
+MEM_PROC( int, MemCmp )( CPOINTER pOne, CPOINTER pTwo, PTRSZVAL sz );
+//#endif
 
 #ifdef __cplusplus
-}; // extern "C"
+}; // extern TEXT( "C" )
 #endif
 
 MEM_PROC( int, StrCmp )( CTEXTSTR pOne, CTEXTSTR pTwo );
@@ -197,7 +202,9 @@ MEM_PROC( int, StrCaseCmp )( CTEXTSTR s1, CTEXTSTR s2 );
 MEM_PROC( int, StrCaseCmpEx )( CTEXTSTR s1, CTEXTSTR s2, INDEX maxlen );
 MEM_PROC( CTEXTSTR, StrChr )( CTEXTSTR s1, TEXTCHAR c );
 MEM_PROC( TEXTSTR, StrCpyEx )( TEXTSTR s1, CTEXTSTR s2, int n );
-MEM_PROC( TEXTSTR, StrCpy )( TEXTSTR s1, CTEXTSTR s2 );
+#undef StrCpy
+//MEM_PROC( TEXTSTR, StrCpy )( TEXTSTR s1, CTEXTSTR s2 );
+#define StrCpy(s1,s2) StrCpyEx( s1, s2, sizeof( s1 )/sizeof(TEXTCHAR) )
 MEM_PROC( size_t, StrLen )( CTEXTSTR s );
 MEM_PROC( size_t, CStrLen )( char *s );
 
@@ -285,9 +292,9 @@ inline void operator delete (void * p DBG_PASS )
 //#define deleteEx(file,line) delete(file,line)
 #ifdef USE_SACK_ALLOCER
 inline void * operator new( size_t size DBG_PASS )
-{ return AllocateEx( (_BLOCK_MAX_SIZE_TYPE)size DBG_RELAY ); }
+{ return AllocateEx( (PTRSZVAL)size DBG_RELAY ); }
 static void * operator new[]( size_t size DBG_PASS )
-{ return AllocateEx( (_BLOCK_MAX_SIZE_TYPE)size DBG_RELAY ); }
+{ return AllocateEx( (PTRSZVAL)size DBG_RELAY ); }
 #define new new( DBG_VOIDSRC )
 #define newEx(file,line) new(file,line)
 #endif

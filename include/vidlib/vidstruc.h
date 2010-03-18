@@ -4,8 +4,12 @@
 //#include <vfw.h>
 #include <imglib/imagestruct.h>
 #ifdef __WINDOWS__
+#ifndef _ARM_
 #include <gl\gl.h>         // Header File For The OpenGL32 Library
 #include <gl\glu.h>        // Header File For The GLu32 Library
+#else
+#define __NO_OPENGL__
+#endif
 #endif
 #ifndef PRENDERER
 #define PRENDERER struct HVIDEO_tag *
@@ -29,8 +33,10 @@ typedef struct PBOInfo
 	int index; // increment to flop between pboIds
    int nextIndex;
 #define PBO_COUNT 2
+#ifndef __NO_OPENGL__
 #ifdef __WINDOWS__
 	 GLuint pboIds[PBO_COUNT];           // IDs of PBOs
+#endif
 #endif
 	 Image dest_buffer;
 	 PCDATA raw; // the raw pixels mapped from the card... re-stuffed into an image... which then must be moved to a context.
@@ -42,7 +48,7 @@ typedef struct HVIDEO_tag
 	PKEYDEFINE KeyDefs;
    CRITICALSECTION cs;
 	struct ImageFile_tag *pImage;
-   char *pTitle; // window title... need this if we draw manually anyhow
+   TEXTCHAR *pTitle; // window title... need this if we draw manually anyhow
 #ifdef _WIN32
 	HWND hWndOutput;
    // this is the thread that created the hwndoutput (events get dispatched to this.)
@@ -127,7 +133,7 @@ typedef struct HVIDEO_tag
 		BIT_FIELD event_dispatched : 1;
 		BIT_FIELD bHidden : 1;
 		BIT_FIELD bCaptured : 1;
-		BIT_FIELD bShowing : 1;
+		//BIT_FIELD bShowing : 1;
 		BIT_FIELD bHiding : 1;
 		BIT_FIELD bHidden_while_showing : 1;
 		BIT_FIELD bShown_while_hiding : 1;

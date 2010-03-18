@@ -1,4 +1,5 @@
 
+#include <stdhdrs.h>
 #include <stdio.h>
 #include <logging.h>
 
@@ -15,20 +16,20 @@ FRACTION_PROC( int, sLogFraction )( TEXTCHAR *string, PFRACTION x )
 	if( x->denominator < 0 )
 	{
 		if( x->numerator > -x->denominator )
-			return sprintf( string, WIDE("-%d %d/%d")
+			return snprintf( string, 31, WIDE("-%d %d/%d")
 						, x->numerator / (-x->denominator)
 						, x->numerator % (-x->denominator), -x->denominator );
 		else
-			return sprintf( string, WIDE("-%d/%d"), x->numerator, -x->denominator );
+			return snprintf( string, 31, WIDE("-%d/%d"), x->numerator, -x->denominator );
 	}
 	else
 	{
 		if( x->numerator > x->denominator )
-			return sprintf( string, WIDE("%d %d/%d")
+			return snprintf( string, 31, WIDE("%d %d/%d")
 						, x->numerator / x->denominator
 						, x->numerator % x->denominator, x->denominator );
 		else
-			return sprintf( string, WIDE("%d/%d"), x->numerator, x->denominator );
+			return snprintf( string, 31, WIDE("%d/%d"), x->numerator, x->denominator );
 	}
 }
 
@@ -37,11 +38,11 @@ FRACTION_PROC( int, sLogFraction )( TEXTCHAR *string, PFRACTION x )
 FRACTION_PROC( int, sLogCoords )( TEXTCHAR *string, PCOORDPAIR pcp )
 {
 	TEXTCHAR *start = string;
-	string += sprintf( string, WIDE("(") );
+	string += snprintf( string, 2, WIDE("(") );
 	string += sLogFraction( string, &pcp->x );
-	string += sprintf( string, WIDE(",") );
+	string += snprintf( string, 2, WIDE(",") );
 	string += sLogFraction( string, &pcp->y );
-	string += sprintf( string, WIDE(")") );
+	string += snprintf( string, 2, WIDE(")") );
 	return (int)(string - start);
 }
 
@@ -49,11 +50,11 @@ FRACTION_PROC( void, LogCoords )( PCOORDPAIR pcp )
 {
 	TEXTCHAR buffer[256];
 	TEXTCHAR *string = buffer;
-	string += sprintf( string, WIDE("(") );
+	string += snprintf( string, 2, WIDE("(") );
 	string += sLogFraction( string, &pcp->x );
-	string += sprintf( string, WIDE(",") );
+	string += snprintf( string, 2, WIDE(",") );
 	string += sLogFraction( string, &pcp->y );
-	string += sprintf( string, WIDE(")") );
+	string += snprintf( string, 2, WIDE(")") );
 	Log( buffer );
 }
 //---------------------------------------------------------------------------
