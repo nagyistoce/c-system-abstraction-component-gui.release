@@ -1,0 +1,12 @@
+
+
+MORE_TARGETS=$(SACK_BASE)/include/sqlite3.h
+
+LIBNAME=sqlite3
+SRCS=sqlite3
+CXFLAGS=-DSQLITE_SOURCE
+
+include $(SACK_BASE)/makefiles/makefile.single
+
+$(SACK_BASE)/include/sqlite3.h: sqlite3.h
+	cp $< $@

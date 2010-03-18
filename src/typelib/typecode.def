@@ -1,0 +1,42 @@
+EXPORTS
+	CreateListEx
+	DeleteListEx
+	AddLinkEx
+	SetLinkEx
+	GetLink
+	FindLink
+	DeleteLink
+	ForAllLinks
+
+	CreateDataListEx
+	DeleteDataListEx
+	AddDataItemEx
+	GetDataItem
+            
+	CreateDataStack
+	DeleteDataStackEx
+	PushData
+	PopData
+	PeekData
+	PeekDataEx
+	EmptyDataStack
+                  
+	CreateLinkStackEx
+	DeleteLinkStackEx
+	PushLinkEx
+	PopLink
+	PeekLink
+                  
+	CreateLinkQueueEx
+	DeleteLinkQueueEx
+	EnqueLinkEx
+	DequeLink
+	IsQueueEmpty
+
+   GetFromSetEx
+   DeleteFromSet
+   CountUsedInSet
+   GetLinearSetArray
+   FindInArray
+   DeleteSet
+   ForAllInSet

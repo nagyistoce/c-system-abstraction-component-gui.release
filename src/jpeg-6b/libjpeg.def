@@ -1,0 +1,12 @@
+
+EXPORTS
+	jpeg_std_error
+   jpeg_CreateDecompress
+   jpeg_read_header
+   jpeg_calc_output_dimensions
+   jpeg_start_decompress
+   jpeg_read_scanlines
+   jpeg_finish_decompress
+   jpeg_destroy_decompress
+   jpeg_read_header
+ 	jpeg_resync_to_restart
