@@ -247,65 +247,67 @@ void DoInit( void )
 
 //---------------------------------------------------------------------
 
-void LogElement( TEXTCHAR *leader, PCONFIG_ELEMENT pce )
+void LogElementEx( TEXTCHAR *leader, PCONFIG_ELEMENT pce DBG_PASS)
+#define LogElement(leader,pc) LogElementEx(leader,pc DBG_SRC )
+
 {
     if( !pce )
     {
-        Log( WIDE("Nothing.") );
+        _lprintf(DBG_RELAY)( WIDE("Nothing.") );
         return;
     }
     switch( pce->type )
     {
     case CONFIG_UNKNOWN:
-        Log( WIDE("This thing was never configured?") );
+        _lprintf(DBG_RELAY)( WIDE("This thing was never configured?") );
         break;
     case CONFIG_TEXT:
-        Log2( WIDE("%s text constant: %s"), leader, GetText( pce->data[0].pText ) );
+        _lprintf(DBG_RELAY)( WIDE("%s text constant: %s"), leader, GetText( pce->data[0].pText ) );
         break;
     case CONFIG_BOOLEAN:
-        Log1( WIDE("%s a boolean"), leader );
+        _lprintf(DBG_RELAY)( WIDE("%s a boolean"), leader );
         break;
     case CONFIG_INTEGER:
-        Log1( WIDE("%s integer"), leader );
+        _lprintf(DBG_RELAY)( WIDE("%s integer"), leader );
         break;
     case CONFIG_COLOR:
-        Log1( WIDE("%s color"), leader );
+        _lprintf(DBG_RELAY)( WIDE("%s color"), leader );
         break;
     case CONFIG_BINARY:
-        Log1( WIDE("%s binary"), leader );
+        _lprintf(DBG_RELAY)( WIDE("%s binary"), leader );
         break;
     case CONFIG_FLOAT:
-        Log1( WIDE("%s Floating"), leader );
+        _lprintf(DBG_RELAY)( WIDE("%s Floating"), leader );
         break;
     case CONFIG_FRACTION:
-        Log1( WIDE("%s fraction"), leader );
+        _lprintf(DBG_RELAY)( WIDE("%s fraction"), leader );
         break;
     case CONFIG_SINGLE_WORD:
-        Log1( WIDE("%s a single word"), leader );
+		 _lprintf(DBG_RELAY)( WIDE("%s a single word:%p"), leader, pce->data[0].pWord );
         break;
     case CONFIG_MULTI_WORD:
-        Log1( WIDE("%s a multi word"), leader );
+        _lprintf(DBG_RELAY)( WIDE("%s a multi word"), leader );
         break;
    case CONFIG_PROCEDURE:
-    Log1( WIDE("%s a procedure to call."), leader );
+    _lprintf(DBG_RELAY)( WIDE("%s a procedure to call."), leader );
     break;
    case CONFIG_URL:
-    Log1( WIDE("%s a url?"), leader );
+    _lprintf(DBG_RELAY)( WIDE("%s a url?"), leader );
     break;
    case CONFIG_FILE:
-    Log1( WIDE("%s a filename"), leader );
+    _lprintf(DBG_RELAY)( WIDE("%s a filename"), leader );
     break;
    case CONFIG_PATH:
-    Log1( WIDE("%s a path name"), leader );
+    _lprintf(DBG_RELAY)( WIDE("%s a path name"), leader );
     break;
    case CONFIG_FILEPATH:
-    Log1( WIDE("%s a full path and file name"), leader );
+    _lprintf(DBG_RELAY)( WIDE("%s a full path and file name"), leader );
     break;
    case CONFIG_ADDRESS:
-    Log1( WIDE("%s an address"), leader );
+    _lprintf(DBG_RELAY)( WIDE("%s an address"), leader );
     break;
     default:
-        Log( WIDE("Do not know what this is.") );
+        _lprintf(DBG_RELAY)( WIDE("Do not know what this is.") );
         break;
     }
 }
@@ -1676,33 +1678,33 @@ int IsAddressVar( PCONFIG_ELEMENT pce, PTEXT *start )
 
 int IsURLVar( PCONFIG_ELEMENT pce, PTEXT *start )
 {
-    if( pce->type != CONFIG_URL )
-        return FALSE;
-    return FALSE;
+	if( pce->type != CONFIG_URL )
+		return FALSE;
+	return FALSE;
 }
 
 //---------------------------------------------------------------------
 
 int IsAnyVar( PCONFIG_ELEMENT pce, PTEXT *start )
 {
-    if( !pce || !start )
-    {
-        //Log( WIDE("No pce or no start") );
-        return FALSE;
-    }
-    return( ( IsConstText( pce, start ) ) ||
-			  ( IsBooleanVar( pce, start ) ) ||
-           ( IsBinaryVar( pce, start ) ) ||
-         ( IsIntegerVar( pce, start ) ) ||
-         ( IsFloatVar( pce, start ) ) ||
-          ( IsFractionVar( pce, start ) ) ||
-         ( IsSingleWordVar( pce, start ) ) ||
-       ( IsMultiWordVar( pce, start ) ) ||
-         ( IsPathVar( pce, start ) ) ||
-         ( IsFileVar( pce, start ) ) ||
-         ( IsFilePathVar( pce, start ) ) ||
-         ( IsURLVar( pce, start ) ) ||
-         ( IsColorVar( pce, start ) ) );
+	if( !pce || !start )
+	{
+		//Log( WIDE("No pce or no start") );
+		return FALSE;
+	}
+	return( ( IsConstText( pce, start ) ) ||
+			 ( IsBooleanVar( pce, start ) ) ||
+			 ( IsBinaryVar( pce, start ) ) ||
+			 ( IsIntegerVar( pce, start ) ) ||
+			 ( IsFloatVar( pce, start ) ) ||
+			 ( IsFractionVar( pce, start ) ) ||
+			 ( IsSingleWordVar( pce, start ) ) ||
+			 ( IsMultiWordVar( pce, start ) ) ||
+			 ( IsPathVar( pce, start ) ) ||
+			 ( IsFileVar( pce, start ) ) ||
+			 ( IsFilePathVar( pce, start ) ) ||
+			 ( IsURLVar( pce, start ) ) ||
+			 ( IsColorVar( pce, start ) ) );
 }
 
 //---------------------------------------------------------------------
@@ -1716,17 +1718,17 @@ void DoProcedure( PTRSZVAL *ppsvUser, PCONFIG_TEST Check )
 	PCONFIG_ELEMENT pce = NULL;
 	va_args parampack;
 #ifdef __WATCOMC__
-    va_args save_parampack;
+	va_args save_parampack;
 #endif
-    init_args( parampack );
-    LIST_FORALL( Check->pVarElementList, idx, PCONFIG_ELEMENT, pce )
-    {
-        if( pce->type == CONFIG_PROCEDURE )
-        {
-            if( pce->data[0].Process)
-            {
+	init_args( parampack );
+	LIST_FORALL( Check->pVarElementList, idx, PCONFIG_ELEMENT, pce )
+	{
+		if( pce->type == CONFIG_PROCEDURE )
+		{
+			if( pce->data[0].Process)
+			{
 #ifdef NEED_ASSEMBLY_CALLER
-                CallProcedure( ppsvUser, pce );
+				CallProcedure( ppsvUser, pce );
 #else
 				PCONFIG_ELEMENT pcePush = pce->prior;
 				// push arguments in reverse order...
@@ -1734,22 +1736,21 @@ void DoProcedure( PTRSZVAL *ppsvUser, PCONFIG_TEST Check )
 				while( pcePush )
 				{
 #ifdef FULL_TRACE
-                    Log( WIDE("To push...") );
-						  LogElement( WIDE("pushing"), pcePush );
+					LogElement( WIDE("pushing"), pcePush );
 #endif
 					switch( pcePush->type )
-                    {
-                    case CONFIG_TEXT:
-							  break;
+					{
+					case CONFIG_TEXT:
+						break;
 					case CONFIG_BINARY:
-                       PushArgument( parampack, POINTER, pcePush->data[0].binary.data );
-                       PushArgument( parampack, _32, pcePush->data[0].binary.length );
-                       break;
-                    case CONFIG_BOOLEAN:
-                        {
-                            LOGICAL val = pcePush->data[0].truefalse.bTrue;
+						PushArgument( parampack, POINTER, pcePush->data[0].binary.data );
+						PushArgument( parampack, _32, pcePush->data[0].binary.length );
+						break;
+					case CONFIG_BOOLEAN:
+						{
+							LOGICAL val = pcePush->data[0].truefalse.bTrue;
 							PushArgument( parampack, LOGICAL, val );
-                        }
+						}
 						break;
 					case CONFIG_INTEGER:
 						PushArgument( parampack, S_64, pcePush->data[0].integer_number );
@@ -1771,39 +1772,39 @@ void DoProcedure( PTRSZVAL *ppsvUser, PCONFIG_TEST Check )
 						PushArgument( parampack, CTEXTSTR, pcePush->data[0].multiword.pWords );
 						break;
 					default:
-                       break;
-                    }
-                    //Log1( WIDE("Total args are now: %d"), argsize );
-                    pcePush = pcePush->prior;
-					}
-// should really be #ifdef __IDIOTS_WROTE_THIS_COMPILER__
+						break;
+						  }
+					//Log1( WIDE("Total args are now: %d"), argsize );
+					pcePush = pcePush->prior;
+				}
+				// should really be #ifdef __IDIOTS_WROTE_THIS_COMPILER__
 #ifdef __WATCOMC__
-                save_parampack = parampack;
-					 (*ppsvUser) = pce->data[0].Process( *ppsvUser, pass_args(parampack) );
-                parampack = save_parampack;
+				save_parampack = parampack;
+				(*ppsvUser) = pce->data[0].Process( *ppsvUser, pass_args(parampack) );
+				parampack = save_parampack;
 #else
-					 (*ppsvUser) = pce->data[0].Process( *ppsvUser, pass_args(parampack) );
+				(*ppsvUser) = pce->data[0].Process( *ppsvUser, pass_args(parampack) );
 #endif
-					 PopArguments( parampack );
+				PopArguments( parampack );
 #endif
-                break; // done, end of list, please leave and do not iterate further!
-            }
-        }
-        else
+				break; // done, end of list, please leave and do not iterate further!
+			}
+		}
+		else
 		{
 			switch( pce->type )
 			{
 			case CONFIG_MULTI_WORD:
 			case CONFIG_SINGLE_WORD:
-              // null content ?
-				  break;
+				// null content ?
+				break;
 			default:
-				  // actually this probably means that there was no content to complete
-              // the match, and NULL is not a valid responce to data...
-				  Log( WIDE("Multiple options here for what to do at end of line?") );
+				// actually this probably means that there was no content to complete
+				// the match, and NULL is not a valid responce to data...
+				Log( WIDE("Multiple options here for what to do at end of line?") );
 			}
-        }
-    }
+		}
+	}
 }
 
 //---------------------------------------------------------------------

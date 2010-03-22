@@ -29,7 +29,7 @@ string( REGEX REPLACE "(.*)\\.(.*)" "\\1_\\2" TARGET_LABEL ${PROJECT_NAME} )
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL} ${ExtraFlags}"
 )
-target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} ${SACK_PSI_LIBRARY} )
+target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} )
 
 install_default_dest( ${PROJECT_NAME} )
 

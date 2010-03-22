@@ -324,6 +324,9 @@ NETWORK_PROC( PCLIENT, CPPOpenTCPListenerAddrEx )(SOCKADDR *pAddr
 
    // make sure to schedule this socket for events (connect)
 #ifdef USE_WSA_EVENTS
+#ifdef LOG_NOTICES
+	lprintf( "SET GLOBAL EVENT" );
+#endif
 	SetEvent( g.event );
 #endif
 #ifdef __LINUX__
@@ -411,7 +414,7 @@ static PCLIENT InternalTCPClientAddrExx(SOCKADDR *lpAddr,
 #ifdef _WIN32
 #  ifdef USE_WSA_EVENTS
 			pResult->event = WSACreateEvent();
-			WSAEventSelect( pResult->Socket, pResult->event, FD_ACCEPT|FD_CLOSE );
+			WSAEventSelect( pResult->Socket, pResult->event, FD_READ|FD_WRITE|FD_CONNECT|FD_CLOSE );
 #  else
 			if( WSAAsyncSelect( pResult->Socket,g.ghWndNetwork,SOCKMSG_TCP,
                                 FD_READ|FD_WRITE|FD_CLOSE|FD_CONNECT) )
@@ -488,6 +491,9 @@ static PCLIENT InternalTCPClientAddrExx(SOCKADDR *lpAddr,
 
 				// socket should now get scheduled for events, after unlocking it?
 #ifdef USE_WSA_EVENTS
+#ifdef LOG_NOTICES
+				lprintf( "SET GLOBAL EVENT" );
+#endif
 				SetEvent( g.event );
 #endif
 #ifdef __UNIX__
@@ -1134,6 +1140,9 @@ int TCPWriteEx(PCLIENT pc DBG_PASS)
 					 {
 						 pc->dwFlags |= CF_WRITEPENDING;
 #ifdef USE_WSA_EVENTS
+#ifdef LOG_NOTICES
+						 lprintf( "SET GLOBAL EVENT" );
+#endif
 						 SetEvent( g.event );
 #endif
 #ifdef __UNIX__

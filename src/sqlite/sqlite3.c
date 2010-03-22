@@ -23,7 +23,12 @@
 # define SQLITE_PRIVATE static
 #endif
 #ifndef SQLITE_API
-# define SQLITE_API
+#include <stdhdrs.h>
+#  ifdef SQLITE_SOURCE
+#    define SQLITE_API EXPORT_METHOD
+#  else
+#    define SQLITE_API IMPORT_METHOD
+#  endif
 #endif
 /************** Begin file sqliteInt.h ***************************************/
 /*

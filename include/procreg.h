@@ -15,18 +15,11 @@
 #define PROCEDURE_REGISTRY_LIBRARY_DEFINED
 #include <sack_types.h>
 #include <deadstart.h>
-#ifdef BCC16
-#ifdef PROCREG_SOURCE
-#define PROCREG_PROC(type,name) type STDPROC _export name
-#else
-#define PROCREG_PROC(type,name) type STDPROC name
-#endif
-#else
+
 #ifdef PROCREG_SOURCE
 #define PROCREG_PROC(type,name) EXPORT_METHOD type CPROC name
 #else
 #define PROCREG_PROC(type,name) IMPORT_METHOD type CPROC name
-#endif
 #endif
 
 

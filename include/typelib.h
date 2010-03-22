@@ -7,13 +7,6 @@
 
 SACK_CONTAINER_NAMESPACE
 
-#ifdef BCC16
-#ifdef _TYPELIBRARY_SOURCE
-#define TYPELIB_PROC(type,name) type STDPROC _export name
-#else
-#define TYPELIB_PROC(type,name) extern type STDPROC name
-#endif
-#else
 #  if defined( _TYPELIBRARY_SOURCE_STEAL )
 #    define TYPELIB_PROC(type,name) type CPROC name
 #  elif defined( _TYPELIBRARY_SOURCE )
@@ -21,7 +14,6 @@ SACK_CONTAINER_NAMESPACE
 #  else
 #    define TYPELIB_PROC(type,name) IMPORT_METHOD type CPROC name
 #  endif
-#endif
 
 // These were designated for basic content containers...
 // original implementation basically just used TEXT

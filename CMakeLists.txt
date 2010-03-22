@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
 
-set( CMAKE_C_COMPILER_WORKS 1 )
-set( CMAKE_CXX_COMPILER_WORKS 1 )
-
 #set( CMAKE_VERBOSE_MAKEFILE  1 )
 #message( ${CMAKE_GENERATOR} )
 
@@ -58,6 +55,7 @@ endif()
 SET(VLC_PATH "c:/tools/vlc-1.0.5" CACHE STRING "Base Path of VLC Installation 1.0.0 and less than 1.1.0" )
 
 SET(BUILD_ELTANIN_ROOT "../eltanin2/BingoUnified" CACHE STRING "If Specified, hook into eltanin build CmakeLists" )
+SET(BUILD_ALTANIK_ROOT "../altanik" CACHE STRING "If Specified, hook into eltanin build CmakeLists" )
 
 if ( UNIX )
         set( USE_INTERNAL_STANDARDLIBS 0 )
@@ -96,18 +94,23 @@ OPTION( USE_ODBC "Use Odbc" 1 )
 OPTION( USE_OPTIONS "Use Option Code all internal option usage (and don't include option code)" 1 )
 OPTION( USING_OLD_MINGW "MinGW Has NO UpdateLayeredWindow" ${MINGW} )
 OPTION( USE_SQLITE "Use SQLITE (also links static internal)" 1 )
+OPTION( USE_SQLITE_EXTERNAL "Use SQLITE (build as external module)" 0 )
+
 OPTION( __NO_GUI__ "No GUI or image parts" 0 )
 OPTION( NEED_JPEG "Build internal jpeg lib (with suitable exports to link against)" ${USE_INTERNAL_STANDARDLIBS} )
 OPTION( NEED_PNG "Build internal png lib (with suitable exports to link against)" ${USE_INTERNAL_STANDARDLIBS} )
 OPTION( NEED_FREETYPE "Build internal freetype lib (with suitable exports to link against)" ${USE_INTERNAL_STANDARDLIBS} )
 OPTION( NEED_ZLIB "Build internal zlib lib (with suitable exports to link against)" ${USE_INTERNAL_STANDARDLIBS} )
 OPTION( BUILD_ELTANIN "Hook into building eltanin tree" OFF )
+OPTION( BUILD_ALTANIK "Hook into building altanik tree" OFF )
 OPTION( __WINDOWS_ARM_CE__ "Build for windows CE 5.0 ARM" 0 )
 
 OPTION( BUILD_MONOLITHIC "Build one giant library" 1 )
 
 
 if( __ARM__ OR __BUILD_ARM_CE__ )
+set( CMAKE_C_COMPILER_WORKS 1 )
+set( CMAKE_CXX_COMPILER_WORKS 1 )
 add_definitions( -D_WIN32_WCE=0x501 -DUNDER_CE -DWINCE -D_WINDOWS -DARM -D_ARM_ -DWIN32_PLATFORM_WFSP -D_UNICODE -DUNICODE -DPOCKETPC2003_UI_MODEL -DWIN32 )
 else( )
   if( MSVC )
@@ -131,10 +134,12 @@ set( ODBC_SOURCES
 )
 
  if( USE_ODBC )
-add_definitions( 
-  -DUSE_ODBC
-)
+add_definitions( -DUSE_ODBC )
+   if( WIN32 )
 LINK_LIBRARIES( odbc32 )
+   else()
+LINK_LIBRARIES( odbc )
+   endif()
  endif( USE_ODBC )
 
  if( USE_OPTIONS )
@@ -145,20 +150,21 @@ SET( OPTION_SOURCE
    src/SQLlib/optlib/optionutil_new.c
    )
  else( USE_OPTIONS )
-add_definitions( 
-  -D__NO_OPTIONS__
-)
+add_definitions( -D__NO_OPTIONS__ )
  endif( USE_OPTIONS )
 
  if( USE_SQLITE )
-SET(SQLITE_SOURCES
-   src/sqlite/sqlite3.c
-   )
-add_definitions( 
-  -DUSE_SQLITE
-)
-
- set( ExtraFlags "${ExtraFlags} -DSQLITE_SOURCE" )
+  SET(SQLITE_SOURCES   src/sqlite/sqlite3.c src/sqlite/sqlite_interface.c  )
+  add_definitions( -DUSE_SQLITE )
+  
+  if( NOT USE_SQLITE_EXTERNAL )
+   # setup to include sqlite in the core libraries...
+   set( BAG_SQLITE_SOURCES ${SQLITE_SOURCES} )
+   set( ExtraFlags "${ExtraFlags} -DSQLITE_SOURCE" )
+  else()
+   set( ExtraFlags "${ExtraFlags} -DUSE_SQLITE_INTERFACE" )
+  endif()
+  
  endif(USE_SQLITE)
 
 else( USE_ODBC OR USE_SQLITE )
@@ -170,8 +176,9 @@ add_definitions(
 endif( USE_ODBC OR USE_SQLITE )
 
 # this is where external image libraries are added for windows native builds
+if( NEED_JPEG OR NEED_PNG OR NEED_FREETYPE )
 include( Externals.cmake )
-
+endif()
 
 if( NOT C++ )
   if( ${CMAKE_COMPILER_IS_GNUCC} ) 
@@ -404,7 +411,7 @@ add_library( sack_bag SHARED
   ${FIRST_GCC_LIBRARY_SOURCE} 
     ${BASE_SOURCES} 
     ${ODBC_SOURCES}
-    ${SQLITE_SOURCES}
+    ${BAG_SQLITE_SOURCES}
     ${IMAGE_SOURCES} 
     ${VIDLIB_SOURCES} 
     ${PSI_SOURCES} 
@@ -437,6 +444,17 @@ target_link_libraries( sack_bag wsock32 ws2_32 opengl32 winmm iphlpapi)
 endif()
 install_default_dest( sack_bag )
 
+if( NOT NEED_PNG ) 
+  target_link_libraries( sack_bag png )
+endif() 
+if( NOT NEED_JPEG ) 
+  target_link_libraries( sack_bag jpeg   )
+endif() 
+if( NOT NEED_FREETYPE )
+  target_link_libraries( sack_bag  freetype  )
+  target_link_libraries( sack_bag  freetype  )
+endif()
+
 
 #------------
 else( BUILD_MONOLITHIC )
@@ -446,7 +464,7 @@ add_library( bag SHARED
   ${FIRST_GCC_LIBRARY_SOURCE} 
     ${BASE_SOURCES} 
     ${ODBC_SOURCES}
-    ${SQLITE_SOURCES}
+    ${BAG_SQLITE_SOURCES}
   ${LAST_GCC_LIBRARY_SOURCE}  
 )
 SET_TARGET_PROPERTIES(bag PROPERTIES 
@@ -467,10 +485,12 @@ target_link_libraries( bag ws2 mmtimer iphlpapi coredll corelibc.lib )
 else()
 target_link_libraries( bag wsock32 ws2_32 opengl32 winmm iphlpapi)
 endif()
-set( SACK_LIBRARY bag bag.psi bag.image bag.video bag.externals )
+set( SACK_LIBRARY bag bag.psi bag.image bag.video )
 
 ###########
 
+if( NEED_FREETYPE OR NEED_JPEG OR NEED_PNG )
+set( SACK_LIBRARY ${SACK_LIBRARY} bag.externals )
 add_library( bag.externals SHARED 
     ${JPEG_SOURCE}
     ${ZLIB_SOURCE}
@@ -478,32 +498,45 @@ add_library( bag.externals SHARED
     ${FREETYPE_SOURCE}
 )
 SET_TARGET_PROPERTIES(bag.externals PROPERTIES
-                  COMPILE_FLAGS  "-DTARGET_LABEL=bag_externals ${ExternalExtraFlags}"
+                  COMPILE_FLAGS  "-DTARGET_LABEL=bag_externals ${ExternalExtraFlags} -DBAG_EXTERNALS -DPNG_INTERNAL"
 )
 target_link_libraries( bag.externals bag )
-
+set( EXTERNALS bag.externals )
+endif()
 ###########
 
-add_library( bag.image SHARED ${IMAGE_SOURCES} )
+add_library( bag.image SHARED 
+  ${FIRST_GCC_LIBRARY_SOURCE} 
+  ${IMAGE_SOURCES} 
+  ${LAST_GCC_LIBRARY_SOURCE} 
+)
 SET_TARGET_PROPERTIES(bag.image PROPERTIES
                   COMPILE_FLAGS  "-DTARGET_LABEL=bag_image"
 )
-target_link_libraries( bag.image bag bag.externals )
+target_link_libraries( bag.image bag ${EXTERNALS} )
 set( SACK_IMAGE_LIBRARY bag.video )
 
 ###########
 
-add_library( bag.video SHARED ${VIDLIB_SOURCES} )
+add_library( bag.video SHARED 
+  ${FIRST_GCC_LIBRARY_SOURCE} 
+  ${VIDLIB_SOURCES} 
+  ${LAST_GCC_LIBRARY_SOURCE} 
+)
 SET_TARGET_PROPERTIES(bag.video PROPERTIES
                   DEFINE_SYMBOL VIDEO_LIBRARY_SOURCE
                   COMPILE_FLAGS  "-DTARGET_LABEL=bag_video -DRENDER_LIBRARY_SOURCE ${ExtraRenderFlags}"
 )
-target_link_libraries( bag.video bag.image bag )
+target_link_libraries( bag.video bag.image bag ${EXTERNALS} )
 set( SACK_VIDEO_LIBRARY bag.video )
 
 ###########
 
-add_library( bag.psi SHARED ${PSI_SOURCES} )
+add_library( bag.psi SHARED 
+  ${FIRST_GCC_LIBRARY_SOURCE} 
+  ${PSI_SOURCES} 
+  ${LAST_GCC_LIBRARY_SOURCE} 
+      )
 SET_TARGET_PROPERTIES(bag.psi PROPERTIES
                   DEFINE_SYMBOL PSI_SOURCE
                   COMPILE_FLAGS  "-DTARGET_LABEL=bag_psi ${ExtraFlags} -DSOURCE_PSI2 -DSYSTRAY_LIBRARAY -DFORCE_NO_INTERFACE"
@@ -511,7 +544,18 @@ SET_TARGET_PROPERTIES(bag.psi PROPERTIES
 target_link_libraries( bag.psi bag.video bag.image bag )
 set( SACK_PSI_LIBRARY bag.psi )
 
-install_default_dest( bag bag.image bag.video bag.psi bag.externals )
+install_default_dest( bag bag.image bag.video bag.psi ${EXTERNALS} )
+
+if( NOT NEED_PNG ) 
+  target_link_libraries( bag.image png )
+endif() 
+if( NOT NEED_JPEG ) 
+  target_link_libraries( bag.image jpeg   )
+endif() 
+if( NOT NEED_FREETYPE )
+  target_link_libraries( bag.image  freetype  )
+  target_link_libraries( bag.psi  freetype  )
+endif()
 
 endif( BUILD_MONOLITHIC )
 
@@ -519,25 +563,31 @@ endif( BUILD_MONOLITHIC )
 # this SACK_CORE_BUILD is for building before we get 'installed' some of the header locations get moved.
 add_definitions( -DSACK_CORE_BUILD )
 
-#SET_TARGET_PROPERTIES( bag properties 
 add_definitions( -D__OBSCURE_STREAM_INTERNALS )
 
-if( NOT NEED_PNG ) 
-  target_link_libraries( ${SACK_LIBRARY} png )
-endif() 
-if( NOT NEED_JPEG ) 
-target_link_libraries( ${SACK_LIBRARY} jpeg   )
-endif() 
-if( NOT NEED_FREETYPE )
-target_link_libraries( ${SACK_LIBRARY} freetype  )
-endif()
+
+  if( USE_SQLITE_EXTERNAL )
+   set( ExtraFlags "${ExtraFlags} -DUSE_SQLITE_INTERFACE" )
+   add_library( bag.sqlite3.external SHARED 
+      ${FIRST_GCC_LIBRARY_SOURCE} 
+      ${SQLITE_SOURCES}
+      ${LAST_GCC_LIBRARY_SOURCE} )
+   # required link back to bag for register interface
+   target_link_libraries( bag.sqlite3.external bag )
+   install_default_dest( bag.sqlite3.external )
+   SET_TARGET_PROPERTIES( bag.sqlite3.external PROPERTIES 
+                  COMPILE_FLAGS  "-DTARGET_LABEL=bag_sqlite3 -DSQLITE_SOURCE"
+                  SUFFIX ""
+                  PREFIX ""
+   )
+   
+  endif()
 
 
-if( NOT SACK_ONLY OR BUILD_INTERSHELL )
-add_subdirectory( src/intershell )
-if( USE_OPTIONS )
-add_subdirectory( src/SQLlib/optlib/editoption )
-endif( USE_OPTIONS )
+if( NOT SACK_ONLY )
+ if( BUILD_INTERSHELL )
+  add_subdirectory( src/intershell )
+ endif( BUILD_INTERSHELL )
 
 # parts of SDK ...
 add_subdirectory( include )
@@ -547,12 +597,22 @@ add_subdirectory( data )
 # includes some testdata in tstdisplay...
 # the test programs do not have install targets, but they will end up building...
 add_subdirectory( src/msgsvr/testdisplay )
+add_subdirectory( src/bench/mem )
+
+endif( NOT SACK_ONLY )
+
+if( USE_OPTIONS )
+ add_subdirectory( src/SQLlib/optlib/editoption )
+endif( USE_OPTIONS )
+
 
 if( BUILD_ELTANIN )
 add_subdirectory( ${BUILD_ELTANIN_ROOT} eltanin )
 endif( BUILD_ELTANIN )
+if( BUILD_ALTANIK )
+add_subdirectory( ${BUILD_ALTANIK_ROOT} altanik )
+endif( BUILD_ALTANIK )
 
-endif()
 
 
 set( CMAKE_C_STANDARD_LIBRARIES_INIT "" )

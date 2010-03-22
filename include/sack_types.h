@@ -9,6 +9,12 @@
 #define _WIN32_WINNT 0x501
 #endif
 
+#ifndef WIN32
+#ifdef _WIN32
+#define WIN32 _WIN32
+#endif
+#endif
+
 // force windows on __MSVC
 #  ifndef __WINDOWS__
 #    define __WINDOWS__
@@ -76,6 +82,7 @@ using namespace System;
 #define CONSTRUCT_SOURCE
 #define PROCREG_SOURCE
 #define SQLPROXY_LIBRARY_SOURCE
+#define TYPELIB_SOURCE
 
 #  ifndef __NO_SQL__
 #    ifndef __NO_OPTIONS__
@@ -236,11 +243,6 @@ using namespace System;
 
 #define my_offsetof( ppstruc, member ) ((PTRSZVAL)&((*ppstruc)->member)) - ((PTRSZVAL)(*ppstruc))
 
-#ifndef WIN32
-#ifdef _WIN32
-#define WIN32 _WIN32
-#endif
-#endif
 
 // okay move this out, tired of recompiling the world... only those things that use
 // deadstart will include PRELOAD() functionality (for now)
@@ -375,11 +377,12 @@ typedef int pid_t;
 #define STDCALL // for IsBadCodePtr which isn't a linux function...
 #endif
 #ifndef WINAPI
-//#define WINAPI
+#define WINAPI __stdcall
 #endif
 #ifndef PASCAL
 //#define PASCAL
 #endif
+#define WINPROC(type,name)   type WINAPI name
 #define CALLBACKPROC( type, name ) type name
 #define DYNAMIC_EXPORT
 #define DYNAMIC_IMPORT extern
@@ -436,6 +439,10 @@ typedef int pid_t;
 #define TOCHR(n) #n[0]
 #define TOSTR(n) WIDE(#n)
 #define STRSYM(n) TOSTR(n)
+
+#define _WIDE__FILE__(n) WIDE(n)
+#define WIDE__FILE__ _WIDE__FILE__(__FILE__)
+
 #define FILELINE  TEXT(__FILE__) WIDE("(" ) TEXT(STRSYM(__LINE__))WIDE(" : " ))
 #if defined( _MSC_VER ) || defined( __PPCCPP__ )
 #define pragnote(msg) message( FILELINE msg )

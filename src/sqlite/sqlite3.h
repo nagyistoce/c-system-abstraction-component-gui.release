@@ -1,24 +1,10 @@
 #include <sack_types.h>
 
-# if !defined(__STATIC__) && !defined(__UNIX__)
-#  ifdef SQLITE_SOURCE
-#define SQLITE_API EXPORT_METHOD
-#   define SQLITE_PROC(type,name) EXPORT_METHOD type name
-#  else
-#define SQLITE_API IMPORT_METHOD
-#   define SQLITE_PROC(type,name) IMPORT_METHOD type name
-#  endif
-# else
-#  ifdef SQLITE_SOURCE
-#define SQLITE_API EXPORT_METHOD
-#   define SQLITE_PROC(type,name) type name
-#  else
-#define SQLITE_API IMPORT_METHOD
-#   define SQLITE_PROC(type,name) extern type name
-#  endif
-# endif
-
-
+#ifdef SQLITE_SOURCE
+#  define SQLITE_API EXPORT_METHOD
+#else
+#  define SQLITE_API IMPORT_METHOD
+#endif
 
 /*
 ** 2001 September 15

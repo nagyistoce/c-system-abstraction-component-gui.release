@@ -20,6 +20,6 @@ string( REGEX REPLACE "(.*)\\.(.*)" "\\1_\\2" TARGET_LABEL ${PROJECT_NAME} )
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL}"
 )
-target_link_libraries( ${PROJECT_NAME} sack_bag ${VLC_INTERFACE} )
+target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} ${VLC_INTERFACE} )
 install_default_dest( ${PROJECT_NAME} )
 

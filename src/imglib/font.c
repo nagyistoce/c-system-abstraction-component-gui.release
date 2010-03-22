@@ -595,6 +595,68 @@ IMAGE_PROC( _32, GetStringSizeFontEx )( CTEXTSTR pString, _32 nLen, _32 *width, 
 	return *width;
 }
 
+// used to compute the actual output size
+//
+IMAGE_PROC( _32, GetStringRenderSizeFontEx )( CTEXTSTR pString, _32 nLen, _32 *width, _32 *height, _32 *charheight, PFONT UseFont )
+{
+	_32 _width, max_width, _height;
+   _32 maxheight = 0;
+   PCHARACTER *chars;
+   if( !UseFont )
+		UseFont = &DEFAULTFONT;
+   // a character must be rendered before height can be computed.
+	if( !UseFont->character[0] )
+	{
+		InternalRenderFontCharacter(  NULL, UseFont, *pString );
+	}
+   if( height )
+		*height = UseFont->height;
+	else
+      height = &_height;
+   if( !width )
+		width = &_width;
+	max_width = *width = 0;
+	chars = UseFont->character;
+	if( pString )
+	{
+		while( pString && *pString && nLen-- )
+		{
+			if( *pString == '\n' )
+			{
+            maxheight = 0;
+				*height += UseFont->height;
+				if( *width > max_width )
+					max_width = *width;
+				*width = 0;
+			}
+			else if( !chars[(unsigned)*pString] )
+			{
+				InternalRenderFontCharacter(  NULL, UseFont, *pString );
+			}
+			if( chars[(int)*pString] )
+			{
+				*width += chars[(int)*pString]->width;
+				if( (UseFont->baseline - chars[(int)*pString]->descent ) > maxheight )
+					maxheight = UseFont->baseline - chars[(int)*pString]->descent;
+			}
+			pString++;
+		}
+      (*charheight) = (*height);
+      (*height) += maxheight - UseFont->height;
+	}
+	else
+	{
+      if( UseFont->character[0] )
+			*width = UseFont->character[0]->width;
+		else
+         *width = 0;
+	}
+
+	if( max_width > *width )
+		*width = max_width;
+	return *width;
+}
+
 
 IMAGE_PROC( _32, GetMaxStringLengthFont )( _32 width, PFONT UseFont )
 {

@@ -270,9 +270,10 @@ PCLIENT GrabClientEx( PCLIENT pClient DBG_PASS )
 		DumpLists();
 #endif
 #ifdef USE_WSA_EVENTS
-		if( pClient->dwFlags & CF_ACTIVE )
+		//if( pClient->dwFlags & CF_ACTIVE )
 		{
-			SetEvent( g.event );
+         //lprintf( "SET EVENT" );
+			//SetEvent( g.event );
 		}
 #endif
 		pClient->dwFlags &= ~CF_STATEFLAGS;
@@ -319,10 +320,14 @@ PCLIENT AddActive( PCLIENT pClient )
 		if( ( pClient->next = g.ActiveClients ) )
 			g.ActiveClients->me = &pClient->next;
 		g.ActiveClients = pClient;
+		/*
+       // something else will probably happen after getting activated.
 #ifdef USE_WSA_EVENTS
       // an active client needs to be scheduled for select.
+		lprintf( "SET EVENT" );
 		SetEvent( g.event );
 #endif
+      */
 
 	}
 	return pClient;
@@ -660,6 +665,10 @@ void HandleEvent( PCLIENT pClient )
    WSANETWORKEVENTS networkEvents;
 	if( WSAEnumNetworkEvents( pClient->Socket, pClient->event, &networkEvents ) == ERROR_SUCCESS )
 	{
+#ifdef LOG_NOTICES
+		lprintf( "RESET CLIENT EVENT" );
+#endif
+		ResetEvent( pClient->event );
 		{
 			if( pClient->dwFlags & CF_UDP )
 			{
@@ -718,6 +727,51 @@ void HandleEvent( PCLIENT pClient )
 				LeaveCriticalSec( &g.csNetwork );
 				// if an unknown socket issued a
 				// notification - close it - unknown handling of unknown socket.
+				if( networkEvents.lNetworkEvents & FD_CONNECT )
+				{
+					{
+						_16 wError = networkEvents.iErrorCode[FD_CONNECT_BIT];
+#ifdef LOG_NOTICES
+						lprintf( WIDE("FD_CONNECT") );
+#endif
+						if( !wError )
+							pClient->dwFlags |= CF_CONNECTED;
+						else
+						{
+							lprintf( WIDE("Connect error: %d"), wError );
+							pClient->dwFlags |= CF_CONNECTERROR;
+						}
+						if( !( pClient->dwFlags & CF_CONNECTERROR ) )
+						{
+							// since this is done before connecting is clear, tcpwrite
+							// may make notice of previously queued data to
+							// connection opening...
+							//Log( WIDE("Sending any previously queued data.") );
+
+                     // with events, we get a FD_WRITE also... which calls tcpwrite.
+							//TCPWrite( pClient );
+						}
+						pClient->dwFlags &= ~CF_CONNECTING;
+						if( pClient->connect.ThisConnected )
+							if( pClient->dwFlags & CF_CPPCONNECT )
+								pClient->connect.CPPThisConnected( pClient->psvConnect, wError );
+							else
+								pClient->connect.ThisConnected( pClient, wError );
+						//lprintf( WIDE("Returned from application connected callback") );
+						// check to see if the read was queued before the connect
+						// actually completed...
+						if( (pClient->dwFlags & ( CF_ACTIVE | CF_CONNECTED )) ==
+							( CF_ACTIVE | CF_CONNECTED ) )
+						{
+							if( pClient->read.ReadComplete )
+								if( pClient->dwFlags & CF_CPPREAD )
+									pClient->read.CPPReadComplete( pClient->psvRead, NULL, 0 );
+								else
+									pClient->read.ReadComplete( pClient, NULL, 0 );
+						}
+						//lprintf( WIDE("Returned from application inital read complete.") );
+					}
+				}
 				if( networkEvents.lNetworkEvents & FD_READ )
 				{
 #ifdef LOG_NOTICES
@@ -777,49 +831,6 @@ void HandleEvent( PCLIENT pClient )
 					lprintf( WIDE("FD_ACCEPT") );
 #endif
 					AcceptClient(pClient);
-				}
-				if( networkEvents.lNetworkEvents & FD_CONNECT )
-				{
-					{
-						_16 wError = networkEvents.iErrorCode[FD_CONNECT_BIT];
-#ifdef LOG_NOTICES
-						lprintf( WIDE("FD_CONNECT") );
-#endif
-						if( !wError )
-							pClient->dwFlags |= CF_CONNECTED;
-						else
-						{
-							lprintf( WIDE("Connect error: %d"), wError );
-							pClient->dwFlags |= CF_CONNECTERROR;
-						}
-						if( !( pClient->dwFlags & CF_CONNECTERROR ) )
-						{
-							// since this is done before connecting is clear, tcpwrite
-							// may make notice of previously queued data to
-							// connection opening...
-							//Log( WIDE("Sending any previously queued data.") );
-							TCPWrite( pClient );
-						}
-						pClient->dwFlags &= ~CF_CONNECTING;
-						if( pClient->connect.ThisConnected )
-							if( pClient->dwFlags & CF_CPPCONNECT )
-								pClient->connect.CPPThisConnected( pClient->psvConnect, wError );
-							else
-								pClient->connect.ThisConnected( pClient, wError );
-						//lprintf( WIDE("Returned from application connected callback") );
-						// check to see if the read was queued before the connect
-						// actually completed...
-						if( (pClient->dwFlags & ( CF_ACTIVE | CF_CONNECTED )) ==
-							( CF_ACTIVE | CF_CONNECTED ) )
-						{
-							if( pClient->read.ReadComplete )
-								if( pClient->dwFlags & CF_CPPREAD )
-									pClient->read.CPPReadComplete( pClient->psvRead, NULL, 0 );
-								else
-									pClient->read.ReadComplete( pClient, NULL, 0 );
-						}
-						//lprintf( WIDE("Returned from application inital read complete.") );
-					}
 				}
 				//lprintf( WIDE("leaveing event handler...") );
 				//lprintf( WIDE("Left event handler CS.") );
@@ -1223,10 +1234,13 @@ void SetNetworkCallbackWindow( HWND hWnd )
 // this is passed '1' when it is called by idleproc
 int CPROC ProcessNetworkMessages( PTRSZVAL quick_check )
 {
-   //lprintf( WIDE("Check messages.") );
+	//lprintf( WIDE("Check messages.") );
+	if( g.bQuit )
+      return -1;
 	if( IsThisThread( g.pThread ) )
 	{
 #  if defined( USE_WSA_EVENTS )
+      int Count = 0;
 		// this is the thread that should be waiting here.
 		PLIST events = NULL;
       PLIST clients = NULL; // clients are added parallel, so events are in order too.
@@ -1234,7 +1248,8 @@ int CPROC ProcessNetworkMessages( PTRSZVAL quick_check )
       // disallow changing of the lists.
 		EnterCriticalSec( &g.csNetwork );
 		AddLink( &events, g.event );
-      AddLink( &clients, (POINTER)1 ); // cannot add a NULL.
+		AddLink( &clients, (POINTER)1 ); // cannot add a NULL.
+      Count++;
 		for( pc = g.ActiveClients; pc; pc = pc->next )
 		{
          // socket might not be quite opened yet...
@@ -1247,6 +1262,7 @@ int CPROC ProcessNetworkMessages( PTRSZVAL quick_check )
 			{
 				AddLink( &events, pc->event );
             AddLink( &clients, pc );
+				Count++;
 #    ifdef LOG_NOTICES
 				lprintf( "Added for read select %p(%d)", pc, pc->Socket );
 #    endif
@@ -1261,11 +1277,13 @@ int CPROC ProcessNetworkMessages( PTRSZVAL quick_check )
 #    endif
             AddLink( &events, pc->event );
 				AddLink( &clients, pc );
-            continue;
+				Count++;
+				continue;
 			}
 
 			AddLink( &events, pc->event );
 			AddLink( &clients, pc );
+			Count++;
 #    ifdef LOG_NOTICES
 			lprintf( "Added for except event %p(%d)", pc, pc->Socket );
 #    endif
@@ -1278,18 +1296,30 @@ int CPROC ProcessNetworkMessages( PTRSZVAL quick_check )
 		{
          DWORD result;
 			// want to wait here anyhow...
-		result = WSAWaitForMultipleEvents( events->Cnt
+#    ifdef LOG_NOTICES
+			lprintf( "Waiting on %d", Count );
+#    endif
+			result = WSAWaitForMultipleEvents( Count
 														, events->pNode
 														, FALSE
 														, (quick_check)?0:WSA_INFINITE
 														, FALSE
 														);
-         lprintf( WIDE("Result was %d"), result );
+#    ifdef LOG_NOTICES
+			lprintf( WIDE("Event Wait Result was %d"), result );
+#    endif
 			if( result >= WSA_WAIT_EVENT_0 )
 			{
             // if result is _0, then it's the global event, and we just return.
 				if( result > WSA_WAIT_EVENT_0 )
 					HandleEvent( (PCLIENT)GetLink( &clients, result-WSA_WAIT_EVENT_0 ) );
+				else
+				{
+#ifdef LOG_NOTICES
+					lprintf( "RESET GLOBAL EVENT" );
+#endif
+					ResetEvent( g.event );
+				}
 				DeleteList( &clients );
 				DeleteList( &events );
 				return 1;
@@ -1379,12 +1409,12 @@ static PTRSZVAL CPROC NetworkThreadProc( PTHREAD thread )
    // and when unloading should remove these timers.
 	g.uPendingTimer = AddTimer( 5000, PendingTimer, 0 );
 	g.uNetworkPauseTimer = AddTimerEx( 1, 1000, NetworkPauseTimer, 0 );
-   g.event = CreateEvent(NULL,1,FALSE,NULL );
+   g.event = CreateEvent( NULL, 0, FALSE, NULL );
 #  endif
 	while( !g.pThread ) // creator won't pass until bThreadInitComplete is set.
 		Relinquish();
 	bThreadInitComplete = TRUE;
-	while(g.pThread)
+	while(g.pThread && !g.bQuit)
 	{
 
 		if( !ProcessNetworkMessages(0) )
@@ -1810,21 +1840,23 @@ int NetworkQuit(void)
       lprintf( WIDE("Remove active client %p"), g.ActiveClients );
 		InternalRemoveClient( g.ActiveClients );
 	}
+	g.bQuit = TRUE;
 #ifndef __LINUX__
    if( IsWindow( g.ghWndNetwork ) )
 	{
 		// okay forget this... at exit, cannot guarantee that
 		// any other thread other than myself has any rights to do anything.
+#  ifdef LOG_NOTICES
 		lprintf( WIDE( "Post SOCKMSG_CLOSE" ) );
-#ifdef USE_WSA_EVENTS
+#  endif
+#  ifdef USE_WSA_EVENTS
 		SetEvent( g.event );
-#else
+#  else
 		PostMessage( g.ghWndNetwork, SOCKMSG_CLOSE, 0, 0 );
-#endif
+#  endif
       // also remove PCLIENT clients, and all client->pUserData allocated...
    }
 #else
-	g.bQuit = TRUE;
 	//while( g.pThread )
 	//	Sleep(0);
 	// should kill Our thread.... and close any active ockets...
@@ -1835,6 +1867,9 @@ int NetworkQuit(void)
 	{
 		_32 started = GetTickCount() + 500;
 #ifdef USE_WSA_EVENTS
+#ifdef LOG_NOTICES
+		lprintf( "SET GLOBAL EVENT" );
+#endif
 		SetEvent( g.event );
 #endif
 		WakeThread( g.pThread );
@@ -1843,7 +1878,9 @@ int NetworkQuit(void)
 			IdleFor( 20 );
 		if( bNetworkReady )
 		{
+#ifdef LOG_STARTUP_SHUTDOWN
 			lprintf( WIDE( "Network was locked up?  Failed to allow network to exit in half a second (500ms)" ) );
+#endif
 		}
 	}
 

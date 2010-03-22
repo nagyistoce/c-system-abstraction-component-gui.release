@@ -282,7 +282,7 @@ static void CPROC PlayerEvent( const libvlc_event_t *event, void *user )
 
 }
 
-static int CPROC lock( PTRSZVAL psv, void **something )
+static int CPROC lock_frame( PTRSZVAL psv, void **something )
 {
 	struct my_vlc_interface *pmyi = (struct my_vlc_interface*)psv;
    lprintf( "LOCK." );
@@ -498,7 +498,7 @@ static PTRSZVAL CPROC UpdateThread( PTHREAD thread )
 	}
 }
 
-static int CPROC unlock( PTRSZVAL psv )
+static int CPROC unlock_frame( PTRSZVAL psv )
 {
 	struct my_vlc_interface *pmyi = (struct my_vlc_interface*)psv;
 	// in this case, we want to update the control - it's already had its content filled.
@@ -781,8 +781,8 @@ struct my_vlc_interface *CreateInstanceIn( PSI_CONTROL pc, CTEXTSTR url )
 #else
 					  , image->pwidth*4
 #endif
-					  , lock
-					  , unlock
+					  , lock_frame
+					  , unlock_frame
 					  );
 			lprintf( "Creating instance with %s", GetText( VarTextPeek( pvt ) ) );
 			ParseIntoArgs( GetText( VarTextPeek( pvt ) ), &argc, &argv );
@@ -890,8 +890,8 @@ struct my_vlc_interface *CreateInstanceOn( PRENDERER renderer, CTEXTSTR name, LO
 #else
 				  , pmyi->host_image->pwidth*4
 #endif
-				  , lock
-				  , unlock
+				  , lock_frame
+				  , unlock_frame
 				  );
 
       lprintf( "Creating instance with %s", GetText( VarTextPeek( pvt ) ) );

@@ -146,6 +146,8 @@ SQLSTUB_PROC( void, SetSQLLoggingDisable )( PODBC odbc, LOGICAL bDisable );
 SQLSTUB_PROC( int, DoSQLCommandEx )( CTEXTSTR command DBG_PASS);
 #define DoSQLCommand(c) DoSQLCommandEx(c DBG_SRC )
 
+SQLSTUB_PROC( void, SQLCommit )( PODBC odbc );
+
 
 // parameters to this are pairs of "name", type, WIDE("value")
 //  type == 0 - value is text, do not quote

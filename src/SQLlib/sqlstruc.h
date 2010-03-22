@@ -107,6 +107,7 @@ struct odbc_handle_tag{
 		BIT_FIELD  bConnected  : 1;
 		BIT_FIELD  bAccess  : 1; // operate as if talking to an access MDB
 		BIT_FIELD  bSQLite  : 1; // sqllite via sqlite odbc driver...
+		BIT_FIELD  bMySQL : 1;  // for selecting how transactions are done.
 #if defined( USE_SQLITE ) || defined( USE_SQLITE_INTERFACE )
 		BIT_FIELD  bSQLite_native  : 1;
 #endif
@@ -118,12 +119,17 @@ struct odbc_handle_tag{
 		BIT_FIELD bPushed : 1; // pop should work up to this point. just did a push... next collector should be marked.
 		BIT_FIELD  bForceConnection : 1; // same sort of thing as the global flag... but that should just apply to default connection?
 		BIT_FIELD bFailEnvOnDbcFail : 1;
+      // generate begintransaction and commit automatically.
+		BIT_FIELD bAutoTransact : 1;
 	} flags;
+	_32 last_command_tick;
+   _32 commit_timer;
 	PCOLLECT collection;
 	int native; // saved for resulting with native error code...
    PTRSZVAL psvUser; // allow user to associate some data with this.
 };
 
+#ifdef SQLLIB_SOURCE
 typedef struct global_tag
 {
    CRITICALSECTION Init;
@@ -164,47 +170,79 @@ typedef struct global_tag
 	void (CPROC*feedback_handler)(CTEXTSTR message);
    ODBC Option; // a third, well-known DSN used for option library by default.  May be SQLite.
 } GLOBAL;
-
+#endif
 #ifdef USE_SQLITE_INTERFACE
-#error this struct is not filled in...
 struct sqlite_interface
 {
-int (*sqlite3_result_text)();
-int (*sqlite3_user_data)();
-int (*sqlite3_last_insert_rowid)();
-int (*sqlite3_create_function)();
-int (*sqlite3_get_autocommit)();
-int (*sqlite3_open)();
-const char* (*sqlite3_errmsg)();
-int (*sqlite3_finalize)();
-int (*sqlite3_close)();
-int (*sqlite3_prepare_v2)();
-int (*sqlite3_step)();
-int (*sqlite3_column_name)();
-int (*sqlite3_column_text)();
-int (*sqlite3_column_bytes)();
-int (*sqlite3_column_type )();
-int (*sqlite3_column_count)();
+void(*sqlite3_result_text)(sqlite3_context*, const char*, int, void(*)(void*));
+void*(*sqlite3_user_data)(sqlite3_context*);
+sqlite3_int64 (*sqlite3_last_insert_rowid)(sqlite3*);
+int (*sqlite3_create_function)(  sqlite3 *db,
+  const char *zFunctionName,
+  int nArg,
+  int eTextRep,
+  void *pApp,
+  void (*xFunc)(sqlite3_context*,int,sqlite3_value**),
+  void (*xStep)(sqlite3_context*,int,sqlite3_value**),
+  void (*xFinal)(sqlite3_context*)
+);
+int (*sqlite3_get_autocommit)(sqlite3*);
+int (*sqlite3_open)(  const char *filename,   /* Database filename (UTF-8) */
+  sqlite3 **ppDb          /* OUT: SQLite db handle */
+);
+const char* (*sqlite3_errmsg)(sqlite3*);
+int (*sqlite3_finalize)(sqlite3_stmt *);
+int (*sqlite3_close)(sqlite3*);
+int (*sqlite3_prepare_v2)(
+  sqlite3 *db,            
+  const char *zSql,       
+  int nByte,              
+  sqlite3_stmt **ppStmt,  
+  const char **pzTail     );
+int (*sqlite3_step)(sqlite3_stmt *);
+const char* (*sqlite3_column_name)(sqlite3_stmt *pStmt, int col);
+const unsigned char* (*sqlite3_column_text)(sqlite3_stmt *pStmt, int col);
+int (*sqlite3_column_bytes)(sqlite3_stmt *pStmt, int col);
+int (*sqlite3_column_type )(sqlite3_stmt *pStmt, int col);
+int (*sqlite3_column_count)(sqlite3_stmt *pStmt);
+int (*sqlite3_config)(int,...);
+int (*sqlite3_db_config)(sqlite3*, int op, ...);
+
 };
 
-//struct sqlite_interface sqlite_iface;
+#ifdef USES_SQLITE_INTERFACE
+#  ifndef DEFINES_SQLITE_INTERFACE
+extern
+#  endif
+        struct sqlite_interface *sqlite_iface;
+#  ifdef DEFINES_SQLITE_INTERFACE
+PRIORITY_PRELOAD( LoadSQLiteInterface, SQL_PRELOAD_PRIORITY )
+{
+   sqlite_iface = (struct sqlite_interface*)GetInterface( "sqlite3" );
+}
+#  endif
+#endif
 
-#define sqlite3_result_text          sqlite_iface.sqlite3_result_text
-#define sqlite3_user_data            sqlite_iface.sqlite3_user_data
-#define sqlite3_last_insert_rowid    sqlite_iface.sqlite3_last_insert_rowid
-#define sqlite3_create_function      sqlite_iface.sqlite3_create_function
-#define sqlite3_get_autocommit       sqlite_iface.sqlite3_get_autocommit
-#define sqlite3_open                 sqlite_iface.sqlite3_open
-#define sqlite3_errmsg               sqlite_iface.sqlite3_errmsg
-#define sqlite3_finalize             sqlite_iface.sqlite3_finalize
-#define sqlite3_close                sqlite_iface.sqlite3_close
-#define sqlite3_prepare_v2           sqlite_iface.sqlite3_prepare_v2
-#define sqlite3_step                 sqlite_iface.sqlite3_step
-#define sqlite3_column_name          sqlite_iface.sqlite3_column_name
-#define sqlite3_column_text          sqlite_iface.sqlite3_column_text
-#define sqlite3_column_bytes         sqlite_iface.sqlite3_column_bytes
-#define sqlite3_column_type          sqlite_iface.sqlite3_column_type
-#define sqlite3_column_count         sqlite_iface.sqlite3_column_count
+#ifndef BUILDS_INTERFACE
+#define sqlite3_result_text          sqlite_iface->sqlite3_result_text
+#define sqlite3_user_data            sqlite_iface->sqlite3_user_data
+#define sqlite3_last_insert_rowid    sqlite_iface->sqlite3_last_insert_rowid
+#define sqlite3_create_function      sqlite_iface->sqlite3_create_function
+#define sqlite3_get_autocommit       sqlite_iface->sqlite3_get_autocommit
+#define sqlite3_open                 sqlite_iface->sqlite3_open
+#define sqlite3_errmsg               sqlite_iface->sqlite3_errmsg
+#define sqlite3_finalize             sqlite_iface->sqlite3_finalize
+#define sqlite3_close                sqlite_iface->sqlite3_close
+#define sqlite3_prepare_v2           sqlite_iface->sqlite3_prepare_v2
+#define sqlite3_step                 sqlite_iface->sqlite3_step
+#define sqlite3_column_name          sqlite_iface->sqlite3_column_name
+#define sqlite3_column_text          sqlite_iface->sqlite3_column_text
+#define sqlite3_column_bytes         sqlite_iface->sqlite3_column_bytes
+#define sqlite3_column_type          sqlite_iface->sqlite3_column_type
+#define sqlite3_column_count         sqlite_iface->sqlite3_column_count
+#define sqlite3_config         sqlite_iface->sqlite3_config
+#define sqlite3_db_config         sqlite_iface->sqlite3_db_config
+#endif
 
 #endif
 

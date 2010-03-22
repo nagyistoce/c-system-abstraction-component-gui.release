@@ -120,8 +120,10 @@
 // incldue this first so we avoid a conflict.
 // hopefully this comes from sack system?
 #include <system.h>
+#if defined( HAVE_ENVIRONMENT )
 #define getenv(name)       OSALOT_GetEnvironmentVariable(name)
 #define setenv(name,val)   SetEnvironmentVariable(name,val)
+#endif
 #define Relinquish()       Sleep(0)
 //#pragma pragnoteonly("GetFunctionAddress is lazy and has no library cleanup - needs to be a lib func")
 //#define GetFunctionAddress( lib, proc ) GetProcAddress( LoadLibrary( lib ), (proc) )

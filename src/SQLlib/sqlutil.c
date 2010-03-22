@@ -4,6 +4,10 @@
 #include <procreg.h>
 #include <filesys.h>
 #include <system.h>
+#define SQLLIB_SOURCE
+#ifdef USE_SQLITE_INTERFACE
+#define USES_SQLITE_INTERFACE
+#endif
 #include "sqlstruc.h"
 
 SQL_NAMESPACE
@@ -552,8 +556,12 @@ SQLSTUB_PROC( int, SQLCreateTableEx )( PODBC odbc, CTEXTSTR filename, CTEXTSTR t
 		{
 			if( !pathchr( filename ) )
 			{
+#ifndef HAVE_ENVIRONMENT
             CTEXTSTR path = OSALOT_GetEnvironmentVariable( WIDE( "MY_LOAD_PATH" ) );
 				snprintf( sec_file, sizeof( sec_file ), WIDE( "%s/%s" ), path, filename );
+#else
+				snprintf( sec_file, sizeof( sec_file ), WIDE( "%s" ), filename );
+#endif
             Fopen( file, sec_file, WIDE("rt") );
 			}
 		}
@@ -563,7 +571,7 @@ SQLSTUB_PROC( int, SQLCreateTableEx )( PODBC odbc, CTEXTSTR filename, CTEXTSTR t
 			int gathering = FALSE;
 			TEXTCHAR *buf;
 			char fgets_buf[1024];
-			TEXTCHAR cmd[1024];
+         PVARTEXT pvt_cmd = VarTextCreate();
 			int nOfs = 0;
          if( !odbc->flags.bNoLogging )
 				lprintf( WIDE("Opened %s to read for table %s(%s)"), sec_file[0]?sec_file:filename, tablename,templatename );
@@ -629,7 +637,7 @@ SQLSTUB_PROC( int, SQLCreateTableEx )( PODBC odbc, CTEXTSTR filename, CTEXTSTR t
 										 , templatename
 										 , trailer
 										 );
-								StrCpy( buf, line );
+								StrCpyEx( buf, line, 1024 );
 								gathering = TRUE;
 							}
 							else
@@ -640,7 +648,7 @@ SQLSTUB_PROC( int, SQLCreateTableEx )( PODBC odbc, CTEXTSTR filename, CTEXTSTR t
 					}
 					if( gathering )
 					{
-						nOfs += snprintf( cmd + nOfs, sizeof( cmd ) - nOfs, WIDE("%s "), p );
+						nOfs += vtprintf( pvt_cmd, WIDE("%s "), p );
 						if( done )
 						{
 							if( options & CTO_DROP )
@@ -661,9 +669,11 @@ SQLSTUB_PROC( int, SQLCreateTableEx )( PODBC odbc, CTEXTSTR filename, CTEXTSTR t
 							//DebugBreak();
 							{
 								PTABLE table;
-								table = GetFieldsInSQL( cmd , 0 );
+                        PTEXT cmd = VarTextGet( pvt_cmd );
+								table = GetFieldsInSQL( GetText( cmd ), 1 );
 								CheckODBCTable( odbc, table, options );
 								DestroySQLTable( table );
+                        LineRelease( cmd );
 							}
 							break;
 						}
@@ -674,6 +684,7 @@ SQLSTUB_PROC( int, SQLCreateTableEx )( PODBC odbc, CTEXTSTR filename, CTEXTSTR t
 #endif
 			}
 			//lprintf( WIDE("Done with create...") );
+			VarTextDestroy( &pvt_cmd );
 			fclose( file );
 		}
 		else
@@ -1272,7 +1283,7 @@ retry:
 				// all read, but one row at a time is read from the database.
 				if( !retry )
 				{
-					StrCpy( cmd, WIDE("select * from `%s`") );
+					StrCpyEx( cmd, WIDE("select * from `%s`"), 1024 );
 					retry++;
 					goto retry;
 				}

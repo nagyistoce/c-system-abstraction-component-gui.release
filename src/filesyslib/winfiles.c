@@ -1,6 +1,9 @@
 
 #include <stdhdrs.h>
 #include <filesys.h>
+
+//#define DEBUG_FILEOPEN
+
 #ifndef UNDER_CE
 //#include <fcntl.h>
 //#include <io.h>
@@ -90,13 +93,11 @@ void SetDefaultFilePath( CTEXTSTR path )
 
 static TEXTSTR PrependBasePath( int groupid, struct Group *group, CTEXTSTR filename )
 {
-   	TEXTSTR fullname;
+	TEXTSTR fullname;
 	if( !groups )
 	{
-		CTEXTSTR name = GetProgramPath();
-		lprintf( WIDE( "Initial path: %s" ), name );
 #ifdef UNDER_CE
-		SetDefaultFilePath( name );
+		SetDefaultFilePath( GetProgramPath() );
 #else
 		SetDefaultFilePath( OSALOT_GetEnvironmentVariable( "MY_WORK_PATH" ) );
 #endif
@@ -176,10 +177,14 @@ int sack_open( int group, CTEXTSTR filename, int opts, ... )
 							 , NULL );
 		break;
 	}
+#ifdef DEBUG_FILEOPEN
 	lprintf( WIDE( "open %s %p %d" ), file->fullname, handle, opts );
+#endif
 	if( handle == INVALID_HANDLE_VALUE )
 	{
+#ifdef DEBUG_FILEOPEN
 		lprintf( WIDE( "Failed to open file [%s]=[%s]" ), file->name, file->fullname );
+#endif
 		return -1;
 	}
 	AddLink( &file->handles, handle );
@@ -212,12 +217,14 @@ int sack_creat( int group, CTEXTSTR file, int opts, ... )
    return sack_open( group, file, opts | O_CREAT );
 }
 
-int sack_close( int file_handle )
+int sack_close( HANDLE file_handle )
 {
 
 	struct file *file = FindFileByHandle( (HANDLE)file_handle );
 	DeleteLink( &file->handles, (POINTER)file_handle );
-   lprintf( WIDE("Close %s"), file->fullname );
+#ifdef DEBUG_FILEOPEN
+	lprintf( WIDE("Close %s"), file->fullname );
+#endif
    /*
 	Release( file->name );
 	Release( file->fullname );
@@ -229,18 +236,18 @@ int sack_close( int file_handle )
 
 
 
-int sack_lseek( int file_handle, int pos, int whence )
+int sack_lseek( HANDLE file_handle, int pos, int whence )
 {
 	return SetFilePointer((HANDLE)file_handle,pos,NULL,whence);
 }
 
-int sack_read( int file_handle, POINTER buffer, int size )
+int sack_read( HANDLE file_handle, POINTER buffer, int size )
 {
    DWORD dwLastReadResult;
    return (ReadFile( (HANDLE)file_handle, buffer, size, &dwLastReadResult, NULL )?dwLastReadResult:-1 );
 }
 
-int sack_write( int file_handle, POINTER buffer, int size )
+int sack_write( HANDLE file_handle, POINTER buffer, int size )
 {
    DWORD dwLastWrittenResult;
 	return (WriteFile( (HANDLE)file_handle, buffer, size, &dwLastWrittenResult, NULL )?dwLastWrittenResult:-1 );
@@ -309,10 +316,14 @@ FILESYS_PROC( FILE*, sack_fopen )( int group, CTEXTSTR filename, CTEXTSTR opts )
 #endif
 	if( !handle )
 	{
+#ifdef DEBUG_FILEOPEN
 		lprintf( WIDE( "Failed to open file [%s]=[%s]" ), file->name, file->fullname );
+#endif
 		return NULL;
 	}
+#ifdef DEBUG_FILEOPEN
 	lprintf( WIDE( "Fopen %s" ), file->fullname );
+#endif
 	AddLink( &file->files, handle );
 	return handle;
 }
@@ -325,7 +336,9 @@ FILESYS_PROC( int, sack_fclose )( FILE *file_file )
 {
 	struct file *file;
 	file = FindFileByFILE( file_file );
+#ifdef DEBUG_FILEOPEN
 	lprintf( WIDE("Closing %s"), file->fullname );
+#endif
 	DeleteLink( &file->files, file_file );
    /*
 	Release( file->name );
