@@ -304,9 +304,7 @@ typedef int pid_t;
 #define STDPROC
 #define STDCALL _stdcall
 #endif
-#ifndef MAXPATH
-#define MAXPATH MAX_PATH
-#endif
+
 #define far 
 #define huge
 #define near

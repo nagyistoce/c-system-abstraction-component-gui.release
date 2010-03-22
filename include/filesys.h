@@ -13,20 +13,12 @@
 #ifndef FILESYSTEM_UTILS_DEFINED
 #define FILESYSTEM_UTILS_DEFINED
 #include <stdhdrs.h>
-#include <sack_types.h>
+
 #if !defined( UNDER_CE ) ||defined( ELTANIN)
 #include <fcntl.h>
-#ifndef _MSC_VER
 #include <io.h>
 #endif
-#endif
-#if defined( BCC16 )
-#if !defined(__STATIC__)
-#define FILESYS_PROC(type,name) type _far _pascal _export name
-#else
-#define FILESYS_PROC(type,name) type _far _pascal name
-#endif
-#else
+
 #if !defined(__STATIC__) && !defined(__UNIX__)
 #ifdef FILESYSTEM_LIBRARY_SOURCE
 #define FILESYS_PROC(type,name) EXPORT_METHOD type name
@@ -38,7 +30,6 @@
 #define FILESYS_PROC(type,name) type name
 #else
 #define FILESYS_PROC(type,name) extern type name
-#endif
 #endif
 #endif
 
