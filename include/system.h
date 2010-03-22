@@ -84,9 +84,10 @@ SYSTEM_PROC( LOGICAL, StopProgram )( PTASK_INFO task );
 //  PcTextStr is a pointer to strings -
 //   char ** - returns a quoted string if args have spaces (and escape quotes in args?)
 SYSTEM_PROC( TEXTSTR, GetArgsString )( PCTEXTSTR pArgs );
-
 SYSTEM_PROC( _32, GetTaskExitCode )( PTASK_INFO task );
 
+SYSTEM_PROC( CTEXTSTR, GetProgramName )( void );
+SYSTEM_PROC( CTEXTSTR, GetProgramPath )( void );
 
 // HandlePeerOutput is called whenever a peer task has generated output on stdout or stderr
 //   - someday evolution may require processing stdout and stderr with different event handlers

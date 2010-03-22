@@ -257,11 +257,7 @@ PTRSZVAL CPROC ScanFile( PTRSZVAL psv, INDEX idx, POINTER *item )
 		System::IO::FileInfo ^info= gcnew System::IO::FileInfo( filemonname );
 		//dwSize == System::IO::FileInfo::Length::get();
 #else
-#ifdef WIN32
 		FILETIME lastmodified;
-#else
-#error need to use stat here, but we lost the code.
-#endif
 #endif
 		filemon->flags.bScanned = TRUE;
 		if( filemon->flags.bDirectory )

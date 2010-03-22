@@ -114,8 +114,6 @@ typedef INDEX (CPROC*RealLogFunction)(CTEXTSTR format,...)
 	;
 SYSLOG_PROC( RealVLogFunction, _vxlprintf )( _32 level DBG_PASS );
 SYSLOG_PROC( RealLogFunction, _xlprintf )( _32 level DBG_PASS );
-SYSLOG_PROC( CTEXTSTR, GetProgramName )( void );
-SYSLOG_PROC( CTEXTSTR, GetProgramPath )( void );
 
 // utility function to format a cpu delta into a buffer...
 // end-start is always printed... therefore tick_end-0 is

@@ -7,7 +7,8 @@
 #$(warning Auto enabling __NO_MSGSVR__)
 
 # comment this out to build sqlite into sack.
-#__EXTERNAL_SQLITE__=1 $(warning this needs some work... like actually loading/filling the interface)
+#__EXTERNAL_SQLITE__=1 
+#$(warning this needs some work... like actually loading/filling the interface)
 
 # NO NO NO - okay this
 # this breaks deadstart compilations
@@ -151,14 +152,14 @@ SRCS= src/deadstart/deadstart_core    \
  src/SQLlib/sqlparse3            \
  $(if $(__NO_OPTIONS__),,src/SQLlib/optlib/getoption src/SQLlib/optlib/getoption_new      \
  src/SQLlib/optlib/optionutil src/SQLlib/optlib/optionutil_new)    \
- $(if $(USE_SQLITE),src/sqlite/sqlite3,) )
+ $(if $(USE_SQLITE),src/sqlite/sqlite_interface src/sqlite/sqlite3,) )
 
 MORE_TARGETS+=$(if $(__NO_SQL__),,$(if $(USE_SQLITE),$(SACK_BASE)/include/sqlite3.h))
 
 
 
 SYSLIBS=$(if $(__WINDOWS__),odbc32 wsock32 iphlpapi winmm, m odbc)
-CXFLAGS:=$(CXFLAGS) $(if $(__NO_SQL__),,-DUSE_ODBC) $(if $(__EXTERNAL_SQLITE__),-DUSE_SQLITE_INTERFACE) $(if $(USE_SQLITE),-DSQLITE_SOURCE,)
+CXFLAGS:=$(CXFLAGS) $(if $(__WINDOWS__),-DWIN32,) $(if $(__NO_SQL__),,-DUSE_ODBC) $(if $(__EXTERNAL_SQLITE__),-DUSE_SQLITE -DUSE_SQLITE_INTERFACE) $(if $(USE_SQLITE),-DSQLITE_SOURCE,)
 
     
 CXFLAGS:=$(CXFLAGS) -DSACK_BAG_EXPORTS \

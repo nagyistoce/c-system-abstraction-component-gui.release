@@ -58,7 +58,7 @@ namespace sack {
 #endif
 
 
-
+#undef _DEBUG
 
 #if defined( __LINUX__ ) && !defined( __CYGWIN__ )
 #define WINAPI
@@ -1711,7 +1711,9 @@ PMEM DigSpace( TEXTSTR pWhat, TEXTSTR pWhere, PTRSZVAL *dwSize )
 	 Log( WIDE("Go to init the heap...") );
 #endif
 	 pMem->dwSize = 0;
+#if defined( USE_CUSTOM_ALLOCER )
 	 InitHeap( pMem, *dwSize );
+#endif
 	 return pMem;
 }
 
@@ -1746,6 +1748,7 @@ int ExpandSpace( PMEM pHeap, PTRSZVAL dwAmount )
 
 
 //static PMEM pMasterInstance;
+//#ifdef USE_CUSTOM_ALLOCER
 
 static PMEM GrabMemEx( PMEM pMem DBG_PASS )
 #define GrabMem(m) GrabMemEx( m DBG_SRC )
@@ -1810,163 +1813,175 @@ static void DropMemEx( PMEM pMem DBG_PASS )
 #endif
 }
 
-
 //------------------------------------------------------------------------------------------------------
 
 POINTER HeapAllocateEx( PMEM pHeap, PTRSZVAL dwSize DBG_PASS )
 {
-	PCHUNK pc;
-	PMEM pMem, pCurMem = NULL;
-	PSPACE pMemSpace;
-	_32 dwPad = 0;
-
-#ifdef _DEBUG
-	if( !g.bDisableAutoCheck )
-		GetHeapMemStatsEx(pHeap, &dwFree,&dwAllocated,&dwBlocks,&dwFreeBlocks DBG_RELAY);
-#endif
-	if( !dwSize ) // no size is NO space!
-	{
-		return NULL;
-	}
-	// if memstats is used - memory could have been initialized there...
-	// so wait til now to grab g.pMemInstance.
 	if( !pHeap )
-		pHeap = g.pMemInstance;
-	pMem = GrabMem( pHeap );
-#ifdef _WIN64
-	dwSize += 7; // fix size to allocate at least _32s which
-	dwSize &= 0xFFFFFFFFFFFFFFF8;
-#else
-	dwSize += 3; // fix size to allocate at least _32s which
-	dwSize &= 0xFFFFFFFC;
-#endif
-
+	{
+		PCHUNK pc = malloc( sizeof( CHUNK ) + dwSize );
+		pc->dwOwners = 1;
+		pc->dwSize = dwSize;
+		//_lprintf(DBG_RELAY)( "alloc %p(%p)", pc, pc->byData );
+		return pc->byData;
+	}
+	else
+	{
+		PHEAP_CHUNK pc;
+		PMEM pMem, pCurMem = NULL;
+		PSPACE pMemSpace;
+		_32 dwPad = 0;
+		//_lprintf(DBG_RELAY)( "..." );
 #ifdef _DEBUG
-	if( !g.bDisableDebug )
-	{
-		dwPad += MAGIC_SIZE;
-		dwSize += MAGIC_SIZE;  // add a _32 at end to mark, and check for application overflow...
-		if( !pMem || !( pMem->dwFlags & HEAP_FLAG_NO_DEBUG ) )
+		if( !g.bDisableAutoCheck )
+			GetHeapMemStatsEx(pHeap, &dwFree,&dwAllocated,&dwBlocks,&dwFreeBlocks DBG_RELAY);
+#endif
+		if( !dwSize ) // no size is NO space!
 		{
-			dwPad += MAGIC_SIZE*2;
-			dwSize += MAGIC_SIZE*2; // pFile, nLine per block...
-			//lprintf( WIDE("Adding 8 bytes to block size...") );
+			return NULL;
 		}
-	}
+		// if memstats is used - memory could have been initialized there...
+		// so wait til now to grab g.pMemInstance.
+		if( !pHeap )
+			pHeap = g.pMemInstance;
+		pMem = GrabMem( pHeap );
+#ifdef _WIN64
+		dwSize += 7; // fix size to allocate at least _32s which
+		dwSize &= 0xFFFFFFFFFFFFFFF8;
+#else
+		dwSize += 3; // fix size to allocate at least _32s which
+		dwSize &= 0xFFFFFFFC;
 #endif
 
-	// re-search for memory should step long back...
-search_for_free_memory:
-	for( pc = NULL, pMemSpace = FindSpace( pMem ); !pc && pMemSpace; pMemSpace = pMemSpace->next )
-	{
-      // grab the new memory (might be old, is ok)
-      GrabMem( (PMEM)pMemSpace->pMem );
-		// then drop old memory, don't need that anymore.
-      if( pCurMem ) // first time through, there is no current.
-			DropMem( pCurMem );
-      // then mark that this block is our current block.
-		pCurMem = (PMEM)pMemSpace->pMem;
-	   //lprintf( WIDE("region %p is now owned."), pCurMem );
-
-		for( pc = pCurMem->pFirstFree; pc; pc = pc->next )
-		{
-			//Log2( WIDE("Check %d vs %d"), pc->dwSize, dwSize );
-			if( pc->dwSize >= dwSize ) // if free block size is big enough...
-			{
-				// split block
-				if( ( pc->dwSize - dwSize ) <= ( CHUNK_SIZE + g.nMinAllocateSize ) ) // must allocate it all.
-				{
-					pc->dwPad = (_16)(dwPad + ( pc->dwSize - dwSize ));
-					UnlinkThing( pc );
-					pc->dwOwners = 1;
-					break; // successful allocation....
-				}
-				else
-				{
-					PCHUNK pNew;  // cleared, NEW, uninitialized block...
-					PCHUNK next;
-					next = (PCHUNK)( pc->byData + pc->dwSize );
-					pNew = (PCHUNK)(pc->byData + dwSize);
-					pNew->dwPad = 0;
-					pNew->dwSize = ( ( pc->dwSize - CHUNK_SIZE ) - dwSize );
-					if( pNew->dwSize & 0x80000000 )
-						DebugBreak();
-
-					pc->dwPad = (_16)dwPad;
-					pc->dwSize = dwSize; // set old size?  this can wait until we have the block.
-					if( pc->dwSize & 0x80000000 )
-						DebugBreak();
-
-					if( (PTRSZVAL)next - (PTRSZVAL)pCurMem < (PTRSZVAL)pCurMem->dwSize )  // not beyond end of memory...
-						next->pPrior = pNew;
-
-					pNew->dwOwners = 0;
-					pNew->pRoot = pc->pRoot;
-					pNew->pPrior = pc;
-
-					// copy link...
-					if( ( pNew->next = pc->next ) )
-						pNew->next->me = &pNew->next;
-					*( pNew->me = pc->me ) = pNew;
-
-					pc->dwOwners = 1;  // set owned block.
-					break; // successful allocation....
-				}
-			}
-		}
-	}
-	if( !pc )
-	{
-		if( dwSize < SYSTEM_CAPACITY )
-		{
-			if( ExpandSpace( pMem, SYSTEM_CAPACITY ) )
-				goto search_for_free_memory;
-		}
-		else
-		{
-			// after 1 allocation, need a free chunk at end...
-			// and let's just have a couple more to spaere.
-			if( ExpandSpace( pMem, dwSize + (CHUNK_SIZE*4) + MEM_SIZE ) )
-			{
-            //lprintf( WIDE("Creating a new expanded space...") );
-				goto search_for_free_memory;
-			}
-		}
-		DropMem( pCurMem );
-      	pCurMem = NULL;
-		
 #ifdef _DEBUG
 		if( !g.bDisableDebug )
-			ODS( WIDE("Remaining space in memory block is insufficient.  Please EXPAND block."));
+		{
+			dwPad += MAGIC_SIZE;
+			dwSize += MAGIC_SIZE;  // add a _32 at end to mark, and check for application overflow...
+			if( !pMem || !( pMem->dwFlags & HEAP_FLAG_NO_DEBUG ) )
+			{
+				dwPad += MAGIC_SIZE*2;
+				dwSize += MAGIC_SIZE*2; // pFile, nLine per block...
+				//lprintf( WIDE("Adding 8 bytes to block size...") );
+			}
+		}
 #endif
-		DropMem( pMem );
-		return NULL;
-	}
-//#if DBG_AVAILABLE
-	if( g.bLogAllocate )
-	{
-      _xlprintf( 2 DBG_RELAY )( WIDE("Allocate : %p(%p) - %") _32f WIDE(" bytes") , pc->byData, pc, pc->dwSize );
-	}
-//#endif
+
+		// re-search for memory should step long back...
+	search_for_free_memory:
+		for( pc = NULL, pMemSpace = FindSpace( pMem ); !pc && pMemSpace; pMemSpace = pMemSpace->next )
+		{
+			// grab the new memory (might be old, is ok)
+			GrabMem( (PMEM)pMemSpace->pMem );
+			// then drop old memory, don't need that anymore.
+			if( pCurMem ) // first time through, there is no current.
+				DropMem( pCurMem );
+			// then mark that this block is our current block.
+			pCurMem = (PMEM)pMemSpace->pMem;
+			//lprintf( WIDE("region %p is now owned."), pCurMem );
+
+			for( pc = pCurMem->pFirstFree; pc; pc = pc->next )
+			{
+				//Log2( WIDE("Check %d vs %d"), pc->dwSize, dwSize );
+				if( pc->dwSize >= dwSize ) // if free block size is big enough...
+				{
+					// split block
+					if( ( pc->dwSize - dwSize ) <= ( CHUNK_SIZE + g.nMinAllocateSize ) ) // must allocate it all.
+					{
+						pc->dwPad = (_16)(dwPad + ( pc->dwSize - dwSize ));
+						UnlinkThing( pc );
+						pc->dwOwners = 1;
+						break; // successful allocation....
+					}
+					else
+					{
+						PHEAP_CHUNK pNew;  // cleared, NEW, uninitialized block...
+						PHEAP_CHUNK next;
+						next = (PHEAP_CHUNK)( pc->byData + pc->dwSize );
+						pNew = (PHEAP_CHUNK)(pc->byData + dwSize);
+						pNew->dwPad = 0;
+						pNew->dwSize = ( ( pc->dwSize - CHUNK_SIZE ) - dwSize );
+						if( pNew->dwSize & 0x80000000 )
+							DebugBreak();
+
+						pc->dwPad = (_16)dwPad;
+						pc->dwSize = dwSize; // set old size?  this can wait until we have the block.
+						if( pc->dwSize & 0x80000000 )
+							DebugBreak();
+
+						if( (PTRSZVAL)next - (PTRSZVAL)pCurMem < (PTRSZVAL)pCurMem->dwSize )  // not beyond end of memory...
+							next->pPrior = pNew;
+
+						pNew->dwOwners = 0;
+						pNew->pRoot = pc->pRoot;
+						pNew->pPrior = pc;
+
+						// copy link...
+						if( ( pNew->next = pc->next ) )
+							pNew->next->me = &pNew->next;
+						*( pNew->me = pc->me ) = pNew;
+
+						pc->dwOwners = 1;  // set owned block.
+						break; // successful allocation....
+					}
+				}
+			}
+		}
+		if( !pc )
+		{
+			if( dwSize < SYSTEM_CAPACITY )
+			{
+				if( ExpandSpace( pMem, SYSTEM_CAPACITY ) )
+					goto search_for_free_memory;
+			}
+			else
+			{
+				// after 1 allocation, need a free chunk at end...
+				// and let's just have a couple more to spaere.
+				if( ExpandSpace( pMem, dwSize + (CHUNK_SIZE*4) + MEM_SIZE ) )
+				{
+					lprintf( WIDE("Creating a new expanded space...") );
+					goto search_for_free_memory;
+				}
+			}
+			DropMem( pCurMem );
+			pCurMem = NULL;
+
+#ifdef _DEBUG
+			if( !g.bDisableDebug )
+				ODS( WIDE("Remaining space in memory block is insufficient.  Please EXPAND block."));
+#endif
+			DropMem( pMem );
+			return NULL;
+		}
+		//#if DBG_AVAILABLE
+		if( g.bLogAllocate )
+		{
+			_xlprintf( 2 DBG_RELAY )( WIDE("Allocate : %p(%p) - %") _32f WIDE(" bytes") , pc->byData, pc, pc->dwSize );
+		}
+		//#endif
 
 #if defined( _DEBUG ) //|| !defined( __NO_WIN32API__ )
-	if( !g.bDisableDebug )
-	{
-		// set end of block tag(s).
-		// without disabling memory entirely, blocks are
-		// still tagged and trashed in debug mode.
-		MemSet( ((PCHUNK)pc)->byData, 0xDEADBEEF, pc->dwSize );
-		BLOCK_TAG(pc) = BLOCK_TAG_ID;
-	}
-	if( !(pMem->dwFlags & HEAP_FLAG_NO_DEBUG ) )
-	{
-		BLOCK_FILE(pc) = pFile;
-		BLOCK_LINE(pc) = nLine;
-	}
+		if( !g.bDisableDebug )
+		{
+			// set end of block tag(s).
+			// without disabling memory entirely, blocks are
+			// still tagged and trashed in debug mode.
+			MemSet( ((PCHUNK)pc)->byData, 0xDEADBEEF, pc->dwSize );
+			BLOCK_TAG(pc) = BLOCK_TAG_ID;
+		}
+		if( !(pMem->dwFlags & HEAP_FLAG_NO_DEBUG ) )
+		{
+			BLOCK_FILE(pc) = pFile;
+			BLOCK_LINE(pc) = nLine;
+		}
 #endif
-	DropMem( pCurMem );
-	DropMem( pMem );
-	return pc->byData;
+		DropMem( pCurMem );
+		DropMem( pMem );
+		return pc->byData;
+	}
+
+   return NULL;
 }
 
 //------------------------------------------------------------------------------------------------------
@@ -2047,6 +2062,8 @@ MEM_PROC( POINTER, PreallocateEx )( POINTER source, PTRSZVAL size DBG_PASS )
 
 //------------------------------------------------------------------------------------------------------
 
+#if defined( USE_CUSTOM_ALLOCER )
+
 static void Bubble( PMEM pMem )
 {
 	// handle sorting free memory to be least signficant first...
@@ -2082,7 +2099,7 @@ static void Bubble( PMEM pMem )
 		}
 	}
 }
-
+#endif
 //------------------------------------------------------------------------------------------------------
 
 //static void CollapsePrior( PCHUNK pThis )
@@ -2092,16 +2109,20 @@ static void Bubble( PMEM pMem )
 
 //------------------------------------------------------------------------------------------------------
 
+
 MEM_PROC( PTRSZVAL, SizeOfMemBlock )( CPOINTER pData )
 {
 	if( pData )
 	{
 		register PCHUNK pc = (PCHUNK)(((PTRSIZEVAL)pData) - offsetof( CHUNK, byData ));
-		return pc->dwSize - pc->dwPad;
+		return pc->dwSize
+#if defined( USE_CUSTOM_ALLOCER )
+			- pc->dwPad
+#endif
+			;
 	}
 	return 0;
 }
-
 //------------------------------------------------------------------------------------------------------
 
 MEM_PROC( POINTER, MemDupEx )( CPOINTER thing DBG_PASS )
@@ -2122,9 +2143,39 @@ MEM_PROC( POINTER, MemDup )(CPOINTER thing )
 
 POINTER ReleaseEx ( POINTER pData DBG_PASS )
 {
-// register PMEM pMem = (PMEM)(pData - offsetof( MEM, pRoot ));
-	register PCHUNK pc = (PCHUNK)(((PTRSZVAL)pData) -
-											 offsetof( CHUNK, byData ));
+#if 1
+	if( pData )
+	{
+		if( !( ((PTRSZVAL)pData) & 0x3FF ) )
+		{
+			// system allocated blocks ( OpenSpace ) will be tracked as spaces...
+         // and they will be aligned on large memory blocks (4096 probably)
+			PSPACE ps = FindSpace( pData );
+			if( ps )
+			{
+				DoCloseSpace( ps, TRUE );
+				return NULL;
+			}
+		}
+      // how to figure if it's a CHUNK or a HEAP_CHUNK?
+		{
+			// register PMEM pMem = (PMEM)(pData - offsetof( MEM, pRoot ));
+			register PCHUNK pc = (PCHUNK)(((PTRSZVAL)pData) -
+													offsetof( CHUNK, byData ));
+			pc->dwOwners--;
+			if( !pc->dwOwners )
+			{
+				if( g.bLogAllocate )
+					lprintf( "Release %p(%p)", pc, pc->byData );
+				free( pc );
+				return NULL;
+			}
+			return pc;
+		}
+	}
+	return NULL;
+#else
+	{
 	PMEM pMem, pCurMem;
 	PSPACE pMemSpace;
 	if( !pData ) // always safe to release nothing at all..
@@ -2365,15 +2416,21 @@ POINTER ReleaseEx ( POINTER pData DBG_PASS )
 	if( !g.bDisableAutoCheck )
 		GetHeapMemStatsEx(pc->pRoot, &dwFree,&dwAllocated,&dwBlocks,&dwFreeBlocks DBG_RELAY);
 #endif
-
+	}
 	return NULL;
+#endif
 }
 
 //------------------------------------------------------------------------------------------------------
 
 MEM_PROC( POINTER, HoldEx )( POINTER pData DBG_PASS )
 {
+#if !defined( USE_CUSTOM_ALLOCER )
 	PCHUNK pc = (PCHUNK)((char*)pData - CHUNK_SIZE);
+	pc->dwOwners++;
+	return pData;
+#else
+	{
 	PMEM pMem = GrabMem( pc->pRoot );
 
 	if( g.bLogAllocate )
@@ -2390,6 +2447,8 @@ MEM_PROC( POINTER, HoldEx )( POINTER pData DBG_PASS )
 	pc->dwOwners++;
 	DropMem(pMem );
 	return pData;
+	}
+#endif
 }
 
 //------------------------------------------------------------------------------------------------------
@@ -2403,6 +2462,7 @@ MEM_PROC( POINTER, GetFirstUsedBlock )( PMEM pHeap )
 
 MEM_PROC( void, DebugDumpHeapMemEx )( PMEM pHeap, LOGICAL bVerbose )
 {
+#if defined( USE_CUSTOM_ALLOCER )
 	PCHUNK pc, _pc;
 	int nTotalFree = 0;
 	int nChunks = 0;
@@ -2484,6 +2544,7 @@ MEM_PROC( void, DebugDumpHeapMemEx )( PMEM pHeap, LOGICAL bVerbose )
 	ODS( byDebug );
 	//Relinquish();  // see notes on above Relinquish.
 	DropMem( pMem );
+#endif
 }
 
 //------------------------------------------------------------------------------------------------------
@@ -2497,6 +2558,7 @@ MEM_PROC( void, DebugDumpMemEx )( LOGICAL bVerbose )
 
 MEM_PROC( void, DebugDumpHeapMemFile )( PMEM pHeap, CTEXTSTR pFilename )
 {
+#if defined( USE_CUSTOM_ALLOCER )
 	FILE *file;
 	Fopen( file, pFilename, WIDE("wt") );
 	if( file )
@@ -2598,7 +2660,7 @@ MEM_PROC( void, DebugDumpHeapMemFile )( PMEM pHeap, CTEXTSTR pFilename )
 
  		fclose( file );
 	}
-
+#endif
 }
 
 //------------------------------------------------------------------------------------------------------
@@ -2698,6 +2760,7 @@ MEM_PROC( LOGICAL, Defragment )( POINTER *ppMemory ) // returns true/false, upda
 
 MEM_PROC( void, GetHeapMemStatsEx )( PMEM pHeap, _32 *pFree, _32 *pUsed, _32 *pChunks, _32 *pFreeChunks DBG_PASS )
 {
+#if defined( USE_CUSTOM_ALLOCER )
 	int nFree = 0, nUsed = 0, nChunks = 0, nFreeChunks = 0, nSpaces = 0;
 	PCHUNK pc, _pc;
 	PMEM pMem;
@@ -2797,6 +2860,7 @@ MEM_PROC( void, GetHeapMemStatsEx )( PMEM pHeap, _32 *pFree, _32 *pUsed, _32 *pC
 		*pChunks = nChunks;
 	if( pFreeChunks )
 		*pFreeChunks = nFreeChunks;
+#endif
 }
 
 //------------------------------------------------------------------------------------------------------

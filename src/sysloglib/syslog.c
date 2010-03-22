@@ -248,7 +248,7 @@ _64 GetCPUTick(void )
       	lasttick = tick;
 		return tick;
 #endif
-#elif defined( GCC ) && !defined( __arm__ )
+#elif defined( __GNUC__ ) && !defined( __arm__ )
 		union {
 			_64 tick;
 			PREFIX_PACKED struct { _32 low, high; } PACKED parts;
@@ -281,7 +281,7 @@ _64 GetCPUFrequency( void )
 		cpu_tick = _cpu_tick = GetCPUTick();
 		tick = _tick = timeGetTime()/*GetTickCount()*/;
 		cpu_tick_freq = 0;
-		while( bCPUTickWorks && ( ( tick = timeGetTime()/*GetTickCount()*/ ) - _tick ) < 250 );
+		while( bCPUTickWorks && ( ( tick = timeGetTime()/*GetTickCount()*/ ) - _tick ) < 25 );
 		{
 			cpu_tick = GetCPUTick();
 		}
@@ -294,20 +294,35 @@ _64 GetCPUFrequency( void )
    return cpu_tick_freq;
 }
 
-static TEXTCHAR filepath[256];
-static CTEXTSTR filename;  // pointer to just filename part...
-
-void SetDefaultName( TEXTCHAR *extra )
+void SetDefaultName( CTEXTSTR path, CTEXTSTR name, CTEXTSTR extra )
 {
 	TEXTCHAR *newpath;
 	size_t len;
+	static CTEXTSTR filepath;// = GetProgramPath();
+	static CTEXTSTR filename;// = GetProgramName();
+	if( path )
+	{
+		if( filepath )
+         Release( (POINTER)filepath );
+		filepath = StrDup( path );
+	}
+	if( name )
+	{
+		if( filename )
+			Release( (POINTER)filename );
+		filename = StrDup( name );
+	}
+	if( !filepath )
+		filepath = StrDup( GetProgramPath() );
+	if( !filename )
+      filename = StrDup( GetProgramName() );
 	// this has to come from C heap.. my init isn't done yet probably and
    // sharemem will just fail.  (it's probably trying to log... )
-	newpath = (TEXTCHAR*)malloc( len = sizeof(TEXTCHAR)*(9 + strlen( filepath ) + (extra?strlen(extra):0) + 5) );
+	newpath = (TEXTCHAR*)malloc( len = sizeof(TEXTCHAR)*(9 + strlen( filepath ) + strlen( filename ) + (extra?strlen(extra):0) + 5) );
 #ifdef __cplusplus_cli
-	snprintf( newpath, len, "%s%s.cli.log", filepath, extra?extra:"" );
+	snprintf( newpath, len, "%s/%s%s.cli.log", filepath, filename, extra?extra:"" );
 #else
-	snprintf( newpath, len, WIDE("%s%s.log"), filepath, extra?extra:WIDE("") );
+	snprintf( newpath, len, WIDE("%s/%s%s.log"), filepath, filename, extra?extra:WIDE("") );
 #endif
 	gFilename = newpath;//( newpath ); // use the C heap.
 	//free( newpath ); // get rid of this ...
@@ -316,6 +331,10 @@ void SetDefaultName( TEXTCHAR *extra )
 #ifndef __NO_OPTIONS__
 static void LoadOptions( char *filename )
 {
+	flags.bLogSourceFile = SACK_GetProfileIntEx( GetProgramName()
+															 , WIDE( "SACK/Logging/Log Source File")
+															 , flags.bLogSourceFile, TRUE );
+
 	if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Enable File Log" )
 #ifdef _DEBUG
                            , 1
@@ -327,17 +346,17 @@ static void LoadOptions( char *filename )
 		logtype = SYSLOG_AUTO_FILE;
 		flags.bLogOpenAppend = 0;
 		flags.bLogOpenBackup = 1;
-		flags.bLogSourceFile = 1;
 		flags.bLogProgram = 0;
 	}
+   // set all default parts of the name.
+   SetDefaultName( NULL, NULL, NULL );
    // this overrides options with options available from SQL database.
 	if( SACK_GetProfileIntEx( GetProgramName(), WIDE("SACK/Logging/Default Log Location is current directory"), 0, TRUE ) )
 	{
 		// override filepath, if log exception.
 		TEXTCHAR buffer[256];
 		GetCurrentPath( buffer, sizeof( buffer ) );
-		snprintf( filepath, sizeof( filepath ), WIDE( "%s/%s" ), buffer, filename );
-		SetDefaultName( NULL );
+		SetDefaultName( buffer, NULL, NULL );
 	}
 	else
 	{
@@ -347,8 +366,7 @@ static void LoadOptions( char *filename )
 		SACK_GetProfileStringEx( GetProgramName(), WIDE( "SACK/Logging/Default Log Location" ), WIDE( "" ), buffer, sizeof( buffer ), TRUE );
 		if( buffer[0] )
 		{
-			snprintf( filepath, sizeof( filepath ), WIDE( "%s/%s" ), buffer, filename );
-			SetDefaultName( NULL );
+			SetDefaultName( buffer, NULL, NULL );
 		}
 	}
 
@@ -379,12 +397,6 @@ static void LoadOptions( char *filename )
 }
 #endif
 
-#if !defined( UNDER_CE ) || 1
-
-#ifdef __WATCOM_CPLUSPLUS__
-#pragma initialize 35
-#endif
-//PRIORITY_PRELOAD( InitSyslog, SYSLOG_PRELOAD_PRIORITY )
 
 static int init_complete;
 void InitSyslog( void )
@@ -392,59 +404,6 @@ void InitSyslog( void )
 	if( init_complete )
 		return;
 	init_complete =1 ;
-#ifdef _WIN32
-   	// make sure we only read up to 4 ... might have to add our own .log entirely
-	// or maybe it's a dot only file extension?
-	{
-		TEXTCHAR *ext;
-		// computes default filepath  (where logs are)
-      // and current filename
-		GetModuleFileName( NULL, filepath, sizeof( filepath ) - 4 );
-		ext = strrchr( filepath, '.' );
-		if( ext )
-		{
-			ext[0] = 0;
-		}
-		filename = pathrchr( filepath );
-		if( filename )
-			filename++;
-		else
-			filename = filepath;
-	}
-	pProgramName = (TEXTSTR)filename;
-	SetDefaultName( NULL ); // no extra here.
-#else
-	//logtype = SYSLOG_FILE;
-	//file = stderr;
-	//fprintf( stderr, WIDE("Syslog Initializing, debug mode, startup stderr\n") );
-	{
-		//char filename[256];
-		//char buf[256], 
-		char *pb;
-		int n;
-		n = readlink("/proc/self/exe",filepath,256);
-		if( n >= 0 )
-		{
-			filepath[n]=0; //linux
-			if( !n )
-			{
-				strcpy( filepath, WIDE(".") );
-				filepath[ n = readlink( WIDE("/proc/curproc/"),filepath,sizeof(filepath))]=0; // fbsd
-			}
-		}
-		else
-			strcpy( filepath, WIDE(".")) ;
-		pb = strrchr(filepath,'/');
-		if( pb )
-		{
-			//pb[0]=0;
-			pb++;
-		}
-
-		pProgramName = strdup( pb );
-      SetDefaultName( NULL );
-	}
-#endif
 
 #ifdef _DEBUG
 	// this is just a quick way to stub this out... based on compiler switches.
@@ -475,7 +434,12 @@ void InitSyslog( void )
 	flags.bInitialized = 1;
 }
 
-//#endif
+#if !defined( UNDER_CE ) || 1
+
+PRIORITY_PRELOAD( InitSyslogPreload, SYSLOG_PRELOAD_PRIORITY )
+{
+   InitSyslog();
+}
 #endif //UNDER_CE
 //----------------------------------------------------------------------------
 CTEXTSTR GetTimeEx( int bUseDay )
@@ -914,6 +878,16 @@ static void BackupFile( const TEXTCHAR *source, int source_name_len, int n )
 
 void DoSystemLog( const TEXTCHAR *buffer )
 {
+	if( !init_complete )
+	{
+		if( logtype == SYSLOG_AUTO_FILE && !file )
+		{
+			// cannot log until system log is complete
+			return;
+		}
+		if( ( logtype == SYSLOG_UDPBROADCAST ) || ( logtype == SYSLOG_UDP ) )
+         return;
+	}
 	if( logtype == SYSLOG_UDP
 		|| logtype == SYSLOG_UDPBROADCAST )
 		UDPSystemLog( buffer );
@@ -921,8 +895,6 @@ void DoSystemLog( const TEXTCHAR *buffer )
 	{
 		if( logtype == SYSLOG_AUTO_FILE )
 		{
-			if( !file )
-				InitSyslog();
 			if( !file && gFilename )
 			{
 				int n_retry = 0;
@@ -946,7 +918,7 @@ void DoSystemLog( const TEXTCHAR *buffer )
 					{
 						TEXTCHAR tmp[10];
 						snprintf( tmp, sizeof( tmp ), WIDE("%d"), n_retry++ );
-						SetDefaultName( tmp );
+						SetDefaultName( NULL, NULL, tmp );
 						goto retry_again;
 					}
 					else
@@ -1182,6 +1154,18 @@ static PLINKQUEUE buffers;
 
 static INDEX CPROC _real_vlprintf ( CTEXTSTR format, va_list args )
 {
+#if 1
+   // this can be used to force logging early to stdout
+	if( !init_complete )
+	{
+		logtype = SYSLOG_FILE;
+		file = stdout ;
+		SystemLogTime( SYSLOG_TIME_CPU|SYSLOG_TIME_DELTA );
+
+      init_complete = 1;
+		flags.bLogSourceFile = 1;
+	}
+#endif
 	if( cannot_log )
 		return 0;
 	if( logtype != SYSLOG_NONE )
@@ -1288,7 +1272,12 @@ static INDEX CPROC _null_lprintf( CTEXTSTR f, ... )
 
 SYSLOG_PROC( RealVLogFunction, _vxlprintf )( _32 level DBG_PASS )
 {
-   //EnterCriticalSec( &next_lprintf.cs );
+	//EnterCriticalSec( &next_lprintf.cs );
+	if( !init_complete )
+	{
+		return _null_vlprintf;
+	}
+
 #if _DEBUG
 	next_lprintf.pFile = pFile;
 	next_lprintf.nLine = nLine;
@@ -1361,38 +1350,6 @@ void SetSystemLoggingLevel( _32 nLevel )
 	}
 	else
 		nLogLevel = nLevel;
-}
-
-CTEXTSTR GetProgramName( void )
-{
-	InitSyslog();
-   return pProgramName;
-}
-
-CTEXTSTR GetProgramPath( void )
-{
-	InitSyslog();
-	{
-		CTEXTSTR end = pathrchr( filepath );
-		static TEXTSTR path;
-		if( path )
-		{
-			//lprintf( WIDE("kill old path") );
-			Release( path );
-		}
-		if( end )
-		{
-			path = NewArray( TEXTCHAR, (1+ end - filepath) );
-			StrCpyEx( path, filepath, (end+1)-filepath );
-			//lprintf( WIDE("result path %p"), path );
-		}
-		else
-		{
-			path = StrDup( filepath );
-			//lprintf( WIDE("result path %p"), path );
-		}
-		return path;
-	}
 }
 
 void SetSyslogOptions( FLAGSETTYPE *options )

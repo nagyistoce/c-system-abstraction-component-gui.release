@@ -39,6 +39,8 @@ static struct {
 	struct system_local_flags{
 		BIT_FIELD bLog : 1;
 	} flags;
+	CTEXTSTR filename;  // pointer to just filename part...
+
 } local_systemlib;
 
 #define l local_systemlib
@@ -134,19 +136,19 @@ static void SetupSystemServices( void )
 		GetModuleFileName( NULL, filepath, sizeof( filepath ) );
 		ext = (TEXTSTR)StrRChr( (CTEXTSTR)filepath, '.' );
 		if( ext )
-			StrCpy( ext, WIDE(".log") );
-		e1 = (TEXTSTR)StrRChr( (CTEXTSTR)filepath, '\\' );
-		e2 = (TEXTSTR)StrRChr( (CTEXTSTR)filepath, '/' );
-		if( e1 && e2 && ( e1 > e2 ) )
+			ext[0] = 0;
+      e1 = (TEXTSTR)pathrchr( filepath );
+		if( e1 )
+		{
 			e1[0] = 0;
-		else if( e1 && e2 )
-			e2[0] = 0;
-		else if( e1 )
-			e1[0] = 0;
-		else if( e2 )
-			e2[0] = 0;
-
-		l.load_path = StrDup( filepath );
+			l.filename = StrDup( e1 + 1 );
+			l.load_path = StrDup( filepath );
+		}
+		else
+		{
+         l.filename = StrDup( filepath );
+			l.load_path = StrDup( "" );
+		}
 
 #ifdef HAVE_ENVIRONMENT
 		{
@@ -254,8 +256,6 @@ PRELOAD( SetupSystemOptions )
 	l.flags.bLog = SACK_GetProfileIntEx( GetProgramName(), "SACK/System/Enable Logging", 0, TRUE );
 }
 #endif
-
-
 
 //--------------------------------------------------------------------------
 
@@ -633,7 +633,6 @@ SYSTEM_PROC( generic_function, LoadFunctionExx )( CTEXTSTR libname, CTEXTSTR fun
 	if( !library )
 	{
 		size_t maxlen = sizeof( TEXTCHAR ) * (strlen( l.load_path ) + 1 + strlen( libname ) + 1 );
-		lprintf( WIDE( "%s  %s" ), l.load_path, libname );
 		library = (PLIBRARY)Allocate( sizeof( LIBRARY ) + ((maxlen<0xFFFFFF)?(_32)maxlen:0) );
 		library->name = library->full_name
 						  + snprintf( library->full_name, maxlen, WIDE("%s/"), l.load_path );
@@ -885,6 +884,30 @@ TEXTSTR GetArgsString( PCTEXTSTR pArgs )
 	}
 	return args;
 }
+
+
+
+CTEXTSTR GetProgramName( void )
+{
+	if( !l.filename )
+	{
+      DebugBreak();
+		return NULL;
+	}
+   return l.filename;
+}
+
+CTEXTSTR GetProgramPath( void )
+{
+	if( !l.load_path )
+	{
+      DebugBreak();
+		return NULL;
+	}
+   return l.load_path;
+}
+
+
 
 SACK_SYSTEM_NAMESPACE_END
 

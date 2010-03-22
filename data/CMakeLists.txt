@@ -17,6 +17,13 @@ glare.png
 )
 
 
+INSTALL(
+  FILES
+    interface.conf
+  DESTINATION
+    # this could also be /etc
+    bin
+)
 
 INSTALL( 
   FILES

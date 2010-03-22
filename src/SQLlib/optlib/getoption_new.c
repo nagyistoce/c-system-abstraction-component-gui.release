@@ -84,7 +84,6 @@ INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const ch
 	InitMachine();
    // resets the search/browse cursor... not empty...
 	FamilyTreeReset( GetOptionTree( odbc ) );
-   SetSQLLoggingDisable( og.Option, TRUE );
    while( system || program || file || pBranch || pValue || start )
    {
 #ifdef DETAILED_LOGGING
@@ -201,7 +200,6 @@ INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const ch
             lprintf( WIDE("Option tree corrupt.  No option option_id=%ld"), ID );
 #endif
             PopODBCEx( odbc );
-				SetSQLLoggingDisable( og.Option, FALSE );
             return INVALID_INDEX;
          }
          else
@@ -221,7 +219,6 @@ INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const ch
          PopODBCEx( odbc );
       }
    }
-   SetSQLLoggingDisable( og.Option, FALSE );
    return parent;
 }
 
@@ -236,7 +233,6 @@ _32 NewGetOptionStringValue( PODBC odbc, INDEX optval, char *buffer, _32 len DBG
    _32 result_len = 0;
    len--;
 
-	SetSQLLoggingDisable( odbc, TRUE );
    snprintf( query, sizeof( query ), "select override_value_id from "OPTION_EXCEPTION" "
             "where ( apply_from<=now() or apply_from=0 )"
             "and ( apply_until>now() or apply_until=0 )"
@@ -276,7 +272,6 @@ _32 NewGetOptionStringValue( PODBC odbc, INDEX optval, char *buffer, _32 len DBG
 	}
 	PopODBCEx( odbc );
    PopODBCEx( odbc );
-	SetSQLLoggingDisable( odbc, FALSE );
    return result_len;
 }
 
@@ -318,7 +313,6 @@ INDEX NewCreateValue( PODBC odbc, INDEX value, CTEXTSTR pValue )
 	CTEXTSTR result=NULL;
    TEXTSTR newval = EscapeSQLBinary( odbc, pValue, StrLen( pValue ) );
    int IDValue;
-	SetSQLLoggingDisable( odbc, TRUE );
 	if( pValue == NULL )
 		snprintf( insert, sizeof( insert ), "insert into "OPTION_BLOBS " (`option_id`,`blob` ) values (%lu,'')"
 				  , value
@@ -340,7 +334,6 @@ INDEX NewCreateValue( PODBC odbc, INDEX value, CTEXTSTR pValue )
       IDValue = INVALID_INDEX;
 	}
    Release( newval );
-	SetSQLLoggingDisable( odbc, FALSE );
    return value;
 }
 

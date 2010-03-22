@@ -276,7 +276,7 @@ typedef struct common_control_frame
 		_32 bRestoring : 1; // there is a frame caption update (with flush to display) which needs to be locked....
 		_32 bShown : 1; // got at least one frame redraw event (focus happens before first draw)
 		_32 bResizedDirty : 1;
-
+		_32 bUpdateRegionSet : 1; // during control update the effective surface region was set while away.
 	} flags;
 
 
@@ -329,7 +329,8 @@ typedef struct common_control_frame
    DeclSingleMethod( EndEdit );
    DeclMethod( AcceptDroppedFiles );
 	COMMON_BUTTON_DATA pCommonButtonData;
-	IMAGE_RECTANGLE dirty_rect;
+	IMAGE_RECTANGLE dirty_rect;   // invalidating an arbitrary rect, this is the intersection of the parent's dirty rect on this
+	IMAGE_RECTANGLE update_rect;  // during update this may be set, and should be used for the update region insted of control surface
    CTEXTSTR save_name;
    int nExtra; // size above common required...
 } FR_CT_COMMON, *PCONTROL;

@@ -37,7 +37,6 @@ SQLGETOPTION_PROC( void, EnumOptionsEx )( PODBC odbc, INDEX parent
 		CTEXTSTR result = NULL;
 		// any existing query needs to be saved...
 		InitMachine();
-		SetSQLLoggingDisable( og.Option, TRUE );
 		PushSQLQueryEx( og.Option ); // any subqueries will of course clean themselves up.
 		snprintf( query
 				  , sizeof( query )
@@ -69,7 +68,6 @@ SQLGETOPTION_PROC( void, EnumOptionsEx )( PODBC odbc, INDEX parent
 			//lprintf( WIDE("reget: %s"), query );
 		}
 		PopODBCEx( og.Option );
-		SetSQLLoggingDisable( og.Option, FALSE );
 	}
 }
 
@@ -142,8 +140,8 @@ static void FixOrphanedBranches( void )
 			LIST_FORALL( options, idx, _32, parent )
 			{
 				lprintf( WIDE("parent node is...%ld"), parent );
-			// node ID parent of 0 or -1 is a parent node...
-         // so nodeID+1 of 0 is 1
+				// node ID parent of 0 or -1 is a parent node...
+				// so nodeID+1 of 0 is 1
 				if( (parent > 1) && !GetLink( &options, parent-1 ) )
 				{
 					deleted = 1;

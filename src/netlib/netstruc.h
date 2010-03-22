@@ -16,7 +16,7 @@
 
 // started using this symbol more in the later days of disabling logging...
 //#define VERBOSE_DEBUG
-
+//#define LOG_STARTUP_SHUTDOWN
 // Define this symbol to use Log( ghLog, WIDE("") ) to log pending
 // write status...
 //#define LOG_PENDING
@@ -26,6 +26,7 @@
 
 //TODO: modify the client struct to contain the MAC addr
 
+#define USE_WSA_EVENTS
 
 #ifndef CLIENT_DEFINED
 #define CLIENT_DEFINED

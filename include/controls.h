@@ -620,6 +620,9 @@ PSI_PROC( void, RestoreBackground )( PSI_CONTROL pc, P_IMAGE_RECTANGLE r );
 // output to the physical surface the rectangle of the control's surface specified.
 PSI_PROC( void, UpdateSomeControls )( PSI_CONTROL pc, P_IMAGE_RECTANGLE pRect );
 
+PSI_PROC( void, SetUpdateRegionEx )( PSI_CONTROL pc, S_32 rx, S_32 ry, _32 rw, _32 rh DBG_PASS );
+#define SetUpdateRegion(pc,x,y,w,h) SetUpdateRegionEx( pc,x,y,w,h DBG_SRC )
+
 
 PSI_PROC( void, EnableCommonUpdates )( PSI_CONTROL frame, int bEnable );
 #define EnableFrameUpdates(pf,e) EnableCommonUpdates( (PSI_CONTROL)pf, e )

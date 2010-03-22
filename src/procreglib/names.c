@@ -1777,7 +1777,7 @@ static void ReadConfiguration( void )
 		AddConfigurationMethod( pch, WIDE("module path %m"), HandleModulePath );
 
 		{
-#ifndef UNDER_CE
+#ifdef HAVE_ENVIRONMENT
 			CTEXTSTR filepath = getenv( WIDE("MY_LOAD_PATH") );
 #else
 			CTEXTSTR filepath = NULL;

@@ -40,7 +40,6 @@ void NewEnumOptions( PODBC odbc
    pending = odbc;
 	// any existing query needs to be saved...
 	InitMachine();
-   SetSQLLoggingDisable( odbc, TRUE );
 	PushSQLQueryEx( odbc ); // any subqueries will of course clean themselves up.
 	snprintf( query
 			  , sizeof( query )
@@ -72,7 +71,6 @@ void NewEnumOptions( PODBC odbc
 		//lprintf( WIDE("reget: %s"), query );
 	}
 	PopODBCEx( odbc );
-   SetSQLLoggingDisable( odbc, FALSE );
 	pending = NULL;
 
 }
@@ -105,7 +103,6 @@ void NewDuplicateOption( PODBC odbc, INDEX iRoot, CTEXTSTR pNewName )
 	INDEX iParent;
 	CTEXTSTR result = NULL;
 	INDEX iNewName;
-	SetSQLLoggingDisable( odbc, TRUE );
 	if( SQLQueryf( odbc, &result, "select parent_option_id from " OPTION_MAP " where option_id=%ld", iRoot ) && result )
 	{
 		struct complex_args args;
@@ -116,7 +113,6 @@ void NewDuplicateOption( PODBC odbc, INDEX iRoot, CTEXTSTR pNewName )
 		args.odbc = odbc;
 		NewEnumOptions( args.odbc, iRoot, CopyRoot, (PTRSZVAL)&args );
 	}
-	SetSQLLoggingDisable( odbc, FALSE );
 }
 
 
@@ -166,12 +162,10 @@ static void NewFixOrphanedBranches( void )
 
 void NewDeleteOption( PODBC odbc, INDEX iRoot )
 {
-	SetSQLLoggingDisable( odbc, TRUE );
 	SQLCommandf( odbc, "delete from "OPTION_MAP " where option_id=%ld", iRoot );
 	SQLCommandf( odbc, "delete from "OPTION_VALUES " where option_id=%ld", iRoot );
 	SQLCommandf( odbc, "delete from "OPTION_BLOBS " where option_id=%ld", iRoot );
    NewFixOrphanedBranches();
-	SetSQLLoggingDisable( odbc, FALSE );
 }
 
 SACK_OPTION_NAMESPACE_END

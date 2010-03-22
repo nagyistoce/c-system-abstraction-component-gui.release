@@ -260,9 +260,8 @@ FILESYS_PROC( int, ScanFiles )( CTEXTSTR base
 		CTEXTSTR p = pathrchr( mask );
 		if( p )
 		{
-			StrCpyEx( basename, mask, p - mask );
-			basename[p-mask] = 0;
-            mask = p + 1;
+			StrCpyEx( basename, mask, p - mask + 1 );
+			mask = p + 1;
 		}
 		else
 			StrCpyEx( basename, WIDE("."), sizeof( basename ) / sizeof( TEXTCHAR ) );

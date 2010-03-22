@@ -339,6 +339,7 @@ enum blot_methods {
    IMAGE_PROC( Font,GetDefaultFont) ( void );
    IMAGE_PROC( _32 ,GetFontHeight)  ( Font );
    IMAGE_PROC( _32 ,GetStringSizeFontEx)( CTEXTSTR pString, _32 len, _32 *width, _32 *height, Font UseFont );
+   IMAGE_PROC( _32, GetStringRenderSizeFontEx )( CTEXTSTR pString, _32 nLen, _32 *width, _32 *height, _32 *charheight, Font UseFont );
 
 // background of color 0,0,0 is transparent - alpha component does not
 // matter....
@@ -551,6 +552,9 @@ IMAGE_PROC_PTR( PSPRITE, SetSpriteHotspot )( PSPRITE sprite, S_32 x, S_32 y );
 IMAGE_PROC_PTR( PSPRITE, SetSpritePosition )( PSPRITE sprite, S_32 x, S_32 y );
 	IMAGE_PROC_PTR( void, UnmakeSprite )( PSPRITE sprite, int bForceImageAlso );
 IMAGE_PROC_PTR( struct font_global_tag *, GetGlobalFonts)( void );
+
+IMAGE_PROC_PTR( _32, GetStringRenderSizeFontEx )( CTEXTSTR pString, _32 nLen, _32 *width, _32 *height, _32 *charheight, Font UseFont );
+
 } IMAGE_INTERFACE, *PIMAGE_INTERFACE;
 
 

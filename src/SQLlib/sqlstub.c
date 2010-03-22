@@ -11,8 +11,12 @@
 //#define LOG_ACTUAL_CONNECTION
 //#define LOG_COLLECTOR_STATES
 //#define LOG_EVERYTHING
+#define SQLLIB_SOURCE
 #define DO_LOGGING
-
+#ifdef USE_SQLITE_INTERFACE
+#define USES_SQLITE_INTERFACE
+#define DEFINES_SQLITE_INTERFACE
+#endif
 #include <stdhdrs.h>
 #include <deadstart.h>
 #include <sack_types.h>
@@ -144,11 +148,6 @@ struct update_task_def
 GLOBAL *global_sqlstub_data;
 #define g (*global_sqlstub_data)
 
-
-#ifdef USE_SQLITE_INTERFACE
-#include "../sqlite/sqlite3ext.h"
-struct sqlite_interface sqlite_iface;
-#endif
 
 //----------------------------------------------------------------------
 
@@ -506,12 +505,25 @@ PTRSZVAL CPROC SetFallback( PTRSZVAL psv, arg_list args )
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-PTRSZVAL CPROC SetRequireConnection( PTRSZVAL psv, arg_list args )
+PTRSZVAL CPROC SetRequirePrimaryConnection( PTRSZVAL psv, arg_list args )
 {
 	PARAM( args, LOGICAL, bRequired );
    g.Primary.flags.bForceConnection = bRequired;
-   g.Backup.flags.bForceConnection = bRequired;
+	return psv;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+PTRSZVAL CPROC SetRequireConnection( PTRSZVAL psv, arg_list args )
+{
+	PARAM( args, LOGICAL, bRequired );
 	g.flags.bRequireConnection = bRequired;
+	return psv;
+}
+
+PTRSZVAL CPROC SetRequireBackupConnection( PTRSZVAL psv, arg_list args )
+{
+	PARAM( args, LOGICAL, bRequired );
+   g.Backup.flags.bForceConnection = bRequired;
 	return psv;
 }
 
@@ -595,7 +607,7 @@ void InitLibrary( void )
 		if( g.feedback_handler ) g.feedback_handler( WIDE("Loading ODBC") );
 		CreateCollector( 0, &g.Primary, FALSE );
 		CreateCollector( 0, &g.Backup, FALSE );
-      	g.Option.info.pDSN = StrDup( "option.db" );
+		g.Option.info.pDSN = StrDup( "option.db" );
 		{
 			PCONFIG_HANDLER pch = CreateConfigurationHandler();
 			AddConfigurationMethod( pch, WIDE("Option DSN=%m"), SetOptionDSN );
@@ -609,6 +621,8 @@ void InitLibrary( void )
 			AddConfigurationMethod( pch, WIDE("LogFile enable=%b"), SetLoggingEnabled2 );
 			AddConfigurationMethod( pch, WIDE("Fallback on failure=%b"), SetFallback );
 			AddConfigurationMethod( pch, WIDE("Require Connection=%b"), SetRequireConnection );
+			AddConfigurationMethod( pch, WIDE("Require Primary Connection=%b"), SetRequirePrimaryConnection );
+			AddConfigurationMethod( pch, WIDE("Require Backup Connection=%b"), SetRequireBackupConnection );
 			// If source is encrypted enable tranlation
 			//AddConfigurationFilter( pch, TranslateINICrypt );
 			if( !ProcessConfigurationFile( pch, WIDE("sql.config"), 0 ) )
@@ -629,6 +643,8 @@ void InitLibrary( void )
 					fprintf( file, WIDE("LogFile enable=No\n" ) );
 					fprintf( file, WIDE("Fallback on failure=No\n") );
 					fprintf( file, WIDE("Require Connection=No\n") );
+					fprintf( file, WIDE("Require Primary Connection=Yes\n") );
+					fprintf( file, WIDE("Require Backup Connection=No\n") );
 					fclose( file );
 				}
 				ProcessConfigurationFile( pch, WIDE("sql.config"), 0 );
@@ -916,6 +932,61 @@ int OpenSQLConnection( PODBC odbc )
 }
 
 //----------------------------------------------------------------------
+
+void CPROC CommitTimer( PTRSZVAL psv )
+{
+	PODBC odbc = (PODBC)psv;
+   if( odbc->last_command_tick )
+		if( odbc->last_command_tick < ( GetTickCount() - 250 ) )
+		{
+			RemoveTimer( odbc->commit_timer );
+			odbc->flags.bAutoTransact = 0;
+			SQLCommand( odbc, "COMMIT" );
+			odbc->flags.bAutoTransact = 1;
+			odbc->last_command_tick = 0;
+		}
+}
+
+//----------------------------------------------------------------------
+
+void SQLCommit( PODBC odbc )
+{
+	odbc->last_command_tick = 0;
+   RemoveTimer( odbc->commit_timer );
+	SQLCommand( odbc, "COMMIT" );
+}
+
+//----------------------------------------------------------------------
+
+void BeginTransact( PODBC odbc )
+{
+	// I Only test this for SQLITE, specifically the optiondb.
+	// this transaction phrase is not really as important on server based systems.
+	if( odbc->flags.bAutoTransact )
+	{
+		if( !odbc->last_command_tick )
+		{
+			odbc->commit_timer = AddTimer( 100, CommitTimer, (PTRSZVAL)odbc );
+			odbc->flags.bAutoTransact = 0;
+			if( odbc->flags.bSQLite_native )
+			{
+				SQLCommand( odbc, "BEGIN TRANSACTION" );
+			}
+			else if( odbc->flags.bAccess )
+			{
+			}
+			else
+			{
+            SQLCommand( odbc, "START TRANSACTION" );
+			}
+			odbc->flags.bAutoTransact = 1;
+			odbc->last_command_tick = GetTickCount();
+		}
+	}
+}
+
+//----------------------------------------------------------------------
+
 
 void DispatchPriorRequests( PODBC odbc )
 {
@@ -1560,7 +1631,8 @@ int DumpInfoEx( PODBC odbc, PVARTEXT pvt, SQLSMALLINT type, SQLHANDLE *handle, L
 			}
 			else if( native == 2006 || native == 2003 )
 			{
-				if( g.feedback_handler ) g.feedback_handler( WIDE("SQL Connection Lost...\nWaiting for reconnect...") );
+            if( odbc->flags.bConnected )
+					if( g.feedback_handler ) g.feedback_handler( WIDE("SQL Connection Lost...\nWaiting for reconnect...") );
 				lprintf( "This is 'connection lost' (not tempoary)" );
 
 				if( !bOpening )
@@ -1575,6 +1647,9 @@ int DumpInfoEx( PODBC odbc, PVARTEXT pvt, SQLSMALLINT type, SQLHANDLE *handle, L
 					while( !IsSQLOpen( odbc ) );
 					lprintf( "Connection closed, and re-open worked." );
 					retry = 1;
+				}
+				else
+				{
 				}
 			}
 			else
@@ -1894,6 +1969,7 @@ SQLPROXY_PROC( int, SQLCommandEx )( PODBC odbc, CTEXTSTR command DBG_PASS )
 	if( use_odbc )
 	{
 		PCOLLECT pCollector;
+		BeginTransact( use_odbc );
 		do
 		{
 #ifdef LOG_COLLECTOR_STATES
@@ -2638,7 +2714,7 @@ int __DoSQLQueryEx( PODBC odbc, PCOLLECT collection, CTEXTSTR query DBG_PASS )
 				if( collection->hstmt )
 				{
 #ifdef LOG_EVERYTHING
-					lprintf( "Releasing old handle... %p %p", collection->_hstmt, collection->hstmt );
+					lprintf( "Releasing old handle... %p", collection->hstmt );
 #endif
 					SQLFreeHandle( SQL_HANDLE_STMT, collection->hstmt );
 					collection->hstmt = 0;

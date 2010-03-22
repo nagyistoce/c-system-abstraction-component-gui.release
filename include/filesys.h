@@ -12,10 +12,13 @@
 
 #ifndef FILESYSTEM_UTILS_DEFINED
 #define FILESYSTEM_UTILS_DEFINED
+#include <stdhdrs.h>
 #include <sack_types.h>
+#if !defined( UNDER_CE ) ||defined( ELTANIN)
 #include <fcntl.h>
 #ifndef _MSC_VER
 #include <io.h>
+#endif
 #endif
 #if defined( BCC16 )
 #if !defined(__STATIC__)
@@ -149,10 +152,10 @@ FILESYS_PROC( _32, GetFileTimeAndSize )( CTEXTSTR name
 
 FILESYS_PROC( int, sack_open )( int group, CTEXTSTR filename, int opts, ... );
 FILESYS_PROC( int, sack_creat )( int group, CTEXTSTR file, int opts, ... );
-FILESYS_PROC( int, sack_close )( int file_handle );
-FILESYS_PROC( int, sack_lseek )( int file_handle, int pos, int whence );
-FILESYS_PROC( int, sack_read )( int file_handle, POINTER buffer, int size );
-FILESYS_PROC( int, sack_write )( int file_handle, POINTER buffer, int size );
+FILESYS_PROC( int, sack_close )( HANDLE file_handle );
+FILESYS_PROC( int, sack_lseek )( HANDLE file_handle, int pos, int whence );
+FILESYS_PROC( int, sack_read )( HANDLE file_handle, POINTER buffer, int size );
+FILESYS_PROC( int, sack_write )( HANDLE file_handle, POINTER buffer, int size );
 
 FILESYS_PROC( FILE*, sack_fopen )( int group, CTEXTSTR filename, CTEXTSTR opts );
 FILESYS_PROC( int, sack_fclose )( FILE *file_file );
@@ -163,8 +166,22 @@ FILESYS_PROC( int, sack_fwrite )( POINTER buffer, int size, int count,FILE *file
 FILESYS_PROC( int, sack_unlink )( CTEXTSTR filename );
 FILESYS_PROC( int, sack_rename )( CTEXTSTR file_source, CTEXTSTR new_name );
 
+#if !defined( SACK_BAG_EXPORTS ) && !defined( BAG_EXTERNALS )
 #define open(a,...) sack_open(0,a,##__VA_ARGS__)
+#define _lopen(a,...) sack_open(0,a,##__VA_ARGS__)
 #define lseek(a,b,c) sack_lseek(a,b,c)
+#define _llseek(a,b,c) sack_lseek(a,b,c)
+
+#define close(a)  sack_close(a)
+#define _lclose(a)  sack_close(a)
+#define read(a,b,c) sack_read(a,b,c)
+#define write(a,b,c) sack_write(a,b,c)
+#define _lread(a,b,c) sack_read(a,b,c)
+#define _lwrite(a,b,c) sack_write(a,b,c)
+#define _lcreat(a,b) sack_creat(0,a,b)
+#define remove(a)   sack_unlink(a)
+#define unlink(a)   sack_unlink(a)
+#endif
 
 #if UNICODE
 #define fprintf fwprintf

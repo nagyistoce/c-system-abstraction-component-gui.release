@@ -1,4 +1,4 @@
-#define DEBUG_BANNER_DRAW_UPDATE
+//#define DEBUG_BANNER_DRAW_UPDATE
 //#ifndef __cplusplus_cli
 //#define USE_RENDER_INTERFACE banner_local.pdi
 //#define USE_IMAGE_INTERFACE banner_local.pii
@@ -14,6 +14,12 @@
 
 #define BANNER_DEFINED
 #include "../include/banner.h"
+
+	struct upd_rect{
+		S_32 x, y;
+      _32 w, h;
+	};
+
 
 typedef struct banner_tag
 {
@@ -34,17 +40,26 @@ typedef struct banner_tag
 	_32 _b;
 	PTHREAD pWaitThread;
 	CDATA basecolor;
-   CDATA textcolor;
+	CDATA textcolor;
+
+	struct {
+		BIT_FIELD bounds_set : 1;
+	} bit_flags;
+
+	struct upd_rect text_bounds;
+	struct upd_rect old_bounds;
+
 } BANNER;
 
 
 typedef struct banner_local_tag {
 	struct {
-		_32 bInited : 1;
+		BIT_FIELD bInited : 1;
 	} flags;
 	_32 w, h;
 	_32 _w, _h;
-   S_32 x, y; // x/y offset for extended banner.
+	S_32 x, y; // x/y offset for extended banner.
+
 	Font font;
    Font explorer_font;
 	Font custom_font;
@@ -264,18 +279,42 @@ static int OnMouseCommon( BANNER_NAME )
 //--------------------------------------------------------------------------
 
 
-void DrawBannerCaption( PBANNER banner, Image surface, TEXTCHAR *caption, CDATA color, int yofs, int height, int left, int explorer )
+void DrawBannerCaption( PSI_CONTROL pc, PBANNER banner, Image surface, TEXTCHAR *caption, CDATA color, int yofs, int height, int left, int explorer )
 {
 	_32 y = 0;
+   S_32 minx = BANNER_WIDTH;
 	_32 w, h, maxw = 0;
+	_32 char_h;
+   int had_bounds;
 	TEXTCHAR *start = caption, *end;
-	BlatColor( surface, 0, 0, surface->width, surface->height, banner->basecolor );
+	if( banner->bit_flags.bounds_set )
+	{
+      // be kinda nice to be able to result this to the control to get a partial update to screen...
+      //lprintf( "Clearing box %d %d %d %d", banner->text_bounds.x, banner->text_bounds.y
+		//			, banner->text_bounds.w, banner->text_bounds.h );
+		banner->old_bounds = banner->text_bounds;
+		BlatColor( surface, banner->text_bounds.x, banner->text_bounds.y
+					, banner->text_bounds.w, banner->text_bounds.h, banner->basecolor );
+	}
+	else
+	{
+      had_bounds = 0;
+		banner->old_bounds.x = 0;
+		banner->old_bounds.y = 0;
+		banner->old_bounds.w = surface->width;
+		banner->old_bounds.h = surface->height;
+		BlatColor( surface, 0, 0, surface->width, surface->height, banner->basecolor );
+	}
 	//ClearImageTo( surface, GetBaseColor( NORMAL ) );
-	GetStringSizeFontEx( caption, strlen( caption ), &maxw, &h
+	GetStringRenderSizeFontEx( caption, strlen( caption ), &maxw, &h, &char_h
 							 , banner_local.custom_font?banner_local.custom_font:explorer?banner_local.explorer_font:banner_local.font );
 	y = yofs - (h/2);
+   banner->text_bounds.y = y - 2;
+	banner->text_bounds.h = h + 4;
+
 	while( start )
 	{
+      S_32 x;
 		end = StrChr( start, '\n' );
 		if( !end )
 		{
@@ -283,20 +322,26 @@ void DrawBannerCaption( PBANNER banner, Image surface, TEXTCHAR *caption, CDATA 
 		}
 		w = GetStringSizeFontEx( start, end-start, NULL, &h
 									  , banner_local.custom_font?banner_local.custom_font:explorer?banner_local.explorer_font:banner_local.font );
+		x = ( BANNER_WIDTH - (left?maxw:w) ) /2;
+
+		if( (x-2) < minx )
+			minx = x - 2;
+		if( (w+4) > maxw )
+         maxw = w + 4;
 		PutStringFontEx( surface
-							, ( BANNER_WIDTH - (left?maxw:w) ) /2+2
+							, x+2
 							, y+2
 							, SetAlpha( ~color, 0x80 ), 0
 							, start, end-start
 							, banner_local.custom_font?banner_local.custom_font:explorer?banner_local.explorer_font:banner_local.font );
 		PutStringFontEx( surface
-							, ( BANNER_WIDTH - (left?maxw:w) ) /2-2
+							, x-2
 							, y-2
 							, SetAlpha( ~color, 0x80 ), 0
 							, start, end-start
 							, banner_local.custom_font?banner_local.custom_font:explorer?banner_local.explorer_font:banner_local.font );
 		PutStringFontEx( surface
-							, ( BANNER_WIDTH - (left?maxw:w) ) /2
+							, x
 							, y
 							, color, 0
 							, start, end-start
@@ -306,6 +351,51 @@ void DrawBannerCaption( PBANNER banner, Image surface, TEXTCHAR *caption, CDATA 
 			start = end+1;
 		else
 			start = NULL;
+	}
+	banner->text_bounds.x = minx;
+	banner->text_bounds.w = maxw;
+	banner->bit_flags.bounds_set = 1;
+
+	{
+		S_32 rx, ry;
+		S_32 rx_right, ry_bottom;
+      S_32 rx_tmp;
+		_32 rw, rh;
+
+      rx_right = banner->text_bounds.x + banner->text_bounds.w;
+		rx_tmp = banner->old_bounds.x + banner->old_bounds.w;
+		if( rx_tmp > rx_right )
+         rx_right = rx_tmp;
+
+      ry_bottom = banner->text_bounds.y + banner->text_bounds.h;
+		rx_tmp = banner->old_bounds.y + banner->old_bounds.h;
+		if( rx_tmp > ry_bottom )
+         ry_bottom = rx_tmp;
+
+
+		if( banner->text_bounds.x < banner->old_bounds.x )
+		{
+			rx = banner->text_bounds.x;
+         rw = rx_right - rx;
+		}
+		else
+		{
+			rx = banner->old_bounds.x;
+         rw = rx_right - rx;
+		}
+
+		if( banner->text_bounds.y < banner->old_bounds.y )
+		{
+			ry = banner->text_bounds.y;
+         rh = ry_bottom - ry;
+		}
+		else
+		{
+			ry = banner->old_bounds.y;
+         rh = ry_bottom - ry;
+		}
+
+		SetUpdateRegion( pc, rx, ry, rw, rh );
 	}
 }
 
@@ -331,7 +421,7 @@ static int OnDrawCommon( BANNER_NAME )
 #ifdef DEBUG_BANNER_DRAW_UPDATE
 			lprintf( WIDE( "--------- BANNER DRAW %s -------------" ), caption );
 #endif
-			DrawBannerCaption( banner, image
+			DrawBannerCaption( pc, banner, image
 								  , caption
 								  , banner->textcolor
 								  , (banner->flags & ( BANNER_OPTION_YESNO|BANNER_OPTION_OKAYCANCEL ))

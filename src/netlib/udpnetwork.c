@@ -409,6 +409,9 @@ NETWORK_PROC( int, doUDPRead )( PCLIENT pc, POINTER lpBuffer, int nBytes )
 
       // we are now able to read, so schedule the socket.
 #ifdef USE_WSA_EVENTS
+#ifdef LOG_NOTICES
+		lprintf( "SET GLOBAL EVENT" );
+#endif
 		SetEvent( g.event );
 #endif
 #ifdef __UNIX__
@@ -456,6 +459,9 @@ int FinishUDPRead( PCLIENT pc )
       case WSAEWOULDBLOCK: // NO data returned....
           pc->dwFlags |= CF_READPENDING;
 #ifdef USE_WSA_EVENTS
+#ifdef LOG_NOTICES
+			 lprintf( "SET GLOBAL EVENT" );
+#endif
 			 SetEvent( g.event );
 #endif
 #ifdef __UNIX__

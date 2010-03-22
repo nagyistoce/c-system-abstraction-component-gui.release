@@ -1282,6 +1282,7 @@ PSI_PROC( void, UpdateFrameEx )( PSI_CONTROL pc
 	}
 }
 
+//---------------------------------------------------------------------------
 
 void IntelligentFrameUpdateAllDirtyControls( PSI_CONTROL pc DBG_PASS )
 {
@@ -1326,6 +1327,7 @@ void IntelligentFrameUpdateAllDirtyControls( PSI_CONTROL pc DBG_PASS )
 			}
 }
 
+//---------------------------------------------------------------------------
 
 void AddCommonUpdateRegionEx( PPENDING_RECT update_rect, int bSurface, PSI_CONTROL pc DBG_PASS )
 #define AddCommonUpdateRegion(upd,surface,pc) AddCommonUpdateRegionEx( upd,surface,pc DBG_SRC )
@@ -1334,37 +1336,51 @@ void AddCommonUpdateRegionEx( PPENDING_RECT update_rect, int bSurface, PSI_CONTR
 	S_32 x, y;
 	_32 wd, ht;
 	if( !pc )
-      return;
-	if( bSurface )
+		return;
+#ifdef DEBUG_UPDAATE_DRAW
+	_lprintf(DBG_RELAY)( "Adding region.... (maybe should wait)" );
+#endif
+	if( pc->flags.bUpdateRegionSet )
 	{
-      //lprintf( WIDE("Computing control's surface rectangle.") );
-		wd = pc->surface_rect.width;
-		ht = pc->surface_rect.height;
-	}
-   else
-	{
-		//lprintf( WIDE("Computing control's window rectangle.") );
-		wd = pc->rect.width;
-		ht = pc->rect.height;
-	}
-	if( pc->parent && !pc->device )
-	{
-		x = pc->rect.x;
-		y = pc->rect.y;
+      wd = pc->update_rect.width;
+		ht = pc->update_rect.height;
+      x = pc->update_rect.x + pc->surface_rect.x;
+		y = pc->update_rect.y + pc->surface_rect.y;
+      pc->flags.bUpdateRegionSet = 0;
 	}
 	else
 	{
-		// if a control was created (or if we're using the bare
-		// frame for the surface of something)
-		// then don't include pc's offset since that is actually
-		// a representation of the screen offset.
-		x = 0;
-		y = 0;
-	}
-	if( bSurface )
-	{
-		x += pc->surface_rect.x;
-		y += pc->surface_rect.y;
+		if( bSurface )
+		{
+			//lprintf( WIDE("Computing control's surface rectangle.") );
+			wd = pc->surface_rect.width;
+			ht = pc->surface_rect.height;
+		}
+		else
+		{
+			//lprintf( WIDE("Computing control's window rectangle.") );
+			wd = pc->rect.width;
+			ht = pc->rect.height;
+		}
+		if( pc->parent && !pc->device )
+		{
+			x = pc->rect.x;
+			y = pc->rect.y;
+		}
+		else
+		{
+			// if a control was created (or if we're using the bare
+			// frame for the surface of something)
+			// then don't include pc's offset since that is actually
+			// a representation of the screen offset.
+			x = 0;
+			y = 0;
+		}
+		if( bSurface )
+		{
+			x += pc->surface_rect.x;
+			y += pc->surface_rect.y;
+		}
 	}
 	if( pc->parent )
 	{
@@ -1438,6 +1454,71 @@ void AddCommonUpdateRegionEx( PPENDING_RECT update_rect, int bSurface, PSI_CONTR
 	if( !update_rect->flags.bTmpRect )
 		LeaveCriticalSec( &update_rect->cs );
 #endif
+}
+
+//---------------------------------------------------------------------------
+
+void SetUpdateRegionEx( PSI_CONTROL pc, S_32 rx, S_32 ry, _32 rw, _32 rh DBG_PASS )
+{
+	PSI_CONTROL parent;
+	S_32 x, y;
+	_32 wd, ht;
+	if( !pc )
+		return;
+
+
+	//lprintf( WIDE("Computing control's surface rectangle.") );
+	wd = rw;
+	ht = rh;
+
+	if( pc->parent && !pc->device )
+	{
+		x = pc->rect.x;
+		y = pc->rect.y;
+	}
+	else
+	{
+		// if a control was created (or if we're using the bare
+		// frame for the surface of something)
+		// then don't include pc's offset since that is actually
+		// a representation of the screen offset.
+		x = 0;
+		y = 0;
+	}
+	x += pc->surface_rect.x;
+	y += pc->surface_rect.y;
+	x += rx;
+	y += ry;
+
+	if( pc->parent )
+	{
+		for( parent = pc->parent; parent /*&& parent->parent*/; parent = parent->parent )
+		{
+			x += ((parent->parent&&!parent->device)?parent->rect.x:0) + parent->surface_rect.x;
+			y += ((parent->parent&&!parent->device)?parent->rect.y:0) + parent->surface_rect.y;
+			if( parent->device )
+				break;
+		}
+	}
+	//else
+   //   parent = pc;
+   //lprintf( WIDE("Adding update region (%d,%d)-(%d,%d)"), x, y, wd, ht );
+	if( wd && ht )
+	{
+		pc->flags.bUpdateRegionSet = 1;
+		{
+#ifdef DEBUG_UPDAATE_DRAW
+			_lprintf(DBG_RELAY)( WIDE("Setting (%d,%d)-(%d,%d)")
+									 , x, y
+									 , wd, ht
+									 );
+#endif
+			pc->update_rect.x = x;
+			pc->update_rect.y = y;
+			pc->update_rect.width = wd;
+			pc->update_rect.height = ht;
+		}
+	}
 }
 
 //---------------------------------------------------------------------------
@@ -1621,10 +1702,13 @@ static void DoUpdateCommonEx( PPENDING_RECT upd, PSI_CONTROL pc, int bDraw, int 
             //if( pc->flags.bTransparent )
             //   current = CopyOriginalSurface( pc, current );
 				pc->draw_result = 0;
+#ifdef DEBUG_UPDAATE_DRAW
+				lprintf( " --- INVOKE DRAW (get region) --- " );
+#endif
 				InvokeDrawMethod( pc, _DrawThySelf, ( pc ) );
 				//if( current )
 				{
-  				if( !pc->draw_result )
+					if( !pc->draw_result )
 					{
 #ifdef DEBUG_UPDAATE_DRAW
                   // if it didn't draw... then why do anything?
@@ -1671,8 +1755,10 @@ static void DoUpdateCommonEx( PPENDING_RECT upd, PSI_CONTROL pc, int bDraw, int 
 				// (else IS transparent, in which case if draw_result, go )
             //   ELSE don't add
 
-            if( !pc->flags.bTransparent || pc->draw_result )
+				if( !pc->flags.bTransparent || pc->draw_result )
+				{
 					AddCommonUpdateRegion( upd, FALSE, pc );
+				}
 #if DEBUG_UPDAATE_DRAW > 2
             if( upd->flags.bHasContent )
 					_lprintf(DBG_RELAY)( WIDE("Added update region %d,%d %d,%d"), upd->x ,upd->y, upd->width, upd->height );
@@ -3638,45 +3724,45 @@ void GetCommonTextEx( PSI_CONTROL pc, TEXTSTR buffer, int buflen, int bCString )
 		return;
 	}
 	StrCpyEx( buffer, GetText( pc->caption.text ), buflen );
-	lprintf( WIDE("GetText was %d"), buflen );
-    buffer[buflen-1] = 0; // make sure we nul terminate..   
-    if( bCString ) // use C processing on escapes....
-    {
-        int n, ofs, escape = 0;
-        ofs = 0;
-	lprintf( WIDE("GetText was %d"), buflen );
-        for( n = 0; buffer[n]; n++ )
-        {
-            if( escape )
-            {
-                switch( buffer[n] )
-                {
-                    case 'n':
-                        buffer[n-ofs] = '\n';
-                        break;
-                    case 't':
-                        buffer[n-ofs] = '\t';
-                        break;
-                    case '\\':
-                        buffer[n-ofs] = '\\';
-                        break;
-                    default:
-                        ofs++;
-                        break;
-                }
-                escape = FALSE;
-                continue;
-            }
-            if( buffer[n] == '\\' )
-            {
-                escape = TRUE;
-                ofs++;
-                continue;
-            }
-            buffer[n-ofs] = buffer[n];
-        }
+	//lprintf( WIDE("GetText was %d"), buflen );
+	buffer[buflen-1] = 0; // make sure we nul terminate..
+	if( bCString ) // use C processing on escapes....
+	{
+		int n, ofs, escape = 0;
+		ofs = 0;
+		//lprintf( WIDE("GetText was %d"), buflen );
+		for( n = 0; buffer[n]; n++ )
+		{
+			if( escape )
+			{
+				switch( buffer[n] )
+				{
+				case 'n':
+					buffer[n-ofs] = '\n';
+					break;
+				case 't':
+					buffer[n-ofs] = '\t';
+					break;
+				case '\\':
+					buffer[n-ofs] = '\\';
+					break;
+				default:
+					ofs++;
+					break;
+				}
+				escape = FALSE;
+				continue;
+			}
+			if( buffer[n] == '\\' )
+			{
+				escape = TRUE;
+				ofs++;
+				continue;
+			}
+			buffer[n-ofs] = buffer[n];
+		}
         buffer[n-ofs] = 0;
-    }
+	}
 }
 
 //---------------------------------------------------------------------------
