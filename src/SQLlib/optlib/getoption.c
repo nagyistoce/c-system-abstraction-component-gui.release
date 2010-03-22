@@ -358,7 +358,7 @@ static INDEX GetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, cons
 			}
 			else
 			{
-				strncpy( namebuf, (*start), sizeof( namebuf )-1 );
+				StrCpyEx( namebuf, (*start), sizeof( namebuf )-1 );
 				(*start) = NULL;
 				start = NULL;
 			}

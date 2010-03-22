@@ -805,7 +805,7 @@ TYPELIB_PROC( char *, WcharConvert )( const wchar_t *wch );
 typedef struct vartext_tag *PVARTEXT;
 
 TYPELIB_PROC( PVARTEXT, VarTextCreateExEx )( _32 initial, _32 expand DBG_PASS );
-#define VarTextCreateExx(i,e) VarTextCreateExEx(i,e DBG_SRC );
+#define VarTextCreateExx(i,e) VarTextCreateExEx(i,e DBG_SRC )
 TYPELIB_PROC( PVARTEXT, VarTextCreateEx )( DBG_VOIDPASS );
 #define VarTextCreate() VarTextCreateEx( DBG_VOIDSRC )
 TYPELIB_PROC( void, VarTextDestroyEx )( PVARTEXT* DBG_PASS );

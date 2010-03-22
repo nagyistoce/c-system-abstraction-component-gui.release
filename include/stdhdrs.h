@@ -141,8 +141,9 @@
 //typedef unsigned int HINSTANCE;
 #  endif
 
-#ifndef UNDER_CE
+#if !defined( UNDER_CE ) ||defined( ELTANIN)
 #include <fcntl.h>
+#include <io.h>
 #endif
 
 # include <filedotnet.h>
@@ -211,7 +212,6 @@ static unsigned long GetTickCount( void )
 #endif
 //#include <stdlib.h>
 #include <stdarg.h>
-//#include <stdio.h>
 #include <string.h>
 #ifdef __CYGWIN__
 #include <errno.h> // provided by -lgcc
@@ -270,6 +270,16 @@ static long long __tick_mark_calibrate;
 #endif
 
 #endif
+
+#ifndef MAXPATH
+// windef.h has MAX_PATH
+# define MAXPATH MAX_PATH
+#endif
+#ifndef PATH_MAX
+# define PATH_MAX MAXPATH
+#endif
+
+
 
 #ifdef FIX_BROKEN_TYPECASTS
 #define int short

@@ -23,6 +23,7 @@
 # define SQLITE_PRIVATE static
 #endif
 #ifndef SQLITE_API
+#define _INCLUDE_NLS
 #include <stdhdrs.h>
 #  ifdef SQLITE_SOURCE
 #    define SQLITE_API EXPORT_METHOD
