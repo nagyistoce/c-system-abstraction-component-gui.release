@@ -36,7 +36,7 @@ typedef struct node_data_tag
 
 static PNODE_DATA last_node;
 static INDEX last_option;
-static char last_value[256];
+static TEXTCHAR last_value[256];
 
 int CPROC FillList( PTRSZVAL psv, CTEXTSTR name, _32 ID, int flags );
 
@@ -127,7 +127,7 @@ static void CPROC OptionSelectionChanged( PTRSZVAL psvUser, PCONTROL pc, PLISTIT
 	{
 		lprintf( WIDE("Set value to real value.") );
 		GetOptionStringValue( pnd->ID_Value, buffer, sizeof( buffer ) );
-		StrCpy( last_value, buffer );
+		StrCpyEx( last_value, buffer, sizeof(last_value)/sizeof(last_value[0]) );
 		SetCommonText( GetNearControl( pc, EDT_OPTIONVALUE ), buffer );
 	}
 	else
@@ -142,7 +142,7 @@ void CPROC UpdateValue( PTRSZVAL psv, PCOMMON pc )
 {
 	char value[256];
 	GetControlText( GetNearControl( pc, EDT_OPTIONVALUE ), value, sizeof(value) );
-	if( strcmp( value, last_value ) != 0 )
+	if( StrCmp( value, last_value ) != 0 )
 	{
       SetOptionStringValue( last_node->ID_Option, value );
 	}
