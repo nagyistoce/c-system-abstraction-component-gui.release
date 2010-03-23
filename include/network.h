@@ -291,20 +291,20 @@ NETWORK_PROC( LOGICAL, DoPing )( CTEXTSTR pstrHost,
              int maxTTL, 
              _32 dwTime, 
              int nCount, 
-             TEXTSTR pResult, 
+             PVARTEXT pResult,
              LOGICAL bRDNS,
              void (*ResultCallback)( _32 dwIP, CTEXTSTR name, int min, int max, int avg, int drop, int hops ) );
 NETWORK_PROC( LOGICAL, DoPingEx )( CTEXTSTR pstrHost,
              int maxTTL, 
              _32 dwTime, 
              int nCount, 
-             TEXTSTR pResult, 
+             PVARTEXT pResult,
              LOGICAL bRDNS,
 											 void (*ResultCallback)( PTRSZVAL psv, _32 dwIP, CTEXTSTR name, int min, int max, int avg, int drop, int hops )
 											, PTRSZVAL psv );
 
 //----- WHOIS.C -----
-NETWORK_PROC( LOGICAL, DoWhois )( CTEXTSTR pHost, CTEXTSTR pServer, TEXTSTR pResult );
+NETWORK_PROC( LOGICAL, DoWhois )( CTEXTSTR pHost, CTEXTSTR pServer, PVARTEXT pvtResult );
 
 #ifdef __cplusplus
 

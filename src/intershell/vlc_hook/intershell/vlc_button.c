@@ -38,7 +38,7 @@ OnCreateControl( "VLC/Player" )( PSI_CONTROL parent, S_32 x, S_32 y, _32 w, _32 
 	PSI_CONTROL pc = MakeNamedControl( parent, "VLC Surface", x, y, w, h, -1 );
 	MyValidatedControlData( PVLC, vlc, pc );
    vlc->pc = pc;
-	//PlayItemIn( pc, "dshow://" );
+	PlayItemIn( pc, "dshow://" );
    return (PTRSZVAL)vlc;
 }
 
@@ -51,7 +51,7 @@ OnGetControl( "VLC/Player")(PTRSZVAL psv )
 OnShowControl( "VLC/Player" )(PTRSZVAL psv )
 {
    PVLC vlc = (PVLC)psv;
-	vlc->vlc = PlayItemInEx( vlc->pc, "screen://", "--screen-fps=10" );
+	//vlc->vlc = PlayItemInEx( vlc->pc, "dshow://", NULL );
 
 }
 

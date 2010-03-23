@@ -20,9 +20,9 @@
 #include <png.h>
 #else
 #include <setjmp.h>
-#include <../src/zlib-1.2.3/zlib.h> // include this before, and we get the types we need...
-#include <../src/libpng-1.2.40/pngconf.h>
-#include <../src/libpng-1.2.40/png.h>
+#include <zlib.h> // include this before, and we get the types we need...
+#include <pngconf.h>
+#include <png.h>
 #endif
 
 #define IMAGE_LIBRARY_SOURCE
