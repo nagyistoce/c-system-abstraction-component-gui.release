@@ -26,23 +26,25 @@
 #ifndef SQLITE_API
 //#include <sqlite3.h>
 // PTRSZVAL type... so we can convert pointers to int sensibly.
-#define _INCLUDE_NLS
-#include <stdhdrs.h>
+# define _INCLUDE_NLS
+# include <stdhdrs.h>
 
-#ifdef __USE_SACK_ALLOCATOR__
-#include <sharemem.h>
-#undef Release
-#undef Delete
-#endif
+# ifdef __USE_SACK_ALLOCATOR__
+# include <sharemem.h>
+# undef Release
+# undef Delete
+# endif
 
-#ifdef __cplusplus
-#include <cstdlib>
-#pragma inline_depth( 0 );
-#endif
+# ifdef __cplusplus
+# include <cstdlib>
+# pragma inline_depth( 0 );
+# endif
 
-//# define SQLITE_API EXPORT_METHOD
-
-# define SQLITE_API
+#  ifdef SQLITE_SOURCE
+#    define SQLITE_API EXPORT_METHOD
+#  else
+#    define SQLITE_API IMPORT_METHOD
+#  endif
 #endif
 /************** Begin file sqlite3.h *****************************************/
 /*
