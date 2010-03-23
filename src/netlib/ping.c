@@ -29,13 +29,13 @@ SACK_NETWORK_NAMESPACE
 
 // Internal Functions
 void Ping(TEXTSTR pstrHost, int maxTTL);
-TEXTSTR ReportError(TEXTSTR pInto, TEXTSTR pstrFrom);
+void ReportError(PVARTEXT pInto, TEXTSTR pstrFrom);
 int  WaitForEchoReply(SOCKET s, _32 dwTime);
 u_short in_cksum(u_short *addr, int len);
 
 // ICMP Echo Request/Reply functions
-int		SendEchoRequest(TEXTSTR, SOCKET, SOCKADDR_IN*);
-int   	RecvEchoReply( TEXTSTR, SOCKET, SOCKADDR_IN*, u_char *);
+int		SendEchoRequest(PVARTEXT, SOCKET, SOCKADDR_IN*);
+int   	RecvEchoReply( PVARTEXT, SOCKET, SOCKADDR_IN*, u_char *);
 
 #define MAX_HOPS     128 
 #define MAX_NAME_LEN 255
@@ -46,7 +46,7 @@ typedef struct HopEntry_tag{
    _32 dwAvgTime;
    _32 dwDropped;
 //   _32 dwTime;
-   TEXTCHAR  pName[MAX_NAME_LEN];  // bRDNS resulting...
+   TEXTSTR  pName;  // bRDNS resulting...
    int TTL;                    // returned TTL from destination...
 } HOPENT, *PHOPENT;
 
@@ -59,7 +59,7 @@ PTRSZVAL CPROC RDNSThread( PTHREAD pThread )
 
    phe = gethostbyaddr( (char*)&pHopEnt->dwIP, 4, AF_INET );
    if( phe )
-      strcpy( pHopEnt->pName,phe->h_name );
+      pHopEnt->pName = StrDup( phe->h_name );
 
    LockedDecrement( &dwThreadsActive );
    /*
@@ -80,7 +80,7 @@ static LOGICAL DoPingExx( CTEXTSTR pstrHost
 								,int maxTTL
 								,_32 dwTime
 								,int nCount
-								,TEXTSTR pResult
+								,PVARTEXT pvtResult
 								,LOGICAL bRDNS
 								,void (*ResultCallback)( _32 dwIP, CTEXTSTR name, int min, int max, int avg, int drop, int hops )
 								,void (*ResultCallbackEx)( PTRSZVAL psv, _32 dwIP, CTEXTSTR name, int min, int max, int avg, int drop, int hops )
@@ -102,20 +102,20 @@ static LOGICAL DoPingExx( CTEXTSTR pstrHost
    static CRITICALSECTION cs;
    static  HOPENT    Entry[MAX_HOPS];
    static  int       nEntry = 0;
-   char     *pResultStart;
-   pResultStart = pResult;
+   //char     *pResultStart;
+   //pResultStart = pResult;
 
    if( maxTTL < 0 )
    {
-       if( pResult )
-           sprintf( pResult, WIDE("TTL Parameter Error ( <0 )\n") );
+       if( pvtResult )
+           vtprintf( pvtResult, WIDE("TTL Parameter Error ( <0 )\n") );
        return 0;
    }
 
    if( nCount < 0 )
    {
-       if( pResult )
-           sprintf( pResult, WIDE("Count Parameter Error ( <0 )\n") );
+       if( pvtResult )
+           vtprintf( pvtResult, WIDE("Count Parameter Error ( <0 )\n") );
        return 0;
    }
 
@@ -136,8 +136,8 @@ static LOGICAL DoPingExx( CTEXTSTR pstrHost
    if( dwIP == INADDR_NONE )
 #endif
    {
-       if( pResult )
-           pResult += sprintf( pResult, WIDE("host was not numeric\n") );
+       if( pvtResult )
+           vtprintf( pvtResult, WIDE("host was not numeric\n") );
        lpHost = gethostbyname(pstrHost);
        if (lpHost)
        {
@@ -145,15 +145,15 @@ static LOGICAL DoPingExx( CTEXTSTR pstrHost
        }
        else
        {
-           if( pResult )
-               sprintf( pResult, WIDE("(1)Host does not exist.(%s)\n"), pstrHost );
+           if( pvtResult )
+               vtprintf( pvtResult, WIDE("(1)Host does not exist.(%s)\n"), pstrHost );
        }
    }
 
    if( dwIP == 0xFFFFFFFF )
    {
-       if( pResult )
-           sprintf( pResult, WIDE("Host does not exist.(%s)\n"), pstrHost );
+       if( pvtResult )
+           vtprintf( pvtResult, WIDE("Host does not exist.(%s)\n"), pstrHost );
        return 0;
    }
    nEntry = 0;
@@ -171,8 +171,8 @@ static LOGICAL DoPingExx( CTEXTSTR pstrHost
 #endif
    if (rawSocket == SOCKET_ERROR)
 	{
-      if( pResult )
-			pResult += sprintf( pResult, WIDE("Uhmm bad things happened for sockraw!\n") );
+      if( pvtResult )
+			vtprintf( pvtResult, WIDE("Uhmm bad things happened for sockraw!\n") );
 		else
 			lprintf( WIDE("Uhmm bad things happened for sockraw!\n") );
 		rawSocket = OpenSocket( TRUE, FALSE, TRUE );
@@ -180,15 +180,15 @@ static LOGICAL DoPingExx( CTEXTSTR pstrHost
 		{
        if( WSAGetLastError() == 10013 )
        {
-           if( pResult )
-               sprintf( pResult, WIDE("User is not an administrator, cannot create a RAW socket.\n")
+           if( pvtResult )
+               vtprintf( pvtResult, WIDE("User is not an administrator, cannot create a RAW socket.\n")
                         WIDE("Unable to override this.\n"));
            return FALSE;
        }
        else
        {
-           if( pResult )
-               pResult = ReportError( pResult, WIDE("socket()"));
+           if( pvtResult )
+               ReportError( pvtResult, WIDE("socket()"));
        }
 		 return FALSE;
 		}
@@ -199,24 +199,24 @@ static LOGICAL DoPingExx( CTEXTSTR pstrHost
    saDest.sin_family = AF_INET;
    saDest.sin_port = 0;
 
-   //pResult += sprintf( pResult, WIDE("Version 1.0   ADA Software Developers, Inc.  Copyright 1999.\n") );
+   //vtprintf( pvtResult, WIDE("Version 1.0   ADA Software Developers, Inc.  Copyright 1999.\n") );
    // Tell the user what we're doing
-   if( pResult )
+   if( pvtResult )
    {
-       pResult += sprintf( pResult, WIDE("Pinging %s [%s] with %d bytes of data:\n"),
+       vtprintf( pvtResult, WIDE("Pinging %s [%s] with %d bytes of data:\n"),
                            pstrHost,
                            inet_ntoa(*(struct in_addr*)&saDest.sin_addr),
                            REQ_DATASIZE);
 
        if( maxTTL )
        {
-           pResult += sprintf( pResult, WIDE("Hop  Size Min(ms) Max(ms) Avg(ms) Drop Hops? IP              Name\n") );
-           pResult += sprintf( pResult, WIDE("--- ----- ------- ------- ------- ---- ----- --------------- -------->\n") );
+           vtprintf( pvtResult, WIDE("Hop  Size Min(ms) Max(ms) Avg(ms) Drop Hops? IP              Name\n") );
+           vtprintf( pvtResult, WIDE("--- ----- ------- ------- ------- ---- ----- --------------- -------->\n") );
        }
        else
        {
-           pResult += sprintf( pResult, WIDE("Size  Min(ms) Max(ms) Avg(ms) Drop Hops? IP              Name\n") );
-           pResult += sprintf( pResult, WIDE("----- ------- ------- ------- ---- ----- --------------- -------->\n") );
+           vtprintf( pvtResult, WIDE("Size  Min(ms) Max(ms) Avg(ms) Drop Hops? IP              Name\n") );
+           vtprintf( pvtResult, WIDE("----- ------- ------- ------- ---- ----- --------------- -------->\n") );
        }
    }
 	EnterCriticalSec( &cs );
@@ -249,7 +249,7 @@ static LOGICAL DoPingExx( CTEXTSTR pstrHost
       {
          // Send ICMP echo request
          dwTimeSent = GetCPUTick();
-         if( SendEchoRequest(pResult, rawSocket, &saDest) <= 0)
+         if( SendEchoRequest(pvtResult, rawSocket, &saDest) <= 0)
          {
             closesocket( rawSocket );
 				LeaveCriticalSec( &cs );
@@ -259,8 +259,8 @@ static LOGICAL DoPingExx( CTEXTSTR pstrHost
          nRet = WaitForEchoReply(rawSocket, dwTime);
          if (nRet == SOCKET_ERROR)
          {
-             if( pResult )
-                 pResult = ReportError( pResult, WIDE("select()"));
+             if( pvtResult )
+                 ReportError( pvtResult, WIDE("select()"));
              goto LoopBreakpoint;  // abort abort FAIL
          }
          else if (!nRet)
@@ -280,11 +280,12 @@ static LOGICAL DoPingExx( CTEXTSTR pstrHost
             if( dwTimeNow < MinTime )
                MinTime = dwTimeNow;
 
-            if( !RecvEchoReply( pResult, rawSocket, &saSrc, &cTTL) )
+            if( !RecvEchoReply( pvtResult, rawSocket, &saSrc, &cTTL) )
             {
-                if( pResult )
-                    pResult = ReportError( pResult, WIDE("recv()") );
-                pResult = pResultStart;
+                if( pvtResult )
+                    ReportError( pvtResult, WIDE("recv()") );
+				//VarTextEmpty( &pvtResult );
+                //pResult = pResultStart;
                 closesocket( rawSocket );
                 LeaveCriticalSec( &cs );
                 return FALSE;
@@ -310,14 +311,14 @@ static LOGICAL DoPingExx( CTEXTSTR pstrHost
       else
           Entry[nEntry].dwAvgTime = 0;
       Entry[nEntry].dwDropped = Dropped;
-      Entry[nEntry].pName[0] = 0;
+      Entry[nEntry].pName = 0;
       nEntry++;
    }
 LoopBreakpoint:
 	nRet = closesocket(rawSocket);
 	if (nRet == SOCKET_ERROR)
-		if( pResult )
-			pResult = ReportError( pResult, WIDE("closesocket()"));
+		if( pvtResult )
+			ReportError( pvtResult, WIDE("closesocket()"));
 
    if( bRDNS )
    {
@@ -354,7 +355,7 @@ LoopBreakpoint:
       else        
       {
          pIPBuf = "No Response.";
-         Entry[i].pName[0] = 0;
+         Entry[i].pName = 0;
       }
       if( maxTTL )
       {
@@ -376,22 +377,22 @@ LoopBreakpoint:
                              , Entry[i].dwAvgTime
                              , Entry[i].dwDropped
                              , 256 - Entry[i].TTL );
-          if( pResult )
+          if( pvtResult )
 			 {
 				 if( Entry[i].dwAvgTime )
-					 sprintf( Avg, WIDE("%7") _32f, Entry[i].dwAvgTime );
+					 snprintf( Avg, sizeof( Avg ),WIDE("%7") _32f, Entry[i].dwAvgTime );
 				 else
-					 strcpy( Avg, WIDE("    ***") );
+					 snprintf( Avg, sizeof( Avg ),WIDE("    ***") );
 				 if( Entry[i].dwMinTime )
-					 sprintf( Min, WIDE("%7") _32f, Entry[i].dwMinTime );
+					 snprintf( Min,sizeof(Min), WIDE("%7") _32f, Entry[i].dwMinTime );
 				 else
-					 strcpy( Min, WIDE("    ***") );
+					 snprintf( Min, sizeof( Min ),WIDE("    ***") );
 				 if( Entry[i].dwMaxTime )
-					 sprintf( Max, WIDE("%7") _32f, Entry[i].dwMaxTime );
+					 snprintf( Max, sizeof( Max), WIDE("%7") _32f, Entry[i].dwMaxTime );
 				 else
-					 strcpy( Max, WIDE("    ***") );
+					 snprintf( Max, sizeof( Max ),WIDE("    ***") );
 
-				 pResult += sprintf( pResult, WIDE("%3d %5d %s %s %s %4") _32f WIDE(" %5d %15.15s %s\n"),
+				 vtprintf( pvtResult, WIDE("%3d %5d %s %s %s %4") _32f WIDE(" %5d %15.15s %s\n"),
 										  i + 1,
 										  REQ_DATASIZE,
 										  Min,
@@ -423,8 +424,8 @@ LoopBreakpoint:
 									 , Entry[i].dwAvgTime
 									 , Entry[i].dwDropped
 									 , 256 - Entry[i].TTL );
-			if( pResult )
-				pResult += sprintf( pResult, WIDE("%5d %7") _32f WIDE(" %7") _32f WIDE(" %7") _32f WIDE(" %4") _32f WIDE(" %5d %15.15s %s\n"),
+			if( pvtResult )
+				vtprintf( pvtResult, WIDE("%5d %7") _32f WIDE(" %7") _32f WIDE(" %7") _32f WIDE(" %4") _32f WIDE(" %5d %15.15s %s\n"),
 										 REQ_DATASIZE,
 										 Entry[i].dwMinTime,
 										 Entry[i].dwMaxTime,
@@ -444,28 +445,28 @@ NETWORK_PROC( LOGICAL, DoPing )( CTEXTSTR pstrHost,
              int maxTTL, 
              _32 dwTime, 
              int nCount, 
-             TEXTSTR pResult, 
+             PVARTEXT pvtResult, 
              LOGICAL bRDNS, 
              void (*ResultCallback)( _32 dwIP, CTEXTSTR name, int min, int max, int avg, int drop, int hops ) )
 {
-   return DoPingExx( pstrHost, maxTTL, dwTime, nCount, pResult, bRDNS, ResultCallback, NULL, 0 );
+   return DoPingExx( pstrHost, maxTTL, dwTime, nCount, pvtResult, bRDNS, ResultCallback, NULL, 0 );
 }
 
 NETWORK_PROC( LOGICAL, DoPingEx )( CTEXTSTR pstrHost,
 											 int maxTTL,
 											 _32 dwTime,
 											 int nCount,
-											 TEXTSTR pResult,
+											 PVARTEXT pvtResult,
 											 LOGICAL bRDNS,
 											 void (*ResultCallback)( PTRSZVAL psv, _32 dwIP, CTEXTSTR name, int min, int max, int avg, int drop, int hops )
 											, PTRSZVAL psvUser )
 {
-   return DoPingExx( pstrHost, maxTTL, dwTime, nCount, pResult, bRDNS, NULL, ResultCallback, psvUser );
+   return DoPingExx( pstrHost, maxTTL, dwTime, nCount, pvtResult, bRDNS, NULL, ResultCallback, psvUser );
 }
 // SendEchoRequest()
 // Fill in echo request header
 // and send to destination
-int SendEchoRequest(TEXTSTR pResult, SOCKET s,SOCKADDR_IN *lpstToAddr)
+int SendEchoRequest(PVARTEXT pvtResult, SOCKET s,SOCKADDR_IN *lpstToAddr)
 {
 	static ECHOREQUEST echoReq;
 	static int nId = 1;
@@ -498,8 +499,8 @@ int SendEchoRequest(TEXTSTR pResult, SOCKET s,SOCKADDR_IN *lpstToAddr)
 				 sizeof(SOCKADDR));   /* address length */
 
 	if (nRet == SOCKET_ERROR) 
-		if( pResult )
-			ReportError( pResult, WIDE("sendto()"));
+		if( pvtResult )
+			ReportError( pvtResult, WIDE("sendto()"));
 	return (nRet);
 }
 
@@ -507,7 +508,7 @@ int SendEchoRequest(TEXTSTR pResult, SOCKET s,SOCKADDR_IN *lpstToAddr)
 // RecvEchoReply()
 // Receive incoming data
 // and parse out fields
-int RecvEchoReply(TEXTSTR pResult, SOCKET s, SOCKADDR_IN *lpsaFrom, u_char *pTTL)
+int RecvEchoReply(PVARTEXT pvtResult, SOCKET s, SOCKADDR_IN *lpsaFrom, u_char *pTTL)
 {
 	ECHOREPLY echoReply;
 	int nRet;
@@ -529,8 +530,8 @@ int RecvEchoReply(TEXTSTR pResult, SOCKET s, SOCKADDR_IN *lpsaFrom, u_char *pTTL
 	// Check return value
 	if (nRet == SOCKET_ERROR) 
 	{
-		if( pResult )
-			ReportError( pResult, WIDE("recvfrom()"));
+		if( pvtResult )
+			ReportError( pvtResult, WIDE("recvfrom()"));
       return 0;
 	}
 // if( echoReply.ipHdr.
@@ -540,9 +541,9 @@ int RecvEchoReply(TEXTSTR pResult, SOCKET s, SOCKADDR_IN *lpsaFrom, u_char *pTTL
 }
 
 // What happened?
-TEXTSTR ReportError(TEXTSTR pInto, TEXTSTR pWhere)
+void ReportError(PVARTEXT pInto, TEXTSTR pWhere)
 {
-    return pInto + sprintf( pInto, WIDE("\n%s error: %d\n"),
+    vtprintf( pInto, WIDE("\n%s error: %d\n"),
                             pWhere, WSAGetLastError());
 }
 

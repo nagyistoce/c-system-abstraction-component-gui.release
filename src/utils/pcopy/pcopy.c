@@ -470,14 +470,14 @@ int main( int argc, CTEXTSTR *argv )
 					case 'X':
 						if( argv[c][ch+1] )
 						{
-							AddLink( &g.excludes, StrDup( argv[c] + ch + 1 ) );
+							AddLink( &g.excludes, strdup( argv[c] + ch + 1 ) );
 							done = 1; // skip remaining characters in parameter
 						}
 						else
 						{
 							if( ( c + 1 ) < (argc-1) )
 							{
-								AddLink( &g.excludes, StrDup( argv[c+1] ) );
+								AddLink( &g.excludes, strdup( argv[c+1] ) );
 								c++; // skip one character...
 								done = 1; // skip remining characters, go to next parameter (c++)
 							}

@@ -74,10 +74,14 @@
 #  endif
 
 // INCLUDE WINDOWS.H
+#ifdef __WATCOMC__
+#undef _WINDOWS_
+#endif
 #include <windows.h>
 #include <windowsx.h>
 // we like timeGetTime() instead of GetTickCount()
 #include <mmsystem.h>
+
 #ifdef NEED_V4W
 #include <vfw.h>
 #endif

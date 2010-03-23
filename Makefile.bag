@@ -108,8 +108,7 @@ HAVE_NASM=$(if $(shell nasm.exe -h),1,)
 
 MONSRC=$(if $(__WINDOWS__),src/filesyslib/filemon/windowsfiles,src/filesyslib/filemon/linuxfiles)
 
-SRCS= src/deadstart/deadlib      \
- src/deadstart/deadstart_core    \
+SRCS= src/deadstart/deadstart_core    \
  src/sysloglib/syslog            \
  src/memlib/sharemem             \
  $(if $(__CYGWIN__)$(__LINUX64__)$(__ARM__),,$(if $(HAVE_NASM),src/memlib/memoryasm,))            \
@@ -189,7 +188,7 @@ NEED_PNG=1
   else
 #  $(warning huh - static make this differently please? )
 NEED_PNG=0
-MORE_PROJECTS:=src/libpng-1.2.40/Makefile $(MORE_PROJECTS)
+MORE_PROJECTS:=src/libpng-1.4.1/Makefile $(MORE_PROJECTS)
   endif
 NEED_ZLIB=1
 NEED_JPEG=1
@@ -235,7 +234,7 @@ endif
 ifeq '$(NEED_ZLIB)' '1'
 ifndef __NO_GUI__
 ########### ZLIB SRCS ##############
-ZBASEDIR=src/zlib-1.2.3
+ZBASEDIR=src/zlib-1.2.4
 INCLUDEDIRS+=$(SACK_BASE)/$(ZBASEDIR)
 include $(ZBASEDIR)/Makefile.bag.part
 endif
@@ -244,35 +243,35 @@ endif
 
 ifeq '$(NEED_JPEG)' '1'
 ifndef __NO_GUI__
-JBASEDIR=src/jpeg-6b
+JBASEDIR=src/jpeg-8a
 SYSDEPMEM=jmemnobs
 
 # library object files common to compression and decompression
 COMSRCS= jcomapi jutils jerror jmemmgr $(SYSDEPMEM)
 
 # compression library object files
-CLIBSRCS= jcapimin jcapistd jctrans jcparam jdatadst \
+CLIBSRCS= jcarith jcapimin jcapistd jctrans jcparam jdatadst \
         jcinit jcmaster jcmarker jcmainct jcprepct \
-        jccoefct jccolor jcsample jchuff jcphuff \
+        jccoefct jccolor jcsample jchuff  \
         jcdctmgr jfdctfst jfdctflt jfdctint
 
 # decompression library object files
-DLIBSRCS= jdapimin jdapistd jdtrans jdatasrc \
-        jdmaster jdinput jdmarker jdhuff jdphuff \
+DLIBSRCS= jaricom jdarith jdapimin jdapistd jdtrans jdatasrc \
+        jdmaster jdinput jdmarker jdhuff  \
         jdmainct jdcoefct jdpostct jddctmgr jidctfst \
-        jidctflt jidctint jidctred jdsample jdcolor \
+        jidctflt jidctint jdsample jdcolor \
         jquant1 jquant2 jdmerge
 # These objectfiles are included in libjpeg.lib
 SRCS+=$(foreach src,$(CLIBSRCS) $(COMSRCS) $(DLIBSRCS),$(JBASEDIR)/$(src))
 CXFLAGS+= -DJPEG_SOURCE
-INCLUDEDIRS+=$(SACK_BASE)/src/jpeg-6b
+INCLUDEDIRS+=$(SACK_BASE)/src/jpeg-8a
 endif
 endif
 ########### PNG SRCS ##############
 
 ifeq '$(NEED_PNG)' '1'
 ifndef __NO_GUI__
-PBASEDIR=src/libpng-1.2.40
+PBASEDIR=src/libpng-1.4.1
 include $(PBASEDIR)/Makefile.bag.part
 endif
 endif
@@ -291,7 +290,7 @@ endif
 ifdef NEED_FREETYPE
 ifndef __NO_GUI__
 
-FBASEDIR=src/freetype-2.3.7/src
+FBASEDIR=src/freetype-2.3.12/src
 
 CXFLAGS+=-DFREETYPE_SOURCE
 

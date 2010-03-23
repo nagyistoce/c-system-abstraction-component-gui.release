@@ -14,7 +14,7 @@
 #include "xmltok.h"
 
 #ifdef __cplusplus
-//extern "C" {
+extern "C" {
 #endif
 
 enum {
@@ -108,7 +108,7 @@ void XmlPrologStateInitExternalEntity(PROLOG_STATE *);
  (((state)->handler)(state, tok, ptr, end, enc))
 
 #ifdef __cplusplus
-//}
+}
 #endif
 
 #endif /* not XmlRole_INCLUDED */

@@ -2,7 +2,7 @@
 if( NOT __NO_GUI__ )
 
 if( NEED_JPEG )
-SET( JBASEDIR src/jpeg-6b )
+SET( JBASEDIR src/jpeg-8a )
 SET( SYSDEPMEM jmemnobs )
 
 # library object files common to compression and decompression
@@ -26,27 +26,27 @@ FOREACH( SRC ${CLIBSRCS} ${COMSRCS} ${DLIBSRCS} )
 ENDFOREACH( SRC )
 add_definitions( -DJPEG_SOURCE )
 # ya, this is sorta redundant... should fix that someday.
-include_directories( ${SACK_BASE}/src/jpeg-6b/jpeg ${SACK_BASE}/src/jpeg-6b )
+include_directories( ${SACK_BASE}/${JBASEDIR} )
 
-#message( adding ${JPEG_SOURCE} )
+#message( adding ${SACK_BASE}/${JPEG_SOURCE} )
 endif()
 
 
 if( NEED_PNG )
 
  if( NEED_ZLIB )
-  SET( ZBASEDIR src/zlib-1.2.3 )
-  include( ${ZBASEDIR}/CMakeLists.part )
+  SET( ZBASEDIR src/zlib-1.2.4 )
+  add_subdirectory( ${ZBASEDIR} )
  endif( NEED_ZLIB )
 
 
- SET( PBASEDIR src/libpng-1.2.40 )
+ SET( PBASEDIR src/libpng-1.4.1 )
  include( ${PBASEDIR}/CMakeLists.part )
 endif( NEED_PNG )
 
 
 if( NEED_FREETYPE )
-SET( FBASEDIR src/freetype-2.3.7/src )
+SET( FBASEDIR src/freetype-2.3.12/src )
 
 add_definitions( -DFREETYPE_SOURCE -DFT2_BUILD_LIBRARY )
 
