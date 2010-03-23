@@ -202,8 +202,7 @@ MEM_PROC( int, StrCaseCmp )( CTEXTSTR s1, CTEXTSTR s2 );
 MEM_PROC( int, StrCaseCmpEx )( CTEXTSTR s1, CTEXTSTR s2, INDEX maxlen );
 MEM_PROC( CTEXTSTR, StrChr )( CTEXTSTR s1, TEXTCHAR c );
 MEM_PROC( TEXTSTR, StrCpyEx )( TEXTSTR s1, CTEXTSTR s2, int n );
-#undef StrCpy
-//MEM_PROC( TEXTSTR, StrCpy )( TEXTSTR s1, CTEXTSTR s2 );
+MEM_PROC( TEXTSTR, StrCpy )( TEXTSTR s1, CTEXTSTR s2 );
 #define StrCpy(s1,s2) StrCpyEx( s1, s2, sizeof( s1 )/sizeof(TEXTCHAR) )
 MEM_PROC( size_t, StrLen )( CTEXTSTR s );
 MEM_PROC( size_t, CStrLen )( char *s );

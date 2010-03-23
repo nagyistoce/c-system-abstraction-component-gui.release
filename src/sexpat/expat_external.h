@@ -34,7 +34,7 @@
    system headers may assume the cdecl convention.
 */
 #ifndef XMLCALL
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || defined( __WATCOMC__ )
 #define XMLCALL __cdecl
 #elif defined(__GNUC__) && defined(__i386) && !defined(__INTEL_COMPILER)
 #define XMLCALL __attribute__((cdecl))
