@@ -769,6 +769,8 @@ void HandleEvent( PCLIENT pClient )
 								else
 									pClient->read.ReadComplete( pClient, NULL, 0 );
 						}
+						if( pClient->pWaiting )
+                     WakeThread( pClient->pWaiting );
 						//lprintf( WIDE("Returned from application inital read complete.") );
 					}
 				}

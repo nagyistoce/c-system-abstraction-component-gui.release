@@ -521,23 +521,24 @@ static PCLIENT InternalTCPClientAddrExx(SOCKADDR *lpAddr,
 						 else
 						 {
 							 if( bProcessing >= 0 )
-								ProcessNetworkMessages( 0 );
+								 ProcessNetworkMessages( 0 );
 						 }
-		    if( bProcessing == 2 )
-		    {
+						 if( bProcessing == 2 )
+						 {
 #ifdef LOG_NOTICES
-			lprintf( "Falling asleep 3 seconds waiting for connect." );
+							 lprintf( "Falling asleep 3 seconds waiting for connect." );
 #endif
-			pResult->pWaiting = MakeThread();
-			WakeableSleep( 3000 );
-		    }
-		    else
-		    {
-			lprintf( WIDE( "Spin wait for connect" ) );
-        		Relinquish();
-		    }
-                }
-                if( (( (GetTickCount()&0xFFFFFFF) - Start ) >= 10000)
+							 pResult->pWaiting = MakeThread();
+							 WakeableSleep( 3000 );
+                      pResult->pWaiting = NULL;
+						 }
+						 else
+						 {
+							 lprintf( WIDE( "Spin wait for connect" ) );
+							 Relinquish();
+						 }
+					 }
+					 if( (( (GetTickCount()&0xFFFFFFF) - Start ) >= 10000)
                     || (pResult->dwFlags &  CF_CONNECTERROR ) )
                 {
                 	  if( pResult->dwFlags &  CF_CONNECTERROR )

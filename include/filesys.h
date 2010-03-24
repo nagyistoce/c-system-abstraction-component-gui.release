@@ -141,18 +141,19 @@ FILESYS_PROC( _32, GetFileTimeAndSize )( CTEXTSTR name
 //# endif
 #endif
 
-FILESYS_PROC( int, sack_open )( int group, CTEXTSTR filename, int opts, ... );
-FILESYS_PROC( int, sack_creat )( int group, CTEXTSTR file, int opts, ... );
+FILESYS_PROC( HANDLE, sack_open )( int group, CTEXTSTR filename, int opts, ... );
+FILESYS_PROC( HANDLE, sack_openfile )( int group, CTEXTSTR filename, OFSTRUCT *of, int flags );
+FILESYS_PROC( HANDLE, sack_creat )( int group, CTEXTSTR file, int opts, ... );
 FILESYS_PROC( int, sack_close )( HANDLE file_handle );
 FILESYS_PROC( int, sack_lseek )( HANDLE file_handle, int pos, int whence );
-FILESYS_PROC( int, sack_read )( HANDLE file_handle, POINTER buffer, int size );
-FILESYS_PROC( int, sack_write )( HANDLE file_handle, POINTER buffer, int size );
+FILESYS_PROC( int, sack_read )( HANDLE file_handle, CPOINTER buffer, int size );
+FILESYS_PROC( int, sack_write )( HANDLE file_handle, CPOINTER buffer, int size );
 
 FILESYS_PROC( FILE*, sack_fopen )( int group, CTEXTSTR filename, CTEXTSTR opts );
 FILESYS_PROC( int, sack_fclose )( FILE *file_file );
 FILESYS_PROC( int, sack_fseek )( FILE *file_file, int pos, int whence );
-FILESYS_PROC( int, sack_fread )( POINTER buffer, int size, int count,FILE *file_file );
-FILESYS_PROC( int, sack_fwrite )( POINTER buffer, int size, int count,FILE *file_file );
+FILESYS_PROC( int, sack_fread )( CPOINTER buffer, int size, int count,FILE *file_file );
+FILESYS_PROC( int, sack_fwrite )( CPOINTER buffer, int size, int count,FILE *file_file );
 
 FILESYS_PROC( int, sack_unlink )( CTEXTSTR filename );
 FILESYS_PROC( int, sack_rename )( CTEXTSTR file_source, CTEXTSTR new_name );
@@ -163,7 +164,12 @@ FILESYS_PROC( int, sack_rename )( CTEXTSTR file_source, CTEXTSTR new_name );
 #define lseek(a,b,c) sack_lseek(a,b,c)
 #define _llseek(a,b,c) sack_lseek(a,b,c)
 
+#define HFILE HANDLE
+#undef HFILE_ERROR
+#define HFILE_ERROR INVALID_HANDLE_VALUE
+#define creat(a,...)  sack_creat( 0,a,##__VA_ARGS__ )
 #define close(a)  sack_close(a)
+#define OpenFile(a,b,c) sack_openfile(0,a,b,c)
 #define _lclose(a)  sack_close(a)
 #define read(a,b,c) sack_read(a,b,c)
 #define write(a,b,c) sack_write(a,b,c)
