@@ -124,7 +124,7 @@ TEXTSTR sack_prepend_path( int group, CTEXTSTR filename )
 	return result;
 }
 
-int sack_open( int group, CTEXTSTR filename, int opts, ... )
+HANDLE sack_open( int group, CTEXTSTR filename, int opts, ... )
 {
 	HANDLE handle;
 	struct file *file;
@@ -185,10 +185,15 @@ int sack_open( int group, CTEXTSTR filename, int opts, ... )
 #ifdef DEBUG_FILEOPEN
 		lprintf( WIDE( "Failed to open file [%s]=[%s]" ), file->name, file->fullname );
 #endif
-		return -1;
+		return INVALID_HANDLE_VALUE;
 	}
 	AddLink( &file->handles, handle );
-	return (int)handle;
+	return handle;
+}
+
+HANDLE sack_openfile( int group,CTEXTSTR filename, OFSTRUCT *of, int flags )
+{
+   return (HANDLE)OpenFile(filename,of,flags);
 }
 
 
@@ -212,7 +217,7 @@ struct file *FindFileByHandle( HANDLE file_file )
 }
 
 
-int sack_creat( int group, CTEXTSTR file, int opts, ... )
+HANDLE sack_creat( int group, CTEXTSTR file, int opts, ... )
 {
    return sack_open( group, file, opts | O_CREAT );
 }
@@ -241,16 +246,16 @@ int sack_lseek( HANDLE file_handle, int pos, int whence )
 	return SetFilePointer((HANDLE)file_handle,pos,NULL,whence);
 }
 
-int sack_read( HANDLE file_handle, POINTER buffer, int size )
+int sack_read( HANDLE file_handle, CPOINTER buffer, int size )
 {
    DWORD dwLastReadResult;
-   return (ReadFile( (HANDLE)file_handle, buffer, size, &dwLastReadResult, NULL )?dwLastReadResult:-1 );
+   return (ReadFile( (HANDLE)file_handle, (POINTER)buffer, size, &dwLastReadResult, NULL )?dwLastReadResult:-1 );
 }
 
-int sack_write( HANDLE file_handle, POINTER buffer, int size )
+int sack_write( HANDLE file_handle, CPOINTER buffer, int size )
 {
    DWORD dwLastWrittenResult;
-	return (WriteFile( (HANDLE)file_handle, buffer, size, &dwLastWrittenResult, NULL )?dwLastWrittenResult:-1 );
+	return (WriteFile( (HANDLE)file_handle, (POINTER)buffer, size, &dwLastWrittenResult, NULL )?dwLastWrittenResult:-1 );
 }
 
 int sack_unlink( CTEXTSTR filename )
@@ -348,13 +353,13 @@ FILESYS_PROC( int, sack_fclose )( FILE *file_file )
    */
    return fclose( file_file );
 }
-FILESYS_PROC( int, sack_fread )( POINTER buffer, int size, int count,FILE *file_file )
+FILESYS_PROC( int, sack_fread )( CPOINTER buffer, int size, int count,FILE *file_file )
 {
-   return fread( buffer, size, count, file_file );
+   return fread( (POINTER)buffer, size, count, file_file );
 }
-FILESYS_PROC( int, sack_fwrite )( POINTER buffer, int size, int count,FILE *file_file )
+FILESYS_PROC( int, sack_fwrite )( CPOINTER buffer, int size, int count,FILE *file_file )
 {
-   return fwrite( buffer, size, count, file_file );
+   return fwrite( (POINTER)buffer, size, count, file_file );
 }
 
 
