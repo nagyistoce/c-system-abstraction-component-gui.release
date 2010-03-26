@@ -20,6 +20,7 @@
 #include <ctype.h>
 #include <sack_types.h>
 #include <deadstart.h>
+#include <sqlgetoption.h>
 #define MAIN_PROGRAM
 #include "netstruc.h"
 #include <network.h>
@@ -85,6 +86,8 @@ PRIORITY_PRELOAD( InitGlobal, GLOBAL_INIT_PRELOAD_PRIORITY )
 	{
   		g.system_name = WIDE("no.network");
 	}
+	g.dwReadTimeout = SACK_GetProfileIntEx( "SACK", "Network/Read wait timeout", 5000, TRUE );
+	g.dwConnectTimeout = SACK_GetProfileIntEx( "SACK", "Network/Connect timeout", 10000, TRUE );
 }
 
 //----------------------------------------------------------------------------
@@ -456,68 +459,68 @@ void CPROC PendingTimer( PTRSZVAL unused )
 #endif
 	EnterCriticalSec( &g.csNetwork );
 #ifdef VERBOSE_DEBUG
-   Log( WIDE("Have network lock.") );
+	Log( WIDE("Have network lock.") );
 #endif
 restart:
-    for( pc = g.ActiveClients; pc; pc = next )
-	 {
-       // pc can go away during check, so just grab his next now.
-       next = pc->next;
-#ifdef LOG_CLIENT_LISTS
-		 lprintf( "Checking active client %p(%d)", pc, pc->Socket );
+	for( pc = g.ActiveClients; pc; pc = next )
+	{
+		// pc can go away during check, so just grab his next now.
+		next = pc->next;
+#if defined( LOG_CLIENT_LISTS ) && defined( VERBOSE_DEBUG )
+		lprintf( "Checking active client %p(%d)", pc, pc->Socket );
 #endif
-        if( IsValid(pc->Socket) &&
-           !(pc->dwFlags & CF_UDP ) )
-		  {
-            //Log( WIDE("Entering non UDP client lock...") );
-            if( EnterCriticalSecNoWait( &pc->csLock, NULL ) == 1 )
-				{
-					LeaveCriticalSec( &g.csNetwork );
+		if( IsValid(pc->Socket) &&
+			!(pc->dwFlags & CF_UDP ) )
+		{
+			//Log( WIDE("Entering non UDP client lock...") );
+			if( EnterCriticalSecNoWait( &pc->csLock, NULL ) == 1 )
+			{
+				LeaveCriticalSec( &g.csNetwork );
 
-                //Log( WIDE("Have non UDP client lock.") );
-                if( !(pc->dwFlags & CF_ACTIVE ) )
-                {
-                    // change to inactive status by the time we got here...
-                    LeaveCriticalSec( &pc->csLock );
-                    goto restart;
-                }
-                if( pc->dwFlags & CF_ACTIVE )
-                {
-                    if( pc->lpFirstPending )
-                    {
-                        Log( WIDE("Pending Timer:Write") );
-                        TCPWrite( pc );
-                    }
-                    if( (pc->dwFlags & CF_CONNECTED) && (pc->dwFlags & CF_ACTIVE))
-                    {
-                        //Log( WIDE("Pending Timer:Read"));
-                        FinishPendingRead( pc DBG_SRC );
-								if( pc->dwFlags & CF_TOCLOSE )
-								{
-									lprintf( WIDE( "Pending read failed - reset connection. (posting to application)" ) );
-									InternalRemoveClientEx( pc, FALSE, FALSE );
-								}
-                    }
-                }
-                LeaveCriticalSec( &pc->csLock );
-					 EnterCriticalSec( &g.csNetwork );
+				//Log( WIDE("Have non UDP client lock.") );
+				if( !(pc->dwFlags & CF_ACTIVE ) )
+				{
+					// change to inactive status by the time we got here...
+					LeaveCriticalSec( &pc->csLock );
+					goto restart;
 				}
-				//else
-            //   Log( WIDE("Failed network lock on non UDP client.") );
-        }
-    }
-    // fortunatly closed clients are owned by this timer...
-    for( pc = g.ClosedClients; pc; pc = next )
-    {
-        next = pc->next; // will dissappear when closed so save it.
-        if( GetTickCount() > (pc->LastEvent + 2000) )
-        {
-            //Log( WIDE("Closing delay terminated client.") );
-            TerminateClosedClient( pc );
-        }
-    }
-    //Log( WIDE("Leaving network lock.") );
-    LeaveCriticalSec( &g.csNetwork );
+				if( pc->dwFlags & CF_ACTIVE )
+				{
+					if( pc->lpFirstPending )
+					{
+						Log( WIDE("Pending Timer:Write") );
+						TCPWrite( pc );
+					}
+					if( (pc->dwFlags & CF_CONNECTED) && (pc->dwFlags & CF_ACTIVE))
+					{
+						//Log( WIDE("Pending Timer:Read"));
+						FinishPendingRead( pc DBG_SRC );
+						if( pc->dwFlags & CF_TOCLOSE )
+						{
+							lprintf( WIDE( "Pending read failed - reset connection. (posting to application)" ) );
+							InternalRemoveClientEx( pc, FALSE, FALSE );
+						}
+					}
+				}
+				LeaveCriticalSec( &pc->csLock );
+				EnterCriticalSec( &g.csNetwork );
+			}
+			//else
+			//   Log( WIDE("Failed network lock on non UDP client.") );
+		}
+	}
+	// fortunatly closed clients are owned by this timer...
+	for( pc = g.ClosedClients; pc; pc = next )
+	{
+		next = pc->next; // will dissappear when closed so save it.
+		if( GetTickCount() > (pc->LastEvent + 2000) )
+		{
+			//Log( WIDE("Closing delay terminated client.") );
+			TerminateClosedClient( pc );
+		}
+	}
+	//Log( WIDE("Leaving network lock.") );
+	LeaveCriticalSec( &g.csNetwork );
 }
 
 #ifndef __LINUX__
@@ -662,7 +665,8 @@ void CPROC NetworkPauseTimer( PTRSZVAL psv )
 
 void HandleEvent( PCLIENT pClient )
 {
-   WSANETWORKEVENTS networkEvents;
+	WSANETWORKEVENTS networkEvents;
+	//lprintf( "Client event on %p", pClient );
 	if( WSAEnumNetworkEvents( pClient->Socket, pClient->event, &networkEvents ) == ERROR_SUCCESS )
 	{
 #ifdef LOG_NOTICES
@@ -748,7 +752,7 @@ void HandleEvent( PCLIENT pClient )
 							// connection opening...
 							//Log( WIDE("Sending any previously queued data.") );
 
-                     // with events, we get a FD_WRITE also... which calls tcpwrite.
+							// with events, we get a FD_WRITE also... which calls tcpwrite.
 							//TCPWrite( pClient );
 						}
 						pClient->dwFlags &= ~CF_CONNECTING;
@@ -770,7 +774,7 @@ void HandleEvent( PCLIENT pClient )
 									pClient->read.ReadComplete( pClient, NULL, 0 );
 						}
 						if( pClient->pWaiting )
-                     WakeThread( pClient->pWaiting );
+							WakeThread( pClient->pWaiting );
 						//lprintf( WIDE("Returned from application inital read complete.") );
 					}
 				}
@@ -842,7 +846,7 @@ void HandleEvent( PCLIENT pClient )
 	}
 	else
 	{
-      lprintf( WIDE( "Event enum failed... do what? close socket?" ) );
+		lprintf( WIDE( "Event enum failed... do what? close socket? %d %d" ), pClient->Socket, WSAGetLastError() );
 	}
 }
 #endif  //defined(USE_WSA_EVENTS)
@@ -1254,8 +1258,8 @@ int CPROC ProcessNetworkMessages( PTRSZVAL quick_check )
       Count++;
 		for( pc = g.ActiveClients; pc; pc = pc->next )
 		{
-         // socket might not be quite opened yet...
-			if( !IsValid( pc->Socket ) )
+         // socket might not be quite opened yet... or maybe the event isn't created just yet
+			if( !IsValid( pc->Socket ) || !(pc->event) || !(pc->Socket) )
 				continue;
          // make sure we drop inactive clients immediately...
 			if( !( pc->dwFlags & CF_ACTIVE ) )
@@ -1266,7 +1270,7 @@ int CPROC ProcessNetworkMessages( PTRSZVAL quick_check )
             AddLink( &clients, pc );
 				Count++;
 #    ifdef LOG_NOTICES
-				lprintf( "Added for read select %p(%d)", pc, pc->Socket );
+				lprintf( "Added for read select %p(%d) %d", pc, pc->Socket, pc->event );
 #    endif
             continue;
 			}
@@ -1275,7 +1279,7 @@ int CPROC ProcessNetworkMessages( PTRSZVAL quick_check )
 			{
 				pc->dwFlags |= CF_WRITEISPENDED;
 #    ifdef LOG_NOTICES
-				Log( WIDE("Pending write... Setting socket into write list...") );
+				Log( WIDE("Pending write... Setting socket into write list... %p(%d) %d"), pc, pc->Socket, pc->event );
 #    endif
             AddLink( &events, pc->event );
 				AddLink( &clients, pc );
@@ -1287,7 +1291,7 @@ int CPROC ProcessNetworkMessages( PTRSZVAL quick_check )
 			AddLink( &clients, pc );
 			Count++;
 #    ifdef LOG_NOTICES
-			lprintf( "Added for except event %p(%d)", pc, pc->Socket );
+			lprintf( "Added for except event %p(%d) %d", pc, pc->Socket, pc->event );
 #    endif
 
 		}
@@ -1296,7 +1300,7 @@ int CPROC ProcessNetworkMessages( PTRSZVAL quick_check )
 		LeaveCriticalSec( &g.csNetwork );
       while( 1 )
 		{
-         DWORD result;
+         S_32 result;
 			// want to wait here anyhow...
 #    ifdef LOG_NOTICES
 			lprintf( "Waiting on %d", Count );
@@ -1310,11 +1314,22 @@ int CPROC ProcessNetworkMessages( PTRSZVAL quick_check )
 #    ifdef LOG_NOTICES
 			lprintf( WIDE("Event Wait Result was %d"), result );
 #    endif
-			if( result >= WSA_WAIT_EVENT_0 )
+			if( result == WSA_WAIT_FAILED )
+			{
+				DWORD dwError = WSAGetLastError();
+				if( dwError == WSA_INVALID_HANDLE )
+				{
+               lprintf( "Rebuild list, have a bad event handle somehow." );
+					break;
+				}
+				lprintf( WIDE( "error of wait is %d" ), WSAGetLastError() );
+            break;
+			}
+			else if( result >= WSA_WAIT_EVENT_0 )
 			{
             // if result is _0, then it's the global event, and we just return.
 				if( result > WSA_WAIT_EVENT_0 )
-					HandleEvent( (PCLIENT)GetLink( &clients, result-WSA_WAIT_EVENT_0 ) );
+					HandleEvent( (PCLIENT)GetLink( &clients, result-(WSA_WAIT_EVENT_0) ) );
 				else
 				{
 #ifdef LOG_NOTICES
@@ -1327,13 +1342,13 @@ int CPROC ProcessNetworkMessages( PTRSZVAL quick_check )
 				return 1;
 			}
 #ifndef UNDER_CE
-			if( result == WSA_WAIT_IO_COMPLETION )
+			else if( result == WSA_WAIT_IO_COMPLETION )
 			{
             // reselect... not sure where io completion fits for network...
 				continue;
 			}
 #endif
-			if( result == WSA_WAIT_TIMEOUT )
+			else if( result == WSA_WAIT_TIMEOUT )
 			{
             //continue
 			}

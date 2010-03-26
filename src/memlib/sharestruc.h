@@ -1,4 +1,5 @@
 #if !defined( MEMORY_STRUCT_DEFINED ) || defined( DEFINE_MEMORY_STRUCT )
+//#define USE_CUSTOM_ALLOCER
 #define MEMORY_STRUCT_DEFINED
 #include "sack_types.h"
 

@@ -1817,15 +1817,18 @@ static void DropMemEx( PMEM pMem DBG_PASS )
 
 POINTER HeapAllocateEx( PMEM pHeap, PTRSZVAL dwSize DBG_PASS )
 {
+#if !defined( USE_CUSTOM_ALLOCER )
 	if( !pHeap )
 	{
 		PCHUNK pc = malloc( sizeof( CHUNK ) + dwSize );
 		pc->dwOwners = 1;
 		pc->dwSize = dwSize;
-		//_lprintf(DBG_RELAY)( "alloc %p(%p)", pc, pc->byData );
+      if( g.bLogAllocate )
+			_lprintf(DBG_RELAY)( "alloc %p(%p) %d", pc, pc->byData, dwSize );
 		return pc->byData;
 	}
 	else
+#endif
 	{
 		PHEAP_CHUNK pc;
 		PMEM pMem, pCurMem = NULL;
@@ -2143,13 +2146,13 @@ MEM_PROC( POINTER, MemDup )(CPOINTER thing )
 
 POINTER ReleaseEx ( POINTER pData DBG_PASS )
 {
-#if 1
+#if !defined( USE_CUSTOM_ALLOCER )
 	if( pData )
 	{
 		if( !( ((PTRSZVAL)pData) & 0x3FF ) )
 		{
 			// system allocated blocks ( OpenSpace ) will be tracked as spaces...
-         // and they will be aligned on large memory blocks (4096 probably)
+			// and they will be aligned on large memory blocks (4096 probably)
 			PSPACE ps = FindSpace( pData );
 			if( ps )
 			{
@@ -2157,7 +2160,7 @@ POINTER ReleaseEx ( POINTER pData DBG_PASS )
 				return NULL;
 			}
 		}
-      // how to figure if it's a CHUNK or a HEAP_CHUNK?
+		// how to figure if it's a CHUNK or a HEAP_CHUNK?
 		{
 			// register PMEM pMem = (PMEM)(pData - offsetof( MEM, pRoot ));
 			register PCHUNK pc = (PCHUNK)(((PTRSZVAL)pData) -
@@ -2176,13 +2179,17 @@ POINTER ReleaseEx ( POINTER pData DBG_PASS )
 	return NULL;
 #else
 	{
-	PMEM pMem, pCurMem;
-	PSPACE pMemSpace;
-	if( !pData ) // always safe to release nothing at all..
-		return NULL;
+		register PCHUNK pc = (PCHUNK)(((PTRSZVAL)pData) -
+												offsetof( CHUNK, byData ));
+		PMEM pMem, pCurMem;
+		PSPACE pMemSpace;
+		if( !pData ) // always safe to release nothing at all..
+			return NULL;
 
-	// Allow a simple release() to close a shared memory file mapping
-	// this is a slight performance hit for all deallocations
+		if( g.bLogAllocate )
+			_lprintf(DBG_RELAY)( "Release %p(%p)", pc, pc->byData );
+		// Allow a simple release() to close a shared memory file mapping
+		// this is a slight performance hit for all deallocations
 	{
 		PSPACE ps = FindSpace( pData );
 		if( ps )
@@ -2431,6 +2438,7 @@ MEM_PROC( POINTER, HoldEx )( POINTER pData DBG_PASS )
 	return pData;
 #else
 	{
+	PCHUNK pc = (PCHUNK)((char*)pData - CHUNK_SIZE);
 	PMEM pMem = GrabMem( pc->pRoot );
 
 	if( g.bLogAllocate )

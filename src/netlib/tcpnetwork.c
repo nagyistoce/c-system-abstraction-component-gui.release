@@ -508,7 +508,7 @@ static PCLIENT InternalTCPClientAddrExx(SOCKADDR *lpAddr,
                 Start = (GetTickCount()&0xFFFFFFF);
                 // caller was expecting connect to block....
                 while( !( pResult->dwFlags & (CF_CONNECTED|CF_CONNECTERROR) ) &&
-                       ( ( (GetTickCount()&0xFFFFFFF) - Start ) < 10000 ) )
+                       ( ( (GetTickCount()&0xFFFFFFF) - Start ) < g.dwConnectTimeout ) )
                 {
 						 // may be this thread itself which connects...
 						 if( !bProcessing )
@@ -941,7 +941,7 @@ NETWORK_PROC( int, doReadExx)(PCLIENT lpClient,POINTER lpBuffer,int nBytes, LOGI
 			while( lpClient->dwFlags & CF_READPENDING )
 			{
             // wait 5 seconds, then bail.
-				if( ( tick + 5000 ) < GetTickCount() )
+				if( ( tick + g.dwReadTimeout ) < GetTickCount() )
 				{
 					//lprintf( "pending has timed out! return now." );
 					timeout = 1;
