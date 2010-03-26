@@ -206,6 +206,8 @@ LOCATION struct network_global_data{
 #if defined( USE_WSA_EVENTS )
    WSAEVENT event;
 #endif
+	_32 dwReadTimeout;
+   _32 dwConnectTimeout;
 }
 *global_network_data; // aka 'g'
 

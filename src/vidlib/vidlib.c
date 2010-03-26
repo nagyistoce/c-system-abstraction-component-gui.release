@@ -1795,8 +1795,8 @@ static void SendApplicationDraw( PVIDEO hVideo )
 					//HDWP hDeferWindowPos = BeginDeferWindowPos( 1 );
 #ifdef NOISY_LOGGING
 					lprintf( WIDE( "redraw... WM_PAINT (sendapplicationdraw)" ) );
-#endif
 					lprintf( WIDE( "%p %p %p"), hVideo->pRedrawCallback, hVideo->dwRedrawData, (PRENDERER) hVideo );
+#endif
 					hVideo->pRedrawCallback (hVideo->dwRedrawData, (PRENDERER) hVideo);
 				}
 				//catch(...)

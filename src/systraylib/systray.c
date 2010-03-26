@@ -163,7 +163,7 @@ PTRSZVAL CPROC RegisterAndCreate( PTHREAD thread )
 	static WNDCLASS wc;  // zero init.
 	static ATOM ac;
 #ifndef __NO_OPTIONS__
-	l.flags.bLog = SACK_GetPrivateProfileIntEx( WIDE( "SACK/System Tray" ), WIDE( "Logging Enable" ), 0, GetProgramName(), TRUE );
+	l.flags.bLog = SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/System Tray/Logging Enable" ), 0, TRUE );
 #endif
 	if( !ac )
 	{

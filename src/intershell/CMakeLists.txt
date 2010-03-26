@@ -37,6 +37,8 @@ string( REGEX REPLACE "(.*)\\.(.*)" "\\1_\\2" TARGET_LABEL ${PROJECT_NAME} )
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   DEFINE_SYMBOL INTERSHELL_SOURCE
                   COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL} -D__NO_ANIMATION__"
+                  SUFFIX ""
+                  PREFIX ""
 )
 
 target_link_libraries( ${PROJECT_NAME} sack_widgets ${SACK_LIBRARY} )
@@ -68,11 +70,10 @@ add_subdirectory( vlc_hook )
 endif()
 add_subdirectory( windows_shell )
 add_subdirectory( tasks )
+add_subdirectory( clock )
 
 
 # this has to be set before the cmakelists.txt ends... but not before other cmakelists are loaded
-set( CMAKE_SHARED_LIBRARY_SUFFIX "" )
-set( CMAKE_SHARED_LIBRARY_PREFIX "" )
 
 if( NOT __ARM__ )
 # arm target has no console.
