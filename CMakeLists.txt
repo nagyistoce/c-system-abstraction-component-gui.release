@@ -474,6 +474,7 @@ endif()
 if( NOT SACK_ONLY OR BUILD_INTERSHELL )
 add_subdirectory( src/intershell )
 add_subdirectory( src/SQLlib/optlib/editoption )
+add_subdirectory( src/msgsvr/server )
 
 # parts of SDK ...
 add_subdirectory( include )
