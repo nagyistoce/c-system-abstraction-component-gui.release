@@ -26,7 +26,7 @@ FILESYS_NAMESPACE
 #endif
 //--------------------------------------------------------------------------
 
-FILESYS_PROC( int, CompareMask )( CTEXTSTR mask, CTEXTSTR name, int keepcase )
+ int  CompareMask ( CTEXTSTR mask, CTEXTSTR name, int keepcase )
 {
 	int m = 0, n = 0;
 	int anymatch;
@@ -181,7 +181,7 @@ static void CPROC MatchFile( PTRSZVAL psvUser, CTEXTSTR name, int flags )
    buffer->result_len = snprintf( buffer->buffer, buffer->len, WIDE("%s"), name );
 }
 
-FILESYS_PROC( int, GetMatchingFileName )( CTEXTSTR filemask, int flags, TEXTSTR pResult, int nResult )
+ int  GetMatchingFileName ( CTEXTSTR filemask, int flags, TEXTSTR pResult, int nResult )
 {
 	void *info = NULL;
 	RESULT_BUFFER result_buf;
@@ -244,7 +244,7 @@ typedef struct myfinddata {
 #define findbuffer(pInfo) ( ((PMFD)(*pInfo))->buffer)
 
 
-FILESYS_PROC( int, ScanFiles )( CTEXTSTR base
+ int  ScanFiles ( CTEXTSTR base
            , CTEXTSTR mask
            , void **pInfo
            , void CPROC Process( PTRSZVAL psvUser, CTEXTSTR name, int flags )
@@ -362,7 +362,7 @@ FILESYS_PROC( int, ScanFiles )( CTEXTSTR base
 
 //---------------------------------------------------------------------------
 
-FILESYS_PROC( void, ScanDrives )( void (CPROC*Process)(PTRSZVAL user, CTEXTSTR letter, int flags)
+ void  ScanDrives ( void (CPROC*Process)(PTRSZVAL user, CTEXTSTR letter, int flags)
 									, PTRSZVAL user )
 {
 #ifdef UNDER_CE
@@ -396,7 +396,7 @@ typedef struct myfinddata {
 } MFD, *PMFD;
 
 //---------------------------------------------------------------------------
-FILESYS_PROC( int, ScanFiles )( CTEXTSTR base
+ int  ScanFiles ( CTEXTSTR base
            , CTEXTSTR mask
            , void **pInfo
            , void CPROC Process( PTRSZVAL psvUser, CTEXTSTR name, int flags )
@@ -505,7 +505,7 @@ FILESYS_PROC( int, ScanFiles )( CTEXTSTR base
 //---------------------------------------------------------------------------
 
 
-FILESYS_PROC( void, ScanDrives )( void(*Process)(PTRSZVAL user, CTEXTSTR letter, int flags)
+ void  ScanDrives ( void(*Process)(PTRSZVAL user, CTEXTSTR letter, int flags)
                                  , PTRSZVAL psv )
 {
 

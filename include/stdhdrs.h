@@ -1,10 +1,20 @@
+/* Includes the system platform as required or appropriate. If
+   under a linux system, include appropriate basic linux type
+   headers, if under windows pull "windows.h".
+   
+   
+   
+   Includes the MOST stuff here ( a full windows.h parse is many
+   many lines of code.)                                          */
 
 #include <sack_types.h>
 
+/* A macro to build a wide character string of __FILE__ */
 #define _WIDE__FILE__(n) WIDE(n)
 #define WIDE__FILE__ _WIDE__FILE__(__FILE__)
 
 #ifndef STANDARD_HEADERS_INCLUDED
+/* multiple inclusion protection symbol */
 #define STANDARD_HEADERS_INCLUDED 
 #include <stdlib.h>
 #include <stddef.h>
@@ -159,6 +169,14 @@
 #if defined( __ARM__ )
 #define DebugBreak()
 #else
+/* A symbol used to cause a debugger to break at a certain
+   point. Sometimes dynamicly loaded plugins can be hard to set
+   the breakpoint in the debugger, so it becomes easier to
+   recompile with a breakpoint in the right place.
+   Example
+   <code lang="c++">
+   DebugBreak();
+   </code>                                                      */
 #define DebugBreak()  asm("int $3\n" )
 #endif
 
@@ -166,24 +184,12 @@
 //#define Sleep(n) (usleep((n)*1000))
 #define Relinquish() sched_yield()
 #define GetLastError() (S_32)errno
+/* return with a THREAD_ID that is a unique, universally
+   identifier for the thread for inter process communication. */
 #define GetCurrentProcessId() ((_32)getpid())
 #define GetCurrentThreadId() ((_32)getpid())
 
-/*
- // moved into timers - please linnk vs timers to get time...
-static unsigned long GetTickCount( void )
-{
-   struct timeval time;
-   gettimeofday( &time, 0 );
-   return (time.tv_sec * 1000) + (time.tv_usec / 1000);
-	}
-   */
-/*
-#define GetTickCount() ( struct timeval time;  gettimeofday( &time, 0 ),\
-    ( (time.tv_sec * 1000) + (time.tv_usec / 1000) )\
-    )
-    */
-//#define GetTickCount() ( time(NULL) * 1000 )
+/* Define a min(a,b) macro when the compiler lacks it. */
 #ifndef min
 #define min(a,b) (((a)<(b))?(a):(b))
 #endif
@@ -193,14 +199,6 @@ static unsigned long GetTickCount( void )
 //typedef void *HANDLE;
 #endif
 
-/*
-#ifndef __PPCCPP__
-#warning GetFunctionAddress is lazy and has no library cleanup - needs to be a lib func
-#else
-#pragma pragnoteonly( WIDE("GetFunctionAddress is lazy and has no library cleanup - needs to be a lib func") )
-#endif
-#define GetFunctionAddress( lib, proc ) dlsym( dlopen( lib, RTLD_NOW ), (proc) )
-*/
 #endif
 #if defined( _MSC_VER )|| defined(__LCC__) || defined( __WATCOMC__ ) || defined( __GNUC__ )
 //#ifndef __cplusplus_cli
@@ -222,70 +220,23 @@ static unsigned long GetTickCount( void )
 
 #endif
 
+#include <logging.h>
+
 // GetTickCount() and Sleep(n) Are typically considered to be defined by including stdhdrs...
 #include <timers.h>
 
-#ifdef NEED_TICK_LOGGING
-#ifdef __LCC__
-#ifdef _DEBUG
-#include <logging.h>
-#include <intrinsics.h>
-static long long __tick_mark_time;
-static long long __tick_mark_now;
-static long long __tick_mark_calibrate;
-
-#define TickCalibrate() {                          \
-   long dwTime = GetTickCount() + 1000;            \
-   long long _tick_count = _rdtsc();               \
-   while( dwTime > GetTickCount() ) Sleep(0);        \
-   _tick_count = ( _rdtsc() - _tick_count );       \
-   Log1( WIDE("count: %ld"), _tick_count );            \
-   /*_tick_count = _tick_count / 1000;  */             \
-   __tick_mark_calibrate = _tick_count / 1000000;  \
-   }
-
-#define TickMark() ( __tick_mark_time = _rdtsc() )
-#define TickLog(msg) { if( !__tick_mark_calibrate) { TickCalibrate(); TickMark(); } else {\
-	__tick_mark_now = _rdtsc();     \
-	Log3( WIDE("%s(%d): ") msg "Delta %lld", __FILE__, __LINE__, \
-		(long)((__tick_mark_now - __tick_mark_time )/__tick_mark_calibrate) ); \
-	__tick_mark_time = __tick_mark_now; \
-	} }
-
-   //long long start = _rdtsc();
-   //long long cur, del;
-// forgot how to declare a long long constant...
-
-
-#else // not debug - don't log ticking
-#define TickMark()
-#define TickLog(msg)
-#define TickCalibrate() 
-#endif
-#else // not lcc - don't use _rdtsc();
-#define TickMark()
-#define TickLog(msg)
-#define TickCalibrate()
-#endif
-#endif
-
-#endif
 
 #ifndef MAXPATH
 // windef.h has MAX_PATH
 # define MAXPATH MAX_PATH
 #endif
+
 #ifndef PATH_MAX
+// sometimes PATH_MAX is what's used, well it's should be MAXPATH which is MAX_PATH
 # define PATH_MAX MAXPATH
-#endif
-
-
-
-#ifdef FIX_BROKEN_TYPECASTS
-#define int short
-// int is the first mortal sin.
 #endif
 
 
 #include <final_types.h>
 
+#endif

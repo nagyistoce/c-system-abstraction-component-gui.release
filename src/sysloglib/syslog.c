@@ -1002,12 +1002,12 @@ void SystemLogEx ( const TEXTCHAR *message DBG_PASS )
 }
 
 #undef SystemLog
-SYSLOG_PROC( void, SystemLog )( const TEXTCHAR *message )
+ void  SystemLog ( const TEXTCHAR *message )
 {
-	SystemLogFL( message FILELINE_NULL );
+	SystemLogFL( message, NULL, 0 );
 }
 
-SYSLOG_PROC( void, LogBinaryFL )( P_8 buffer, _32 size FILELINE_PASS )
+ void  LogBinaryFL ( P_8 buffer, _32 size FILELINE_PASS )
 {
 	int nOut = size;
 	P_8 data = buffer;
@@ -1066,7 +1066,7 @@ SYSLOG_PROC( void, LogBinaryFL )( P_8 buffer, _32 size FILELINE_PASS )
 	}
 }
 #undef LogBinaryEx
-SYSLOG_PROC( void, LogBinaryEx )( P_8 buffer, _32 size DBG_PASS )
+ void  LogBinaryEx ( P_8 buffer, _32 size DBG_PASS )
 {
 #ifdef _DEBUG
 	LogBinaryFL( buffer,size DBG_RELAY );
@@ -1075,12 +1075,12 @@ SYSLOG_PROC( void, LogBinaryEx )( P_8 buffer, _32 size DBG_PASS )
 #endif
 }
 #undef LogBinary
-SYSLOG_PROC( void, LogBinary )( P_8 buffer, _32 size )
+ void  LogBinary ( P_8 buffer, _32 size )
 {
-	LogBinaryFL( buffer,size FILELINE_NULL );
+	LogBinaryFL( buffer,size, NULL, 0 );
 }
 
-SYSLOG_PROC( void, SetSystemLog )( enum syslog_types type, const void *data )
+ void  SetSystemLog ( enum syslog_types type, const void *data )
 {
 	if( file )
 	{
@@ -1113,7 +1113,7 @@ SYSLOG_PROC( void, SetSystemLog )( enum syslog_types type, const void *data )
 	//SystemLog( WIDE("thing is: ") STRSYM( (SYSLOG_EXTERN) ) );
 }
 
-SYSLOG_PROC( void, SystemLogTime )( LOGICAL enable )
+ void  SystemLogTime ( LOGICAL enable )
 {
 	flags.bLogTime = FALSE;
 	flags.bUseDay = FALSE;
@@ -1270,7 +1270,7 @@ static INDEX CPROC _null_lprintf( CTEXTSTR f, ... )
 }
 
 
-SYSLOG_PROC( RealVLogFunction, _vxlprintf )( _32 level DBG_PASS )
+ RealVLogFunction  _vxlprintf ( _32 level DBG_PASS )
 {
 	//EnterCriticalSec( &next_lprintf.cs );
 	if( !init_complete )

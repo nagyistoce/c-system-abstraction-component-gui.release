@@ -399,7 +399,7 @@ static void NativeRemoveBinaryNode( PTREEROOT root, PTREENODE node )
 
 //---------------------------------------------------------------------------
 
-TYPELIB_PROC( void, RemoveBinaryNode )( PTREEROOT root, POINTER data, PTRSZVAL key )
+ void  RemoveBinaryNode ( PTREEROOT root, POINTER data, PTRSZVAL key )
 {
 	PTREENODE node;
 	if( !root )

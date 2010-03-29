@@ -7,12 +7,12 @@ project( InterShell_window )
 
 
 set(SOURCES 
+  ${FIRST_GCC_PROGRAM_SOURCE}
    ../../utils/runner/runwin.c 
+  ${LAST_GCC_PROGRAM_SOURCE}
 )
 
-add_definitions( 
-	-DLOAD_LIBNAME="${CMAKE_SHARED_LIBRARY_PREFIX}InterShell.core${CMAKE_SHARED_LIBRARY_SUFFIX}" -DMODE=0
-)
+add_definitions( -DLOAD_LIBNAME="InterShell.core" -DMODE=0 )
 
 if( C++ )
 set_source_files_properties( ${SOURCES} PROPERTIES LANGUAGE "CXX" )

@@ -226,7 +226,7 @@ inline _32 DoXchg( PV_32 p, _32 val ){  __asm__( WIDE("lock xchg (%2),%0"):"=a"(
 #endif
 //-------------------------------------------------------------------------
 #if !defined( HAS_ASSEMBLY ) || defined( __CYGWIN__ )
-MEM_PROC( _32, LockedExchange )( PV_32 p, _32 val )
+ _32  LockedExchange ( PV_32 p, _32 val )
 {
 	// Windows only available - for linux platforms please consult
 	// the assembly version should be consulted
@@ -288,7 +288,7 @@ MEM_PROC( _32, LockedExchange )( PV_32 p, _32 val )
 #endif
 }
 
-MEM_PROC( _64, LockedExchange64 )( PV_64 p, _64 val )
+ _64  LockedExchange64 ( PV_64 p, _64 val )
 {
 	// Windows only available - for linux platforms please consult
 	// the assembly version should be consulted
@@ -312,7 +312,7 @@ MEM_PROC( _64, LockedExchange64 )( PV_64 p, _64 val )
 
 #ifdef __cplusplus
 /*
-MEM_PROC( PTRSZVAL, LockedExchange )( PVPTRSZVAL p, PTRSZVAL val )
+ PTRSZVAL  LockedExchange ( PVPTRSZVAL p, PTRSZVAL val )
 {
 	// Windows only available - for linux platforms please consult
 	// the assembly version should be consulted
@@ -344,7 +344,7 @@ MEM_PROC( PTRSZVAL, LockedExchange )( PVPTRSZVAL p, PTRSZVAL val )
 #endif
 #endif
 
-MEM_PROC( void, MemSet )( POINTER p, PTRSZVAL n, PTRSZVAL sz )
+ void  MemSet ( POINTER p, PTRSZVAL n, PTRSZVAL sz )
 {
 #if defined( _MSC_VER ) && !defined( __NO_WIN32API__ ) && !defined( UNDER_CE )
 #if defined( _WIN64 )
@@ -369,7 +369,7 @@ MEM_PROC( void, MemSet )( POINTER p, PTRSZVAL n, PTRSZVAL sz )
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-MEM_PROC( void, MemCpy )( POINTER pTo, CPOINTER pFrom, PTRSZVAL sz )
+ void  MemCpy ( POINTER pTo, CPOINTER pFrom, PTRSZVAL sz )
 {
 #if defined( _MSC_VER ) && !defined( __NO_WIN32API__ )&& !defined( UNDER_CE )
 
@@ -389,7 +389,7 @@ MEM_PROC( void, MemCpy )( POINTER pTo, CPOINTER pFrom, PTRSZVAL sz )
 #endif
 }
 
-MEM_PROC( int, MemCmp )( CPOINTER pOne, CPOINTER pTwo, PTRSZVAL sz )
+ int  MemCmp ( CPOINTER pOne, CPOINTER pTwo, PTRSZVAL sz )
 {
 	return memcmp( pOne, pTwo, sz );
 }
@@ -400,10 +400,10 @@ extern void MemSet( POINTER p, PTRSZVAL n, PTRSZVAL sz );
 extern void MemCpy( POINTER to, CPOINTER from, PTRSZVAL sz );
 extern int MemCmp( CPOINTER p1, CPOINTER p2, PTRSZVAL sz );
 #else
-MEM_PROC(  _32,  LockedExchange )( PV_32 p, _32 val );
-MEM_PROC(  void, MemSet )( POINTER p, PTRSZVAL n, PTRSZVAL sz );
-MEM_PROC(  void, MemCpy )( POINTER to, CPOINTER from, PTRSZVAL sz );
-MEM_PROC(  int, MemCmp )( CPOINTER to, CPOINTER from, PTRSZVAL sz );
+  _32   LockedExchange ( PV_32 p, _32 val );
+  void  MemSet ( POINTER p, PTRSZVAL n, PTRSZVAL sz );
+  void  MemCpy ( POINTER to, CPOINTER from, PTRSZVAL sz );
+  int  MemCmp ( CPOINTER to, CPOINTER from, PTRSZVAL sz );
 #endif
 #endif
 
@@ -595,14 +595,14 @@ TEXTSTR StrStr( TEXTSTR s1, CTEXTSTR s2 )
 
 
 //-------------------------------------------------------------------------
-MEM_PROC( _32, LockedIncrement )( P_32 p)
+ _32  LockedIncrement ( P_32 p)
 {
 	 if(p)
 		  return (*p)++;
 	 return 0;
 }
 //-------------------------------------------------------------------------
-MEM_PROC( _32, LockedDecrement )( P_32 p )
+ _32  LockedDecrement ( P_32 p )
 {
 	 if(p)
 		  return (*p)--;
@@ -631,12 +631,12 @@ static void DumpSection( PCRITICALSECTION pcs )
 	namespace timers { // begin timer namespace
 
 #endif
-MEM_PROC( _32, CriticalSecOwners )( PCRITICALSECTION pcs )
+ _32  CriticalSecOwners ( PCRITICALSECTION pcs )
 {
    return pcs->dwLocks;
 }
 
-MEM_PROC( S_32, EnterCriticalSecNoWaitEx )( PCRITICALSECTION pcs, THREAD_ID *prior DBG_PASS )
+ S_32  EnterCriticalSecNoWaitEx ( PCRITICALSECTION pcs, THREAD_ID *prior DBG_PASS )
 {
 	//_64 tick, tick2;
 	THREAD_ID dwCurProc;
@@ -925,7 +925,7 @@ static LOGICAL LeaveCriticalSecNoWakeEx( PCRITICALSECTION pcs DBG_PASS )
 
 //-------------------------------------------------------------------------
 
-MEM_PROC( void, InitializeCriticalSec )( PCRITICALSECTION pcs )
+ void  InitializeCriticalSec ( PCRITICALSECTION pcs )
 {
 #ifdef DEBUG_CRITICAL_SECTIONS
 	lprintf( WIDE( "CLEARING CRITICAL SECTION" ) );
@@ -1202,21 +1202,21 @@ static void DoCloseSpace( PSPACE ps, int bFinal )
 
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( void, CloseSpaceEx )( POINTER pMem, int bFinal )
+ void  CloseSpaceEx ( POINTER pMem, int bFinal )
 {
 	DoCloseSpace( FindSpace( pMem ), bFinal );
 }
 
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( void, CloseSpace )( POINTER pMem )
+ void  CloseSpace ( POINTER pMem )
 {
 	DoCloseSpace( FindSpace( pMem ), TRUE );
 }
 
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( PTRSZVAL, GetSpaceSize )( POINTER pMem )
+ PTRSZVAL  GetSpaceSize ( POINTER pMem )
 {
 	PSPACE ps;
 	ps = FindSpace( pMem );
@@ -1235,7 +1235,7 @@ PTRSZVAL GetFileSize( int fd )
 
 #endif
 //------------------------------------------------------------------------------------------------------
-MEM_PROC( POINTER, OpenSpaceExx )( CTEXTSTR pWhat, CTEXTSTR pWhere, PTRSZVAL address, PTRSZVAL *dwSize, P_32 bCreated )
+ POINTER  OpenSpaceExx ( CTEXTSTR pWhat, CTEXTSTR pWhere, PTRSZVAL address, PTRSZVAL *dwSize, P_32 bCreated )
 {
 	POINTER pMem = NULL;
 	//static _32 bOpening;
@@ -1620,7 +1620,7 @@ MEM_PROC( POINTER, OpenSpaceExx )( CTEXTSTR pWhat, CTEXTSTR pWhere, PTRSZVAL add
 
 //------------------------------------------------------------------------------------------------------
 #undef OpenSpaceEx
-MEM_PROC( POINTER, OpenSpaceEx )( CTEXTSTR pWhat, CTEXTSTR pWhere, PTRSZVAL address, PTRSZVAL *dwSize )
+ POINTER  OpenSpaceEx ( CTEXTSTR pWhat, CTEXTSTR pWhere, PTRSZVAL address, PTRSZVAL *dwSize )
 {
 	_32 bCreated;
 	return OpenSpaceExx( pWhat, pWhere, address, dwSize, &bCreated );
@@ -1628,13 +1628,13 @@ MEM_PROC( POINTER, OpenSpaceEx )( CTEXTSTR pWhat, CTEXTSTR pWhere, PTRSZVAL addr
 
 //------------------------------------------------------------------------------------------------------
 #undef OpenSpace
-MEM_PROC( POINTER, OpenSpace )( CTEXTSTR pWhat, CTEXTSTR pWhere, PTRSZVAL *dwSize )
+ POINTER  OpenSpace ( CTEXTSTR pWhat, CTEXTSTR pWhere, PTRSZVAL *dwSize )
 {
 	return OpenSpaceEx( pWhat, pWhere, 0, dwSize );
 }
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( int, InitHeap)( PMEM pMem, PTRSZVAL dwSize )
+ int  InitHeap( PMEM pMem, PTRSZVAL dwSize )
 {
 	//pMem->dwSize = *dwSize - MEM_SIZE;
 	// size of the PMEM block is all inclusive (from pMem(0) to pMem(dwSize))
@@ -1820,7 +1820,7 @@ POINTER HeapAllocateEx( PMEM pHeap, PTRSZVAL dwSize DBG_PASS )
 #if !defined( USE_CUSTOM_ALLOCER )
 	if( !pHeap )
 	{
-		PCHUNK pc = malloc( sizeof( CHUNK ) + dwSize );
+		PCHUNK pc = (PCHUNK)malloc( sizeof( CHUNK ) + dwSize );
 		pc->dwOwners = 1;
 		pc->dwSize = dwSize;
       if( g.bLogAllocate )
@@ -1989,14 +1989,14 @@ POINTER HeapAllocateEx( PMEM pHeap, PTRSZVAL dwSize DBG_PASS )
 
 //------------------------------------------------------------------------------------------------------
 #undef AllocateEx
-MEM_PROC( POINTER, AllocateEx )( PTRSZVAL dwSize DBG_PASS )
+ POINTER  AllocateEx ( PTRSZVAL dwSize DBG_PASS )
 {
 	return HeapAllocateEx( g.pMemInstance, dwSize DBG_RELAY );
 }
 
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( POINTER, HeapReallocateEx )( PMEM pHeap, POINTER source, PTRSZVAL size DBG_PASS )
+ POINTER  HeapReallocateEx ( PMEM pHeap, POINTER source, PTRSZVAL size DBG_PASS )
 {
 	POINTER dest;
 	PTRSZVAL min;
@@ -2021,7 +2021,7 @@ MEM_PROC( POINTER, HeapReallocateEx )( PMEM pHeap, POINTER source, PTRSZVAL size
 
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( POINTER, HeapPreallocateEx )( PMEM pHeap, POINTER source, PTRSZVAL size DBG_PASS )
+ POINTER  HeapPreallocateEx ( PMEM pHeap, POINTER source, PTRSZVAL size DBG_PASS )
 {
 	POINTER dest;
 	PTRSZVAL min;
@@ -2044,21 +2044,21 @@ MEM_PROC( POINTER, HeapPreallocateEx )( PMEM pHeap, POINTER source, PTRSZVAL siz
 
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( POINTER, HeapMoveEx )( PMEM pNewHeap, POINTER source DBG_PASS )
+ POINTER  HeapMoveEx ( PMEM pNewHeap, POINTER source DBG_PASS )
 {
 	return HeapReallocateEx( pNewHeap, source, SizeOfMemBlock( source ) DBG_RELAY );
 }
 
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( POINTER, ReallocateEx )( POINTER source, PTRSZVAL size DBG_PASS )
+ POINTER  ReallocateEx ( POINTER source, PTRSZVAL size DBG_PASS )
 {
 	return HeapReallocateEx( g.pMemInstance, source, size DBG_RELAY );
 }
 
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( POINTER, PreallocateEx )( POINTER source, PTRSZVAL size DBG_PASS )
+ POINTER  PreallocateEx ( POINTER source, PTRSZVAL size DBG_PASS )
 {
 	return HeapPreallocateEx( g.pMemInstance, source, size DBG_RELAY );
 }
@@ -2113,7 +2113,7 @@ static void Bubble( PMEM pMem )
 //------------------------------------------------------------------------------------------------------
 
 
-MEM_PROC( PTRSZVAL, SizeOfMemBlock )( CPOINTER pData )
+ PTRSZVAL  SizeOfMemBlock ( CPOINTER pData )
 {
 	if( pData )
 	{
@@ -2128,7 +2128,7 @@ MEM_PROC( PTRSZVAL, SizeOfMemBlock )( CPOINTER pData )
 }
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( POINTER, MemDupEx )( CPOINTER thing DBG_PASS )
+ POINTER  MemDupEx ( CPOINTER thing DBG_PASS )
 {
 	PTRSZVAL size = SizeOfMemBlock( thing );
 	POINTER result;
@@ -2138,7 +2138,7 @@ MEM_PROC( POINTER, MemDupEx )( CPOINTER thing DBG_PASS )
 }
 
 #undef MemDup
-MEM_PROC( POINTER, MemDup )(CPOINTER thing )
+ POINTER  MemDup (CPOINTER thing )
 {
 	return MemDupEx( thing DBG_SRC );
 }
@@ -2430,7 +2430,7 @@ POINTER ReleaseEx ( POINTER pData DBG_PASS )
 
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( POINTER, HoldEx )( POINTER pData DBG_PASS )
+ POINTER  HoldEx ( POINTER pData DBG_PASS )
 {
 #if !defined( USE_CUSTOM_ALLOCER )
 	PCHUNK pc = (PCHUNK)((char*)pData - CHUNK_SIZE);
@@ -2461,14 +2461,14 @@ MEM_PROC( POINTER, HoldEx )( POINTER pData DBG_PASS )
 
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( POINTER, GetFirstUsedBlock )( PMEM pHeap )
+ POINTER  GetFirstUsedBlock ( PMEM pHeap )
 {
 	return pHeap->pRoot[0].byData;
 }
 
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( void, DebugDumpHeapMemEx )( PMEM pHeap, LOGICAL bVerbose )
+ void  DebugDumpHeapMemEx ( PMEM pHeap, LOGICAL bVerbose )
 {
 #if defined( USE_CUSTOM_ALLOCER )
 	PCHUNK pc, _pc;
@@ -2557,14 +2557,14 @@ MEM_PROC( void, DebugDumpHeapMemEx )( PMEM pHeap, LOGICAL bVerbose )
 
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( void, DebugDumpMemEx )( LOGICAL bVerbose )
+ void  DebugDumpMemEx ( LOGICAL bVerbose )
 {
 	DebugDumpHeapMemEx( g.pMemInstance, bVerbose );
 }
 
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( void, DebugDumpHeapMemFile )( PMEM pHeap, CTEXTSTR pFilename )
+ void  DebugDumpHeapMemFile ( PMEM pHeap, CTEXTSTR pFilename )
 {
 #if defined( USE_CUSTOM_ALLOCER )
 	FILE *file;
@@ -2672,13 +2672,13 @@ MEM_PROC( void, DebugDumpHeapMemFile )( PMEM pHeap, CTEXTSTR pFilename )
 }
 
 //------------------------------------------------------------------------------------------------------
-MEM_PROC( void, DebugDumpMemFile )( CTEXTSTR pFilename )
+ void  DebugDumpMemFile ( CTEXTSTR pFilename )
 {
 	DebugDumpHeapMemFile( g.pMemInstance, pFilename );
 }
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( LOGICAL, Defragment )( POINTER *ppMemory ) // returns true/false, updates pointer
+ LOGICAL  Defragment ( POINTER *ppMemory ) // returns true/false, updates pointer
 {
 	// this is broken... needs
 	// to fixup BLOCK_TAG, BLOCK_FILE, etc...
@@ -2766,7 +2766,7 @@ MEM_PROC( LOGICAL, Defragment )( POINTER *ppMemory ) // returns true/false, upda
 
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( void, GetHeapMemStatsEx )( PMEM pHeap, _32 *pFree, _32 *pUsed, _32 *pChunks, _32 *pFreeChunks DBG_PASS )
+ void  GetHeapMemStatsEx ( PMEM pHeap, _32 *pFree, _32 *pUsed, _32 *pChunks, _32 *pFreeChunks DBG_PASS )
 {
 #if defined( USE_CUSTOM_ALLOCER )
 	int nFree = 0, nUsed = 0, nChunks = 0, nFreeChunks = 0, nSpaces = 0;
@@ -2873,13 +2873,13 @@ MEM_PROC( void, GetHeapMemStatsEx )( PMEM pHeap, _32 *pFree, _32 *pUsed, _32 *pC
 
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( void, GetMemStats )( _32 *pFree, _32 *pUsed, _32 *pChunks, _32 *pFreeChunks )
+ void  GetMemStats ( _32 *pFree, _32 *pUsed, _32 *pChunks, _32 *pFreeChunks )
 {
 	GetHeapMemStats( g.pMemInstance, pFree, pUsed, pChunks, pFreeChunks );
 }
 
 //------------------------------------------------------------------------------------------------------
-MEM_PROC( int, SetAllocateLogging )( LOGICAL bTrueFalse )
+ int  SetAllocateLogging ( LOGICAL bTrueFalse )
 {
    LOGICAL prior = g.bLogAllocate;
 	g.bLogAllocate = bTrueFalse;
@@ -2888,7 +2888,7 @@ MEM_PROC( int, SetAllocateLogging )( LOGICAL bTrueFalse )
 
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( int, SetCriticalLogging )( LOGICAL bTrueFalse )
+ int  SetCriticalLogging ( LOGICAL bTrueFalse )
 {
 #ifdef _DEBUG
    int prior = g.bLogCritical;
@@ -2900,7 +2900,7 @@ MEM_PROC( int, SetCriticalLogging )( LOGICAL bTrueFalse )
 }
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( int, SetAllocateDebug )( LOGICAL bDisable )
+ int  SetAllocateDebug ( LOGICAL bDisable )
 {
 #ifdef _DEBUG
 	int save = g.bDisableDebug;
@@ -2912,7 +2912,7 @@ MEM_PROC( int, SetAllocateDebug )( LOGICAL bDisable )
 #endif
 }
 
-MEM_PROC( int, SetManualAllocateCheck )( LOGICAL bDisable )
+ int  SetManualAllocateCheck ( LOGICAL bDisable )
 {
 #ifdef _DEBUG
 	int save = g.bDisableAutoCheck;
@@ -2925,14 +2925,14 @@ MEM_PROC( int, SetManualAllocateCheck )( LOGICAL bDisable )
 
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( void, SetMinAllocate )( int nSize )
+ void  SetMinAllocate ( int nSize )
 {
 	g.nMinAllocateSize = nSize;
 }
 
 //------------------------------------------------------------------------------------------------------
 
-MEM_PROC( void, SetHeapUnit )( int dwSize )
+ void  SetHeapUnit ( int dwSize )
 {
 	g.dwSystemCapacity = dwSize;
 }
@@ -2940,7 +2940,7 @@ MEM_PROC( void, SetHeapUnit )( int dwSize )
 //------------------------------------------------------------------------------------------------------
 // result in 0(equal), 1 above, or -1 below
 // *r contains the position of difference
-MEM_PROC( int, CmpMem8 )( void *s1, void *s2, unsigned long n, unsigned long *r )
+ int  CmpMem8 ( void *s1, void *s2, unsigned long n, unsigned long *r )
 {
 	register int t1, t2;
 	_32 pos;
@@ -2975,12 +2975,12 @@ MEM_PROC( int, CmpMem8 )( void *s1, void *s2, unsigned long n, unsigned long *r 
 
 //------------------------------------------------------------------------------------------------------
 #undef GetHeapMemStats
-MEM_PROC( void, GetHeapMemStats )( PMEM pHeap, _32 *pFree, _32 *pUsed, _32 *pChunks, _32 *pFreeChunks )
+ void  GetHeapMemStats ( PMEM pHeap, _32 *pFree, _32 *pUsed, _32 *pChunks, _32 *pFreeChunks )
 {
 	GetHeapMemStatsEx( pHeap, pFree, pUsed, pChunks, pFreeChunks DBG_SRC );
 }
 
-MEM_PROC( TEXTSTR, StrDupEx )( CTEXTSTR original DBG_PASS )
+ TEXTSTR  StrDupEx ( CTEXTSTR original DBG_PASS )
 {
 	if( original )
 	{
@@ -3012,7 +3012,7 @@ size_t CStrLen( char *s )
 }
 
 
-MEM_PROC( char *, CStrDupEx )( CTEXTSTR original DBG_PASS )
+ char *  CStrDupEx ( CTEXTSTR original DBG_PASS )
 {
 	INDEX len;
 	char *result;
@@ -3025,7 +3025,7 @@ MEM_PROC( char *, CStrDupEx )( CTEXTSTR original DBG_PASS )
 	return result;
 }
 
-MEM_PROC( TEXTSTR, DupCStrEx )( const char * original DBG_PASS )
+ TEXTSTR  DupCStrEx ( const char * original DBG_PASS )
 {
 	INDEX len = 0;
 	TEXTSTR result;
@@ -3039,7 +3039,7 @@ MEM_PROC( TEXTSTR, DupCStrEx )( const char * original DBG_PASS )
 }
 
 
-MEM_PROC( int, StrCmp )( CTEXTSTR s1, CTEXTSTR s2 )
+ int  StrCmp ( CTEXTSTR s1, CTEXTSTR s2 )
 {
 	if( !s1 )
 		if( s2 )
@@ -3055,7 +3055,7 @@ MEM_PROC( int, StrCmp )( CTEXTSTR s1, CTEXTSTR s2 )
 	return s1[0] - s2[0];
 }
 
-MEM_PROC( int, StrCaseCmp )( CTEXTSTR s1, CTEXTSTR s2 )
+ int  StrCaseCmp ( CTEXTSTR s1, CTEXTSTR s2 )
 {
 	if( !s1 )
 		if( s2 )
@@ -3073,7 +3073,7 @@ MEM_PROC( int, StrCaseCmp )( CTEXTSTR s1, CTEXTSTR s2 )
 	return tolower(s1[0]) - tolower(s2[0]);
 }
 
-MEM_PROC( int, StrCmpEx )( CTEXTSTR s1, CTEXTSTR s2, INDEX maxlen )
+ int  StrCmpEx ( CTEXTSTR s1, CTEXTSTR s2, INDEX maxlen )
 {
 	if( !s1 )
 		if( s2 )
@@ -3091,7 +3091,7 @@ MEM_PROC( int, StrCmpEx )( CTEXTSTR s1, CTEXTSTR s2, INDEX maxlen )
    return 0;
 }
 
-MEM_PROC( int, StrCaseCmpEx )( CTEXTSTR s1, CTEXTSTR s2, INDEX maxlen )
+ int  StrCaseCmpEx ( CTEXTSTR s1, CTEXTSTR s2, INDEX maxlen )
 {
 	if( !s1 )
 		if( s2 )
@@ -3111,7 +3111,7 @@ MEM_PROC( int, StrCaseCmpEx )( CTEXTSTR s1, CTEXTSTR s2, INDEX maxlen )
    return 0;
 }
 
-MEM_PROC( int, StriCmp )( CTEXTSTR pOne, CTEXTSTR pTwo )
+ int  StriCmp ( CTEXTSTR pOne, CTEXTSTR pTwo )
 {
    return -1;
 }

@@ -1,5 +1,8 @@
+/* A header for doing .NET /CLR compatiblity changes. Things
+   like fopen needing to be _fopen_s and junk.               */
 
 #ifndef FILE_DOT_NET_COMPAT
+/* Header multiple inclusion protection symbol. */
 #define FILE_DOT_NET_COMPAT
 #include <filesys.h>
 
@@ -74,6 +77,8 @@ int Rename( CTEXTSTR from, CTEXTSTR to );
 
 
 #else
+/* A macro which can be translated into microsoft so-called safe
+   methods.                                                      */
 #define Fopen( result, name, opts ) result = sack_fopen( 0, name, opts )
 //#define MYFILE  FILE
 //#define Fopen   fopen

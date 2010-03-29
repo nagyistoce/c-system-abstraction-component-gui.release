@@ -319,7 +319,7 @@ PTEXT SegBreak(PTEXT segment)  // remove leading segments.
    return(temp);
 }
 
-TYPELIB_PROC( _32, GetSegmentSpaceEx )( PTEXT segment, int position, int nTabs, INDEX *tabs)
+ _32  GetSegmentSpaceEx ( PTEXT segment, int position, int nTabs, INDEX *tabs)
 {
 	int total = 0;
 	do
@@ -343,7 +343,7 @@ TYPELIB_PROC( _32, GetSegmentSpaceEx )( PTEXT segment, int position, int nTabs, 
 	return total;
 }
 //---------------------------------------------------------------------------
-TYPELIB_PROC( _32, GetSegmentSpace )( PTEXT segment, int position, int nTabSize )
+ _32  GetSegmentSpace ( PTEXT segment, int position, int nTabSize )
 {
 	int total = 0;
 	do
@@ -366,14 +366,14 @@ TYPELIB_PROC( _32, GetSegmentSpace )( PTEXT segment, int position, int nTabSize 
 	return total;
 }
 //---------------------------------------------------------------------------
-TYPELIB_PROC( _32, GetSegmentLengthEx )( PTEXT segment, int position, int nTabs, INDEX *tabs )
+ _32  GetSegmentLengthEx ( PTEXT segment, int position, int nTabs, INDEX *tabs )
 {
 	while( segment && segment->flags & TF_INDIRECT )
       segment = GetIndirect( segment );
    return GetSegmentSpaceEx( segment, position, nTabs, tabs ) + GetTextSize( segment );
 }
 //---------------------------------------------------------------------------
-TYPELIB_PROC( _32, GetSegmentLength )( PTEXT segment, int position, int nTabSize )
+ _32  GetSegmentLength ( PTEXT segment, int position, int nTabSize )
 {
 	while( segment && segment->flags & TF_INDIRECT )
       segment = GetIndirect( segment );
@@ -1872,7 +1872,7 @@ void VarTextInitEx( PVARTEXT pvt DBG_PASS )
    pvt->expand_by = 32;
 }
 
-TYPELIB_PROC( PVARTEXT, VarTextCreateExEx )( _32 initial, _32 expand DBG_PASS )
+ PVARTEXT  VarTextCreateExEx ( _32 initial, _32 expand DBG_PASS )
 {
 	PVARTEXT pvt = (PVARTEXT)AllocateEx( sizeof( VARTEXT ) DBG_RELAY );
 
@@ -2018,7 +2018,7 @@ PTEXT VarTextGetEx( PVARTEXT pvt DBG_PASS )
 
 //---------------------------------------------------------------------------
 
-TYPELIB_PROC( PTEXT, VarTextPeekEx )( PVARTEXT pvt DBG_PASS )
+ PTEXT  VarTextPeekEx ( PVARTEXT pvt DBG_PASS )
 {
 	if( !pvt )
 		return NULL;

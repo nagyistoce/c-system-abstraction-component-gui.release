@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <stdlib.h>
+#include <logging.h>
 #include <network.h>
 #include <sharemem.h>
 

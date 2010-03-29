@@ -10,7 +10,7 @@
 #include <filesys.h>
 #include <system.h>
 #include <network.h>
-#include <controls.H> // INI prompt
+#include <controls.h> // INI prompt
 #ifdef __WATCOMC__
 #include <io.h> // unlink
 #endif

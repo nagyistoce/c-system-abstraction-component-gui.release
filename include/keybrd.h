@@ -214,6 +214,7 @@
 
 #ifdef __cplusplus
 namespace sack {
+	namespace image {
 	namespace render {
 		namespace keyboard {
 //extern "C" {
@@ -234,9 +235,10 @@ typedef struct keyboard_tag
 
 #ifdef __cplusplus
 		};
+		};
 	};
-}; // namespace sack namespace render namespace keyboard
-using namespace sack::render::keyboard;
+}; // namespace sack namespace image namespace render namespace keyboard
+using namespace sack::image::render::keyboard;
 //} // extern "C"
 #endif
 

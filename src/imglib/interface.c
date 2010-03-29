@@ -127,7 +127,7 @@ static POINTER CPROC _ImageGetImageInterface( void )
    return &RealImageInterface;
 }
 
-IMAGE_PROC( PIMAGE_INTERFACE, GetImageInterface )( void )
+ PIMAGE_INTERFACE  GetImageInterface ( void )
 {
    return (PIMAGE_INTERFACE)_ImageGetImageInterface();
 }
@@ -138,7 +138,7 @@ static void CPROC _ImageDropImageInterface( POINTER p )
 }
 #ifndef __STATIC__
 #if !(defined( SACK_BAG_EXPORTS ) && defined( __LINUX__ ))
-IMAGE_PROC( void, DropImageInterface )( PIMAGE_INTERFACE p )
+ void  DropImageInterface ( PIMAGE_INTERFACE p )
 {
    _ImageDropImageInterface(p );
 }

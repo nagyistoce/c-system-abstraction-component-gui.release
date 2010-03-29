@@ -104,7 +104,7 @@ OPTION( NEED_ZLIB "Build internal zlib lib (with suitable exports to link agains
 OPTION( BUILD_ELTANIN "Hook into building eltanin tree" OFF )
 OPTION( BUILD_ALTANIK "Hook into building altanik tree" OFF )
 OPTION( __WINDOWS_ARM_CE__ "Build for windows CE 5.0 ARM" 0 )
-
+OPTION( USE_ASSEMBLY "Use Assembly files as available.  NASM required for this." OFF )
 OPTION( BUILD_MONOLITHIC "Build one giant library" 1 )
 
 
@@ -200,6 +200,9 @@ endif()
 
   add_definitions( -D_DEBUG )
 
+if( USE_ASSEMBLY )
+set( ExtraFlags "${ExtraFlags} -DHAS_ASSEMBLY )
+set( ImageExtraFlags "${ExtraFlags} -DHAS_ASSEMBLY )
 set( ASM_SOURCES
   src/imglib/ImageFile.asm
   src/imglib/alphamac.asm
@@ -217,10 +220,8 @@ set( ASM_SOURCES
   src/imglib/mmx.asm
   src/imglib/plotasm.asm
 )
-
-set ( CONFIGURATION
-  src/procreglib/interface.conf
-)
+set( MEM_ASSEMBLY_SOURCES src/memlib/memoryasm.asm )
+endif()
 
 # expat is a 'standard' library.  ripped a copy for ease, it's also incredibly simple.
 set ( EXPAT_SOURCES 
@@ -328,6 +329,7 @@ endif()
 set(BASE_SOURCES  ${BASE_SOURCES}
   src/sysloglib/syslog.c
   src/memlib/sharemem.c
+  ${MEM_ASSEMBLY_SOURCES}
   src/typelib/binarylist.c
   src/typelib/familytree.c
   src/typelib/input.c
@@ -382,16 +384,18 @@ endif(__WINDOWS__)
 
 if( C++ )
 set_source_files_properties( ${FIRST_GCC_LIBRARY_SOURCE} ${LAST_GCC_LIBRARY_SOURCE} PROPERTIES LANGUAGE "CXX" )
+set_source_files_properties( ${FIRST_GCC_PROGRAM_SOURCE} ${LAST_GCC_PROGRAM_SOURCE} PROPERTIES LANGUAGE "CXX" )
 set_source_files_properties( ${BASE_SOURCES} PROPERTIES LANGUAGE "CXX" )
 set_source_files_properties( ${IMAGE_SOURCES} PROPERTIES LANGUAGE "CXX" )
 set_source_files_properties( ${VIDLIB_SOURCES} PROPERTIES LANGUAGE "CXX" )
 set_source_files_properties( ${PSI_SOURCES} PROPERTIES LANGUAGE "CXX" )
-set_source_files_properties( ${JPEG_SOURCES} PROPERTIES LANGUAGE "CXX" )
+#set_source_files_properties( ${JPEG_SOURCES} PROPERTIES LANGUAGE "CXX" )
+set_source_files_properties( ${ODBC_SOURCES} PROPERTIES LANGUAGE "CXX" )
+set_source_files_properties( ${OPTION_SOURCES} PROPERTIES LANGUAGE "CXX" )
 
-set_source_files_properties( ${PNG_SOURCES} PROPERTIES LANGUAGE "CXX" )
-set_source_files_properties( ${JPEG_SOURCES} PROPERTIES LANGUAGE "CXX" )
-set_source_files_properties( ${ZLIB_SOURCES} PROPERTIES LANGUAGE "CXX" )
-set_source_files_properties( ${FREETYPE_SOURCES} PROPERTIES LANGUAGE "CXX" )
+#set_source_files_properties( ${PNG_SOURCES} PROPERTIES LANGUAGE "CXX" )
+#set_source_files_properties( ${ZLIB_SOURCES} PROPERTIES LANGUAGE "CXX" )
+#set_source_files_properties( ${FREETYPE_SOURCES} PROPERTIES LANGUAGE "CXX" )
 endif()
 
 if( NOT WATCOM )
@@ -511,7 +515,7 @@ add_library( bag.image SHARED
   ${LAST_GCC_LIBRARY_SOURCE} 
 )
 SET_TARGET_PROPERTIES(bag.image PROPERTIES
-                  COMPILE_FLAGS  "-DTARGET_LABEL=bag_image"
+                  COMPILE_FLAGS  "-DTARGET_LABEL=bag_image ${ImageExtraFlags}"
 )
 target_link_libraries( bag.image bag ${EXTERNALS} )
 set( SACK_IMAGE_LIBRARY bag.video )
@@ -598,7 +602,7 @@ add_subdirectory( data )
 # includes some testdata in tstdisplay...
 # the test programs do not have install targets, but they will end up building...
 add_subdirectory( src/msgsvr/testdisplay )
-add_subdirectory( src/bench/mem )
+#add_subdirectory( src/bench/mem )
 
 endif( NOT SACK_ONLY )
 

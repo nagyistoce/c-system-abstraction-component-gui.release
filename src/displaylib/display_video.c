@@ -140,6 +140,7 @@ static char CPROC DisplayGetKeyText( int key )
 #endif
 //--------------------------------------------------------------------------
 
+#if ACTIVE_MESSAGE_IMPLEMENTED
 RENDER_PROC( int, SendActiveMessage )( PRENDERER dest, PACTIVEMESSAGE msg )
 {
 	if( ((PPANEL)dest)->DefaultMethod )
@@ -149,7 +150,7 @@ RENDER_PROC( int, SendActiveMessage )( PRENDERER dest, PACTIVEMESSAGE msg )
 	}	
 	return FALSE;
 }
-
+#endif
 //--------------------------------------------------------------------------
 RENDER_PROC( void, ForceDisplayFocus )( PRENDERER display )
 {
@@ -165,6 +166,7 @@ RENDER_PROC( void, ForceDisplayBack )( PRENDERER display )
 {
 }
 //--------------------------------------------------------------------------
+#if ACTIVE_MESSAGE_IMPLEMENTED
 
 // could/should pass information related ot the message created
 // next time?
@@ -209,7 +211,7 @@ RENDER_PROC( PACTIVEMESSAGE, CreateActiveMessage )( int ID, int size, ... )
 	*/
 	return NULL;
 }
-
+#endif
 //--------------------------------------------------------------------------
 
 RENDER_PROC( void, MakeTopmost )(PRENDERER pRenderer )

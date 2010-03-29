@@ -75,12 +75,14 @@
 #define MF_STRING 0
 #endif
 #ifndef MF_UNCHECKED
+/* Menu item is not checked. */
 #define MF_UNCHECKED 0
 #endif
 #ifndef MF_DEFAULT
 #define MF_DEFAULT 0x1000
 #endif
 #ifndef MF_SYSMENU
+/* Not sure what menu flag SYSMENU is for */
 #define MF_SYSMENU 0x2000
 #endif
 

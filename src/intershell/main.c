@@ -4816,7 +4816,10 @@ PTRSZVAL CPROC MenuThread( PTHREAD thread )
 #else
 //int main( int argc, TEXTCHAR **argv )
 //{
-//PUBLIC( int, Start)( void )
+	//PUBLIC( int, Start)( void )
+#ifdef __cplusplus
+	extern "C"
+#endif
 PUBLIC( int, Main)( int argc, TEXTCHAR **argv, int bConsole )
 {
 	//TEXTCHAR *argv[] = { NULL };

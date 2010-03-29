@@ -43,7 +43,7 @@ static struct Group *GetGroupFilePath( CTEXTSTR group )
    return filegroup;
 }
 
-FILESYS_PROC( int, GetFileGroup )( CTEXTSTR groupname, CTEXTSTR default_path )
+ int  GetFileGroup ( CTEXTSTR groupname, CTEXTSTR default_path )
 {
 	struct Group *filegroup = GetGroupFilePath( groupname );
 	if( !filegroup )
@@ -57,7 +57,7 @@ FILESYS_PROC( int, GetFileGroup )( CTEXTSTR groupname, CTEXTSTR default_path )
 }
 
 
-FILESYS_PROC( int, SetGroupFilePath )( CTEXTSTR group, CTEXTSTR path )
+ int  SetGroupFilePath ( CTEXTSTR group, CTEXTSTR path )
 {
 	struct Group *filegroup = GetGroupFilePath( group );
 	if( !filegroup )
@@ -287,7 +287,7 @@ struct file *FindFileByFILE( FILE *file_file )
    return file;
 }
 
-FILESYS_PROC( FILE*, sack_fopen )( int group, CTEXTSTR filename, CTEXTSTR opts )
+ FILE*  sack_fopen ( int group, CTEXTSTR filename, CTEXTSTR opts )
 {
 	FILE *handle;
 	struct file *file;
@@ -332,12 +332,12 @@ FILESYS_PROC( FILE*, sack_fopen )( int group, CTEXTSTR filename, CTEXTSTR opts )
 	AddLink( &file->files, handle );
 	return handle;
 }
-FILESYS_PROC( int, sack_fseek )( FILE *file_file, int pos, int whence )
+ int  sack_fseek ( FILE *file_file, int pos, int whence )
 {
 	//struct file *file = FindFileByFILE( file_file );
    return fseek( file_file, pos, whence );
 }
-FILESYS_PROC( int, sack_fclose )( FILE *file_file )
+ int  sack_fclose ( FILE *file_file )
 {
 	struct file *file;
 	file = FindFileByFILE( file_file );
@@ -353,17 +353,17 @@ FILESYS_PROC( int, sack_fclose )( FILE *file_file )
    */
    return fclose( file_file );
 }
-FILESYS_PROC( int, sack_fread )( CPOINTER buffer, int size, int count,FILE *file_file )
+ int  sack_fread ( CPOINTER buffer, int size, int count,FILE *file_file )
 {
    return fread( (POINTER)buffer, size, count, file_file );
 }
-FILESYS_PROC( int, sack_fwrite )( CPOINTER buffer, int size, int count,FILE *file_file )
+ int  sack_fwrite ( CPOINTER buffer, int size, int count,FILE *file_file )
 {
    return fwrite( (POINTER)buffer, size, count, file_file );
 }
 
 
-FILESYS_PROC( int, sack_rename )( CTEXTSTR file_source, CTEXTSTR new_name )
+ int  sack_rename ( CTEXTSTR file_source, CTEXTSTR new_name )
 {
 	return MoveFile( file_source, new_name );
 }

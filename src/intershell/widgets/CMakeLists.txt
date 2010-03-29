@@ -3,10 +3,10 @@ cmake_minimum_required(VERSION 2.8)
 project( sack_widgets ) 
 
 set(SOURCES 
-   banner/banner 
-   keypad/buttons 
-   keypad/keypad 
-   keypad/accum 
+   banner/banner.c 
+   keypad/buttons.c 
+   keypad/keypad.c 
+   keypad/accum.c 
 )
 
 add_definitions( 

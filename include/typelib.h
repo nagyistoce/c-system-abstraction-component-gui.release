@@ -1,3 +1,5 @@
+/* This contains the methods to use the base container types
+   defined in sack_types.h.                                  */
 #ifndef LINKSTUFF
 #define LINKSTUFF
 
@@ -7,12 +9,13 @@
 
 SACK_CONTAINER_NAMESPACE
 
+#    define TYPELIB_CALLTYPE CPROC
 #  if defined( _TYPELIBRARY_SOURCE_STEAL )
-#    define TYPELIB_PROC(type,name) type CPROC name
+#    define TYPELIB_PROC type TYPELIB_CALLTYPE name type CPROC name
 #  elif defined( _TYPELIBRARY_SOURCE )
-#    define TYPELIB_PROC(type,name) EXPORT_METHOD type CPROC name
+#    define TYPELIB_PROC EXPORT_METHOD
 #  else
-#    define TYPELIB_PROC(type,name) IMPORT_METHOD type CPROC name
+#    define TYPELIB_PROC IMPORT_METHOD
 #  endif
 
 // These were designated for basic content containers...
@@ -26,17 +29,26 @@ SACK_CONTAINER_NAMESPACE
 _LINKLIST_NAMESPACE
 
 //--------------------------------------------------------
-TYPELIB_PROC( PLIST,       CreateListEx   )( DBG_VOIDPASS );
-TYPELIB_PROC( PLIST,       DeleteListEx   )( PLIST *plist DBG_PASS );
-TYPELIB_PROC( PLIST,       AddLinkEx      )( PLIST *pList, POINTER p DBG_PASS );
-TYPELIB_PROC( PLIST,       SetLinkEx      )( PLIST *pList, INDEX idx, POINTER p DBG_PASS );
-TYPELIB_PROC( POINTER,     GetLink        )( PLIST *pList, INDEX idx );
-TYPELIB_PROC( POINTER*,    GetLinkAddress )( PLIST *pList, INDEX idx );
-TYPELIB_PROC( INDEX,       FindLink       )( PLIST *pList, POINTER value );
-TYPELIB_PROC( LOGICAL,     DeleteLink     )( PLIST *pList, POINTER value );
-TYPELIB_PROC( void,        EmptyList      )( PLIST *pList );
+TYPELIB_PROC  PLIST TYPELIB_CALLTYPE        CreateListEx   ( DBG_VOIDPASS );
+TYPELIB_PROC  PLIST TYPELIB_CALLTYPE        DeleteListEx   ( PLIST *plist DBG_PASS );
+/* See <link AddLink>.
+   
+   
+   
+   See <link DBG_PASS>. */
+TYPELIB_PROC  PLIST TYPELIB_CALLTYPE        AddLinkEx      ( PLIST *pList, POINTER p DBG_PASS );
+TYPELIB_PROC  PLIST TYPELIB_CALLTYPE        SetLinkEx      ( PLIST *pList, INDEX idx, POINTER p DBG_PASS );
+TYPELIB_PROC  POINTER TYPELIB_CALLTYPE      GetLink        ( PLIST *pList, INDEX idx );
+TYPELIB_PROC  POINTER* TYPELIB_CALLTYPE     GetLinkAddress ( PLIST *pList, INDEX idx );
+TYPELIB_PROC  INDEX TYPELIB_CALLTYPE        FindLink       ( PLIST *pList, POINTER value );
+TYPELIB_PROC  LOGICAL TYPELIB_CALLTYPE      DeleteLink     ( PLIST *pList, POINTER value );
+TYPELIB_PROC  void TYPELIB_CALLTYPE         EmptyList      ( PLIST *pList );
 
 #ifdef __cplusplus
+/* This was a basic attempt to make list into a C++ class. I
+   gave up doing this sort of thing afterwards after realizing
+   the methods of a library and these static methods for a class
+   aren't much different.                                        */
 typedef class iList
 {
 	PLIST list;
@@ -56,7 +68,7 @@ public:
 typedef PTRSZVAL (CPROC *ForProc)( PTRSZVAL user, INDEX idx, POINTER *item );
 // if the callback function returns non 0 - then the looping is aborted,
 // and the value is returned... the user value is passed to the callback.
-TYPELIB_PROC( PTRSZVAL,    ForAllLinks    )( PLIST *pList, ForProc func, PTRSZVAL user ); 
+TYPELIB_PROC  PTRSZVAL TYPELIB_CALLTYPE     ForAllLinks    ( PLIST *pList, ForProc func, PTRSZVAL user ); 
 
 #define LIST_FORALL( l, i, t, v )  if(((v)=(t)NULL),(l))            \
                                             for( ((i)=0); ((i) < ((l)->Cnt))? \
@@ -70,6 +82,32 @@ TYPELIB_PROC( PTRSZVAL,    ForAllLinks    )( PLIST *pList, ForProc func, PTRSZVA
 
 #define CreateList()       ( CreateListEx( DBG_VOIDSRC ) )
 #define DeleteList(p)      ( DeleteListEx( (p) DBG_SRC ) )
+/* Adds a pointer to a user object to a list.
+   Example
+   <code lang="c++">
+   
+   // the list can be initialized to NULL,
+   // it does not have to be assigned the result of a CreateList().
+   // this allows the list to only be allocated if it is used.
+   PLIST list = NULL;
+   
+   AddLink( &amp;list, (POINTER)user_pointer );
+   
+   
+   {
+       POINTER p; // this should be USER_DATA_TYPE *p;
+       INDEX idx; // just a generic counter.
+       LIST_FORALL( list, idx, POINTER, p )
+       {
+           // for each item in the list, p will be not null.
+           if( p-\>something == some_other_thing )
+               break;
+       }
+       // p will be NULL if the list is empty
+       // p will be NULL if the LIST_FORALL loop completes to termination.
+       // p will be not NULL if the LIST_FORALL loop executed a 'break;'
+   }
+   </code>                                                                 */
 #define AddLink(p,v)       ( AddLinkEx( (p),((POINTER)(v)) DBG_SRC ) )
 #define SetLink(p,i,v)     ( SetLinkEx( (p),(i),((POINTER)(v)) DBG_SRC ) )
 
@@ -78,14 +116,30 @@ TYPELIB_PROC( PTRSZVAL,    ForAllLinks    )( PLIST *pList, ForProc func, PTRSZVA
 #endif
 //--------------------------------------------------------
 
-TYPELIB_PROC( PDATALIST, CreateDataListEx )( PTRSZVAL nSize DBG_PASS );
-TYPELIB_PROC( void,      DeleteDataListEx )( PDATALIST *ppdl DBG_PASS );
-TYPELIB_PROC( POINTER,   SetDataItemEx )( PDATALIST *ppdl, INDEX idx, POINTER data DBG_PASS );
+TYPELIB_PROC  PDATALIST TYPELIB_CALLTYPE  CreateDataListEx ( PTRSZVAL nSize DBG_PASS );
+TYPELIB_PROC  void TYPELIB_CALLTYPE       DeleteDataListEx ( PDATALIST *ppdl DBG_PASS );
+TYPELIB_PROC  POINTER TYPELIB_CALLTYPE    SetDataItemEx ( PDATALIST *ppdl, INDEX idx, POINTER data DBG_PASS );
+/* Adds an item to a DataList.
+   Example
+   <code lang="c++">
+   PDATALIST datalist = CreateDataList();
+   
+   struct my_struct {
+       _32 my_data;
+   }
+   
+   struct my_struct my_item;
+   my_item.my_data = 0;
+   
+   
+   AddDataItem( &amp;datalist, &amp;my_item );
+   
+   </code>                                     */
 #define AddDataItem(list,data) (((list)&&(*(list)))?SetDataItemEx((list),(*list)->Cnt,data DBG_SRC ):NULL)
-TYPELIB_PROC( POINTER,   SetDataItemEx )( PDATALIST *ppdl, INDEX idx, POINTER data DBG_PASS );
-TYPELIB_PROC( POINTER,   GetDataItem )( PDATALIST *ppdl, INDEX idx );
-TYPELIB_PROC( void,      DeleteDataItem )( PDATALIST *ppdl, INDEX idx );
-TYPELIB_PROC( void,      EmptyDataList )( PDATALIST *ppdl );
+TYPELIB_PROC  POINTER TYPELIB_CALLTYPE    SetDataItemEx ( PDATALIST *ppdl, INDEX idx, POINTER data DBG_PASS );
+TYPELIB_PROC  POINTER TYPELIB_CALLTYPE    GetDataItem ( PDATALIST *ppdl, INDEX idx );
+TYPELIB_PROC  void TYPELIB_CALLTYPE       DeleteDataItem ( PDATALIST *ppdl, INDEX idx );
+TYPELIB_PROC  void TYPELIB_CALLTYPE       EmptyDataList ( PDATALIST *ppdl );
 
 #define DATA_FORALL( l, i, t, v )  if(((v)=(t)NULL),(l)&&((l)->Cnt != INVALID_INDEX))   \
 	for( ((i)=0);                         \
@@ -106,6 +160,14 @@ TYPELIB_PROC( void,      EmptyDataList )( PDATALIST *ppdl );
 	      :(((v)=(t)NULL),0); (i)++ )
 
 #define CreateDataList(sz) ( CreateDataListEx( (sz) DBG_SRC ) )
+/* Destroy a DataList.
+   Example
+   <code>
+   PDATALIST datalist = CreateDataList( 4 );
+   DeleteDataList( &amp;datalist );
+   </code>
+   Parameters
+   ppDataList :  pointer to the PDATALIST.   */
 #define DeleteDataList(p)  ( DeleteDataListEx( (p) DBG_SRC ) )
 #define SetDataItem(p,i,v) ( SetDataItemEx( (p),(i),(v) DBG_SRC ) )
 
@@ -114,17 +176,17 @@ TYPELIB_PROC( void,      EmptyDataList )( PDATALIST *ppdl );
 #ifdef __cplusplus
 		namespace link_stack {
 #endif
-TYPELIB_PROC( PLINKSTACK,  CreateLinkStackEx)( DBG_VOIDPASS );
+TYPELIB_PROC  PLINKSTACK TYPELIB_CALLTYPE   CreateLinkStackEx( DBG_VOIDPASS );
          // creates a link stack with maximum entries - any extra entries are pushed off the bottom into NULL
-TYPELIB_PROC( PLINKSTACK,     CreateLinkStackLimitedEx        )( int max_entries  DBG_PASS );
+TYPELIB_PROC  PLINKSTACK TYPELIB_CALLTYPE      CreateLinkStackLimitedEx        ( int max_entries  DBG_PASS );
 #define CreateLinkStackLimited(n) CreateLinkStackLimitedEx(n DBG_SRC)
-TYPELIB_PROC( void,        DeleteLinkStackEx)( PLINKSTACK *pls DBG_PASS);
-TYPELIB_PROC( PLINKSTACK,  PushLinkEx       )( PLINKSTACK *pls, POINTER p DBG_PASS);
-TYPELIB_PROC( POINTER,     PopLink          )( PLINKSTACK *pls );
-TYPELIB_PROC( POINTER,     PeekLink         )( PLINKSTACK *pls );
+TYPELIB_PROC  void TYPELIB_CALLTYPE         DeleteLinkStackEx( PLINKSTACK *pls DBG_PASS);
+TYPELIB_PROC  PLINKSTACK TYPELIB_CALLTYPE   PushLinkEx       ( PLINKSTACK *pls, POINTER p DBG_PASS);
+TYPELIB_PROC  POINTER TYPELIB_CALLTYPE      PopLink          ( PLINKSTACK *pls );
+TYPELIB_PROC  POINTER TYPELIB_CALLTYPE      PeekLink         ( PLINKSTACK *pls );
 // thought about adding these, but decided on creating a limited stack instead.
-//TYPELIB_PROC( POINTER,     StackLength      )( PLINKSTACK *pls );
-//TYPELIB_PROC( POINTER,     PopLinkEx        )( PLINKSTACK *pls, int position );
+//TYPELIB_PROC  POINTER TYPELIB_CALLTYPE      StackLength      ( PLINKSTACK *pls );
+//TYPELIB_PROC  POINTER TYPELIB_CALLTYPE      PopLinkEx        ( PLINKSTACK *pls, int position );
 
 #define CreateLinkStack()  CreateLinkStackEx( DBG_VOIDSRC ) 
 #define DeleteLinkStack(p) DeleteLinkStackEx((p) DBG_SRC)
@@ -138,15 +200,15 @@ TYPELIB_PROC( POINTER,     PeekLink         )( PLINKSTACK *pls );
 		namespace data_stack {
 #endif
 
-TYPELIB_PROC( PDATASTACK,  CreateDataStackEx)( INDEX size DBG_PASS ); // sizeof data elements...
-TYPELIB_PROC( void,        DeleteDataStackEx)( PDATASTACK *pds DBG_PASS);
-TYPELIB_PROC( PDATASTACK,  PushDataEx     )( PDATASTACK *pds, POINTER pdata DBG_PASS );
-TYPELIB_PROC( POINTER,     PopData        )( PDATASTACK *pds );
-TYPELIB_PROC( void,        EmptyDataStack )( PDATASTACK *pds );
-TYPELIB_PROC( POINTER,     PeekData       )( PDATASTACK *pds ); // keeps data on stack (can be used)
+TYPELIB_PROC  PDATASTACK TYPELIB_CALLTYPE   CreateDataStackEx( INDEX size DBG_PASS ); // sizeof data elements...
+TYPELIB_PROC  void TYPELIB_CALLTYPE         DeleteDataStackEx( PDATASTACK *pds DBG_PASS);
+TYPELIB_PROC  PDATASTACK TYPELIB_CALLTYPE   PushDataEx     ( PDATASTACK *pds, POINTER pdata DBG_PASS );
+TYPELIB_PROC  POINTER TYPELIB_CALLTYPE      PopData        ( PDATASTACK *pds );
+TYPELIB_PROC  void TYPELIB_CALLTYPE         EmptyDataStack ( PDATASTACK *pds );
+TYPELIB_PROC  POINTER TYPELIB_CALLTYPE      PeekData       ( PDATASTACK *pds ); // keeps data on stack (can be used)
 // Incrementing Item moves progressivly down the stack
 // final(invalid) stack, and/or empty stack will return NULL;
-TYPELIB_PROC( POINTER,     PeekDataEx     )( PDATASTACK *pds, INDEX Item ); // keeps data on stack (can be used)
+TYPELIB_PROC  POINTER TYPELIB_CALLTYPE      PeekDataEx     ( PDATASTACK *pds, INDEX Item ); // keeps data on stack (can be used)
                                           
 #define CreateDataStack(size) CreateDataStackEx( size DBG_SRC )
 #define DeleteDataStack(p) DeleteDataStackEx((p) DBG_SRC)
@@ -160,16 +222,19 @@ TYPELIB_PROC( POINTER,     PeekDataEx     )( PDATASTACK *pds, INDEX Item ); // k
 		namespace queue {
 #endif
 
-TYPELIB_PROC( PLINKQUEUE,  CreateLinkQueueEx)( DBG_VOIDPASS );
-TYPELIB_PROC( void,        DeleteLinkQueueEx)( PLINKQUEUE *pplq DBG_PASS );
-TYPELIB_PROC( PLINKQUEUE,  EnqueLinkEx      )( PLINKQUEUE *pplq, POINTER link DBG_PASS );
-TYPELIB_PROC( PLINKQUEUE,  PrequeLinkEx      )( PLINKQUEUE *pplq, POINTER link DBG_PASS );
-TYPELIB_PROC( POINTER,     DequeLink        )( PLINKQUEUE *pplq );
-TYPELIB_PROC( LOGICAL,     IsQueueEmpty     )( PLINKQUEUE *pplq );
-TYPELIB_PROC( INDEX,       GetQueueLength   )( PLINKQUEUE plq );
+/* Creates a <link LinkQueue>. In debug mode, gets passed the
+   current source and file so it can blame the user for the
+   allocation.                                                */
+TYPELIB_PROC  PLINKQUEUE TYPELIB_CALLTYPE   CreateLinkQueueEx( DBG_VOIDPASS );
+TYPELIB_PROC  void TYPELIB_CALLTYPE         DeleteLinkQueueEx( PLINKQUEUE *pplq DBG_PASS );
+TYPELIB_PROC  PLINKQUEUE TYPELIB_CALLTYPE   EnqueLinkEx      ( PLINKQUEUE *pplq, POINTER link DBG_PASS );
+TYPELIB_PROC  PLINKQUEUE TYPELIB_CALLTYPE   PrequeLinkEx      ( PLINKQUEUE *pplq, POINTER link DBG_PASS );
+TYPELIB_PROC  POINTER TYPELIB_CALLTYPE      DequeLink        ( PLINKQUEUE *pplq );
+TYPELIB_PROC  LOGICAL TYPELIB_CALLTYPE      IsQueueEmpty     ( PLINKQUEUE *pplq );
+TYPELIB_PROC  INDEX TYPELIB_CALLTYPE        GetQueueLength   ( PLINKQUEUE plq );
 // get a PLINKQUEUE element at index
-TYPELIB_PROC( POINTER,     PeekQueueEx    )( PLINKQUEUE plq, INDEX idx );
-TYPELIB_PROC( POINTER,     PeekQueue    )( PLINKQUEUE plq );
+TYPELIB_PROC  POINTER TYPELIB_CALLTYPE      PeekQueueEx    ( PLINKQUEUE plq, INDEX idx );
+TYPELIB_PROC  POINTER TYPELIB_CALLTYPE      PeekQueue    ( PLINKQUEUE plq );
 
 
 #define     CreateLinkQueue()     CreateLinkQueueEx( DBG_VOIDSRC )
@@ -185,14 +250,14 @@ TYPELIB_PROC( POINTER,     PeekQueue    )( PLINKQUEUE plq );
 #ifdef __cplusplus
 		namespace data_queue {
 #endif
-TYPELIB_PROC( PDATAQUEUE,  CreateDataQueueEx)( INDEX size DBG_PASS );
-TYPELIB_PROC( PDATAQUEUE,  CreateLargeDataQueueEx)( INDEX size, INDEX entries, INDEX expand DBG_PASS );
-TYPELIB_PROC( void,        DeleteDataQueueEx)( PDATAQUEUE *pplq DBG_PASS );
-TYPELIB_PROC( PDATAQUEUE,  EnqueDataEx      )( PDATAQUEUE *pplq, POINTER Data DBG_PASS );
-TYPELIB_PROC( PDATAQUEUE,  PrequeDataEx      )( PDATAQUEUE *pplq, POINTER Data DBG_PASS );
-TYPELIB_PROC( LOGICAL,     DequeData        )( PDATAQUEUE *pplq, POINTER Data );
-TYPELIB_PROC( LOGICAL,     IsDataQueueEmpty )( PDATAQUEUE *pplq );
-TYPELIB_PROC( void,        EmptyDataQueue )( PDATAQUEUE *pplq );
+TYPELIB_PROC  PDATAQUEUE TYPELIB_CALLTYPE   CreateDataQueueEx( INDEX size DBG_PASS );
+TYPELIB_PROC  PDATAQUEUE TYPELIB_CALLTYPE   CreateLargeDataQueueEx( INDEX size, INDEX entries, INDEX expand DBG_PASS );
+TYPELIB_PROC  void TYPELIB_CALLTYPE         DeleteDataQueueEx( PDATAQUEUE *pplq DBG_PASS );
+TYPELIB_PROC  PDATAQUEUE TYPELIB_CALLTYPE   EnqueDataEx      ( PDATAQUEUE *pplq, POINTER Data DBG_PASS );
+TYPELIB_PROC  PDATAQUEUE TYPELIB_CALLTYPE   PrequeDataEx      ( PDATAQUEUE *pplq, POINTER Data DBG_PASS );
+TYPELIB_PROC  LOGICAL TYPELIB_CALLTYPE      DequeData        ( PDATAQUEUE *pplq, POINTER Data );
+TYPELIB_PROC  LOGICAL TYPELIB_CALLTYPE      IsDataQueueEmpty ( PDATAQUEUE *pplq );
+TYPELIB_PROC  void TYPELIB_CALLTYPE         EmptyDataQueue ( PDATAQUEUE *pplq );
 /*
  * get a PDATAQUEUE element at index
  * result buffer is a pointer to the type of structure expected to be
@@ -206,13 +271,13 @@ TYPELIB_PROC( void,        EmptyDataQueue )( PDATAQUEUE *pplq );
  * the pointer to the data in the queue may also not be returned because the queue may be
  * reallocated and moved.
  */
-TYPELIB_PROC( LOGICAL, PeekDataQueueEx    )( PDATAQUEUE *pplq, POINTER ResultBuffer, INDEX idx );
+TYPELIB_PROC  LOGICAL TYPELIB_CALLTYPE  PeekDataQueueEx    ( PDATAQUEUE *pplq, POINTER ResultBuffer, INDEX idx );
 #define PeekDataQueueEx( q, type, result, idx ) PeekDataQueueEx( q, (POINTER)result, idx )
 /*
  * Result buffer is filled with the last element, and the result is true, otherwise the return
  * value is FALSE, and the data was not filled in.
  */
-TYPELIB_PROC( LOGICAL, PeekDataQueue    )( PDATAQUEUE *pplq, POINTER ResultBuffer );
+TYPELIB_PROC  LOGICAL TYPELIB_CALLTYPE  PeekDataQueue    ( PDATAQUEUE *pplq, POINTER ResultBuffer );
 #define PeekDataQueue( q, type, result ) PeekDataQueue( q, (POINTER)result )
 
 #define     CreateDataQueue(size)     CreateDataQueueEx( size DBG_SRC )
@@ -236,31 +301,78 @@ typedef struct MsgDataHandle *PMSGHANDLE;
 // messages sent - the first dword of them must be
 // a message ID.
 typedef void (CPROC *MsgQueueReadCallback)( PTRSZVAL psv, CPOINTER p, PTRSZVAL sz );
-TYPELIB_PROC( PMSGHANDLE, SackCreateMsgQueue )( CTEXTSTR name, PTRSZVAL size
+TYPELIB_PROC  PMSGHANDLE TYPELIB_CALLTYPE  SackCreateMsgQueue ( CTEXTSTR name, PTRSZVAL size
                                                       , MsgQueueReadCallback Read
                                                       , PTRSZVAL psvRead );
-TYPELIB_PROC( PMSGHANDLE, SackOpenMsgQueue )( CTEXTSTR name
+TYPELIB_PROC  PMSGHANDLE TYPELIB_CALLTYPE  SackOpenMsgQueue ( CTEXTSTR name
 													 , MsgQueueReadCallback Read
 													 , PTRSZVAL psvRead );
-TYPELIB_PROC( void, DeleteMsgQueue )( PMSGHANDLE **ppmh );
+TYPELIB_PROC  void TYPELIB_CALLTYPE  DeleteMsgQueue ( PMSGHANDLE **ppmh );
 
 #define MSGQUE_NOWAIT 0x0001 // if enque, fail send, return immediate on fail
                              // if deque, fail no msg ready to get...
 #define MSGQUE_EXCEPT 0x0002 // read any msg BUT MsgID
 #define MSGQUE_WAIT_ID 0x0004 // enque this message... it is a task ID which is waiting.
 
+/* Error result if there is no message to read. (GetLastError()
+   after peekmsg or readmsg returns -1)                         */
 #define MSGQUE_ERROR_NOMSG 1
+/* Error result if the message to read is bigger than the buffer
+   passed to read the message.                                   */
 #define MSGQUE_ERROR_E2BIG 2
+/* Error result. Unexpected error (queue head/tail out of
+   bounds)                                                */
 #define MSGQUE_ERROR_EABORT 5
 // result is the size of the message, or 0 if no message.
 // -1 if some other error?
-TYPELIB_PROC( int, DequeMsgEx )( PMSGHANDLE pmh, _32 *MsgID, POINTER buffer, PTRSZVAL msgsize, _32 options DBG_PASS );
+TYPELIB_PROC  int TYPELIB_CALLTYPE  DequeMsgEx ( PMSGHANDLE pmh, _32 *MsgID, POINTER buffer, PTRSZVAL msgsize, _32 options DBG_PASS );
+/* Receives a message from the message queue.
+   Parameters
+   Message Queue :  PMSGHANDLE to read from
+   Message ID * :   a Pointer to the message ID to read. Updated
+                    with the message ID from the queue.
+   buffer :         buffer to read message into
+   buffer length :  length of the buffer to read
+   options :        extra options for the read
+   
+   Return Value List
+   \-1 :  Error
+   0 :    No Message to read
+   \>0 :  size of message read.
+   
+   Returns
+   \ \                                                           */
 #define DequeMsg(q,b,s,i,o) DequeMsgEx(q,b,s,i,o DBG_SRC )
-TYPELIB_PROC( int, PeekMsgEx )( PMSGHANDLE pmh, _32 MsgID, POINTER buffer, PTRSZVAL msgsize, _32 options DBG_PASS );
+TYPELIB_PROC  int TYPELIB_CALLTYPE  PeekMsgEx ( PMSGHANDLE pmh, _32 MsgID, POINTER buffer, PTRSZVAL msgsize, _32 options DBG_PASS );
+/* Just peek at the next message.
+   Parameters
+   queue :        The PMSGHANDLE queue to read.
+   MsgID :        what message to read. 0 is read any message.
+   buffer :       where to read the message data into.
+   buffer_size :  the length of the message buffer.
+   options :      Options controlling the read
+   
+   Returns
+   \-1 on error
+   
+   0 if no message
+   
+   length of the message read                                  */
 #define PeekMsg(q,b,s,i,o) PeekMsgEx(q,b,s,i,o DBG_SRC )
-TYPELIB_PROC( int, EnqueMsgEx )( PMSGHANDLE pmh, POINTER buffer, PTRSZVAL msgsize, _32 options DBG_PASS );
+TYPELIB_PROC  int TYPELIB_CALLTYPE  EnqueMsgEx ( PMSGHANDLE pmh, POINTER buffer, PTRSZVAL msgsize, _32 options DBG_PASS );
+/* Add a message to the queue.
+   Parameters
+   Message Queue :  PMSGQUEUE to write to.
+   Buffer :         pointer to the message to send. THe MSgID is
+                    the first part of the message buffer.
+   Buffer Length :  how long the message to send is
+   Options :        Extra options for send
+   
+   Return Value List
+   \-1 :  Error
+   \>0 :  bytes of message sent                                  */
 #define EnqueMsg(q,b,s,o) EnqueMsgEx(q,b,s,o DBG_SRC )
-TYPELIB_PROC( int, IsMsgQueueEmpty )( PMSGHANDLE pmh );
+TYPELIB_PROC  int TYPELIB_CALLTYPE  IsMsgQueueEmpty ( PMSGHANDLE pmh );
 
 #ifdef __cplusplus
 }; //namespace message {
@@ -278,18 +390,50 @@ namespace sets {
 //       another good place where #define defining defines is good.
 //---------------------------------------------------------------------------
 
+/* Hard coded 32 bit division for getting word index. (x\>\>5) */
 #define UNIT_USED_IDX(n)   ((n) >> 5)
+/* Hard coded 32 bit division for getting bit index. (x &amp;
+   0x1f)                                                      */
 #define UNIT_USED_MASK(n)  (1 << ((n) &0x1f))
 
+/* A macro for use by internal code that marks a member of a set
+   as used.
+   Parameters
+   set :    pointer to a genericset
+   index :  item to mark used.                                   */
 #define SetUsed(set,n)   ((((set)->bUsed[UNIT_USED_IDX(n)]) |= UNIT_USED_MASK(n)), (++(set)->nUsed) )
+/* A macro for use by internal code that marks a member of a set
+   as available.
+   Parameters
+   set :    pointer to a genericset
+   index :  item to mark available.                              */
 #define ClearUsed(set,n) ((((set)->bUsed[UNIT_USED_IDX(n)]) &= ~UNIT_USED_MASK(n)), (--(set)->nUsed) )
+/* A macro for use by internal code that tests a whole set of
+   bits for used. (32 bits, can check to see if any in 32 is
+   free)
+   Parameters
+   set :    pointer to a genericset
+   index :  index of an one in the set of 32 being tested.
+   
+   Returns
+   0 if not all are used.
+   
+   1 if all in this block of bits are used.                   */
 #define AllUsed(set,n)   (((set)->bUsed[UNIT_USED_IDX(n)]) == 0xFFFFFFFF )
+/* A macro for use by internal code that tests a member of a set
+   as used.
+   Parameters
+   set :    pointer to a genericset
+   index :  item to test used.
+   
+   Returns
+   not zero if is used, otherwise is free.                       */
 #define IsUsed(set,n)    (((set)->bUsed[UNIT_USED_IDX(n)]) & UNIT_USED_MASK(n) )
 
 
 #ifdef __cplusplus
 #define CPP_(n)
-//#define CPP_(n) n
+/* A macro which is used to emit code in C++ mode... */
 #else
 #define CPP_(n)
 #endif
@@ -317,69 +461,245 @@ namespace sets {
 	} name##SET, *P##name##SET
 #endif
 
+/* This represents the basic generic set structure. Addtional
+   data is allocated at the end of this strcture to fit the bit
+   array that maps usage of the set, and for the set size of
+   elements.
+   
+   
+   Remarks
+   \ \ 
+   Summary
+   Generic sets are good for tracking lots of tiny structures.
+   
+   
+   
+   They track slabs of X structures at a time. They allocate a
+   slab of X structures with an array of X bits indicating
+   whether a node is used or not. The structure overall has how
+   many are used, so once full, a block can be quickly checked
+   whether there is anything free. Then when checking a block
+   that might have room, the availablility is checked 32 bits at
+   a time, until a free spot is found.
+   
+   Sets of 1024 members of x,y coordinates for example are good
+   for this sort of storage. the points are often static, once
+   loaded they all exist until none of them do. This storage has
+   gross deletion methods too, quickly evaporate all allocated
+   chunks. Storing tiny chunks in a slab is more efficient
+   because every allocation method has some sort of tracking
+   associated with it - an overhead of having it. Plus, when
+   operating on sets of data, a single solid slab of exatly the
+   structures you are working with is more efficient to cache.
+   
+   
+   Example
+   <code lang="c++">
+   struct treenode_tag {
+       _32 treenode_data;  // abitrary structure data
+   };
+   typedef struct treenode_tag TREENODE;
+   
+   \#define MAXTREENODESPERSET 256
+   DeclareSet( TREENODE );
+   </code>
+   The important part of the prior code is the last two lines.
+   
+   \#define MAX\<your type name\>SPERSET \<how many\>
+   
+   This defines how many of your structure are kept per set
+   block.
+   
+   The DeclareSet( type ) declares a typedefed structure called
+   'struct type##set_tag', 'name##SET', and '*P##name##SET'; in
+   the above case, it would be 'struct TREENODEset_tag',
+   'TREENODESET', and 'PTREENODESET'.
+   
+   
+   
+   Then to actually use the set...
+   <code lang="c#">
+   // declare a set pointer with one of the magic names.
+   PTREENODESET nodeset = NULL;
+   // get a node from the set.
+   TREENODE *node = GetFromSet( TREENODE, nodeset );
+   
+   </code>
+   
+   Notice there is no CreateSet, getting a set member will
+   create the set as required. Many operations may expend the
+   set, except for GetUsedSetMember which will only result with
+   \members that are definatly in the set. Accesses to the set
+   are all prefixed by the type name the set was created with,
+   'TREENODE' in this example.
+   <code lang="c++">
+   DeleteFromSet( TREENODE, nodeset, node );
+   node = GetFromSet( TREENODE, nodeset );
+   
+   {
+      int index = GetMemberIndex( TREENODE, nodeset, node );
+   }
+   </code>
+   
+   The accessor macros take care of expanding several parameters
+   that require sizeof structure expansion.                      */
 typedef struct genericset_tag {
 	// wow might be nice to have some flags...
 	// first flag - bSetSet - meaning that this is a set of sets of
 	// the type specified...
 	struct genericset_tag *next;
+	/* This is the pointer that's pointing at the pointer pointing
+	   to me. (did you get that?) See <link DeclareLink>.          */
 	struct genericset_tag **me;
 	_32 nUsed;
 	_32 nBias; // hmm if I change this here? we're hozed... so.. we'll do it anyhow :) evil - recompile please
 	_32 bUsed[1]; // after this p * unit must be computed
 } GENERICSET, *PGENERICSET;
 
-TYPELIB_PROC( POINTER ,GetFromSetEx)( GENERICSET **pSet, int setsize, int unitsize, int maxcnt DBG_PASS );
+/* \ \ 
+   Parameters
+   pSet :      pointer to a generic set
+   nMember :   index of the member
+   setsize :   number of elements in each block
+   unitsize :  set block
+   maxcnt :    max elements per set block       */
+TYPELIB_PROC  POINTER  TYPELIB_CALLTYPE GetFromSetEx( GENERICSET **pSet, int setsize, int unitsize, int maxcnt DBG_PASS );
+/* <combine sack::containers::sets::GetFromSetEx@GENERICSET **@int@int@int maxcnt>
+   
+   \ \                                                                             */
 #define GetFromSeta(ps, ss, us, max) GetFromSetEx( (ps), (ss), (us), (max) DBG_SRC )
+/* <combine sack::containers::sets::GetFromSetEx@GENERICSET **@int@int@int maxcnt>
+   
+   \ \ 
+   Parameters
+   name :  name of type the set contains.
+   pSet :  pointer to a set to get an element from.                                */
 #define GetFromSet( name, pset ) (P##name)GetFromSeta( (GENERICSET**)(pset), sizeof( name##SET ), sizeof( name ), MAX##name##SPERSET )
 
-TYPELIB_PROC( PGENERICSET ,GetFromSetPoolEx)( GENERICSET **pSetSet
+/* \ \ 
+   Parameters
+   pSet :      pointer to a generic set
+   nMember :   index of the member
+   setsize :   number of elements in each block
+   unitsize :  set block
+   maxcnt :    max elements per set block       */
+TYPELIB_PROC  PGENERICSET  TYPELIB_CALLTYPE GetFromSetPoolEx( GENERICSET **pSetSet
 													 , int setsetsize, int setunitsize, int setmaxcnt
 													 , GENERICSET **pSet
 													 , int setsize, int unitsize, int maxcnt DBG_PASS );
+/* <combine sack::containers::sets::GetFromSetPoolEx@GENERICSET **@int@int@int@GENERICSET **@int@int@int maxcnt>
+   
+   \ \                                                                                                           */
 #define GetFromSetPoola(pl, sss, sus, smax, ps, ss, us, max) GetFromSetPoolEx( (pl), (sss), (sus), (smax), (ps), (ss), (us), (max) DBG_SRC )
+/* <combine sack::containers::sets::GetFromSetPoolEx@GENERICSET **@int@int@int@GENERICSET **@int@int@int maxcnt>
+   
+   \ \                                                                                                           */
 #define GetFromSetPool( name, pool, pset ) (P##name)GetFromSetPoola( (GENERICSET**)(pool)    \
 	, sizeof( name##SETSET ), sizeof( name##SET ), MAX##name##SETSPERSET\
 	, (GENERICSET**)(pset), sizeof( name##SET ), sizeof( name ), MAX##name##SPERSET )
 
-TYPELIB_PROC( POINTER ,GetSetMemberEx)( GENERICSET **pSet, INDEX nMember, int setsize, int unitsize, int maxcnt DBG_PASS );
+/* \ \ 
+   Parameters
+   pSet :      pointer to a generic set
+   nMember :   index of the member
+   setsize :   number of elements in each block
+   unitsize :  set block
+   maxcnt :    max elements per set block       */
+TYPELIB_PROC  POINTER  TYPELIB_CALLTYPE GetSetMemberEx( GENERICSET **pSet, INDEX nMember, int setsize, int unitsize, int maxcnt DBG_PASS );
+/* <combine sack::containers::sets::GetSetMemberEx@GENERICSET **@INDEX@int@int@int maxcnt>
+   
+   \ \                                                                                     */
 #define GetSetMembera(ps, member, ss, us, max) (GetSetMemberEx( (ps), (member), (ss), (us), (max) DBG_SRC ))
+/* <combine sack::containers::sets::GetSetMemberEx@GENERICSET **@INDEX@int@int@int maxcnt>
+   
+   \ \                                                                                     */
 #define GetSetMember( name, pset, member ) ((P##name)GetSetMembera( (GENERICSET**)(pset), (member), sizeof( name##SET ), sizeof( name ), MAX##name##SPERSET ))
 
-TYPELIB_PROC( POINTER ,GetUsedSetMemberEx)( GENERICSET **pSet, INDEX nMember, int setsize, int unitsize, int maxcnt DBG_PASS );
+/* \ \ 
+   Parameters
+   pSet :      pointer to a generic set
+   nMember :   index of the member
+   setsize :   number of elements in each block
+   unitsize :  set block
+   maxcnt :    max elements per set block       */
+TYPELIB_PROC  POINTER  TYPELIB_CALLTYPE GetUsedSetMemberEx( GENERICSET **pSet, INDEX nMember, int setsize, int unitsize, int maxcnt DBG_PASS );
+/* <combine sack::containers::sets::GetUsedSetMemberEx@GENERICSET **@INDEX@int@int@int maxcnt>
+   
+   \ \                                                                                         */
 #define GetUsedSetMembera(ps, member, ss, us, max) (GetUsedSetMemberEx( (ps), (member), (ss), (us), (max) DBG_SRC ))
+/* <combine sack::containers::sets::GetUsedSetMemberEx@GENERICSET **@INDEX@int@int@int maxcnt>
+   
+   \ \                                                                                         */
 #define GetUsedSetMember( name, pset, member ) ((P##name)GetUsedSetMembera( (GENERICSET**)(pset), (member), sizeof( name##SET ), sizeof( name ), MAX##name##SPERSET ))
 
-TYPELIB_PROC( INDEX, GetMemberIndex)(GENERICSET **set, POINTER unit, int unitsize, int max );
+TYPELIB_PROC  INDEX TYPELIB_CALLTYPE  GetMemberIndex(GENERICSET **set, POINTER unit, int unitsize, int max );
+/* <combine sack::containers::sets::GetMemberIndex>
+   
+   \ \                                              */
 #define GetMemberIndex(name,set,member) GetMemberIndex( (GENERICSET**)set, member, sizeof( name ), MAX##name##SPERSET )
 
+/* <combine sack::containers::sets::GetMemberIndex@GENERICSET **@POINTER@int@int>
+   
+   \ \                                                                            */
 #define GetIndexFromSet( name, pset ) GetMemberIndex( name, pset, GetFromSet( name, pset ) )
 
-TYPELIB_PROC( void, DeleteFromSetExx)( GENERICSET *set, POINTER unit, int unitsize, int max DBG_PASS );
+/* \ \ 
+   Parameters
+   pSet :      pointer to a generic set
+   nMember :   index of the member
+   setsize :   number of elements in each block
+   unitsize :  set block
+   maxcnt :    max elements per set block       */
+TYPELIB_PROC  void TYPELIB_CALLTYPE  DeleteFromSetExx( GENERICSET *set, POINTER unit, int unitsize, int max DBG_PASS );
+/* <combine sack::containers::sets::DeleteFromSetExx@GENERICSET *@POINTER@int@int max>
+   
+   \ \                                                                                 */
 #define DeleteFromSetEx( name, set, member, xx ) DeleteFromSetExx( (GENERICSET*)set, member, sizeof( name ), MAX##name##SPERSET DBG_SRC )
+/* <combine sack::containers::sets::DeleteFromSetExx@GENERICSET *@POINTER@int@int max>
+   
+   \ \                                                                                 */
 #define DeleteFromSet( name, set, member ) DeleteFromSetExx( (GENERICSET*)set, member, sizeof( name ), MAX##name##SPERSET DBG_SRC )
 
-TYPELIB_PROC( void, DeleteSetMemberEx)( GENERICSET *set, INDEX iMember, PTRSZVAL unitsize, INDEX max );
+TYPELIB_PROC  void TYPELIB_CALLTYPE  DeleteSetMemberEx( GENERICSET *set, INDEX iMember, PTRSZVAL unitsize, INDEX max );
+/* <combine sack::containers::sets::DeleteSetMemberEx@GENERICSET *@INDEX@PTRSZVAL@INDEX>
+   
+   \ \                                                                                   */
 #define DeleteSetMember( name, set, member ) DeleteSetMemberEx( (GENERICSET*)set, member, sizeof( name ), MAX##name##SPERSET )
 
-TYPELIB_PROC( int, MemberValidInSetEx)( GENERICSET *set, POINTER unit, int unitsize, int max );
+TYPELIB_PROC  int TYPELIB_CALLTYPE  MemberValidInSetEx( GENERICSET *set, POINTER unit, int unitsize, int max );
+/* <combine sack::containers::sets::MemberValidInSetEx@GENERICSET *@POINTER@int@int>
+   
+   \ \                                                                               */
 #define MemberValidInSet( name, set, member ) MemberValidInSetEx( (GENERICSET*)set, member, sizeof( name ), MAX##name##SPERSET )
 
-TYPELIB_PROC( int, CountUsedInSet)( GENERICSET *set, int max );
+TYPELIB_PROC  int TYPELIB_CALLTYPE  CountUsedInSet( GENERICSET *set, int max );
+/* <combine sack::containers::sets::CountUsedInSet>
+   
+   \ \                                              */
 #define CountUsedInSet( name, set ) CountUsedInSet( (GENERICSET*)set, MAX##name##SPERSET )
 
-TYPELIB_PROC( POINTER *,GetLinearSetArray)( GENERICSET *pSet, int *pCount, int unitsize, int max );
+TYPELIB_PROC  POINTER * TYPELIB_CALLTYPE GetLinearSetArray( GENERICSET *pSet, int *pCount, int unitsize, int max );
+/* <combine sack::containers::sets::GetLinearSetArray>
+   
+   \ \                                                 */
 #define GetLinearSetArray( name, set, pCount ) GetLinearSetArray( (GENERICSET*)set, pCount, sizeof( name ), MAX##name##SPERSET )
 
-TYPELIB_PROC( int, FindInArray)( POINTER *pArray, int nArraySize, POINTER unit );
+TYPELIB_PROC  int TYPELIB_CALLTYPE  FindInArray( POINTER *pArray, int nArraySize, POINTER unit );
 
-TYPELIB_PROC( void, DeleteSet)( GENERICSET **ppSet );
+/* Delete all allocated slabs.
+   Parameters
+   ppSet :  pointer to a generic set pointer to delete. */
+TYPELIB_PROC  void TYPELIB_CALLTYPE  DeleteSet( GENERICSET **ppSet );
+/* <combine sack::containers::sets::DeleteSet@GENERICSET **>
+   
+   \ \                                                       */
 #define DeleteSetEx( name, ppset ) { name##SET **delete_me = ppset; DeleteSet( (GENERICSET**)delete_me ); }
 
 typedef PTRSZVAL (CPROC *FAISCallback)(void*,PTRSZVAL);
-TYPELIB_PROC( PTRSZVAL, _ForAllInSet)( GENERICSET *pSet, int unitsize, int max, FAISCallback f, PTRSZVAL psv );
+TYPELIB_PROC  PTRSZVAL TYPELIB_CALLTYPE  _ForAllInSet( GENERICSET *pSet, int unitsize, int max, FAISCallback f, PTRSZVAL psv );
 
 typedef PTRSZVAL (CPROC *FESMCallback)(INDEX,PTRSZVAL);
-TYPELIB_PROC( PTRSZVAL, ForEachSetMember )( GENERICSET *pSet, int unitsize, int max, FESMCallback f, PTRSZVAL psv );
+TYPELIB_PROC  PTRSZVAL TYPELIB_CALLTYPE  ForEachSetMember ( GENERICSET *pSet, int unitsize, int max, FESMCallback f, PTRSZVAL psv );
 
 
 #if 0 //def __cplusplus
@@ -409,7 +729,13 @@ TYPELIB_PROC( PTRSZVAL, ForEachSetMember )( GENERICSET *pSet, int unitsize, int 
 #define ForAllInSet(name, pset,f,psv) _ForAllInSet( (GENERICSET*)(pset), sizeof( name ), MAX##name##SPERSET, (f), (psv) )
 #else
 
+/* <combine sack::containers::sets::_ForAllInSet@GENERICSET *@int@int@FAISCallback@PTRSZVAL>
+   
+   \ \                                                                                       */
 #define ForAllInSet(name, pset,f,psv) _ForAllInSet( (GENERICSET*)(pset), sizeof( name ), MAX##name##SPERSET, (f), (psv) )
+/* <combine sack::containers::sets::ForEachSetMember@GENERICSET *@int@int@FESMCallback@PTRSZVAL>
+   
+   \ \                                                                                           */
 #define ForEachSetMember(name,pset,f,psv) ForEachSetMember( (GENERICSET*)(pset),sizeof(name),MAX##name##SPERSET, (f), (psv) )
 #endif
 
@@ -442,23 +768,35 @@ namespace text {
 //  - not sure how to address that issue... there's
 // certainly modifications to current font... italic for
 // instance..
-enum {
-	FORMAT_OP_CLEAR_END_OF_LINE = 1
-	  , FORMAT_OP_CLEAR_START_OF_LINE
-	  , FORMAT_OP_CLEAR_LINE
-	  , FORMAT_OP_CLEAR_END_OF_PAGE
-	  , FORMAT_OP_CLEAR_START_OF_PAGE
-	  , FORMAT_OP_CLEAR_PAGE // set cursor home
-	  //, FORMAT_OP_POSITION_DELTA // position information is a delta cursor
-	  , FORMAT_OP_CONCEAL // sets option to not show text at all until next color.
-	  , FORMAT_OP_DELETE_CHARS // background is how many to delete.
-	  , FORMAT_OP_SET_SCROLL_REGION // format.x, y are start/end of region -1,-1 clears.
-	  , FORMAT_OP_GET_CURSOR // this works as a transaction...
-	  , FORMAT_OP_SET_CURSOR // responce to getcursor...
-
-	  , FORMAT_OP_PAGE_BREAK // clear page, home page... result in page break...
-	  , FORMAT_OP_PARAGRAPH_BREAK // break between paragraphs - kinda same as lines...
-	  // since lines are as long as possible...
+	enum FORMAT_OPS {
+      /* this segment clears to the end of the line.  Its content is then added to the output */
+		FORMAT_OP_CLEAR_END_OF_LINE = 1
+        ,FORMAT_OP_CLEAR_START_OF_LINE/* clear from the current cursor to the start of line */
+						  
+                   ,/* clear the current line */
+						  FORMAT_OP_CLEAR_LINE
+						 ,/* clear to the end of the page from this line */
+						  FORMAT_OP_CLEAR_END_OF_PAGE
+                   ,/* clear from this line to the start of the page */
+						  FORMAT_OP_CLEAR_START_OF_PAGE
+						 ,/* clear the entire vieable page (pushes all content to history)
+                    set cursor home */
+						  FORMAT_OP_CLEAR_PAGE 
+						 ,/* sets option to not show text at all until next color. */
+						  FORMAT_OP_CONCEAL
+                   ,/* background is how many to delete. */
+						  FORMAT_OP_DELETE_CHARS 
+                   ,/* format.x, y are start/end of region -1,-1 clears. */
+						  FORMAT_OP_SET_SCROLL_REGION 
+                   ,/* this works as a transaction... */
+						  FORMAT_OP_GET_CURSOR 
+						 ,/* responce to getcursor... */
+						  FORMAT_OP_SET_CURSOR
+						 ,/* clear page, home page... result in page break... */
+						  FORMAT_OP_PAGE_BREAK
+						 ,/* break between paragraphs - kinda same as lines...
+						  since lines are as long as possible... */
+						 FORMAT_OP_PARAGRAPH_BREAK
 };
 
 //typedef struct text_color_tag { _32 color: 8; } TEXTCOLOR;
@@ -475,18 +813,27 @@ enum {
 //
 typedef struct format_info_tag
 {
+   /* bit-packed flags indicating the type of format information that is applied to this segment.*/
 	struct {
 		// extended operation from enumeration above...
 		// might shrink if more attributes are desired...
 		// if many more are needed, one might consider
       // adding FONT!
+     /* this segment uses the prior foreground, not its own. */
 		_32 prior_foreground : 1;
+     /* this segment uses the prior background, not its own. */
 		_32 prior_background : 1;
+     /* this segment uses the default foreground, not its own. */
 		_32 default_foreground : 1;
+      /* this segment uses the default background, not its own. */
 		_32 default_background : 1;
+      /* the foreground color of this segment (0-16 standard console text [ANSI text]) */
 		_32 foreground : 4;
+      /* the background color of this segment (0-16 standard console text [ANSI text]) */
 		_32 background : 4;
+      /* a bit indicating the text should blink if supported */
 		_32 blink : 1;
+      /* a bit indicating the foreground and background color should be reversed */
 		_32 reverse : 1;
 		// usually highly is bolder, perhaps it's
       // a highlighter effect and changes the background
@@ -502,8 +849,10 @@ typedef struct format_info_tag
 		// it's a wiggly scribble line?  maybe that
       // could be extended again?
 		_32 strike : 1;
-		_32 wide : 1; // text is drawn wide (printer kinda font?)
-		_32 italic : 1; // this is pretty common......
+      // text is drawn wide (printer kinda font?)
+		_32 wide : 1;
+       // this is pretty common......
+		_32 italic : 1;
 		// --
 		// these flags are free, but since we already have text segments
 		// and I'm bringing in consoles, perhaps we should consider using
@@ -519,19 +868,37 @@ typedef struct format_info_tag
 		// vertical/down, right/left upside down if not centered
 		// if centered, the text pivots around position.
 		_32 bInvert:1;
-		_32 bAlign:2;  // 0 = default alignment 1 = left, 2 = center 3 = right
+		// 0 = default alignment 1 = left, 2 = center 3 = right
 		// 0 is not set, the flag set in the lower 32 bit flags
 		// is not needed any longer.... anything non zero
-      // is that operation to apply.
+		// is that operation to apply.
+		_32 bAlign:2;
+      /* format op indicates one of the enum FORMAT_OPS applies to this segment */
 		_32 format_op : 7;
 
 	} flags;
 	// if x,y are valid segment will have TF_POSFORMAT set...
 	union {
+		/* Coordinate information attached to a text segment. */
+		/* Positioning specification of this text segment. with
+		   basically 0 format options, position is used.
+		   
+		   Position represents the distance from this segment to the
+		   prior segment in count of tabs and spaces.
+		   
+		   coords specifies an x,y coordinate location for the segment.
+		   
+		   
+		   
+		   Usage of this union is dependant on <link text::format_info_tag::flags@1::format_op, format_op>. */
 		struct {
+         // Signed coordinate of this segment on a text display.  May be relative depending on format_op.
 			S_16 x;
-			S_16 y; // need more than 8 bits for displays even now...
+         // Signed coordinate of this segment on a text display.  May be relative depending on format_op.
+			S_16 y; 
 		} coords;
+		/* Defines the distance from the prior segment in count of tabs
+		   and spaces (mostly count of spaces).                         */
 		struct {
          _16 tabs;   // tabs preceed spaces....
 			_16 spaces; // not sure what else to put with this...
@@ -542,37 +909,52 @@ typedef struct format_info_tag
 
 #define IGNORE_CURSOR_POS -16384 // special coordinate which is NO coordinate
 
-#define TF_STATIC    0x00000001   // declared in program data.... do NOT release
-
+/* test flag, format has position data */
 #define TF_FORMATPOS (TF_FORMATABS|TF_FORMATREL|TF_FORMATEX)
-// applications may use these flags to group expressions
-// will affect the BuildLine but is not generated by library.
-#define TF_QUOTE     0x00000002   // double quoted string segment " "
-#define TF_SQUOTE    0x00000004   // single quoted string ' '
-#define TF_BRACKET   0x00000008   // bracketed expression []
-#define TF_BRACE     0x00000010   // braced expression {}
-#define TF_PAREN     0x00000020   // parenthised expression ()
-#define TF_TAG       0x00000040   // HTML tag like expression <>
 
-#define TF_FORMATEX  0x00000080   // foreground is FORMAT_OP
-#define TF_FORMATREL 0x00000100   // x,y position used (relative)
-#define TF_INDIRECT  0x00000200   // size field extually points at PTEXT
-#define TF_FORMATABS 0x00000800   // format position is x/y - else space count
-#define TF_COMPLETE  0x00001000   // set during burst for last segment...
-#define TF_BINARY    0x00002000   // set for non-text variable
-#define TF_DEEP      0x00004000   // on release release indrect also...
-#define TF_NORETURN  0x00008000   // set on first segment to send to omit lead \r\n
+/* these flags are used in PTEXT.flags member
+ applications may use these flags to group expressions
+ will affect the BuildLine but is not generated by library.
+( TF_QUOTE, TF_SQUOTE, TF_BRACKET, TF_BRACE, TF_PAREN, and TF_TAG).
+*/
+enum TextFlags {
+ TF_STATIC    = 0x00000001,   // declared in program data.... do NOT release
+
+ TF_QUOTE     = 0x00000002,   // double quoted string segment " "
+ TF_SQUOTE    = 0x00000004,   // single quoted string ' '
+ TF_BRACKET   = 0x00000008,   // bracketed expression []
+ TF_BRACE     = 0x00000010,   // braced expression {}
+ TF_PAREN     = 0x00000020,   // parenthised expression ()
+ TF_TAG       = 0x00000040,   // HTML tag like expression &lt;&gt;
+
+ TF_FORMATEX  = 0x00000080,   // foreground is FORMAT_OP
+ TF_FORMATREL = 0x00000100,   // x,y position used (relative)
+ TF_INDIRECT  = 0x00000200,   // size field extually points at PTEXT
+ TF_FORMATABS = 0x00000800,   // format position is x/y - else space count
+ TF_COMPLETE  = 0x00001000,   // set during burst for last segment...
+ TF_BINARY    = 0x00002000,   // set for non-text variable
+ TF_DEEP      = 0x00004000,   // on release release indrect also...
+ TF_NORETURN  = 0x00008000,   // set on first segment to send to omit lead \r\n
 
 // these values used originally for ODBC query construction....
 // these values are flags stored on the indirect following a value
 // label...
-#define TF_LOWER     0x00010000   // Low bound of value...
-#define TF_UPPER     0x00020000   // Upper bound of a value...
-#define TF_EQUAL     0x00040000   // boundry may be ON this value...
-
-#define TF_TEMP      0x00080000   // this segment is not a permanent part (SubstToken)
-#define TF_APPLICATION 0x00100000  // this is something special do not treat as text indirect.
-
+// Low bound of value...
+  TF_LOWER     = 0x00010000,
+// these values used originally for ODBC query construction....
+// these values are flags stored on the indirect following a value
+// label...
+  // Upper bound of a value...
+  TF_UPPER     = 0x00020000,
+// these values used originally for ODBC query construction....
+// these values are flags stored on the indirect following a value
+// label...
+// boundry may be ON this value...
+ TF_EQUAL     = 0x00040000,
+ 
+ TF_TEMP      = 0x00080000,   // this segment is not a permanent part (SubstToken)
+ TF_APPLICATION = 0x00100000,  // this is something special do not treat as text indirect.
+};
 //--------------------------------------------------------------------------
 
 // flag combinatoin which represents actual data is present even with 0 size
@@ -593,34 +975,117 @@ typedef struct format_info_tag
 #define DEFTEXT(str) {TF_STATIC,NULL,NULL,{{1,1}},{sizeof(str)-1,str}}
 #define DECLTEXT(name, str) static DECLTEXTSZTYPE( name, sizeof(str) ) = DEFTEXT(str)
 
+/* Description
+   A Text segment, it is based on DataBlock that has a length
+   and an addtional region at the end of the structure which
+   contains the text of the segment. Segments may have
+   formatting attributes. Segments may be linked to other
+   segments in a NEXTLINE/PRIORLINE. Segments may have indirect
+   content, which may represent phrases. Sets of segments may
+   represent sentence diagrams. A Pointer to a <link text::TEXT, TEXT>
+   type.
+   
+   TEXT is a type I created to provide a variety of functions.
+   One particular application was a common language processor,
+   and I created the TEXT structure to store elements which are
+   described by language. Sentences are words, and phases. A
+   phrase is a set of words, but sometimes a word is a phrase.
+   
+   
+   
+   (sentence) = ( word ) ... (phrase ) ...
+   
+   (phrase) = (word)...
+   
+   
+   
+   hmm.. how to describe this.
+   
+   <code lang="c++">
+   PTEXT phrase = NULL;
+   SegAppend( phrase, SegCreateFromText( "Test" ) );
+   </code>
+   <code>
+   SegAppend( phrase, SegCreateFromText( "Test" ) );
+   SegAppend( phrase, SegCreateFromText( "Test" ) );
+   </code>
+   
+   PTEXT segments point at other segments. A list of segments is
+   a sentence. Segments can have information encoded on them
+   that remove text from them. For instance, \< and \> tags
+   might be removed around a phrase and stored as an attribute
+   of the segment. A segment with such an attribute could be an
+   indirect segment that points at a list of words which are the
+   phrases in the tag.
+   
+   <code lang="c++">
+   
+   a map of two segments, and their content...
+   
+       (segment with TF_TAG) -\> (segment with TF_TAG)
+             |                        |
+             \+ - ("html")             + - (body) -\> (background="#000000")
+   
+   
+   would actually expand to
+      \<html\>\<body background="#000000"\>
+   
+   </code>
+   See Also
+   SegCreate
+   
+   burst
+   
+   TextParse
+   
+   SegAppend
+   
+   SegSubst
+   
+   SegSplit
+   
+   SegGrab
+   
+   SegDelete
+   
+   LineRelease
+   
+   BuildLine
+   
+   
+   
+   and also.....
+   
+   PVARTEXT                                                                  */
 typedef struct text_segment_tag
 {
-   _32 flags;  // then here I could overlap with pEnt .bshadow, bmacro, btext ?
-	struct text_segment_tag *Next, *Prior;
-	// format is 64 bits.
-   // it's two 32 bit bitfields (position, expression)
-	FORMAT format; // valid if TF_FORMAT is set...
+	// then here I could overlap with pEnt .bshadow, bmacro, btext ?
+   _32 flags;  
+	/* This points to the next segment in the sentence or phrase. NULL
+	   if at the end of the line.                                      */
+		struct text_segment_tag *Next;
+	/* This points to the prior segment in the sentence or phrase. (NULL
+	   if at the first segment)                                          */
+		struct text_segment_tag *Prior;
+	/* format is 64 bits.
+      it's two 32 bit bitfields (position, expression)
+	 valid if TF_FORMAT is set... */
+	FORMAT format; 
+   /* A description of the data stored here.  It is compatible with a DATABLOCk.... */
    struct {
-		PTRSZVAL size;// unsigned size; size is sometimes a pointer value...
-                 // this means bad thing when we change platforms...
-#ifdef _MSC_VER
-#pragma warning (disable:4200)
-#endif
-	   TEXTCHAR  data[
-#if !defined( __cplusplus ) || defined( __WATCOMC__ ) || defined( GCC )
-		   			1
-#endif
-						   ]; // beginning of var data - this is created size+sizeof(VPA)
-#ifdef _MSC_VER
-#pragma warning (default:4200)
-#endif
-	} data; // must be last since var character data is included
+	   /* unsigned size; size is sometimes a pointer value...
+                  this means bad thing when we change platforms... Or not, since we went to PTRSZVAL which is big enough for a pointer. */
+		PTRSZVAL size;
+		/* the data of the test segment 
+		 beginning of var data - this is created size+sizeof(TEXT) */
+	   	TEXTCHAR  data[1]; 
+	} data; 
 } TEXT, *PTEXT;
 
 //
 // PTEXT DumpText( PTEXT somestring )
 //    PTExT (single data segment with full description \r in text)
-TYPELIB_PROC( PTEXT, DumpText) ( PTEXT text );
+TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  DumpText ( PTEXT text );
 //SegCreateFromText( ".." );
 // Burst, SegAppend, SegGrab
 // segments are ment to be lines, the meaninful tag "TF_NORETURN" means it's part of the prior line.
@@ -640,47 +1105,116 @@ extern TEXT blank;
 
 #define HAS_WHITESPACE(pText) ( (pText)->format.position.spaces || (pText)->format.position.tabs )
 
+/* A convenient macro to go from one segment in a line of text
+   to the next segment.                                        */
 #define NEXTLINE(line)   ((PTEXT)(((PTEXT)line)?(((PTEXT)line)->Next):(NULL)))
+/* A convenient macro to go from one segment in a line of text
+   to the prior segment.                                       */
 #define PRIORLINE(line)  ((PTEXT)(((PTEXT)line)?(((PTEXT)line)->Prior):(NULL)))
 
+/* Link one PTEXT segment to another. Sets one half of the links
+   appropriate for usage.
+   
+   
+   Example
+   This example sets the prior pointer of 'word' to 'line'.
+   <code>
+   PTEXT line;
+   PTEXT word;
+   SETPRIORLINE( word, line );
+   </code>                                                       */
 #define SETPRIORLINE(line,p) ((line)?(((line)->Prior) = (PTEXT)(p)):0)
+/* Link one PTEXT segment to another. Sets one half of the links
+   appropriate for usage.
+   
+   
+   Example
+   This example sets the next pointer of 'line' to 'word'.
+   <code lang="c#">
+   PTEXT line;
+   PTEXT word;
+   SETNEXTLINE( line, word );
+   </code>                                                       */
 #define SETNEXTLINE(line,p)  ((line)?(((line)->Next ) = (PTEXT)(p)):0)
 
+/* Sets a pointer to PTEXT to the first text segment in the
+   list.                                                    */
 #define SetStart(line)     for(; line && PRIORLINE(line);line=PRIORLINE(line))
+/* Sets a PTEXT to the last segment that it points to.
+   Parameters
+   line :  segment in the line to move to the end of.
+   
+   Remarks
+   Updates the variable passed to point to the last segment. */
 #define SetEnd(line)      for(; line && NEXTLINE(line); line=NEXTLINE(line))
 // might also check to see if pseg is an indirect - setting this size would be BAD
 #define SetTextSize(pseg, sz ) ((pseg)?((pseg)->data.size = (sz )):0)
-TYPELIB_PROC( PTEXT, GetIndirect)(PTEXT segment );
+TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  GetIndirect(PTEXT segment );
 
-TYPELIB_PROC( _32, GetTextFlags)( PTEXT segment );
-TYPELIB_PROC( INDEX, GetTextSize)( PTEXT segment );
-TYPELIB_PROC( TEXTSTR, GetText)( PTEXT segment );
+TYPELIB_PROC  _32 TYPELIB_CALLTYPE  GetTextFlags( PTEXT segment );
+TYPELIB_PROC  INDEX TYPELIB_CALLTYPE  GetTextSize( PTEXT segment );
+TYPELIB_PROC  TEXTSTR TYPELIB_CALLTYPE  GetText( PTEXT segment );
 // by registering for TF_APPLICTION is set on the segment
 // and flags anded with the segment flags match, the
 // function is called.... the result is the actual
 // segment of this - since a TF_APPLICATION is also
 // TF_INDIRECT - using the size to point to some application
 // defined structure instead of a PTEXT structure.
-TYPELIB_PROC( void, RegisterTextExtension )( _32 flags, PTEXT(CPROC*)(PTRSZVAL,POINTER), PTRSZVAL );
+TYPELIB_PROC  void TYPELIB_CALLTYPE  RegisterTextExtension ( _32 flags, PTEXT(CPROC*)(PTRSZVAL,POINTER), PTRSZVAL );
 // similar to GetIndirect - but results in the literal pointer
 // instead of the text that the application may have registered to result with.
-TYPELIB_PROC( POINTER, GetApplicationPointer )( PTEXT text );
-TYPELIB_PROC( void, SetApplicationPointer )( PTEXT text, POINTER p);
+TYPELIB_PROC  POINTER TYPELIB_CALLTYPE  GetApplicationPointer ( PTEXT text );
+/* Used to set the content of a segment to some application
+   defined value. This allows a users application to store
+   chunks of data in lists of text. These external chunks are
+   handled like other words.
+   
+   
+   Parameters
+   text :  this is the text segment to set application data on
+   p :     this is a pointer to application data               */
+TYPELIB_PROC  void TYPELIB_CALLTYPE  SetApplicationPointer ( PTEXT text, POINTER p);
 
 
+/* Set segment's indirect data.
+   Parameters
+   segment :  pointer to a TEXT segment to set the indirect content
+              of.
+   data :     pointer to a PTEXT to be referenced indirectly.       */
 #define SetIndirect(Seg,Where)  ( (Seg)->data.size = ((PTRSZVAL)(Where)-(PTRSZVAL)NULL) )
 
-// these return 1 for more(l1>l2) -1 for (l1<l2) and 0 for match.
-TYPELIB_PROC( int, SameText )( PTEXT l1, PTEXT l2 );
-TYPELIB_PROC( int, LikeText )( PTEXT l1, PTEXT l2 );
-// these return TRUE if match else FALSE.
-TYPELIB_PROC( int, TextIs ) ( PTEXT pText, CTEXTSTR text );
-TYPELIB_PROC( int, TextLike ) ( PTEXT pText, CTEXTSTR text );
+		/* these return 1 for more(l1&gt;l2) -1 for (l1&lt;l2) and 0 for match.
+       */
+TYPELIB_PROC  int TYPELIB_CALLTYPE  SameText ( PTEXT l1, PTEXT l2 );
+TYPELIB_PROC  int TYPELIB_CALLTYPE  LikeText ( PTEXT l1, PTEXT l2 );
+/* Compares if text is like a C string. Case Sensitive.
+   
+   <b>Returns</b>
+   
+   TRUE if they are alike.
+   
+   FALSE if they are different.
+   
+   <b>Parameters</b>                                    */
+TYPELIB_PROC  int TYPELIB_CALLTYPE  TextIs  ( PTEXT pText, CTEXTSTR text );
+/* Compares if text is like a C string. Case insensitive (like).
+   Returns
+   TRUE if they are alike.
+   
+   FALSE if they are different.
+   Parameters
+   pText :  PTEXT segment to compare
+   text :   C string buffer to compare against                   */
+TYPELIB_PROC  int TYPELIB_CALLTYPE  TextLike  ( PTEXT pText, CTEXTSTR text );
 
 //#define SameText( l1, l2 )  ( strcmp( GetText(l1), GetText(l2) ) )
 #define textmin(a,b) ( (((a)>0)&&((b)>0))?(((a)<(b))?(a):(b)):(((a)>0)?(a):((b)>0)?(b):0) )
 #ifdef __LINUX__
+/* windows went with stricmp() and strnicmp(), whereas linux
+   went with strcasecmp() and strncasecmp()                  */
 #define strnicmp strncasecmp
+/* windows went with stricmp() and strnicmp(), whereas linux
+   went with strcasecmp() and strncasecmp()                  */
 #define stricmp strcasecmp
 #endif
 //#define LikeText( l1, l2 )  ( strnicmp( GetText(l1), GetText(l2), textmin( GetTextSize(l1),
@@ -688,58 +1222,238 @@ TYPELIB_PROC( int, TextLike ) ( PTEXT pText, CTEXTSTR text );
 //#define TextIs(text,string) ( !stricmp( GetText(text), string ) )
 //#define TextLike(text,string) ( !stricmp( GetText(text), string ) )
 
-TYPELIB_PROC( PTEXT, SegCreateEx)( S_32 nSize DBG_PASS );
+TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  SegCreateEx( S_32 nSize DBG_PASS );
+/* Create a PTEXT with specified number of character capacity.
+   
+   
+   Example
+   <code lang="c#">
+   PTEXT text = SegCreate( 10 ); 
+   </code>                                                     */
 #define SegCreate(s) SegCreateEx(s DBG_SRC)
-TYPELIB_PROC( PTEXT, SegCreateFromTextEx)( CTEXTSTR text DBG_PASS );
+/* \ \ 
+   See Also
+   <link DBG_PASS>
+   
+   <link SegCreateFromText> */
+TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  SegCreateFromTextEx( CTEXTSTR text DBG_PASS );
+/* Creates a PTEXT segment from a string.
+   Example
+   <code lang="c++">
+   PTEXT line = SegCreateFromText( "Around the world in a day." );
+   </code>                                                         */
 #define SegCreateFromText(t) SegCreateFromTextEx(t DBG_SRC)
-TYPELIB_PROC( PTEXT, SegCreateIndirectEx)( PTEXT pText DBG_PASS );
+/* \ \ 
+   See Also
+   <link DBG_PASS>
+   
+   <link SegCreateIndirect> */
+TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  SegCreateIndirectEx( PTEXT pText DBG_PASS );
+/* Creates a text segment that refers to the parameter
+   indirectly. The new segment is not really a clone, but a
+   reference of the original PTEXT.
+   
+   
+   Example
+   <code lang="c#">
+   PTEXT phrase = SegCreateIndirect( SegAppend( SegCreateFromText( "Hello" )
+                                              , SegCreateFromText( "World" ) ) );
+   </code>
+   The resulting phrase is a single segment with no prior or
+   next, but its content is "HelloWorld" if it was passed to
+   buildline... it's go the content of the two text segments
+   linked together, but not in its buffer. It is actually a 0
+   length buffer for a TEXT segment.
+                                                                                  */
 #define SegCreateIndirect(t) SegCreateIndirectEx(t DBG_SRC)
 
-TYPELIB_PROC( PTEXT, SegDuplicateEx)( PTEXT pText DBG_PASS);
+/* \ \ 
+   See Also
+   <link DBG_PASS>
+   
+   <link SegDuplicate> */
+TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  SegDuplicateEx( PTEXT pText DBG_PASS);
+/* This duplicates a specific segment. It duplicates the first
+   segment of a string. If the segment has indirect data, then
+   the first segment of the indirect data is duplicated.       */
 #define SegDuplicate(pt) SegDuplicateEx( pt DBG_SRC )
-TYPELIB_PROC( PTEXT, LineDuplicateEx)( PTEXT pText DBG_PASS );
+/* Duplicates a linked list of segments.
+   
+   Duplicates the structure of a line. The resulting line is an
+   exact duplicate of the input line. All segments linked in
+   exactly the same sorts of ways.
+   Parameters
+   line :  list of segments to duplicate                        */
+TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  LineDuplicateEx( PTEXT pText DBG_PASS );
+/* <combine sack::containers::text::LineDuplicateEx@PTEXT pText>
+   
+   \ \                                                           */
 #define LineDuplicate(pt) LineDuplicateEx(pt DBG_SRC )
-TYPELIB_PROC( PTEXT, TextDuplicateEx)( PTEXT pText, int bSingle DBG_PASS );
+/* \ \ 
+   See Also
+   <link DBG_PASS>
+   
+   <link TextDuplicate> */
+TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  TextDuplicateEx( PTEXT pText, int bSingle DBG_PASS );
+/* Duplicate the whole string of text to another string with
+   exactly the same content.                                 */
 #define TextDuplicate(pt,s) TextDuplicateEx(pt,s DBG_SRC )
 
-TYPELIB_PROC( PTEXT, SegCreateFromIntEx)( int value DBG_PASS );
+/* \ \ 
+   See Also
+   <link DBG_PASS>
+   
+   <link SegCreateFromInt> */
+TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  SegCreateFromIntEx( int value DBG_PASS );
+/* Creates a text segment from a 64 bit integer.
+   Example
+   <code>
+   PTEXT number = SegCreateFromInt( 3314 );
+   </code>                                       */
 #define SegCreateFromInt(v) SegCreateFromIntEx( v DBG_SRC )
-TYPELIB_PROC( PTEXT, SegCreateFrom_64Ex)( S_64 value DBG_PASS );
+TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  SegCreateFrom_64Ex( S_64 value DBG_PASS );
+/* Create a text segment from a _64 bit value. (long long int) */
 #define SegCreateFrom_64(v) SegCreateFrom_64Ex( v DBG_SRC )
-TYPELIB_PROC( PTEXT, SegCreateFromFloatEx)( float value DBG_PASS );
+/* \ \ 
+   See Also
+   <link DBG_PASS>
+   
+   <link SegCreateFromFloat> */
+TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  SegCreateFromFloatEx( float value DBG_PASS );
+/* Creates a text segment from a floating point value. Probably
+   uses something like '%g' to format output. Fairly limited.
+   
+   
+   Example
+   <code lang="c++">
+   PTEXT short_PI = SegCreateFromFloat( 3.14 );
+   </code>                                                      */
 #define SegCreateFromFloat(v) SegCreateFromFloatEx( v DBG_SRC )
 
                    
-TYPELIB_PROC( PTEXT, SegAppend   )( PTEXT source, PTEXT other );
-TYPELIB_PROC( PTEXT, SegInsert   )( PTEXT what, PTEXT before );
+TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  SegAppend   ( PTEXT source, PTEXT other );
+/* Inserts a segment before another segment.
+   Parameters
+   what :    what to insert into the list
+   before :  insert the segments before this segment
+   
+   Returns
+   The parameter 'what'.                             */
+TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  SegInsert   ( PTEXT what, PTEXT before );
 
-TYPELIB_PROC( PTEXT, SegExpandEx )(PTEXT source, int nSize DBG_PASS );  // add last node... blank space.
+TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  SegExpandEx (PTEXT source, int nSize DBG_PASS );  /* \ \ 
+                                                                                           See Also
+                                                                                           <link DBG_PASS>
+                                                                                           
+                                                                                           <link SegExpand> */
+/* This expands a segment by a number of characters.
+   
+   
+   Parameters
+   PTEXT :  the segment to expand
+   int :    count of character to expand by
+   
+   Returns
+   A pointer to a new segment that is bigger, but has the same
+   existing content.                                           */
+/* Expands a text segment by a certain amount. */
 #define SegExpand(s,n) SegExpandEx( s,n DBG_SRC );
 
-TYPELIB_PROC( void,  LineReleaseEx )(PTEXT line DBG_PASS );
+TYPELIB_PROC  void TYPELIB_CALLTYPE   LineReleaseEx (PTEXT line DBG_PASS );
+/* Release a line of text.
+   
+   A line may be a single segment.
+   
+   This is the proper way to dispose of PTEXT segments.
+   
+   Any segment in the line may be passed, the first segment is
+   found, and then all segments in the line are deleted.       */
 #define LineRelease(l) LineReleaseEx(l DBG_SRC )
 
-TYPELIB_PROC( void, SegReleaseEx)( PTEXT seg DBG_PASS );
+/* \ \ 
+   
+   <b>See Also</b>
+   
+   <link DBG_PASS>
+   
+   <link SegRelease> */
+TYPELIB_PROC  void TYPELIB_CALLTYPE  SegReleaseEx( PTEXT seg DBG_PASS );
+/* Release a single segment. UNSAFE. Does not respect that it is
+   in a list.
+   See Also
+   <link LineRelease>                                            */
 #define SegRelease(l) SegReleaseEx(l DBG_SRC )
 
-TYPELIB_PROC( PTEXT, SegConcatEx   )(PTEXT output,PTEXT input,S_32 offset,S_32 length DBG_PASS);
+TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  SegConcatEx   (PTEXT output,PTEXT input,S_32 offset,S_32 length DBG_PASS);
+/* <combine sack::containers::text::SegConcatEx@PTEXT@PTEXT@S_32@S_32 length>
+   
+   looks like it takes a peice of one segment and appends it to
+   another....
+   
+   Needs More research to document correctly and exemplify.                   */
 #define SegConcat(out,in,ofs,len) SegConcatEx(out,in,ofs,len DBG_SRC)
 
-TYPELIB_PROC( PTEXT, SegUnlink   )(PTEXT segment);
-TYPELIB_PROC( PTEXT, SegBreak    )(PTEXT segment);
-TYPELIB_PROC( PTEXT, SegDelete   )(PTEXT segment); // removes seg from list, deletes seg.
-TYPELIB_PROC( PTEXT, SegGrab     )(PTEXT segment); // removes seg from list, returns seg.
-TYPELIB_PROC( PTEXT, SegSubst    )( PTEXT _this, PTEXT that );
+/* Removes a segment from a list of segments. Links what was
+   prior and what was after together. Sets both next and prior
+   of the segment unlinked to NULL.
+   
+   
+   Example
+   <code lang="c++">
+   SegUnlink( segment );
+   </code>
+   Returns
+   The segment passed.                                         */
+TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  SegUnlink   (PTEXT segment);
+TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  SegBreak    (PTEXT segment);
+TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  SegDelete   (PTEXT segment); /* Removes a segment from a list. It also releases the segment.
+                                                                      Example
+                                                                      <code lang="c#">
+                                                                      
+                                                                      SegDelete( segment );
+                                                                      </code>
+                                                                      
+                                                                      the result is NULL;                                          */
+TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  SegGrab     (PTEXT segment); /* removes segment from any list it might be in, returns
+                                                                      segment.                                              */
+/* This substitutes a text segment 'this' with 'that.
+   
+   The segment may be substituted by a list of segments. (Replace
+   the word 'the' with ('this','little','apple') ).               */
+TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  SegSubst    ( PTEXT _this, PTEXT that );
 
-TYPELIB_PROC( PTEXT, SegSplitEx)( PTEXT *pLine, int nPos DBG_PASS);
+/* \ \ 
+   See Also
+   <link DBG_PASS>
+   
+   <link SegSplit> */
+TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  SegSplitEx( PTEXT *pLine, int nPos DBG_PASS);
+/* Split a PTEXT segment.
+   
+   
+   Example
+   \ \ 
+   <code lang="c++">
+   
+   PTEXT result = SegSplit( &amp;old_string, 5 );
+   
+   </code>
+   Returns
+   PTEXT new_string;
+   Remarks
+   the old string segment is split at the position indicated. The
+   pointer to the old segment is modified to point to now two
+   segments linked dynamically, each part of the segment after
+   the split. If the index is beyond the bounds of the segment,
+   the segment remains unmodified.                                */
 #define SegSplit(line,pos) SegSplitEx( line, pos DBG_SRC )
 
-TYPELIB_PROC( PTEXT, FlattenLine )( PTEXT pLine );
-TYPELIB_PROC( S_64, IntCreateFromSeg)( PTEXT pText );
-TYPELIB_PROC( S_64, IntCreateFromText)( CTEXTSTR p );
+TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  FlattenLine ( PTEXT pLine );
+TYPELIB_PROC  S_64 TYPELIB_CALLTYPE  IntCreateFromSeg( PTEXT pText );
+TYPELIB_PROC  S_64 TYPELIB_CALLTYPE  IntCreateFromText( CTEXTSTR p );
 
-TYPELIB_PROC( double, FloatCreateFromSeg)( PTEXT pText );
-TYPELIB_PROC( double, FloatCreateFromText)( CTEXTSTR p, CTEXTSTR *pp );
+TYPELIB_PROC  double TYPELIB_CALLTYPE  FloatCreateFromSeg( PTEXT pText );
+TYPELIB_PROC  double TYPELIB_CALLTYPE  FloatCreateFromText( CTEXTSTR p, CTEXTSTR *pp );
 
 //
 // IsSegAnyNumber returns 0 if no, 1 if is int, 2 if is float
@@ -755,27 +1469,80 @@ TYPELIB_PROC( double, FloatCreateFromText)( CTEXTSTR p, CTEXTSTR *pp );
 //
 //#define IsNumber(p) IsSegAnyNumberEx( &(p), NULL, NULL, NULL, 0 )
 #define IsIntNumber(p, pint) IsSegAnyNumberEx( &(p), NULL, pint, NULL, 0 )
+/* Tests a PTEXT segment to see if it might be a floating point
+   number.                                                      */
 #define IsFltNumber(p, pflt) IsSegAnyNumberEx( &(p), pflt, NULL, NULL, 0 )
-TYPELIB_PROC( int, IsSegAnyNumberEx )( PTEXT *ppText, double *pfNumber, S_64 *piNumber, int *pbIsInt, int bUseAllSegs );
+/* Tests the content of a PTEXT to see if it might be a number.
+   Parameters
+   ppText :       pointer to PTEXT to check
+   pfNumber :     pointer to double to get result of number it's
+                  a float
+   piNumber :     pointer to a signed 64 bit value to get the
+                  \result if it's not a float.
+   pbIsInt :      point to a integer \- receives boolean result
+                  if the segment was an integer is TRUE else it's
+                  a double.
+   bUseAllSegs :  if TRUE, use all the segments starting with the
+                  first, and update the pointer to the next
+                  stgment. If false, use only the first segment. if
+                  uses all segments, it must also use ALL
+                  segments to get the number.
+   
+   Returns
+   0 if not a number or fails.
+   
+   1 if a valid conversion took place.                              */
+TYPELIB_PROC  int TYPELIB_CALLTYPE  IsSegAnyNumberEx ( PTEXT *ppText, double *pfNumber, S_64 *piNumber, int *pbIsInt, int bUseAllSegs );
+/* <combine sack::containers::text::IsSegAnyNumberEx@PTEXT *@double *@S_64 *@int *@int>
+   
+   \ \                                                                                  */
 #define IsSegAnyNumber(pptext, pfNum, piNum, pbIsInt) IsSegAnyNumberEx( pptext, pfNum, piNum, pbIsInt, 0 )
 
 
 
-TYPELIB_PROC( _32, GetSegmentSpaceEx )( PTEXT segment, int position, int nTabs, INDEX *tabs);
-TYPELIB_PROC( _32, GetSegmentSpace )( PTEXT segment, int position, int nTabSize );
-TYPELIB_PROC( _32, GetSegmentLengthEx )( PTEXT segment, int position, int nTabs, INDEX *tabs );
-TYPELIB_PROC( _32, GetSegmentLength )( PTEXT segment, int position, int nTabSize );
+TYPELIB_PROC  _32 TYPELIB_CALLTYPE  GetSegmentSpaceEx ( PTEXT segment, int position, int nTabs, INDEX *tabs);
+TYPELIB_PROC  _32 TYPELIB_CALLTYPE  GetSegmentSpace ( PTEXT segment, int position, int nTabSize );
+TYPELIB_PROC  _32 TYPELIB_CALLTYPE  GetSegmentLengthEx ( PTEXT segment, int position, int nTabs, INDEX *tabs );
+TYPELIB_PROC  _32 TYPELIB_CALLTYPE  GetSegmentLength ( PTEXT segment, int position, int nTabSize );
 
-TYPELIB_PROC( _32, LineLengthExEx)( PTEXT pt, _32 bSingle, INDEX nTabsize, PTEXT pEOL );
-TYPELIB_PROC( _32, LineLengthExx)( PTEXT pt, _32 bSingle,PTEXT pEOL );
+TYPELIB_PROC  _32 TYPELIB_CALLTYPE  LineLengthExEx( PTEXT pt, _32 bSingle, INDEX nTabsize, PTEXT pEOL );
+TYPELIB_PROC  _32 TYPELIB_CALLTYPE  LineLengthExx( PTEXT pt, _32 bSingle,PTEXT pEOL );
 #define LineLengthExx(pt,single,eol) LineLengthExEx( pt,single,8,eol)
+/* \ \ 
+   Parameters
+   Text segment :  PTEXT line or segment to get the length of
+   single :        boolean, if set then only a single segment is
+                   measured, otherwise all segments from this to
+                   the end are measured.                         */
 #define LineLengthEx(pt,single) LineLengthExx( pt,single,NULL)
+/* Computes the length of characters in a line, if all segments
+   in the line are flattened into a single word.                */
 #define LineLength(pt) LineLengthEx( pt, FALSE )
-TYPELIB_PROC( PTEXT, BuildLineExEx)( PTEXT pt, int bSingle, INDEX nTabsize, PTEXT pEOL DBG_PASS );
-TYPELIB_PROC( PTEXT, BuildLineExx)( PTEXT pt, int bSingle, PTEXT pEOL DBG_PASS );
+/* Collapses an indirect segment or a while list of segments
+   into a single segment with content expanded. When passed to
+   things like TextParse and Burst, segments have their
+   positioning encoded to counters for tabs and spaces; the
+   segment itself contains only text without whitespace. Buildline
+   expands these segments into their plain text representation.
+   Parameters
+   pt :        pointer to a PTEXT segment. 
+   bSingle :   if TRUE, build only the first segment. If the
+               segment is indirect, builds entire content of
+               indirect.
+   nTabsize :  how wide tabs are. When written into a line, tabs
+               are written as spaces. (maybe if 0, tabs are
+               emitted directly?)
+   pEOL :      the segment to use to represent an end of line. Often
+               this is a SegCreate(0) segment.                       */
+TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  BuildLineExEx( PTEXT pt, int bSingle, INDEX nTabsize, PTEXT pEOL DBG_PASS );
+TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  BuildLineExx( PTEXT pt, int bSingle, PTEXT pEOL DBG_PASS );
 //#define BuildLineEx(b,pt,single) BuildLineEx(b,pt,single DBG_SRC )
 #define BuildLineExx(from,single,eol) BuildLineExEx( from,single,8,NULL DBG_SRC )
+/* <combine sack::containers::text::BuildLineExEx@PTEXT@int@INDEX@PTEXT pEOL>
+   
+   \ \                                                                        */
 #define BuildLineEx(from,single) BuildLineExEx( from,single,8,NULL DBG_SRC )
+/* Flattens all segments in a line to a single segment result. */
 #define BuildLine(from) BuildLineExEx( from, FALSE,8,NULL DBG_SRC )
 
 //
@@ -783,60 +1550,163 @@ TYPELIB_PROC( PTEXT, BuildLineExx)( PTEXT pt, int bSingle, PTEXT pEOL DBG_PASS )
 //
 //static CTEXTSTR normal_punctuation=WIDE("\'\"\\({[<>]}):@%/,;!?=*&$^~#`");
 // filter_to_space WIDE(" \t")
-TYPELIB_PROC( PTEXT, TextParse )( PTEXT input, CTEXTSTR punctuation, CTEXTSTR filter_tospace, int bTabs, int bSpaces  DBG_PASS );
-//static CTEXTSTR normal_punctuation=WIDE("\'\"\\({[<>]}):@%/,;!?=*&$^~#`");
+TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  TextParse ( PTEXT input, CTEXTSTR punctuation, CTEXTSTR filter_tospace, int bTabs, int bSpaces  DBG_PASS );
+/* normal_punctuation=WIDE("'"\\({[\<\>]}):@%/,;!?=*&amp;$^~#`");
+   
+   Process a line of PTEXT into another line of PTEXT, but with
+   words parsed as appropriate for common language.
+   Parameters
+   input\ :  pointer to a list of PTEXT segments to parse.
+   
+   Remarks
+   Burst is a simple method of breaking a sentence into its word
+   and phrase parts. It collapses space and tabs before words
+   into the word. Any space representation is space preceeding
+   the word. Sentences are also broken on any punctuation.
+   "({[\<\>]})'";;.,/?\\!@#$%^&amp;*=" for instances. + and - are
+   treated specially if they prefix numbers, otherwise they are
+   also punctuation. Also groups of '.' like '...' are kept
+   together. if the '.' is in a number, it is stored as part of
+   the number. Otherwise a '.' used in an abbreviation like P.S.
+   will be a '.' with 0 spaces followed by a segment also with 0
+   spaces. (unless it's the lsat one)
+   
+   so initials are encoded badly.
+   
+   
+   Bugs
+   There is an exploit in the parser such that . followed by a
+   number will cause fail to break into seperate words. This is
+   used by configuration scripts to write binary blocks, and
+   read them back in, having the block parsed into a segment
+   correctly.
+   See Also
+   <link sack::containers::text::TextParse@PTEXT@CTEXTSTR@CTEXTSTR@int@int bSpaces, TextParse> */
 
-TYPELIB_PROC( PTEXT, burstEx)( PTEXT input DBG_PASS);
+TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  burstEx( PTEXT input DBG_PASS);
+/* <combine sack::containers::text::burstEx@PTEXT input>
+   
+   \ \                                                   */
 #define burst( input ) burstEx( (input) DBG_SRC )
 
-TYPELIB_PROC( int, CompareStrings)( PTEXT pt1, int single1
+/* Compares a couple lists of text segments.
+   Parameters
+   pt1 :      pointer to a phrase
+   single1 :  use only the first word, not the whole phrase
+   pt2 :      pointer to a phrase
+   single2 :  use only the first segment, not the whole phrase
+   bExact :   if FALSE, match case insensitive, otherwise match
+              exact case.                                       */
+TYPELIB_PROC  int TYPELIB_CALLTYPE  CompareStrings( PTEXT pt1, int single1
                             , PTEXT pt2, int single2
                             , int bExact );
 
 
-TYPELIB_PROC( PTEXT, FlattenLine )( PTEXT pLine );
+/* This removes indirect segments, replacing them with their
+   indirect content.
+   Parameters
+   pLine :  pointer to a PTEXT segment list to flatten.      */
+TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  FlattenLine ( PTEXT pLine );
 
 #define FORALLTEXT(start,var)  for(var=start;var; var=NEXTLINE(var))
 
-TYPELIB_PROC( char *, WcharConvert )( const wchar_t *wch );
+TYPELIB_PROC  char * TYPELIB_CALLTYPE  WcharConvert ( const wchar_t *wch );
 
 //--------------------------------------------------------------------------
 
+/* This is a string collector type.  It has an interface to be able to vtprintf( vartext, "format string", ... ); which appends the specified string to the collected text.
+  Example
+   PVARTEXT pvt = VarTextCreate();
+   vtprintf( pvt, "hello world!" );
+   {
+      PTEXT text = VarTextGet( pvt );
+	  printf( "Text is : %s(%d)", GetText( text ), GetTextSize( text ) );
+	  LineRelease( text );
+   }
+   VarTextDestroy( &pvt );
+   */
 typedef struct vartext_tag *PVARTEXT;
 
-TYPELIB_PROC( PVARTEXT, VarTextCreateExEx )( _32 initial, _32 expand DBG_PASS );
+TYPELIB_PROC  PVARTEXT TYPELIB_CALLTYPE  VarTextCreateExEx ( _32 initial, _32 expand DBG_PASS );
+/* <combine sack::containers::text::VarTextCreateExEx@_32@_32 expand>
+   
+   \ \                                                                */
 #define VarTextCreateExx(i,e) VarTextCreateExEx(i,e DBG_SRC )
-TYPELIB_PROC( PVARTEXT, VarTextCreateEx )( DBG_VOIDPASS );
+TYPELIB_PROC  PVARTEXT TYPELIB_CALLTYPE  VarTextCreateEx ( DBG_VOIDPASS );
+/* The simplest, most general way to create a PVARTEXT
+   collector. The most extended vartext creator allows
+   specification of how long the initial buffer is, and how much
+   the buffer expands by when required. This was added to
+   optimize building HUGE SQL queries, working withing 100k
+   buffers that expanded by 50k at a time was a lot less
+   operations than expanding 32 bytes or something at a time.    */
 #define VarTextCreate() VarTextCreateEx( DBG_VOIDSRC )
-TYPELIB_PROC( void, VarTextDestroyEx )( PVARTEXT* DBG_PASS );
+TYPELIB_PROC  void TYPELIB_CALLTYPE  VarTextDestroyEx ( PVARTEXT* DBG_PASS );
+/* Destroy a VarText collector. */
 #define VarTextDestroy(pvt) VarTextDestroyEx( pvt DBG_SRC )
 
-TYPELIB_PROC( void, VarTextInitEx)( PVARTEXT pvt DBG_PASS);
+TYPELIB_PROC  void TYPELIB_CALLTYPE  VarTextInitEx( PVARTEXT pvt DBG_PASS);
+/* Probably should not be exported. Initializes a VARTEXT
+   structure to prepare it for subsequent VarText operations. */
 #define VarTextInit(pvt) VarTextInitEx( (pvt) DBG_SRC )
-TYPELIB_PROC( void, VarTextEmptyEx)( PVARTEXT pvt DBG_PASS);
+/* Empties a PVARTEXT structure.
+   Parameters
+   pvt :  PVARTEXT to empty.     */
+TYPELIB_PROC  void TYPELIB_CALLTYPE  VarTextEmptyEx( PVARTEXT pvt DBG_PASS);
+/* <combine sack::containers::text::VarTextEmptyEx@PVARTEXT pvt>
+   
+   \ \                                                           */
 #define VarTextEmpty(pvt) VarTextEmptyEx( (pvt) DBG_SRC )
-TYPELIB_PROC( void, VarTextAddCharacterEx)( PVARTEXT pvt, TEXTCHAR c DBG_PASS );
+TYPELIB_PROC  void TYPELIB_CALLTYPE  VarTextAddCharacterEx( PVARTEXT pvt, TEXTCHAR c DBG_PASS );
+/* Adds a single character to a PVARTEXT collector.
+   
+   
+   Example
+   <code lang="c++">
+   PVARTEXT pvt = VarTextCreate();
+   VarTextAddCharacter( pvt, 'a' );
+   </code>                                          */
 #define VarTextAddCharacter(pvt,c) VarTextAddCharacterEx( (pvt),(c) DBG_SRC )
-// returns true if any data was added...
-TYPELIB_PROC( int, VarTextEndEx)( PVARTEXT pvt DBG_PASS ); // move any collected text to commit...
+/* Commits the currently collected text to segment, and adds the
+   segment to the internal line accumulator.                     
+		 returns true if any data was added...
+       move any collected text to commit... */
+TYPELIB_PROC  int TYPELIB_CALLTYPE  VarTextEndEx( PVARTEXT pvt DBG_PASS ); 
+/* <combine sack::containers::text::VarTextEndEx@PVARTEXT pvt>
+   
+   \ \                                                         */
 #define VarTextEnd(pvt) VarTextEndEx( (pvt) DBG_SRC )
-TYPELIB_PROC( int, VarTextLength)( PVARTEXT pvt );
-TYPELIB_PROC( PTEXT, VarTextGetEx)( PVARTEXT pvt DBG_PASS );
+TYPELIB_PROC  int TYPELIB_CALLTYPE  VarTextLength( PVARTEXT pvt );
+/* Gets the text segment built in the VarText. The PVARTEXT is
+   set to empty. Clears the collector.
+   Parameters
+   pvt :  PVARTEXT to get text from.                           */
+TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  VarTextGetEx( PVARTEXT pvt DBG_PASS );
+/* <combine sack::containers::text::VarTextGetEx@PVARTEXT pvt>
+   
+   \ \                                                         */
 #define VarTextGet(pvt) VarTextGetEx( (pvt) DBG_SRC )
-TYPELIB_PROC( PTEXT, VarTextPeekEx )( PVARTEXT pvt DBG_PASS );
+TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  VarTextPeekEx ( PVARTEXT pvt DBG_PASS );
+/* \Returns the PTEXT that is currently in a PVARTEXT. It does
+   not alter the contents of the PVARTEXT. Do not LineRelease
+   this peeked value.                                          */
 #define VarTextPeek(pvt) VarTextPeekEx( (pvt) DBG_SRC )
-TYPELIB_PROC( void, VarTextExpandEx)( PVARTEXT pvt, int size DBG_PASS );
+TYPELIB_PROC  void TYPELIB_CALLTYPE  VarTextExpandEx( PVARTEXT pvt, int size DBG_PASS );
+/* Add a specified number of characters to the amount of space
+   in the VARTEXT collector.                                   */
 #define VarTextExpand(pvt, sz) VarTextExpandEx( (pvt), (sz) DBG_SRC )
 
-//TYPELIB_PROC( int vtprintfEx( PVARTEXT pvt DBG_PASS, CTEXTSTR format, ... );
+//TYPELIB_PROC  int vtprintfEx( PVARTEXT pvt DBG_PASS TYPELIB_CALLTYPE  CTEXTSTR format, ... ;
 // note - don't include format - MUST have at least one parameter passed to ...
 //#define vtprintf(pvt, ...) vtprintfEx( (pvt) DBG_SRC, __VA_ARGS__ )
 
-TYPELIB_PROC( int, vtprintfEx)( PVARTEXT pvt, CTEXTSTR format, ... );
-// note - don't include format - MUST have at least one parameter passed to ...
+TYPELIB_PROC  int TYPELIB_CALLTYPE  vtprintfEx( PVARTEXT pvt, CTEXTSTR format, ... );
+/* <combine sack::containers::text::vtprintfEx@PVARTEXT@CTEXTSTR@...>
+   
+   Note                                                               */
 #define vtprintf vtprintfEx
 
-TYPELIB_PROC( int, vvtprintf)( PVARTEXT pvt, CTEXTSTR format, va_list args );
+TYPELIB_PROC  int TYPELIB_CALLTYPE  vvtprintf( PVARTEXT pvt, CTEXTSTR format, va_list args );
 
 //--------------------------------------------------------------------------
 // extended command entry stuff... handles editing buffers with insert/overwrite/copy/paste/etc...
@@ -844,33 +1714,45 @@ TYPELIB_PROC( int, vvtprintf)( PVARTEXT pvt, CTEXTSTR format, va_list args );
 typedef struct user_input_buffer_tag {
 // -------------------- custom cmd buffer extension 
    int nHistory;  // position counter for pulling history
-   PLINKQUEUE InputHistory;
+   PLINKQUEUE InputHistory;  // a link queue which contains the prior lines of text entered for commands.
    int   bRecallBegin; // set to TRUE when nHistory has wrapped...
 
+   /* A exchange-lock variable for controlling access to the
+      \history (so things aren't being read from it while it is
+      scrolling old data out).                                  */
    _32   CollectionBufferLock;
    INDEX CollectionIndex;  // used to store index.. for insert type operations...
    int   CollectionInsert; // flag for whether we are inserting or overwriting
 	PTEXT CollectionBuffer; // used to store partial from GatherLine
 } USER_INPUT_BUFFER, *PUSER_INPUT_BUFFER;
 
-TYPELIB_PROC( PUSER_INPUT_BUFFER, CreateUserInputBuffer )( void );
+TYPELIB_PROC  PUSER_INPUT_BUFFER TYPELIB_CALLTYPE  CreateUserInputBuffer ( void );
 
-TYPELIB_PROC( void, DestroyUserInputBuffer )( PUSER_INPUT_BUFFER *pci );
+TYPELIB_PROC  void TYPELIB_CALLTYPE  DestroyUserInputBuffer ( PUSER_INPUT_BUFFER *pci );
 
 // negative with SEEK_SET is SEEK_END -nPos
-#define COMMAND_POS_SET SEEK_SET
-#define COMMAND_POS_CUR SEEK_CUR
-TYPELIB_PROC( int, SetUserInputPosition )( PUSER_INPUT_BUFFER pci, int nPos, int whence );
+enum CommandPositionOps {
+	// defined that the x,y position in the segment should be used for absolute positioning.
+   // can also be SEEK_SET
+ COMMAND_POS_SET = 0,
+ // defined that the x,y position in the segment should be used for relative positioning.
+ // can also be SEEK_CUR
+ COMMAND_POS_CUR = 1
+};
+/* Updates the current input position, for things like input,
+   etc. Some external process indicates where in the line to set
+   the cursor position.                                          */
+TYPELIB_PROC  int TYPELIB_CALLTYPE  SetUserInputPosition ( PUSER_INPUT_BUFFER pci, int nPos, int whence );
 
 // bInsert < 0 toggle insert.  bInsert == 0 clear isnert(set overwrite) else
 // set insert (clear overwrite )
-TYPELIB_PROC( void, SetUserInputInsert )( PUSER_INPUT_BUFFER pci, int bInsert );
-TYPELIB_PROC( void, SetUserInputInsert )( PUSER_INPUT_BUFFER pci, int bInsert );
+TYPELIB_PROC  void TYPELIB_CALLTYPE  SetUserInputInsert ( PUSER_INPUT_BUFFER pci, int bInsert );
+TYPELIB_PROC  void TYPELIB_CALLTYPE  SetUserInputInsert ( PUSER_INPUT_BUFFER pci, int bInsert );
 
-TYPELIB_PROC( void, RecallUserInput )( PUSER_INPUT_BUFFER pci, int bUp );
-TYPELIB_PROC( void, EnqueUserInputHistory )( PUSER_INPUT_BUFFER pci, PTEXT pHistory );
+TYPELIB_PROC  void TYPELIB_CALLTYPE  RecallUserInput ( PUSER_INPUT_BUFFER pci, int bUp );
+TYPELIB_PROC  void TYPELIB_CALLTYPE  EnqueUserInputHistory ( PUSER_INPUT_BUFFER pci, PTEXT pHistory );
 
-TYPELIB_PROC( PTEXT, GatherUserInput )( PUSER_INPUT_BUFFER pci, PTEXT stroke );
+TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  GatherUserInput ( PUSER_INPUT_BUFFER pci, PTEXT stroke );
 
 #ifdef __cplusplus
 }; //namespace text {
@@ -881,74 +1763,376 @@ TYPELIB_PROC( PTEXT, GatherUserInput )( PUSER_INPUT_BUFFER pci, PTEXT stroke );
 #ifdef __cplusplus
 	namespace BinaryTree {
 #endif
+/* This type defines a specific node in the tree. It is entirely
+   private, and is a useless definition.                         */
 typedef struct treenode_tag *PTREENODE;
+/* Defines a Binary Tree.
+   See Also
+   <link CreateBinaryTree> */
 typedef struct treeroot_tag *PTREEROOT;
 
+/* This option may be passed to extended CreateBinaryTree
+   methods to disallow adding of duplicates. Otherwise
+   duplicates will be added; they will be added to the side of
+   the node with the same value that has less children. Trees
+   are created by default without this option, allowing the
+   addition of duplicates.
+   
+   
+   Example
+   <code lang="c++">
+   
+   PTREEROOT = <link CreateBinaryTreeExtended>( BT_OPT_NODUPLICATES, NULL, NULL DBG_SRC );
+   
+   </code>                                                                                 */
 #define BT_OPT_NODUPLICATES 1
 
+/* Generic Compare is the type declaration for the callback routine for user custom comparisons.  
+  This routine should return -1 if new is less than old, it should return 1 if new is more than old, and it 
+  should return 0 if new and old are the same key. */
 typedef int (CPROC *GenericCompare)( PTRSZVAL oldnode,PTRSZVAL newnode );
-typedef void (CPROC *GenericDestroy)(POINTER user, PTRSZVAL key);
-// when adding a node if Compare is NULL the default method of
-// a basic unsigned integer compare on the key value is done.
-// if Compare is specified the specified key value of the orginal node (old)
-// and of the new node (new) is added.  
-// Result of compare should be ( <0 (lesser)) ( 0 (equal)) ( >0 (greater))
-TYPELIB_PROC( PTREEROOT, CreateBinaryTreeExtended)( _32 flags
+typedef void (CPROC *GenericDestroy)( POINTER user, PTRSZVAL key);
+
+/* when adding a node if Compare is NULL the default method of a
+   basic unsigned integer compare on the key value is done. if
+   Compare is specified the specified key value of the orginal
+   node (old) and of the new node (new) is added. Result of
+   compare should be ( \<0 (lesser)) ( 0 (equal)) ( \>0
+   (greater))
+   
+   
+   Example
+   <code lang="c++">
+   int CPROC MyGenericCompare( PTRSZVAL oldnode,PTRSZVAL newnode )
+   {
+   </code>
+   <code>
+      if(oldnode\>newnode)
+          return 1;
+      else if(oldnode\<newnode)
+          return -1;
+      else return 0;
+   
+   </code>
+   <code lang="c++">
+      return (oldnode\>newnode)? 1
+             \:(oldnode\<newnode)? -1
+             \:0;
+   }
+   void CPROC MyGenericDestroy(POINTER user, PTRSZVAL key)
+   {
+      /* do something custom with your user data and or key value *&#47;
+   }
+   
+   PTREEROOT tree = CreateBinaryTreeExtended( 0 // BT_OPT_NODUPLICATES
+                                            , MyGenericCompare
+                                            , MyGenericDestroy
+                                            <link DBG_PASS, DBG_SRC> );
+   
+   </code>
+   
+   See Also
+   <link CreateBinaryTreeExx>
+   
+   <link CreateBinaryTreeEx>
+   
+   <link CreateBinaryTree>                                               */
+TYPELIB_PROC  PTREEROOT TYPELIB_CALLTYPE  CreateBinaryTreeExtended( _32 flags
 															, GenericCompare Compare
 															, GenericDestroy Destroy DBG_PASS);
+/* This is the simpler case of <link CreateBinaryTreeExtended>,
+   which does not make you pass DBG_SRC.
+   
+   
+   
+   
+   Example
+   <code lang="c++">
+   
+   PTREEROOT tree = CreateBinaryTreeExx( BT_OPT_NODUPLICATES, NULL, NULL );
+   </code>                                                                  */
 #define CreateBinaryTreeExx(flags,compare,destroy) CreateBinaryTreeExtended(flags,compare,destroy DBG_SRC)
+/* Creates a binary tree, allowing specification of comparison
+   and destruction routines.
+   
+   
+   Example
+   <code lang="c++">
+   
+   PTREEROOT tree = CreateBinaryTreeEx( <link CreateBinaryTreeExtended, MyGenericCompare>, <link CreateBinaryTreeExtended, MyGenericDestroy> );
+   
+   </code>                                                                                                                                      */
 #define CreateBinaryTreeEx(compare,destroy) CreateBinaryTreeExx( 0, compare, destroy )
-//TYPELIB_PROC( PTREEROOT, CreateBinaryTreeEx)( int (*Compare)(PTRSZVAL oldnode,PTRSZVAL newnode )
-//                            , void (*Destroy)(PTRSZVAL user, PTRSZVAL key) );
 
+/* This is the simplest way to create a binary tree.
+   
+   The default compare routine treats 'key' as an integer value
+   that is compared against other for lesser/greater condition.
+   
+   This tree also allows duplicates to be added.
+   
+   
+   Example
+   <code lang="c++">
+   
+   PTREEROOT tree = CreateBinaryTree();
+   
+   </code>                                                      */
 #define CreateBinaryTree() CreateBinaryTreeEx( NULL, NULL )
 
-TYPELIB_PROC( void, DestroyBinaryTree)( PTREEROOT root );
+/* \ \ 
+   Example
+   <code lang="c++">
+   
+   PTREEROOT tree = CreateBinaryTree();
+   
+   DestroyBinaryTree( tree );
+   tree = NULL;
+   
+   </code>                              */
+TYPELIB_PROC  void TYPELIB_CALLTYPE  DestroyBinaryTree( PTREEROOT root );
 
-TYPELIB_PROC( void, BalanceBinaryTree)( PTREEROOT root ); 
+/* Balances a binary tree. If data is added to a binary list in
+   a linear way (from least to most), the tree can become
+   unbalanced, and all be on the left or right side of data. This
+   routine can analyze branches and perform rotations so that
+   the tree can be discretely rebalanced.
+   
+   
+   Example
+   <code lang="c++">
+   <link PTREEROOT> tree;
+   
+   /* <link AddBinaryNode>... *&#47;
+   BalanceBinaryTree( tree );
+   </code>                                                        */
+TYPELIB_PROC  void TYPELIB_CALLTYPE  BalanceBinaryTree( PTREEROOT root ); 
 
-TYPELIB_PROC( int, AddBinaryNodeEx)( PTREEROOT root
+/* \ \ 
+   See Also
+   <link AddBinaryNode>
+   
+   <link DBG_PASS>
+                        */
+TYPELIB_PROC  int TYPELIB_CALLTYPE  AddBinaryNodeEx( PTREEROOT root
                                     , POINTER userdata
 											  , PTRSZVAL key DBG_PASS );
+/* Adds a user pointer identified by key to a binary list.
+   
+   
+   See Also
+   <link BinaryTree::CreateBinaryTree, CreateBinaryTree>
+   Example
+   <code lang="c++">
+   
+   PTREEROOT tree = CreateBinaryTree();
+   
+   PTRSZVAL key = 1;
+   POINTER data = NewArray( TEXTCHAR, 32 );
+   
+   AddBinaryNode( tree, data, key );
+   
+   </code>
+   Parameters
+   root :  PTREEROOT binary tree instance.
+   data :  POINTER to some user object.
+   key :   PTRSZVAL a integer type which can be used to identify
+           the data. (used to compare in the tree).<p /><p />If
+           the user has specified a custom comparison routine in
+           an extended CreateBinaryTree(), then this value might
+           be a pointer to some other data. Often the thing used
+           to key into a binary tree is a <link CTEXTSTR>.
+   Returns
+   The tree may be created with <link BT_OPT_NODUPLICATES>, in
+   which case this will result FALSE if the key is found
+   duplicated in the list. Otherwise this returns TRUE. if the
+   root parameter is NULL, the result is FALSE.                  */
 #define AddBinaryNode(r,u,k) AddBinaryNodeEx((r),(u),(k) DBG_SRC )
-//TYPELIB_PROC( int, AddBinaryNode)( PTREEROOT root
+//TYPELIB_PROC  int TYPELIB_CALLTYPE  AddBinaryNode( PTREEROOT root
 //                                    , POINTER userdata
 //                                    , PTRSZVAL key );
 
-TYPELIB_PROC( void, RemoveBinaryNode)( PTREEROOT root, POINTER use, PTRSZVAL key );
+TYPELIB_PROC  void TYPELIB_CALLTYPE  RemoveBinaryNode( PTREEROOT root, POINTER use, PTRSZVAL key );
 
-TYPELIB_PROC( POINTER, FindInBinaryTree)( PTREEROOT root, PTRSZVAL key );
+/* Search in a binary tree for the specified key.
+   Returns
+   user data POINTER if found, else NULL.
+   
+   
+   Example
+   <code lang="c++">
+   
+   PTREEROOT tree;
+   
+   void f( void )
+   {
+      POINTER mydata = FindInBinaryTree( tree, 5 );
+      if( mydata )
+      {
+          // found '5' as the key in the tree
+      }
+   }
+   </code>                                          */
+TYPELIB_PROC  POINTER TYPELIB_CALLTYPE  FindInBinaryTree( PTREEROOT root, PTRSZVAL key );
 
 
 // result of fuzzy routine is 0 = match.  100 = inexact match
 // 1 = no match, actual may be larger
 // -1 = no match, actual may be lesser
 // 100 = inexact match- checks nodes near for better match.
-TYPELIB_PROC( POINTER, LocateInBinaryTree)( PTREEROOT root, PTRSZVAL key
+TYPELIB_PROC  POINTER TYPELIB_CALLTYPE  LocateInBinaryTree( PTREEROOT root, PTRSZVAL key
 														, int (CPROC*fuzzy)( PTRSZVAL psv, PTRSZVAL node_key ) );
 
 
-TYPELIB_PROC( void, RemoveLastFoundNode)(PTREEROOT root );
-TYPELIB_PROC( void, RemoveCurrentNode)(PTREEROOT root );
+/* During FindInBinaryTree and LocateInBinaryTree, the last
+   found result is stored. This function allows deletion of that
+   node.
+   
+   
+   Example
+   <code lang="c++">
+   FindInBinaryTree( tree, 5 );
+   RemoveLastFoundNode( tree );
+   </code>                                                       */
+TYPELIB_PROC  void TYPELIB_CALLTYPE  RemoveLastFoundNode(PTREEROOT root );
+/* Removes the currently browsed node from the tree.
+   
+   
+   See Also
+   <link GetChildNode>                               */
+TYPELIB_PROC  void TYPELIB_CALLTYPE  RemoveCurrentNode(PTREEROOT root );
 
-TYPELIB_PROC( void, DumpTree)( PTREEROOT root 
+/* Basically this is meant to dump to a log, if the print
+   function is passed as NULL, then the tree's contents are
+   dumped to the log. It dumps a very cryptic log of how all
+   nodes in the tree are arranged. But by allowing the user to
+   provide a method to log his data and key, the logging is more
+   meaningful based on the application. The basic code for
+   managing trees and nodes works....
+   
+   
+   Example
+   <code>
+   
+   int ForEachNode( POINTER user, PTRSZVAL key )
+   {
+       // return not 1 to dump to log the internal tree structure
+       return 0; // probably did own logging here, so don't log tree internal
+   }
+   
+   <link PTREEROOT> tree;
+   
+   void f( void )
+   {
+       DumpTree( tree, ForEachNode );
+   }
+   
+   </code>                                                                    */
+TYPELIB_PROC  void TYPELIB_CALLTYPE  DumpTree( PTREEROOT root 
                           , int (*Dump)( POINTER user, PTRSZVAL key ) );
 
 
-TYPELIB_PROC( POINTER, GetLeastNode)( PTREEROOT root );
-TYPELIB_PROC( POINTER, GetGreatestNode)( PTREEROOT root );
-TYPELIB_PROC( POINTER, GetLesserNode)( PTREEROOT root );
-TYPELIB_PROC( POINTER, GetGreaterNode)( PTREEROOT root );
-TYPELIB_PROC( POINTER, GetCurrentNode)( PTREEROOT root );
+/* See Also
+   <link GetChildNode> */
+TYPELIB_PROC  POINTER TYPELIB_CALLTYPE  GetLeastNode( PTREEROOT root );
+/* See Also
+   <link GetChildNode> */
+TYPELIB_PROC  POINTER TYPELIB_CALLTYPE  GetGreatestNode( PTREEROOT root );
+/* See Also
+   <link GetChildNode> */
+TYPELIB_PROC  POINTER TYPELIB_CALLTYPE  GetLesserNode( PTREEROOT root );
+/* See Also
+   <link GetChildNode> */
+TYPELIB_PROC  POINTER TYPELIB_CALLTYPE  GetGreaterNode( PTREEROOT root );
+/* \Returns the node that is set as 'current' in the tree. There
+   is a cursor within the tree that can be used for browsing.
+   See Also
+   <link GetChildNode>                                           */
+TYPELIB_PROC  POINTER TYPELIB_CALLTYPE  GetCurrentNode( PTREEROOT root );
 
-TYPELIB_PROC( POINTER, GetRootNode)( PTREEROOT root );
-TYPELIB_PROC( POINTER, GetParentNode)( PTREEROOT root );
-TYPELIB_PROC( POINTER, GetChildNode)( PTREEROOT root, int direction );
-TYPELIB_PROC( POINTER, GetPriorNode)( PTREEROOT root );
+/* This sets the current node cursor to the root of the node.
+   See Also
+   <link GetChildNode>                                        */
+TYPELIB_PROC  POINTER TYPELIB_CALLTYPE  GetRootNode( PTREEROOT root );
+/* See Also
+   <link GetChildNode> */
+TYPELIB_PROC  POINTER TYPELIB_CALLTYPE  GetParentNode( PTREEROOT root );
+/* While browsing the tree after a find operation move to the
+   next child node, direction 0 is lesser direction !0 is
+   greater.
+   
+   
+   
+   Binary Trees have a 'current' cursor. These operations may be
+   used to browse the tree.
+   
+   
+   Example
+   \ \ 
+   <code>
+   
+   // this assumes you have a tree, and it's fairly populated, then this demonstrates
+   // all steps of browsing.
+   
+   POINTER my_data;
+   
+   // go to the 'leftmost' least node. (as determined by the compare callback)
+   my_data = GetLeastNode( tree );
+   
+   // go to the 'rightmost' greatest node. (as determined by the compare callback)
+   my_data = GetGreatestNode( tree );
+   
+   // move to the node that is less than the current node.  (move to the 'left')
+   my_data = GetLesserNode( tree );
+   
+   // move to the node that is greater than the current node.  (move to the 'right')
+   my_data = GetGreaterNode( tree );
+   
+   // follow the tree to the left down from here
+   my_data = GetChildNode( tree, 0 );
+   
+   // follow the tree to the right down from here
+   my_data = GetChildNode( tree, 1 );
+   
+   // follow the tree up to the node above the current one.
+   //  (the one who's lesser or greater points at this)
+   my_data = GetParentNode( tree );
+   
+   // this is probably the least useful, but someone clever might find a trick for it
+   // Move back to the node we were just at.
+   //  (makes the current the prior, and moves to what the prior was,
+   //     but then it's just back and forth between the last two; it's not a stack ).
+   my_data = GetPriorNode( tree );
+   
+   </code>
+   
+   A more practical example...
+   <code lang="c++">
+   
+   POINTER my_data;
+   for( my_data = GetLeastNode( tree );
+        my_data;
+        my_data = GetGreaterNode( tree ) )
+   {
+        // browse the tree from least to most.
+   }
+   
+   </code>                                                                            */
+TYPELIB_PROC  POINTER TYPELIB_CALLTYPE  GetChildNode( PTREEROOT root, int direction );
+/* See Also
+   <link GetChildNode> */
+TYPELIB_PROC  POINTER TYPELIB_CALLTYPE  GetPriorNode( PTREEROOT root );
 
-TYPELIB_PROC( _32, GetNodeCount )( PTREEROOT root );
+/* \Returns the total number of nodes in the tree.
+   
+   
+   Example
+   <code lang="c++">
+   _32 total_nodes = GetNodeCount(tree);
+   </code>                                         */
+TYPELIB_PROC  _32 TYPELIB_CALLTYPE  GetNodeCount ( PTREEROOT root );
 
-TYPELIB_PROC( PTREEROOT, ShadowBinaryTree)( PTREEROOT root ); // returns a shadow of the original.
+TYPELIB_PROC  PTREEROOT TYPELIB_CALLTYPE  ShadowBinaryTree( PTREEROOT root ); // returns a shadow of the original.
 
 #ifdef __cplusplus
 	}; //namespace BinaryTree {
@@ -960,12 +2144,24 @@ TYPELIB_PROC( PTREEROOT, ShadowBinaryTree)( PTREEROOT root ); // returns a shado
 namespace family {
 #endif
 typedef struct familyroot_tag *PFAMILYTREE;
-TYPELIB_PROC( PFAMILYTREE, CreateFamilyTree )( int (CPROC *Compare)(PTRSZVAL key1, PTRSZVAL key2)
+/* <unfinished>
+   
+   Incomplete Work in progress (maybe) */
+TYPELIB_PROC  PFAMILYTREE TYPELIB_CALLTYPE  CreateFamilyTree ( int (CPROC *Compare)(PTRSZVAL key1, PTRSZVAL key2)
 															, void (CPROC *Destroy)(POINTER user, PTRSZVAL key) );
-TYPELIB_PROC( POINTER, FamilyTreeFindChild )( PFAMILYTREE root
+/* <unfinished>
+   
+   Incomplete, Family tree was never completed. */
+TYPELIB_PROC  POINTER TYPELIB_CALLTYPE  FamilyTreeFindChild ( PFAMILYTREE root
 														  , PTRSZVAL psvKey );
-TYPELIB_PROC( void, FamilyTreeReset )( PFAMILYTREE *option_tree );
-TYPELIB_PROC( void, FamilyTreeAddChild )( PFAMILYTREE *root, POINTER userdata, PTRSZVAL key );
+/* <unfinished>
+   
+   Incomplete, Family tree was never completed. */
+TYPELIB_PROC  void TYPELIB_CALLTYPE  FamilyTreeReset ( PFAMILYTREE *option_tree );
+/* <unfinished>
+   
+   Incomplete Work in progress (maybe) */
+TYPELIB_PROC  void TYPELIB_CALLTYPE  FamilyTreeAddChild ( PFAMILYTREE *root, POINTER userdata, PTRSZVAL key );
 #ifdef __cplusplus
 }; //namespace family {
 #endif
@@ -1001,217 +2197,6 @@ using namespace sack::containers;
 // Revision 1.99  2005/07/10 23:56:25  d3x0r
 // Fix types for C++...
 //
-// Revision 1.98  2005/07/05 23:46:09  d3x0r
-// Fixes for c++ lameness, and c compatiblity
-//
-// Revision 1.104  2005/07/05 23:49:45  jim
-// Blah more silly fixes to get around C++ lameness.
-//
-// Revision 1.103  2005/07/05 23:30:27  jim
-// Fix set references... C doesn't allow struct ___ to become a name ____
-//
-// Revision 1.102  2005/07/05 22:20:06  jim
-// Compat fixes for c++ and class usage of containers... some protection fixes for failing to load deadstart register
-//
-// Revision 1.97  2005/07/05 18:10:06  d3x0r
-// Fixes for C++ compilation, fixed sets
-//
-// Revision 1.96  2005/07/01 07:40:00  d3x0r
-// Disrelate getfromset from struct - might be a class...
-//
-// Revision 1.95  2005/06/30 13:22:44  d3x0r
-// Attempt to define preload, atexit methods for msvc.  Fix deadstart loading to be more protected.
-//
-// Revision 1.94  2005/05/25 16:50:09  d3x0r
-// Synch with working repository.
-//
-// Revision 1.101  2005/05/18 21:19:22  jim
-// Define a method which will only get a valid set member from a set.
-//
-// Revision 1.100  2005/05/16 23:18:36  jim
-// Allocate the correct amount of space for the message queue - it's a MSGQUEUE not a DATAQUEUE.  Also implement DequeMessage() in such a way that the waited for message ID can change.
-//
-// Revision 1.99  2005/02/09 22:38:54  panther
-// allow timers library to steal sets code....
-//
-// Revision 1.98  2005/02/04 19:34:12  panther
-// Added definition to test for leading whitespace
-//
-// Revision 1.97  2005/02/04 19:25:54  panther
-// Added iterator for sets that's a little different
-//
-// Revision 1.96  2005/01/10 21:43:42  panther
-// Unix-centralize makefiles, also modify set container handling of getmember index
-//
-// Revision 1.95  2004/12/22 20:15:51  panther
-// Parnthise getsetmember for expression usage
-//
-// Revision 1.94  2004/12/19 15:44:57  panther
-// Extended set methods to interact with raw index numbers
-//
-// Revision 1.93  2004/12/02 10:27:14  panther
-// Updates for linux stripped environment build
-//
-// Revision 1.92  2004/11/05 02:34:41  d3x0r
-// Minor mods...
-//
-// Revision 1.91  2004/09/29 00:49:47  d3x0r
-// Added fancy wait for PSI frames which allows non-polling sleeping... Extended Idle() to result in meaningful information.
-//
-// Revision 1.90  2004/09/24 09:02:12  d3x0r
-// Fix the braces around text declarations
-//
-// Revision 1.89  2004/09/17 16:18:00  d3x0r
-// ...
-//
-// Revision 1.88  2004/09/15 16:12:12  d3x0r
-// First - tear apart text object... added many many formatting options to it.
-//
-// Revision 1.87  2004/07/07 15:33:54  d3x0r
-// Cleaned c++ warnings, bad headers, fixed make system, fixed reallocate...
-//
-// Revision 1.86  2004/06/17 01:28:43  d3x0r
-// Tweaks to get relase build to build.
-//
-// Revision 1.85  2004/06/16 04:37:50  d3x0r
-// Add extra parens to clean warnings, and extra initializers for extended union
-//
-// Revision 1.84  2004/06/16 03:02:44  d3x0r
-// checkpoint
-//
-// Revision 1.83  2004/06/12 09:16:49  d3x0r
-// Added flatten line to common text operations. define ignore cursor value
-//
-// Revision 1.82  2004/06/12 09:12:52  d3x0r
-// Added FORMAT_OP, and extended format to include extended info
-//
-// Revision 1.81  2004/06/07 17:01:55  d3x0r
-// Remove position flag...
-//
-// Revision 1.80  2004/06/07 10:58:27  d3x0r
-// add flattenline
-//
-// Revision 1.79  2004/06/07 10:55:35  d3x0r
-// add tab handling as sepearte type of space, extend linelength and buildline, and provide extended methods of calculating spacing
-//
-// Revision 1.78  2004/06/03 10:59:58  d3x0r
-// Fix types passed to createfamilytree
-//
-// Revision 1.77  2004/06/03 10:56:01  d3x0r
-// okay so family tree does exist...
-//
-// Revision 1.76  2004/05/24 16:41:12  d3x0r
-// Add PeekQueue and GetQUeueLength
-//
-// Revision 1.75  2004/05/04 04:15:28  d3x0r
-// remove LogN, soon to consider removing LogX
-//
-// Revision 1.74  2004/04/26 09:47:25  d3x0r
-// Cleanup some C++ problems, and standard C issues even...
-//
-// Revision 1.73  2004/04/26 09:30:22  d3x0r
-// Fix declarations to allow c++ compile
-//
-// Revision 1.72  2004/04/12 12:07:43  d3x0r
-// Added family tree container - parent, child, elder, younger type relations
-//
-// Revision 1.71  2004/04/06 16:17:30  d3x0r
-// Implement text comparison macros as functions for segfault protection
-//
-// Revision 1.70  2004/03/06 08:35:29  d3x0r
-// format mods
-//
-// Revision 1.69  2004/03/04 01:09:47  d3x0r
-// Modifications to force slashes to wlib.  Updates to Interfaces to be gotten from common interface manager.
-//
-// Revision 1.68  2004/02/14 01:19:00  d3x0r
-// Extensions of Set structure in containers, C++ interface extension
-//
-// Revision 1.67  2004/02/10 19:03:03  d3x0r
-// Fix termination on class traversion of plist
-//
-// Revision 1.66  2004/02/08 23:33:15  d3x0r
-// Add a iList class for c++, public access to building parameter va_lists
-//
-// Revision 1.65  2004/01/29 10:11:50  d3x0r
-// extended format for text type
-//
-// Revision 1.64  2003/11/28 19:37:42  panther
-// Fix adoptcontrol, orphancontrol
-//
-// Revision 1.63  2003/11/10 01:53:49  panther
-// Fix vartextcreateex call
-//
-// Revision 1.62  2003/11/03 15:51:18  panther
-// Add some functionality to VarText, abstract data content
-//
-// Revision 1.61  2003/10/27 17:38:37  panther
-// Define some errno abstractions - incomplete... but needed for msgsvr port
-//
-// Revision 1.60  2003/10/26 23:38:20  panther
-// Modify createmsgqueue
-//
-// Revision 1.59  2003/10/24 14:51:01  panther
-// Modify remove functions binary tree
-//
-// Revision 1.58  2003/10/20 00:04:21  panther
-// Extend OpenSpace in SharedMem
-// revise msgqueue operations to more resemble sysVipc msgq
-//
-// Revision 1.57  2003/08/20 08:07:12  panther
-// some fixes to blot scaled... fixed to makefiles test projects... fixes to export containters lib funcs
-//
-// Revision 1.56  2003/08/08 07:50:34  panther
-// Fix LIST_FORALL to clear variable to NULL at end of list.
-//
-// Revision 1.55  2003/08/02 17:40:09  panther
-// Fix format on x,y position to be signed again - watcom is wrong either way
-//
-// Revision 1.54  2003/08/01 07:57:39  panther
-// Fix project builds
-//
-// Revision 1.53  2003/07/27 14:22:26  panther
-// Define forallinset callback as cproc
-//
-// Revision 1.52  2003/07/25 10:21:57  panther
-// Fix callback for foralllinks
-//
-// Revision 1.51  2003/05/20 18:30:16  panther
-// New functions - create/destroy vartext
-//
-// Revision 1.50  2003/04/27 01:24:17  panther
-// Add AddDataItem, DATA_FORALL
-//
-// Revision 1.49  2003/04/21 11:46:52  panther
-// Ug - forgot a commit somewhere... return pointer at set data item
-//
-// Revision 1.48  2003/04/21 08:12:27  panther
-// Hmm lost change - destroydatalist to deletedatalist
-//
-// Revision 1.47  2003/04/13 22:14:06  panther
-// Added extended format operation
-//
-// Revision 1.46  2003/04/12 20:52:46  panther
-// Added new type contrainer - data list.
-//
-// Revision 1.45  2003/04/08 07:01:22  panther
-// Fix cleanup issue (popups) Added another text type EX FORMAT OP
-// Fixed a dangling segsplit in text.c
-//
-// Revision 1.44  2003/04/06 23:24:12  panther
-// Define another FORMAT_OP and redefine SegSplit
-//
-// Revision 1.43  2003/04/06 09:57:02  panther
-// Remove unused FORMAT_OP, make coords signed, add FORMATPOS define
-//
-// Revision 1.42  2003/04/02 06:45:37  panther
-// Define flags for handling positioning in TEXT subsystem
-//
-// Revision 1.41  2003/03/30 21:16:05  panther
-// Added EX functions to pass application source to DataStack allocations
-//
-// Revision 1.40  2003/03/26 07:23:53  panther
-// Include buildline end of line option
 //
 // Revision 1.39  2003/03/25 08:38:11  panther
 // Add logging

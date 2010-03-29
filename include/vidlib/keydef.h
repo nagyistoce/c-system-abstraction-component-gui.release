@@ -1,5 +1,6 @@
 #ifndef KEY_STRUCTURE_DEFINED
 
+RENDER_NAMESPACE
 
 #ifndef RENDER_INTERFACE_INCLUDED
 typedef void (CPROC *KeyTriggerHandler)(PTRSZVAL,_32 keycode);
@@ -30,6 +31,8 @@ typedef struct KeyDefine {
    KEYBIND mod[8];
 } KEYDEFINE;
 
+
+RENDER_NAMESPACE_END
 
 
 #endif
