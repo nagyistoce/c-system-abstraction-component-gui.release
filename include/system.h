@@ -68,8 +68,8 @@ SYSTEM_PROC( PTASK_INFO, LaunchPeerProgramExx )( CTEXTSTR program, CTEXTSTR path
 																DBG_PASS
 															  );
 
-SYSTEM_PROC( PTASK_INFO, LaunchProgramEx )( CTEXTSTR program, TEXTSTR path, PCTEXTSTR args, TaskEnd EndNotice, PTRSZVAL psv );
-SYSTEM_PROC( PTASK_INFO, LaunchProgram )( CTEXTSTR program, TEXTSTR path, PCTEXTSTR  args );
+SYSTEM_PROC( PTASK_INFO, LaunchProgramEx )( CTEXTSTR program, CTEXTSTR path, PCTEXTSTR args, TaskEnd EndNotice, PTRSZVAL psv );
+SYSTEM_PROC( PTASK_INFO, LaunchProgram )( CTEXTSTR program, CTEXTSTR path, PCTEXTSTR  args );
 SYSTEM_PROC( PTRSZVAL, TerminateProgram )( PTASK_INFO task );
 SYSTEM_PROC( void, SetProgramUserData )( PTASK_INFO task, PTRSZVAL psv );
 

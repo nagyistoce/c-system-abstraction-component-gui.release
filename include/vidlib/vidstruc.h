@@ -1,6 +1,19 @@
 #ifndef VIDEO_STRUCTURE_DEFINED
 #define VIDEO_STRUCTURE_DEFINED
 
+#ifndef RENDER_NAMESPACE
+#ifdef __cplusplus
+#define RENDER_NAMESPACE namespace sack { namespace image { namespace render {
+#define RENDER_NAMESPACE_END }}}
+#else
+#define RENDER_NAMESPACE 
+#define RENDER_NAMESPACE_END
+
+//extern "C" {
+#endif
+#endif
+
+
 //#include <vfw.h>
 #include <imglib/imagestruct.h>
 #ifdef __WINDOWS__

@@ -111,7 +111,7 @@ PRIORITY_PRELOAD( CreateFontCacheGlobal, IMAGE_PRELOAD_PRIORITY )
 
 //-------------------------------------------------------------------------
 #ifndef _PSI_INCLUSION_
-IMAGE_PROC( struct font_global_tag *, GetGlobalFonts)( void )
+ struct font_global_tag *  GetGlobalFonts( void )
 {
    return &fg;
 }
@@ -120,7 +120,7 @@ IMAGE_PROC( struct font_global_tag *, GetGlobalFonts)( void )
 //-------------------------------------------------------------------------
 #if 0
 #if !defined( NO_FONT_GLOBAL_DECLARATION ) || defined(__LINUX__)
-DYNAMIC_EXPORT int InitFont( void )
+EXPORT_METHOD int InitFont( void )
 {
 	if( !&fg )
 	{
@@ -141,7 +141,7 @@ DYNAMIC_EXPORT int InitFont( void )
    return 1;
 }
 #else
-//DYNAMIC_IMPORT int InitFont(void);
+//IMPORT_METHOD int InitFont(void);
 #endif
 #endif
 //-------------------------------------------------------------------------

@@ -98,7 +98,7 @@ PRELOAD( Started )
 }
 //#endif
 
-CONSTRUCT_PROC( void, LoadComplete )( void )
+ void  LoadComplete ( void )
 {
 	_32 result;
    // if we registered with the summoner...

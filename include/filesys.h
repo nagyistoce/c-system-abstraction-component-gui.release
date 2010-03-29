@@ -11,6 +11,7 @@
  */
 
 #ifndef FILESYSTEM_UTILS_DEFINED
+/* Header multiple inclusion protection symbol. */
 #define FILESYSTEM_UTILS_DEFINED
 #include <stdhdrs.h>
 
@@ -19,24 +20,27 @@
 #include <io.h>
 #endif
 
-#if !defined(__STATIC__) && !defined(__UNIX__)
+/* uhmm in legacy usage this was not CPROC, but was unspecified */
+#define FILESYS_API
+
 #ifdef FILESYSTEM_LIBRARY_SOURCE
-#define FILESYS_PROC(type,name) EXPORT_METHOD type name
+#define FILESYS_PROC EXPORT_METHOD
 #else
-#define FILESYS_PROC(type,name) IMPORT_METHOD type name
-#endif
-#else
-#ifdef FILESYSTEM_LIBRARY_SOURCE
-#define FILESYS_PROC(type,name) type name
-#else
-#define FILESYS_PROC(type,name) extern type name
-#endif
+/* define the method that file system and file monitor use for
+   library linkage.                                            */
+#define FILESYS_PROC IMPORT_METHOD
 #endif
 
 #ifdef __cplusplus
+/* defined the file system partial namespace (under
+   SACK_NAMESPACE probably)                         */
 #define _FILESYS_NAMESPACE  namespace filesys {
+/* Define the ending symbol for file system namespace. */
 #define _FILESYS_NAMESPACE_END }
+/* Defined the namespace of file montior utilities. File monitor
+   provides event notification based on file system changes.     */
 #define _FILEMON_NAMESPACE  namespace monitor {
+/* Define the end symbol for file monitor namespace. */
 #define _FILEMON_NAMESPACE_END }
 #else
 #define _FILESYS_NAMESPACE 
@@ -44,23 +48,57 @@
 #define _FILEMON_NAMESPACE 
 #define _FILEMON_NAMESPACE_END
 #endif
+/* define the file system namespace end. */
 #define FILESYS_NAMESPACE_END _FILESYS_NAMESPACE_END SACK_NAMESPACE_END 
+/* define the file system namespace. */
 #define FILESYS_NAMESPACE SACK_NAMESPACE _FILESYS_NAMESPACE 
+/* Define end file monitor namespace. */
 #define FILEMON_NAMESPACE_END _FILEMON_NAMESPACE_END _FILESYS_NAMESPACE_END SACK_NAMESPACE_END 
+/* Defines the file montior namespace when compiling C++. */
 #define FILEMON_NAMESPACE SACK_NAMESPACE _FILESYS_NAMESPACE _FILEMON_NAMESPACE
 
+/* Namespace for filesystem access methods. */
 FILESYS_NAMESPACE
 
-#define SFF_SUBCURSE    1 // go into subdirectories
-#define SFF_DIRECTORIES 2 // return directory names also
-#define SFF_NAMEONLY    4 // don't concatenate base with filename to result.
-#define SFF_IGNORECASE  8 // when matching filename - do not match case.
+	enum ScanFileFlags {
 
-// flags sent to Process when called with a matching name
-#define SFF_DIRECTORY   1 // is a directory...
-#define SFF_DRIVE       2 // this is a drive...
+SFF_SUBCURSE    = 1, // go into subdirectories
+SFF_DIRECTORIES = 2, // return directory names also
+SFF_NAMEONLY    = 4, // don't concatenate base with filename to result.
+SFF_IGNORECASE  = 8 // when matching filename - do not match case.
+	};
 
-FILESYS_PROC( int, CompareMask )( CTEXTSTR mask, CTEXTSTR name, int keepcase );
+ // flags sent to Process when called with a matching name
+enum ScanFileProcessFlags{
+SFF_DIRECTORY  = 1, // is a directory...
+		SFF_DRIVE      = 2, // this is a drive...
+};
+
+/* \ \ 
+   Parameters
+   mask :      This is the mask used to compare 
+   name :      this is the name to compare against using the mask.
+   keepcase :  if TRUE, must match case also.
+   
+   Returns
+   TRUE if name is matched by mask. Otherwise returns FALSE.
+   Example
+   <code lang="c++">
+   if( CompareMask( "*.exe", "program.exe", FALSE ) )
+   {
+       // then program.exe is matched by the mask.
+   }
+   </code>
+   Remarks
+   The mask support standard 'globbing' characters.
+   
+   ? matches one character
+   
+   \* matches 0 or more characters
+   
+   otherwise the literal character must match, unless comparing
+   case insensitive, in which case 'A' == 'a' also.                */
+FILESYS_PROC  int FILESYS_API  CompareMask ( CTEXTSTR mask, CTEXTSTR name, int keepcase );
 
 // ScanFiles usage:
 //   base - base path to scan
@@ -70,47 +108,115 @@ FILESYS_PROC( int, CompareMask )( CTEXTSTR mask, CTEXTSTR name, int keepcase );
 //   Process is called with the full name of any matching files
 //   subcurse is a flag - set to go into all subdirectories looking for files.
 // There is no way to abort the scan... 
-FILESYS_PROC( int, ScanFiles )( CTEXTSTR base
+FILESYS_PROC  int FILESYS_API  ScanFiles ( CTEXTSTR base
            , CTEXTSTR mask
            , void **pInfo
            , void CPROC Process( PTRSZVAL psvUser, CTEXTSTR name, int flags )
            , int flags 
            , PTRSZVAL psvUser );
-FILESYS_PROC( void, ScanDrives )( void (CPROC *Process)(PTRSZVAL user, CTEXTSTR letter, int flags)
+FILESYS_PROC  void FILESYS_API  ScanDrives ( void (CPROC *Process)(PTRSZVAL user, CTEXTSTR letter, int flags)
 										  , PTRSZVAL user );
 // result is length of name filled into pResult if pResult == NULL && nResult = 0
 // the result will the be length of the name matching the file.
-FILESYS_PROC( int, GetMatchingFileName )( CTEXTSTR filemask, int flags, TEXTSTR pResult, int nResult );
+FILESYS_PROC  int FILESYS_API  GetMatchingFileName ( CTEXTSTR filemask, int flags, TEXTSTR pResult, int nResult );
 
 // searches a path for the last '/' or '\'
-FILESYS_PROC( CTEXTSTR, pathrchr )( CTEXTSTR path );
+FILESYS_PROC  CTEXTSTR FILESYS_API  pathrchr ( CTEXTSTR path );
 #ifdef __cplusplus
-FILESYS_PROC( TEXTSTR, pathrchr )( TEXTSTR path );
+FILESYS_PROC  TEXTSTR FILESYS_API  pathrchr ( TEXTSTR path );
 #endif
 // searches a path for the first '/' or '\'
-FILESYS_PROC( CTEXTSTR, pathchr )( CTEXTSTR path );
+FILESYS_PROC  CTEXTSTR FILESYS_API  pathchr ( CTEXTSTR path );
 
 // returns pointer passed (if it worked?)
-FILESYS_PROC( TEXTSTR, GetCurrentPath )( TEXTSTR path, int buffer_len );
-FILESYS_PROC( int, SetCurrentPath )( CTEXTSTR path );
-FILESYS_PROC( int, MakePath )( CTEXTSTR path );
-FILESYS_PROC( int, IsPath )( CTEXTSTR path );
+FILESYS_PROC  TEXTSTR FILESYS_API  GetCurrentPath ( TEXTSTR path, int buffer_len );
+FILESYS_PROC  int FILESYS_API  SetCurrentPath ( CTEXTSTR path );
+/* Creates a directory. If parent peices of the directory do not
+   exist, those parts are created also.
+   
+   
+   Example
+   <code lang="c#">
+   MakePath( "c:\\where\\I'm/going/to/store/data" ); 
+   </code>                                                       */
+FILESYS_PROC  int FILESYS_API  MakePath ( CTEXTSTR path );
+/* A boolean result function whether a specified name is a
+   directory or not. (if not, assumes it's a file).
+   
+   
+   Example
+   <code lang="c#">
+   if( IsPath( "c:/windows" ) )
+   {
+       // if yes, then c:\\windows is a directory.
+   }
+   </code>                                                 */
+FILESYS_PROC  int FILESYS_API  IsPath ( CTEXTSTR path );
 
 
-FILESYS_PROC( _64, GetFileWriteTime )( CTEXTSTR name ); // last modification time.
-FILESYS_PROC( LOGICAL, SetFileWriteTime)( CTEXTSTR name, _64 filetime ); // last modification time.
+FILESYS_PROC  _64 FILESYS_API  GetFileWriteTime ( CTEXTSTR name ); // last modification time.
+FILESYS_PROC  LOGICAL FILESYS_API  SetFileWriteTime( CTEXTSTR name, _64 filetime ); // last modification time.
 
 //--------------------- Windows-CE File Extra Support ----------
 
-FILESYS_PROC( void, SetDefaultFilePath )( CTEXTSTR path );
-FILESYS_PROC( int, SetGroupFilePath )( CTEXTSTR group, CTEXTSTR path );
-FILESYS_PROC( TEXTSTR, sack_prepend_path )( int group, CTEXTSTR filename );
+FILESYS_PROC  void FILESYS_API  SetDefaultFilePath ( CTEXTSTR path );
+FILESYS_PROC  int FILESYS_API  SetGroupFilePath ( CTEXTSTR group, CTEXTSTR path );
+FILESYS_PROC  TEXTSTR FILESYS_API  sack_prepend_path ( int group, CTEXTSTR filename );
 
 
-FILESYS_PROC( int, GetFileGroup )( CTEXTSTR groupname, CTEXTSTR default_path );
+/* This is a new feature added for supporting systems without a
+   current file location. This gets an integer ID of a group of
+   files by name.
+   
+   the name 'default' is used to specify files to go into the
+   'current working directory'
+   
+   
+   Parameters
+   groupname :     name of the group
+   default_path :  the path of the group, if the name is not
+                   found.
+   
+   Returns
+   the ID of a file group.
+   Example
+   <code lang="c++">
+   int group = GetFileGroup( "fonts", "./fonts" );
+   </code>                                                      */
+FILESYS_PROC  int FILESYS_API  GetFileGroup ( CTEXTSTR groupname, CTEXTSTR default_path );
 
-FILESYS_PROC( _32, GetSizeofFile )( TEXTCHAR *name, P_32 unused );
-FILESYS_PROC( _32, GetFileTimeAndSize )( CTEXTSTR name
+/* \Returns the size of the file.
+   
+   
+   Parameters
+   name :  name of the file to get information about
+   
+   Returns
+   \Returns the size of the file. or -1 if the file did not
+   exist.                                                   */
+FILESYS_PROC  _32 FILESYS_API  GetSizeofFile ( TEXTCHAR *name, P_32 unused );
+/* An extended function, which returns a _64 bit time
+   appropriate for the current platform. This is meant to
+   replace 'stat'. It can get all commonly checked attributes of
+   a file.
+   
+   
+   Parameters
+   name :              name of the file to get information about
+   lpCreationTime :    pointer to a FILETIME type to get creation
+                       time. can be NULL.
+   lpLastAccessTime :  pointer to a FILETIME type to get access
+                       time. can be NULL.
+   lpLastWriteTime :   pointer to a FILETIME type to get write
+                       time. can be NULL.
+   IsDirectory :       pointer to a LOGICAL to receive indicator
+                       whether the file was a directory. can be
+                       NULL.
+   
+   Returns
+   \Returns the size of the file. or -1 if the file did not
+   exist.                                                         */
+FILESYS_PROC  _32 FILESYS_API  GetFileTimeAndSize ( CTEXTSTR name
 													, LPFILETIME lpCreationTime
 													,  LPFILETIME lpLastAccessTime
 													,  LPFILETIME lpLastWriteTime
@@ -141,22 +247,22 @@ FILESYS_PROC( _32, GetFileTimeAndSize )( CTEXTSTR name
 //# endif
 #endif
 
-FILESYS_PROC( HANDLE, sack_open )( int group, CTEXTSTR filename, int opts, ... );
-FILESYS_PROC( HANDLE, sack_openfile )( int group, CTEXTSTR filename, OFSTRUCT *of, int flags );
-FILESYS_PROC( HANDLE, sack_creat )( int group, CTEXTSTR file, int opts, ... );
-FILESYS_PROC( int, sack_close )( HANDLE file_handle );
-FILESYS_PROC( int, sack_lseek )( HANDLE file_handle, int pos, int whence );
-FILESYS_PROC( int, sack_read )( HANDLE file_handle, CPOINTER buffer, int size );
-FILESYS_PROC( int, sack_write )( HANDLE file_handle, CPOINTER buffer, int size );
+FILESYS_PROC  HANDLE FILESYS_API  sack_open ( int group, CTEXTSTR filename, int opts, ... );
+FILESYS_PROC  HANDLE FILESYS_API  sack_openfile ( int group, CTEXTSTR filename, OFSTRUCT *of, int flags );
+FILESYS_PROC  HANDLE FILESYS_API  sack_creat ( int group, CTEXTSTR file, int opts, ... );
+FILESYS_PROC  int FILESYS_API  sack_close ( HANDLE file_handle );
+FILESYS_PROC  int FILESYS_API  sack_lseek ( HANDLE file_handle, int pos, int whence );
+FILESYS_PROC  int FILESYS_API  sack_read ( HANDLE file_handle, CPOINTER buffer, int size );
+FILESYS_PROC  int FILESYS_API  sack_write ( HANDLE file_handle, CPOINTER buffer, int size );
 
-FILESYS_PROC( FILE*, sack_fopen )( int group, CTEXTSTR filename, CTEXTSTR opts );
-FILESYS_PROC( int, sack_fclose )( FILE *file_file );
-FILESYS_PROC( int, sack_fseek )( FILE *file_file, int pos, int whence );
-FILESYS_PROC( int, sack_fread )( CPOINTER buffer, int size, int count,FILE *file_file );
-FILESYS_PROC( int, sack_fwrite )( CPOINTER buffer, int size, int count,FILE *file_file );
+FILESYS_PROC  FILE* FILESYS_API  sack_fopen ( int group, CTEXTSTR filename, CTEXTSTR opts );
+FILESYS_PROC  int FILESYS_API  sack_fclose ( FILE *file_file );
+FILESYS_PROC  int FILESYS_API  sack_fseek ( FILE *file_file, int pos, int whence );
+FILESYS_PROC  int FILESYS_API  sack_fread ( CPOINTER buffer, int size, int count,FILE *file_file );
+FILESYS_PROC  int FILESYS_API  sack_fwrite ( CPOINTER buffer, int size, int count,FILE *file_file );
 
-FILESYS_PROC( int, sack_unlink )( CTEXTSTR filename );
-FILESYS_PROC( int, sack_rename )( CTEXTSTR file_source, CTEXTSTR new_name );
+FILESYS_PROC  int FILESYS_API  sack_unlink ( CTEXTSTR filename );
+FILESYS_PROC  int FILESYS_API  sack_rename ( CTEXTSTR file_source, CTEXTSTR new_name );
 
 #if !defined( SACK_BAG_EXPORTS ) && !defined( BAG_EXTERNALS )
 #define open(a,...) sack_open(0,a,##__VA_ARGS__)

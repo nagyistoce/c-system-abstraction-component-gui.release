@@ -41,7 +41,6 @@
 #define LockedExchange InterlockedExchange
 #endif
 
-
 SACK_DEADSTART_NAMESPACE
 
 #undef PRELOAD
@@ -570,9 +569,12 @@ void SuspendDeadstart( void )
    bSuspend = 1;
 }
 
+SACK_DEADSTART_NAMESPACE_END
+SACK_NAMESPACE
+
 // linked into BAG to provide a common definition for function Exit()
 // this then invokes an exit in the mainline program (if available)
-DYNAMIC_EXPORT	void BAG_Exit( int code )
+EXPORT_METHOD	void BAG_Exit( int code )
 {
 #ifndef __cplusplus_cli
 	InvokeExits();
@@ -588,6 +590,8 @@ int is_deadstart_complete( void )
 	return 1;//deadstart_complete;
 }
 
+SACK_NAMESPACE_END
+SACK_DEADSTART_NAMESPACE
 
 #if 0
 int APIENTRY DllMain( HINSTANCE HInst, DWORD dwReason, UINT voidreason )

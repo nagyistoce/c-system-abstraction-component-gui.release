@@ -1,3 +1,6 @@
+/* Includes networking as appropriate for the target platform. Providing
+   compatibility definitions as are lacking between platforms...
+   or perhaps appropriate name aliasing to the correct types.            */
 #ifndef INCLUDED_SOCKET_LIBRARY
 #define INCLUDED_SOCKET_LIBRARY
 

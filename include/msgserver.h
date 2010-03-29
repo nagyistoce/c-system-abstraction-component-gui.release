@@ -24,7 +24,17 @@
 #endif
 #endif
 
+#ifdef __cplusplus
+#define MSGSERVER_NAMESPACE namespace sack { namespace msg { namespace server {
+#define MSGSERVER_NAMESPACE_END }} }
+#else
+#define MSGSERVER_NAMESPACE 
+#define MSGSERVER_NAMESPACE_END
+#endif
+
 #include <msgprotocol.h>
+
+MSGSERVER_NAMESPACE
 
 #ifdef _DEBUG
 #define CLIENT_TIMEOUT   120000 // 2 seconds
@@ -46,6 +56,11 @@ SERVERMSG_PROC(int, SendMultiServiceEvent)( _32 pid, _32 event
 								 , ... );
 #define SendServiceEvent(pid,event,data,len) SendMultiServiceEvent(pid,event,1,data,len)
 //void SendServiceEvent( _32 pid, _32 event, _32 *data, _32 len );
+#endif
+
+MSGSERVER_NAMESPACE_END
+#ifdef __cplusplus
+using namespace sack::msg::server;
 #endif
 
 #endif

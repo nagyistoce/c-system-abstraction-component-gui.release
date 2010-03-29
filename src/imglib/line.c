@@ -193,7 +193,7 @@ void CPROC do_lineExVc( ImageFile *pImage, int x1, int y1
                             , void (*func)(ImageFile *pif, int x, int y, int d ) )
 {
    int err, delx, dely, len, inc;
-   if( !pImage || !pImage->image ) return;
+   //if( !pImage || !pImage->image ) return;
    delx = x2 - x1;
    if( delx < 0 )
       delx = -delx;

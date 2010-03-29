@@ -159,7 +159,7 @@ typedef struct MsgDataHandle
 // in this case size is the size of the queue, there
 // is no expansion possible...
 // this should be created such that it is at least 3 * largest message
-TYPELIB_PROC( PMSGHANDLE, SackCreateMsgQueue )( CTEXTSTR name, PTRSZVAL size
+ PMSGHANDLE  SackCreateMsgQueue ( CTEXTSTR name, PTRSZVAL size
 													  , MsgQueueReadCallback Read
 														, PTRSZVAL psvRead )
 {
@@ -208,7 +208,7 @@ TYPELIB_PROC( PMSGHANDLE, SackCreateMsgQueue )( CTEXTSTR name, PTRSZVAL size
 // in this case size is the size of the queue, there
 // is no expansion possible...
 // this should be created such that it is at least 3 * largest message
-TYPELIB_PROC( PMSGHANDLE, SackOpenMsgQueue )( CTEXTSTR name
+ PMSGHANDLE  SackOpenMsgQueue ( CTEXTSTR name
 													 , MsgQueueReadCallback Read
 													 , PTRSZVAL psvRead )
 {
@@ -255,7 +255,7 @@ TYPELIB_PROC( PMSGHANDLE, SackOpenMsgQueue )( CTEXTSTR name
 
 //--------------------------------------------------------------------------
 
-TYPELIB_PROC( void, DeleteMsgQueueEx )( PMSGHANDLE *ppmh DBG_PASS )
+ void  DeleteMsgQueueEx ( PMSGHANDLE *ppmh DBG_PASS )
 {
 
 	if( ppmh )
@@ -473,7 +473,7 @@ static int ScanForWaiting( PMSGQUEUE pmq, _32 msg )
 
 //--------------------------------------------------------------------------
 
-TYPELIB_PROC( int, EnqueMsgEx )( PMSGHANDLE pmh,  POINTER msg, PTRSZVAL size, _32 opts DBG_PASS )
+ int  EnqueMsgEx ( PMSGHANDLE pmh,  POINTER msg, PTRSZVAL size, _32 opts DBG_PASS )
 {
 	if( pmh )
 	{
@@ -637,7 +637,7 @@ TYPELIB_PROC( int, EnqueMsgEx )( PMSGHANDLE pmh,  POINTER msg, PTRSZVAL size, _3
 
 	//--------------------------------------------------------------------------
 
-TYPELIB_PROC( int, IsMsgQueueEmpty )( PMSGHANDLE pmh )
+ int  IsMsgQueueEmpty ( PMSGHANDLE pmh )
 {
    PMSGQUEUE pmq = pmh->pmq;
    if( !pmq || ( pmq->Bottom == pmq->Top ) )
@@ -650,7 +650,7 @@ TYPELIB_PROC( int, IsMsgQueueEmpty )( PMSGHANDLE pmh )
 // if this thread id known, you may change the MsgID
 // being waited for, which will result in this waking up
 // and reading for the new ID...
-TYPELIB_PROC( int, DequeMsgEx )( PMSGHANDLE pmh, _32 *MsgID, POINTER result, PTRSZVAL size, _32 options DBG_PASS )
+ int  DequeMsgEx ( PMSGHANDLE pmh, _32 *MsgID, POINTER result, PTRSZVAL size, _32 options DBG_PASS )
 {
 	PMSGQUEUE pmq = pmh->pmq;
 	int p;

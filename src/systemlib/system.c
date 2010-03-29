@@ -422,7 +422,7 @@ static int DumpError( void )
 // Run a program completely detached from the current process
 // it runs independantly.  Program does not suspend until it completes.
 // No way at all to know if the program works or fails.
-SYSTEM_PROC( PTASK_INFO, LaunchProgramEx )( CTEXTSTR program, TEXTSTR path, PCTEXTSTR args, TaskEnd EndNotice, PTRSZVAL psv )
+SYSTEM_PROC( PTASK_INFO, LaunchProgramEx )( CTEXTSTR program, CTEXTSTR path, PCTEXTSTR args, TaskEnd EndNotice, PTRSZVAL psv )
 {
 	PTASK_INFO task;
 	if( program && program[0] )
@@ -564,7 +564,7 @@ SYSTEM_PROC( PTASK_INFO, LaunchProgramEx )( CTEXTSTR program, TEXTSTR path, PCTE
 	return FALSE;
 }
 
-SYSTEM_PROC( PTASK_INFO, LaunchProgram )( CTEXTSTR program, TEXTSTR path, PCTEXTSTR args )
+SYSTEM_PROC( PTASK_INFO, LaunchProgram )( CTEXTSTR program, CTEXTSTR path, PCTEXTSTR args )
 {
    return LaunchProgramEx( program, path, args, NULL, 0 );
 }

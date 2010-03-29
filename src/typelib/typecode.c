@@ -40,7 +40,7 @@ namespace sack {
 #define LockedExchange InterlockedExchange
 #endif
 
-TYPELIB_PROC( PLIST, CreateListEx )( DBG_VOIDPASS )
+ PLIST  CreateListEx ( DBG_VOIDPASS )
 {
    PLIST pl;
    INDEX size;
@@ -50,7 +50,7 @@ TYPELIB_PROC( PLIST, CreateListEx )( DBG_VOIDPASS )
 }
 
 //--------------------------------------------------------------------------
-TYPELIB_PROC( PLIST, DeleteListEx )( PLIST *pList DBG_PASS )
+ PLIST  DeleteListEx ( PLIST *pList DBG_PASS )
 {
 	PLIST ppList;
 	if( pList &&
@@ -121,7 +121,7 @@ static PLIST ExpandListEx( PLIST *pList, INDEX amount DBG_PASS )
 
 //--------------------------------------------------------------------------
 
-TYPELIB_PROC( PLIST, AddLinkEx )( PLIST *pList, POINTER p DBG_PASS )
+ PLIST  AddLinkEx ( PLIST *pList, POINTER p DBG_PASS )
 {
 	INDEX i;
 	if( !pList )
@@ -153,7 +153,7 @@ TYPELIB_PROC( PLIST, AddLinkEx )( PLIST *pList, POINTER p DBG_PASS )
 
 //--------------------------------------------------------------------------
 
-TYPELIB_PROC( PLIST, SetLinkEx )( PLIST *pList, INDEX idx, POINTER p DBG_PASS )
+ PLIST  SetLinkEx ( PLIST *pList, INDEX idx, POINTER p DBG_PASS )
 {
 	INDEX sz;
 	if( !pList )
@@ -178,7 +178,7 @@ TYPELIB_PROC( PLIST, SetLinkEx )( PLIST *pList, INDEX idx, POINTER p DBG_PASS )
 
 //--------------------------------------------------------------------------
 
-TYPELIB_PROC( POINTER, GetLink )( PLIST *pList, INDEX idx )
+ POINTER  GetLink ( PLIST *pList, INDEX idx )
 {
    // must lock the list so that it's not expanded out from under us...
 	POINTER p;
@@ -202,7 +202,7 @@ TYPELIB_PROC( POINTER, GetLink )( PLIST *pList, INDEX idx )
 
 //--------------------------------------------------------------------------
 
-TYPELIB_PROC( POINTER*, GetLinkAddress )( PLIST *pList, INDEX idx )
+ POINTER*  GetLinkAddress ( PLIST *pList, INDEX idx )
 {
    // must lock the list so that it's not expanded out from under us...
 	POINTER *p;
@@ -226,7 +226,7 @@ TYPELIB_PROC( POINTER*, GetLinkAddress )( PLIST *pList, INDEX idx )
 
 //--------------------------------------------------------------------------
 
-TYPELIB_PROC( PTRSZVAL, ForAllLinks )( PLIST *pList, ForProc func, PTRSZVAL user )
+ PTRSZVAL  ForAllLinks ( PLIST *pList, ForProc func, PTRSZVAL user )
 {
 	INDEX i;
 	PTRSZVAL result = 0;
@@ -260,7 +260,7 @@ static PTRSZVAL CPROC IsLink( PTRSZVAL value, INDEX i, POINTER *link )
 
 //--------------------------------------------------------------------------
 
-TYPELIB_PROC( INDEX, FindLink )( PLIST *pList, POINTER value )
+ INDEX  FindLink ( PLIST *pList, POINTER value )
 {
 	if( !pList || !(*pList ) )
 		return INVALID_INDEX;
@@ -279,7 +279,7 @@ static PTRSZVAL CPROC KillLink( PTRSZVAL value, INDEX i, POINTER *link )
 	return 0;
 }
 
-TYPELIB_PROC( LOGICAL, DeleteLink )( PLIST *pList, POINTER value )
+ LOGICAL  DeleteLink ( PLIST *pList, POINTER value )
 {
 	if( ForAllLinks( pList, KillLink, (PTRSZVAL)value ) )
 		return TRUE;
@@ -294,7 +294,7 @@ static PTRSZVAL CPROC RemoveItem( PTRSZVAL value, INDEX i, POINTER *link )
 	return 0;
 }
 
-TYPELIB_PROC( void,        EmptyList      )( PLIST *pList )
+ void         EmptyList      ( PLIST *pList )
 {
 	ForAllLinks( pList, RemoveItem, 0 );
 }
@@ -323,7 +323,7 @@ PDATALIST ExpandDataListEx( PDATALIST *ppdl, int entries DBG_PASS )
 
 //--------------------------------------------------------------------------
 
-TYPELIB_PROC( PDATALIST, CreateDataListEx )( PTRSZVAL nSize DBG_PASS )
+ PDATALIST  CreateDataListEx ( PTRSZVAL nSize DBG_PASS )
 {
 	PDATALIST pdl = (PDATALIST)AllocateEx( sizeof( DATALIST ) DBG_RELAY );
 	pdl->Cnt = 0;
@@ -335,7 +335,7 @@ TYPELIB_PROC( PDATALIST, CreateDataListEx )( PTRSZVAL nSize DBG_PASS )
 
 //--------------------------------------------------------------------------
 
-TYPELIB_PROC( void, DeleteDataListEx )( PDATALIST *ppdl DBG_PASS )
+ void  DeleteDataListEx ( PDATALIST *ppdl DBG_PASS )
 {
 	if( ppdl )
 	{
@@ -412,7 +412,7 @@ POINTER GetDataItem( PDATALIST *ppdl, INDEX idx )
 namespace link_stack {
 #endif
 
-TYPELIB_PROC( PLINKSTACK,     CreateLinkStackLimitedEx        )( int max_entries  DBG_PASS )
+ PLINKSTACK      CreateLinkStackLimitedEx        ( int max_entries  DBG_PASS )
 {
 	PLINKSTACK pls;
 	pls = (PLINKSTACK)AllocateEx( sizeof( LINKSTACK ) DBG_RELAY );
@@ -425,14 +425,14 @@ TYPELIB_PROC( PLINKSTACK,     CreateLinkStackLimitedEx        )( int max_entries
 
 //--------------------------------------------------------------------------
 
-TYPELIB_PROC( PLINKSTACK, CreateLinkStackEx )( DBG_VOIDPASS )
+ PLINKSTACK  CreateLinkStackEx ( DBG_VOIDPASS )
 {
 	return CreateLinkStackLimitedEx( 0 DBG_RELAY );
 }
 
 //--------------------------------------------------------------------------
 
-TYPELIB_PROC( void, DeleteLinkStackEx )( PLINKSTACK *pls DBG_PASS )
+ void  DeleteLinkStackEx ( PLINKSTACK *pls DBG_PASS )
 {
 	if( pls && *pls )
 	{
@@ -443,7 +443,7 @@ TYPELIB_PROC( void, DeleteLinkStackEx )( PLINKSTACK *pls DBG_PASS )
 
 //--------------------------------------------------------------------------
 
-TYPELIB_PROC( POINTER, PeekLink )( PLINKSTACK *pls )
+ POINTER  PeekLink ( PLINKSTACK *pls )
 {
 	// should lock - but it's fast enough?
 	POINTER p = NULL;
@@ -454,7 +454,7 @@ TYPELIB_PROC( POINTER, PeekLink )( PLINKSTACK *pls )
 
 //--------------------------------------------------------------------------
 
-TYPELIB_PROC( POINTER, PopLink )( PLINKSTACK *pls )
+ POINTER  PopLink ( PLINKSTACK *pls )
 {
 	POINTER p = NULL;
 	if( pls && *pls && (*pls)->Top )
@@ -492,7 +492,7 @@ static PLINKSTACK ExpandStackEx( PLINKSTACK *stack, int entries DBG_PASS )
 
 //--------------------------------------------------------------------------
 
-TYPELIB_PROC( PLINKSTACK, PushLinkEx )( PLINKSTACK *pls, POINTER p DBG_PASS )
+ PLINKSTACK  PushLinkEx ( PLINKSTACK *pls, POINTER p DBG_PASS )
 {
 	if( !pls )
 		return NULL;
@@ -522,7 +522,7 @@ TYPELIB_PROC( PLINKSTACK, PushLinkEx )( PLINKSTACK *pls, POINTER p DBG_PASS )
 		namespace data_stack {
 #endif
 
-TYPELIB_PROC( POINTER, PopData )( PDATASTACK *pds )
+ POINTER  PopData ( PDATASTACK *pds )
 {
    POINTER p = NULL;
    if( (pds) && (*pds) && (*pds)->Top )
@@ -552,7 +552,7 @@ static PDATASTACK ExpandDataStackEx( PDATASTACK *pds, int entries DBG_PASS )
 
 //--------------------------------------------------------------------------
 
-TYPELIB_PROC( PDATASTACK, PushDataEx )( PDATASTACK *pds, POINTER pdata DBG_PASS )
+ PDATASTACK  PushDataEx ( PDATASTACK *pds, POINTER pdata DBG_PASS )
 {
 	if( pds && *pds )
    {
@@ -571,7 +571,7 @@ TYPELIB_PROC( PDATASTACK, PushDataEx )( PDATASTACK *pds, POINTER pdata DBG_PASS 
 
 //--------------------------------------------------------------------------
 
-TYPELIB_PROC( POINTER, PeekDataEx )( PDATASTACK *pds, INDEX nBack )
+ POINTER  PeekDataEx ( PDATASTACK *pds, INDEX nBack )
 {
    POINTER p = NULL;
 	nBack++;
@@ -584,7 +584,7 @@ TYPELIB_PROC( POINTER, PeekDataEx )( PDATASTACK *pds, INDEX nBack )
 
 //--------------------------------------------------------------------------
 
-TYPELIB_PROC( POINTER, PeekData )( PDATASTACK *pds )
+ POINTER  PeekData ( PDATASTACK *pds )
 {
    POINTER p = NULL;
    if( pds && *pds && (*pds)->Top )
@@ -602,7 +602,7 @@ void  EmptyDataStack( PDATASTACK *pds )
 
 //--------------------------------------------------------------------------
 
-TYPELIB_PROC( PDATASTACK, CreateDataStackEx )( INDEX size DBG_PASS )
+ PDATASTACK  CreateDataStackEx ( INDEX size DBG_PASS )
 {
    PDATASTACK pds;
    pds = (PDATASTACK)AllocateEx( sizeof( DATASTACK ) + ( 10 * size ) DBG_RELAY );
@@ -687,7 +687,7 @@ static PLINKQUEUE ExpandLinkQueueEx( PLINKQUEUE *pplq, INDEX entries DBG_PASS )
 
 //--------------------------------------------------------------------------
 
-TYPELIB_PROC( PLINKQUEUE, EnqueLinkEx )( PLINKQUEUE *pplq, POINTER link DBG_PASS )
+ PLINKQUEUE  EnqueLinkEx ( PLINKQUEUE *pplq, POINTER link DBG_PASS )
 {
    INDEX tmp;
    PLINKQUEUE plq;
@@ -721,7 +721,7 @@ TYPELIB_PROC( PLINKQUEUE, EnqueLinkEx )( PLINKQUEUE *pplq, POINTER link DBG_PASS
 
 //--------------------------------------------------------------------------
 
-TYPELIB_PROC( LOGICAL, IsQueueEmpty )( PLINKQUEUE *pplq  )
+ LOGICAL  IsQueueEmpty ( PLINKQUEUE *pplq  )
 {
    if( !pplq || !(*pplq) ||
        (*pplq)->Bottom == (*pplq)->Top )
@@ -731,7 +731,7 @@ TYPELIB_PROC( LOGICAL, IsQueueEmpty )( PLINKQUEUE *pplq  )
 
 //--------------------------------------------------------------------------
 
-TYPELIB_PROC( INDEX, GetQueueLength )( PLINKQUEUE plq )
+ INDEX  GetQueueLength ( PLINKQUEUE plq )
 {
    int used = 0;
 	if( plq )
@@ -744,7 +744,7 @@ TYPELIB_PROC( INDEX, GetQueueLength )( PLINKQUEUE plq )
 }
 
 //--------------------------------------------------------------------------
-TYPELIB_PROC( POINTER, PeekQueueEx    )( PLINKQUEUE plq, INDEX idx )
+ POINTER  PeekQueueEx    ( PLINKQUEUE plq, INDEX idx )
 {
 	INDEX top;
 	if( idx == INVALID_INDEX )
@@ -768,7 +768,7 @@ TYPELIB_PROC( POINTER, PeekQueueEx    )( PLINKQUEUE plq, INDEX idx )
    return NULL;
 }
 
-TYPELIB_PROC( POINTER, PeekQueue )( PLINKQUEUE plq )
+ POINTER  PeekQueue ( PLINKQUEUE plq )
 {
 	return PeekQueueEx( plq, 0 );
    /*
@@ -786,7 +786,7 @@ TYPELIB_PROC( POINTER, PeekQueue )( PLINKQUEUE plq )
 
 //--------------------------------------------------------------------------
 
-TYPELIB_PROC( POINTER, DequeLink )( PLINKQUEUE *pplq )
+ POINTER  DequeLink ( PLINKQUEUE *pplq )
 {
    POINTER p;
    INDEX tmp;
@@ -891,7 +891,7 @@ PDATAQUEUE  CreateLargeDataQueueEx( INDEX size, INDEX entries, INDEX expand DBG_
 
 //--------------------------------------------------------------------------
 
-TYPELIB_PROC( PDATAQUEUE, EnqueDataEx )( PDATAQUEUE *ppdq, POINTER link DBG_PASS )
+ PDATAQUEUE  EnqueDataEx ( PDATAQUEUE *ppdq, POINTER link DBG_PASS )
 {
 	INDEX tmp;
 	PDATAQUEUE pdq;
@@ -924,7 +924,7 @@ TYPELIB_PROC( PDATAQUEUE, EnqueDataEx )( PDATAQUEUE *ppdq, POINTER link DBG_PASS
 
 //--------------------------------------------------------------------------
 
-TYPELIB_PROC( PDATAQUEUE, PrequeDataEx )( PDATAQUEUE *ppdq, POINTER link DBG_PASS )
+ PDATAQUEUE  PrequeDataEx ( PDATAQUEUE *ppdq, POINTER link DBG_PASS )
 {
 	INDEX tmp;
 	PDATAQUEUE pdq;
@@ -959,7 +959,7 @@ TYPELIB_PROC( PDATAQUEUE, PrequeDataEx )( PDATAQUEUE *ppdq, POINTER link DBG_PAS
 
 //--------------------------------------------------------------------------
 
-TYPELIB_PROC( LOGICAL, IsDataQueueEmpty )( PDATAQUEUE *ppdq  )
+ LOGICAL  IsDataQueueEmpty ( PDATAQUEUE *ppdq  )
 {
 	if( !ppdq || !(*ppdq) ||
 		(*ppdq)->Bottom == (*ppdq)->Top )
@@ -969,7 +969,7 @@ TYPELIB_PROC( LOGICAL, IsDataQueueEmpty )( PDATAQUEUE *ppdq  )
 
 //--------------------------------------------------------------------------
 
-TYPELIB_PROC( LOGICAL, DequeData )( PDATAQUEUE *ppdq, POINTER result )
+ LOGICAL  DequeData ( PDATAQUEUE *ppdq, POINTER result )
 {
    int p;
    INDEX tmp;
@@ -1000,7 +1000,7 @@ TYPELIB_PROC( LOGICAL, DequeData )( PDATAQUEUE *ppdq, POINTER result )
 
 // zero is the first,
 #undef PeekDataQueueEx
-TYPELIB_PROC( LOGICAL, PeekDataQueueEx )( PDATAQUEUE *ppdq, POINTER result, INDEX idx )
+ LOGICAL  PeekDataQueueEx ( PDATAQUEUE *ppdq, POINTER result, INDEX idx )
 {
 	INDEX top;
 	if( ppdq && *ppdq )
@@ -1037,12 +1037,12 @@ TYPELIB_PROC( LOGICAL, PeekDataQueueEx )( PDATAQUEUE *ppdq, POINTER result, INDE
 }
 
 #undef PeekDataQueue
-TYPELIB_PROC( LOGICAL, PeekDataQueue )( PDATAQUEUE *ppdq, POINTER result )
+ LOGICAL  PeekDataQueue ( PDATAQUEUE *ppdq, POINTER result )
 {
 	return PeekDataQueueEx( ppdq, result, 0 );
 }
 
-TYPELIB_PROC( void, EmptyDataQueue )( PDATAQUEUE *ppdq )
+ void  EmptyDataQueue ( PDATAQUEUE *ppdq )
 {
 	if( ppdq && *ppdq )
 	{

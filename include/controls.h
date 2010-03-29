@@ -412,7 +412,7 @@ PSI_PROC( void, ReleaseCommonUse )( PSI_CONTROL pc );
 PSI_PROC( void, SetFrameMousePosition )( PSI_CONTROL frame, int x, int y );
 PSI_PROC( void, CaptureCommonMouse )( PSI_CONTROL pc, LOGICAL bCapture );
 _MOUSE_NAMESPACE_END
-USE_PSI_MOUSE_NAMESPACE
+USE_MOUSE_NAMESPACE
 
 PSI_PROC( Font, GetCommonFontEx )( PSI_CONTROL pc DBG_PASS );
 #define GetCommonFont(pc) GetCommonFontEx( pc DBG_SRC )
@@ -1511,6 +1511,7 @@ void DropControlInterface( void );
 #define GetFrameSurface GetControlSurface
 
 PSI_NAMESPACE_END
+
 USE_PSI_NAMESPACE
 
 #include <psi/edit.h>

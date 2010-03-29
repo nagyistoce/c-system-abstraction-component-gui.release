@@ -11,7 +11,7 @@
 
 FILESYS_NAMESPACE
 
-FILESYS_PROC( CTEXTSTR, pathrchr )( CTEXTSTR path )
+ CTEXTSTR  pathrchr ( CTEXTSTR path )
 {
 	CTEXTSTR end1, end2;
 	end1 = strrchr( path, '\\' );
@@ -22,7 +22,7 @@ FILESYS_PROC( CTEXTSTR, pathrchr )( CTEXTSTR path )
 }
 
 #ifdef __cplusplus
-FILESYS_PROC( TEXTSTR, pathrchr )( TEXTSTR path )
+ TEXTSTR  pathrchr ( TEXTSTR path )
 {
 	TEXTSTR end1, end2;
 	end1 = strrchr( path, '\\' );
@@ -35,7 +35,7 @@ FILESYS_PROC( TEXTSTR, pathrchr )( TEXTSTR path )
 
 //-----------------------------------------------------------------------
 
-FILESYS_PROC( CTEXTSTR, pathchr )( CTEXTSTR path )
+ CTEXTSTR  pathchr ( CTEXTSTR path )
 {
 	CTEXTSTR end1, end2;
 	end1 = strchr( path, (int)'\\' );
@@ -79,7 +79,7 @@ static void convert( P_64 outtime, time_t *time )
 
 //-----------------------------------------------------------------------
 
-FILESYS_PROC( _64, GetFileWriteTime)( CTEXTSTR name ) // last modification time.
+ _64  GetFileWriteTime( CTEXTSTR name ) // last modification time.
 {
 #ifdef _WIN32
 	HANDLE hFile = CreateFile( name
@@ -112,7 +112,7 @@ FILESYS_PROC( _64, GetFileWriteTime)( CTEXTSTR name ) // last modification time.
 
 //-----------------------------------------------------------------------
 
-FILESYS_PROC( LOGICAL, SetFileWriteTime)( CTEXTSTR name, _64 filetime ) // last modification time.
+ LOGICAL  SetFileWriteTime( CTEXTSTR name, _64 filetime ) // last modification time.
 {
 #ifdef _WIN32
 	HANDLE hFile = CreateFile( name
@@ -144,7 +144,7 @@ FILESYS_PROC( LOGICAL, SetFileWriteTime)( CTEXTSTR name, _64 filetime ) // last 
 
 //-----------------------------------------------------------------------
 
-FILESYS_PROC( int, IsPath )( CTEXTSTR path )
+ int  IsPath ( CTEXTSTR path )
 {
 	
 	if( !path )
@@ -170,7 +170,7 @@ FILESYS_PROC( int, IsPath )( CTEXTSTR path )
 
 //-----------------------------------------------------------------------
 
-FILESYS_PROC( int, MakePath )( CTEXTSTR path )
+ int  MakePath ( CTEXTSTR path )
 {
 	if( !path )
 		return 0;
@@ -183,7 +183,7 @@ FILESYS_PROC( int, MakePath )( CTEXTSTR path )
 
 //-----------------------------------------------------------------------
 
-FILESYS_PROC( int, SetCurrentPath )( CTEXTSTR path )
+ int  SetCurrentPath ( CTEXTSTR path )
 {
 	if( !path )
 		return 0;

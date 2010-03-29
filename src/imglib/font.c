@@ -43,7 +43,7 @@ extern FONT DEFAULTFONT;
 //PFONT LucidaConsole13by8 = (PFONT)&_LucidaConsole13by8;
 
 
-IMAGE_PROC( PFONT, GetDefaultFont )( void )
+PFONT GetDefaultFont( void )
 {
    return &DEFAULTFONT;
 }
@@ -472,7 +472,7 @@ void PutStringInvertFontEx( ImageFile *pImage, S_32 x, S_32 y, CDATA color, CDAT
    return;// x;
 }
 
-IMAGE_PROC( _32, PutMenuStringFontEx )( ImageFile *pImage, S_32 x, S_32 y, CDATA color, CDATA background, CTEXTSTR pc, _32 nLen, PFONT UseFont )
+_32 PutMenuStringFontEx( ImageFile *pImage, S_32 x, S_32 y, CDATA color, CDATA background, CTEXTSTR pc, _32 nLen, PFONT UseFont )
 {
    int bUnderline;
    if( !UseFont )
@@ -501,7 +501,7 @@ IMAGE_PROC( _32, PutMenuStringFontEx )( ImageFile *pImage, S_32 x, S_32 y, CDATA
    return x;
 }
 
-IMAGE_PROC( _32, GetMenuStringSizeFontEx )( CTEXTSTR string, int len, int *width, int *height, PFONT font )
+ _32  GetMenuStringSizeFontEx ( CTEXTSTR string, int len, int *width, int *height, PFONT font )
 {
    int _width;
    if( !font )
@@ -528,22 +528,22 @@ IMAGE_PROC( _32, GetMenuStringSizeFontEx )( CTEXTSTR string, int len, int *width
    return *width;
 }
 
-IMAGE_PROC( _32, GetMenuStringSizeFont )( CTEXTSTR string, int *width, int *height, PFONT font )
+ _32  GetMenuStringSizeFont ( CTEXTSTR string, int *width, int *height, PFONT font )
 {
    return GetMenuStringSizeFontEx( string, strlen( string ), width, height, font );
 }
 
-IMAGE_PROC( _32, GetMenuStringSizeEx )( CTEXTSTR string, int len, int *width, int *height )
+ _32  GetMenuStringSizeEx ( CTEXTSTR string, int len, int *width, int *height )
 {
    return GetMenuStringSizeFontEx( string, len, width, height, &DEFAULTFONT );
 }
 
-IMAGE_PROC( _32, GetMenuStringSize )( CTEXTSTR string, int *width, int *height )
+ _32  GetMenuStringSize ( CTEXTSTR string, int *width, int *height )
 {
    return GetMenuStringSizeFontEx( string, strlen( string ), width, height, &DEFAULTFONT );
 }
 
-IMAGE_PROC( _32, GetStringSizeFontEx )( CTEXTSTR pString, _32 nLen, _32 *width, _32 *height, PFONT UseFont )
+ _32  GetStringSizeFontEx ( CTEXTSTR pString, _32 nLen, _32 *width, _32 *height, PFONT UseFont )
 {
    _32 _width, max_width, _height;
    PCHARACTER *chars;
@@ -597,7 +597,7 @@ IMAGE_PROC( _32, GetStringSizeFontEx )( CTEXTSTR pString, _32 nLen, _32 *width, 
 
 // used to compute the actual output size
 //
-IMAGE_PROC( _32, GetStringRenderSizeFontEx )( CTEXTSTR pString, _32 nLen, _32 *width, _32 *height, _32 *charheight, PFONT UseFont )
+ _32  GetStringRenderSizeFontEx ( CTEXTSTR pString, _32 nLen, _32 *width, _32 *height, _32 *charheight, PFONT UseFont )
 {
 	_32 _width, max_width, _height;
    _32 maxheight = 0;
@@ -658,7 +658,7 @@ IMAGE_PROC( _32, GetStringRenderSizeFontEx )( CTEXTSTR pString, _32 nLen, _32 *w
 }
 
 
-IMAGE_PROC( _32, GetMaxStringLengthFont )( _32 width, PFONT UseFont )
+ _32  GetMaxStringLengthFont ( _32 width, PFONT UseFont )
 {
    if( !UseFont )
       UseFont = &DEFAULTFONT;
@@ -668,7 +668,7 @@ IMAGE_PROC( _32, GetMaxStringLengthFont )( _32 width, PFONT UseFont )
    return 0;
 }  
 
-IMAGE_PROC( _32, GetFontHeight )( PFONT font )
+ _32  GetFontHeight ( PFONT font )
 {
 	if( font )
 	{

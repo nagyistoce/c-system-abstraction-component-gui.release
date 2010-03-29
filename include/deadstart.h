@@ -7,9 +7,6 @@
 #include <sack_types.h>
 #include <typelib.h> // leach, assuming this will be compiled with this part at least.
 
-#ifdef TYPELIB_SOURCE
-#define DEADSTART_SOURCE
-#endif
 
 #ifdef __cplusplus
 #define USE_SACK_DEADSTART_NAMESPACE using namespace sack::app::deadstart;
@@ -21,8 +18,19 @@
 #define SACK_DEADSTART_NAMESPACE_END
 #endif
 
-#define DEADSTART_PROC TYPELIB_PROC
+#ifdef TYPELIB_SOURCE
+#define DEADSTART_SOURCE
+#endif
+#    define DEADSTART_CALLTYPE CPROC
+#  if defined( _TYPELIBRARY_SOURCE_STEAL )
+#    define DEADSTART_PROC type DEADSTART_CALLTYPE name type CPROC name
+#  elif defined( _TYPELIBRARY_SOURCE )
+#    define DEADSTART_PROC EXPORT_METHOD
+#  else
+#    define DEADSTART_PROC IMPORT_METHOD
+#  endif
 
+/* Application namespace. */
 SACK_DEADSTART_NAMESPACE
 
 
@@ -51,16 +59,16 @@ SACK_DEADSTART_NAMESPACE
 // proc, proc_name, priority DEADSTART_PRIORTY_,unused to hack in self reference of static symbol
 // this will trick most compilers.
 // uses a compiler-native function (not cproc)
-DEADSTART_PROC( void, RegisterPriorityStartupProc)( void(*)(void), CTEXTSTR,int,void* unused, CTEXTSTR,int);
-DEADSTART_PROC( void, RegisterPriorityShutdownProc)( void(*)(void), CTEXTSTR,int,void* unused, CTEXTSTR,int);
-DEADSTART_PROC( void, SuspendDeadstart )( void );
-DEADSTART_PROC( void, InvokeDeadstart )(void);
-DEADSTART_PROC( void, InvokeExits )(void);
-DEADSTART_PROC( void, MarkRootDeadstartComplete )( void );
+DEADSTART_PROC  void DEADSTART_CALLTYPE  RegisterPriorityStartupProc( void(*)(void), CTEXTSTR,int,void* unused, CTEXTSTR,int);
+DEADSTART_PROC  void DEADSTART_CALLTYPE  RegisterPriorityShutdownProc( void(*)(void), CTEXTSTR,int,void* unused, CTEXTSTR,int);
+DEADSTART_PROC  void DEADSTART_CALLTYPE  SuspendDeadstart ( void );
+DEADSTART_PROC  void DEADSTART_CALLTYPE  InvokeDeadstart (void);
+DEADSTART_PROC  void DEADSTART_CALLTYPE  InvokeExits (void);
+DEADSTART_PROC  void DEADSTART_CALLTYPE  MarkRootDeadstartComplete ( void );
 
 #ifdef __LINUX__
 // call this after a fork().  Otherwise, it will falsely invoke shutdown when it exits.
-DEADSTART_PROC( void, DispelDeadstart )( void );
+DEADSTART_PROC  void DEADSTART_CALLTYPE  DispelDeadstart ( void );
 #endif
 
 #if ( defined( __cplusplus) || defined( _WIN64 ) ) && 0 

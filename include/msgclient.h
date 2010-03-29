@@ -30,7 +30,6 @@
 #ifdef __cplusplus
 #define MSGCLIENT_NAMESPACE SACK_NAMESPACE namespace msg { namespace client {
 #define MSGCLIENT_NAMESPACE_END }} SACK_NAMESPACE_END
-
 #else
 #define MSGCLIENT_NAMESPACE 
 #define MSGCLIENT_NAMESPACE_END

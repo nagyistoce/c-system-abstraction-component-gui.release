@@ -1,14 +1,8 @@
-/*
- *  Crafted by Jim Buckeyne
- *   (c)1999-2006++ Freedom Collective
- * 
- *  Define operations on Images
- *    Image image = MakeImageFile(width,height);
- *    UnmakeImageFile( image );
- *    ... and draw on it inbetween I suppose...
- *  consult doc/image.html
- *
- */
+/* Crafted by Jim Buckeyne (c)1999-2006++ Freedom Collective
+   
+   
+   
+   Image building tracking, and simple manipulations.        */
 
 
 
@@ -33,21 +27,46 @@
 
 #include <sack_types.h>
 #include <colordef.h>
-#include <msgprotocol.h>
 #include <fractions.h>
-#include <procreg.h>
+//#include <procreg.h>
 
-#ifndef SECOND_IMAGE_LEVEL
-#define SECOND_IMAGE_LEVEL _2
-#define PASTE(sym,name) name
-#else
-#define PASTE2(sym,name) sym##name
-#define PASTE(sym,name) PASTE2(sym,name)
-#endif
+# ifndef SECOND_IMAGE_LEVEL
+#  define SECOND_IMAGE_LEVEL _2
+/* This is a macro used for building name changes for
+   interfaces.                                        */
+#  define PASTE(sym,name) name
+# else
+#  define PASTE2(sym,name) sym##name
+#  define PASTE(sym,name) PASTE2(sym,name)
+# endif
+/* Macro to do symbol concatenation. */
 #define _PASTE2(sym,name) sym##name
+/* A second level paste macro so macro substitution is done on
+   \parameters.                                                */
 #define _PASTE(sym,name) _PASTE2(sym,name)
 
 
+/* Define the default call type of image routines. CPROC is
+   __cdecl.                                                 */
+#define IMAGE_API CPROC
+
+#     ifdef IMAGE_LIBRARY_SOURCE
+#        define IMAGE_PROC  EXPORT_METHOD
+// this sometimes needs an extra 'extern'
+#           ifdef IMAGE_MAIN
+#        define IMAGE_PROC_D EXPORT_METHOD
+#           else
+#        define IMAGE_PROC_D extern EXPORT_METHOD
+#           endif
+#     else
+/* Define the linkage type of the routine... probably
+   __declspec(dllimport) if not building the library. */
+#        define IMAGE_PROC IMPORT_METHOD
+// this sometimes needs an extra 'extern'
+#        define IMAGE_PROC_D  IMPORT_METHOD
+#     endif
+
+#if 0
 #  ifdef BCC16
 #     ifdef IMAGE_LIBRARY_SOURCE
 #        define IMAGE_PROC(type,name) type STDPROC _export PASTE(SECOND_IMAGE_LEVEL,name)
@@ -103,36 +122,70 @@
 #        endif
 #     endif
 #  endif
+#endif
 
 #ifdef _WIN32 
 #define _INVERT_IMAGE
 #endif
 
 #ifdef __cplusplus
+/* Define the namespace of image routines, when building under
+   C++.                                                        */
 #define IMAGE_NAMESPACE namespace sack { namespace image {
+/* Define the namespace of image routines, when building under
+   C++. This ends a namespace.                                 */
 #define IMAGE_NAMESPACE_END }}
+/* Define the namespace of image routines, when building under
+   C++. This ends the namespace. Assembly routines only have the
+   ability to export C names, so extern"c" { } is used instead
+   of namespace ___ { }.                                         */
 #define ASM_IMAGE_NAMESPACE extern "C" {
+/* Define the namespace of image routines, when building under
+   C++. This ends the namespace. Assembly routines only have the
+   ability to export C names, so extern"c" { } is used instead
+   of namespace ___ { }.                                         */
 #define ASM_IMAGE_NAMESPACE_END }
 #else
 #define IMAGE_NAMESPACE 
 #define IMAGE_NAMESPACE_END
-#define ASM_IMAGE_NAMESPACE 
+#define ASM_IMAGE_NAMESPACE /* Defined Image API.
+   
+   
+   
+   
+   See Also
+   <link sack::image::Image, Image>
+   
+   <link sack::image::Font, Font>
+   
+   <link Colors>
+                                    */
+
 #define ASM_IMAGE_NAMESPACE_END
 #endif
 
+/* asdf */
+/* Namespace for image handling. */
 IMAGE_NAMESPACE
 
+/* A fixed point decimal number (for freetype font rendering) */
 typedef S_32 fixed;
 //#ifndef IMAGE_STRUCTURE_DEFINED
 //#define IMAGE_STRUCTURE_DEFINED
 // consider minimal size - +/- 32000 should be enough for display purposes.
 // print... well that's another matter.
    typedef S_32 IMAGE_COORDINATE;
+   /* Represents the width and height of an image (unsigned values) */
    typedef _32  IMAGE_SIZE_COORDINATE;
 
+   /* An array of 2 IMAGE_COORDINATES - [0] = x, [1] = y */
    typedef IMAGE_COORDINATE IMAGE_POINT[2];
+   /* An unsigned value coordinate pair to track the size of
+      images.                                                */
    typedef IMAGE_SIZE_COORDINATE IMAGE_EXTENT[2];
+   /* Pointer to an <link sack::image::IMAGE_POINT, IMAGE_POINT> */
    typedef IMAGE_COORDINATE *P_IMAGE_POINT;
+   /* Pointer to a <link sack::image::IMAGE_EXTENT, IMAGE_EXTENT> */
    typedef IMAGE_SIZE_COORDINATE *P_IMAGE_EXTENT;
 
 #ifdef HAVE_ANONYMOUS_STRUCTURES
@@ -152,21 +205,36 @@ typedef struct boundry_rectangle_tag
    };
 } IMAGE_RECTANGLE, *P_IMAGE_RECTANGLE;
 #else
+/* Defines the coordinates of a rectangle. */
+/* Pointer to an image rectangle.  */
 typedef struct boundry_rectangle_tag
 {  
+   /* anonymous union containing position information. */
    union {
+      /* An anonymous structure containing x,y and width,height of a
+         rectangle.                                                  */
       struct {
+         /* the left coordinate of a rectangle. */
+         /* the top coordinate of a rectangle */
          IMAGE_COORDINATE x, y;
+         /* The Y span of the rectangle */
+         /* the X Span of the rectangle */
          IMAGE_SIZE_COORDINATE width, height;
       };
+      /* Anonymous structure containing position (x,y) and size
+         (width,height).                                        */
       struct {
+         /* The location of a rectangle (upper left x, y) */
          IMAGE_POINT position;
+         /* the size of a rectangle (width and height) */
          IMAGE_EXTENT size;
       };
    };
 } IMAGE_RECTANGLE, *P_IMAGE_RECTANGLE;
 #endif
+/* A macro for accessing vertical (Y) information of an <link sack::image::IMAGE_POINT, IMAGE_POINT>. */
 #define IMAGE_POINT_H(ImagePoint) ((ImagePoint)[0])
+/* A macro for accessing vertical (Y) information of an <link sack::image::IMAGE_POINT, IMAGE_POINT>. */
 #define IMAGE_POINT_V(ImagePoint) ((ImagePoint)[1])
 
 // the image at exactly this position and size 
@@ -185,6 +253,21 @@ typedef struct boundry_rectangle_tag
    }
 
 
+/* One of the two primary types that the image library works
+   with.
+   
+   
+   Example
+   <code lang="c++">
+   void LoadImage( char *name )
+   {
+       Image image = LoadImageFile( name );
+       if( image )
+       {
+          // the image file loaded successfully.
+       }
+   }
+   </code>                                                   */
 typedef struct ImageFile_tag *Image;
 #if defined( __cplusplus )
 IMAGE_NAMESPACE_END
@@ -194,6 +277,7 @@ IMAGE_NAMESPACE_END
 IMAGE_NAMESPACE
 #endif
 
+/* pointer to a sprite type. */
 typedef struct sprite_tag *PSPRITE;
 //#endif
 // at some point, it may be VERY useful
@@ -207,15 +291,22 @@ typedef struct simple_font_tag {
    _8 char_width[1]; // open ended array size characters...
 } FontData;
 
+/* Contains information about a font for drawing and rendering
+   from a font file.                                           */
 typedef struct font_tag *Font;
-
-//typedef EMPTY_STRUCT RealFont;
 
 #endif
 
+/* A definition of a block structure to transport font and image
+   data across message queues.                                   */
+/* Type of buffer used to transfer data across message queues. */
 typedef struct data_transfer_state_tag {
+   /* size of this block of data. */
    _32 size;
+   /* offset of the data in the total message. Have to break up
+      large buffers into smaller chunks for transfer.           */
    _32 offset;
+   /* buffer containing the data to transfer. */
    CDATA buffer;
 } *DataState;
 
@@ -225,89 +316,457 @@ enum string_behavior {
    STRING_PRINT_RAW   // every character assumed to have a glyph-including '\0'
    ,STRING_PRINT_CONTROL // control characters perform 'typical' actions - newline, tab, backspace...
    ,STRING_PRINT_C  // c style escape characters are handled \n \b \x## - literal text
-   ,STRING_PRINT_MENU // & performs an underline, also does C style handling. \& == &
+   ,STRING_PRINT_MENU /* &amp; performs an underline, also does C style handling. \\&amp;
+                         == &amp;                                                         */
 };
 
+/* Definitions of symbols to pass to <link SetBlotMethod> to
+   specify optimization method.                              */
 enum blot_methods {
+    /* A Symbol to pass to <link SetBlotMethod> to specify using C
+      coded primitives. (for shading and alpha blending).         */
     BLOT_C    
-   , BLOT_ASM  
-   , BLOT_MMX           
+   , BLOT_ASM/* A Symbol to pass to <link SetBlotMethod> to specify using
+      primitives with assembly optimization (for shading and alpha
+      blending).                                                   */
+						,
+                  /* A Symbol to pass to <link SetBlotMethod> to specify using
+      primitives with MMX optimization (for shading and alpha
+      blending).                                                */
+    BLOT_MMX 
+              
 }; 
 
-#define BLOT_COPY 0
-#define BLOT_SHADED 1
-#define BLOT_MULTISHADE 2
+// specify the method that pixels are copied from one image to another
+enum BlotOperation {
+   /* copy the pixels from one image to another with no color transform*/
+ BLOT_COPY = 0,
+   // copy the pixels from one image to another with no color transform, scaling by a single color
+ BLOT_SHADED = 1,
+   // copy the pixels from one image to another with no color transform, scaling independant R, G and B color channels to a combination of an R Color, B Color, G Color
+ BLOT_MULTISHADE = 2
+};
 
-#define ALPHA_TRANSPARENT 0x100
-#define ALPHA_TRANSPARENT_INVERT 0x200
-#define ALPHA_TRANSPARENT_MAX 0x2FF // more than this clips to total transparency
-                                    // for line, plot more than 255 will 
-                                    // be total opaque... this max only 
-                                    // applies to blotted images
-//Transparency parameter definition
-// 0       : no transparency - completely opaque
-// 1 (TRUE): 0 colors (absolute transparency) only
-// 2-255   : 0 color transparent, plus transparency factor applied to all 
-//           2 - mostly almost completely transparent
-//           255 not transparent (opaque)
-// 257-511 : alpha transparency in pixel plus transparency value - 256 
-//           0 pixels will be transparent
-//           257 - slightly more opaquen than the original
-//           511 - image totally opaque - alpha will be totally overriden
-//           no addition 511 nearly completely transparent
-// 512-767 ; the low byte of this is subtracted from the alpha of the image
-//         ; this allows images to be more transparent than they were originally
-//          512 - no modification alpha imge normal
-//          600 - mid range... more transparent
-//          767 - totally transparent
-// any value of transparent greater than the max will be clipped to max
-// this will make very high values opaque totally...
 
-// library global changes.
-// string behavior cannot be tracked per image.
-// string behavior should, for all strings, be the same
-// usage for an application... so behavior is associated with
-// the particular stream and/or image family.
-// does not modify character handling behavior - only strings.
-   IMAGE_PROC( void, SetStringBehavior)( Image pImage, _32 behavior );
-   IMAGE_PROC( void, SetBlotMethod)    ( _32 method );
-   IMAGE_PROC_D( CDATA, ColorAverage ,( CDATA c1, CDATA c2
-                                 , int d, int max ) );
-//-----------------------------------------------------
+/* Transparency parameter definition
+   
+   0 : no transparency - completely opaque
+   
+   1 (TRUE): 0 colors (absolute transparency) only
+   
+   2-255 : 0 color transparent, plus transparency factor applied
+   to all 2 - mostly almost completely transparent 255 not
+   transparent (opaque)
+   
+   257-511 : alpha transparency in pixel plus transparency value
+   \- 256 0 pixels will be transparent 257 - slightly more
+   opaquen than the original 511 - image totally opaque - alpha
+   will be totally overriden no addition 511 nearly completely
+   transparent 512-767 ; the low byte of this is subtracted from
+   the alpha of the image ; this allows images to be more
+   transparent than they were originally 512 - no modification
+   alpha imge normal 600 - mid range... more transparent 767 -
+   totally transparent any value of transparent greater than the
+   max will be clipped to max this will make very high values
+   opaque totally...                                             */
+enum AlphaModifier {
+   /* Direct alpha copy - whatever the alpha is is what the output will be.  Adding a value of 0-255 here will increase the base opacity by that much */
+	ALPHA_TRANSPARENT = 0x100,
+   // Inverse alpha copy - whatever the alpha is is what the output will be.  Adding a value of 0-255 here will decrease the base opacity by that much
+ALPHA_TRANSPARENT_INVERT = 0x200,
 
-   IMAGE_PROC( Image,BuildImageFileEx) ( PCOLOR pc, _32 width, _32 height DBG_PASS); // already have the color plane....
-   IMAGE_PROC( Image,MakeImageFileEx)  (_32 Width, _32 Height DBG_PASS);
-   IMAGE_PROC( Image,MakeSubImageEx)   ( Image pImage, S_32 x, S_32 y, _32 width, _32 height DBG_PASS );
-   IMAGE_PROC( void, AdoptSubImage )   ( Image pFoster, Image pOrphan );
-   IMAGE_PROC( void, OrphanSubImage )  ( Image pImage );
-   IMAGE_PROC( Image,RemakeImageEx)    ( Image pImage, PCOLOR pc, _32 width, _32 height DBG_PASS);
-   IMAGE_PROC( Image,LoadImageFileEx)  ( CTEXTSTR name DBG_PASS );
-   IMAGE_PROC( Image, DecodeMemoryToImage )( P_8 buf, _32 size );
-   IMAGE_PROC( Image, ImageRawBMPFile )(_8* ptr, _32 filesize); // direct hack for processing clipboard data...
+   // more than this clips to total transparency
+	// for line, plot more than 255 will
+// be total opaque... this max only
+	// applies to blotted images
+ALPHA_TRANSPARENT_MAX = 0x2FF
+};
 
-	IMAGE_PROC( void,UnmakeImageFileEx) ( Image pif DBG_PASS );
-   IMAGE_PROC( void ,SetImageBound)    ( Image pImage, P_IMAGE_RECTANGLE bound );
+/* library global changes. string behavior cannot be tracked per
+   image. string behavior should, for all strings, be the same
+   usage for an application... so behavior is associated with
+   the particular stream and/or image family. does not modify
+   character handling behavior - only strings.
+   See Also
+   <link sack::image::string_behavior, String Behaviors>         */
+   IMAGE_PROC  void IMAGE_API  SetStringBehavior( Image pImage, _32 behavior );
+   /* Specify the optimized code to draw with. There are 3 levels,
+      C - routines coded in C, ASM - assembly optimization (32bit
+      NASM), MMX assembly but taking advantage of MMX features.    */
+   IMAGE_PROC  void IMAGE_API  SetBlotMethod    ( _32 method );
+   /* This routine can be used to generically scale to any point
+      between two colors.
+      Parameters
+      Color 1 :   CDATA color to scale from
+      Color 2 :   CDATA color to scale to
+      distance :  How from from 0 to max distance to scale.
+      max :       How wide the scalar is.
+      
+      Remarks
+      Max is the scale that distance can go from. Distance 0 is the
+      first color, Distance == max is the second color. The
+      distance from 0 to max proportionately scaled the color....
+      Example
+      <code lang="c++">
+      CDATA green = BASE_COLOR_GREEN;
+      CDATA blue = BASE_COLOR_BLUE;
+      CDATA red = BASE_COLOR_RED;
+      </code>
+      
+      Compute a color that is halfway from blue to green. (if the
+      total distance is 100, then 50 is half way).
+      <code lang="c++">
+      CDATA blue_green = ColorAverage( blue, green, 50, 100 );
+      </code>
+      
+      Compute a color that's mostly red.
+      <code lang="c++">
+      CDATA red_blue_green = ColorAverage( blue_green, red, 240, 255 );
+      </code>
+      
+      Iterate through a whole scaled range...
+      <code lang="c++">
+      int n;
+      for( n = 0; n \< 100; n++ )
+      {
+          CDATA scaled = ColorAverage( BASE_COLOR_WHITE, BASE_COLOR_BLACK, n, 100 );
+          // as n increases, the color slowly goes from WHITE to BLACK.
+      }
+      </code>                                                                        */
+   IMAGE_PROC_D  CDATA (IMAGE_API *ColorAverage)( CDATA c1, CDATA c2, int d, int max );
+
+   /* Creates an image from user defined parts. The buffer used is
+      from the user. This was used by the video library, but
+      RemakeImage accomplishes this also.
+      Parameters
+      pc :      the color buffer to use for the image.
+      width :   how wide the color buffer is
+      height :  How tall the color buffer is                       */
+   IMAGE_PROC  Image IMAGE_API BuildImageFileEx ( PCOLOR pc, _32 width, _32 height DBG_PASS); 
+   /* <combine sack::image::MakeImageFile>
+      
+      Adds <link sack::DBG_PASS, DBG_PASS> parameter. */
+   /* Creates an Image with a specified width and height. The
+      image's color is undefined to start.
+      
+      
+      Parameters
+      Width :     how wide to make the image. Cannot be negative.
+      Height :    how tall to make the image. Cannot be negative.
+      DBG_PASS :  _nt_
+      
+      Example
+      See <link sack::image::Image, Image>                        */
+   IMAGE_PROC  Image IMAGE_API MakeImageFileEx  (_32 Width, _32 Height DBG_PASS);
+   /* Creates a sub image region on an image. Sub-images may be
+      used like any other image. There are two uses for this sort
+      of thing. OH, the sub image shares the exact data of the
+      parent image, and is not a copy.
+      Parameters
+      pImage :  image to make the sub image in
+      x :       signed location of the top side of the sub\-image
+      y :       signed location of the left side of the sub\-image
+      width :   how wide to make the sub\-image
+      height :  how tall to make the sub\-image
+      
+      Returns
+      NULL if the input image is NULL.
+      
+      Otherwise returns an Image.
+      Example
+      Use 1: An image might contain a grid of symbols or
+      characters, each exactly the same size. These may be token
+      peices used in a game or a special graphic font.
+      <code lang="c++">
+      Image peices_image = LoadImageFile( "Game Peices.image" );
+      PLIST peices = NULL;
+      int x, y;
+      \#define PEICE_WIDTH 32
+      \#define PEICE_HEIGHT 32
+      for( x = 0; x \< 10; x++ )
+         for( y = 0; y \< 2; y++ )
+         {
+             AddLink( &amp;peices, MakeSubImage( peices_image
+                                           , x * PEICE_WIDTH, y * PEICE_HEIGHT
+                                           , PEICE_WIDTH, PEICE_HEIGHT );
+         }
+      
+      // at this point there we have a list with all the tokens,
+      // which were 32x32 pixels each.
+      // Any of these peice images may be output using a scaled or direct blot.
+      </code>
+      
+      Use 2: Partitioning views on an image for things like
+      controls and other clipped regions.
+      <code lang="c++">
+      Image image = MakeImageFile( 1024, 768 );
+      Image clock = MakeSubImage( image, 32, 32, 150, 16 );
+      
+      DrawString( clock, 0, 0, BASE_COLOR_WHITE, BASE_COLOR_BLACK, "Current Time..." );
+      </code>                                                                           */
+   IMAGE_PROC  Image IMAGE_API MakeSubImageEx   ( Image pImage, S_32 x, S_32 y, _32 width, _32 height DBG_PASS );
+   /* Adds an image as a sub-image of another image. The image
+      being added as a sub image must not already have a parent.
+      Sub-images are like views into the parent, and share the same
+      pixel buffer that the parent has.
+      Parameters
+      pFoster :  This is the parent image to received the new
+                 subimage
+      pOrphan :  this is the subimage to be added                   */
+   IMAGE_PROC  void IMAGE_API  AdoptSubImage    ( Image pFoster, Image pOrphan );
+   /* Removes a sub-image (child image) from a parent image. The
+      sub image my then be moved to another image with
+      AdoptSubImage.
+      Parameters
+      pImage :  the sub\-image to orphan.                        */
+   IMAGE_PROC  void IMAGE_API  OrphanSubImage   ( Image pImage );
+   /* Create or recreate an image using the specified color buffer,
+      and size. All sub-images have their color data reference
+      updated.
+      Example
+      <code>
+      Image image = NULL;
+      
+      POINTER data = NewArray( CDATA, 100* 100 );
+      image = RemakeImage( image, data, 100, 100 );
+      
+      
+      
+      </code>
+      Remarks
+      If the source image is NULL, a new image will be built using
+      the color buffer and size specified.
+      
+      Image.flags has IF_FLAG_EXTERN_COLORS set if made this way,
+      since the color buffer is an external resource. This causes
+      UnmakeImage() to not attempt to free the color buffer.
+      
+      If the original image does exist, its color buffer is swapped
+      for the one specified, and coordinates are updated. The video
+      system uses this to create an image that has the color data
+      surface the surface of the display.
+      See Also
+      <link sack::image::BuildImageFile, BuildImageFile>
+      
+      GetDisplayImage
+      Parameters
+      data :    Pointer to a buffer of 32 bit color data. ARGB and
+                ABGR available via compile option.
+      width :   the width of the data in pixels.
+      height :  the height of the data in pixels.
+      Returns
+      \Returns the original image if not NULL, otherwise results
+      with an image who's color plane is defined by a user defined
+      buffer of width by height size. The user must have allocated
+      this buffer appropriately, and is responsible for its
+      destruction.                                                  */
+   IMAGE_PROC  Image IMAGE_API RemakeImageEx    ( Image pImage, PCOLOR pc, _32 width, _32 height DBG_PASS);
+   /* Load an image file. Today we support PNG, JPG, GIF, BMP.
+      Tomorrow consider tapping into that FreeImage project on
+      sourceforge, that combines all readers into one.
+      Parameters
+      name :      Filename to read from. Opens in 'Current Directory'
+                  if not an absolute path.
+      DBG_PASS :  _nt_
+      Example
+      See <link sack::image::Image, Image>                            */
+   IMAGE_PROC  Image IMAGE_API LoadImageFileEx  ( CTEXTSTR name DBG_PASS );
+   /* Decodes a block of memory into an image. This is used
+      internally so, LoadImageFile() opens the file and reads it
+      into a buffer, which it then passes to DecodeMemoryToImage().
+      Images stored in custom user structures may be passed for
+      decoding also.
+      Parameters
+      buf :   Pointer to bytes of data to decode
+      size :  the size of the buffer to decode
+      Returns
+      NULL is returned if the data does not decode as an image.
+      
+      an Image is returned otherwise.
+      Example
+      This pretends that you have a FILE* open to some image
+      already, and that the image is tiny (less than 4k bytes).
+      <code lang="c#">
+      char buffer[4096];
+      int length;
+      length = fread( buffer, 1, 4096, some_file );
+      
+      Image image = DecodeMemoryToImage( buffer, length );
+      if( image )
+      {
+         // buffer decoded okay.
+      }
+      </code>                                                       */
+		IMAGE_PROC  Image IMAGE_API  DecodeMemoryToImage ( P_8 buf, _32 size );
+      /* direct hack for processing clipboard data... probably does some massaging of the databefore calling DecodeMemoryToImage */
+   IMAGE_PROC  Image IMAGE_API  ImageRawBMPFile (_8* ptr, _32 filesize); 
+
+	/* Releases an image, has extra debug parameters.
+	   Parameters
+	   Image :     the Image to release.
+	   DBG_PASS :  Adds <link sack::DBG_PASS, DBG_PASS> parameter for
+	               the release memory tracking.                       */
+	IMAGE_PROC  void IMAGE_API UnmakeImageFileEx ( Image pif DBG_PASS );
+   /* Sets the active image rectangle to the bounding rectangle
+      specified. This can be used to limit artificially drawing
+      onto an image. (It is easier to track to create a subimage in
+      the location to draw instead of masking with a bound rect,
+      which has problems restoring back to initial conditions)
+      Parameters
+      pImage :  Image to set the drawing clipping rectangle.
+      bound :   a pointer to an IMAGE_RECTANGLE to set the image
+                boundaries to.                                      */
+   IMAGE_PROC  void  IMAGE_API SetImageBound    ( Image pImage, P_IMAGE_RECTANGLE bound );
 // reset clip rectangle to the full image (subimage part )
 // Some operations (move, resize) will also reset the bound rect, 
 // this must be re-set afterwards.  
 // ALSO - one SHOULD be nice and reset the rectangle when done, 
 // otherwise other people may not have checked this.
-   IMAGE_PROC( void ,FixImagePosition) ( Image pImage );
+   IMAGE_PROC  void  IMAGE_API FixImagePosition ( Image pImage );
+
+/* Change the size of an image, reallocating the color buffer as
+   necessary.
+   
+   <b>Parameters</b>
+   
+   <b>Remarks</b>
+   
+   If the image is a sub image (located within a parent), the
+   subimage view on the parent image is updated to the new width
+   and height. The color buffer remains the parent's buffer.
+   
+   If the image is a parent, a new buffer is allocated. If the
+   previous buffer was specified by the user in RemakeImage,
+   that buffer is not freed, but a new buffer is still created.
+   
+   
+   
+   <b>Bugs</b>
+   
+   If the image is a parent image, the child images are not
+   updated to the newly allocated buffer. Resize works really
+   well for subimages though.                                    */
+   IMAGE_PROC  void IMAGE_API ResizeImageEx     ( Image pImage, S_32 width, S_32 height DBG_PASS);
+   /* Moves an image within a parent image. Top level images and
+      images which have a user color buffer do not move.
+      Parameters
+      pImage :  The image to move.
+      x :       the new X coordinate of the image.
+      y :       the new Y coordinate of the image.               */
+   IMAGE_PROC  void IMAGE_API MoveImage         ( Image pImage, S_32 x, S_32 y );
 
 //-----------------------------------------------------
-   // width, height < 0 are for image fixups...
-   IMAGE_PROC( void,ResizeImageEx)     ( Image pImage, S_32 width, S_32 height DBG_PASS);
-   IMAGE_PROC( void,MoveImage)         ( Image pImage, S_32 x, S_32 y );
 
-//-----------------------------------------------------
+   IMAGE_PROC  void IMAGE_API BlatColor         ( Image pifDest, S_32 x, S_32 y, _32 w, _32 h, CDATA color );
+   /* Blat is the sound a trumpet makes when it spews forth
+      noise... so Blat color is just fill a rectangle with a color,
+      quickly. Apply alpha transparency of the color specified.
+      Parameters
+      pifDest :  The destination image to fill the rectangle on
+      x :        left coordinate of the rectangle
+      y :        right coordinate of the rectangle
+      w :        width of the rectangle
+      h :        height of the rectangle
+      color :    color to fill the rectangle with. The alpha of this
+                 color will be applied.                              */
+   IMAGE_PROC  void IMAGE_API BlatColorAlpha    ( Image pifDest, S_32 x, S_32 y, _32 w, _32 h, CDATA color );
 
-   IMAGE_PROC( void,BlatColor)         ( Image pifDest, S_32 x, S_32 y, _32 w, _32 h, CDATA color );
-   IMAGE_PROC( void,BlatColorAlpha)    ( Image pifDest, S_32 x, S_32 y, _32 w, _32 h, CDATA color );
+   /* \ \ 
+      Parameters
+      pDest :         destination image (the one to copy to)
+      pIF :           source image 
+      x :             destination top coordinate
+      y :             destination left coordinate
+      nTransparent :  <link sack::image::AlphaModifier, Alpha Operation>
+      method :        <link sack::image::blot_methods, Blot Method>
+      _nt_ :          _nt_                                               */
+   IMAGE_PROC  void IMAGE_API BlotImageEx       ( Image pDest, Image pIF, S_32 x, S_32 y, _32 nTransparent, _32 method, ... ); 
+   /* Copies an image from one image onto another. The copy is done
+      directly and no scaling is applied. If a width or height
+      larget than the image to copy is specified, only the amount
+      of the image that is valid is copied.
+      
+      
+      Parameters
+      pDest :         Destination image
+      pIF :           Image file to copy
+      x :             X position to put copy at
+      y :             Y position to put copy at
+      xs :            X position to copy from.
+      ys :            Y position to copy from.
+      wd :            how much of the image horizontally to copy
+      ht :            how much of the image vertically to copy
+      nTransparent :  <link sack::image::AlphaModifier, Alpha Transparency method>
+      method :        <link sack::image::blot_methods, BlotMethods>
+      <b>Method == BLOT_SHADED extra parameters</b>
+      red :    Color to use the red channel to output the scale from
+               black to color
+      green :  Color to use the red channel to output the scale from
+               black to color
+      blue :   Color to use the red channel to output the scale from
+               black to color 
+      <b>Method == BLOT_SHADED extra parameters</b>
+      shade :  _nt_
+      
+      See Also                                                                     */
+   IMAGE_PROC  void IMAGE_API BlotImageSizedEx  ( Image pDest, Image pIF, S_32 x, S_32 y, S_32 xs, S_32 ys, _32 wd, _32 ht, _32 nTransparent, _32 method, ... );
 
-   IMAGE_PROC( void,BlotImageEx)       ( Image pDest, Image pIF, S_32 x, S_32 y, _32 nTransparent, _32 method, ... ); // always to screen...
-   IMAGE_PROC( void,BlotImageSizedEx)  ( Image pDest, Image pIF, S_32 x, S_32 y, S_32 xs, S_32 ys, _32 wd, _32 ht, _32 nTransparent, _32 method, ... );
-
-   IMAGE_PROC( void,BlotScaledImageSizedEx)( Image pifDest, Image pifSrc
+   /* Copies some or all of an image to a destination image of
+      specified width and height. This does linear interpolation
+      scaling.
+      
+      
+      
+      There are simple forms of this function as macros, since
+      commonly you want to output the entire image, a macro which
+      automatically sets (0,0),(width,height) as the source
+      \parameters to output the whole image exists.
+      Parameters
+      \ \ 
+      pifDest :       Destination image
+      pifSrc :        image to copy from
+      xd :            destination x coordinate
+      yd :            destination y coordinate
+      wd :            destination width (source image width will be
+                      scaled to this)
+      hd :            destination height (source image height will
+                      be scaled to this)
+      xs :            source x coordinate (where to copy from)
+      ys :            source y coordinate (where to copy from)
+      ws :            source width (how much of the image to copy)
+      hs :            source height (how much of the image to copy)
+      nTransparent :  Alpha method...
+      method :        specifies how the source color data is
+                      transformed if at all. See BlotMethods
+      ... :           possible extra parameters depending on method
+      <b>Method == BLOT_MULTISHADE extra parameters</b>
+      red :    Color to use the red channel to output the scale from
+               black to color
+      green :  Color to use the red channel to output the scale from
+               black to color
+      blue :   Color to use the red channel to output the scale from
+               black to color
+      <b>Method == BLOT_SHADED extra parameters</b>
+      shade :  _nt_
+      
+      See Also
+      <link sack::image::AlphaModifier, Alpha Methods>
+      
+      <link sack::image::blot_methods, Blot Methods>
+      
+      
+      
+      <link sack::image::BlotScaledImage, BlotScaledImage>
+      
+      <link sack::image::BlotScaledImageShaded, BlotScaledImageShaded>
+      
+      <link sack::image::BlotScaledImageShadedAlpha, BlotScaledImageShadedAlpha>
+      
+      
+      
+      
+                                                                                 */
+   IMAGE_PROC  void IMAGE_API BlotScaledImageSizedEx( Image pifDest, Image pifSrc
                                    , S_32 xd, S_32 yd
                                    , _32 wd, _32 hd
                                    , S_32 xs, S_32 ys
@@ -316,145 +775,602 @@ enum blot_methods {
                                    , _32 method, ... );
 
 
-//-------------------------------
-// Your basic PLOT functions  (Image.C, plotasm.asm)
-//-------------------------------
-   //void,*plotraw)   ( Image pi, S_32 x, S_32 y, CDATA c );
-   IMAGE_PROC_D( void,plot,      ( Image pi, S_32 x, S_32 y, CDATA c ));
-   IMAGE_PROC_D( void,plotalpha, ( Image pi, S_32 x, S_32 y, CDATA c ));
-   IMAGE_PROC_D( CDATA,getpixel, ( Image pi, S_32 x, S_32 y ));
+/* Your basic PLOT functions (Image.C, plotasm.asm)
+   
+   A function pointer to the function which sets a pixel in an
+   image at a specified x, y coordinate.
+   Parameters
+   Image :  The image to get the pixel from
+   X :      x coordinate to get pixel color
+   Y :      y coordinate to get pixel color
+   Color :  color to put at the coordinate. image will be set
+            exactly to this color, and whatever the alpha of the
+            color is.                                            */
+   IMAGE_PROC_D  void (IMAGE_API *plot)       ( Image pi, S_32 x, S_32 y, CDATA c );
+   /* A function pointer to the function which sets a pixel in an
+      image at a specified x, y coordinate.
+      Parameters
+      Image :  The image to get the pixel from
+      X :      x coordinate to get pixel color
+      Y :      y coordinate to get pixel color
+      Color :  color to put at the coordinate. Alpha blending will be
+               done.                                                  */
+   IMAGE_PROC_D  void (IMAGE_API *plotalpha)  ( Image pi, S_32 x, S_32 y, CDATA c );
+   /* A function pointer to the function which gets a pixel from an
+      image at a specified x, y coordinate.
+      Parameters
+      Image :  The image to get the pixel from
+      X :      x coordinate to get pixel color
+      Y :      y coordinate to get pixel color
+      
+      Returns
+      CDATA color in the Image at the specified coordinate.         */
+   IMAGE_PROC_D  CDATA (IMAGE_API *getpixel)  ( Image pi, S_32 x, S_32 y );
 //-------------------------------
 // Line functions  (lineasm.asm) // should include a line.c ... for now core was assembly...
 //-------------------------------
-   IMAGE_PROC_D( void,do_line,     ( Image pBuffer, S_32 x, S_32 y, S_32 xto, S_32 yto, CDATA color ));  // d is color data...
-   IMAGE_PROC_D( void,do_lineAlpha,( Image pBuffer, S_32 x, S_32 y, S_32 xto, S_32 yto, CDATA color));  // d is color data...
+   IMAGE_PROC_D  void (IMAGE_API *do_line)      ( Image pBuffer, S_32 x, S_32 y, S_32 xto, S_32 yto, CDATA color );  // d is color data...
+   IMAGE_PROC_D  void (IMAGE_API *do_lineAlpha) ( Image pBuffer, S_32 x, S_32 y, S_32 xto, S_32 yto, CDATA color);  // d is color data...
 
-   IMAGE_PROC_D( void,do_hline,     ( Image pImage, S_32 y, S_32 xfrom, S_32 xto, CDATA color ));
-   IMAGE_PROC_D( void,do_vline,     ( Image pImage, S_32 x, S_32 yfrom, S_32 yto, CDATA color ));
-   IMAGE_PROC_D( void,do_hlineAlpha,( Image pImage, S_32 y, S_32 xfrom, S_32 xto, CDATA color ));
-   IMAGE_PROC_D( void,do_vlineAlpha,( Image pImage, S_32 x, S_32 yfrom, S_32 yto, CDATA color ));
-	IMAGE_PROC_D( void, do_lineExV,( Image pImage, S_32 x, S_32 y
+   /* This is a function pointer that references a function to do
+      optimized horizontal lines. The function pointer is updated
+      when SetBlotMethod() is called.
+      Parameters
+      Image :   the image to draw to
+      Y :       the y coordinate of the line (how far down from top to
+                draw it)
+      x_from :  X coordinate to draw from
+      x_to :    X coordinate to draw to
+      color :   the color of the line. This color will be set to the
+                surface, the alpha result will be the alpha of this
+                color.                                                 */
+   IMAGE_PROC_D  void (IMAGE_API *do_hline)      ( Image pImage, S_32 y, S_32 xfrom, S_32 xto, CDATA color );
+   /* This is a function pointer that references a function to do
+      optimized vertical lines. The function pointer is updated
+      when SetBlotMethod() is called.
+      
+      
+      Parameters
+      Image :   the image to draw to
+      X :       the x coordinate of the line (how far over to draw
+                it)
+      y_from :  Y coordinate to draw from
+      y_to :    Y coordinate to draw to
+      color :   the color of the line. This color will be set to the
+                surface, the alpha result will be the alpha of this
+                color.                                               */
+   IMAGE_PROC_D  void (IMAGE_API *do_vline)      ( Image pImage, S_32 x, S_32 yfrom, S_32 yto, CDATA color );
+   /* This is a function pointer that references a function to do
+      optimized horizontal lines with alpha blending. The function
+      pointer is updated when SetBlotMethod() is called.
+      Parameters
+      Image :   the image to draw to
+      Y :       the Y coordinate of the line (how far down from top
+                of image to draw it)
+      x_from :  X coordinate to draw from
+      x_to :    X coordinate to draw to
+      color :   the color of the line (alpha component of the color
+                will be applied)                                    */
+   IMAGE_PROC_D  void (IMAGE_API *do_hlineAlpha) ( Image pImage, S_32 y, S_32 xfrom, S_32 xto, CDATA color );
+   /* This is a function pointer that references a function to do
+      optimized vertical lines with alpha blending. The function
+      pointer is updated when SetBlotMethod() is called.
+      
+      
+      Parameters
+      Image :   the image to draw to
+      X :       the x coordinate of the line (how far over to draw
+                it)
+      y_from :  Y coordinate to draw from
+      y_to :    Y coordinate to draw to
+      color :   the color of the line (alpha component of the color
+                will be applied)                                    */
+   IMAGE_PROC_D  void (IMAGE_API *do_vlineAlpha) ( Image pImage, S_32 x, S_32 yfrom, S_32 yto, CDATA color );
+	/* routine which iterates through the points along a lone from
+	   x,y to xto,yto, calling a user function at each point.
+	   Parameters
+	   Image :  the image to pretend to draw on
+	   x :      draw from this x coordinate
+	   y :      draw from this y coordinate
+	   xto :    draw to this x coordinate
+	   yto :    draw to this y coordinate
+	   d :      userdata (color data)
+	   func :   user callback function to a function of type...<p />void
+	            func( Image pif, S_32 x, S_32 y, int d ) ;
+	   
+	   Remarks
+	   The Image passed does not HAVE to be an Image, it can be any
+	   user POINTER.
+	   
+	   The data passed is limited to 32 bits, and will not hold a
+	   pointer if built for 64 bit platform.
+	   Example
+	   <code lang="c++">
+	   Image image;
+	   
+	   void MyPlotter( Image image, S_32 x, S_32 y, CDATA color )
+	   {
+	       // do something with the image at x,y
+	   }
+	   
+	   void UseMyPlotter( Image image )
+	   {
+	       do_lineExV( image, 10, 10, 80, 80, BASE_COLOR_BLACK, MyPlotter );
+	   }
+	   </code>                                                               */
+	IMAGE_PROC_D  void (IMAGE_API *do_lineExV)    ( Image pImage, S_32 x, S_32 y
 									, S_32 xto, S_32 yto, CDATA color
-		                            , void (*func)( Image pif, S_32 x, S_32 y, int d ) ));
-   IMAGE_PROC( Font,GetDefaultFont) ( void );
-   IMAGE_PROC( _32 ,GetFontHeight)  ( Font );
-   IMAGE_PROC( _32 ,GetStringSizeFontEx)( CTEXTSTR pString, _32 len, _32 *width, _32 *height, Font UseFont );
-   IMAGE_PROC( _32, GetStringRenderSizeFontEx )( CTEXTSTR pString, _32 nLen, _32 *width, _32 *height, _32 *charheight, Font UseFont );
+		                            , void (*func)( Image pif, S_32 x, S_32 y, int d ) );
+   /* \Returns the correct Font pointer to the default font. In all
+      font functions, NULL may be used as the font, and this is the
+      font that will be used.
+      Parameters
+      None.
+      Example
+      <code lang="c++">
+      Font font = GetDefaultFont();
+      </code>                                                       */
+   IMAGE_PROC  Font IMAGE_API GetDefaultFont ( void );
+   /* \Returns the height of a font for purposes of spacing between
+      lines. Characters may render outside of this height.
+      
+      
+      Parameters
+      Font :  Font to get the height of. if NULL returns an internal
+              font's height.
+      
+      Returns
+      the height of the font.                                        */
+   IMAGE_PROC  _32  IMAGE_API GetFontHeight  ( Font );
+   /* \Returns the approximate rectangle that would be used for a
+      string. It only counts using the line measurement. Newlines
+      in strings count to wrap text to subsequent lines and start
+      recounting the width, returning the maximum length of string
+      horizontally.
+      Parameters
+      pString :  The string to measure
+      len :      the length of characters to count in string
+      width :    a pointer to a _32 to receive the width of the
+                 string
+      height :   a pointer to a _32 to receive the height of the
+                 string
+      UseFont :  A Font to use. 
+      
+      Returns
+      \Returns the width parameter. If NULL are passed for width
+      and height, this is OK. One of the simple macros just passes
+      the string and gets the return - this is for how wide the
+      string would be.                                             */
+   IMAGE_PROC  _32  IMAGE_API GetStringSizeFontEx( CTEXTSTR pString, _32 len, _32 *width, _32 *height, Font UseFont );
+   /* Fill the width and height with the actual size of the string
+      as it is drawn. (may be above or below the original
+      rectangle)
+      Parameters
+      pString :     the string to measure
+      nLen :        the number of characters in the string
+      width :       a pointer to a 32 bit value to get resulting
+                    width
+      height :      a pointer to a 32 bit value to get resulting
+                    height
+      charheight :  the actual height of the characters (as reports
+                    by line)
+      UseFont :     a Font to use. If NULL use a default internal
+                    font.                                           */
+   IMAGE_PROC  _32 IMAGE_API  GetStringRenderSizeFontEx ( CTEXTSTR pString, _32 nLen, _32 *width, _32 *height, _32 *charheight, Font UseFont );
 
 // background of color 0,0,0 is transparent - alpha component does not
 // matter....
-   IMAGE_PROC( void,PutCharacterFont)              ( Image pImage
+   IMAGE_PROC  void IMAGE_API PutCharacterFont              ( Image pImage
                                                   , S_32 x, S_32 y
                                                   , CDATA color, CDATA background,
                                                    TEXTCHAR c, Font font );
-   IMAGE_PROC( void,PutCharacterVerticalFont)      ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, TEXTCHAR c, Font font );
-   IMAGE_PROC( void,PutCharacterInvertFont)        ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, TEXTCHAR c, Font font );
-   IMAGE_PROC( void,PutCharacterVerticalInvertFont)( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, TEXTCHAR c, Font font );
+   /* Outputs a string in the specified font, from the specified
+      point, text is drawn from the point up, with the characters
+      aligned with the top to the left; it goes up from the point.
+      the point becomes the bottom left of the rectangle output.
+      Parameters
+      pImage :      image to draw string into
+      x :           x position of the string
+      y :           y position of the string
+      color :       color of the data drawn in the font
+      background :  color of the data not drawn in the font
+      c :           the character to output
+      font :        the font to use. NULL use an internal default
+                    font.                                          */
+   IMAGE_PROC  void IMAGE_API PutCharacterVerticalFont      ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, TEXTCHAR c, Font font );
+   /* Outputs a string in the specified font, from the specified
+      point, text is drawn from the point to the left, with the
+      characters aligned with the top to the left; it goes up from
+      the point. the point becomes the bottom left of the rectangle
+      \output.
+      Parameters
+      pImage :      image to draw string into
+      x :           x position of the string
+      y :           y position of the string
+      color :       color of the data drawn in the font
+      background :  color of the data not drawn in the font
+      pc :          pointer to constant text
+      nLen :        length of text to output
+      font :        the font to use. NULL use an internal default
+                    font.                                           */
+   IMAGE_PROC  void IMAGE_API PutCharacterInvertFont        ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, TEXTCHAR c, Font font );
+   /* Outputs a character in the specified font, from the specified
+      point, text is drawn from the point up, with the characters
+      aligned with the top to the left; it goes up from the point. the
+      point becomes the bottom left of the rectangle output.
+      Parameters
+                                                                       */
+   IMAGE_PROC  void IMAGE_API PutCharacterVerticalInvertFont( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, TEXTCHAR c, Font font );
 
-   IMAGE_PROC( void,PutStringFontEx)              ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, CTEXTSTR pc, _32 nLen, Font font );
-   IMAGE_PROC( void,PutStringVerticalFontEx)      ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, CTEXTSTR pc, _32 nLen, Font font );
-   IMAGE_PROC( void,PutStringInvertFontEx)        ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, CTEXTSTR pc, _32 nLen, Font font );
-   IMAGE_PROC( void,PutStringInvertVerticalFontEx)( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, CTEXTSTR pc, _32 nLen, Font font );
+   /* Outputs a string in the specified font, from the specified
+      point, text is drawn right side up and godes from left to
+      right. The point becomes the top left of the rectangle
+      \output.
+      Parameters
+      pImage :      image to draw string into
+      x :           x position of the string
+      y :           y position of the string
+      color :       color of the data drawn in the font
+      background :  color of the data not drawn in the font
+      pc :          pointer to constant text
+      nLen :        length of text to output
+      font :        the font to use. NULL use an internal default
+                    font.                                         */
+   IMAGE_PROC  void IMAGE_API PutStringFontEx              ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, CTEXTSTR pc, _32 nLen, Font font );
+   /* Outputs a string in the specified font, from the specified
+      point, text is drawn from the point down, with the characters
+      aligned with the top to the right; it goes down from the
+      point. the point becomes the top right of the rectangle
+      \output.
+      Parameters
+      pImage :      image to draw string into
+      x :           x position of the string
+      y :           y position of the string
+      color :       color of the data drawn in the font
+      background :  color of the data not drawn in the font
+      pc :          pointer to constant text
+      nLen :        length of text to output
+      font :        the font to use. NULL use an internal default
+                    font.                                           */
+   IMAGE_PROC  void IMAGE_API PutStringVerticalFontEx      ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, CTEXTSTR pc, _32 nLen, Font font );
+   /* Outputs a string in the specified font, from the specified
+      point, text is drawn upside down, and goes to the left from
+      the point. the point becomes the bottom right of the
+      rectangle output.
+      Parameters
+      pImage :      image to draw string into
+      x :           x position of the string
+      y :           y position of the string
+      color :       color of the data drawn in the font
+      background :  color of the data not drawn in the font
+      pc :          pointer to constant text
+      nLen :        length of text to output
+      font :        the font to use. NULL use an internal default
+                    font.                                         */
+   IMAGE_PROC  void IMAGE_API PutStringInvertFontEx        ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, CTEXTSTR pc, _32 nLen, Font font );
+   /* Outputs a string in the specified font, from the specified
+      point, text is drawn from the point up, with the characters
+      aligned with the top to the left; it goes up from the point. the
+      point becomes the bottom left of the rectangle output.
+      Parameters
+      pImage :      image to draw string into
+      x :           x position of the string
+      y :           y position of the string
+      color :       color of the data drawn in the font
+      background :  color of the data not drawn in the font
+      pc :          pointer to constant text
+      nLen :        length of text to output
+      font :        the font to use. NULL use an internal default
+                    font.                                              */
+   IMAGE_PROC  void IMAGE_API PutStringInvertVerticalFontEx( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, CTEXTSTR pc, _32 nLen, Font font );
 
    //_32 (*PutMenuStringFontEx)            ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, CTEXTSTR pc, _32 nLen, Font font );
    //_32 (*PutCStringFontEx)               ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, CTEXTSTR pc, _32 nLen, Font font );
-   IMAGE_PROC( _32, GetMaxStringLengthFont ) ( _32 width, Font UseFont );
+   IMAGE_PROC  _32 IMAGE_API  GetMaxStringLengthFont  ( _32 width, Font UseFont );
 
-   IMAGE_PROC( void, GetImageSize)            ( Image pImage, _32 *width, _32 *height );
-   IMAGE_PROC( PCDATA, GetImageSurface )       ( Image pImage );
+   /* Used as a proper accessor method to get an image's width and
+      height. Decided to allow the image structure to be mostly
+      public, so the first 4 members are the images x,y, width and
+      height, and are immediately accessable by the Image pointer.
+      Parameters
+      pImage :  image to get the size of
+      width :   pointer to a 32 bit unsigned value to result with the
+                width, if NULL ignored.
+      height :  pointer to a 32 bit unsigned value to result with the
+                height, if NULL ignored.                              */
+   IMAGE_PROC  void IMAGE_API  GetImageSize            ( Image pImage, _32 *width, _32 *height );
+   /* \Returns the pointer to the color buffer currently used
+      \internal to the image.
+      Parameters
+      pImage :  Image to get the surface of.
+      
+      Example
+      <code lang="c#">
+      Image image = MakeImageFile( 100, 100 );
+      PCDATA pointer_color_data = GetImageSurface( image );
+      </code>
+      Note
+      This might be used to do an optimized output routine. Drawing
+      to the image with plot and line are not necessarily the best
+      for things like circles. Provides ability for user to output
+      directly to the color buffer.                                 */
+   IMAGE_PROC  PCDATA IMAGE_API  GetImageSurface        ( Image pImage );
 
    // would seem silly to load fonts - but for server implementations
    // the handle received is not the same as the font sent.
-   IMAGE_PROC( Font, LoadFont )               ( Font font );
-   IMAGE_PROC( void, UnloadFont )             ( Font font );
-	IMAGE_PROC( void, SyncImage )                 ( void );
+   IMAGE_PROC  Font IMAGE_API  LoadFont                ( Font font );
+   /* Destroys a font, releasing all resources associated with
+      character data and font rendering.                       */
+   IMAGE_PROC  void IMAGE_API  UnloadFont              ( Font font );
+	/* This is a function used to synchronize image operations when
+	   the image interface is across a message server.              */
+	IMAGE_PROC  void IMAGE_API  SyncImage                  ( void );
 	// intersect rectangle, results with the overlapping portion of R1 and R2
    // into R ...
-   IMAGE_PROC( int, IntersectRectangle )( IMAGE_RECTANGLE *r, IMAGE_RECTANGLE *r1, IMAGE_RECTANGLE *r2 );
-   IMAGE_PROC( int, MergeRectangle )( IMAGE_RECTANGLE *r, IMAGE_RECTANGLE *r1, IMAGE_RECTANGLE *r2 );
-   IMAGE_PROC( void, GetImageAuxRect )   ( Image pImage, P_IMAGE_RECTANGLE pRect );
-   IMAGE_PROC( void, SetImageAuxRect )   ( Image pImage, P_IMAGE_RECTANGLE pRect );
+   IMAGE_PROC  int IMAGE_API  IntersectRectangle ( IMAGE_RECTANGLE *r, IMAGE_RECTANGLE *r1, IMAGE_RECTANGLE *r2 );
+   /* Merges two image rectangles. The resulting rectangle is a
+      rectangle that includes both rectangles.
+      Parameters
+      r :   Pointer to an IMAGE_RECTANGLE for the result.
+      r1 :  PIMAGE_RECTANGLE one rectangle.
+      r2 :  PIMAGE_RECTANGLE the other rectangle.               */
+   IMAGE_PROC  int IMAGE_API  MergeRectangle ( IMAGE_RECTANGLE *r, IMAGE_RECTANGLE *r1, IMAGE_RECTANGLE *r2 );
+   /* User applications may use an aux rect attatched to an image. The
+      'Display' render library used this itself however, making
+      this mostly an internal feature.
+      Parameters
+      pImage :  image to get the aux rect of.
+      pRect :   pointer to an IMAGE_RECTANGLE to get the aux
+                rectangle data in.                                     */
+   IMAGE_PROC  void IMAGE_API  GetImageAuxRect    ( Image pImage, P_IMAGE_RECTANGLE pRect );
+   /* User applications may use an aux rect attatched to an image.
+      The 'Display' render library used this itself however, making
+      this mostly an internal feature.
+      Parameters
+      pImage :  image to set the aux rect of.
+      pRect :   pointer to an IMAGE_RECTANGLE to set the aux
+                rectangle to.                                       */
+   IMAGE_PROC  void IMAGE_API  SetImageAuxRect    ( Image pImage, P_IMAGE_RECTANGLE pRect );
 
-	IMAGE_PROC( PSPRITE, MakeSpriteImageFileEx )( CTEXTSTR fname DBG_PASS );
-	IMAGE_PROC( PSPRITE, MakeSpriteImageEx )( Image image DBG_PASS );
-	IMAGE_PROC( void, UnmakeSprite )( PSPRITE sprite, int bForceImageAlso );
+	/* \ \ 
+	   Parameters
+	   Filename :  \file name of image to load. Converts image into
+	               sprite automatically, resulting with a sprite.
+	   DBG_PASS :  See <link sack::DBG_PASS, DBG_PASS>              */
+		IMAGE_PROC  PSPRITE IMAGE_API  MakeSpriteImageFileEx ( CTEXTSTR fname DBG_PASS );
+      /* create a sprite from an Image */
+	IMAGE_PROC  PSPRITE IMAGE_API  MakeSpriteImageEx ( Image image DBG_PASS );
+	/* Release a Sprite. */
+	IMAGE_PROC  void IMAGE_API  UnmakeSprite ( PSPRITE sprite, int bForceImageAlso );
 	// angle is a fixed scaled integer with 0x1 0000 0000 being the full circle.
-	IMAGE_PROC( void, rotate_scaled_sprite )(Image bmp, PSPRITE sprite, fixed angle, fixed scale_width, fixed scale_height );
-	IMAGE_PROC( void, rotate_sprite )(Image bmp, PSPRITE sprite, fixed angle);
-	IMAGE_PROC( void, BlotSprite )( Image pdest, PSPRITE ps ); // hotspot bitmaps...
-IMAGE_PROC( PSPRITE, SetSpriteHotspot )( PSPRITE sprite, S_32 x, S_32 y );
-IMAGE_PROC( PSPRITE, SetSpritePosition )( PSPRITE sprite, S_32 x, S_32 y );
+	IMAGE_PROC  void IMAGE_API  rotate_scaled_sprite (Image bmp, PSPRITE sprite, fixed angle, fixed scale_width, fixed scale_height );
 
-IMAGE_PROC( Font, InternalRenderFontFile )( CTEXTSTR file
+   /* output a rotated sprite to destination image, using and angle specified.  The angle is represented as 0x1 0000 0000 is 360 degrees */
+	IMAGE_PROC  void IMAGE_API  rotate_sprite (Image bmp, PSPRITE sprite, fixed angle);
+
+   /* output a sprite at its current location */
+	IMAGE_PROC  void IMAGE_API  BlotSprite ( Image pdest, PSPRITE ps ); 
+/* Sets the point on a sprite which is the 'hotspot' the hotspot
+   is the point that is drawn at the specified coordinate when
+   outputting a sprite.
+   Parameters
+   sprite :  The PSPRITE to set the hotspot of.
+   x :       x coordinate in the sprite's image that becomes the
+             hotspot.
+   y :       y coordinate in the sprite's image that becomes the
+             hotspot.                                            */
+IMAGE_PROC  PSPRITE IMAGE_API  SetSpriteHotspot ( PSPRITE sprite, S_32 x, S_32 y );
+/* This function sets the current location of a sprite. When
+   asked to render, the sprite will draw itself here.
+   Parameters
+   sprite :  the sprite to move
+   x :       the new x coordinate of the parent image to draw at
+   y :       the new y coordinate of the parent image to draw at */
+IMAGE_PROC  PSPRITE IMAGE_API  SetSpritePosition ( PSPRITE sprite, S_32 x, S_32 y );
+
+/* Use a font file to get a font that can be used for outputting
+   characters and strings.
+   Parameters
+   file\ :    Filename of a font to render.
+   nWidth :   desired width in pixels to render the font.
+   nHeight :  desired height in pixels to render the font.
+   flags :    0 = render mono. 2=render 2 bits, 3=render 8 bit.  */
+IMAGE_PROC  Font IMAGE_API  InternalRenderFontFile ( CTEXTSTR file
 										, S_16 nWidth
 										, S_16 nHeight
-										, _32 flags // whether to render 1(0/1), 2(2), 8(3) bits, ...
+										, _32 flags 
 										);
-IMAGE_PROC( Font, InternalRenderFont )( _32 nFamily
+/* Creates a font based on indexes from the internal font cache.
+   This is used by the FontPicker dialog to choose a font. The
+   data the dialog used to render the font is available to the
+   application, and may be passed back for rendering a font
+   without knowing specifically what the values mean.
+   Parameters
+   nFamily :  The number of the family in the cache.
+   nStyle :   The number of the style in the cache.
+   nFile :    The number of the file in the cache.
+   nWidth :   the width to use for rendering characters (in
+              pixels)
+   nHeight :  the width to use for rendering characters (in
+              pixels)
+   flags :    0 = render mono. 2=render 2 bits, 3=render 8 bit.
+   
+   Returns
+   A Font which can be used to output. If the file exists. NULL
+   on failure.
+   Example
+   Used internally for FontPicker dialog, see <link sack::image::InternalRenderFontFile@CTEXTSTR@S_16@S_16@_32, InternalRenderFontFile> */
+IMAGE_PROC  Font IMAGE_API  InternalRenderFont ( _32 nFamily
 								  , _32 nStyle
 								  , _32 nFile
 								  , S_16 nWidth
 								  , S_16 nHeight
                           , _32 flags
 												  );
-IMAGE_PROC( void, DestroyFont)( Font *font );
-IMAGE_PROC( struct font_global_tag *, GetGlobalFonts)( void );
+/* Releases all resources for a Font.  */
+IMAGE_PROC  void IMAGE_API  DestroyFont( Font *font );
+/* Get the global font data structure. This is an internal
+   structure, and it's definition may not be exported. Currently
+   the definition is in documentation.
+   See Also
+   <link sack::image::FONT_GLOBAL, Font Global>                  */
+IMAGE_PROC  struct font_global_tag * IMAGE_API  GetGlobalFonts( void );
 // types of data which may result...
 typedef struct font_data_tag *PFONTDATA;
+/* Information to render a font from a file to memory. */
 typedef struct render_font_data_tag *PRENDER_FONTDATA;
 
-IMAGE_PROC( Font, RenderFont)( POINTER data, _32 flags ); // flags ? override?
-IMAGE_PROC( Font, RenderScaledFontData)( PFONTDATA pfd, PFRACTION width_scale, PFRACTION height_scale );
+/* Recreates a Font based on saved FontData.
+   Parameters
+   pfd :           pointer to font data.
+   width_scale :   FRACTION to scale the original font height
+                   \description by
+   height_scale :  FRACTION to scale the original font height
+                   \description by                            */
+IMAGE_PROC  Font IMAGE_API  RenderScaledFontData( PFONTDATA pfd, PFRACTION width_scale, PFRACTION height_scale );
+/* <combine sack::image::RenderScaledFontData@PFONTDATA@PFRACTION@PFRACTION>
+   
+   \ \                                                                       */
 #define RenderFontData(pfd) RenderScaledFontData( pfd,NULL,NULL )
 
-IMAGE_PROC( Font, RenderFontFileEx )( CTEXTSTR file, _32 width, _32 height, _32 flags, P_32 pnFontDataSize, POINTER *pFontData );
+/* Renders a font file and returns a Font. The font can then be
+   used in string output functions to images.
+   Parameters
+   file\ :           \File name of a font to render. Any font
+                     that freetype supports.
+   width :           width of characters to render in.
+   height :          height of characters to render.
+   flags :           if( ( flags &amp; 3 ) == 3 )<p /> font\-\>flags
+                     = FONT_FLAG_8BIT;<p /> else if( ( flags &amp;
+                     3 ) == 2 )<p /> font\-\>flags =
+                     FONT_FLAG_2BIT;<p /> else<p /> font\-\>flags
+                     = FONT_FLAG_MONO;<p />
+   pnFontDataSize :  optional pointer to a 32 bit value to
+                     receive the size of rendered data.
+   pFontData :       The render data. This data can be used to
+                     recreate this font.                             */
+IMAGE_PROC  Font IMAGE_API  RenderFontFileEx ( CTEXTSTR file, _32 width, _32 height, _32 flags, P_32 pnFontDataSize, POINTER *pFontData );
+/* <combine sack::image::RenderFontFileEx@CTEXTSTR@_32@_32@_32@P_32@POINTER *>
+   
+   \ \                                                                         */
 #define RenderFontFile(file,w,h,flags) RenderFontFileEx(file,w,h,flags,NULL,NULL)
-//typedef struct blah *PFONTDATA;
-IMAGE_PROC( int, GetFontRenderData )( Font font, POINTER *fontdata, _32 *fontdatalen );
+
+		/* This can be used to get the internal description of a font,
+		   which the user may then save, and use later to recreate the
+		   font the same way.
+		   Parameters
+		   font :         Font to get the render description from.
+		   fontdata :     a pointer to a pointer which will be filled
+		                  with a pointer buffer that has the font data.
+		   fontdatalen :  a pointer to 32 bit value to receive the length
+		                  of data.                                        */
+		IMAGE_PROC  int IMAGE_API  GetFontRenderData ( Font font, POINTER *fontdata, _32 *fontdatalen );
 // exported for the PSI font chooser to set the data for the font
 // to be retreived later when only the font handle remains.
-IMAGE_PROC( void, SetFontRendererData )( Font font, POINTER pResult, _32 size );
+IMAGE_PROC  void IMAGE_API  SetFontRendererData ( Font font, POINTER pResult, _32 size );
 
 
+/* Defines a pointer member of the interface structure. */
 #define IMAGE_PROC_PTR(type,name) type (CPROC*_##name)
+/* Macro to build function pointer entries in the image
+   interface.                                           */
 #define DIMAGE_PROC_PTR(type,name) type (CPROC**_##name)
-//-----------------------------------------------------
+/* This defines the interface call table. each function
+   available in the API is reflected in this interface. It
+   provdes a function table so applications don't have to be
+   directly linked to the image API. This allows replacing the
+   image API.                                                  */
 typedef struct image_interface_tag 
 {
-/*4*/ IMAGE_PROC_PTR( void, SetStringBehavior) ( Image pImage, _32 behavior );
-/*5*/ IMAGE_PROC_PTR( void, SetBlotMethod)     ( _32 method );
+/* <combine sack::image::SetStringBehavior@Image@_32>
+   
+   Internal
+   Interface index 4                                  */ IMAGE_PROC_PTR( void, SetStringBehavior) ( Image pImage, _32 behavior );
+/* <combine sack::image::SetBlotMethod@_32>
+   
+   \ \ 
+   Internal
+   Interface index 5                        */ IMAGE_PROC_PTR( void, SetBlotMethod)     ( _32 method );
 
-//-----------------------------------------------------
-
-/*6*/   IMAGE_PROC_PTR( Image,BuildImageFileEx) ( PCOLOR pc, _32 width, _32 height DBG_PASS); // already have the color plane....
-/*7*/   IMAGE_PROC_PTR( Image,MakeImageFileEx)  (_32 Width, _32 Height DBG_PASS);
-/*8*/   IMAGE_PROC_PTR( Image,MakeSubImageEx)   ( Image pImage, S_32 x, S_32 y, _32 width, _32 height DBG_PASS );
-/*9*/   IMAGE_PROC_PTR( Image,RemakeImageEx)    ( Image pImage, PCOLOR pc, _32 width, _32 height DBG_PASS);
-/*10*/  IMAGE_PROC_PTR( Image,LoadImageFileEx)  ( CTEXTSTR name DBG_PASS );
-/*11*/  IMAGE_PROC_PTR( void,UnmakeImageFileEx) ( Image pif DBG_PASS );
+/*
+   Internal
+   Interface index 6*/   IMAGE_PROC_PTR( Image,BuildImageFileEx) ( PCOLOR pc, _32 width, _32 height DBG_PASS);
+/* <combine sack::image::MakeImageFileEx@_32@_32 Height>
+   
+   Internal
+   Interface index 7*/  IMAGE_PROC_PTR( Image,MakeImageFileEx)  (_32 Width, _32 Height DBG_PASS);
+/* <combine sack::image::MakeSubImageEx@Image@S_32@S_32@_32@_32 height>
+   
+   Internal
+   Interface index 8                                                                    */   IMAGE_PROC_PTR( Image,MakeSubImageEx)   ( Image pImage, S_32 x, S_32 y, _32 width, _32 height DBG_PASS );
+/* <combine sack::image::RemakeImageEx@Image@PCOLOR@_32@_32 height>
+   
+   \ \ 
+   
+   <b>Internal</b>
+   
+   Interface index 9                                                */   IMAGE_PROC_PTR( Image,RemakeImageEx)    ( Image pImage, PCOLOR pc, _32 width, _32 height DBG_PASS);
+/* <combine sack::image::LoadImageFileEx@CTEXTSTR name>
+   
+   Internal
+   Interface index 10                                                   */  IMAGE_PROC_PTR( Image,LoadImageFileEx)  ( CTEXTSTR name DBG_PASS );
+/* <combine sack::image::UnmakeImageFileEx@Image pif>
+   
+   Internal
+   Interface index 11                                                 */  IMAGE_PROC_PTR( void,UnmakeImageFileEx) ( Image pif DBG_PASS );
 #define UnmakeImageFile(pif) UnmakeImageFileEx( pif DBG_SRC )
-/*12*/  IMAGE_PROC_PTR( void ,SetImageBound)    ( Image pImage, P_IMAGE_RECTANGLE bound );
-// reset clip rectangle to the full image (subimage part )
-// Some operations (move, resize) will also reset the bound rect, 
-// this must be re-set afterwards.  
-// ALSO - one SHOULD be nice and reset the rectangle when done, 
-// otherwise other people may not have checked this.
-/*13*/  IMAGE_PROC_PTR( void ,FixImagePosition) ( Image pImage );
+/* <combine sack::image::SetImageBound@Image@P_IMAGE_RECTANGLE>
+   
+   Internal
+   Interface index 12                                                           */  IMAGE_PROC_PTR( void ,SetImageBound)    ( Image pImage, P_IMAGE_RECTANGLE bound );
+/* <combine sack::image::FixImagePosition@Image>
+   
+   Internal
+   Interface index 13
+   
+   reset clip rectangle to the full image (subimage part ) Some
+   operations (move, resize) will also reset the bound rect,
+   this must be re-set afterwards. ALSO - one SHOULD be nice and
+   reset the rectangle when done, otherwise other people may not
+   have checked this.
+                                                                 */  IMAGE_PROC_PTR( void ,FixImagePosition) ( Image pImage );
 
 //-----------------------------------------------------
 
-/*14*/  IMAGE_PROC_PTR( void,ResizeImageEx)     ( Image pImage, S_32 width, S_32 height DBG_PASS);
-/*15*/   IMAGE_PROC_PTR( void,MoveImage)         ( Image pImage, S_32 x, S_32 y );
+/* <combine sack::image::ResizeImageEx@Image@S_32@S_32 height>
+   
+   Internal
+   Interface index 14                                                          */  IMAGE_PROC_PTR( void,ResizeImageEx)     ( Image pImage, S_32 width, S_32 height DBG_PASS);
+/* <combine sack::image::MoveImage@Image@S_32@S_32>
+   
+   Internal
+   Interface index 15                                               */   IMAGE_PROC_PTR( void,MoveImage)         ( Image pImage, S_32 x, S_32 y );
 
 //-----------------------------------------------------
 
-/*16*/   IMAGE_PROC_PTR( void,BlatColor)     ( Image pifDest, S_32 x, S_32 y, _32 w, _32 h, CDATA color );
-/*17*/   IMAGE_PROC_PTR( void,BlatColorAlpha)( Image pifDest, S_32 x, S_32 y, _32 w, _32 h, CDATA color );
+/* <combine sack::image::BlatColor@Image@S_32@S_32@_32@_32@CDATA>
+   
+   Internal
+   Interface index 16                                                             */   IMAGE_PROC_PTR( void,BlatColor)     ( Image pifDest, S_32 x, S_32 y, _32 w, _32 h, CDATA color );
+/* <combine sack::image::BlatColorAlpha@Image@S_32@S_32@_32@_32@CDATA>
+   
+   Internal
+   Interface index 17                                                                  */   IMAGE_PROC_PTR( void,BlatColorAlpha)( Image pifDest, S_32 x, S_32 y, _32 w, _32 h, CDATA color );
 
-/*18*/   IMAGE_PROC_PTR( void,BlotImageEx)     ( Image pDest, Image pIF, S_32 x, S_32 y, _32 nTransparent, _32 method, ... ); // always to screen...
-/*19*/   IMAGE_PROC_PTR( void,BlotImageSizedEx)( Image pDest, Image pIF, S_32 x, S_32 y, S_32 xs, S_32 ys, _32 wd, _32 ht, _32 nTransparent, _32 method, ... );
+/* <combine sack::image::BlotImageEx@Image@Image@S_32@S_32@_32@_32@...>
+                                                                                                                   
+   Internal
+	Interface index 18*/   IMAGE_PROC_PTR( void,BlotImageEx)     ( Image pDest, Image pIF, S_32 x, S_32 y, _32 nTransparent, _32 method, ... );
 
-/*20*/   IMAGE_PROC_PTR( void,BlotScaledImageSizedEx)( Image pifDest, Image pifSrc
+ /* <combine sack::image::BlotImageSizedEx@Image@Image@S_32@S_32@S_32@S_32@_32@_32@_32@_32@...>
+
+   Internal
+	Interface index 19*/   IMAGE_PROC_PTR( void,BlotImageSizedEx)( Image pDest, Image pIF, S_32 x, S_32 y, S_32 xs, S_32 ys, _32 wd, _32 ht, _32 nTransparent, _32 method, ... );
+
+/* <combine sack::image::BlotScaledImageSizedEx@Image@Image@S_32@S_32@_32@_32@S_32@S_32@_32@_32@_32@_32@...>
+   
+  Internal
+   Interface index  20                                                                                                        */   IMAGE_PROC_PTR( void,BlotScaledImageSizedEx)( Image pifDest, Image pifSrc
                                    , S_32 xd, S_32 yd
                                    , _32 wd, _32 hd
                                    , S_32 xs, S_32 ys
@@ -463,76 +1379,180 @@ typedef struct image_interface_tag
                                    , _32 method, ... );
 
 
-//-------------------------------
-// Your basic PLOT functions  (Image.C, plotasm.asm)
-//-------------------------------
-   //void,*plotraw)   ( Image pi, S_32 x, S_32 y, CDATA c );
-/*21*/   DIMAGE_PROC_PTR( void,plot)      ( Image pi, S_32 x, S_32 y, CDATA c );
-/*22*/   DIMAGE_PROC_PTR( void,plotalpha) ( Image pi, S_32 x, S_32 y, CDATA c );
-/*23*/   DIMAGE_PROC_PTR( CDATA,getpixel) ( Image pi, S_32 x, S_32 y );
-//-------------------------------
-// Line functions  (lineasm.asm) // should include a line.c ... for now core was assembly...
-//-------------------------------
-/*24*/   DIMAGE_PROC_PTR( void,do_line)     ( Image pBuffer, S_32 x, S_32 y, S_32 xto, S_32 yto, CDATA color );  // d is color data...
-/*25*/   DIMAGE_PROC_PTR( void,do_lineAlpha)( Image pBuffer, S_32 x, S_32 y, S_32 xto, S_32 yto, CDATA color);  // d is color data...
+/*Internal
+   Interface index 21*/   DIMAGE_PROC_PTR( void,plot)      ( Image pi, S_32 x, S_32 y, CDATA c );
+/*Internal
+   Interface index 22*/   DIMAGE_PROC_PTR( void,plotalpha) ( Image pi, S_32 x, S_32 y, CDATA c );
+/*Internal
+   Interface index 23*/   DIMAGE_PROC_PTR( CDATA,getpixel) ( Image pi, S_32 x, S_32 y );
+/*Internal
+   Interface index 24*/   DIMAGE_PROC_PTR( void,do_line)     ( Image pBuffer, S_32 x, S_32 y, S_32 xto, S_32 yto, CDATA color );  // d is color data...
+/*Internal
+   Interface index 25*/   DIMAGE_PROC_PTR( void,do_lineAlpha)( Image pBuffer, S_32 x, S_32 y, S_32 xto, S_32 yto, CDATA color);  // d is color data...
 
-/*26*/   DIMAGE_PROC_PTR( void,do_hline)     ( Image pImage, S_32 y, S_32 xfrom, S_32 xto, CDATA color );
-/*27*/   DIMAGE_PROC_PTR( void,do_vline)     ( Image pImage, S_32 x, S_32 yfrom, S_32 yto, CDATA color );
-/*28*/   DIMAGE_PROC_PTR( void,do_hlineAlpha)( Image pImage, S_32 y, S_32 xfrom, S_32 xto, CDATA color );
-/*29*/   DIMAGE_PROC_PTR( void,do_vlineAlpha)( Image pImage, S_32 x, S_32 yfrom, S_32 yto, CDATA color );
+/*Internal
+   Interface index 26*/   DIMAGE_PROC_PTR( void,do_hline)     ( Image pImage, S_32 y, S_32 xfrom, S_32 xto, CDATA color );
+/*Internal
+   Interface index 27*/   DIMAGE_PROC_PTR( void,do_vline)     ( Image pImage, S_32 x, S_32 yfrom, S_32 yto, CDATA color );
+/*Internal
+   Interface index 28*/   DIMAGE_PROC_PTR( void,do_hlineAlpha)( Image pImage, S_32 y, S_32 xfrom, S_32 xto, CDATA color );
+/*Internal
+   Interface index 29*/   DIMAGE_PROC_PTR( void,do_vlineAlpha)( Image pImage, S_32 x, S_32 yfrom, S_32 yto, CDATA color );
 
-/*30*/   IMAGE_PROC_PTR( Font,GetDefaultFont) ( void );
-/*31*/   IMAGE_PROC_PTR( _32 ,GetFontHeight)  ( Font );
-/*32*/   IMAGE_PROC_PTR( _32 ,GetStringSizeFontEx)( CTEXTSTR pString, _32 len, _32 *width, _32 *height, Font UseFont );
+/* <combine sack::image::GetDefaultFont>
+   
+   Internal
+   Interface index 30                    */   IMAGE_PROC_PTR( Font,GetDefaultFont) ( void );
+/* <combine sack::image::GetFontHeight@Font>
+   
+   Internal
+   Interface index 31                                        */   IMAGE_PROC_PTR( _32 ,GetFontHeight)  ( Font );
+/* <combine sack::image::GetStringSizeFontEx@CTEXTSTR@_32@_32 *@_32 *@Font>
+   
+   Internal
+   Interface index 32                                                       */   IMAGE_PROC_PTR( _32 ,GetStringSizeFontEx)( CTEXTSTR pString, _32 len, _32 *width, _32 *height, Font UseFont );
 
-// background of color 0,0,0 is transparent - alpha component does not
-// matter....
-/*33*/   IMAGE_PROC_PTR( void,PutCharacterFont)              ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, TEXTCHAR c, Font font );
-/*34*/   IMAGE_PROC_PTR( void,PutCharacterVerticalFont)      ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, TEXTCHAR c, Font font );
-/*35*/   IMAGE_PROC_PTR( void,PutCharacterInvertFont)        ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, TEXTCHAR c, Font font );
-/*36*/   IMAGE_PROC_PTR( void,PutCharacterVerticalInvertFont)( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, TEXTCHAR c, Font font );
+/* <combine sack::image::PutCharacterFont@Image@S_32@S_32@CDATA@CDATA@TEXTCHAR@Font>
+   
+   Internal
+   Interface index 33                                                                                */   IMAGE_PROC_PTR( void,PutCharacterFont)              ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, TEXTCHAR c, Font font );
+/* <combine sack::image::PutCharacterVerticalFont@Image@S_32@S_32@CDATA@CDATA@TEXTCHAR@Font>
+   
+   Internal
+   Interface index 34                                                                                        */   IMAGE_PROC_PTR( void,PutCharacterVerticalFont)      ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, TEXTCHAR c, Font font );
+/* <combine sack::image::PutCharacterInvertFont@Image@S_32@S_32@CDATA@CDATA@TEXTCHAR@Font>
+   
+   Internal
+   Interface index 35                                                                                      */   IMAGE_PROC_PTR( void,PutCharacterInvertFont)        ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, TEXTCHAR c, Font font );
+/* <combine sack::image::PutCharacterVerticalInvertFont@Image@S_32@S_32@CDATA@CDATA@TEXTCHAR@Font>
+   
+   Internal
+   Interface index 36                                                                                              */   IMAGE_PROC_PTR( void,PutCharacterVerticalInvertFont)( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, TEXTCHAR c, Font font );
 
-/*37*/   IMAGE_PROC_PTR( void,PutStringFontEx)              ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, CTEXTSTR pc, _32 nLen, Font font );
-/*38*/   IMAGE_PROC_PTR( void,PutStringVerticalFontEx)      ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, CTEXTSTR pc, _32 nLen, Font font );
-/*39*/   IMAGE_PROC_PTR( void,PutStringInvertFontEx)        ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, CTEXTSTR pc, _32 nLen, Font font );
-/*40*/   IMAGE_PROC_PTR( void,PutStringInvertVerticalFontEx)( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, CTEXTSTR pc, _32 nLen, Font font );
+/* <combine sack::image::PutStringFontEx@Image@S_32@S_32@CDATA@CDATA@CTEXTSTR@_32@Font>
+   
+   Internal
+   Interface index 37                                                                                   */   IMAGE_PROC_PTR( void,PutStringFontEx)              ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, CTEXTSTR pc, _32 nLen, Font font );
+/* <combine sack::image::PutStringVerticalFontEx@Image@S_32@S_32@CDATA@CDATA@CTEXTSTR@_32@Font>
+   
+   Internal
+   Interface index 38                                                                                           */   IMAGE_PROC_PTR( void,PutStringVerticalFontEx)      ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, CTEXTSTR pc, _32 nLen, Font font );
+/* <combine sack::image::PutStringInvertFontEx@Image@S_32@S_32@CDATA@CDATA@CTEXTSTR@_32@Font>
+   
+   Internal
+   Interface index 39                                                                                         */   IMAGE_PROC_PTR( void,PutStringInvertFontEx)        ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, CTEXTSTR pc, _32 nLen, Font font );
+/* <combine sack::image::PutStringInvertVerticalFontEx@Image@S_32@S_32@CDATA@CDATA@CTEXTSTR@_32@Font>
+   
+   Internal
+   Interface index 40                                                                                                 */   IMAGE_PROC_PTR( void,PutStringInvertVerticalFontEx)( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, CTEXTSTR pc, _32 nLen, Font font );
 
-   //_32 (*PutMenuStringFontEx)            ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, CTEXTSTR pc, _32 nLen, Font font );
-   //_32 (*PutCStringFontEx)               ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, CTEXTSTR pc, _32 nLen, Font font );
-/*41*/   IMAGE_PROC_PTR( _32, GetMaxStringLengthFont )( _32 width, Font UseFont );
+/* <combine sack::image::GetMaxStringLengthFont@_32@Font>
+   
+   Internal
+   Interface index 41                                     */   IMAGE_PROC_PTR( _32, GetMaxStringLengthFont )( _32 width, Font UseFont );
 
-/*42*/   IMAGE_PROC_PTR( void, GetImageSize)                ( Image pImage, _32 *width, _32 *height );
-/*43*/   IMAGE_PROC_PTR( Font, LoadFont )                   ( Font font );
+/* <combine sack::image::GetImageSize@Image@_32 *@_32 *>
+   
+   Internal
+   Interface index 42                                                    */   IMAGE_PROC_PTR( void, GetImageSize)                ( Image pImage, _32 *width, _32 *height );
+/* <combine sack::image::LoadFont@Font>
+   
+   Internal
+   Interface index 43                                   */   IMAGE_PROC_PTR( Font, LoadFont )                   ( Font font );
+         /* <combine sack::image::UnloadFont@Font>
+            
+            \ \                                    */
          IMAGE_PROC_PTR( void, UnloadFont )                 ( Font font );
 
-/*44*/   IMAGE_PROC_PTR( DataState, BeginTransferData )    ( _32 total_size, _32 segsize, CDATA data );
-/*45*/   IMAGE_PROC_PTR( void, ContinueTransferData )      ( DataState state, _32 segsize, CDATA data );
-/*46*/   IMAGE_PROC_PTR( Image, DecodeTransferredImage )    ( DataState state );
-/*47*/   IMAGE_PROC_PTR( Font, AcceptTransferredFont )     ( DataState state );
-/*48*/   DIMAGE_PROC_PTR( CDATA, ColorAverage )( CDATA c1, CDATA c2
+/* Internal
+   Interface index 44
+   
+   This is used by internal methods to transfer image and font
+   data to the render agent.                                   */   IMAGE_PROC_PTR( DataState, BeginTransferData )    ( _32 total_size, _32 segsize, CDATA data );
+/* Internal
+   Interface index 45
+   
+   Used internally to transfer data to render agent. */   IMAGE_PROC_PTR( void, ContinueTransferData )      ( DataState state, _32 segsize, CDATA data );
+/* Internal
+   Interface index 46
+   
+   Command issues at end of data transfer to decode the data
+   into an image.                                            */   IMAGE_PROC_PTR( Image, DecodeTransferredImage )    ( DataState state );
+/* After a data transfer decode the information as a font.
+   Internal
+   Interface index 47                                      */   IMAGE_PROC_PTR( Font, AcceptTransferredFont )     ( DataState state );
+/*Internal
+   Interface index 48*/   DIMAGE_PROC_PTR( CDATA, ColorAverage )( CDATA c1, CDATA c2
                                               , int d, int max );
-/*49*/   IMAGE_PROC_PTR( void, SyncImage )                 ( void );
+/* <combine sack::image::SyncImage>
+   
+   Internal
+   Interface index 49               */   IMAGE_PROC_PTR( void, SyncImage )                 ( void );
+         /* <combine sack::image::GetImageSurface@Image>
+            
+            \ \                                          */
          IMAGE_PROC_PTR( PCDATA, GetImageSurface )       ( Image pImage );
+         /* <combine sack::image::IntersectRectangle@IMAGE_RECTANGLE *@IMAGE_RECTANGLE *@IMAGE_RECTANGLE *>
+            
+            \ \                                                                                             */
          IMAGE_PROC_PTR( int, IntersectRectangle )      ( IMAGE_RECTANGLE *r, IMAGE_RECTANGLE *r1, IMAGE_RECTANGLE *r2 );
+   /* <combine sack::image::MergeRectangle@IMAGE_RECTANGLE *@IMAGE_RECTANGLE *@IMAGE_RECTANGLE *>
+      
+      \ \                                                                                         */
    IMAGE_PROC_PTR( int, MergeRectangle )( IMAGE_RECTANGLE *r, IMAGE_RECTANGLE *r1, IMAGE_RECTANGLE *r2 );
+   /* <combine sack::image::GetImageAuxRect@Image@P_IMAGE_RECTANGLE>
+      
+      \ \                                                            */
    IMAGE_PROC_PTR( void, GetImageAuxRect )   ( Image pImage, P_IMAGE_RECTANGLE pRect );
+   /* <combine sack::image::SetImageAuxRect@Image@P_IMAGE_RECTANGLE>
+      
+      \ \                                                            */
    IMAGE_PROC_PTR( void, SetImageAuxRect )   ( Image pImage, P_IMAGE_RECTANGLE pRect );
+   /* <combine sack::image::OrphanSubImage@Image>
+      
+      \ \                                         */
    IMAGE_PROC_PTR( void, OrphanSubImage )  ( Image pImage );
+   /* <combine sack::image::AdoptSubImage@Image@Image>
+      
+      \ \                                              */
    IMAGE_PROC_PTR( void, AdoptSubImage )   ( Image pFoster, Image pOrphan );
+	/* <combine sack::image::MakeSpriteImageFileEx@CTEXTSTR fname>
+	   
+	   \ \                                                         */
 	IMAGE_PROC_PTR( PSPRITE, MakeSpriteImageFileEx )( CTEXTSTR fname DBG_PASS );
+	/* <combine sack::image::MakeSpriteImageEx@Image image>
+	   
+	   \ \                                                  */
 	IMAGE_PROC_PTR( PSPRITE, MakeSpriteImageEx )( Image image DBG_PASS );
+	/* <combine sack::image::rotate_scaled_sprite@Image@PSPRITE@fixed@fixed@fixed>
+	   
+	   \ \                                                                         */
 	IMAGE_PROC_PTR( void   , rotate_scaled_sprite )(Image bmp, PSPRITE sprite, fixed angle, fixed scale_width, fixed scale_height);
+	/* <combine sack::image::rotate_sprite@Image@PSPRITE@fixed>
+	   
+	   \ \                                                      */
 	IMAGE_PROC_PTR( void   , rotate_sprite )(Image bmp, PSPRITE sprite, fixed angle);
-	IMAGE_PROC_PTR( void   , BlotSprite )( Image pdest, PSPRITE ps ); // hotspot bitmaps...
-   IMAGE_PROC_PTR( Image, DecodeMemoryToImage )( P_8 buf, _32 size );
+ /* <combine sack::image::BlotSprite@Image@PSPRITE>
+	                                                  
+	 Internal
+   Interface index 61                                              */
+		IMAGE_PROC_PTR( void   , BlotSprite )( Image pdest, PSPRITE ps );
+    /* <combine sack::image::DecodeMemoryToImage@P_8@_32>
+       
+       \ \                                                */
+    IMAGE_PROC_PTR( Image, DecodeMemoryToImage )( P_8 buf, _32 size );
 
-   // returns a Font
+   /* <combine sack::image::InternalRenderFontFile@CTEXTSTR@S_16@S_16@_32>
+      
+      \returns a Font                                                      */
 	IMAGE_PROC_PTR( Font, InternalRenderFontFile )( CTEXTSTR file
 																 , S_16 nWidth
 																 , S_16 nHeight
 																 , _32 flags // whether to render 1(0/1), 2(2), 8(3) bits, ...
 																 );
-   // requires knowing the font cache....
+   /* <combine sack::image::InternalRenderFont@_32@_32@_32@S_16@S_16@_32>
+      
+      requires knowing the font cache....                                 */
 	IMAGE_PROC_PTR( Font, InternalRenderFont )( _32 nFamily
 															, _32 nStyle
 															, _32 nFile
@@ -540,43 +1560,89 @@ typedef struct image_interface_tag
 															, S_16 nHeight
 															, _32 flags
 															);
+/* <combine sack::image::RenderScaledFontData@PFONTDATA@PFRACTION@PFRACTION>
+   
+   \ \                                                                       */
 IMAGE_PROC_PTR( Font, RenderScaledFontData)( PFONTDATA pfd, PFRACTION width_scale, PFRACTION height_scale );
-//IMAGE_PROC_PTR( Font, RenderFontData )( PFONTDATA pfd );
+/* <combine sack::image::RenderFontFileEx@CTEXTSTR@_32@_32@_32@P_32@POINTER *>
+   
+   \ \                                                                         */
 IMAGE_PROC_PTR( Font, RenderFontFileEx )( CTEXTSTR file, _32 width, _32 height, _32 flags, P_32 size, POINTER *pFontData );
-//typedef struct blah *PFONTDATA;
+/* <combine sack::image::DestroyFont@Font *>
+   
+   \ \                                       */
 IMAGE_PROC_PTR( void, DestroyFont)( Font *font );
+/* <combine sack::image::GetGlobalFonts>
+   
+   global_font_data in interface is really a global font data. Don't
+   have to call GetGlobalFont to get this.                           */
 struct font_global_tag *_global_font_data;
+/* <combine sack::image::GetFontRenderData@Font@POINTER *@_32 *>
+   
+   \ \                                                           */
 IMAGE_PROC_PTR( int, GetFontRenderData )( Font font, POINTER *fontdata, _32 *fontdatalen );
+/* <combine sack::image::SetFontRendererData@Font@POINTER@_32>
+   
+   \ \                                                         */
 IMAGE_PROC_PTR( void, SetFontRendererData )( Font font, POINTER pResult, _32 size );
+/* <combine sack::image::SetSpriteHotspot@PSPRITE@S_32@S_32>
+   
+   \ \                                                       */
 IMAGE_PROC_PTR( PSPRITE, SetSpriteHotspot )( PSPRITE sprite, S_32 x, S_32 y );
+/* <combine sack::image::SetSpritePosition@PSPRITE@S_32@S_32>
+   
+   \ \                                                        */
 IMAGE_PROC_PTR( PSPRITE, SetSpritePosition )( PSPRITE sprite, S_32 x, S_32 y );
+	/* <combine sack::image::UnmakeImageFileEx@Image pif>
+	   
+	   \ \                                                */
 	IMAGE_PROC_PTR( void, UnmakeSprite )( PSPRITE sprite, int bForceImageAlso );
+/* <combine sack::image::GetGlobalFonts>
+   
+   \ \                                   */
 IMAGE_PROC_PTR( struct font_global_tag *, GetGlobalFonts)( void );
 
+/* <alias sack::image::GetStringRenderSizeFontEx@CTEXTSTR@_32@_32 *@_32 *@_32 *@Font>
+   
+   \ \                                                                                */
 IMAGE_PROC_PTR( _32, GetStringRenderSizeFontEx )( CTEXTSTR pString, _32 nLen, _32 *width, _32 *height, _32 *charheight, Font UseFont );
 
 } IMAGE_INTERFACE, *PIMAGE_INTERFACE;
 
 
-IMAGE_PROC( struct image_interface_tag*, GetImageInterface )( void );
-IMAGE_PROC( void, DropImageInterface )( PIMAGE_INTERFACE );
+/* \Result with an Image interface. This function requires
+   direct linking, so the interface should be loaded with
+   GetInterface instead.                                   */
+IMAGE_PROC  struct image_interface_tag* IMAGE_API  GetImageInterface ( void );
+/* When done with an image interface, the application should
+   drop it. This disconnects message pipes etc, when the image
+   library is mounted across a pipe service.                   */
+IMAGE_PROC  void IMAGE_API  DropImageInterface ( PIMAGE_INTERFACE );
 
 #ifndef PSPRITE_METHOD
+/* <combine sack::image::PSPRITE_METHOD>
+   
+   \ \                                   */
 #define PSPRITE_METHOD PSPRITE_METHOD
-IMAGE_NAMESPACE_END
-//RENDER_NAMESPACE
 	typedef struct sprite_method_tag *PSPRITE_METHOD;
-//END_RENDER_NAMESPACE
-IMAGE_NAMESPACE
 #endif
 	// provided for display rendering portion to define this method for sprites to use.
    // deliberately out of namespace... please do not move this up.
-IMAGE_PROC( void, SetSavePortion )( void (CPROC*_SavePortion )( PSPRITE_METHOD psm, _32 x, _32 y, _32 w, _32 h ) );
+IMAGE_PROC  void IMAGE_API  SetSavePortion ( void (CPROC*_SavePortion )( PSPRITE_METHOD psm, _32 x, _32 y, _32 w, _32 h ) );
 
 #define GetImageInterface() (PIMAGE_INTERFACE)GetInterface( WIDE("image") )
+/* <combine sack::image::DropImageInterface@PIMAGE_INTERFACE>
+   
+   \ \                                                        */
 #define DropImageInterface(x) DropInterface( WIDE("image"), NULL )
 
+/* Method to define automatic name translation from standard
+   names Like BlatColorAlphaEx to the interface the user has
+   specified to be using.                                    */
 #define PROC_ALIAS(name) ((USE_IMAGE_INTERFACE)->_##name)
+/* Method to define automatic name translation from standard
+   names Like BlatColorAlphaEx to the interface the user has
+   specified to be using. For function pointers.             */
 #define PPROC_ALIAS(name) (*(USE_IMAGE_INTERFACE)->_##name)
 
 #ifdef DEFINE_DEFAULT_IMAGE_INTERFACE
@@ -661,9 +1727,13 @@ IMAGE_PROC( void, SetSavePortion )( void (CPROC*_SavePortion )( PSPRITE_METHOD p
 //#define global_font_data         (*PROC_ALIAS(global_font_data))
 #endif
 
+/* <combine sack::image::GetMaxStringLengthFont@_32@Font>
+   
+   \ \                                                    */
 #define GetMaxStringLength(w) GetMaxStringLengthFont(w, NULL )
 
 #ifdef DEFINE_IMAGE_PROTOCOL
+//#include <msgprotocol.h>
 #include <stddef.h>
 // need to define BASE_IMAGE_MESSAGE_ID before hand to determine what the base message is.
 //#define MSG_ID(method)  ( ( offsetof( struct image_interface_tag, _##method ) / sizeof( void(*)(void) ) ) + BASE_IMAGE_MESSAGE_ID + MSG_EventUser )
@@ -821,79 +1891,310 @@ IMAGE_PROC( void, SetSavePortion )( void (CPROC*_SavePortion )( PSPRITE_METHOD p
 // although - special forwards - such as DBG_SRC will just dissappear
 // in certain compilation modes (NON_DEBUG)
 
+
+/* <combine sack::image::BuildImageFileEx@PCOLOR@_32@_32 height>
+   
+   \ \                                                           */
 #define BuildImageFile(p,w,h) BuildImageFileEx( p,w,h DBG_SRC )
+/* <combine sack::image::MakeImageFileEx@_32@_32 Height>
+   
+   \ \                                                   */
 #define MakeImageFile(w,h) MakeImageFileEx( w,h DBG_SRC )
+/* <combine sack::image::MakeSubImageEx@Image@S_32@S_32@_32@_32 height>
+   
+   \ \                                                                  */
 #define MakeSubImage( image, x, y, w, h ) MakeSubImageEx( image, x, y, w, h DBG_SRC )
+/* <combine sack::image::RemakeImageEx@Image@PCOLOR@_32@_32 height>
+   
+   \ \                                                              */
 #define RemakeImage(p,pc,w,h) RemakeImageEx(p,pc,w,h DBG_SRC)
 #define ResizeImage( p,w,h) ResizeImageEx( p,w,h DBG_SRC )
+/* <combine sack::image::UnmakeImageFileEx@Image pif>
+   
+   Destroys an image. Does not automatically destroy child
+   images created on the image.
+   Parameters
+   Image :  an image to destroy
+   Example
+   <code lang="c++">
+   Image image = MakeImageFile( 100, 100 );
+   UnmakeImageFile( image );
+   </code>                                                 */
 #define UnmakeImageFile(pif) UnmakeImageFileEx( pif DBG_SRC )
+/* <combine sack::image::MakeSpriteImageEx@Image image>
+   
+   \ \                                                  */
 #define MakeSpriteImage(image) MakeSpriteImageEx(image DBG_SRC)
+/* <combine sack::image::MakeSpriteImageFileEx@CTEXTSTR fname>
+   
+   \ \                                                         */
 #define MakeSpriteImageFile(file) MakeSpriteImageFileEx( image DBG_SRC )
 
-IMAGE_PROC( void, FlipImageEx )( Image pif DBG_PASS );
+/* This function flips an image top to bottom. This if for
+   building windows compatible images. Internally images are
+   kept in platform-native direction. If an image is created
+   from another source, this might be a method to flip the image
+   top-to-bottom if required.
+   
+   
+   Parameters
+   pImage :                           Image to flip.
+   <link sack::DBG_PASS, DBG_PASS> :  _nt_
+   
+   Note
+   There has been a warning around flip image for a while, it
+   does its job right now (reversing jpeg images on windows),
+   but not necessarily suited for the masses.                    */
+IMAGE_PROC  void IMAGE_API  FlipImageEx ( Image pif DBG_PASS );
+/* <combine sack::image::FlipImageEx@Image pif>
+   
+   \ \                                          */
 #define FlipImage(pif) FlipImageEx( pif DBG_SRC )
 
+/* <combine sack::image::LoadImageFileEx@CTEXTSTR name>
+   
+   \ \                                                  */
 #define LoadImageFile(file) LoadImageFileEx( file DBG_SRC )
+/* <combine sack::image::BlatColor@Image@S_32@S_32@_32@_32@CDATA>
+   
+   \ \                                                            */
 #define ClearImageTo(img,color) BlatColor(img,0,0,(img)->width,(img)->height, color )
+/* <combine sack::image::BlatColor@Image@S_32@S_32@_32@_32@CDATA>
+   
+   \ \                                                            */
 #define ClearImage(img) BlatColor(img,0,0,(img)->width,(img)->height, 0 )
 
+/* Copy one image to another. Copies the source from 0,0 to the
+   destination 0,0 of the minimum width and height of the
+   smaller of the source or destination.
+   Parameters
+   pifDest :  Image to copy to
+   pifSrc :   Image to copy from
+   X :        left coordinate to copy image to
+   Y :        upper coordinate to copy image to
+   Example
+   This creates an image to write to, creates an image to copy
+   (a 64 by 64 square that is filled with 50% green color). And
+   copies the image to the output buffer.
+   <code>
+   Image output = MakeImageFile( 1024, 768 );
+   Image source = MakeImageFile( 64, 64 );
+   
+   // 50% transparent
+   ClearImageTo( source, SetAlpha( BASE_COLOR_GREEN, 128 ) );
+   ClearImage( output );
+   
+   BlotImage( output, source, 100, 100 );
+   BlotImageAlpha( output, source, 200, 200 );
+   </code>                                                      */
 #define BlotImage( pd, ps, x, y ) BlotImageEx( pd, ps, x, y, TRUE, BLOT_COPY )
+/* Copy one image to another at the specified coordinate in the
+   destination.
+   Parameters
+   Destination :  Image to output to
+   Source :       Image to copy
+   X :            Location to copy to
+   Y :            Location to copy to <link sack::image::AlphaModifier, Alpha>
+                  \: Specify how to write the alpha                            */
 #define BlotImageAlpha( pd, ps, x, y, a ) BlotImageEx( pd, ps, x, y, a, BLOT_COPY )
+/* <combine sack::image::BlotImageSizedEx@Image@Image@S_32@S_32@S_32@S_32@_32@_32@_32@_32@...>
+   
+   \ \                                                                                         */
 #define BlotImageSized( pd, ps, x, y, w, h ) BlotImageSizedEx( pd, ps, x, y, 0, 0, w, h, TRUE, BLOT_COPY )
+/* <combine sack::image::BlotImageSizedEx@Image@Image@S_32@S_32@S_32@S_32@_32@_32@_32@_32@...>
+   
+   \ \                                                                                         */
 #define BlotImageSizedAlpha( pd, ps, x, y, w, h, a ) BlotImageSizedEx( pd, ps, x, y, 0, 0, w, h, a, BLOT_COPY )
+/* <combine sack::image::BlotImageSizedEx@Image@Image@S_32@S_32@S_32@S_32@_32@_32@_32@_32@...>
+   
+   \ \                                                                                         */
 #define BlotImageSizedTo( pd, ps, xd, yd, xs, ys, w, h )  BlotImageSizedEx( pd, ps, xd, yd, xs, ys, w, h, TRUE, BLOT_COPY )
 
+/* Copy one image to another at the specified coordinate in the
+   destination. Shade the image on copy with a color.
+   Parameters
+   Destination :  Image to output to
+   Source :       Image to copy
+   X :            Location to copy to
+   Y :            Location to copy to
+   Color :        color to multiply the source color by to shade
+                  on copy.                                       */
 #define BlotImageShaded( pd, ps, xd, yd, c ) BlotImageEx( pd, ps, xd, yd, TRUE, BLOT_SHADED, c )
+/* <combine sack::image::BlotImageSizedEx@Image@Image@S_32@S_32@S_32@S_32@_32@_32@_32@_32@...>
+   
+   \ \                                                                                         */
 #define BlotImageShadedSized( pd, ps, xd, yd, xs, ys, ws, hs, c ) BlotImageSizedEx( pd, ps, xd, yd, xs, ys, ws, hs, TRUE, BLOT_SHADED, c )
 
+/* Copy one image to another at the specified coordinate in the
+   destination. Scale RGB channels to specified colors.
+   Parameters
+   Destination :  Image to output to
+   Source :       Image to copy
+   X :            Location to copy to
+   Y :            Location to copy to
+   X_source :     the left coordinate of the image source
+   Y_source :     the top coordinate of the image source
+   Width :        How wide to copy the image
+   Height :       How wide to copy the image
+   color :        color mutiplier to shade the image.           */
 #define BlotImageMultiShaded( pd, ps, xd, yd, r, g, b ) BlotImageEx( pd, ps, xd, yd, ALPHA_TRANSPARENT, BLOT_MULTISHADE, r, g, b )
+/* Copy one image to another at the specified coordinate in the
+   destination. Scale RGB channels to specified colors.
+   Parameters
+   Destination :  Image to output to
+   Source :       Image to copy
+   X :            Location to copy to
+   Y :            Location to copy to
+   X_source :     the left coordinate of the image source
+   Y_source :     the top coordinate of the image source
+   Width :        How wide to copy the image
+   Height :       How wide to copy the image
+   color :        color mutiplier to shade the image.           */
 #define BlotImageMultiShadedSized( pd, ps, xd, yd, xs, ys, ws, hs, r, g, b ) BlotImageSizedEx( pd, ps, xd, yd, xs, ys, ws, hs, TRUE, BLOT_MULTISHADE, r, g, b )
 
+/* <combine sack::image::BlotScaledImageSizedEx@Image@Image@S_32@S_32@_32@_32@S_32@S_32@_32@_32@_32@_32@...>
+   
+   \ \                                                                                                       */
 #define BlotScaledImageSized( pd, ps, xd, yd, wd, hd, xs, ys, ws, hs ) BlotScaledImageSizedEx( pd, ps, xd, yd, wd, hd, xs, ys, ws, hs, 0, BLOT_COPY )
+/* <combine sack::image::BlotScaledImageSizedEx@Image@Image@S_32@S_32@_32@_32@S_32@S_32@_32@_32@_32@_32@...>
+   
+   \ \                                                                                                       */
 #define BlotScaledImageSizedMultiShaded( pd, ps, xd, yd, wd, hd, xs, ys, ws, hs,r,g,b ) BlotScaledImageSizedEx( pd, ps, xd, yd, wd, hd, xs, ys, ws, hs, 0, BLOT_MULTISHADE,r,g,b )
 
+/* <combine sack::image::BlotScaledImageSizedEx@Image@Image@S_32@S_32@_32@_32@S_32@S_32@_32@_32@_32@_32@...>
+   
+   \ \                                                                                                       */
 #define BlotScaledImageSizedTo( pd, ps, xd, yd, wd, hd) BlotScaledImageSizedEx( pd, ps, xd, yd, wd, hd, 0, 0, (ps)->width, (ps)->height, 0, BLOT_COPY )
+/* <combine sack::image::BlotScaledImageSizedEx@Image@Image@S_32@S_32@_32@_32@S_32@S_32@_32@_32@_32@_32@...>
+   
+   \ \                                                                                                       */
 #define BlotScaledImageSizedToAlpha( pd, ps, xd, yd, wd, hd, a) BlotScaledImageSizedEx( pd, ps, xd, yd, wd, hd, 0, 0, (ps)->width, (ps)->height, a, BLOT_COPY )
 
+/* <combine sack::image::BlotScaledImageSizedEx@Image@Image@S_32@S_32@_32@_32@S_32@S_32@_32@_32@_32@_32@...>
+   
+   \ \                                                                                                       */
 #define BlotScaledImageSizedToShaded( pd, ps, xd, yd, wd, hd,shade) BlotScaledImageSizedEx( pd, ps, xd, yd, wd, hd, 0, 0, (ps)->width, (ps)->height, 0,BLOT_SHADED, shade )
+/* <combine sack::image::BlotScaledImageSizedEx@Image@Image@S_32@S_32@_32@_32@S_32@S_32@_32@_32@_32@_32@...>
+   
+   \ \                                                                                                       */
 #define BlotScaledImageSizedToShadedAlpha( pd, ps, xd, yd, wd, hd,a,shade) BlotScaledImageSizedEx( pd, ps, xd, yd, wd, hd, 0, 0, (ps)->width, (ps)->height, a, BLOT_SHADED, shade )
 
+/* <combine sack::image::BlotScaledImageSizedEx@Image@Image@S_32@S_32@_32@_32@S_32@S_32@_32@_32@_32@_32@...>
+   
+   \ \                                                                                                       */
 #define BlotScaledImageSizedToMultiShaded( pd, ps, xd, yd, wd, hd,r,g,b) BlotScaledImageSizedEx( pd, ps, xd, yd, wd, hd, 0, 0, (ps)->width, (ps)->height, 0,BLOT_MULTISHADE, r,g,b )
+/* <combine sack::image::BlotScaledImageSizedEx@Image@Image@S_32@S_32@_32@_32@S_32@S_32@_32@_32@_32@_32@...>
+   
+   \ \                                                                                                       */
 #define BlotScaledImageSizedToMultiShadedAlpha( pd, ps, xd, yd, wd, hd,a,r,g,b) BlotScaledImageSizedEx( pd, ps, xd, yd, wd, hd, 0, 0, (ps)->width, (ps)->height, a,BLOT_MULTISHADE, r,g,b )
 
+/* <combine sack::image::BlotScaledImageSizedEx@Image@Image@S_32@S_32@_32@_32@S_32@S_32@_32@_32@_32@_32@...>
+   
+   \ \                                                                                                       */
 #define BlotScaledImageAlpha( pd, ps, t ) BlotScaledImageSizedEx( pd, ps, 0, 0, (pd)->width, (pd)->height, 0, 0, (ps)->width, (ps)->height, t, BLOT_COPY )
+/* <combine sack::image::BlotScaledImageSizedEx@Image@Image@S_32@S_32@_32@_32@S_32@S_32@_32@_32@_32@_32@...>
+   
+   \ \                                                                                                       */
 #define BlotScaledImageShadedAlpha( pd, ps, t, shade ) BlotScaledImageSizedEx( pd, ps, 0, 0, (pd)->width, (pd)->height, 0, 0, (ps)->width, (ps)->height, t, BLOT_SHADED, shade )
+/* <combine sack::image::BlotScaledImageSizedEx@Image@Image@S_32@S_32@_32@_32@S_32@S_32@_32@_32@_32@_32@...>
+   
+   \ \                                                                                                       */
 #define BlotScaledImageMultiShadedAlpha( pd, ps, t, r, g, b ) BlotScaledImageSizedEx( pd, ps, 0, 0, (pd)->width, (pd)->height, 0, 0, (ps)->width, (ps)->height, t, BLOT_MULTISHADE, r, g, b )
 
+/* <combine sack::image::BlotScaledImageSizedEx@Image@Image@S_32@S_32@_32@_32@S_32@S_32@_32@_32@_32@_32@...>
+   
+   \ \                                                                                                       */
 #define BlotScaledImage( pd, ps ) BlotScaledImageSizedEx( pd, ps, 0, 0, (pd)->width, (pd)->height, 0, 0, (ps)->width, (ps)->height, 0, BLOT_COPY )
+/* <combine sack::image::BlotScaledImageSizedEx@Image@Image@S_32@S_32@_32@_32@S_32@S_32@_32@_32@_32@_32@...>
+   
+   \ \                                                                                                       */
 #define BlotScaledImageShaded( pd, ps, shade ) BlotScaledImageSizedEx( pd, ps, 0, 0, (pd)->width, (pd)->height, 0, 0, (ps)->width, (ps)->height, 0, BLOT_SHADED, shade )
+/* <combine sack::image::BlotScaledImageSizedEx@Image@Image@S_32@S_32@_32@_32@S_32@S_32@_32@_32@_32@_32@...>
+   
+   \ \                                                                                                       */
 #define BlotScaledImageMultiShaded( pd, ps, r, g, b ) BlotScaledImageSizedEx( pd, ps, 0, 0, (pd)->width, (pd)->height, 0, 0, (ps)->width, (ps)->height, 0, BLOT_MULTISHADE, r, g, b )
 
+/* <combine sack::image::BlotScaledImageSizedEx@Image@Image@S_32@S_32@_32@_32@S_32@S_32@_32@_32@_32@_32@...>
+   
+   \ \                                                                                                       */
 #define BlotScaledImageTo( pd, ps )  BlotScaledImageToEx( pd, ps, FALSE, BLOT_COPY )
 
-// now why would we need an inverse line? I don't get it....
+/* now why would we need an inverse line? I don't get it....
+   anyhow this would draw from the end to the start... basically
+   this accounts for rounding errors on the orward way.          */
 #define do_inv_line(pb,x,y,xto,yto,d) do_line( pb,y,x,yto,xto,d)
 
+/* <combine sack::image::PutCharacterFont@Image@S_32@S_32@CDATA@CDATA@TEXTCHAR@Font>
+   
+   \ \                                                                               */
 #define PutCharacter(i,x,y,fore,back,c)               PutCharacterFont(i,x,y,fore,back,c,NULL )
+/* <combine sack::image::PutCharacterVerticalFont@Image@S_32@S_32@CDATA@CDATA@TEXTCHAR@Font>
+   
+   Passes default font if not specified.                                                     */
 #define PutCharacterVertical(i,x,y,fore,back,c)       PutCharacterVerticalFont(i,x,y,fore,back,c,NULL )
+/* <combine sack::image::PutCharacterInvertFont@Image@S_32@S_32@CDATA@CDATA@TEXTCHAR@Font>
+   
+   \ \                                                                                     */
 #define PutCharacterInvert(i,x,y,fore,back,c)         PutCharacterInvertFont(i,x,y,fore,back,c,NULL )
+/* <combine sack::image::PutCharacterVerticalInvertFont@Image@S_32@S_32@CDATA@CDATA@TEXTCHAR@Font>
+   
+   \ \                                                                                             */
 #define PutCharacterInvertVertical(i,x,y,fore,back,c) PutCharacterInvertVerticalFont(i,x,y,fore,back,c,NULL )
+/* <combine sack::image::PutCharacterVerticalInvertFont@Image@S_32@S_32@CDATA@CDATA@TEXTCHAR@Font>
+   
+   \ \                                                                                             */
 #define PutCharacterInvertVerticalFont(i,x,y,fore,back,c,f) PutCharacterVerticalInvertFont(i,x,y,fore,back,c,f )
 
+/* <combine sack::image::PutStringFontEx@Image@S_32@S_32@CDATA@CDATA@CTEXTSTR@_32@Font>
+   
+   \ \                                                                                  */
 #define PutString(pi,x,y,fore,back,pc) PutStringFontEx( pi, x, y, fore, back, pc, strlen(pc), NULL )
+/* <combine sack::image::PutStringFontEx@Image@S_32@S_32@CDATA@CDATA@CTEXTSTR@_32@Font>
+   
+   \ \                                                                                  */
 #define PutStringEx(pi,x,y,color,back,pc,len) PutStringFontEx( pi, x, y, color,back,pc,len,NULL )
+/* <combine sack::image::PutStringFontEx@Image@S_32@S_32@CDATA@CDATA@CTEXTSTR@_32@Font>
+   
+   \ \                                                                                  */
 #define PutStringFont(pi,x,y,fore,back,pc,font) PutStringFontEx(pi,x,y,fore,back,pc,strlen(pc), font )
 
+/* <combine sack::image::PutStringVerticalFontEx@Image@S_32@S_32@CDATA@CDATA@CTEXTSTR@_32@Font>
+   
+   \ \                                                                                          */
 #define PutStringVertical(pi,x,y,fore,back,pc) PutStringVerticalFontEx( pi, x, y, fore, back, pc, strlen(pc), NULL )
+/* <combine sack::image::PutStringVerticalFontEx@Image@S_32@S_32@CDATA@CDATA@CTEXTSTR@_32@Font>
+   
+   \ \                                                                                          */
 #define PutStringVerticalEx(pi,x,y,color,back,pc,len) PutStringVerticalFontEx( pi, x, y, color,back,pc,len,NULL )
+/* <combine sack::image::PutStringVerticalFontEx@Image@S_32@S_32@CDATA@CDATA@CTEXTSTR@_32@Font>
+   
+   \ \                                                                                          */
 #define PutStringVerticalFont(pi,x,y,fore,back,pc,font) PutStringVerticalFontEx(pi,x,y,fore,back,pc,strlen(pc), font )
 
+/* <combine sack::image::PutStringInvertFontEx@Image@S_32@S_32@CDATA@CDATA@CTEXTSTR@_32@Font>
+   
+   \ \                                                                                        */
 #define PutStringInvert( pi, x, y, fore, back, pc ) PutStringInvertFontEx( pi, x, y, fore, back, pc,strlen(pc), NULL )
+/* <combine sack::image::PutStringInvertFontEx@Image@S_32@S_32@CDATA@CDATA@CTEXTSTR@_32@Font>
+   
+   \ \                                                                                        */
 #define PutStringInvertEx( pi, x, y, fore, back, pc, nLen ) PutStringInvertFontEx( pi, x, y, fore, back, pc, nLen, NULL )
+/* <combine sack::image::PutStringInvertFontEx@Image@S_32@S_32@CDATA@CDATA@CTEXTSTR@_32@Font>
+   
+   The non Ex Version doesn't pass the string length.                                         */
 #define PutStringInvertFont( pi, x, y, fore, back, pc, nLen ) PutStringInvertFontEx( pi, x, y, fore, back, pc, strlen(pc), font )
 
+/* <combine sack::image::PutStringInvertVerticalFontEx@Image@S_32@S_32@CDATA@CDATA@CTEXTSTR@_32@Font>
+   
+   \ \                                                                                                */
 #define PutStringInvertVertical( pi, x, y, fore, back, pc ) PutStringInvertVerticalFontEx( pi, x, y, fore, back, pc, strlen(pc), NULL )
+/* <combine sack::image::PutStringInvertVerticalFontEx@Image@S_32@S_32@CDATA@CDATA@CTEXTSTR@_32@Font>
+   
+   \ \                                                                                                */
 #define PutStringInvertVerticalEx( pi, x, y, fore, back, pc, nLen ) PutStringInvertVerticalFontEx( pi, x, y, fore, back, pc, nLen, NULL )
+/* <combine sack::image::PutStringInvertVerticalFontEx@Image@S_32@S_32@CDATA@CDATA@CTEXTSTR@_32@Font>
+   
+   \ \                                                                                                */
 #define PutStringInvertVerticalFont( pi, x, y, fore, back, pc, font ) PutStringInvertVerticalFontEx( pi, x, y, fore, back, pc, strlen(pc), font )
 
 //IMG_PROC _32 PutMenuStringFontEx        ( ImageFile *pImage, S_32 x, S_32 y, CDATA color, CDATA background, CTEXTSTR pc, _32 nLen, PFONT font );
@@ -904,11 +2205,18 @@ IMAGE_PROC( void, FlipImageEx )( Image pif DBG_PASS );
 //#define PutCStringFont(img,x,y,fore,back,string,font) PutCStringFontEx( img,x,y,fore,back,string,strlen(string),font)
 //#define PutCString( img,x,y,fore,back,string) PutCStringFont(img,x,y,fore,back,string,NULL )
 
-//IMG_PROC _32 GetMenuStringSizeFontEx( CTEXTSTR string, _32 len, _32 *width, _32 *height, PFONT font );
-//IMG_PROC _32 GetMenuStringSizeFont( CTEXTSTR string, _32 *width, _32 *height, PFONT font );
+/* <combine sack::image::GetStringSizeFontEx@CTEXTSTR@_32@_32 *@_32 *@Font>
+   
+   \ \                                                                      */
 
 #define GetStringSizeEx(s,len,pw,ph) GetStringSizeFontEx( (s),len,pw,ph,NULL)
+/* <combine sack::image::GetStringSizeFontEx@CTEXTSTR@_32@_32 *@_32 *@Font>
+   
+   \ \                                                                      */
 #define GetStringSize(s,pw,ph)       GetStringSizeFontEx( (s),(s)?strlen(s):0,pw,ph,NULL)
+/* <combine sack::image::GetStringSizeFontEx@CTEXTSTR@_32@_32 *@_32 *@Font>
+   
+   \ \                                                                      */
 #define GetStringSizeFont(s,pw,ph,f) GetStringSizeFontEx( (s),(s)?strlen(s):0,pw,ph,f )
 
 #ifdef __cplusplus
@@ -919,196 +2227,5 @@ using namespace sack::image;
 #endif
 
 
-//-------------------------------------------------------------------------
-// $Log: image.h,v $
-// Revision 1.70  2005/06/20 17:24:25  jim
-// Sync with dev repository.
-//
-// Revision 1.69  2005/05/30 11:56:20  d3x0r
-// various fixes... working on psilib update optimization... various stabilitizations... also extending msgsvr functionality.
-//
-// Revision 1.68  2005/05/25 16:50:09  d3x0r
-// Synch with working repository.
-//
-// Revision 1.69  2005/04/13 18:29:19  jim
-// Export DecodeMemoryToImage in interface.
-//
-// Revision 1.68  2005/04/05 11:56:04  panther
-// Adding sprite support - might have added an extra draw callback...
-//
-// Revision 1.67  2005/01/18 10:48:19  panther
-// Define image interface export so there's no conflict between image and display_image
-//
-// Revision 1.66  2004/08/17 02:30:44  d3x0r
-// Fix reference macro for ColorAverage
-//
-// Revision 1.65  2004/06/21 07:47:36  d3x0r
-// Checkpoint - make system rouding out nicly.
-//
-// Revision 1.64  2004/06/01 21:46:33  d3x0r
-// Parenthise USE_IMAGE_INTERFACE usage
-//
-// Revision 1.63  2004/06/01 05:58:32  d3x0r
-// Include procreg instead of interface.h
-//
-// Revision 1.62  2004/04/26 09:47:24  d3x0r
-// Cleanup some C++ problems, and standard C issues even...
-//
-// Revision 1.61  2004/03/04 01:09:47  d3x0r
-// Modifications to force slashes to wlib.  Updates to Interfaces to be gotten from common interface manager.
-//
-// Revision 1.60  2003/10/28 01:14:34  panther
-// many changes to implement msgsvr on windows.  Even to get displaylib service to build, there's all sorts of errors in inconsistant definitions...
-//
-// Revision 1.59  2003/10/14 16:26:29  panther
-// Remove redundant Log Messages.  Fix string function names.
-//
-// Revision 1.58  2003/10/07 20:30:13  panther
-// Fix name mangling for PutStringInvertVertical
-//
-// Revision 1.57  2003/09/20 00:41:04  panther
-// Fix order of interface def
-//
-// Revision 1.56  2003/09/19 16:40:35  panther
-// Implement Adopt and Orphan sub image - for up coming Sheet Control
-//
-// Revision 1.55  2003/09/18 12:14:49  panther
-// MergeRectangle Added.  Seems Control edit near done (fixing move/size errors)
-//
-// Revision 1.54  2003/09/18 08:35:19  panther
-// Oops fudged the getauxrect
-//
-// Revision 1.53  2003/09/18 07:53:20  panther
-// Added to idle - IdleFor - which sleeps for a time, calling idle procs
-//
-// Revision 1.52  2003/09/15 17:06:37  panther
-// Fixed to image, display, controls, support user defined clipping , nearly clearing correct portions of frame when clearing hotspots...
-//
-// Revision 1.51  2003/09/08 12:59:54  panther
-// Oops forgot a semi-colon
-//
-// Revision 1.50  2003/09/08 12:56:51  panther
-// Define common image data x, y info (IMAGE_RECTANGLE) in an anonymous structure method
-//
-// Revision 1.49  2003/09/01 20:04:37  panther
-// Added OpenGL Interface to windows video lib, Modified RCOORD comparison
-//
-// Revision 1.48  2003/08/27 16:05:09  panther
-// Define image and renderer sync functions
-//
-// Revision 1.47  2003/07/24 16:56:41  panther
-// Updates to expliclity define C procedure model for callbacks and assembly modules - incomplete
-//
-// Revision 1.46  2003/06/25 15:36:58  panther
-// Make that two broken macros
-//
-// Revision 1.45  2003/06/25 15:33:38  panther
-// Ooops broken one of the function macros
-//
-// Revision 1.44  2003/06/24 11:46:10  panther
-// Fix definition of pointer second_level
-//
-// Revision 1.43  2003/05/01 21:32:08  panther
-// Cleaned up from having moved several methods into frame/control common space
-//
-// Revision 1.42  2003/04/24 00:03:49  panther
-// Added ColorAverage to image... Fixed a couple macros
-//
-// Revision 1.41  2003/03/30 21:38:54  panther
-// Fix MSG_ definitions.  Fix lack of anonymous unions
-//
-// Revision 1.40  2003/03/29 22:51:59  panther
-// New render/image layering ability.  Added support to Display for WIN32 usage (native not SDL)
-//
-// Revision 1.39  2003/03/27 15:36:38  panther
-// Changes were done to limit client messages to server - but all SERVER-CLIENT messages were filtered too... Define LOWEST_BASE_MESSAGE
-//
-// Revision 1.38  2003/03/25 23:37:13  panther
-// Pass signed parameter to ResizeImage
-//
-// Revision 1.37  2003/03/25 08:38:11  panther
-// Add logging
-//
-// Revision 1.36  2003/03/24 00:22:03  panther
-// Parenthise parameters to GetStringSize macros
-//
-// Revision 1.35  2003/03/21 09:00:44  panther
-// Define exported data type functions (needed for BCC32/16)
-//
-// Revision 1.34  2003/03/19 02:03:45  panther
-// BCC32 compatibilty updates
-//
-// Revision 1.33  2003/03/19 00:58:48  panther
-// Compatibility fixes for BCC32
-//
-// Revision 1.32  2003/03/17 08:19:38  panther
-// Fix PutCharacter macro
-//
-// Revision 1.31  2003/03/10 15:05:20  panther
-// Master Checkpoint - Tweaks fixes, etc all go in now.
-//
-// Revision 1.30  2003/02/23 18:26:12  panther
-// Exoprt handle message proc for message clients
-//
-// Revision 1.29  2003/02/20 02:34:58  panther
-// Added LoadFont definition
-//
-// Revision 1.28  2003/02/19 01:44:53  panther
-// Added image loader program - image load commpleted - table bias solved
-//
-// Revision 1.27  2003/02/18 18:01:37  panther
-// Added LoadImageFile to services, test8 to test it
-//
-// Revision 1.26  2003/02/17 02:58:23  panther
-// Changes include - better support for clipped images in displaylib.
-// More events handled.
-// Modifications to image structure and better unification of clipping
-// ideology.
-// Better definition of image and render interfaces.
-// MUCH logging has been added and needs to be trimmed out.
-//
-// Revision 1.25  2003/02/13 13:26:09  panther
-// Need to set the invert_image flag
-//
-// Revision 1.24  2003/02/13 12:54:35  panther
-// Added Loadimagefileex back in
-//
-// Revision 1.23  2003/02/12 22:17:31  panther
-// Cleanups for modified image.h, render.h - minor patches to psi_client/server
-//
-// Revision 1.22  2003/02/12 20:30:53  panther
-// Image interface.h -> image.h
-//
-// Revision 1.12  2003/02/12 14:52:12  panther
-// Migrate vidlib to render_interface compatibility, migrate makefiles to newer system
-//
-// Revision 1.11  2003/02/10 08:56:42  panther
-// Fix OwnMouse
-//
-// Revision 1.10  2003/02/09 04:03:34  panther
-// General tweaks to improve functionality
-//
-// Revision 1.9  2003/02/07 13:59:50  panther
-// Minor typo fixes, minor additions to support added routines
-//
-// Revision 1.8  2003/02/05 23:39:29  panther
-// Begin message inteface for control_interface
-//
-// Revision 1.7  2003/02/05 23:34:45  panther
-// Landmark commit for all server/client message service things
-//
-// Revision 1.6  2003/02/05 23:22:01  panther
-// Added literal data to Image definition
-//
-// Revision 1.5  2003/02/05 22:40:46  panther
-// Fixup image library to be explicitly 32 bit - no questionable 'int's
-//
-// Revision 1.4  2003/02/05 11:00:44  panther
-// Make render interface more similar to image_interface which is the more evolved methodology.
-//
-// Revision 1.3  2002/12/12 11:03:06  panther
-// New image definitions - working on interface defs.
-//
-// Revision 1.2  2002/12/02 12:57:11  panther
-// image interface changes all over, viewlib...
-//
+
+/*   */

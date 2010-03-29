@@ -82,8 +82,10 @@ typedef struct font_global_tag
 } FONT_GLOBAL;
 #endif
 
-#define MAGIC_PICK_FONT 'PICK'
-#define MAGIC_RENDER_FONT 'FONT'
+enum {
+ MAGIC_PICK_FONT = 'PICK',
+ MAGIC_RENDER_FONT = 'FONT'
+};
 struct font_data_tag {
    _32 magic;
 	_32 nFamily;
@@ -95,6 +97,7 @@ struct font_data_tag {
 	_64 cachefile_time;
    TEXTCHAR names[];
 };
+// defines FONTDATA for internal usage.
 typedef struct font_data_tag  FONTDATA;
 
 typedef struct render_font_data_tag {
@@ -105,8 +108,9 @@ typedef struct render_font_data_tag {
 	TEXTCHAR filename[];
 } RENDER_FONTDATA;
 
-
+/* internal function to load fonts */
 void LoadAllFonts( void );
+/* internal function to unload fonts */
 void UnloadAllFonts( void );
 
 

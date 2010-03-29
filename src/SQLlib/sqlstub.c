@@ -968,11 +968,14 @@ void BeginTransact( PODBC odbc )
 		{
 			odbc->commit_timer = AddTimer( 100, CommitTimer, (PTRSZVAL)odbc );
 			odbc->flags.bAutoTransact = 0;
+#ifdef USE_SQLITE
 			if( odbc->flags.bSQLite_native )
 			{
 				SQLCommand( odbc, "BEGIN TRANSACTION" );
 			}
-			else if( odbc->flags.bAccess )
+			else
+#endif
+				if( odbc->flags.bAccess )
 			{
 			}
 			else

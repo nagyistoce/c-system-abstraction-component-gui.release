@@ -5,6 +5,17 @@
 #ifdef __cplusplus
 using namespace sack;
 #endif
+
+#ifdef __cplusplus
+#define MSGPROTOCOL_NAMESPACE namespace sack { namespace msg { namespace protocol {
+#define MSGPROTOCOL_NAMESPACE_END }} }
+#else
+#define MSGPROTOCOL_NAMESPACE
+#define MSGPROTOCOL_NAMESPACE_END 
+#endif
+
+MSGPROTOCOL_NAMESPACE
+
 #define MSGQ_ID_BASE WIDE("Srvr")
 
 // this is a fun thing, in order to use it,
@@ -157,16 +168,22 @@ typedef SERVER_FUNCTION *server_function_table;
 typedef int (CPROC*EventHandlerFunction)(_32 MsgID, _32*params, _32 paramlen);
 typedef int (CPROC*EventHandlerFunctionEx)(_32 SourceID, _32 MsgID, _32*params, _32 paramlen);
 typedef int (CPROC*EventHandlerFunctionExx)( PTRSZVAL psv, _32 SourceID, _32 MsgID, _32*params, _32 paramlen);
+
 // result of EventHandlerFunction shall be one fo the following values...
 //   EVENT_HANDLED
 // 0 - no futher action required
 //   EVENT_WAIT_DISPATCH
 // 1 - when no further events are available, please send event_dispatched.
 //     this Event was handled by an internal queuing for later processing.
-#define EVENT_HANDLED 0
-#define EVENT_WAIT_DISPATCH  1
+enum EventResult {
+ EVENT_HANDLED = 0,
+ EVENT_WAIT_DISPATCH = 1
+};
 
-
+MSGPROTOCOL_NAMESPACE_END
+#ifdef __cplusplus
+using namespace sack::msg::protocol;
+#endif
 
 #endif
 // $Log: msgprotocol.h,v $

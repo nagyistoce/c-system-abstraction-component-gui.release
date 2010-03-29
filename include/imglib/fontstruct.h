@@ -24,15 +24,17 @@ typedef struct font_char_tag
 
 typedef struct font_tag
 {
-	_16 height; // distance between 'lines' of text
-	_16 baseline; // distance from top-left origin to character baseline.
-	        // the top of a character is now (y + baseline - ascent)
-	        // if this is more than (y) the remainder must be
-	        // filled with the background color.
-	        // the bottom is ( y + baseline - descent ) - if this is
+   // distance between 'lines' of text - the font may render above and below this height.
+	_16 height; 
+	 // distance from top-left origin to character baseline.
+	 // the top of a character is now (y + baseline - ascent)
+	 // if this is more than (y) the remainder must be
+	 // filled with the background color.
+	 // the bottom is ( y + baseline - descent ) - if this is
 	// less than height the remainder must be background filled.
-	// if 0 - characters will be 1 - old font - please compensate
-   // for change....
+   _16 baseline;
+	/* if 0 - characters will be 1 - old font - please compensate
+     for change.... */
 	_16 characters;
    _8 flags;
    _8 junk;

@@ -87,7 +87,7 @@ static int stop;
 #define WM_USER_SHUTDOWN     WM_USER+516
 #define WM_USER_MOUSE_CHANGE     WM_USER+517
 
-
+IMAGE_NAMESPACE
 
 struct saved_location
 {
@@ -104,6 +104,7 @@ struct sprite_method_tag
 	void(CPROC*RenderSprites)(PTRSZVAL psv, PRENDERER renderer, S_32 x, S_32 y, _32 w, _32 h );
 	PTRSZVAL psv;
 };
+IMAGE_NAMESPACE_END
 
 RENDER_NAMESPACE
 
@@ -4773,6 +4774,7 @@ RENDER_PROC (LOGICAL, HasFocus) (PRENDERER hVideo)
 
 //----------------------------------------------------------------------------
 
+#if ACTIVE_MESSAGE_IMPLEMENTED
 RENDER_PROC (int, SendActiveMessage) (PRENDERER dest, PACTIVEMESSAGE msg)
 {
    return 0;
@@ -4787,7 +4789,7 @@ RENDER_PROC (void, SetDefaultHandler) (PRENDERER hVideo,
                                        GeneralCallback general, PTRSZVAL psv)
 {
 }
-
+#endif
 //----------------------------------------------------------------------------
 
 RENDER_PROC (void, OwnMouseEx) (PVIDEO hVideo, _32 own DBG_PASS)
@@ -4978,12 +4980,17 @@ static RENDER_INTERFACE VidInterface = { InitDisplay
                                        , (void (CPROC*)(PRENDERER, MouseCallback, PTRSZVAL)) SetMouseHandler
                                        , (void (CPROC*)(PRENDERER, RedrawCallback, PTRSZVAL)) SetRedrawHandler
                                        , (void (CPROC*)(PRENDERER, KeyProc, PTRSZVAL)) SetKeyboardHandler
-                                       , (void (CPROC*)(PRENDERER, LoseFocusCallback, PTRSZVAL)) SetLoseFocusHandler, NULL   // default callback
+													,  SetLoseFocusHandler
+#if ACTIVE_MESSAGE_IMPLEMENTED
+                                          , NULL
+#endif
                                        , (void (CPROC*)(S_32 *, S_32 *)) GetMousePosition
                                        , (void (CPROC*)(PRENDERER, S_32, S_32)) SetMousePosition
                                        , HasFocus  // has focus
+#if ACTIVE_MESSAGE_IMPLEMENTED
                                        , NULL         // SendMessage
-                                       , NULL         // CrateMessage
+													, NULL         // CrateMessage
+#endif
                                        , GetKeyText
                                        , IsKeyDown
                                        , KeyDown
