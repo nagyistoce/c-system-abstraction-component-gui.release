@@ -27,7 +27,7 @@
 #undef ForAllInSet
 
 //----------------------------------------------------------------------------
-static int bLog; // put into a global structure, and configure.
+static int bLog = 1; // put into a global structure, and configure.
 
 #ifdef __cplusplus 
 namespace sack {
@@ -140,8 +140,8 @@ PGENERICSET GetFromSetPoolEx( GENERICSET **pSetSet, int setsetsizea, int setunit
 			if( n == maxcnt )
 				set = set->next;
 		}
+		if( bLog ) _lprintf( DBG_RELAY )( WIDE( "Unit result: %p from %p %d %d %d %d" ), unit, set, unitsize, maxcnt, n, ( ( (maxcnt +31) / 32 ) * 4 )  );
 	}
-	if( bLog ) _lprintf( DBG_RELAY )( WIDE( "Unit result: %p" ), unit );
 	return (PGENERICSET)unit;
 }
 
@@ -309,8 +309,14 @@ void DeleteFromSetExx( GENERICSET *pSet, void *unit, int unitsize, int max DBG_P
 			//Log1( WIDE("Found item in set at %d"), n / unitsize );
 			if( n % unitsize )
 			{
-				Log2( WIDE("Error in set member alignment! %d of %d"), n % unitsize, unitsize );
-				DebugBreak();
+				lprintf( WIDE("Error in set member alignment! %d %d %d %d %d %d of %d")
+						 , unit
+						 , pSet
+						 , &pSet->bUsed
+                   , ofs
+						 , n, n % unitsize, unitsize );
+            return;
+				//DebugBreak();
 			}
 			n /= unitsize;
 			ClearUsed( pSet, n );

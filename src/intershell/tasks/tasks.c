@@ -433,7 +433,7 @@ PRELOAD( RegisterTaskControls )
 
 //---------------------------------------------------------------------------
 
-PLOAD_TASK CPROC CreateTask( struct menu_button_tag *button )
+PLOAD_TASK CPROC CreateTask( PMENU_BUTTON button )
 {
 	PLOAD_TASK task = New( LOAD_TASK );
 	MemSet( task, 0, sizeof( LOAD_TASK ) );
@@ -444,7 +444,7 @@ PLOAD_TASK CPROC CreateTask( struct menu_button_tag *button )
    return task;
 }
 
-OnCreateMenuButton( WIDE("Task") )( struct menu_button_tag *button )
+OnCreateMenuButton( WIDE("Task") )( PMENU_BUTTON button )
 {
 	PLOAD_TASK task = New( LOAD_TASK );
 	MemSet( task, 0, sizeof( LOAD_TASK ) );

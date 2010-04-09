@@ -277,13 +277,19 @@ using namespace System;
 
 #ifdef SACK_BAG_EXPORTS
 # ifdef BUILD_GLUE
+// this is used as the export method appropriate for C#?
 #  define EXPORT_METHOD [DllImport(LibName)] public
 # else
 #  ifdef __cplusplus_cli
-#   define EXPORT_METHOD __declspec(dllexport)
-#   define IMPORT_METHOD __declspec(dllimport)
-#  define LITERAL_LIB_EXPORT_METHOD __declspec(dllexport)
-#  define LITERAL_LIB_IMPORT_METHOD extern
+#   ifdef __STATIC__
+#     define EXPORT_METHOD
+#     define IMPORT_METHOD extern
+#else
+#     define EXPORT_METHOD __declspec(dllexport)
+#     define IMPORT_METHOD __declspec(dllimport)
+#   endif
+#   define LITERAL_LIB_EXPORT_METHOD __declspec(dllexport)
+#   define LITERAL_LIB_IMPORT_METHOD extern
 //__declspec(dllimport)
 #  else
 /* Method to declare functions exported from a DLL. (nothign on
@@ -472,8 +478,8 @@ typedef int pid_t;
 //#define DYNAMIC_EXPORT
 //#define DYNAMIC_IMPORT extern
 #define PUBLIC(type,name) EXPORT_METHOD type CPROC name
-#define LIBMAIN() static int LibraryEntrance( void ) __attribute__((constructor)); static int LibraryEntrance( void )
-#define LIBEXIT() static int LibraryExit( void )     __attribute__((destructor)); static int LibraryExit( void )
+#define LIBMAIN() static int LibraryEntrance( void ) __attribute__((constructor)); static int LibraryEntrance( void ) { HINSTANCE hInstance = GetModuleHandle( NULL );
+#define LIBEXIT() } static int LibraryExit( void )    __attribute__((destructor)); static int LibraryExit( void )
 #define LIBMAIN_END()
 /* Portability Macro for porting legacy code forward. */
 #define FAR
@@ -1067,12 +1073,16 @@ typedef P_0 POINTER;
    with things like char const *.                               */
 typedef const void *CPOINTER;
 
+SACK_NAMESPACE_END
+
 //------------------------------------------------------
 // formatting macro defintions for [vsf]printf output of the above types
 #ifndef _MSC_VER
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 #endif
+
+SACK_NAMESPACE
 
 #if defined( __LINUX64__ ) || defined( _WIN64 )
 #define _32f   WIDE("u" )
@@ -1378,6 +1388,12 @@ typedef struct SimpleDataBlock {
    value.                                                       */
 _LINKLIST_NAMESPACE
 
+/* <combine sack::containers::list::LinkBlock>
+   
+   \ \                                         */
+/* <combine sack::containers::list::LinkBlock>
+   
+   \ \                                         */
 typedef struct LinkBlock
 {
 	/* How many pointers the list can contain now. */

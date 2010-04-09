@@ -10,12 +10,10 @@
 //----------------------------------------------------------------
 
 #include <vectlib.h>
-//#include "vecstruc.h"
+#include "vecstruc.h"
 //#include "vectlib.h"
 
-#ifdef __cplusplus
-namespace sack { namespace math { namespace vector {
-#endif
+VECTOR_NAMESPACE
 
 #undef _0
 #undef _X
@@ -30,7 +28,11 @@ static const _POINT __Z = {ZERO, ZERO,  ONE};
 static const _POINT __W = {ZERO, ZERO, ZERO, ONE};
 #endif
 #if defined( __GNUC__  ) && defined( __cplusplus )
+#ifdef __STATIC__
+#define PRE_EXTERN
+#else
 #define PRE_EXTERN extern
+#endif
 #else
 #define PRE_EXTERN
 #endif
@@ -52,7 +54,7 @@ const TRANSFORM __I = { { { 1, 0, 0, 0 }
 							 , { 0, 0, 0 } // rotaccel
 							 , ONE // time_scale
 							 , 0 // last_cpu
-							 , 0 // something
+							 //, 0 // something
 //							 , NULL // callbacks
   //                    , NULL // userdata
 };
@@ -1237,9 +1239,7 @@ void LoadTransform( PTRANSFORM pt, CTEXTSTR filename )
 
 }
 
-#ifdef __cplusplus
-}}} //namespace sack { namespace math { namespace vector {
-#endif
+VECTOR_NAMESPACE_END
 
 // $Log: vectlib.c,v $
 // Revision 1.15  2005/01/27 08:14:39  panther

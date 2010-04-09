@@ -40,9 +40,11 @@
 #endif
 #ifdef __cplusplus
 #define SACK_SYSTEM_NAMESPACE namespace sack {	namespace system {
+#define _SYSTEM_NAMESPACE namespace system {
 #define SACK_SYSTEM_NAMESPACE_END } }
 #else
 #define SACK_SYSTEM_NAMESPACE
+#define _SYSTEM_NAMESPACE 
 #define SACK_SYSTEM_NAMESPACE_END
 #endif
 
@@ -50,7 +52,8 @@
 #define HAVE_ENVIRONMENT
 #endif
 
-SACK_SYSTEM_NAMESPACE
+SACK_NAMESPACE
+	_SYSTEM_NAMESPACE
 
 typedef struct task_info_tag *PTASK_INFO;
 typedef void (CPROC*TaskEnd)(PTRSZVAL, PTASK_INFO task_ended);

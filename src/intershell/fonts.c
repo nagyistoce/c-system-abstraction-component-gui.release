@@ -7,6 +7,9 @@
 #include "fonts.h"
 
 #include <psi.h>
+
+INTERSHELL_NAMESPACE
+
 extern CONTROL_REGISTRATION menu_surface;
 
 
@@ -18,7 +21,7 @@ PRELOAD( RegisterFontConfigurationIDs )
 	EasyRegisterResource( WIDE( "intershell/font" ), BTN_EDITFONT, NORMAL_BUTTON_NAME );
 }
 
-typedef struct font_preset_tag
+typedef struct font_preset
 {
    TEXTCHAR *name;
 	Font font;
@@ -273,4 +276,6 @@ OnLoadCommon( WIDE( "Common Fonts" ) )( PCONFIG_HANDLER pch )
 {
 	AddConfigurationMethod( pch, WIDE("font preset %m=%B"), RecreateFont );
 }
+
+INTERSHELL_NAMESPACE_END
 

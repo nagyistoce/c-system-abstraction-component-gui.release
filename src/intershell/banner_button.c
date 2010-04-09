@@ -4,6 +4,8 @@
 #include "intershell_export.h"
 #include "intershell_registry.h"
 
+INTERSHELL_NAMESPACE
+
 typedef struct banner_button BANNER_BUTTON, *PBANNER_BUTTON;
 
 struct banner_button {
@@ -290,3 +292,4 @@ OnLoadControl( MAKE_BANNER_MESSAGE )( PCONFIG_HANDLER pch, PTRSZVAL psvBanner )
 	AddConfigurationMethod( pch, WIDE( "banner okay or cancel=%b" ), ConfigSetBannerOkayCancel );
 }
 
+INTERSHELL_NAMESPACE_END

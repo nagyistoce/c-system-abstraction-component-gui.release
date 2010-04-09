@@ -114,9 +114,11 @@
 
 #ifdef __cplusplus
 #define RENDER_NAMESPACE namespace sack { namespace image { namespace render {
+#define _RENDER_NAMESPACE namespace render {
 #define RENDER_NAMESPACE_END }}}
 #else
 #define RENDER_NAMESPACE 
+#define _RENDER_NAMESPACE 
 #define RENDER_NAMESPACE_END
 #endif
 
@@ -124,7 +126,12 @@
 #include <sack_types.h>
 #include <keybrd.h>
 #include <image.h>
-#include <msgprotocol.h>
+#ifndef __NO_INTERFACES__
+#include <procreg.h>   // for interface, can omit if no interfaces
+#endif
+#ifndef __NO_MSGSVR__
+#include <msgprotocol.h>  // for interface across the message service
+#endif
 
 #ifndef SECOND_RENDER_LEVEL
 #define SECOND_RENDER_LEVEL
@@ -161,12 +168,19 @@
 #  endif
 
 
-
-RENDER_NAMESPACE
+IMAGE_NAMESPACE
+/* PRENDERER is the primary object this namespace deals with.
+   
+   
+   See Also
+   <link render.h>                                            */
+_RENDER_NAMESPACE
 
 #ifndef PRENDERER
+	/* Application layer abstract structure to handle displays. This
+	   is the type returned by OpenDisplay.                          */
 	typedef struct HVIDEO_tag *PRENDERER;
-typedef struct HVIDEO_tag RENDERER;
+/*typedef struct HVIDEO_tag RENDERER;*/
 #endif
 
 // disable this functionality, it was never fully implemented, and is a lot to document.
@@ -273,10 +287,14 @@ enum {
  MSG_ThreadEventPost 
 };
 
+/* function signature for the close callback  which can be specified to handle events to redraw the display.  see SetCloseHandler. */
 typedef void (CPROC*CloseCallback)( PTRSZVAL psvUser );
+/* function signature for the redraw callback  which can be specified to handle events to redraw the display.  see SetRedrawHandler. */
 typedef void (CPROC*RedrawCallback)( PTRSZVAL psvUser, PRENDERER self );
-// would be 'wise' to retun 0 if ignored, 1 if observed (perhaps not used), but NOT ignored.
+/* function signature for the close callback  which can be specified to handle events to redraw the display.  see SetMouseHandler.
+  would be 'wise' to retun 0 if ignored, 1 if observed (perhaps not used), but NOT ignored.*/
 typedef int  (CPROC*MouseCallback)( PTRSZVAL psvUser, S_32 x, S_32 y, _32 b );
+/* function signature for the close callback  which can be specified to handle events to redraw the display.  see SetLoseFocusHandler. */
 typedef void (CPROC*LoseFocusCallback)( PTRSZVAL dwUser, PRENDERER pGain );
 // without a keyproc, you will still get key notification in the mousecallback
 // if KeyProc returns 0 or is NULL, then bound keys are checked... otherwise
@@ -650,18 +668,24 @@ enum DisplayAttributes {
    RENDER_PROC( void, MoveSizeDisplayRel )( PRENDERER hVideo
                                         , S_32 delx, S_32 dely
                                         , S_32 delw, S_32 delh );
-    RENDER_PROC( void , PutDisplayAbove)      ( PRENDERER, PRENDERER ); // this that - put this above that
-	 RENDER_PROC (void, PutDisplayIn) (PRENDERER hVideo, PRENDERER hContainer); /* put this in container
-	                                                                Parameters
-	                                                                hVideo :      Display to put into another display surface
-	                                                                hContainer :  The new parent window of the hVideo.
-	                                                                
-	                                                                Example
-	                                                                <code lang="c#">
-	                                                                Render render = OpenDisplay( 0 );
-	                                                                Render parent = OpenDisplay( 0 );
-	                                                                PutDisplayIn( render, parent );
-	                                                                </code>                                                   */
+		/* Put the display above another display. This makes sure that
+		   the displays are stacked at least in this order.
+		   Parameters
+		   this_display :  the display to put above another
+		   that_display :  the display that will be on the bottom.     */
+		RENDER_PROC( void , PutDisplayAbove)      ( PRENDERER this_display, PRENDERER that_display );
+      /* put this in container
+	   Parameters
+	   hVideo :      Display to put into another display surface
+	   hContainer :  The new parent window of the hVideo.
+	   
+	   Example
+	   <code lang="c#">
+	   Render render = OpenDisplay( 0 );
+	   Render parent = OpenDisplay( 0 );
+	   PutDisplayIn( render, parent );
+	   </code>                                                   */
+	 RENDER_PROC (void, PutDisplayIn) (PRENDERER hVideo, PRENDERER hContainer); 
 
     /* Gets the Image from the Render.
        Parameters
@@ -1086,6 +1110,8 @@ IMAGE_NAMESPACE
    work this way.                                               */
 RENDER_PROC( PSPRITE_METHOD, EnableSpriteMethod )(PRENDERER render, void(CPROC*RenderSprites)(PTRSZVAL psv, PRENDERER renderer, S_32 x, S_32 y, _32 w, _32 h ), PTRSZVAL psv );
 
+/* signature for callback method to pass to
+   WinShell_AcceptDroppedFiles.             */
 typedef void (CPROC*dropped_file_acceptor)(PTRSZVAL psv, CTEXTSTR filename, S_32 x, S_32 y );
 /* Adds a callback to call when a file is dropped. Each callback
    can return 0 that it did not accept the file, or 1 that it
@@ -1127,10 +1153,31 @@ RENDER_PROC( void, SetDisplayNoMouse )( PRENDERER hVideo, int bNoMouse );
    
    \ \                                                          */
 #define OwnMouse(d,o) OwnMouseEx( d, o DBG_SRC )
-    //IsKeyDown
-    //KeyDown
-    //KeyDouble
-    //GetKeyText
+
+/* <combine sack::image::render::OpenDisplaySizedAt@_32@_32@_32@S_32@S_32>
+   
+   \ \                                                                     */
+#define OpenDisplay(a)            OpenDisplaySizedAt(a,-1,-1,-1,-1)
+/* <combine sack::image::render::OpenDisplaySizedAt@_32@_32@_32@S_32@S_32>
+   
+   \ \                                                                     */
+#define OpenDisplaySized(a,w,h)   OpenDisplaySizedAt(a,w,h,-1,-1)
+/* <combine sack::image::render::OpenDisplayAboveSizedAt@_32@_32@_32@S_32@S_32@PRENDERER>
+   
+   \ \                                                                                    */
+#define OpenDisplayAbove(p,a)            OpenDisplayAboveSizedAt(p,-1,-1,-1,-1,a)
+/* <combine sack::image::render::OpenDisplayAboveSizedAt@_32@_32@_32@S_32@S_32@PRENDERER>
+   
+   \ \                                                                                    */
+#define OpenDisplayAboveSized(p,a,w,h)   OpenDisplayAboveSizedAt(p,w,h,-1,-1,a)
+/* <combine sack::image::render::OpenDisplayAboveUnderSizedAt@_32@_32@_32@S_32@S_32@PRENDERER@PRENDERER>
+   
+   \ \                                                                                                   */
+#define OpenDisplayUnderSizedAt(p,a,w,h,x,y) OpenDisplayAboveUnderSizedAt(a,w,h,-1,-1,NULL,p) 
+
+#ifndef __NO_INTERFACES__
+_INTERFACE_NAMESPACE
+
 #define RENDER_PROC_PTR(type,name) type  (CPROC*_##name)
 /* <combine sack::image::render::render_interface_tag>
    
@@ -1427,9 +1474,6 @@ typedef struct render_interface_tag
 
 } *PRENDER_INTERFACE, RENDER_INTERFACE;
 
-RENDER_NAMESPACE_END
-#include <procreg.h>
-RENDER_NAMESPACE
 /* RENDER_PROC( PRENDER_INTERFACE, GetDisplayInterface )( void
    );
    
@@ -1533,32 +1577,18 @@ typedef int check_this_variable;
 
 #endif
 
-/* <combine sack::image::render::OpenDisplaySizedAt@_32@_32@_32@S_32@S_32>
-   
-   \ \                                                                     */
-#define OpenDisplay(a)            OpenDisplaySizedAt(a,-1,-1,-1,-1)
-/* <combine sack::image::render::OpenDisplaySizedAt@_32@_32@_32@S_32@S_32>
-   
-   \ \                                                                     */
-#define OpenDisplaySized(a,w,h)   OpenDisplaySizedAt(a,w,h,-1,-1)
-/* <combine sack::image::render::OpenDisplayAboveSizedAt@_32@_32@_32@S_32@S_32@PRENDERER>
-   
-   \ \                                                                                    */
-#define OpenDisplayAbove(p,a)            OpenDisplayAboveSizedAt(p,-1,-1,-1,-1,a)
-/* <combine sack::image::render::OpenDisplayAboveSizedAt@_32@_32@_32@S_32@S_32@PRENDERER>
-   
-   \ \                                                                                    */
-#define OpenDisplayAboveSized(p,a,w,h)   OpenDisplayAboveSizedAt(p,w,h,-1,-1,a)
-/* <combine sack::image::render::OpenDisplayAboveUnderSizedAt@_32@_32@_32@S_32@S_32@PRENDERER@PRENDERER>
-   
-   \ \                                                                                                   */
-#define OpenDisplayUnderSizedAt(p,a,w,h,x,y) OpenDisplayAboveUnderSizedAt(a,w,h,-1,-1,NULL,p) 
+	_INTERFACE_NAMESPACE_END
+#ifdef __cplusplus
+	using namespace sack::image::render::interface;
+#endif
+#endif
+
+#ifndef __NO_MSGSVR__
 
 #ifdef DEFINE_RENDER_PROTOCOL
-#include <stddef.h>
+#include <stddef.h>  // offsetof
 // need to define BASE_RENDER_MESSAGE_ID before including this.
 //#define MSG_ID(method)  ( ( offsetof( struct render_interface_tag, _##method ) / sizeof( void(*)(void) ) ) + BASE_RENDER_MESSAGE_ID + MSG_EventUser )
-
 #define MSG_DisplayClientClose        MSG_ID(DisplayClientClose)
 #define MSG_SetApplicationTitle       MSG_ID(SetApplicationTitle)
 #define MSG_SetRendererTitle       MSG_ID(SetRendererTitle)
@@ -1615,6 +1645,7 @@ typedef int check_this_variable;
 #define MSG_UnbindKey               MSG_ID(UnbindKey)
 #define MSG_IsTouchDisplay          MSG_ID(IsTouchDisplay )
 #define MSG_GetNativeHandle             MSG_ID(GetNativeHandle)
+#endif
 #endif
 
 RENDER_NAMESPACE_END

@@ -345,14 +345,8 @@ int DoRegisterControl( PCONTROL_REGISTRATION pcr, int nSize )
 				//return pcr->TypeID;
 			}
 		}
-#ifdef __cplusplus
 #define EXTRA2 stuff.stuff.
 #define EXTRA stuff.
-#else
-      // anonymous structures...
-#define EXTRA2
-#define EXTRA
-#endif
 		RegisterIntValueEx( root, NULL, WIDE("extra"), pcr->EXTRA extra );
 		RegisterIntValueEx( root, NULL, WIDE("width"), pcr->EXTRA2 width );
 		RegisterIntValueEx( root, NULL, WIDE("height"), pcr->EXTRA2 height );
@@ -3293,7 +3287,7 @@ PSI_PROC( void, SizeCommon )( PSI_CONTROL pc, _32 width, _32 height )
 		ResizeImage( pc->Window, width, height );
 
 		{
-				extern void UpdateSurface( PCOMMON pc );
+				extern void UpdateSurface( PSI_CONTROL pc );
 				UpdateSurface( pc );
 		}
 
@@ -4472,7 +4466,7 @@ void AddCommonButtons( PSI_CONTROL pf, int *done, int *okay )
 //---------------------------------------------------------------------------
 
 _MOUSE_NAMESPACE
-PSI_PROC( int, InvokeDefaultButton )( PCOMMON pcNear, int bCancel )
+PSI_PROC( int, InvokeDefaultButton )( PSI_CONTROL pcNear, int bCancel )
 {
 	PSI_CONTROL pcf = GetFrame( pcNear );
 	if( pcf )
@@ -4489,7 +4483,7 @@ PSI_PROC( int, InvokeDefaultButton )( PCOMMON pcNear, int bCancel )
 			pc = GetControl( pcf, pf->nIDDefaultOK );
 		if( pc )
 		{
-			//extern void InvokeButton( PCOMMON );
+			//extern void InvokeButton( PSI_CONTROL );
 			InvokeButton( pc );
 			return 1;
 		}
@@ -4497,7 +4491,7 @@ PSI_PROC( int, InvokeDefaultButton )( PCOMMON pcNear, int bCancel )
    return 0;
 }
 
-int InvokeDefault( PCOMMON pc, int type )
+int InvokeDefault( PSI_CONTROL pc, int type )
 {
    return InvokeDefaultButton( pc, type );
 }

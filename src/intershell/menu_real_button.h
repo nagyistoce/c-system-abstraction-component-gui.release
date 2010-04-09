@@ -8,7 +8,10 @@
 #ifndef __NO_ANIMATION__
 #include "animation.h"
 #endif
-struct menu_button_tag
+
+INTERSHELL_NAMESPACE
+
+struct menu_button
 {
 	long long x, y, w, h;
 	//int nType;
@@ -66,5 +69,9 @@ struct menu_button_tag
 	PLIST no_show_on; // list of CTEXTSTR's that are system names this button is INvisible on.
 	PCanvasData canvas;
 	PLIST extra_config; // extra lines that are read from config, (for which do not have a plugin loaded), saved here
-	struct menu_button_tag *container_button; // macro elements have this set to their real button, so color updates auto propagate to physical button level.
+	struct menu_button *container_button; // macro elements have this set to their real button, so color updates auto propagate to physical button level.
 };
+
+typedef struct menu_button MENU_BUTTON;
+INTERSHELL_NAMESPACE_END
+

@@ -12,11 +12,6 @@
 #include <stdio.h>
 #include <sharemem.h>
 #include <configscript.h>
-/* these are quick hacks implemented to generilize the above */
-/* they should perhaps be moved out to intershell_registry.h for use by OnSave and OnLoad method */
-#define MakeElem( w, name, text ) genxElement name = genxDeclareElement( w, NULL, text, &l.status )
-#define MakeAttr( w, name, text ) genxAttribute name = genxDeclareAttribute( w, NULL, text, &l.status )
-#define AddAttr( attr, format, ... ) { TEXTCHAR tmp[256]; snprintf( tmp, sizeof( tmp ), format,## __VA_ARGS__ ); genxAddAttribute( attr, (constUtf8)tmp ); }
 
 #include <filesys.h> // pathrchr
 #include <../sexpat/expat.h>
@@ -32,6 +27,13 @@
 
 #include "pages.h"
 
+INTERSHELL_NAMESPACE
+
+/* these are quick hacks implemented to generilize the above */
+/* they should perhaps be moved out to intershell_registry.h for use by OnSave and OnLoad method */
+#define MakeElem( w, name, text ) genxElement name = genxDeclareElement( w, NULL, text, &l.status )
+#define MakeAttr( w, name, text ) genxAttribute name = genxDeclareAttribute( w, NULL, text, &l.status )
+#define AddAttr( attr, format, ... ) { TEXTCHAR tmp[256]; snprintf( tmp, sizeof( tmp ), format,## __VA_ARGS__ ); genxAddAttribute( attr, (constUtf8)tmp ); }
 
 extern CONTROL_REGISTRATION menu_surface;
 
@@ -1599,4 +1601,5 @@ void SaveButtonConfig( PSI_CONTROL pc_canvas, TEXTCHAR *filename )
 		}
 #endif
 }
+INTERSHELL_NAMESPACE_END
 

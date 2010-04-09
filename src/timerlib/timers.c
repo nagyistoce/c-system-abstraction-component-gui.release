@@ -129,6 +129,7 @@ struct threads_tag
    int nLine;
 };
 
+typedef struct threads_tag THREAD;
 #define MAXTHREADSPERSET 16
 DeclareSet( THREAD );
 
@@ -1426,7 +1427,7 @@ static void *WatchdogProc( void *unused )
 #endif
 //--------------------------------------------------------------------------
 
-TIMER_PROC( _32, AddTimerExx )( _32 start, _32 frequency, void (CPROC*callback)(PTRSZVAL user), PTRSZVAL user DBG_PASS )
+TIMER_PROC( _32, AddTimerExx )( _32 start, _32 frequency, TimerCallbackProc callback, PTRSZVAL user DBG_PASS )
 {
 	PTIMER timer = GetFromSet( TIMER, &g.timer_pool );
 					 //timer = AllocateEx( sizeof( TIMER ) DBG_RELAY );

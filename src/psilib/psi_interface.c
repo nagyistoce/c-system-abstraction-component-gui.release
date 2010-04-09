@@ -15,7 +15,7 @@ PSI_PROC(PSI_CONTROL, NotNULL)( PCOMMON pf, int options, int x, int y, int w, in
 }
 
 
-static CONTROL_INTERFACE ControlInterface = {
+static struct control_interface_tag ControlInterface = {
 #include "interface_data.h"
 };
 

@@ -12,7 +12,7 @@ struct sheet_tag {
 		_32 bDisabled : 1;
 		_32 bCustomColors : 1;
 	} flags;
-	PCOMMON content;  // each content has an ID... so select by ID;
+	PSI_CONTROL content;  // each content has an ID... so select by ID;
    Image active_slices[3], inactive_slices[3];
 	Image active, inactive;
    CDATA cActiveText, cInactiveText;
@@ -27,7 +27,7 @@ typedef struct multi_sheet_tag {
 		_32 bNoTabs : 1;
 		_32 bCustomColors : 1;
 	} flags;
-   PCOMMON mount_point;
+   PSI_CONTROL mount_point;
 	PSHEET sheets;
 	PSHEET current;
    PSHEET prior_sheet;
@@ -42,7 +42,7 @@ typedef struct multi_sheet_tag {
    _32 tab_pad; // this needs to be like some portion of the image..
 } SHEETCONTROL, *PSHEETCONTROL;
 
-static void ComputeHeight( PCOMMON pc )
+static void ComputeHeight( PSI_CONTROL pc )
 {
 	ValidatedControlData( PSHEETCONTROL, SHEET_CONTROL, psc, pc );
 	_32 TAB_HEIGHT, tmp1 = 0, tmp2 = 0;
@@ -135,7 +135,7 @@ static void BlotTab( Image surface, Image slices[3], int x, int width, int heigh
 	}
 }
 
-static int CPROC DrawSheetControl( PCOMMON pc )
+static int CPROC DrawSheetControl( PSI_CONTROL pc )
 {
 	ValidatedControlData( PSHEETCONTROL, SHEET_CONTROL, psc, pc );
 	Image surface;
@@ -275,7 +275,7 @@ static PSHEET GetSheetID( PSHEETCONTROL psc, _32 ID )
    return NULL;
 }
 
-static void SetCurrentPage( PCOMMON pControl, PSHEET sheet )
+static void SetCurrentPage( PSI_CONTROL pControl, PSHEET sheet )
 {
 	ValidatedControlData( PSHEETCONTROL, SHEET_CONTROL, psc, pControl );
    //lprintf( WIDE("Set a current page?") );
@@ -297,7 +297,7 @@ static void SetCurrentPage( PCOMMON pControl, PSHEET sheet )
 #ifdef DEBUG_SHEET
 			lprintf( WIDE("Orphan control %p"), psc->current->content );
 #endif
-			OrphanCommonEx( (PCOMMON)psc->current->content, FALSE );
+			OrphanCommonEx( (PSI_CONTROL)psc->current->content, FALSE );
          if( !sheet )
 				SmudgeCommon( pControl );
 		}
@@ -311,7 +311,7 @@ static void SetCurrentPage( PCOMMON pControl, PSHEET sheet )
 					 , psc->mount_point->child
 					 , sheet->content );
 #endif
-			AdoptCommonEx( (PCOMMON)psc->mount_point, NULL, (PCOMMON)sheet->content, FALSE );
+			AdoptCommonEx( (PSI_CONTROL)psc->mount_point, NULL, (PSI_CONTROL)sheet->content, FALSE );
 			SmudgeCommon( pControl );
 		}
 	}
@@ -321,7 +321,7 @@ static void SetCurrentPage( PCOMMON pControl, PSHEET sheet )
 	}
 }
 
-static int CPROC MouseSheetControl( PCOMMON pc, S_32 x, S_32 y, _32 b )
+static int CPROC MouseSheetControl( PSI_CONTROL pc, S_32 x, S_32 y, _32 b )
 {
    ValidatedControlData( PSHEETCONTROL, SHEET_CONTROL, psc, pc );
 	PSHEET sheet;
@@ -360,7 +360,7 @@ static int CPROC MouseSheetControl( PCOMMON pc, S_32 x, S_32 y, _32 b )
    return 1;
 }
 
-static void CPROC DestroySheetControl( PCOMMON pc )
+static void CPROC DestroySheetControl( PSI_CONTROL pc )
 {
    //ValidatedControlData( PSHEETCONTROL, SHEET_CONTROL, psc, pc );
 }
@@ -394,7 +394,7 @@ OnEditFrameDone( SHEET_CONTROL_NAME )( PSI_CONTROL pc )
 
 }
 
-static void CPROC AddingSheet( PCOMMON sheet, PCOMMON page )
+static void CPROC AddingSheet( PSI_CONTROL sheet, PSI_CONTROL page )
 {
 	ValidatedControlData( PSHEETCONTROL, SHEET_CONTROL, psc, sheet );
 	// if we haven't gotten a mount point yet, no use in
@@ -412,10 +412,10 @@ static void CPROC AddingSheet( PCOMMON sheet, PCOMMON page )
 #endif
 	OrphanCommonEx( page, FALSE );
 	AddSheet( sheet, page );
-   //(PCOMMON)sheet->common.parent = NULL;
+   //(PSI_CONTROL)sheet->common.parent = NULL;
 }
 
-static int CPROC InitSheetControl( PCOMMON pc )
+static int CPROC InitSheetControl( PSI_CONTROL pc )
 {
 	ValidatedControlData( PSHEETCONTROL, SHEET_CONTROL, psc, pc );
 	if( psc )
@@ -457,7 +457,7 @@ PRIORITY_PRELOAD( register_sheet_control, PSI_PRELOAD_PRIORITY ) {
 }
 
 
-PSI_PROC( void, AddSheet )( PCOMMON pControl, PCOMMON contents )
+PSI_PROC( void, AddSheet )( PSI_CONTROL pControl, PSI_CONTROL contents )
 {
    ValidatedControlData( PSHEETCONTROL, SHEET_CONTROL, psc, pControl );
    PSHEET sheet;
@@ -517,7 +517,7 @@ PSI_PROC( void, AddSheet )( PCOMMON pControl, PCOMMON contents )
 	}
 }
 
-PSI_PROC( int, RemoveSheet )( PCOMMON pControl, _32 ID )
+PSI_PROC( int, RemoveSheet )( PSI_CONTROL pControl, _32 ID )
 {
 	ValidatedControlData( PSHEETCONTROL, SHEET_CONTROL, psc, pControl );
 	if( psc )
@@ -545,7 +545,7 @@ PSI_PROC( int, RemoveSheet )( PCOMMON pControl, _32 ID )
 	return FALSE;
 }
 
-PSI_PROC( void, SetCurrentSheet )( PCOMMON pControl, _32 ID )
+PSI_PROC( void, SetCurrentSheet )( PSI_CONTROL pControl, _32 ID )
 {
 	ValidatedControlData( PSHEETCONTROL, SHEET_CONTROL, psc, pControl );
 	if( psc )
@@ -557,7 +557,7 @@ PSI_PROC( void, SetCurrentSheet )( PCOMMON pControl, _32 ID )
 }
 
 
-PSI_PROC( int, GetSheetSize )( PCOMMON pControl, _32 *width, _32 *height )
+PSI_PROC( int, GetSheetSize )( PSI_CONTROL pControl, _32 *width, _32 *height )
 {
    ValidatedControlData( PSHEETCONTROL, SHEET_CONTROL, psc, pControl );
 	if( psc )
@@ -571,32 +571,32 @@ PSI_PROC( int, GetSheetSize )( PCOMMON pControl, _32 *width, _32 *height )
    return 0;
 }
 
-PSI_PROC( PCOMMON, GetSheet )( PCOMMON pControl, _32 ID )
+PSI_PROC( PSI_CONTROL, GetSheet )( PSI_CONTROL pControl, _32 ID )
 {
    ValidatedControlData( PSHEETCONTROL, SHEET_CONTROL, psc, pControl );
 	if( psc )
 	{
 		PSHEET sheet = GetSheetID( psc, ID );
 		if( sheet )
-			return (PCOMMON)sheet->content;
+			return (PSI_CONTROL)sheet->content;
 	}
    return NULL;
 }
 
-PSI_PROC( PCOMMON, GetSheetControl )( PCOMMON pControl
+PSI_PROC( PSI_CONTROL, GetSheetControl )( PSI_CONTROL pControl
 												 , _32 IDSheet
 												 , _32 IDControl )
 {
    ValidatedControlData( PSHEETCONTROL, SHEET_CONTROL, psc, pControl );
 	if( psc )
 	{
-		PCOMMON sheet = GetSheet( pControl, IDSheet );
+		PSI_CONTROL sheet = GetSheet( pControl, IDSheet );
 		return GetControl( sheet, IDControl );
 	}
 	return NULL;
 }
 
-PSI_PROC( PCOMMON, GetCurrentSheet )( PCOMMON pControl )
+PSI_PROC( PSI_CONTROL, GetCurrentSheet )( PSI_CONTROL pControl )
 {
    ValidatedControlData( PSHEETCONTROL, SHEET_CONTROL, psc, pControl );
 	if( psc )
@@ -608,7 +608,7 @@ PSI_PROC( PCOMMON, GetCurrentSheet )( PCOMMON pControl )
 }
 
 
-PSI_PROC( void, DisableSheet )( PCOMMON pControl, _32 ID, LOGICAL bDisable )
+PSI_PROC( void, DisableSheet )( PSI_CONTROL pControl, _32 ID, LOGICAL bDisable )
 {
    ValidatedControlData( PSHEETCONTROL, SHEET_CONTROL, psc, pControl );
 	if( psc )
@@ -668,7 +668,7 @@ static void SliceImages( Image image, Image slices[3] )
 
 //-------------------------------------------------------------------
 
-void SetTabImages( PCOMMON pControl, Image active, Image inactive )
+void SetTabImages( PSI_CONTROL pControl, Image active, Image inactive )
 {
 	ValidatedControlData( PSHEETCONTROL, SHEET_CONTROL, psc, pControl );
 	if( psc )
@@ -689,7 +689,7 @@ void SetTabImages( PCOMMON pControl, Image active, Image inactive )
 //-------------------------------------------------------------------
 
 // set tab images on a per-sheet basis, overriding the defaults specified.
-void SetSheetTabImages( PCOMMON pControl, _32 ID, Image active, Image inactive )
+void SetSheetTabImages( PSI_CONTROL pControl, _32 ID, Image active, Image inactive )
 {
 	ValidatedControlData( PSHEETCONTROL, SHEET_CONTROL, psc, pControl );
 	if( psc )
@@ -712,7 +712,7 @@ void SetSheetTabImages( PCOMMON pControl, _32 ID, Image active, Image inactive )
 
 //-------------------------------------------------------------------
 
-void SetTabTextColors( PCOMMON pControl, CDATA cActive, CDATA cInactive )
+void SetTabTextColors( PSI_CONTROL pControl, CDATA cActive, CDATA cInactive )
 {
 	ValidatedControlData( PSHEETCONTROL, SHEET_CONTROL, psc, pControl );
 	if( psc )
@@ -726,7 +726,7 @@ void SetTabTextColors( PCOMMON pControl, CDATA cActive, CDATA cInactive )
 
 //-------------------------------------------------------------------
 
-void SetSheetTabTextColors( PCOMMON pControl, _32 ID, CDATA cActive, CDATA cInactive )
+void SetSheetTabTextColors( PSI_CONTROL pControl, _32 ID, CDATA cActive, CDATA cInactive )
 {
 	ValidatedControlData( PSHEETCONTROL, SHEET_CONTROL, psc, pControl );
 	if( psc )

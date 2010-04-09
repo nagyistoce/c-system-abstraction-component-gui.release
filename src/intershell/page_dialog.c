@@ -9,7 +9,8 @@
  */
 
 
-
+#if 0
+// obsoleted.
 #include <sharemem.h>
 
 #include "intershell_local.h"
@@ -93,4 +94,4 @@ OnEditControl( PAGE_CHANGER_NAME )( PTRSZVAL psv, PSI_CONTROL parent_frame )
 	return psv;
 }
 
-
+#endif

@@ -11,10 +11,6 @@
 #endif
 #endif
 
-typedef struct CanvasData  CanvasData, *PCanvasData;
-
-
-
 
 #include <sack_types.h>
 #include <image.h>
@@ -24,16 +20,23 @@ typedef struct CanvasData  CanvasData, *PCanvasData;
 
 #include "widgets/include/buttons.h"
 
+#include "intershell_export.h"
+#include "loadsave.h"
+
+INTERSHELL_NAMESPACE
+
+typedef struct CanvasData  CanvasData, *PCanvasData;
+INTERSHELL_NAMESPACE_END
+
+#include "pages.h"
+
+INTERSHELL_NAMESPACE
+
 #ifdef INTERSHELL_SOURCE
 #define g global_pos_data
 #endif
 
 
-
-#include "pages.h"
-#include "intershell_export.h"
-#include "loadsave.h"
-#include "intershell_button.h"
 
 #define GLARE_FLAG_MULTISHADE 1
 #define GLARE_FLAG_SHADE 2
@@ -351,7 +354,10 @@ void FlushToKey( PMENU_BUTTON button );
 
 void SetMacroResult( int allow_continue );
 
+INTERSHELL_NAMESPACE_END
 
 #include "intershell_registry.h"
+
+
 
 #endif

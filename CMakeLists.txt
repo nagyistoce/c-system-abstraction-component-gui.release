@@ -427,9 +427,28 @@ add_library( sack_bag SHARED
 SET_TARGET_PROPERTIES(sack_bag PROPERTIES
                   DEFINE_SYMBOL SACK_BAG_EXPORTS
                   COMPILE_FLAGS  "-DTARGET_LABEL=sack_bag ${ExtraFlags} ${ExtraRenderFlags}"
-                  
-                  )
-                  
+		  SOLUTION_FOLDER "MyFolder" 
+)
+
+add_library( sack_bags 
+    ${FIRST_GCC_LIBRARY_SOURCE} 
+    ${BASE_SOURCES} 
+    ${ODBC_SOURCES}
+    ${BAG_SQLITE_SOURCES}
+    ${IMAGE_SOURCES} 
+    ${VIDLIB_SOURCES} 
+    ${PSI_SOURCES} 
+    ${JPEG_SOURCE}
+    ${ZLIB_SOURCE}
+    ${PNG_SOURCE}
+    ${FREETYPE_SOURCE}
+  ${LAST_GCC_LIBRARY_SOURCE} )
+SET_TARGET_PROPERTIES(sack_bags PROPERTIES
+                  DEFINE_SYMBOL SACK_BAG_EXPORTS
+                  COMPILE_FLAGS  "-DTARGET_LABEL=sack_bag ${ExtraFlags} ${ExtraRenderFlags} -D__STATIC__"
+		  SOLUTION_FOLDER "MyFolder" 
+)
+
 if( __WINDOWS_ARM_CE__ )
 SET_TARGET_PROPERTIES( sack_bag PROPERTIES LINK_LIBRARIES "" )
 endif()
@@ -439,7 +458,10 @@ ADD_DEPENDENCIES( sack_bag generate_foo )
 SET_TARGET_PROPERTIES(sack_bag PROPERTIES LINK_FLAGS "option resource=all_resources.res")
 
 endif()
+
 set( SACK_LIBRARY sack_bag )
+
+set( SACK_LIBRARY_ARCH sack_bags )
 
 if( __ARM__ )
 target_link_libraries( sack_bag ws2 mmtimer iphlpapi coredll corelibc.lib)

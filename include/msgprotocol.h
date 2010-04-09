@@ -7,14 +7,38 @@ using namespace sack;
 #endif
 
 #ifdef __cplusplus
-#define MSGPROTOCOL_NAMESPACE namespace sack { namespace msg { namespace protocol {
+#define _MSG_NAMESPACE  namespace msg {
+#define _PROTOCOL_NAMESPACE namespace protocol {
+#define MSGPROTOCOL_NAMESPACE namespace sack { _MSG_NAMESPACE _PROTOCOL_NAMESPACE
 #define MSGPROTOCOL_NAMESPACE_END }} }
 #else
+#define _MSG_NAMESPACE
+#define _PROTOCOL_NAMESPACE 
 #define MSGPROTOCOL_NAMESPACE
 #define MSGPROTOCOL_NAMESPACE_END 
 #endif
 
-MSGPROTOCOL_NAMESPACE
+SACK_NAMESPACE
+	/* This namespace contains an implmentation of inter process
+	   communications using a set of message queues which result
+	   from 'msgget' 'msgsnd' and 'msgrcv'. This are services
+	   available under a linux kernel. Reimplemented a version to
+	   service for windows. This is really a client/service
+	   registration and message routing system, it is not the
+	   message queue itself. See <link sack::containers::message, message>
+	   for the queue implementation (again, under linux, does not
+	   use this custom queue).
+	   
+	   
+	   See Also
+	   RegisterService
+	   
+	   LoadService                                                         */
+	_MSG_NAMESPACE
+/* Defines structures and methods for receiving and sending
+	   messages. Also defines some utility macros for referencing
+		message ID from a user interface structure.                */
+	_PROTOCOL_NAMESPACE
 
 #define MSGQ_ID_BASE WIDE("Srvr")
 

@@ -38,7 +38,7 @@ void XMLCALL start_tags( void *UserData
 	TEXTSTR control_data = NULL;
 	TEXTSTR IDName = NULL;
 	TEXTSTR type = NULL;
-	PCOMMON pc;
+	PSI_CONTROL pc;
 	CTEXTSTR *p = atts;
 	//lprintf( WIDE("begin a tag %s with..."), name );
 	while( p && *p )
@@ -117,7 +117,7 @@ void XMLCALL start_tags( void *UserData
 	if( IDName )
 	{
 		//lprintf( WIDE( "Making a control... %s %s %s" ), type?type:WIDE("notype"), caption?caption:WIDE("nocatpion"), IDName );
-		pc = MakeNamedCaptionedControlByName( (PCOMMON)UserData
+		pc = MakeNamedCaptionedControlByName( (PSI_CONTROL)UserData
 														, type
 														, x, y
 														, width, height
@@ -129,7 +129,7 @@ void XMLCALL start_tags( void *UserData
 	else
 	{
 		//lprintf( WIDE( "Making a control... %s %s" ), type?type:WIDE("notype"), caption?caption:WIDE("nocatpion") );
-		pc = MakeNamedCaptionedControl( (PCOMMON)UserData
+		pc = MakeNamedCaptionedControl( (PSI_CONTROL)UserData
 														, type
 														, x, y
 														, width, height
@@ -166,7 +166,7 @@ void XMLCALL start_tags( void *UserData
 void XMLCALL end_tags( void *UserData
 							, const XML_Char *name )
 {
-	PCOMMON pc = (PCOMMON)UserData;
+	PSI_CONTROL pc = (PSI_CONTROL)UserData;
 	//lprintf( WIDE("Ended a tag %s.."), name );
 	if( pc )
 		XML_SetUserData( xp, pc->parent );
@@ -217,7 +217,7 @@ PSI_CONTROL ParseXMLFrameEx( POINTER buffer, _32 size DBG_PASS )
 }
 
 PSI_CONTROL LoadXMLFrameOverEx( PSI_CONTROL parent, CTEXTSTR file DBG_PASS )
-//PCOMMON  LoadXMLFrame( char *file )
+//PSI_CONTROL  LoadXMLFrame( char *file )
 {
 	POINTER buffer;
 	CTEXTSTR _file; // temp storage for prior value(create frame in place, allow moving later)
@@ -333,7 +333,7 @@ PSI_CONTROL LoadXMLFrameOverEx( PSI_CONTROL parent, CTEXTSTR file DBG_PASS )
 }
 
 PSI_CONTROL LoadXMLFrameEx( CTEXTSTR file DBG_PASS )
-//PCOMMON  LoadXMLFrame( char *file )
+//PSI_CONTROL  LoadXMLFrame( char *file )
 {
    return LoadXMLFrameOverEx( NULL, file DBG_RELAY );
 }

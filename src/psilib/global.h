@@ -33,6 +33,7 @@
 
 PSI_NAMESPACE
 
+//DOM-IGNORE-BEGIN
 typedef struct global_tag
 {
 #ifndef PSI_SERVICE
@@ -92,6 +93,9 @@ extern
 #    endif
 #  endif
 #endif
+/* This is the structure PSI uses to track .... what? The
+   application has to know its own handles... what does PSI keep
+   anyhow? most methods are registered now.                      */
 PSI_GLOBAL g
 #ifndef CONTROL_BASE
 ;
@@ -121,6 +125,7 @@ PSI_GLOBAL g
             } };
 
 #endif
+//DOM-IGNORE-END
 
 #ifndef CONTROL_BASE
 extern

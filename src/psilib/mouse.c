@@ -11,14 +11,14 @@
 //#define DEBUG_MOUSE_SMUDGE
 //---------------------------------------------------------------------------
 PSI_NAMESPACE
-	void UpdateSomeControls( PCOMMON pfc, P_IMAGE_RECTANGLE pRect );
+	void UpdateSomeControls( PSI_CONTROL pfc, P_IMAGE_RECTANGLE pRect );
 PSI_NAMESPACE_END
 
 PSI_MOUSE_NAMESPACE
 
 //---------------------------------------------------------------------------
 
-	static void DrawHotSpotEx( PCOMMON pc, P_IMAGE_POINT bias, P_IMAGE_POINT point, int hot DBG_PASS )
+	static void DrawHotSpotEx( PSI_CONTROL pc, P_IMAGE_POINT bias, P_IMAGE_POINT point, int hot DBG_PASS )
 #define DrawHotSpot(pc,bias,point,hot) DrawHotSpotEx(pc,bias,point,hot DBG_SRC)
 {
     Image surface = pc->Window;
@@ -38,7 +38,7 @@ PSI_MOUSE_NAMESPACE
 
 //---------------------------------------------------------------------------
 
-void DrawHotSpotsEx( PCOMMON pf, PEDIT_STATE pEditState DBG_PASS )
+void DrawHotSpotsEx( PSI_CONTROL pf, PEDIT_STATE pEditState DBG_PASS )
 #define DrawHotSpots(pf,pe) DrawHotSpotsEx(pf,pe DBG_SRC)
 {
 	int n;
@@ -70,7 +70,7 @@ void DrawHotSpotsEx( PCOMMON pf, PEDIT_STATE pEditState DBG_PASS )
 void SetupHotSpots( PEDIT_STATE pEditState )
 {
 	int bias_x = 0, bias_y = 0;
-	PCOMMON pCom = (PCOMMON)pEditState->pCurrent;
+	PSI_CONTROL pCom = (PSI_CONTROL)pEditState->pCurrent;
 	do
 	{
 		bias_x += pCom->surface_rect.x;
@@ -214,7 +214,7 @@ static int MouseInHotSpot( PEDIT_STATE pEditState, int x, int y DBG_PASS )
 }
 
 //---------------------------------------------------------------------------
-static int CPROC EditControlKeyProc( PCOMMON pc, _32 key )
+static int CPROC EditControlKeyProc( PSI_CONTROL pc, _32 key )
 {
 	PPHYSICAL_DEVICE pf = GetFrame(pc)->device;
 #ifdef HOTSPOT_DEBUG
@@ -271,13 +271,13 @@ static int CPROC EditControlKeyProc( PCOMMON pc, _32 key )
 	}
 	return 0;
 }
-//static int (CPROC*EditControlList)(PCOMMON,_32) = { EditControlKeyProc };
+//static int (CPROC*EditControlList)(PSI_CONTROL,_32) = { EditControlKeyProc };
 
 //---------------------------------------------------------------------------
 _MOUSE_NAMESPACE_END
-void SetCommonFocus( PCOMMON pc )
+void SetCommonFocus( PSI_CONTROL pc )
 {
-	PCOMMON frame;
+	PSI_CONTROL frame;
 	if( pc && ( frame = GetFrame( pc ) ) )
 	{
 		PPHYSICAL_DEVICE pf = frame->device;
@@ -295,7 +295,7 @@ void SetCommonFocus( PCOMMON pc )
 
 			if( !pc->flags.bDisable && !pc->flags.bNoFocus )
 			{
-				PCOMMON test;
+				PSI_CONTROL test;
 				test = pc->parent;
 				while( test )
 				{
@@ -356,7 +356,7 @@ void SetCommonFocus( PCOMMON pc )
 	}
 }
 
-int IsControlFocused( PCOMMON pc )
+int IsControlFocused( PSI_CONTROL pc )
 {
 	if( pc && pc->flags.bFocused )
 		return TRUE;
@@ -366,7 +366,7 @@ _MOUSE_NAMESPACE
 
 //---------------------------------------------------------------------------
 
-void AddUseEx( PCOMMON pc DBG_PASS )
+void AddUseEx( PSI_CONTROL pc DBG_PASS )
 {
 	pc->InUse++;
 #ifdef DEBUG_ADD_DELETEUSE
@@ -380,7 +380,7 @@ void AddUseEx( PCOMMON pc DBG_PASS )
 
 //---------------------------------------------------------------------------
 
-void DeleteUseEx( PCOMMON *pc DBG_PASS )
+void DeleteUseEx( PSI_CONTROL *pc DBG_PASS )
 {
 	if( pc && *pc )
 	{
@@ -392,8 +392,8 @@ void DeleteUseEx( PCOMMON *pc DBG_PASS )
          if( !(*pc)->flags.bDestroy )
 			{
             // do update with use still locked...
-				PCOMMON parent = *pc;
-				//PCOMMON update = NULL;
+				PSI_CONTROL parent = *pc;
+				//PSI_CONTROL update = NULL;
 				while( parent && ( parent->parent && !parent->device ) /*&& (parent->flags.bTransparent || parent->flags.bDirty)*/ )
 				{
 					if( parent->flags.bDirty )
@@ -433,7 +433,7 @@ void DeleteUseEx( PCOMMON *pc DBG_PASS )
 
 //---------------------------------------------------------------------------
 
-void ReleaseCommonUse( PCOMMON pc )
+void ReleaseCommonUse( PSI_CONTROL pc )
 {
 // set fake decrement to this ...
 // we can force the render code of deleteuse to run
@@ -449,9 +449,9 @@ void ReleaseCommonUse( PCOMMON pc )
 
 //---------------------------------------------------------------------------
 
-void OwnCommonMouse( PCOMMON pc, int bOwn )
+void OwnCommonMouse( PSI_CONTROL pc, int bOwn )
 {
-	PCOMMON pfc = GetFrame( pc );
+	PSI_CONTROL pfc = GetFrame( pc );
 	PPHYSICAL_DEVICE pf = pfc->device;
 #ifdef DETAILED_MOUSE_DEBUG
 	lprintf( "Own Common Mouse called on %p %s", pc, bOwn?"OWN":"release" );
@@ -463,7 +463,7 @@ void OwnCommonMouse( PCOMMON pc, int bOwn )
 
 //---------------------------------------------------------------------------
 
-void AddWaitEx( PCOMMON pc DBG_PASS )
+void AddWaitEx( PSI_CONTROL pc DBG_PASS )
 {
 	pc->InWait++;
 #ifdef DEBUG_ADD_DELETEUSE
@@ -473,7 +473,7 @@ void AddWaitEx( PCOMMON pc DBG_PASS )
 
 //---------------------------------------------------------------------------
 
-void DeleteWaitEx( PCOMMON *pc DBG_PASS )
+void DeleteWaitEx( PSI_CONTROL *pc DBG_PASS )
 {
 	if( pc && *pc )
 	{
@@ -495,7 +495,7 @@ void DeleteWaitEx( PCOMMON *pc DBG_PASS )
 
 //---------------------------------------------------------------------------
 
-static PCOMMON FindControl( PCOMMON pfc, PCOMMON pc, int x, int y, int b )
+static PSI_CONTROL FindControl( PSI_CONTROL pfc, PSI_CONTROL pc, int x, int y, int b )
 {
    // input x, y relative to the current frame bias on input.
 	// _x, _y are the saved input values to this function
@@ -578,7 +578,7 @@ static PCOMMON FindControl( PCOMMON pfc, PCOMMON pc, int x, int y, int b )
 #endif
             if( pc->child )
             {
-               PCOMMON child;
+               PSI_CONTROL child;
 #ifdef DETAILED_MOUSE_DEBUG
                lprintf( WIDE("To find a child control... at %d,%d "), x, y );
 #endif
@@ -633,7 +633,7 @@ static PCOMMON FindControl( PCOMMON pfc, PCOMMON pc, int x, int y, int b )
          // the actual surface of the control...
 			// and we do not change active controls until surpassing THAT bound
 			{
-				PCOMMON parent_non_private = pc;
+				PSI_CONTROL parent_non_private = pc;
 				while( parent_non_private && ( parent_non_private->BorderType & BORDER_NO_EXTRA_INIT ) )
 				{
 					parent_non_private = parent_non_private->parent;
@@ -645,12 +645,12 @@ static PCOMMON FindControl( PCOMMON pfc, PCOMMON pc, int x, int y, int b )
 				// found containing the mouse.  the 'pc' for this subsection is the top control
 				// which does not have a private flag... could mass replace this code
             // to use 'parent_non_private' instead of 'pc' but I was lazy and clever tonight.
-				PCOMMON pc = parent_non_private;
+				PSI_CONTROL pc = parent_non_private;
 #ifdef HOTSPOT_DEBUG
 				lprintf( WIDE("edit state active... do some stuff... "));
 #endif
             if( pc->nType &&  // don't set focus to the frame...
-               (PCOMMON)pc != pf->EditState.pCurrent )
+               (PSI_CONTROL)pc != pf->EditState.pCurrent )
             {
                if( pf->EditState.pCurrent )
 					{
@@ -674,7 +674,7 @@ static PCOMMON FindControl( PCOMMON pfc, PCOMMON pc, int x, int y, int b )
                   pf->EditState.pCurrent->_KeyProc = pf->EditState._KeyProc;
                   SmudgeSomeControls( pf->EditState.pCurrent, &upd );
                }
-               pf->EditState.pCurrent = (PCOMMON)pc;
+               pf->EditState.pCurrent = (PSI_CONTROL)pc;
                // override the current key proc so arrows work...
 #ifdef HOTSPOT_DEBUG
 					lprintf( WIDE("overriding key method.") );
@@ -683,8 +683,8 @@ static PCOMMON FindControl( PCOMMON pfc, PCOMMON pc, int x, int y, int b )
 					pf->EditState._KeyProc = pf->EditState.pCurrent->_KeyProc;
 					pf->EditState.pCurrent->n_KeyProc = 1;
 					{
-						static int (CPROC**tmp)(PCOMMON,_32);
-						tmp = (int(CPROC**)(PCOMMON,_32))Allocate( sizeof( int (CPROC *)(PCOMMON,_32) ) );
+						static int (CPROC**tmp)(PSI_CONTROL,_32);
+						tmp = (int(CPROC**)(PSI_CONTROL,_32))Allocate( sizeof( int (CPROC *)(PSI_CONTROL,_32) ) );
                   tmp[0] = EditControlKeyProc;
 						pf->EditState.pCurrent->_KeyProc = tmp;//&EditControlList /*EditControlKeyProc*/;
 					}
@@ -724,8 +724,8 @@ static PCOMMON FindControl( PCOMMON pfc, PCOMMON pc, int x, int y, int b )
 
 int CPROC FirstFrameMouse( PPHYSICAL_DEVICE pf, S_32 x, S_32 y, _32 b, int bCallOriginal )
 {
-   PCOMMON pc = pf->common;
-	extern void DumpFrameContents( PCOMMON pc );
+   PSI_CONTROL pc = pf->common;
+	extern void DumpFrameContents( PSI_CONTROL pc );
    //DumpFrameContents( pc );
 #if defined DETAILED_MOUSE_DEBUG //|| defined EDIT_MOUSE_DEBUG
     lprintf( WIDE("Mouse Event: %p %d %d %d"), pf, x, y, b );
@@ -1034,7 +1034,7 @@ int CPROC FirstFrameMouse( PPHYSICAL_DEVICE pf, S_32 x, S_32 y, _32 b, int bCall
 
 //---------------------------------------------------------------------------
 
-PSI_PROC( void, SetFrameMousePosition )( PCOMMON pfc, int x, int y )
+PSI_PROC( void, SetFrameMousePosition )( PSI_CONTROL pfc, int x, int y )
 {
    PPHYSICAL_DEVICE pf = pfc->device;
 	//ValidatedControlData( PFRAME, CONTROL_FRAME, pf, pfc );
@@ -1052,7 +1052,7 @@ PSI_PROC( void, SetFrameMousePosition )( PCOMMON pfc, int x, int y )
 //---------------------------------------------------------------------------
 
 int HandleEditStateMouse( PEDIT_STATE pEditState
-                        , PCOMMON pfc
+                        , PSI_CONTROL pfc
 								, S_32 x
 								, S_32 y
 								, _32 b )
@@ -1288,10 +1288,10 @@ int HandleEditStateMouse( PEDIT_STATE pEditState
 
 //---------------------------------------------------------------------------
 
-int InvokeMouseMethod( PCOMMON pfc, S_32 x, S_32 y, _32 b )
+int InvokeMouseMethod( PSI_CONTROL pfc, S_32 x, S_32 y, _32 b )
 {
 	PPHYSICAL_DEVICE pf = pfc->device;
-   PCOMMON pCurrent;
+   PSI_CONTROL pCurrent;
    //ValidatedControlData( PFRAME, CONTROL_FRAME, pf, pfc );
    if( !pf )
 		return 0;
@@ -1303,7 +1303,7 @@ int InvokeMouseMethod( PCOMMON pfc, S_32 x, S_32 y, _32 b )
    {
 		int result;
 		pCurrent = pf->pCurrent;
-      if( !pf->flags.bCaptured && ( pCurrent == (PCOMMON)pfc ) )
+      if( !pf->flags.bCaptured && ( pCurrent == (PSI_CONTROL)pfc ) )
       {
 #ifdef DETAILED_MOUSE_DEBUG
          lprintf( WIDE("**** Calling frame's mouse...") );
@@ -1346,7 +1346,7 @@ int InvokeMouseMethod( PCOMMON pfc, S_32 x, S_32 y, _32 b )
 
 //---------------------------------------------------------------------------
 
-int IsMouseInCurrent( PCOMMON pfc, S_32 x, S_32 y, _32 is_surface, _32 b )
+int IsMouseInCurrent( PSI_CONTROL pfc, S_32 x, S_32 y, _32 is_surface, _32 b )
 {
 	PPHYSICAL_DEVICE pf = pfc->device;
 	//ValidatedControlData( PFRAME, CONTROL_FRAME, pf, pfc );
@@ -1364,7 +1364,7 @@ int IsMouseInCurrent( PCOMMON pfc, S_32 x, S_32 y, _32 is_surface, _32 b )
 		return FALSE;
 
 	if( pf->EditState.flags.bActive &&
-		(PCOMMON)pf->EditState.pCurrent == (PCOMMON)pf->pCurrent )
+		(PSI_CONTROL)pf->EditState.pCurrent == (PSI_CONTROL)pf->pCurrent )
 	{
 		tolerance[0] = SPOT_SIZE;
 		tolerance[1] = SPOT_SIZE;
@@ -1383,7 +1383,7 @@ int IsMouseInCurrent( PCOMMON pfc, S_32 x, S_32 y, _32 is_surface, _32 b )
 				(S_64)x < ( pf->pCurrent->surface_rect.width - 2*tolerance[0] ) &&
 				(S_64)y < ( pf->pCurrent->surface_rect.height - 2*tolerance[1] )  )
 			{
-				PCOMMON pc;
+				PSI_CONTROL pc;
 #ifdef DETAILED_MOUSE_DEBUG
 				lprintf( WIDE("Mouse (%d,%d) %08x is still in current control (%d,%d)-(%d,%d)... bias(%d,%d) let's see - does it have children? %p")
 						 , x, y, b
@@ -1496,9 +1496,9 @@ int CPROC AltFrameMouse( PTRSZVAL psvCommon, S_32 x, S_32 y, _32 b )
 {
 	PPHYSICAL_DEVICE pf = (PPHYSICAL_DEVICE)psvCommon;
 	//PFRAME pf = (PFRAME)psvCommon;
-	PCOMMON pc = pf->common;
-	PCOMMON pcIn;
-	extern void DumpFrameContents( PCOMMON );
+	PSI_CONTROL pc = pf->common;
+	PSI_CONTROL pcIn;
+	extern void DumpFrameContents( PSI_CONTROL );
 	if( !pc )
 	{
 		// maybe this was closed before it actually got the first message?
@@ -1527,7 +1527,7 @@ int CPROC AltFrameMouse( PTRSZVAL psvCommon, S_32 x, S_32 y, _32 b )
 			 , pf->CurrentBias.flags.bias_is_surface?"surface":"frame"
 			 );
 #endif
-   AddUse( (PCOMMON)pc );
+   AddUse( (PSI_CONTROL)pc );
 	if( pf->flags.bCaptured )
 	{
 #ifdef DETAILED_MOUSE_DEBUG
@@ -1735,11 +1735,11 @@ int CPROC AltFrameMouse( PTRSZVAL psvCommon, S_32 x, S_32 y, _32 b )
 
 //---------------------------------------------------------------------------
 
-int CPROC DefaultFrameMouse( PCOMMON pc, S_32 x, S_32 y, _32 b )
+int CPROC DefaultFrameMouse( PSI_CONTROL pc, S_32 x, S_32 y, _32 b )
 {
 	// okay really frame mouse proc is JUST like every other
 	// control proc- mouse coordinates are relative to the surface.
-   PCOMMON frame = GetFrame( pc );
+   PSI_CONTROL frame = GetFrame( pc );
 	PPHYSICAL_DEVICE pf = frame?frame->device:NULL;
 	if( !pf )
 		return FALSE; //probably destroyed or something...
@@ -1772,13 +1772,13 @@ int CPROC DefaultFrameMouse( PCOMMON pc, S_32 x, S_32 y, _32 b )
 
 //---------------------------------------------------------------------------
 
-void CaptureCommonMouse( PCOMMON pc, LOGICAL bCapture )
+void CaptureCommonMouse( PSI_CONTROL pc, LOGICAL bCapture )
 {
-	PCOMMON pf = GetFrame( pc );
+	PSI_CONTROL pf = GetFrame( pc );
 	PPHYSICAL_DEVICE pd = pf?pf->device:NULL;
 	if( pd )
 	{
-      PCOMMON _pc;
+      PSI_CONTROL _pc;
 		pd->flags.bCaptured = bCapture;
 		pd->pCurrent = pc;
 		pd->CurrentBias.x = 0;
@@ -1798,11 +1798,11 @@ void CaptureCommonMouse( PCOMMON pc, LOGICAL bCapture )
 	}
 }
 
-void GetMouseButtons( PCOMMON pc, _32 *buttons )
+void GetMouseButtons( PSI_CONTROL pc, _32 *buttons )
 {
 	if( buttons )
 	{
-		PCOMMON frame = GetFrame( pc );
+		PSI_CONTROL frame = GetFrame( pc );
 		PPHYSICAL_DEVICE pf = frame?frame->device:NULL;
       (*buttons) = pf->_b;
 	}

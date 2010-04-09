@@ -3,85 +3,93 @@
 
 #ifdef __cplusplus
 
-#define PSI_NAMESPACE SACK_NAMESPACE namespace psi {
+#define PSI_NAMESPACE SACK_NAMESPACE namespace PSI {
+#define _PSI_NAMESPACE namespace PSI {
 #define PSI_NAMESPACE_END } SACK_NAMESPACE_END
-#define USE_PSI_NAMESPACE using namespace sack::psi;
+#define USE_PSI_NAMESPACE using namespace sack::PSI;
+	
+#   define _PSI_INTERFACE_NAMESPACE namespace interface {
+#   define _PSI_INTERFACE_NAMESPACE_END }
 
 #   define _BUTTON_NAMESPACE namespace button {
 #   define _BUTTON_NAMESPACE_END } 
 #   define USE_BUTTON_NAMESPACE using namespace button; 
-#   define USE_PSI_BUTTON_NAMESPACE using namespace sack::psi::button; 
+#   define USE_PSI_BUTTON_NAMESPACE using namespace sack::PSI::button; 
 
 #   define _COLORWELL_NAMESPACE namespace colorwell {
 #   define _COLORWELL_NAMESPACE_END } 
 #   define USE_COLORWELL_NAMESPACE using namespace colorwell; 
-#   define USE_PSI_COLORWELL_NAMESPACE using namespace sack::psi::colorwell; 
+#   define USE_PSI_COLORWELL_NAMESPACE using namespace sack::PSI::colorwell; 
 
 #   define _MENU_NAMESPACE namespace popup {
 #   define _MENU_NAMESPACE_END } 
 #   define USE_MENU_NAMESPACE using namespace popup; 
-#   define USE_PSI_MENU_NAMESPACE using namespace sack::psi::popup; 
+#   define USE_PSI_MENU_NAMESPACE using namespace sack::PSI::popup; 
 
 #   define _TEXT_NAMESPACE namespace text {
 #   define _TEXT_NAMESPACE_END } 
 #   define USE_TEXT_NAMESPACE using namespace text; 
-#   define USE_PSI_TEXT_NAMESPACE using namespace sack::psi::text; 
+#   define USE_PSI_TEXT_NAMESPACE using namespace sack::PSI::text; 
 
 #   define _EDIT_NAMESPACE namespace edit {
 #   define _EDIT_NAMESPACE_END } 
 #   define USE_EDIT_NAMESPACE using namespace edit; 
-#   define USE_PSI_EDIT_NAMESPACE using namespace sack::psi::edit; 
+#   define USE_PSI_EDIT_NAMESPACE using namespace sack::PSI::edit; 
 
 #   define _SLIDER_NAMESPACE namespace slider {
 #   define _SLIDER_NAMESPACE_END } 
 #   define USE_SLIDER_NAMESPACE using namespace slider; 
-#   define USE_PSI_SLIDER_NAMESPACE using namespace sack::psi::slider; 
+#   define USE_PSI_SLIDER_NAMESPACE using namespace sack::PSI::slider; 
 
 #   define _FONTS_NAMESPACE namespace font {
 #   define _FONTS_NAMESPACE_END } 
 #   define USE_FONTS_NAMESPACE using namespace font; 
-#   define USE_PSI_FONTS_NAMESPACE using namespace sack::psi::font; 
+#   define USE_PSI_FONTS_NAMESPACE using namespace sack::PSI::font; 
 
 #   define _LISTBOX_NAMESPACE namespace listbox {
 #   define _LISTBOX_NAMESPACE_END } 
 #   define USE_LISTBOX_NAMESPACE using namespace listbox; 
-#   define USE_PSI_LISTBOX_NAMESPACE using namespace sack::psi::listbox; 
+#   define USE_PSI_LISTBOX_NAMESPACE using namespace sack::PSI::listbox; 
 
 #   define _SCROLLBAR_NAMESPACE namespace scrollbar {
 #   define _SCROLLBAR_NAMESPACE_END } 
 #   define USE_SCROLLBAR_NAMESPACE using namespace scrollbar; 
-#   define USE_PSI_SCROLLBAR_NAMESPACE using namespace sack::psi::scrollbar; 
+#   define USE_PSI_SCROLLBAR_NAMESPACE using namespace sack::PSI::scrollbar; 
 
 #   define _SHEETS_NAMESPACE namespace sheet_control {
 #   define _SHEETS_NAMESPACE_END } 
 #   define USE_SHEETS_NAMESPACE using namespace sheet_control; 
-#   define USE_PSI_SHEETS_NAMESPACE using namespace sack::psi::sheet_control; 
+#   define USE_PSI_SHEETS_NAMESPACE using namespace sack::PSI::sheet_control; 
 
 #   define _MOUSE_NAMESPACE namespace _mouse {
 #   define _MOUSE_NAMESPACE_END } 
 #   define USE_MOUSE_NAMESPACE using namespace _mouse; 
-#   define USE_PSI_MOUSE_NAMESPACE using namespace sack::psi::_mouse; 
+#   define USE_PSI_MOUSE_NAMESPACE using namespace sack::PSI::_mouse; 
 
 #   define _XML_NAMESPACE namespace xml {
 #   define _XML_NAMESPACE_END } 
 #   define USE_XML_NAMESPACE using namespace xml; 
-#   define USE_PSI_XML_NAMESPACE using namespace sack::psi::xml; 
+#   define USE_PSI_XML_NAMESPACE using namespace sack::PSI::xml; 
 
 #   define _PROP_NAMESPACE namespace properties {
 #   define _PROP_NAMESPACE_END } 
 #   define USE_PROP_NAMESPACE using namespace properties; 
-#   define USE_PSI_PROP_NAMESPACE using namespace sack::psi::properties; 
+#   define USE_PSI_PROP_NAMESPACE using namespace sack::PSI::properties; 
 
 #   define _CLOCK_NAMESPACE namespace clock {
 #   define _CLOCK_NAMESPACE_END } 
 #   define USE_CLOCK_NAMESPACE using namespace clock; 
-#   define USE_PSI_CLOCK_NAMESPACE using namespace sack::psi::clock; 
+#   define USE_PSI_CLOCK_NAMESPACE using namespace sack::PSI::clock; 
 
 #else
 
 #define PSI_NAMESPACE SACK_NAMESPACE 
+#define _PSI_NAMESPACE
 #define PSI_NAMESPACE_END SACK_NAMESPACE_END
 #define USE_PSI_NAMESPACE
+
+#   define _PSI_INTERFACE_NAMESPACE
+#   define _PSI_INTERFACE_NAMESPACE_END
 
 #   define _BUTTON_NAMESPACE 
 #   define _BUTTON_NAMESPACE_END 

@@ -17,17 +17,6 @@ PSI_NAMESPACE
 
 //---------------------------------------------------------------------------
 
-PSI_PROC( void, SetFrameInitProc )( PCOMMON pFrame, ControlInitProc InitProc, PTRSZVAL psvInit )
-{
-    if( pFrame )
-    {
-        //pFrame->InitControl = InitProc;
-      //pFrame->psvInit = psvInit;
-    }
-}
-
-//---------------------------------------------------------------------------
-
 TEXTCHAR *GetBorderTypeString( _32 BorderType )
 {
 	static TEXTCHAR string[256];
@@ -38,7 +27,7 @@ TEXTCHAR *GetBorderTypeString( _32 BorderType )
 //---------------------------------------------------------------------------
 
 #if 0
-static void SaveCommon( PCOMMON pc, PVARTEXT out )
+static void SaveCommon( PSI_CONTROL pc, PVARTEXT out )
 {
 	char id[32];
 	snprintf( id, sizeof( id ), WIDE("psi/control/%d"), pc->nType );
@@ -70,7 +59,7 @@ static int SaveControlFile( PCONTROL pc, PVARTEXT out, int level )
          vtprintf( out, WIDE("\t") );
 	}
 	vtprintf( out, WIDE("CONTROL ") );
-	SaveCommon( (PCOMMON)pc, out );
+	SaveCommon( (PSI_CONTROL)pc, out );
 	{
       void (CPROC *Save)(PCONTROL,PVARTEXT);
 		if( Save=GetRegisteredProcedure( id, void,Save,(PCONTROL,PVARTEXT)) )
@@ -83,7 +72,7 @@ static int SaveControlFile( PCONTROL pc, PVARTEXT out, int level )
 //---------------------------------------------------------------------------
 
 #if 0
-static int SaveFrameFile( PCOMMON pc, PVARTEXT out, int level )
+static int SaveFrameFile( PSI_CONTROL pc, PVARTEXT out, int level )
 {
 	return 0;
 #if 0
@@ -116,7 +105,7 @@ static int SaveFrameFile( PCOMMON pc, PVARTEXT out, int level )
 	{
       void (CPROC *Save)(PCONTROL,PVARTEXT);
 		if( Save=GetRegisteredProcedure( id, void,Save,(PCONTROL,PVARTEXT)) )
-			Save( (PCOMMON)pc, out );
+			Save( (PSI_CONTROL)pc, out );
 	}
    vtprintf( out, WIDE("\n") );
 	return 1;
@@ -126,7 +115,7 @@ static int SaveFrameFile( PCOMMON pc, PVARTEXT out, int level )
 
 //---------------------------------------------------------------------------
 
-PSI_PROC( int, SaveFrame )( PCOMMON pFrame, CTEXTSTR file )
+PSI_PROC( int, SaveFrame )( PSI_CONTROL pFrame, CTEXTSTR file )
 {
 	return SaveXMLFrame( pFrame, file );
    /*
@@ -153,7 +142,7 @@ PSI_PROC( int, SaveFrame )( PCOMMON pFrame, CTEXTSTR file )
 //---------------------------------------------------------------------------
 
 #if 0
-static int LoadControlFile( PCOMMON pFrame, FILE *in )
+static int LoadControlFile( PSI_CONTROL pFrame, FILE *in )
 {
     // okay type of control already read.... "CTRL" magic already consumed...
    return TRUE;
@@ -162,7 +151,7 @@ static int LoadControlFile( PCOMMON pFrame, FILE *in )
 
 //---------------------------------------------------------------------------
 #if 0
-static int DecodeControlInfo( POINTER rawinfo, _32 size, PCOMMON pFrame )
+static int DecodeControlInfo( POINTER rawinfo, _32 size, PSI_CONTROL pFrame )
 {
     struct info_tag{
       _32 nType;
@@ -206,7 +195,7 @@ static int DecodeControlInfo( POINTER rawinfo, _32 size, PCOMMON pFrame )
    return size; // assume that the whole size of data was used...
 }
 #endif
-static int DecodeFrameInfo( POINTER rawinfo, _32 size, PCOMMON *pFrameResult, PCOMMON hAbove, FrameInitProc InitProc, PTRSZVAL psv )
+static int DecodeFrameInfo( POINTER rawinfo, _32 size, PSI_CONTROL *pFrameResult, PSI_CONTROL hAbove, FrameInitProc InitProc, PTRSZVAL psv )
 {
 	struct info_tag{
 		_32 Version;
@@ -250,7 +239,7 @@ static int DecodeFrameInfo( POINTER rawinfo, _32 size, PCOMMON *pFrameResult, PC
 		Current += 4;
 		if( magic == *(_32*)"FRAM" )
 		{
-			PCOMMON pFrameResultBuffer;
+			PSI_CONTROL pFrameResultBuffer;
 			nextsize = *(_32*)Current;
 			Current += 4;
 			Current += DecodeFrameInfo( (POINTER)Current, nextsize, &pFrameResultBuffer, *pFrameResult, InitProc, psv );
@@ -274,7 +263,7 @@ static int DecodeFrameInfo( POINTER rawinfo, _32 size, PCOMMON *pFrameResult, PC
 
 //---------------------------------------------------------------------------
 
-PSI_PROC( PCOMMON, LoadFrameFromMemory )( POINTER info, _32 size, PCOMMON hAbove, FrameInitProc InitProc, PTRSZVAL psv  )
+PSI_PROC( PSI_CONTROL, LoadFrameFromMemory )( POINTER info, _32 size, PSI_CONTROL hAbove, FrameInitProc InitProc, PTRSZVAL psv  )
 {
 	_32 magic;
 	_32 this_size;
@@ -283,7 +272,7 @@ PSI_PROC( PCOMMON, LoadFrameFromMemory )( POINTER info, _32 size, PCOMMON hAbove
 	this_size = *(_32*)(buffer + 4);
 	if( magic == *(_32*)"FRAM" )
 	{
-		PCOMMON pFrame;
+		PSI_CONTROL pFrame;
 		if( DecodeFrameInfo( (POINTER)(buffer + 4), this_size, &pFrame, hAbove, InitProc, psv ) != this_size )
 		{
 			Log( WIDE("Decode length did not match legnth of data passed...") );
@@ -297,11 +286,11 @@ PSI_PROC( PCOMMON, LoadFrameFromMemory )( POINTER info, _32 size, PCOMMON hAbove
 //---------------------------------------------------------------------------
 #if 0
 // please use LoadXMLFrame();
-PSI_PROC( PCOMMON, LoadFrameFromFile )( FILE *in, PCOMMON hAbove, FrameInitProc InitProc, PTRSZVAL psv  )
+PSI_PROC( PSI_CONTROL, LoadFrameFromFile )( FILE *in, PSI_CONTROL hAbove, FrameInitProc InitProc, PTRSZVAL psv  )
 {
 	_32 magic;
 	_32 size;
-	PCOMMON pFrame;
+	PSI_CONTROL pFrame;
 	POINTER buffer;
 	while( fread( &magic, 1, sizeof( magic ), in ) )
 	{
@@ -349,8 +338,8 @@ PTRSZVAL CPROC GroupRead( PTRSZVAL psv, arg_list args )
 	PARAM( args, S_64, height );
 	PARAM( args, TEXTCHAR *, caption );
 	PARAM( args, TEXTCHAR *, more );
-	PCOMMON pc;
-	pc = CreateCommonExxx( (PCOMMON)PeekLink( &readstack )
+	PSI_CONTROL pc;
+	pc = CreateCommonExxx( (PSI_CONTROL)PeekLink( &readstack )
 							  , pTypeName, 0
 							  , (int)x, (int)y, (int)width, (int)height, (int)ID, NULL
 							  , caption
@@ -387,8 +376,8 @@ PTRSZVAL CPROC ControlRead( PTRSZVAL psv, arg_list args )
 	PARAM( args, S_64, height );
    PARAM( args, TEXTCHAR *, caption );
    PARAM( args, TEXTCHAR *, more );
-	PCOMMON pc;
-	pc = CreateCommonExxx( (PCOMMON)PeekLink( &readstack )
+	PSI_CONTROL pc;
+	pc = CreateCommonExxx( (PSI_CONTROL)PeekLink( &readstack )
 						, pTypeName, 0
 							  , (int)x, (int)y, (int)width, (int)height, (int)ID, NULL
                         , caption, 0
@@ -400,10 +389,10 @@ PTRSZVAL CPROC ControlRead( PTRSZVAL psv, arg_list args )
    return psv;
 }
 
-PSI_PROC( PCOMMON, LoadFrame )( CTEXTSTR file, PCOMMON hAbove, FrameInitProc InitProc, PTRSZVAL psv )
+PSI_PROC( PSI_CONTROL, LoadFrame )( CTEXTSTR file, PSI_CONTROL hAbove, FrameInitProc InitProc, PTRSZVAL psv )
 {
 	PCONFIG_HANDLER pch = CreateConfigurationHandler();
-   PCOMMON frame;
+   PSI_CONTROL frame;
 	AddConfigurationMethod( pch, WIDE("GROUP \'%m\' %i (%i,%i)[%i,%i] \'%m\' %m")
 								 , GroupRead );
 	AddConfigurationMethod( pch, WIDE("GROUP END")

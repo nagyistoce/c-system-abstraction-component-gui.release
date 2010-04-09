@@ -40,7 +40,7 @@ extern CONTROL_REGISTRATION shade_well, color_well;
 
 typedef struct PickColor_tag
 {
-	PCOMMON frame;
+	PSI_CONTROL frame;
 	struct {
 		_32 bSettingShade : 1;
 	} flags;
@@ -50,13 +50,13 @@ typedef struct PickColor_tag
 	CDATA Presets[36];
 	PCONTROL LastPreset;
    PCONTROL pcZoom;
-   PCOMMON psw, pShadeRed, pShadeBlue, pShadeGreen; // shade well data...
+   PSI_CONTROL psw, pShadeRed, pShadeBlue, pShadeGreen; // shade well data...
 	int bSetPreset;
    int ColorDialogDone, ColorDialogOkay;
 } PICK_COLOR_DATA, *PPICK_COLOR_DATA;
 
 void CPROC InitColorDataDefault( POINTER );
-void SetShaderControls( PPICK_COLOR_DATA ppcd, PCOMMON source );
+void SetShaderControls( PPICK_COLOR_DATA ppcd, PSI_CONTROL source );
 
 PUBLIC_DATA( WIDE("Color Choice Data"), PICK_COLOR_DATA, InitColorDataDefault, NULL );
 
@@ -185,7 +185,7 @@ CUSTOM_CONTROL_DRAW( DrawShadeControl, ( PCONTROL pcShade ) )
 
 //----------------------------------------------------------------------------
 
-CUSTOM_CONTROL_MOUSE( PaletteMouse, ( PCOMMON pc, S_32 x, S_32 y, _32 buttons ) )
+CUSTOM_CONTROL_MOUSE( PaletteMouse, ( PSI_CONTROL pc, S_32 x, S_32 y, _32 buttons ) )
 {
 	PPICK_COLOR_DATA ppcd = PPCD(pc);
 	if( buttons == -1 )
@@ -206,7 +206,7 @@ CUSTOM_CONTROL_MOUSE( PaletteMouse, ( PCOMMON pc, S_32 x, S_32 y, _32 buttons ) 
 
 //----------------------------------------------------------------------------
 
-int CPROC DrawPalette( PCOMMON pc )
+int CPROC DrawPalette( PSI_CONTROL pc )
 {
 	PPICK_COLOR_DATA ppcd = PPCD(pc);
 	if( ppcd )
@@ -390,7 +390,7 @@ BUTTON_CHECK( AlphaPressed, ( PTRSZVAL unused, PCONTROL pc ) )
 
 //----------------------------------------------------------------------------
 
-int CPROC PaletteLoad( PTRSZVAL psv, PCOMMON pf, _32 ID )
+int CPROC PaletteLoad( PTRSZVAL psv, PSI_CONTROL pf, _32 ID )
 {
 	// hmm don't think there's really anything special I need to...
 	// okay yeah...
@@ -420,7 +420,7 @@ void CPROC InitColorDataDefault( POINTER p )
 }
 //----------------------------------------------------------------------------
 
-void SetShaderControls( PPICK_COLOR_DATA ppcd, PCOMMON source )
+void SetShaderControls( PPICK_COLOR_DATA ppcd, PSI_CONTROL source )
 {
 	if( source != ppcd->pShadeRed )
 	{
@@ -456,9 +456,9 @@ static TEXTCHAR palette_frame_xml[] = {
 //    )
  };
 
-PSI_PROC( int, PickColorEx )( CDATA *result, CDATA original, PCOMMON hAbove, int x, int y )
+PSI_PROC( int, PickColorEx )( CDATA *result, CDATA original, PSI_CONTROL hAbove, int x, int y )
 {
-	PCOMMON pf = NULL;
+	PSI_CONTROL pf = NULL;
 	PICK_COLOR_DATA pcd;
 	MemSet( &pcd, 0, sizeof( pcd ) );
 	InitColorData( &pcd, original );
@@ -500,7 +500,7 @@ PSI_PROC( int, PickColorEx )( CDATA *result, CDATA original, PCOMMON hAbove, int
 #define FRAME_HEIGHT 259
 	if( !pf )
 	{
-		PCOMMON pc;
+		PSI_CONTROL pc;
 		//DumpRegisteredNames();
 		pf = CreateFrame( WIDE("Color Select")
 							 , x - FRAME_WIDTH/2, y - FRAME_HEIGHT/2
@@ -604,7 +604,7 @@ PSI_PROC( int, PickColorEx )( CDATA *result, CDATA original, PCOMMON hAbove, int
 
 //----------------------------------------------------------------------------
 
-PSI_PROC( int, PickColor )( CDATA *result, CDATA original, PCOMMON hAbove )
+PSI_PROC( int, PickColor )( CDATA *result, CDATA original, PSI_CONTROL hAbove )
 {
 	S_32 x, y;
    GetMousePosition( &x, &y );
@@ -628,7 +628,7 @@ static int CPROC ColorWellDraw( PCONTROL pc )
    return TRUE;
 }
 
-static int CPROC ColorWellMouse( PCOMMON pc, S_32 x, S_32 y, _32 b )
+static int CPROC ColorWellMouse( PSI_CONTROL pc, S_32 x, S_32 y, _32 b )
 {
    ValidatedControlData( PCOLOR_WELL, color_well.TypeID, pcw, pc );
 	if( pc->flags.bDisable ) // ignore mouse on these...
@@ -668,7 +668,7 @@ static int CPROC ColorWellMouse( PCOMMON pc, S_32 x, S_32 y, _32 b )
    return TRUE;
 }
 
-PCOMMON EnableColorWellPick( PCOMMON pc, LOGICAL bEnable )
+PSI_CONTROL EnableColorWellPick( PSI_CONTROL pc, LOGICAL bEnable )
 {
 	ValidatedControlData( PCOLOR_WELL, color_well.TypeID, pcw, pc );
 	if( pcw )
@@ -689,7 +689,7 @@ PSI_CONTROL SetOnUpdateColorWell( PSI_CONTROL pc, void(CPROC*update_proc)(PTRSZV
 
 //----------------------------------------------------------------------------
 
-static int CPROC ShadeWellMouse( PCOMMON pc, S_32 x, S_32 y, _32 b )
+static int CPROC ShadeWellMouse( PSI_CONTROL pc, S_32 x, S_32 y, _32 b )
 {
 	ValidatedControlData( PSHADE_WELL, shade_well.TypeID, psw, pc );
 	if( b == -1 )
@@ -717,7 +717,7 @@ static int CPROC ShadeWellMouse( PCOMMON pc, S_32 x, S_32 y, _32 b )
 
 //----------------------------------------------------------------------------
 
-PSI_PROC( void, SetShadeMin )( PCOMMON pc, CDATA color )
+PSI_PROC( void, SetShadeMin )( PSI_CONTROL pc, CDATA color )
 {
 	ValidatedControlData( PSHADE_WELL, shade_well.TypeID, psw, pc );
 	if( psw )
@@ -729,7 +729,7 @@ PSI_PROC( void, SetShadeMin )( PCOMMON pc, CDATA color )
 
 //----------------------------------------------------------------------------
 
-PSI_PROC( void, SetShadeMax )( PCOMMON pc, CDATA color )
+PSI_PROC( void, SetShadeMax )( PSI_CONTROL pc, CDATA color )
 {
 	ValidatedControlData( PSHADE_WELL, shade_well.TypeID, psw, pc );
 	if( psw )
@@ -741,7 +741,7 @@ PSI_PROC( void, SetShadeMax )( PCOMMON pc, CDATA color )
 
 //----------------------------------------------------------------------------
 
-PSI_PROC( void, SetShadeMid )( PCOMMON pc, CDATA color )
+PSI_PROC( void, SetShadeMid )( PSI_CONTROL pc, CDATA color )
 {
 	ValidatedControlData( PSHADE_WELL, shade_well.TypeID, psw, pc );
 	if( psw )
@@ -752,7 +752,7 @@ PSI_PROC( void, SetShadeMid )( PCOMMON pc, CDATA color )
 }
 
 //----------------------------------------------------------------------------
-PSI_PROC( CDATA, GetColorFromWell )( PCOMMON pc )
+PSI_PROC( CDATA, GetColorFromWell )( PSI_CONTROL pc )
 {
 	ValidatedControlData( PCOLOR_WELL, color_well.TypeID, pcw, pc );
    if( pcw )
@@ -762,7 +762,7 @@ PSI_PROC( CDATA, GetColorFromWell )( PCOMMON pc )
 
 //----------------------------------------------------------------------------
 
-PSI_PROC( PCOMMON, SetColorWell )( PCOMMON pc, CDATA color )
+PSI_PROC( PSI_CONTROL, SetColorWell )( PSI_CONTROL pc, CDATA color )
 {
 	ValidatedControlData( PCOLOR_WELL, color_well.TypeID, pcw, pc );
 	if( pcw )
@@ -776,7 +776,7 @@ PSI_PROC( PCOMMON, SetColorWell )( PCOMMON pc, CDATA color )
 
 //CONTROL_PROC_DEF( COLOR_WELL, ColorWell, BORDER_THIN|BORDER_INVERT
 //					 , CDATA color )
-int CPROC InitColorWell( PCOMMON pc )
+int CPROC InitColorWell( PSI_CONTROL pc )
 {
 	if( pc )
 	{
@@ -788,7 +788,7 @@ int CPROC InitColorWell( PCOMMON pc )
 
 //----------------------------------------------------------------------------
 
-int CPROC InitShadeWell( PCOMMON pc )
+int CPROC InitShadeWell( PSI_CONTROL pc )
 {
 	SetShadeMin( pc, BASE_COLOR_BLACK );
 	SetShadeMid( pc, BASE_COLOR_DARKGREY );
@@ -799,13 +799,13 @@ int CPROC InitShadeWell( PCOMMON pc )
 
 //----------------------------------------------------------------------------
 
-int CPROC InitPalette( PCOMMON pc )
+int CPROC InitPalette( PSI_CONTROL pc )
 {
    SetNoFocus( pc );
    return TRUE;
 }
 
-void CPROC ColorWellDestroy( PCOMMON pc )
+void CPROC ColorWellDestroy( PSI_CONTROL pc )
 {
 	ValidatedControlData( PCOLOR_WELL, color_well.TypeID, pcw, pc );
 	if( pcw )

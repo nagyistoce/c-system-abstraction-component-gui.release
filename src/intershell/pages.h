@@ -11,8 +11,9 @@
 #include <colordef.h>
 #include <image.h>
 #include <controls.h>
-#include "intershell_button.h"
+#include "intershell_export.h"
 
+INTERSHELL_NAMESPACE
 /*
 struct page_layout_tag
 {
@@ -23,7 +24,7 @@ struct page_layout_tag
 };
 */
 
-struct page_data_tag
+struct page_data
 {
    CDATA background_color;
    Image    background_image;
@@ -53,22 +54,21 @@ struct page_data_tag
 
 
 };
-
+typedef struct page_data PAGE_DATA;
 
 #define PAGE_CHANGER_NAME WIDE("page/Page Changer")
-//#define PAGE_TITLE_NAME "page/Show Title"
 
 void SetCurrentPageID( PSI_CONTROL pc_canvas, _32 ID ); // MNU_CHANGE_PAGE ID (minus base)
 void DestroyPageID( PSI_CONTROL pc_canvas, _32 ID ); // MNU_DESTROY_PAGE ID (minus base)
 void UnDestroyPageID( PSI_CONTROL pc_canvas, _32 ID ); // MNU_DESTROY_PAGE ID (minus base)
 
-void AddPage( PCanvasData canvas, struct page_data_tag * page );
-//void RestorePageExx( PSI_CONTROL pc_canvas, PCanvasData canvas, struct page_data_tag * page, int bFull, int active DBG_PASS);
-//#define RestorePageEx(pc,c,p,f,a) RestorePageExx( pc,c,p,f,a DBG_SRC)
-void RestorePageEx( PSI_CONTROL pc_canvas, PCanvasData canvas, struct page_data_tag * page, int bFull, int active);
+void AddPage( PCanvasData canvas, struct page_data * page );
+void RestorePageEx( PSI_CONTROL pc_canvas, PCanvasData canvas, struct page_data * page, int bFull, int active);
 #define RestorePage(pc,c,p,f) RestorePageEx(pc,c,p,f,1)
-struct page_data_tag * GetPageFromFrame( PSI_CONTROL frame );
-void ChangePagesEx( PSI_CONTROL pc_canvas, struct page_data_tag * page DBG_PASS);
+
+struct page_data * GetPageFromFrame( PSI_CONTROL frame );
+
+void ChangePagesEx( PSI_CONTROL pc_canvas, struct page_data * page DBG_PASS);
 #define ChangePages(pc,p) ChangePagesEx(pc,p DBG_SRC)
 
 void InsertStartupPage( PSI_CONTROL pc_canvas, CTEXTSTR page_name );
@@ -78,20 +78,6 @@ void InsertStartupPage( PSI_CONTROL pc_canvas, CTEXTSTR page_name );
 void RenamePage( PSI_CONTROL pc_canvas );
 void CreateNamedPage( PSI_CONTROL pc_canvas, CTEXTSTR page_name );
 
-typedef struct page_changer {
-	struct {
-		_32 set_home_page : 1;
-	} flags;
-	//PTEXT_PLACEMENT title;
-	//TEXTSTR next_page_title;
-   //TEXTSTR button_label;
-	// this needs to be obsoleted,
-	// but here is common configuration of
-	// lense, color, press method, etc...
-	// providing enough flexibility for someone
-   // to really hang themselves...
-	PMENU_BUTTON button;
-} PAGE_CHANGER, *PPAGE_CHANGER;
-
+INTERSHELL_NAMESPACE_END
 
 #endif
