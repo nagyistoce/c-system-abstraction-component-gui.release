@@ -8,30 +8,80 @@
 #include <math.h>
 #include <float.h>
 
+SACK_NAMESPACE
+	_MATH_NAMESPACE
+   _VECTOR_NAMESPACE
 
-VECTOR_NAMESPACE
-
-#define RCOORD_IS_DOUBLE
-typedef double RCOORD, *PRCOORD;  // basic type used here....
+/* Define that an RCOORD is represented by the basic type
+   'double' for platforms with smaller fast floating point
+   types, this could be float.                             */
+#define RCOORD_IS_DOUBLE 1
+	/* basic type that Vectlib is based on.
+	 This specifies a 'real' (aka float) coordinate.
+	 Combinations of coordinates create vectors and points.  */
+typedef double RCOORD;
+/* <combine sack::math::vector::RCOORD>
+   
+   \ \                                  */
+typedef double *PRCOORD;  
 
 // these SHOULD be dimension relative, but we lack much code for that...
 typedef RCOORD MATRIX[4][4];
+/* Describes the rotation matrix for a PTRANSFORM. */
 typedef RCOORD PMATRIX[][4];
 
 #ifdef RCOORD_IS_DOUBLE
 #define RCOORDBITS(v)  (*(_64*)&(v))
 #else
+/* A macro to get the literal bits into an unsigned value of the
+   same size. Shift and binary operators do not apply to
+   floating point values, but floating point values are fields
+   of bits that represent fractional parts of integers. This
+   gets the bits so the fields can be tested.                    */
 #define RCOORDBITS(v)  (*(_32*)&(v))
 #endif
+/* a symbol which is effectively the largest negative value of
+   the space, anything less than this is untrackable, and is the
+   same as infinity.                                             */
 #define NEG_INFINITY ((RCOORD)-9999999999.0)
+/* a symbol which is effectively the largest value of the space,
+   anything more than this is untrackable, and is the same as
+   infinity.                                                     */
 #define POS_INFINITY ((RCOORD)9999999999.0)
 
+/* This is 'epsilon' that is used with by NearZero comparison
+   macro.                                                     */
 #define e1 (0.00001)
+/* Checks to see if a coordinate is 0 or near 0. */
 #define NearZero( n ) (fabs(n)<e1)
 #ifndef __cplusplus
 #endif
 
 
+
+#ifdef RCOORD_IS_DOUBLE
+// THRESHOLD may be any number more than 1.
+// eveything 0 or more makes pretty much every number
+// which is anything like another number equal...
+// threshold is in count of bits...
+// therefore for 1millionth digit accuracy that would be 20 bits.
+// 10 bits is thousanths different are near
+// 0 bits is if the same magnitude of number... but may be
+//   quite different
+// -10 bits is thousands different are near
+// 1 == 1.5
+// 1 == 1.01
+#define THRESHOLD 16
+#ifdef _MSC_VER
+#define EXPON(f) ((int)(( RCOORDBITS(f) & 0x4000000000000000I64 ) ?   \
+                    (( RCOORDBITS(f) &  0x3FF0000000000000I64 ) >> (20+32)) :    \
+                    ((( RCOORDBITS(f) & 0x3FF0000000000000I64 ) >> (20+32)) - 1024)))
+#else
+#define EXPON(f) ((int)(( RCOORDBITS(f) & 0x4000000000000000LL ) ?   \
+                    (( RCOORDBITS(f) &  0x3FF0000000000000LL ) >> (20+32)) :    \
+                    ((( RCOORDBITS(f) & 0x3FF0000000000000LL ) >> (20+32)) - 1024)))
+#endif
+#else
 // THRESHOLD may be any number more than 1.
 // eveything 0 or more makes pretty much every number
 // which is anything like another number equal...
@@ -44,19 +94,9 @@ typedef RCOORD PMATRIX[][4];
 // 1 == 1.5
 // 1 == 1.01
 
-#ifdef RCOORD_IS_DOUBLE
-#define THRESHOLD 16
-#ifdef _MSC_VER
-#define EXPON(f) ((int)(( RCOORDBITS(f) & 0x4000000000000000I64 ) ?   \
-                    (( RCOORDBITS(f) &  0x3FF0000000000000I64 ) >> (20+32)) :    \
-                    ((( RCOORDBITS(f) & 0x3FF0000000000000I64 ) >> (20+32)) - 1024)))
-#else
-#define EXPON(f) ((int)(( RCOORDBITS(f) & 0x4000000000000000LL ) ?   \
-                    (( RCOORDBITS(f) &  0x3FF0000000000000LL ) >> (20+32)) :    \
-                    ((( RCOORDBITS(f) & 0x3FF0000000000000LL ) >> (20+32)) - 1024)))
-#endif
-#else
 #define THRESHOLD 1
+/* Macro to extract the exponent part of a RCOORD.
+                                                   */
 #define EXPON(f) ((int)( RCOORDBITS(f) & 0x40000000L ) ?   \
                     (( RCOORDBITS(f) & 0x3F800000L ) >> 23) :    \
                     ((( RCOORDBITS(f) & 0x3F800000L ) >> 23) - 128))

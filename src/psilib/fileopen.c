@@ -156,7 +156,7 @@ int PSI_PickFile( PSI_CONTROL parent, CTEXTSTR basepath, CTEXTSTR types, TEXTSTR
 	// auto configure open file dialog - well for now let us start at
 	// the current working directory...
 	S_32 x, y;
-	PCOMMON frame;
+	PSI_CONTROL frame;
 	PCONTROL pcList;
 	FILEOPENDATA fod;
 

@@ -45,7 +45,7 @@ PSI_PROC( PMENU, CreatePopup )( void )
 {
 #ifdef CUSTOM_MENUS
 	PMENU pm;
-	PCOMMON pc = MakeControl( NULL, menu.TypeID
+	PSI_CONTROL pc = MakeControl( NULL, menu.TypeID
 									, 0, 0
 									, 1, 1
 									, -1 );
@@ -70,7 +70,7 @@ PSI_PROC( PMENU, CreatePopup )( void )
 
 #ifdef CUSTOM_MENUS
 //----------------------------------------------------------------------
-void ShowMenu( PMENU pm, int x, int y, LOGICAL bWait, PCOMMON parent );
+void ShowMenu( PMENU pm, int x, int y, LOGICAL bWait, PSI_CONTROL parent );
 void UnshowMenu( PMENU pm );
 
 int CalculateMenuItems( PMENU pm )
@@ -297,7 +297,7 @@ void RenderSelect( PMENU pm, PMENUITEM pmi )
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-static int CPROC RenderItems( PCOMMON pc )
+static int CPROC RenderItems( PSI_CONTROL pc )
 {
 	//PTRSZVAL psv;
 	//PRENDERER display;
@@ -478,7 +478,7 @@ static int MenuMouse( PMENU pm, S_32 x, S_32 y, _32 b )
    return TRUE;
 }
 
-static int OnMouseCommon( WIDE("Popup Menu") )( PCOMMON pc, S_32 x, S_32 y, _32 b )
+static int OnMouseCommon( WIDE("Popup Menu") )( PSI_CONTROL pc, S_32 x, S_32 y, _32 b )
 {
 	ValidatedControlData( PMENU, menu.TypeID, pm, pc );
 	MenuMouse( pm, x, y, b );
@@ -538,7 +538,7 @@ void UnshowMenu( PMENU pm )
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-int CPROC FocusChanged( PCOMMON pc, LOGICAL bFocus )
+int CPROC FocusChanged( PSI_CONTROL pc, LOGICAL bFocus )
 {
 	ValidatedControlData( PMENU, menu.TypeID, pm, pc );
 #define LosingFocus  (!pc->flags.bFocused )
@@ -556,7 +556,7 @@ int CPROC FocusChanged( PCOMMON pc, LOGICAL bFocus )
 	}
 	if( bFocus )
 	{
-		PCOMMON child;
+		PSI_CONTROL child;
       Log1( WIDE("Menu selection = %")_32fs WIDE(""), pm->selection );
 		if( pm->selection != -1 || pm->flags.abort )
 		{
@@ -638,7 +638,7 @@ CONTROL_REGISTRATION menu = { WIDE("Popup Menu")
 PRIORITY_PRELOAD( RegisterMenuPopup, PSI_PRELOAD_PRIORITY ) { DoRegisterControl( &menu ); }
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-void ShowMenu( PMENU pm, int x, int y, LOGICAL bWait, PCOMMON parent )
+void ShowMenu( PMENU pm, int x, int y, LOGICAL bWait, PSI_CONTROL parent )
 {
 	S_32 cx, cy;
 	S_32 dx, dy;
@@ -930,7 +930,7 @@ PSI_PROC( PMENUITEM, CheckPopupItem )( PMENU pm, _32 dwID, _32 state )
 
 //----------------------------------------------------------------------
 
-PSI_PROC( int, TrackPopup )( PMENU hMenuSub, PCOMMON parent )
+PSI_PROC( int, TrackPopup )( PMENU hMenuSub, PSI_CONTROL parent )
 {
 #ifdef CUSTOM_MENUS
 	S_32 x, y;

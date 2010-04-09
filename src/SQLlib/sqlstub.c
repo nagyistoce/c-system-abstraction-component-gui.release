@@ -121,7 +121,7 @@ int DumpInfoEx( PODBC odbc, PVARTEXT pvt, SQLSMALLINT type, SQLHANDLE *handle, L
 //int DumpInfo( PVARTEXT pvt, SQLSMALLINT type, SQLHANDLE *handle );
 #endif
 
-enum {
+enum SQL_DelayOperations {
    LAST_NONE
      , LAST_COMMAND
      , LAST_QUERY
@@ -651,7 +651,7 @@ void InitLibrary( void )
 			}
 			DestroyConfigurationEvaluator( pch );
 		}
-		if( !g.Backup.info.pDSN[0] )
+		if( !g.Backup.info.pDSN || !g.Backup.info.pDSN[0] )
 		{
 			g.flags.bNoBackup = 1;
 		}
@@ -680,6 +680,10 @@ int OpenSQLConnection( PODBC odbc )
 #ifdef USE_ODBC
 	PTEXT pConnect;
 #endif
+	if( !odbc->info.pDSN )
+	{
+		return FALSE;
+	}
 	if( odbc->flags.bConnected )
 	{
 		return TRUE;
@@ -1659,7 +1663,7 @@ int DumpInfoEx( PODBC odbc, PVARTEXT pvt, SQLSMALLINT type, SQLHANDLE *handle, L
 			{
 				lprintf( "This is some other error (%5s)[%d]:%s", statecode, native, message );
 				if( StrCmp( statecode, "IM002" ) == 0 )
-					vtprintf( pvt, WIDE("(%5s)[%") _32f WIDE("]:%s<%s>"), statecode, native, message, odbc->info.pDSN );
+					vtprintf( pvt, WIDE("(%5s)[%") _32f WIDE("]:%s<%s>"), statecode, native, message, odbc->info.pDSN?odbc->info.pDSN:"" );
 				else
 					vtprintf( pvt, WIDE("(%5s)[%") _32f WIDE("]:%s"), statecode, native, message );
 				if( !bNoLog && EnsureLogOpen( odbc ) )
@@ -1799,7 +1803,7 @@ int __DoSQLCommandEx( PODBC odbc, PCOLLECT collection DBG_PASS )
 	cmd = VarTextPeek( collection->pvt_out );
 	if( EnsureLogOpen(odbc ) )
 	{
-		fprintf( g.pSQLLog, WIDE("%s[%p]:%s\n"), odbc->info.pDSN, odbc, GetText( cmd ) );
+		fprintf( g.pSQLLog, WIDE("%s[%p]:%s\n"), odbc->info.pDSN?odbc->info.pDSN:"NoDSN?", odbc, GetText( cmd ) );
 		fflush( g.pSQLLog );
 	}
 	VarTextEmpty( collection->pvt_result );
@@ -2174,7 +2178,7 @@ int __GetSQLResult( PODBC odbc, PCOLLECT collection, int bMore )
 	if( !OpenSQLConnection( odbc ) )
 	{
 		GenerateResponce( collection, WM_SQL_RESULT_ERROR );
-		return;
+		return 0;
 	}
 #endif
 	if( bMore )
@@ -2764,7 +2768,7 @@ int __DoSQLQueryEx( PODBC odbc, PCOLLECT collection, CTEXTSTR query DBG_PASS )
 	}
 	if( EnsureLogOpen(odbc ) )
 	{
-		fprintf( g.pSQLLog, WIDE("%s[%p]:%s\n"), odbc->info.pDSN, odbc, query );
+		fprintf( g.pSQLLog, WIDE("%s[%p]:%s\n"), odbc->info.pDSN?odbc->info.pDSN:"NoDSN?", odbc, query );
 		fflush( g.pSQLLog );
 	}
 	if( !g.flags.bNoLog )

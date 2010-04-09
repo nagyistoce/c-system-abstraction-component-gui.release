@@ -11,7 +11,7 @@ typedef struct context_tag
 	TEXTCHAR *name;
 	PVARTEXT vt;
 	_32 nChildren;
-	PCOMMON pc; // current control...
+	PSI_CONTROL pc; // current control...
 
 	genxWriter w;
 
@@ -38,7 +38,7 @@ typedef struct local_tag
 
 static LOCAL l;
 
-void WriteCommonData( PCOMMON pc )
+void WriteCommonData( PSI_CONTROL pc )
 {
 	PVARTEXT out = VarTextCreateExx( 10000, 5000 );
 	for( ; pc; pc = pc->next )
@@ -80,7 +80,7 @@ void WriteCommonData( PCOMMON pc )
 			TEXTCHAR id[32];
          PVARTEXT out = VarTextCreate();
 			snprintf( id, sizeof( id ), WIDE("psi/control/%d/rtti"), pc->nType );
-			if( ( Save=GetRegisteredProcedure( id, int, save,(PCOMMON,PVARTEXT)) ) )
+			if( ( Save=GetRegisteredProcedure( id, int, save,(PSI_CONTROL,PVARTEXT)) ) )
 			{
 				PTEXT data;
 				Save( pc, out );
@@ -91,7 +91,7 @@ void WriteCommonData( PCOMMON pc )
 					LineRelease( data );
 				}
 			}
-			if( ( Save=GetRegisteredProcedure( id, int, extra save,(PCOMMON,PVARTEXT)) ) )
+			if( ( Save=GetRegisteredProcedure( id, int, extra save,(PSI_CONTROL,PVARTEXT)) ) )
 			{
 				PTEXT data;
 				Save( pc, out );
@@ -142,7 +142,7 @@ genxSender senderprocs = { WriteBuffer
 								 , WriteBufferBounded
 								 , Flush };
 
-int SaveXMLFrame( PCOMMON frame, CTEXTSTR file )
+int SaveXMLFrame( PSI_CONTROL frame, CTEXTSTR file )
 {
 	//FILE *out = fopen( file, WIDE("wb") );
 	XML_CONTEXT context;

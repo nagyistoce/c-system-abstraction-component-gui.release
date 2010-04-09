@@ -10,6 +10,8 @@
 
 #include "fonts.h"
 
+INTERSHELL_NAMESPACE
+
 #define TEXT_LABEL_NAME WIDE("Text Label")
 
 
@@ -892,4 +894,5 @@ OnLoadControl( WIDE( "text/Set Variable" ) )( PCONFIG_HANDLER pch, PTRSZVAL psv 
    AddConfigurationMethod( pch,  WIDE( "set variable text value=%m" ), SetVariableVariableValue );
 }
 
+INTERSHELL_NAMESPACE_END
 

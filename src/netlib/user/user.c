@@ -30,11 +30,9 @@ void CPROC Closed( PCLIENT pc )
 int main( int argc, char** argv )
 {
    SOCKADDR *sa;
-//cpg27dec2006 c:\work\sack\src\netlib\user\user.c(27): Warning! W202: Symbol 'port' has been defined, but not referenced
-//cpg27dec2006 	int port;
 	if( argc < 2 )
 	{
-		printf( "usage: %s <Telnet IP> [port]\n", argv[0] );
+		printf( "usage: %s <Telnet IP[:port]>\n", argv[0] );
 		return 0;
 	}
 	SystemLog( "Starting the network" );

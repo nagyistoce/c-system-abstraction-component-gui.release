@@ -36,12 +36,12 @@ extern ControlInitProc KnownControlInit[];
 #define MNU_SAVEFRAME 2003
 
 static PMENU pFrameEditMenu, pControlEditMenu;
-//static PCOMMON pEditProperties;
+//static PSI_CONTROL pEditProperties;
 
 typedef struct edit_property_data_tag {
-   PCOMMON *ppFrame;
-	PCOMMON pEditCurrent;
-   PCOMMON pPropertySheet;
+   PSI_CONTROL *ppFrame;
+	PSI_CONTROL pEditCurrent;
+   PSI_CONTROL pPropertySheet;
    S_32 x,y;
    int bDone, bOkay;
 } EDIT_PROP_DATA, *PEDIT_PROP_DATA;
@@ -52,7 +52,7 @@ typedef struct edit_property_data_tag {
 #define DEFAULT_BUTTON_HEIGHT 20
 #define DEFAULT_BUTTON_BORDER BORDER_NORMAL
 
-void CreateAControl( PCOMMON frame, _32 type, PEDIT_PROP_DATA pepd )
+void CreateAControl( PSI_CONTROL frame, _32 type, PEDIT_PROP_DATA pepd )
 {
 	//if( type < USER_CONTROL )
 	{
@@ -253,10 +253,10 @@ TEXTCHAR control_property_frame_xml[] = {
  };
 
 
-PSI_PROC( int, EditControlProperties )( PCOMMON control )
+PSI_PROC( int, EditControlProperties )( PSI_CONTROL control )
 {
 	PEDIT_PROP_DATA pEditProps = (PEDIT_PROP_DATA)Allocate( sizeof( EDIT_PROP_DATA ) );
-	PCOMMON pf, pSheet = NULL;
+	PSI_CONTROL pf, pSheet = NULL;
 	S_32 x, y;
 	S_32 select;
 	GetMousePosition( &pEditProps->x, &pEditProps->y );
@@ -353,15 +353,15 @@ PSI_PROC( int, EditControlProperties )( PCOMMON control )
 				GetControlPropSheet gcps;
 				snprintf( classname, sizeof( classname ), WIDE("psi/control/%d/rtti"), control->nType );
             			//DumpRegisteredNames();
-				gcps = GetRegisteredProcedure( classname, PCOMMON, get_property_page, (PCOMMON) );
+				gcps = GetRegisteredProcedure( classname, PSI_CONTROL, get_property_page, (PSI_CONTROL) );
 
 				if( gcps )
 				{
-					PCOMMON pCustomSheet;
+					PSI_CONTROL pCustomSheet;
 					pCustomSheet = gcps( (PCONTROL)control );
 					lprintf( WIDE("Got the page...") );
 					AddSheet( pc
-							  , (PCOMMON)(pEditProps->pPropertySheet = pCustomSheet) );
+							  , (PSI_CONTROL)(pEditProps->pPropertySheet = pCustomSheet) );
 				}
             else
                lprintf( WIDE("can't Get the page...") );
@@ -417,10 +417,10 @@ PSI_PROC( int, EditControlProperties )( PCOMMON control )
 					TEXTCHAR classname[32];
 					ApplyControlPropSheet Apply;
 					snprintf( classname, sizeof( classname ), WIDE("psi/control/%d/rtti"), control->nType );
-					Apply = GetRegisteredProcedure( classname, void, read_property_page, (PCOMMON, PCONTROL) );
+					Apply = GetRegisteredProcedure( classname, void, read_property_page, (PSI_CONTROL, PCONTROL) );
 					if( Apply )
 					{
-						Apply( (PCONTROL)pEditProps->pPropertySheet, (PCOMMON)pc );
+						Apply( (PCONTROL)pEditProps->pPropertySheet, (PSI_CONTROL)pc );
 					}
 				}
 			}
@@ -431,7 +431,7 @@ PSI_PROC( int, EditControlProperties )( PCOMMON control )
 					TEXTCHAR classname[32];
 					DoneControlPropSheet Done;
 					snprintf( classname, sizeof( classname ), WIDE("psi/control/%d/rtti"), control->nType );
-					Done = GetRegisteredProcedure( classname, void, done_property_page, (PCOMMON) );
+					Done = GetRegisteredProcedure( classname, void, done_property_page, (PSI_CONTROL) );
 					if( Done )
 					{
 						Done( (PCONTROL)pEditProps->pPropertySheet );
@@ -449,10 +449,10 @@ PSI_PROC( int, EditControlProperties )( PCOMMON control )
 
 	//---------------------------------------------------------------------------
 
-PSI_PROC( int, EditFrameProperties )( PCOMMON frame, S_32 x, S_32 y )
+PSI_PROC( int, EditFrameProperties )( PSI_CONTROL frame, S_32 x, S_32 y )
 {
 	PEDIT_PROP_DATA pEditProps = (PEDIT_PROP_DATA)Allocate( sizeof( EDIT_PROP_DATA ) );
-	PCOMMON pf;
+	PSI_CONTROL pf;
 	_32 select;
    pEditProps->x = x;
    pEditProps->y = y;
@@ -484,7 +484,7 @@ PSI_PROC( int, EditFrameProperties )( PCOMMON frame, S_32 x, S_32 y )
 		{
 			pEditProps->bDone = FALSE;
 			pEditProps->bOkay = FALSE;
-			pEditProps->pEditCurrent = (PCOMMON)frame;
+			pEditProps->pEditCurrent = (PSI_CONTROL)frame;
 		}
 		GetMousePosition( &x, &y );
 		pf = CreateFrame( WIDE("Frame Properties")
@@ -624,7 +624,7 @@ void RetachChildFrames( PSI_CONTROL pc )
 
 //---------------------------------------------------------------------------
 
-PSI_PROC( void, EditFrame )( PCOMMON pc, int bEnable )
+PSI_PROC( void, EditFrame )( PSI_CONTROL pc, int bEnable )
 {
 	if( !pc || pc->flags.bNoEdit )
 	{
@@ -732,7 +732,7 @@ PSI_PROC( void, EditFrame )( PCOMMON pc, int bEnable )
 	{
 		if( !pc->flags.auto_opened )
 		{
-			extern PPHYSICAL_DEVICE OpenPhysicalDevice( PCOMMON pc, PCOMMON over, PRENDERER pActImg );
+			extern PPHYSICAL_DEVICE OpenPhysicalDevice( PSI_CONTROL pc, PSI_CONTROL over, PRENDERER pActImg );
 			pc->flags.auto_opened = 1;
 			DisplayFrame( pc );
 			//OpenPhysicalDevice( pc, pc->parent, NULL );
@@ -850,7 +850,7 @@ PSI_PROP_NAMESPACE_END
 // Fixed some warnings, other issues with loading controls.
 //
 // Revision 1.9  2004/05/21 07:48:10  d3x0r
-// track popup takes a PCOMMON NOT a PCOMMON
+// track popup takes a PSI_CONTROL NOT a PSI_CONTROL
 //
 // Revision 1.8  2004/01/31 01:30:20  d3x0r
 // Mods to extend/test procreglib.

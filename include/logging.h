@@ -32,6 +32,23 @@
 #define LOGGING_NAMESPACE 
 #define LOGGING_NAMESPACE_END
 #endif
+/* Handles log output. Logs can be directed to UDP directed, or
+   broadcast, or localhost, or to a file location, and under
+   windows the debugging console log.
+   
+   
+   
+   lprintf
+   
+   SetSystemLog
+   
+   SystemLogTime
+   
+   
+   
+   there are options, when options code is enabled, which
+   control logging output and format. Log file location can be
+   specified generically for instance.... see Options.          */
 LOGGING_NAMESPACE
 
 

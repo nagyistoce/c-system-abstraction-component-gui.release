@@ -70,17 +70,109 @@ typedef PTRSZVAL (CPROC *ForProc)( PTRSZVAL user, INDEX idx, POINTER *item );
 // and the value is returned... the user value is passed to the callback.
 TYPELIB_PROC  PTRSZVAL TYPELIB_CALLTYPE     ForAllLinks    ( PLIST *pList, ForProc func, PTRSZVAL user ); 
 
+/* This is a iterator which can be used to check each member in
+   a PLIST.
+   Parameters
+   list :     List to iterate through
+   index :    variable to use to index the list
+   type :     type of the elements stored in the list (for C++)
+   pointer :  variable used to get the current member of the
+              list.
+   
+   Example
+   <code lang="c++">
+   POINTER p;  // the pointer to receive the list member pointer (should be a user type)
+   INDEX idx; // indexer
+   PLIST pList; // some list.
+   
+   LIST_FORALL( pList, idx, POINTER, p )
+   {
+       // p will never be NULL here.
+       // each link stored in the list is set to p here..
+   
+       // this is a way to remove this item from the list...
+       SetLink( &amp;pList, idx, NULL );
+   
+       if( some condition )
+          break;
+   }
+   
+   </code>
+   Another example that uses data and searches..
+   <code lang="c++">
+   PLIST pList = NULL;
+   INDEX idx;
+   CTEXTSTR string;
+   
+   AddLink( &amp;pList, (POINTER)"hello" );
+   </code>
+   <code>
+   AddLink( &amp;pList, (POINTER)"world" );
+   
+   LITS_FORALL( pList, idx, CTEXTSTR, string )
+   {
+       if( strcmp( string, "hello" ) == 0 )
+           break;
+   }
+   // here 'string' will be NULL if not found, else will be what was found
+   </code>
+   Remarks
+   This initializes the parameters passed to the macro so that
+   if the list is NULL or empty, then p will be set to NULL. If
+   there are no non-nulll members in the list, p will be set to
+   NULL. If you break in the loop, like in the case of searching
+   the list for something, then p will be non-null at the end of
+   the loop.
+                                                                                         */
 #define LIST_FORALL( l, i, t, v )  if(((v)=(t)NULL),(l))            \
                                             for( ((i)=0); ((i) < ((l)->Cnt))? \
                                         (((v)=(t)(PTRSZVAL)(l)->pNode[i]),1):(((v)=(t)NULL),0); (i)++ )  if( v )
+/* This can be used to continue iterating through a list after a
+   LIST_FORALL has been interrupted.
+   Parameters
+   list :     \Description
+   index :    index variable for stepping through the list
+   type :     type of the members in the list.
+   pointer :  variable name to use to store the the current list
+              element.
+   
+   Example
+   <code lang="c++">
+   PLIST pList = NULL;
+   CTEXTSTR p;
+   INDEX idx;
+   
+   </code>
+   <code>
+   AddLink( &amp;pList, "this" );
+   AddLink( &amp;pList, "is" );
+   AddLink( &amp;pList, "a" );
+   AddLink( &amp;pList, "test" );
+   
+   LIST_FORALL( pList, idx, CTEXTSTR, p )
+   {
+       if( strcmp( p, "is" ) == 0 )
+           break;
+   }
+   LIST_NEXTALL( pList, idx, CTEXTSTR, p )
+   {
+       printf( "remaining element : %s", p );
+   }
+   </code>
+   <code lang="c++">
+   j 
+   </code>                                                       */
 #define LIST_NEXTALL( l, i, t, v )  if(l)            \
     for( ++(i),((v)=(t)NULL); ((i) < ((l)->Cnt))? \
     (((v)=(t)(l)->pNode[i]),1):(((v)=(t)NULL),0); (i)++ )  if( v )
-// removing this will cause some code to be uncomfortably modified...
-// but as with all bad things - they must be removed.
-//#define LIST_ENDFORALL()
+/* <combine sack::containers::list::CreateListEx@DBG_VOIDPASS>
+   
+   \ \                                                         */
 
 #define CreateList()       ( CreateListEx( DBG_VOIDSRC ) )
+/* <combine sack::containers::list::DeleteListEx@PLIST *plist>
+   
+   \ \                                                         */
 #define DeleteList(p)      ( DeleteListEx( (p) DBG_SRC ) )
 /* Adds a pointer to a user object to a list.
    Example
@@ -109,6 +201,9 @@ TYPELIB_PROC  PTRSZVAL TYPELIB_CALLTYPE     ForAllLinks    ( PLIST *pList, ForPr
    }
    </code>                                                                 */
 #define AddLink(p,v)       ( AddLinkEx( (p),((POINTER)(v)) DBG_SRC ) )
+/* <combine sack::containers::list::SetLinkEx@PLIST *@INDEX@POINTER p>
+   
+   \ \                                                                 */
 #define SetLink(p,i,v)     ( SetLinkEx( (p),(i),((POINTER)(v)) DBG_SRC ) )
 
 #ifdef __cplusplus
@@ -660,12 +755,28 @@ TYPELIB_PROC  void TYPELIB_CALLTYPE  DeleteFromSetExx( GENERICSET *set, POINTER 
    \ \                                                                                 */
 #define DeleteFromSet( name, set, member ) DeleteFromSetExx( (GENERICSET*)set, member, sizeof( name ), MAX##name##SPERSET DBG_SRC )
 
+/* Marks a member in a set as usable.
+   Parameters
+   set :       pointer to a genericset pointer
+   iMember :   index of member to delete
+   unitsize :  (filled by macro) size of element in set
+   max :       (filled by macro) size of a block of elements. */
 TYPELIB_PROC  void TYPELIB_CALLTYPE  DeleteSetMemberEx( GENERICSET *set, INDEX iMember, PTRSZVAL unitsize, INDEX max );
 /* <combine sack::containers::sets::DeleteSetMemberEx@GENERICSET *@INDEX@PTRSZVAL@INDEX>
    
    \ \                                                                                   */
 #define DeleteSetMember( name, set, member ) DeleteSetMemberEx( (GENERICSET*)set, member, sizeof( name ), MAX##name##SPERSET )
 
+/* This function can check to see if a pointer is a valid
+   element from a set.
+   Parameters
+   set :       pointer to a set to check
+   unit :      pointer to an element from the set
+   unitsize :  size of element structures in the set.
+   max :       count of structures per set block
+   
+   Returns
+   TRUE if unit is in the set, else FALSE.                */
 TYPELIB_PROC  int TYPELIB_CALLTYPE  MemberValidInSetEx( GENERICSET *set, POINTER unit, int unitsize, int max );
 /* <combine sack::containers::sets::MemberValidInSetEx@GENERICSET *@POINTER@int@int>
    
@@ -684,6 +795,17 @@ TYPELIB_PROC  POINTER * TYPELIB_CALLTYPE GetLinearSetArray( GENERICSET *pSet, in
    \ \                                                 */
 #define GetLinearSetArray( name, set, pCount ) GetLinearSetArray( (GENERICSET*)set, pCount, sizeof( name ), MAX##name##SPERSET )
 
+/* Returned the index of an item in a linear array returned from
+   a set.
+   Parameters
+   pArray :      pointer to an array which has been returned from
+                 the set
+   nArraySize :  size fo the array
+   unit :        pointer to an element in the array
+   
+   Returns
+   Index of the unit in the array, INVALID_INDEX if not in the
+   array.                                                         */
 TYPELIB_PROC  int TYPELIB_CALLTYPE  FindInArray( POINTER *pArray, int nArraySize, POINTER unit );
 
 /* Delete all allocated slabs.
@@ -696,6 +818,20 @@ TYPELIB_PROC  void TYPELIB_CALLTYPE  DeleteSet( GENERICSET **ppSet );
 #define DeleteSetEx( name, ppset ) { name##SET **delete_me = ppset; DeleteSet( (GENERICSET**)delete_me ); }
 
 typedef PTRSZVAL (CPROC *FAISCallback)(void*,PTRSZVAL);
+/* \ \ 
+   Parameters
+   pSet :      poiner to a set
+   unitsize :  size of elements in the array
+   max :       count of elements per set block
+   f :         user callback function to call for each element in
+               the set
+   psv :       user data passed to the user callback when it is
+               invoked for a member of the set.
+   
+   Returns
+   If the user callback returns 0, the loop continues. If the
+   user callback returns non zero then the looping through the
+   set ends, and that result is returned.                         */
 TYPELIB_PROC  PTRSZVAL TYPELIB_CALLTYPE  _ForAllInSet( GENERICSET *pSet, int unitsize, int max, FAISCallback f, PTRSZVAL psv );
 
 typedef PTRSZVAL (CPROC *FESMCallback)(INDEX,PTRSZVAL);
@@ -1091,16 +1227,6 @@ TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  DumpText ( PTEXT text );
 // segments are ment to be lines, the meaninful tag "TF_NORETURN" means it's part of the prior line.
 
 //--------------------------------------------------------------------------
-
-#ifndef _TYPELIBRARY_SOURCE
-#if defined (_WIN32 ) && !defined( __STATIC__ )
-IMPORT_METHOD PTEXT newline;
-IMPORT_METHOD PTEXT blank;
-#else
-extern TEXT newline;
-extern TEXT blank;
-#endif
-#endif
 
 
 #define HAS_WHITESPACE(pText) ( (pText)->format.position.spaces || (pText)->format.position.tabs )
@@ -1791,6 +1917,9 @@ typedef struct treeroot_tag *PTREEROOT;
   This routine should return -1 if new is less than old, it should return 1 if new is more than old, and it 
   should return 0 if new and old are the same key. */
 typedef int (CPROC *GenericCompare)( PTRSZVAL oldnode,PTRSZVAL newnode );
+/* Signature for the user callback passed to CreateBinaryTreeEx
+   that will be called for each node removed from the binary
+   list.                                                        */
 typedef void (CPROC *GenericDestroy)( POINTER user, PTRSZVAL key);
 
 /* when adding a node if Compare is NULL the default method of a
@@ -1821,7 +1950,7 @@ typedef void (CPROC *GenericDestroy)( POINTER user, PTRSZVAL key);
    }
    void CPROC MyGenericDestroy(POINTER user, PTRSZVAL key)
    {
-      /* do something custom with your user data and or key value *&#47;
+      // do something custom with your user data and or key value
    }
    
    PTREEROOT tree = CreateBinaryTreeExtended( 0 // BT_OPT_NODUPLICATES
@@ -1903,7 +2032,7 @@ TYPELIB_PROC  void TYPELIB_CALLTYPE  DestroyBinaryTree( PTREEROOT root );
    <code lang="c++">
    <link PTREEROOT> tree;
    
-   /* <link AddBinaryNode>... *&#47;
+   // <link AddBinaryNode>...
    BalanceBinaryTree( tree );
    </code>                                                        */
 TYPELIB_PROC  void TYPELIB_CALLTYPE  BalanceBinaryTree( PTREEROOT root ); 

@@ -1219,22 +1219,10 @@ PROCREG_PROC( int, RegisterValueExx )( PCLASSROOT root, CTEXTSTR name_class, CTE
 			}
 			else
 			{
-            /*
-		if( oldname->flags.bValue )
-		{
-lprintf(  WIDE("%s"), oldname->name );
-					if( oldname->flags.bIntVal )
-				lprintf(  WIDE("[%ld]"), oldname->data.name.iValue );
-			if( oldname->flags.bStringVal )
-				lprintf(  WIDE("\"%s\""), oldname->data.name.sValue );
-				}
-            */
-			//if( oldname->flags.bStringVal )
-			//		Release( (POINTER)oldname->data.name.sValue );
-			oldname->flags.bStringVal = 1;
+				oldname->flags.bStringVal = 1;
 				oldname->data.name.sValue = SaveName( value );
 			}
-	}
+		}
 		else
 		{
 			PNAME newname = GetFromSet( NAME, &l.NameSet ); //Allocate( sizeof( NAME ) );
@@ -1871,8 +1859,12 @@ POINTER GetInterface( CTEXTSTR pServiceName )
 		}
 		else
 		{
-			lprintf( WIDE("Did not find load procedure for:[%s] (dumping names from /system/interface/* so you can see what might be availalbe)"), interface_name );
-			DumpRegisteredNamesFrom(GetClassRoot(WIDE( "system/interfaces" )));
+			if( !GetRegisteredValueExx( (PCLASSROOT)interface_name, NULL, WIDE( "Logged" ), 1 ) )
+			{
+				lprintf( WIDE("Did not find load procedure for:[%s] (dumping names from /system/interface/* so you can see what might be availalbe)"), interface_name );
+				DumpRegisteredNamesFrom(GetClassRoot(WIDE( "system/interfaces" )));
+				RegisterValueExx( (PCLASSROOT)interface_name, NULL, WIDE( "Logged" ), 1, (CTEXTSTR)1 );
+			}
 		}
 	}
 	return NULL;

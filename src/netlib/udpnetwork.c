@@ -78,8 +78,9 @@ NETWORK_PROC( PCLIENT, CPPServeUDPAddr )( SOCKADDR *pAddr
        				*(((unsigned char *)pAddr)+7) );
 #endif
       if (bind(pc->Socket,&pc->saSource,sizeof(SOCKADDR)))
-      {
-         Log3( WIDE("%s(%d): Bind Fail: %d"), __FILE__, __LINE__, WSAGetLastError() );
+		{
+			DumpAddr( "BIND FAIL:", &pc->saSource );
+         lprintf( WIDE("Bind Fail: %d"), WSAGetLastError() );
 	      InternalRemoveClientEx( pc, TRUE, FALSE );
    	   LeaveCriticalSec( &pc->csLock );
 	      return NULL;

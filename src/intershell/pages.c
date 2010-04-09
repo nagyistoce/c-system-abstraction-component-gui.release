@@ -14,6 +14,9 @@
  *    page/Page Changer
  *    page/title
  */
+#ifndef INTERSHELL_SOURCE
+#define INTERSHELL_SOURCE
+#endif
 
 #include <stdhdrs.h> // DebugBreak()
 #include <sharemem.h>
@@ -27,6 +30,8 @@
 #include "widgets/include/banner.h"
 
 #include <psi.h>
+
+INTERSHELL_NAMESPACE
 
 extern CONTROL_REGISTRATION menu_surface;
 
@@ -915,7 +920,6 @@ void RenamePage( PSI_CONTROL pc_canvas )
 //---------------------------------------------------------------------------
 
 OnCreateMenuButton( PAGE_CHANGER_NAME )( PMENU_BUTTON button )
-//PTRSZVAL CPROC CreatePageChanger( PMENU_BUTTON button )
 {
 	// add layout, and set title on button...
 	// well...
@@ -923,9 +927,7 @@ OnCreateMenuButton( PAGE_CHANGER_NAME )( PMENU_BUTTON button )
 	InterShell_SetButtonStyle( button, WIDE( "bicolor square" ) );
 	InterShell_SetButtonColors( button, BASE_COLOR_WHITE,BASE_COLOR_GREEN,BASE_COLOR_BLACK, 0 );
 	{
-		PPAGE_CHANGER page_changer = New( PAGE_CHANGER );
-		page_changer->button = button;
-		return (PTRSZVAL)page_changer;
+		return (PTRSZVAL)button;//page_changer;
 	}
 	return 0;
 }
@@ -937,27 +939,10 @@ OnDestroyControl( PAGE_CHANGER_NAME )( PTRSZVAL psv )
    Release( (PPAGE_DATA)psv );
 }
 
-void InterShell_DisableButtonPageChange( PMENU_BUTTON button )
-{
-	// set a one shot flag to disable the change associated with this button.
-   if( button )
-		button->flags.bIgnorePageChange = 1;
-}
-
-static void OnCopyControl( PAGE_CHANGER_NAME )( PTRSZVAL psv )
-{
-	PPAGE_CHANGER page = (PPAGE_CHANGER)psv;
-	if( page )
-	{
-		/* Nothing else to copy here... */
-      /* Oops... */
-	}
-
-}
-
 #undef UpdateButtonEx
 PUBLIC( void, UpdateButtonEx )( PMENU_BUTTON button, int bEndingEdit  )
 {
    UpdateButtonExx( button, bEndingEdit DBG_SRC );
 }
+INTERSHELL_NAMESPACE_END
 

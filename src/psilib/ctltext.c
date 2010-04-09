@@ -24,7 +24,7 @@ PSI_CONTROL SetTextControlAttributes( PSI_CONTROL pc, int flags )
    return pc;
 }
 
-void SetControlAlignment( PCOMMON pc, int align )
+void SetControlAlignment( PSI_CONTROL pc, int align )
 {
 	//if( align & TEXT_INVERT )
 	//	pc->flags.bInvert = 1;
@@ -43,7 +43,7 @@ void SetControlAlignment( PCOMMON pc, int align )
    SmudgeCommon( pc );
 }
 
-static int CPROC _DrawTextControl( PCOMMON pc )
+static int CPROC _DrawTextControl( PSI_CONTROL pc )
 {
 	ValidatedControlData( PTEXTCONTROL, STATIC_TEXT, ptc, pc );
    //lprintf( WIDE("drawing a text control...") );
@@ -151,7 +151,7 @@ PSI_PROC( void, SetTextControlColors )( PCONTROL pc, CDATA fore, CDATA back )
 	SmudgeCommon( pc );
 }
 
-LOGICAL GetControlTextOffsetMinMax( PCOMMON pc, int *min_offset, int *max_offset )
+LOGICAL GetControlTextOffsetMinMax( PSI_CONTROL pc, int *min_offset, int *max_offset )
 {
 	ValidatedControlData( PTEXTCONTROL, STATIC_TEXT, ptc, pc );
 	if( ptc )
@@ -220,7 +220,7 @@ LOGICAL GetControlTextOffsetMinMax( PCOMMON pc, int *min_offset, int *max_offset
 }
 
 
-LOGICAL SetControlTextOffset( PCOMMON pc, int offset )
+LOGICAL SetControlTextOffset( PSI_CONTROL pc, int offset )
 {
 	ValidatedControlData( PTEXTCONTROL, STATIC_TEXT, ptc, pc );
 	if( ptc )

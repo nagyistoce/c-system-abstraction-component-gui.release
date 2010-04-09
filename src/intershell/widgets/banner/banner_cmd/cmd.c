@@ -205,6 +205,7 @@ int APIENTRY WinMain( HINSTANCE hInst, HINSTANCE hPrev, LPWSTR lpCmd, int nCmdSh
 {
 	int argc; 
 	TEXTCHAR **argv;
+	ParseIntoArgs( lpCmd, &argc, &argv );
 
 #else
 int main( int argc, char **argv )
@@ -213,7 +214,6 @@ int main( int argc, char **argv )
    int result;
 	PBANNER banner = NULL;
 	lprintf( WIDE("Started...") );
-	ParseIntoArgs( lpCmd, &argc, &argv );
 	lprintf( WIDE( "Started..." ) );
 	if( !HandleArgs( argc, argv ) )
       return 0;

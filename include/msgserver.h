@@ -3,38 +3,36 @@
 
 
 #ifdef BCC16
-#ifdef SERVERMSG_SOURCE
-#define SERVERMSG_PROC(type,name) type STDPROC _export name
+# ifdef SERVERMSG_SOURCE
+# define SERVERMSG_PROC(type,name) type STDPROC _export name
+# else
+# define SERVERMSG_PROC(type,name) type STDPROC name
+# endif
 #else
-#define SERVERMSG_PROC(type,name) type STDPROC name
-#endif
-#else
-#if !defined(__STATIC__) && !defined(__UNIX__)
-#ifdef SERVERMSG_SOURCE
-#define SERVERMSG_PROC(type,name) EXPORT_METHOD type CPROC name
-#else
-#define SERVERMSG_PROC(type,name) __declspec(dllimport) type CPROC name
-#endif
-#else
-#ifdef SERVERMSG_SOURCE
-#define SERVERMSG_PROC(type,name) type CPROC name
-#else
-#define SERVERMSG_PROC(type,name) extern type CPROC name
-#endif
-#endif
-#endif
-
-#ifdef __cplusplus
-#define MSGSERVER_NAMESPACE namespace sack { namespace msg { namespace server {
-#define MSGSERVER_NAMESPACE_END }} }
-#else
-#define MSGSERVER_NAMESPACE 
-#define MSGSERVER_NAMESPACE_END
+# ifdef SERVERMSG_SOURCE
+# define SERVERMSG_PROC(type,name) EXPORT_METHOD type CPROC name
+# else
+# define SERVERMSG_PROC(type,name) IMPORT_METHOD type CPROC name
+# endif
 #endif
 
 #include <msgprotocol.h>
 
-MSGSERVER_NAMESPACE
+#ifdef __cplusplus
+#define _SERVER_NAMESPACE namespace server {
+#define MSGSERVER_NAMESPACE namespace sack { namespace msg { namespace server {
+#define MSGSERVER_NAMESPACE_END }} }
+#else
+#define _SERVER_NAMESPACE 
+#define MSGSERVER_NAMESPACE 
+#define MSGSERVER_NAMESPACE_END
+#endif
+
+SACK_NAMESPACE
+   _MSG_NAMESPACE
+/* Defines methods and events that the service side might want
+   to use.                                                     */
+	_SERVER_NAMESPACE
 
 #ifdef _DEBUG
 #define CLIENT_TIMEOUT   120000 // 2 seconds
@@ -43,10 +41,13 @@ MSGSERVER_NAMESPACE
 #endif
 
 
+/* User callback signature to return the function callback table
+   to the server for event dispatch to a service (?) (INTERNAL?) */
 typedef int (CPROC *GetServiceFunctionTable)(server_function_table *ppTable
 												  ,_32 *nEntries
 												  ,_32 MsgBase);
 
+#ifndef CLIENT_MESSAGE_INTERFACE
 #ifndef CLIENTMSG_SOURCE
 // now - is there some magic to allow libraries to link to
 // the core application?? - this is in the server's core
@@ -54,8 +55,12 @@ typedef int (CPROC *GetServiceFunctionTable)(server_function_table *ppTable
 SERVERMSG_PROC(int, SendMultiServiceEvent)( _32 pid, _32 event
 								 , _32 parts
 								 , ... );
+/* <combine sack::msg::client::SendMultiServiceEvent@_32@_32@_32@...>
+   
+   \ \                                                                */
 #define SendServiceEvent(pid,event,data,len) SendMultiServiceEvent(pid,event,1,data,len)
 //void SendServiceEvent( _32 pid, _32 event, _32 *data, _32 len );
+#endif
 #endif
 
 MSGSERVER_NAMESPACE_END

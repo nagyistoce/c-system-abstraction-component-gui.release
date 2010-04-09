@@ -71,6 +71,8 @@ struct ImageFile_tag
    int actual_width;  // Width of image.
    int actual_height; // Height of image.
 #endif
+//DOM-IGNORE-BEGIN
+
    int pwidth; // width of real physical layer
 
    // The image data.
@@ -114,6 +116,7 @@ private:
    /* gl context? */
 	int glSurface;
 #endif
+//DOM-IGNORE-END
 };
 
 /* The basic structure. This is referenced by applications as '<link sack::image::Image, Image>'

@@ -14,7 +14,7 @@ PSI_EDIT_NAMESPACE
 //---------------------------------------------------------------------------
 
 typedef struct edit {
-	PCOMMON pc;
+	PSI_CONTROL pc;
 	struct {
 		int insert:1;
 		_32 bPassword : 1; // hide data content.
@@ -59,7 +59,7 @@ CTEXTSTR GetString( PEDIT pe, CTEXTSTR text, int length )
 
 //---------------------------------------------------------------------------
 
-CUSTOM_CONTROL_DRAW( DrawEditControl, ( PCOMMON pc ) )
+CUSTOM_CONTROL_DRAW( DrawEditControl, ( PSI_CONTROL pc ) )
 {
 	ValidatedControlData( PEDIT, EDIT_FIELD, pe, pc );
 	Font font;
@@ -190,8 +190,8 @@ CUSTOM_CONTROL_DRAW( DrawEditControl, ( PCOMMON pc ) )
 
 //---------------------------------------------------------------------------
 
-static int OnMouseCommon( EDIT_FIELD_NAME )( PCOMMON pc, S_32 x, S_32 y, _32 b )
-//CUSTOM_CONTROL_MOUSE(  MouseEditControl, ( PCOMMON pc, S_32 x, S_32 y, _32 b ) )
+static int OnMouseCommon( EDIT_FIELD_NAME )( PSI_CONTROL pc, S_32 x, S_32 y, _32 b )
+//CUSTOM_CONTROL_MOUSE(  MouseEditControl, ( PSI_CONTROL pc, S_32 x, S_32 y, _32 b ) )
 {
 	static int _b;
 	ValidatedControlData( PEDIT, EDIT_FIELD, pe, pc );
@@ -344,7 +344,7 @@ static void InsertAChar( PEDIT pe, PTEXT *caption, TEXTCHAR ch )
 		pe->nCaptionSize += 16;
 		newtext = SegCreate( pe->nCaptionSize );
 		StrCpyEx( GetText( newtext ), GetText( *caption )
-				 , pe->nCaptionUsed );
+				 , (pe->nCaptionUsed+1) ); // include the NULL, the buffer will be large enough.
 		SetTextSize( newtext, pe->nCaptionUsed );
 		GetText( newtext )[pe->nCaptionUsed] = 0;
 		LineRelease( *caption );
@@ -484,7 +484,7 @@ static void Cut( PEDIT pe, PTEXT *caption )
 }
 #endif
 
-CUSTOM_CONTROL_KEY( KeyEditControl, ( PCOMMON pc, _32 key ) )
+CUSTOM_CONTROL_KEY( KeyEditControl, ( PSI_CONTROL pc, _32 key ) )
 {
 	ValidatedControlData( PEDIT, EDIT_FIELD, pe, pc );
    int used_key = 0;
@@ -685,7 +685,7 @@ CUSTOM_CONTROL_KEY( KeyEditControl, ( PCOMMON pc, _32 key ) )
 
 //---------------------------------------------------------------------------
 
-PCOMMON SetEditControlReadOnly( PCOMMON pc, LOGICAL bEnable )
+PSI_CONTROL SetEditControlReadOnly( PSI_CONTROL pc, LOGICAL bEnable )
 {
 	ValidatedControlData( PEDIT, EDIT_FIELD, pe, pc );
 	if( pe )
@@ -698,7 +698,7 @@ PCOMMON SetEditControlReadOnly( PCOMMON pc, LOGICAL bEnable )
 
 //---------------------------------------------------------------------------
 
-PCOMMON SetEditControlPassword( PCOMMON pc, LOGICAL bEnable )
+PSI_CONTROL SetEditControlPassword( PSI_CONTROL pc, LOGICAL bEnable )
 {
 	ValidatedControlData( PEDIT, EDIT_FIELD, pe, pc );
 	if( pe )
@@ -711,7 +711,7 @@ PCOMMON SetEditControlPassword( PCOMMON pc, LOGICAL bEnable )
 
 //---------------------------------------------------------------------------
 
-void CPROC ChangeEditCaption( PCOMMON pc )
+void CPROC ChangeEditCaption( PSI_CONTROL pc )
 {
    ValidatedControlData( PEDIT, EDIT_FIELD, pe, pc );
     if( !pc->caption.text )
@@ -737,7 +737,7 @@ void CPROC ChangeEditCaption( PCOMMON pc )
 /*
 void SetEditFont( PCONTROL pc, Font font )
 {
-   SetCommonFont( (PCOMMON)pc, font );
+   SetCommonFont( (PSI_CONTROL)pc, font );
 }
 */
 
@@ -764,12 +764,12 @@ static int CPROC FocusChanged( PCONTROL pc, LOGICAL bFocused )
 //---------------------------------------------------------------------------
 #undef MakeEditControl
 
-	int CPROC InitEditControl( PCOMMON pControl );
-int CPROC ConfigEditControl( PCOMMON pc )
+	int CPROC InitEditControl( PSI_CONTROL pControl );
+int CPROC ConfigEditControl( PSI_CONTROL pc )
 {
 	return InitEditControl(pc);
 }
-PCOMMON CPROC MakeEditControl( PCOMMON pFrame, int attr
+PSI_CONTROL CPROC MakeEditControl( PSI_CONTROL pFrame, int attr
 									  , int x, int y, int w, int h
 									  , PTRSZVAL nID, TEXTCHAR *caption )
 {
@@ -784,7 +784,7 @@ void CPROC GrabFilename( PSI_CONTROL pc, CTEXTSTR name, S_32 x, S_32 y )
 	SetControlText( pc, name );
 }
 
-int CPROC InitEditControl( PCOMMON pc )
+int CPROC InitEditControl( PSI_CONTROL pc )
 {
 	ValidatedControlData( PEDIT, EDIT_FIELD, pe, pc );
 	if( pe )

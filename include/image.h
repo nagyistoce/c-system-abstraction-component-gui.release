@@ -19,6 +19,7 @@
 // it's ACTUAL x,y,width,height as the first 4 S_32 bit values.
 
 #ifndef IMAGE_H
+// multiple inclusion protection symbol
 #define IMAGE_H
 
 #if defined( _MSC_VER ) && defined( SACK_BAG_EXPORTS ) && 0
@@ -28,7 +29,9 @@
 #include <sack_types.h>
 #include <colordef.h>
 #include <fractions.h>
-//#include <procreg.h>
+#ifndef __NO_INTERFACES__
+#include <procreg.h>
+#endif
 
 # ifndef SECOND_IMAGE_LEVEL
 #  define SECOND_IMAGE_LEVEL _2
@@ -132,6 +135,7 @@
 /* Define the namespace of image routines, when building under
    C++.                                                        */
 #define IMAGE_NAMESPACE namespace sack { namespace image {
+#define _IMAGE_NAMESPACE namespace image {
 /* Define the namespace of image routines, when building under
    C++. This ends a namespace.                                 */
 #define IMAGE_NAMESPACE_END }}
@@ -147,6 +151,7 @@
 #define ASM_IMAGE_NAMESPACE_END }
 #else
 #define IMAGE_NAMESPACE 
+#define _IMAGE_NAMESPACE
 #define IMAGE_NAMESPACE_END
 #define ASM_IMAGE_NAMESPACE /* Defined Image API.
    
@@ -163,10 +168,20 @@
 
 #define ASM_IMAGE_NAMESPACE_END
 #endif
-
-/* asdf */
-/* Namespace for image handling. */
-IMAGE_NAMESPACE
+SACK_NAMESPACE
+/* Deals with images and image processing.
+   
+   
+   
+   Image is the primary type of this.
+   
+   Font is a secondary type for putting text on images.
+   
+   
+   
+   render namespace is contained in image, because without
+   image, there could be no render. see PRENDERER.         */
+	_IMAGE_NAMESPACE
 
 /* A fixed point decimal number (for freetype font rendering) */
 typedef S_32 fixed;
@@ -1191,7 +1206,7 @@ IMAGE_PROC  Font IMAGE_API  InternalRenderFontFile ( CTEXTSTR file
    nFile :    The number of the file in the cache.
    nWidth :   the width to use for rendering characters (in
               pixels)
-   nHeight :  the width to use for rendering characters (in
+   nHeight :  the height to use for rendering characters (in
               pixels)
    flags :    0 = render mono. 2=render 2 bits, 3=render 8 bit.
    
@@ -1220,13 +1235,39 @@ typedef struct font_data_tag *PFONTDATA;
 /* Information to render a font from a file to memory. */
 typedef struct render_font_data_tag *PRENDER_FONTDATA;
 
-/* Recreates a Font based on saved FontData.
+/* Recreates a Font based on saved FontData. The resulting font
+   may be scaled from its original size.
    Parameters
    pfd :           pointer to font data.
    width_scale :   FRACTION to scale the original font height
-                   \description by
+                   \description by. if NULL uses the original
+                   font's size.
    height_scale :  FRACTION to scale the original font height
-                   \description by                            */
+                   \description by.  if NULL uses the original
+                   font's size.
+   
+   Example
+   <code lang="c++">
+   POINTER some_loaded_data; // pretend it is initialized to something valid
+   
+   Font font = RenderScaledFontData( some_loaded_data, NULL, NULL );
+   PutStringFont( image, 0, 0, BASE_COLOR_WHITE, 0, "Hello World", font );
+   </code>
+   
+   Or, maybe your original designed screen was 1024x768, and
+   it's now showing on 1600x1200, for the text to remain the
+   same...
+   <code lang="c++">
+   FRACTION width_scale;
+   FRACTION height_scale;
+   _32 w, h;
+   GetDisplaySize( &amp;w, &amp;h );
+   SetFraction( width_scale, w, 1024 );
+   SetFraction( height_scale, h, 768 );
+   
+   Font font2 = RenderScaledFontData( some_loaded_data, &amp;width_scale, &amp;height_scale );
+   PutStringFont( image, 0, 0, BASE_COLOR_WHITE, 0, "Hello World", font2 );
+   </code>                                                                                     */
 IMAGE_PROC  Font IMAGE_API  RenderScaledFontData( PFONTDATA pfd, PFRACTION width_scale, PFRACTION height_scale );
 /* <combine sack::image::RenderScaledFontData@PFONTDATA@PFRACTION@PFRACTION>
    
@@ -1269,6 +1310,18 @@ IMAGE_PROC  Font IMAGE_API  RenderFontFileEx ( CTEXTSTR file, _32 width, _32 hei
 // to be retreived later when only the font handle remains.
 IMAGE_PROC  void IMAGE_API  SetFontRendererData ( Font font, POINTER pResult, _32 size );
 
+#ifndef PSPRITE_METHOD
+/* <combine sack::image::PSPRITE_METHOD>
+   
+   \ \                                   */
+#define PSPRITE_METHOD PSPRITE_METHOD
+	typedef struct sprite_method_tag *PSPRITE_METHOD;
+#endif
+	// provided for display rendering portion to define this method for sprites to use.
+   // deliberately out of namespace... please do not move this up.
+IMAGE_PROC  void IMAGE_API  SetSavePortion ( void (CPROC*_SavePortion )( PSPRITE_METHOD psm, _32 x, _32 y, _32 w, _32 h ) );
+
+_INTERFACE_NAMESPACE
 
 /* Defines a pointer member of the interface structure. */
 #define IMAGE_PROC_PTR(type,name) type (CPROC*_##name)
@@ -1619,16 +1672,6 @@ IMAGE_PROC  struct image_interface_tag* IMAGE_API  GetImageInterface ( void );
    library is mounted across a pipe service.                   */
 IMAGE_PROC  void IMAGE_API  DropImageInterface ( PIMAGE_INTERFACE );
 
-#ifndef PSPRITE_METHOD
-/* <combine sack::image::PSPRITE_METHOD>
-   
-   \ \                                   */
-#define PSPRITE_METHOD PSPRITE_METHOD
-	typedef struct sprite_method_tag *PSPRITE_METHOD;
-#endif
-	// provided for display rendering portion to define this method for sprites to use.
-   // deliberately out of namespace... please do not move this up.
-IMAGE_PROC  void IMAGE_API  SetSavePortion ( void (CPROC*_SavePortion )( PSPRITE_METHOD psm, _32 x, _32 y, _32 w, _32 h ) );
 
 #define GetImageInterface() (PIMAGE_INTERFACE)GetInterface( WIDE("image") )
 /* <combine sack::image::DropImageInterface@PIMAGE_INTERFACE>
@@ -1880,6 +1923,11 @@ IMAGE_PROC  void IMAGE_API  SetSavePortion ( void (CPROC*_SavePortion )( PSPRITE
 #define RenderScaledFontData              LEVEL_ALIAS(RenderScaledFontData)
 #define RenderFontData              LEVEL_ALIAS(RenderFontData)
 #define RenderFontFileEx              LEVEL_ALIAS(RenderFontFileEx)
+#endif
+
+_INTERFACE_NAMESPACE_END
+#ifdef __cplusplus
+	using namespace sack::image::interface;
 #endif
 
 // these macros provide common extensions for 

@@ -46,6 +46,7 @@
 #include <vidlib/vidstruc.h>
 #endif
 
+INTERSHELL_NAMESPACE
 // this structure maintains the current edit button
 // what it is, and temp data for configuing it via
 // Set/GetCommonButtonControls()
@@ -346,7 +347,7 @@ static LOGICAL IsSelectionValidEx( PCanvasData canvas, PMENU_BUTTON pExclude, in
 
 PMENU_BUTTON CreateButton( void )
 {
-	PMENU_BUTTON button = (PMENU_BUTTON)Allocate( sizeof( MENU_BUTTON ) );
+	PMENU_BUTTON button = New( MENU_BUTTON );
 	MemSet( button, 0, sizeof( MENU_BUTTON ) );
 	// applicaitons end up setting this color...
 	//button->page = ShellGetCurrentPage();
@@ -4636,7 +4637,7 @@ void InterShell_SetButtonHighlight( PMENU_BUTTON button, LOGICAL bEnable )
 		SetKeyHighlight( button->control.key, bEnable );
 }
 
-static void CPROC HandleSQLFeedback( CTEXTSTR message )
+static void CPROC MyHandleSQLFeedback( CTEXTSTR message )
 {
 	lprintf( WIDE("SQLMessage %s"), message );
 	BannerNoWait( message );
@@ -4647,7 +4648,7 @@ PRIORITY_PRELOAD( LoadingMessage, DEFAULT_PRELOAD_PRIORITY+3 )
 	BannerNoWait( WIDE("Loading...") );
 	//void SQLSetFeedbackHandler( void (CPROC*HandleSQLFeedback*)(TEXTCHAR *message) );
 #ifndef __NO_SQL__
-	SQLSetFeedbackHandler( HandleSQLFeedback );
+	SQLSetFeedbackHandler( MyHandleSQLFeedback );
 #endif
 }
 
@@ -5086,7 +5087,7 @@ GetCommonButtonControls
 , InterShell_DisablePageUpdate					
 , RestoreCurrentPage						
 , HidePageExx
-, InterShell_DisableButtonPageChange			
+//, NULL //InterShell_DisableButtonPageChange			
 , CreateLabelVariable					
 , CreateLabelVariableEx					
 , LabelVariableChanged					
@@ -5150,5 +5151,6 @@ OnCreateMenuButton( WIDE( "InterShell/Debug Memory" ) )( PMENU_BUTTON button )
 {
 	return 1;
 }
+INTERSHELL_NAMESPACE_END
 
 #endif

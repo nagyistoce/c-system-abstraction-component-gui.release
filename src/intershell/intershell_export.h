@@ -4,9 +4,12 @@
 #ifdef SACK_CORE_BUILD
 #include <../src/genx/genx.h>
 #else
-#include <genxml/genx.h>
+#include <../src/genx/genx.h>
 #endif
 #include <configscript.h>
+
+#include "widgets/include/buttons.h"
+
 #define _DEFINE_INTERFACE
 
 //!defined(__STATIC__) &&
@@ -26,15 +29,176 @@
 #endif
 #endif
 
-//#include "intershell_local.h"
-#include "intershell_button.h"
 
-typedef struct page_data_tag PAGE_DATA, *PPAGE_DATA;
+#ifdef __cplusplus
+#define INTERSHELL_NAMESPACE SACK_NAMESPACE namespace intershell {
+#define INTERSHELL_NAMESPACE_END  } SACK_NAMESPACE_END
+
+
+namespace sack {
+	/* \ \ 
+	   Example
+	   A Simple Button
+	   
+	   This simple button, when clicked will show a message box
+	   indicating that the button was clicked. For button controls
+	   there is a default configuration dialog that is used for
+	   controls that do not themselves define a
+	   OnConfigureControl(OnEditControl) event handler. The default
+	   dialog, depending on its current design is able to set all
+	   relavent properties common to buttons, such as colors, font,
+	   button style, perhaps a page change indicator.
+	   
+	   
+	   
+	   <code lang="c++">
+	   
+	   
+	   OnCreateMenuButton( “basic/Hello World” )( PMENU_BUTTON button )
+	   {
+	       return 1; // result OK to create.
+	   }
+	   
+	   OnKeyPressEvent( “basic/Hello World” )( PTRSZVAL psvUnused )
+	   {
+	       SimpleMessageBox( NULL  // the parent frame, NULL is okay
+	                       , “Hello World!”   // the message within the message box
+	                       , “Button Clicked” );  // the title of the message box.
+	       // SimpleMessageBox displays a simple frame with a message
+	       // and a title, and an OK button. The function waits
+	       // until the OK button is clicked before returning.
+	   }
+	   
+	   
+	   </code>
+	   
+	   A Simple Listbox
+	   
+	   <code lang="c++">
+	   OnCreateListbox( “basic/List Test” )( PSI_CONTROL pc_list )
+	   {
+	         return pc_list; // result non-zero OK to create.
+	         // this result can also be used in subsequent events
+	   // by typecasting it back to the original PSI_CONTROL
+	   // type that it is.
+	   }
+	   
+	   
+	   
+	   </code>
+	   // several implementations of listboxes change their content
+	   
+	   based on the state of other controls around them, and/or
+	   
+	   database content. The OnShowControl is a convenient place
+	   
+	   to re-populate the listbox with new data.
+	   
+	   There is no requirement to do this in this way.
+	   
+	   Some listboxes may populate their content during OnCreate.
+	   
+	   <code lang="c++">
+	   
+	   OnShowControl( “basic/List Test” )( PTRSZVAL psvList )
+	   
+	   {
+	   
+	         PSI_CONTROL pc_list = (PSI_CONTROL)psvList;
+	   
+	         ResetList( pc_list );
+	   
+	         AddListItem( pc_list, “One List Item” );
+	   
+	         AddListItem( pc_list, “Another List Item” );
+	   
+	   }
+	   
+	   
+	   
+	   
+	   
+	   
+	   
+	   
+	   
+	   A Simple Control
+	   
+	   
+	   
+	   There is no such thing as a ‘simple’ control.
+	   
+	   
+	   
+	   OnCreateControl( “basic/Other Control” )( PSI_CONTROL frame, S_32 x, S_32 y, _32 w, _32 h )
+	   
+	   {
+	   
+	         // this code results with a create PSI control.
+	   
+	         // the PSI control must have been previously registered
+	   
+	   // or defined in some way.
+	   
+	         // the result of creating an invalid control,
+	   
+	   // or of creating a control that fails creation
+	   
+	   // for one reason or another is NULL, which will in turn
+	   
+	   // fails creation of the MILK control.
+	   
+	         return (PTRSZVAL)MakeNamedControl( frame
+	   
+	   , “Some PSI Control type-name”
+	   
+	   , x, y  // control position passed to event
+	   
+	   , w, h  // control size passed to event
+	   
+	   , \-1 ); // control ID; typically unused.
+	   
+	   }
+	   
+	   
+	   
+	   // For MILK to be able to hide the control when pages change,
+	   
+	   // show the control when pages change, move the control to
+	   
+	   // a new position, or to resize the control, this method MUST
+	   
+	   // be defined for MILK widgets created through OnCreateControl.
+	   
+	   
+	   
+	   OnQueryGetControl( PTRSZVAL psv )
+	   
+	   {
+	   
+	         // since we know that we returned a PSI_CONTROL from the
+	   
+	         // creation event, this can simply be typecast and returned.
+	   
+	         return (PSI_CONTROL)psv;
+	   
+	   }
+	   </code>                                                                                     */
+	namespace intershell {
+#else
+#define INTERSHELL_NAMESPACE
+#define INTERSHELL_NAMESPACE_END
+#endif
+
+
+
+typedef struct menu_button *PMENU_BUTTON;
+typedef struct page_data   *PPAGE_DATA;
 
 
 // pabel label is actually just a text label thing... 
-typedef struct page_label *PPAGE_LABEL;
-typedef struct font_preset_tag *PFONT_PRESET;
+typedef struct page_label      *PPAGE_LABEL;
+typedef struct font_preset     *PFONT_PRESET;
 
 
 //-------------------------------------------------------
@@ -187,7 +351,7 @@ INTERSHELL_PROC_PTR( void, HidePageExx )( PSI_CONTROL pc_canvas DBG_PASS);
 //   tend/issue/perform these types of verbs may fail, and this is the only
 //   sort of thing at the moment that happens... perhaps renaming this to
 // button_abort_function could be done?
-INTERSHELL_PROC_PTR( void, InterShell_DisableButtonPageChange )( PMENU_BUTTON button );
+// INTERSHELL_PROC_PTR( void, InterShell_DisableButtonPageChange )( PMENU_BUTTON button );
 
 INTERSHELL_PROC_PTR( PVARIABLE, CreateLabelVariable )( CTEXTSTR name, enum label_variable_types type, CPOINTER data );
 INTERSHELL_PROC_PTR( PVARIABLE, CreateLabelVariableEx )( CTEXTSTR name, enum label_variable_types type, CPOINTER data, PTRSZVAL psv );
@@ -275,6 +439,7 @@ INTERSHELL_PROC_PTR( PTRSZVAL,  InterShell_CreateControl )( CTEXTSTR type, int x
 };  //struct intershell_interface {
 
 #endif
+
 
 #ifdef INTERSHELL_SOURCE
 // magically knows which button we're editing at the moment.
@@ -551,9 +716,13 @@ PRIORITY_PRELOAD( InitInterShellInterface, DEFAULT_PRELOAD_PRIORITY - 3)
 
 
 
-#ifndef HidePageEx
+# ifndef HidePageEx
 #define HidePageEx(page) HidePageExx( page DBG_SRC )
-#endif
+# endif
 
+# ifdef __cplusplus
+} }
+using namespace sack::intershell;
+# endif
 
 #endif

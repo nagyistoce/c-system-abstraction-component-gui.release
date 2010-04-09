@@ -4,11 +4,18 @@
 #define InterShell_REGISTRY // symbol to test if this was included....
 #define TASK_PREFIX WIDE("intershell")
 #include <psi.h>
-#include "intershell_button.h"
 #include <configscript.h>
+#include "widgets/include/buttons.h"
 #ifndef POSTFIX
 #define POSTFIX WIDE("")
 #endif
+
+#ifdef __cplusplus
+namespace sack {
+	namespace intershell {
+#endif
+
+typedef struct menu_button *PMENU_BUTTON;
 
 //OnCreateMenuButton(name)(PMENU_BUTTON button ) { /*create button data*/ }
 #define OnCreateMenuButton(name) \
@@ -178,6 +185,11 @@
 /* Intended use:edits properties regarding page security... OnPageChange return FALSE to disallow page change...*/
 #define OnEditPageSecurityContext( name ) \
 	__DefineRegistryMethod(TASK_PREFIX,EditSecurityContext,WIDE( "common" ),WIDE( "global properties" ),WIDE( "Page Security:" )name,void,(PPAGE_DATA),__LINE__)
+
+#ifdef __cplusplus
+	} }
+using namespace sack::intershell;
+#endif
 
 #endif
 

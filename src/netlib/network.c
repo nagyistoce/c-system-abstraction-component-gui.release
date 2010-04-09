@@ -86,8 +86,13 @@ PRIORITY_PRELOAD( InitGlobal, GLOBAL_INIT_PRELOAD_PRIORITY )
 	{
   		g.system_name = WIDE("no.network");
 	}
+#ifndef __NO_OPTIONS__
 	g.dwReadTimeout = SACK_GetProfileIntEx( "SACK", "Network/Read wait timeout", 5000, TRUE );
 	g.dwConnectTimeout = SACK_GetProfileIntEx( "SACK", "Network/Connect timeout", 10000, TRUE );
+#else
+	g.dwReadTimeout = 5000;
+	g.dwConnectTimeout = 10000;
+#endif
 }
 
 //----------------------------------------------------------------------------

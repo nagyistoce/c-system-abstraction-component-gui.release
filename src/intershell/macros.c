@@ -7,6 +7,8 @@
 #include "resource.h"
 #include "fonts.h"
 
+INTERSHELL_NAMESPACE
+
 #define MACRO_BUTTON_NAME WIDE( "Macro" )
 
 
@@ -587,3 +589,4 @@ static void OnCloneControl( MACRO_BUTTON_NAME )( PTRSZVAL psvNew, PTRSZVAL psvOr
 	}
 }
 
+INTERSHELL_NAMESPACE_END

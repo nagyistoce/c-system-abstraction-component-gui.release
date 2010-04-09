@@ -7,23 +7,45 @@
 /* Multiple inclusion protection symbol. */
 #define FRACTIONS_DEFINED
 
-/* Define the call type of the function. */
-#define FRACTION_API CPROC
-#ifdef FRACTION_SOURCE
-#define FRACTION_PROC EXPORT_METHOD
-#else
-/* Define the library linkage for a these functions. */
-#define FRACTION_PROC IMPORT_METHOD
-#endif
-
+#include <sack_types.h>
 
 #ifdef __cplusplus
-namespace sack { /* Namespace of custom math routines. (aren't very many of
-   these)                                                  */
-namespace math { /* Namespace for integer fraction math library. Only very basic
-   operations supported.                                        */
-namespace fraction {
+#  define _FRACTION_NAMESPACE namespace fraction {
+#  define _FRACTION_NAMESPACE_END }
+#  ifndef _MATH_NAMESPACE
+#    define _MATH_NAMESPACE namespace math {
+#  endif
+#  define 	SACK_MATH_FRACTION_NAMESPACE_END } } }
+#else
+#  define _FRACTION_NAMESPACE
+#  define _FRACTION_NAMESPACE_END
+#  ifndef _MATH_NAMESPACE
+#    define _MATH_NAMESPACE
+#  endif
+#  define 	SACK_MATH_FRACTION_NAMESPACE_END
 #endif
+
+
+SACK_NAMESPACE
+	/* Namespace of custom math routines.  Contains operators
+	 for Vectors and fractions. */
+	_MATH_NAMESPACE
+	/* Fraction namespace contains a PFRACTION type which is used to
+   store integer fraction values. Provides for ration and
+   proportion scaling. Can also represent fractions that contain
+   a whole part and a fractional part (5 2/3 : five and
+	two-thirds).                                                  */
+	_FRACTION_NAMESPACE
+
+/* Define the call type of the function. */
+#define FRACTION_API CPROC
+#  ifdef FRACTION_SOURCE
+#    define FRACTION_PROC EXPORT_METHOD
+#  else
+/* Define the library linkage for a these functions. */
+#    define FRACTION_PROC IMPORT_METHOD
+#  endif
+
 
 /* The faction type. Stores a fraction as integer
    numerator/denominator instead of a floating point scalar. */
@@ -153,8 +175,9 @@ FRACTION_PROC  _32 FRACTION_API  ScaleValue ( PFRACTION f, S_32 value );
    the value of ( value * 1/ f )               */
 FRACTION_PROC  _32 FRACTION_API  InverseScaleValue ( PFRACTION f, S_32 value );
 
+	SACK_MATH_FRACTION_NAMESPACE_END
+
 #ifdef __cplusplus
-}}} //namespace sack { namespace math { namespace fraction {
 using namespace sack::math::fraction;
 #endif
 

@@ -1,7 +1,33 @@
 #ifndef SQL_GET_OPTION_DEFINED
 #define SQL_GET_OPTION_DEFINED
 #include <sack_types.h>
+#include <pssql.h>
 #include <procreg.h>
+
+#ifdef __cplusplus
+#define _OPTION_NAMESPACE namespace options {
+#define _OPTION_NAMESPACE_END };
+#define USE_OPTION_NAMESPACE 	using namespace sack::sql::options;
+
+#else
+#define _OPTION_NAMESPACE
+#define _OPTION_NAMESPACE_END
+#define USE_OPTION_NAMESPACE
+#endif
+
+SACK_NAMESPACE
+   _SQL_NAMESPACE
+	/* Contains methods for saving and recovering options from a
+	   database. If enabled, will use a local option.db sqlite
+	   database. Use EditOptions application to modify options. Can
+	   use any database connection, but sql.config file will specify
+	   'option.db' to start.                                         */
+	_OPTION_NAMESPACE
+
+#define SACK_OPTION_NAMESPACE SACK_NAMESPACE _SQL_NAMESPACE _OPTION_NAMESPACE
+#define SACK_OPTION_NAMESPACE_END _OPTION_NAMESPACE_END _SQL_NAMESPACE_END SACK_NAMESPACE_END
+
+
 
 #ifdef SQLGETOPTION_SOURCE
 #define SQLGETOPTION_PROC(type,name) LITERAL_LIB_EXPORT_METHOD type CPROC name
@@ -9,6 +35,12 @@
 #define SQLGETOPTION_PROC(type,name) LITERAL_LIB_IMPORT_METHOD type CPROC name
 #endif
 
+#ifndef __NO_INTERFACES__
+   _INTERFACE_NAMESPACE
+/* Defines a set of functions that can be registered as an
+   interface, and the interface can be used for saving options. Module
+   ideas might be to save into the windows registry system or
+   into INI files.                                                     */
 typedef struct option_interface_tag
 {
    // these provide simple section, key, value queries.
@@ -42,7 +74,11 @@ static void UseInterface( void )
    pOptionInterface = (POPTION_INTERFACE)UseInterface;
 }
 #endif
-//cpg27dec2006 c:\work\altanik\include\optint.h(71): Warning! W202: Symbol 'pOptionInterface' has been defined, but not referenced
+   _INTERFACE_NAMESPACE_END
+#ifdef __cplusplus
+using namespace sack::sql::options::interface;
+#endif
+#endif
 
 //#ifdef DEFAULT_OPTION_INTERFACE
 //#undef GetPrivateProfileString

@@ -14,18 +14,67 @@
 #      define MEM_PROC IMPORT_METHOD
 #    endif
 
-
+#ifndef TIMER_NAMESPACE
 #ifdef __cplusplus
-namespace sack {
-namespace timers {
+#define _TIMER_NAMESPACE namespace timers {
+/* define a timer library namespace in C++. */
+#define TIMER_NAMESPACE SACK_NAMESPACE namespace timers {
+/* define a timer library namespace in C++ end. */
+#define TIMER_NAMESPACE_END } SACK_NAMESPACE_END
+#else
+#define TIMER_NAMESPACE 
+#define TIMER_NAMESPACE_END
 #endif
+#endif
+
+	TIMER_NAMESPACE
    // enables file/line monitoring of sections and a lot of debuglogging
 //#define DEBUG_CRITICAL_SECTIONS
    /* this symbol controls the logging in timers.c... (higher level interface to NoWait primatives)*/
 //#define LOG_DEBUG_CRITICAL_SECTIONS
 
-/* A custom implementation of windows CRITICAL_SECTION api */
-typedef struct critical_section_tag {
+/* A custom implementation of windows CRITICAL_SECTION api.
+   Provides same capability for Linux type systems. Can be
+   checked as a study in how to implement safe locks.
+   
+   
+   
+   
+   See Also
+   InitCriticalSec
+   
+   EnterCriticalSec
+   
+   LeaveCriticalSec
+   
+   
+   Example
+   <c>For purposes of this example this is declared in global
+   memory, known to initialize to all 0.</c>
+   <code lang="c++">
+   CRITICALSECTION cs_lock_test;
+   
+   
+   </code>
+   
+   In some bit of code that can be executed by several
+   threads...
+   <code lang="c++">
+   {
+      EnterCriticalSec( &amp;cs_lock_test );
+      // the code in here will only be run by a single thread
+      LeaveCriticalSec( &amp;cs_lock_test );
+   }
+   </code>
+   
+   Remarks
+   The __Ex versions of functions passes source file and line
+   information in debug mode. This can be used if critical
+   section debugging is turned on, or if critical section
+   logging is turned on. (See ... ) This allows applications to
+   find deadlocks by tracking who is entering critical sections
+   and probably failing to leave them.                          */
+struct critical_section_tag {
 	_32 dwUpdating; // this is set when entering or leaving (updating)...
 	_32 dwLocks;  // count of locks entered.  (only low 24 bits may count for 16M entries, upper bits indicate internal statuses.
 	THREAD_ID dwThreadID; // windows upper 16 is process ID, lower is thread ID
@@ -35,13 +84,28 @@ typedef struct critical_section_tag {
 	CTEXTSTR pFile;
 	_32  nLine;
 #endif
-} CRITICALSECTION;
+};
 
-/* defines a pointer to a CRITICALSECTION type */
+/* <combine sack::timers::critical_section_tag>
+   
+   \ \                                          */
+typedef struct critical_section_tag CRITICALSECTION;
+
+/* <combine sack::timers::critical_section_tag>
+   
+   defines a pointer to a CRITICALSECTION type  */
 typedef struct critical_section_tag *PCRITICALSECTION;
-/* attempts to enter the critical section, and does not block.  If it enters the return is 1, else the return is 0.  if not NULL, prior will be set to the current thread ID of the owning thread. */
+/* attempts to enter the critical section, and does not block.
+   Returns
+   If it enters the return is 1, else the return is 0.
+   Parameters
+   pcs :    pointer to a critical section
+   prior :  if not NULL, prior will be set to the current thread
+            ID of the owning thread.                             */
 MEM_PROC  S_32 MEM_API  EnterCriticalSecNoWaitEx ( PCRITICALSECTION pcs, THREAD_ID *prior DBG_PASS );
-/* attempts to enter the critical section, and does not block.  If it enters the return is 1, else the return is 0.  if not NULL, prior will be set to the current thread ID of the owning thread. */
+/* <combine sack::timers::EnterCriticalSecNoWaitEx@PCRITICALSECTION@THREAD_ID *prior>
+   
+   \ \                                                                                */
 #define EnterCriticalSecNoWait( pcs,prior ) EnterCriticalSecNoWaitEx( (pcs),(prior) DBG_SRC )
 /* clears all members of a CRITICALSECTION.  Same as memset( pcs, 0, sizeof( CRITICALSECTION ) ); */
 MEM_PROC  void MEM_API  InitializeCriticalSec ( PCRITICALSECTION pcs );
@@ -58,6 +122,19 @@ using namespace sack::timers;
 
 #ifdef __cplusplus
 namespace sack {
+/* Memory namespace contains functions for allocating and
+   releasing memory. Also contains methods for accessing shared
+   memory (if available on the target platform).
+   
+   
+   
+   Allocate
+   
+   Release
+   
+   Hold
+   
+   OpenSpace                                                    */
 namespace memory {
 #endif
 
