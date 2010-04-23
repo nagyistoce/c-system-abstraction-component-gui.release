@@ -255,6 +255,9 @@ struct required_key_def
       This is used when actually building C++ for providing an
       initializer to this structure.                           */
    required_key_def( int bPrimary, int bUnique, CTEXTSTR _name, CTEXTSTR colname1, CTEXTSTR colname2 ) { flags.bPrimary = bPrimary; flags.bUnique = bUnique; name = _name; colnames[0] = colname1; colnames[1] = colname2; colnames[2] = 0; }
+	required_key_def( int bPrimary, int bUnique, CTEXTSTR _name, CTEXTSTR colname1, CTEXTSTR colname2, CTEXTSTR colname3 ) { flags.bPrimary = bPrimary; flags.bUnique = bUnique; name = _name; colnames[0] = colname1; colnames[1] = colname2; colnames[2] = colname3; colnames[3] = 0; }
+#else
+#define required_key_def( a,b,c,...) { {a,b}, c, {__VA_ARGS__} }
 #endif
 }; /* Describes a key column of a table.
       <code lang="c++">

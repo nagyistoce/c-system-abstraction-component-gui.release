@@ -629,41 +629,41 @@ static void ComputeImageData( ImageFile *pImage )
 Image DecodeMemoryToImage( P_8 buf, _32 size )
 {
 	Image file = NULL;
-	lprintf( WIDE("Attempting to decode an image...") );
+	//lprintf( WIDE("Attempting to decode an image...") );
 #ifdef DO_PNG
-  if( !file )
-        file = ImagePngFile( buf, size );
+	if( !file )
+		file = ImagePngFile( buf, size );
 #endif //DO_PNG
 
 #ifdef DO_GIF
-  if( !file )
-        file = ImageGifFile( buf, size );
+	if( !file )
+		file = ImageGifFile( buf, size );
 #endif //DO_GIF
 
 #ifdef DO_BMP
-   if( !file )
-      file = ImageBMPFile( buf, size );
+	if( !file )
+		file = ImageBMPFile( buf, size );
 #endif
 
-   // PLEASE NOTE: JPEG IS DUMB! and aborted our application
-   //  PLEASE PLEASE take a look at this...
+	// PLEASE NOTE: JPEG IS DUMB! and aborted our application
+	//  PLEASE PLEASE take a look at this...
 #ifdef DO_JPG
-  if( !file )
-        file = ImageJpgFile( buf, size );
+	if( !file )
+		file = ImageJpgFile( buf, size );
 #endif
 
 #ifdef DO_TGA
-  if( !file )
-        file = ImageTgaFile( buf, size );
+	if( !file )
+		file = ImageTgaFile( buf, size );
 #endif //DO_TGA
 
-// consider a bitmap loader - though bmp has no header...
+	// consider a bitmap loader - though bmp has no header...
 
-  return file;
+	return file;
 }
 //----------------------------------------------------------------------
 
- ImageFile*  ImageLoadImageFileEx (  CTEXTSTR filename DBG_PASS )
+ImageFile*  ImageLoadImageFileEx (  CTEXTSTR filename DBG_PASS )
 {
    _32 size;
    P_8 buf;
@@ -671,13 +671,11 @@ Image DecodeMemoryToImage( P_8 buf, _32 size )
 	FILE* fp;
 
    fp = sack_fopen( 0, filename, WIDE("rb"));
-#if 0
    {
       char path[280];
-      //GetCurrentPath( path );
-      Log4( WIDE("Loading image file: %s %s %p %d"), path, filename, fp, GetLastError() );
+      GetCurrentPath( path, sizeof( path ) );
+      lprintf( WIDE("Loading image file: [%s] %s %p %d"), path, filename, fp, GetLastError() );
    }
-#endif
    if (!fp)
       return NULL;
 

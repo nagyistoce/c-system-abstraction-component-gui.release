@@ -275,10 +275,10 @@ FILESYS_PROC  int FILESYS_API  MakePath ( CTEXTSTR path );
 FILESYS_PROC  int FILESYS_API  IsPath ( CTEXTSTR path );
 
 
-FILESYS_PROC  _64 FILESYS_API  GetFileWriteTime ( CTEXTSTR name ); // last modification time.
-FILESYS_PROC  LOGICAL FILESYS_API  SetFileWriteTime( CTEXTSTR name, _64 filetime ); // last modification time.
+FILESYS_PROC  _64 FILESYS_API  GetFileWriteTime ( CTEXTSTR name );
+FILESYS_PROC  _64 FILESYS_API  GetTimeAsFileTime ( void );
+FILESYS_PROC  LOGICAL FILESYS_API  SetFileWriteTime( CTEXTSTR name, _64 filetime ); 
 
-//--------------------- Windows-CE File Extra Support ----------
 
 FILESYS_PROC  void FILESYS_API  SetDefaultFilePath ( CTEXTSTR path );
 FILESYS_PROC  int FILESYS_API  SetGroupFilePath ( CTEXTSTR group, CTEXTSTR path );
@@ -376,6 +376,14 @@ FILESYS_PROC  int FILESYS_API  sack_lseek ( HANDLE file_handle, int pos, int whe
 FILESYS_PROC  int FILESYS_API  sack_read ( HANDLE file_handle, CPOINTER buffer, int size );
 FILESYS_PROC  int FILESYS_API  sack_write ( HANDLE file_handle, CPOINTER buffer, int size );
 
+FILESYS_PROC  int FILESYS_API  sack_iopen ( int group, CTEXTSTR filename, int opts, ... );
+FILESYS_PROC  int FILESYS_API  sack_iopenfile ( int group, CTEXTSTR filename, OFSTRUCT *of, int flags );
+FILESYS_PROC  int FILESYS_API  sack_icreat ( int group, CTEXTSTR file, int opts, ... );
+FILESYS_PROC  int FILESYS_API  sack_iclose ( int file_handle );
+FILESYS_PROC  int FILESYS_API  sack_ilseek ( int file_handle, int pos, int whence );
+FILESYS_PROC  int FILESYS_API  sack_iread ( int file_handle, CPOINTER buffer, int size );
+FILESYS_PROC  int FILESYS_API  sack_iwrite ( int file_handle, CPOINTER buffer, int size );
+
 FILESYS_PROC  FILE* FILESYS_API  sack_fopen ( int group, CTEXTSTR filename, CTEXTSTR opts );
 FILESYS_PROC  int FILESYS_API  sack_fclose ( FILE *file_file );
 FILESYS_PROC  int FILESYS_API  sack_fseek ( FILE *file_file, int pos, int whence );
@@ -386,23 +394,25 @@ FILESYS_PROC  int FILESYS_API  sack_unlink ( CTEXTSTR filename );
 FILESYS_PROC  int FILESYS_API  sack_rename ( CTEXTSTR file_source, CTEXTSTR new_name );
 
 #if !defined( SACK_BAG_EXPORTS ) && !defined( BAG_EXTERNALS )
-#define open(a,...) sack_open(0,a,##__VA_ARGS__)
+#define open(a,...) sack_iopen(0,a,##__VA_ARGS__)
 #define _lopen(a,...) sack_open(0,a,##__VA_ARGS__)
-#define lseek(a,b,c) sack_lseek(a,b,c)
+#define lseek(a,b,c) sack_ilseek(a,b,c)
 #define _llseek(a,b,c) sack_lseek(a,b,c)
 
 #define HFILE HANDLE
 #undef HFILE_ERROR
 #define HFILE_ERROR INVALID_HANDLE_VALUE
-#define creat(a,...)  sack_creat( 0,a,##__VA_ARGS__ )
-#define close(a)  sack_close(a)
+
+#define creat(a,...)  sack_icreat( 0,a,##__VA_ARGS__ )
+#define close(a)  sack_iclose(a)
 #define OpenFile(a,b,c) sack_openfile(0,a,b,c)
 #define _lclose(a)  sack_close(a)
-#define read(a,b,c) sack_read(a,b,c)
-#define write(a,b,c) sack_write(a,b,c)
+#define read(a,b,c) sack_iread(a,b,c)
+#define write(a,b,c) sack_iwrite(a,b,c)
 #define _lread(a,b,c) sack_read(a,b,c)
 #define _lwrite(a,b,c) sack_write(a,b,c)
 #define _lcreat(a,b) sack_creat(0,a,b)
+
 #define remove(a)   sack_unlink(a)
 #define unlink(a)   sack_unlink(a)
 #endif

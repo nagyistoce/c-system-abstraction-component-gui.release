@@ -25,15 +25,19 @@ struct Group {
 	TEXTSTR base_path;
 };
 
-PLIST files;
-PLIST groups;
+static struct winfile_local_tag {
+	PLIST files;
+	PLIST groups;
+   PLIST handles;
+} winfile_local;
 
+#define l winfile_local
 
 static struct Group *GetGroupFilePath( CTEXTSTR group )
 {
 	struct Group *filegroup;
    INDEX idx;
-	LIST_FORALL( groups, idx, struct Group *, filegroup )
+	LIST_FORALL( l.groups, idx, struct Group *, filegroup )
 	{
 		if( StrCaseCmp( filegroup->name, group ) == 0 )
 		{
@@ -51,9 +55,9 @@ static struct Group *GetGroupFilePath( CTEXTSTR group )
 		filegroup = New( struct Group );
 		filegroup->name = StrDup( groupname );
 		filegroup->base_path = StrDup( default_path );
-		AddLink( &groups, filegroup );
+		AddLink( &l.groups, filegroup );
 	}
-   return FindLink( &groups, filegroup );
+   return FindLink( &l.groups, filegroup );
 }
 
 
@@ -65,22 +69,22 @@ static struct Group *GetGroupFilePath( CTEXTSTR group )
 		filegroup = New( struct Group );
 		filegroup->name = StrDup( group );
 		filegroup->base_path = StrDup( path );
-      AddLink( &groups, filegroup );
+      AddLink( &l.groups, filegroup );
 	}
 	else
 	{
 		Release( (POINTER)filegroup->base_path );
 		filegroup->base_path = StrDup( path );
 	}
-   return FindLink( &groups, filegroup );
+   return FindLink( &l.groups, filegroup );
 }
 
 
 void SetDefaultFilePath( CTEXTSTR path )
 {
 	struct Group *filegroup;
-	filegroup = (struct Group *)GetLink( &groups, 0 );
-	if( groups && filegroup )
+	filegroup = (struct Group *)GetLink( &l.groups, 0 );
+	if( l.groups && filegroup )
 	{
 		Release( (POINTER)filegroup->base_path );
 		filegroup->base_path = StrDup( path );
@@ -94,7 +98,7 @@ void SetDefaultFilePath( CTEXTSTR path )
 static TEXTSTR PrependBasePath( int groupid, struct Group *group, CTEXTSTR filename )
 {
 	TEXTSTR fullname;
-	if( !groups )
+	if( !l.groups )
 	{
 #ifdef UNDER_CE
 		SetDefaultFilePath( GetProgramPath() );
@@ -104,7 +108,7 @@ static TEXTSTR PrependBasePath( int groupid, struct Group *group, CTEXTSTR filen
 
 		if( !groupid )
 		{
-         	group = (struct Group *)GetLink( &groups, groupid );
+         	group = (struct Group *)GetLink( &l.groups, groupid );
 		}
 	}
 	if( !group || filename[0] == '/' || filename[0] == '\\' || filename[1] == ':' )
@@ -119,7 +123,7 @@ static TEXTSTR PrependBasePath( int groupid, struct Group *group, CTEXTSTR filen
 
 TEXTSTR sack_prepend_path( int group, CTEXTSTR filename )
 {
-	struct Group *filegroup = (struct Group *)GetLink( &groups, group );
+	struct Group *filegroup = (struct Group *)GetLink( &l.groups, group );
 	TEXTSTR result = PrependBasePath( group, filegroup, filename );
 	return result;
 }
@@ -129,7 +133,7 @@ HANDLE sack_open( int group, CTEXTSTR filename, int opts, ... )
 	HANDLE handle;
 	struct file *file;
    INDEX idx;
-	LIST_FORALL( files, idx, struct file *, file )
+	LIST_FORALL( l.files, idx, struct file *, file )
 	{
 		if( StrCmp( file->name, filename ) == 0 )
 		{
@@ -138,13 +142,13 @@ HANDLE sack_open( int group, CTEXTSTR filename, int opts, ... )
 	}
 	if( !file )
 	{
-		struct Group *filegroup = (struct Group *)GetLink( &groups, group );
+		struct Group *filegroup = (struct Group *)GetLink( &l.groups, group );
 		file = New( struct file );
 		file->name = StrDup( filename );
       file->fullname = PrependBasePath( group, filegroup, filename );
 		file->handles = NULL;
       file->files = NULL;
-		AddLink( &files,file );
+		AddLink( &l.files,file );
 	}
 	switch( opts & 3 )
 	{
@@ -201,7 +205,7 @@ struct file *FindFileByHandle( HANDLE file_file )
 {
 	struct file *file;
    INDEX idx;
-	LIST_FORALL( files, idx, struct file *, file )
+	LIST_FORALL( l.files, idx, struct file *, file )
 	{
 		INDEX idx2;
       HANDLE check;
@@ -222,6 +226,13 @@ HANDLE sack_creat( int group, CTEXTSTR file, int opts, ... )
    return sack_open( group, file, opts | O_CREAT );
 }
 
+int sack_icreat( int group, CTEXTSTR file, int opts, ... )
+{
+	HANDLE h = sack_open( group, file, opts | O_CREAT );
+	AddLink( &l.handles, h );
+   return FindLink( &l.handles, h );
+}
+
 int sack_close( HANDLE file_handle )
 {
 
@@ -234,9 +245,42 @@ int sack_close( HANDLE file_handle )
 	Release( file->name );
 	Release( file->fullname );
 	Release( file );
-	DeleteLink( &files, file );
+	DeleteLink( &l.files, file );
    */
 	return CloseHandle((HANDLE)file_handle);
+}
+
+int sack_iopen( int group, CTEXTSTR filename, int opts, ... )
+{
+	HANDLE h = sack_open( group, filename, opts );
+	AddLink( &l.handles, h );
+   return FindLink( &l.handles, h );
+}
+
+int sack_iclose( int file_handle )
+{
+   HANDLE h = GetLink( &l.handles, file_handle );
+   return sack_close( h );
+}
+
+int sack_ilseek( int file_handle, int pos, int whence )
+{
+   HANDLE h = GetLink( &l.handles, file_handle );
+	return SetFilePointer(h,pos,NULL,whence);
+}
+
+int sack_iread( int file_handle, CPOINTER buffer, int size )
+{
+   HANDLE h = GetLink( &l.handles, file_handle );
+   DWORD dwLastReadResult;
+   return (ReadFile( h, (POINTER)buffer, size, &dwLastReadResult, NULL )?dwLastReadResult:-1 );
+}
+
+int sack_iwrite( int file_handle, CPOINTER buffer, int size )
+{
+   HANDLE h = GetLink( &l.handles, file_handle );
+   DWORD dwLastWrittenResult;
+	return (WriteFile( h, (POINTER)buffer, size, &dwLastWrittenResult, NULL )?dwLastWrittenResult:-1 );
 }
 
 
@@ -261,7 +305,7 @@ int sack_write( HANDLE file_handle, CPOINTER buffer, int size )
 int sack_unlink( CTEXTSTR filename )
 {
    int okay;
-   struct Group *filegroup = (struct Group *)GetLink( &groups, 0 );
+   struct Group *filegroup = (struct Group *)GetLink( &l.groups, 0 );
    TEXTSTR tmp = PrependBasePath( 0, filegroup, filename );
 	okay = DeleteFile(tmp);
 	Release( tmp );
@@ -272,7 +316,7 @@ struct file *FindFileByFILE( FILE *file_file )
 {
 	struct file *file;
    INDEX idx;
-	LIST_FORALL( files, idx, struct file *, file )
+	LIST_FORALL( l.files, idx, struct file *, file )
 	{
 		INDEX idx2;
       FILE *check;
@@ -292,7 +336,7 @@ struct file *FindFileByFILE( FILE *file_file )
 	FILE *handle;
 	struct file *file;
    INDEX idx;
-	LIST_FORALL( files, idx, struct file *, file )
+	LIST_FORALL( l.files, idx, struct file *, file )
 	{
 		if( StrCmp( file->name, filename ) == 0 )
 		{
@@ -301,13 +345,13 @@ struct file *FindFileByFILE( FILE *file_file )
 	}
 	if( !file )
 	{
-		struct Group *filegroup = (struct Group *)GetLink( &groups, group );
+		struct Group *filegroup = (struct Group *)GetLink( &l.groups, group );
 		file = New( struct file );
 		file->handles = NULL;
       	file->files = NULL;
 		file->name = StrDup( filename );
 		file->fullname = PrependBasePath( group, filegroup, filename );
-		AddLink( &files,file );
+		AddLink( &l.files,file );
 	}
 
 #ifdef UNICODE

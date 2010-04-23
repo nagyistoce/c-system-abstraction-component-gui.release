@@ -859,7 +859,7 @@ int SQLPromptINIValue(
 	if( _SQLPromptINIValue )
 		return _SQLPromptINIValue(lpszSection, lpszEntry, lpszDefault, lpszReturnBuffer, cbReturnBuffer, filename );
 #else
-	return _SQLPromptINIValue(lpszSection, lpszEntry, lpszDefault, lpszReturnBuffer, cbReturnBuffer, filename );
+	return SQLPromptINIValue(lpszSection, lpszEntry, lpszDefault, lpszReturnBuffer, cbReturnBuffer, filename );
 #endif
 #endif
 #if prompt_stdout

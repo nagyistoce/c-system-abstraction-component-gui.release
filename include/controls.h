@@ -1864,8 +1864,6 @@ PSI_PROC( void, RegisterResource )( CTEXTSTR appname, CTEXTSTR resource_name, in
 #define EasyRegisterResourceRange( domain, name, range, typename ) RegisterResource( domain, WIDE(#name), name, range, typename );
 #define SimpleRegisterAppResource( name, typename, class ) RegisterResource( WIDE("application/") class, WIDE(#name), name, 1, typename );
 
-//------- INI Prompt for option library (static)
-#ifdef __STATIC__
 PSI_PROC( int, _SQLPromptINIValue )(
 												CTEXTSTR lpszSection,
 												CTEXTSTR lpszEntry,
@@ -1874,7 +1872,6 @@ PSI_PROC( int, _SQLPromptINIValue )(
 												int cbReturnBuffer,
 												CTEXTSTR filename
 											  );
-#endif
 
 /* This namespace is not completely implemented (if at all). At
    the start it looked good, and a lot of it was a

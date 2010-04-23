@@ -192,7 +192,10 @@ namespace sack {
 
 
 
-typedef struct menu_button *PMENU_BUTTON;
+#ifndef MENU_BUTTON_DEFINED
+#define MENU_BUTTON_DEFINED
+		typedef struct menu_button *PMENU_BUTTON;
+#endif
 typedef struct page_data   *PPAGE_DATA;
 
 

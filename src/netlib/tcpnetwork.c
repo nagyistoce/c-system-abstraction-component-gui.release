@@ -697,6 +697,11 @@ int FinishPendingRead(PCLIENT lpClient DBG_PASS )  // only time this should be c
 	if( !(lpClient->dwFlags & CF_CONNECTED)  )
 		return lpClient->RecvPending.dwUsed; // amount of data available...
 	//lprintf( WIDE("FinishPendingRead of %d"), lpClient->RecvPending.dwAvail );
+	if( !( lpClient->dwFlags & CF_READPENDING ) )
+	{
+      // without a pending read, don't read, the buffers are not correct.
+		return 0;
+	}
 	while( lpClient->RecvPending.dwAvail )  // if any room is availiable.
 	{
 #ifdef VERBOSE_DEBUG
