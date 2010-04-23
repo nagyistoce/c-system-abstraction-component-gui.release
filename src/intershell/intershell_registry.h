@@ -15,7 +15,10 @@ namespace sack {
 	namespace intershell {
 #endif
 
-typedef struct menu_button *PMENU_BUTTON;
+#ifndef MENU_BUTTON_DEFINED
+#define MENU_BUTTON_DEFINED
+		typedef struct menu_button *PMENU_BUTTON;
+#endif
 
 //OnCreateMenuButton(name)(PMENU_BUTTON button ) { /*create button data*/ }
 #define OnCreateMenuButton(name) \

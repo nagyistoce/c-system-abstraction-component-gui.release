@@ -671,6 +671,11 @@ void CPROC NetworkPauseTimer( PTRSZVAL psv )
 void HandleEvent( PCLIENT pClient )
 {
 	WSANETWORKEVENTS networkEvents;
+	if( !pClient )
+	{
+      lprintf( "How did a NULL client get here?!" );
+		return;
+	}
 	//lprintf( "Client event on %p", pClient );
 	if( WSAEnumNetworkEvents( pClient->Socket, pClient->event, &networkEvents ) == ERROR_SUCCESS )
 	{
@@ -851,7 +856,13 @@ void HandleEvent( PCLIENT pClient )
 	}
 	else
 	{
-		lprintf( WIDE( "Event enum failed... do what? close socket? %d %d" ), pClient->Socket, WSAGetLastError() );
+		DWORD dwError = WSAGetLastError();
+		if( dwError == 10038 )
+		{
+         // no longer a socket, probably in a closed or closing state.
+		}
+      else
+			lprintf( WIDE( "Event enum failed... do what? close socket? %d %d" ), pClient->Socket, dwError );
 	}
 }
 #endif  //defined(USE_WSA_EVENTS)
@@ -1253,11 +1264,13 @@ int CPROC ProcessNetworkMessages( PTRSZVAL quick_check )
 #  if defined( USE_WSA_EVENTS )
       int Count = 0;
 		// this is the thread that should be waiting here.
-		PLIST events = NULL;
-      PLIST clients = NULL; // clients are added parallel, so events are in order too.
+		static PLIST events = NULL;
+      static PLIST clients = NULL; // clients are added parallel, so events are in order too.
 		PCLIENT pc;
       // disallow changing of the lists.
 		EnterCriticalSec( &g.csNetwork );
+		EmptyList( &events );
+      EmptyList( &clients );
 		AddLink( &events, g.event );
 		AddLink( &clients, (POINTER)1 ); // cannot add a NULL.
       Count++;
@@ -1305,7 +1318,7 @@ int CPROC ProcessNetworkMessages( PTRSZVAL quick_check )
 		LeaveCriticalSec( &g.csNetwork );
       while( 1 )
 		{
-         S_32 result;
+			S_32 result;
 			// want to wait here anyhow...
 #    ifdef LOG_NOTICES
 			lprintf( "Waiting on %d", Count );
@@ -1330,22 +1343,6 @@ int CPROC ProcessNetworkMessages( PTRSZVAL quick_check )
 				lprintf( WIDE( "error of wait is %d" ), WSAGetLastError() );
             break;
 			}
-			else if( result >= WSA_WAIT_EVENT_0 )
-			{
-            // if result is _0, then it's the global event, and we just return.
-				if( result > WSA_WAIT_EVENT_0 )
-					HandleEvent( (PCLIENT)GetLink( &clients, result-(WSA_WAIT_EVENT_0) ) );
-				else
-				{
-#ifdef LOG_NOTICES
-					lprintf( "RESET GLOBAL EVENT" );
-#endif
-					ResetEvent( g.event );
-				}
-				DeleteList( &clients );
-				DeleteList( &events );
-				return 1;
-			}
 #ifndef UNDER_CE
 			else if( result == WSA_WAIT_IO_COMPLETION )
 			{
@@ -1355,16 +1352,36 @@ int CPROC ProcessNetworkMessages( PTRSZVAL quick_check )
 #endif
 			else if( result == WSA_WAIT_TIMEOUT )
 			{
-            //continue
+				if( quick_check )
+               return 1;
+			}
+			else if( result >= WSA_WAIT_EVENT_0 )
+			{
+            // if result is _0, then it's the global event, and we just return.
+				if( result > WSA_WAIT_EVENT_0 )
+				{
+               //lprintf( "index is %d", result-(WSA_WAIT_EVENT_0) );
+					HandleEvent( (PCLIENT)GetLink( &clients, result-(WSA_WAIT_EVENT_0) ) );
+				}
+				else
+				{
+#ifdef LOG_NOTICES
+					lprintf( "RESET GLOBAL EVENT" );
+#endif
+					ResetEvent( g.event );
+				}
+				//DeleteList( &clients );
+				//DeleteList( &events );
+				return 1;
 			}
 		}
 		// result 0... we had nothing to do
       // but we are this thread.
-		DeleteList( &clients );
-		DeleteList( &events );
+		//DeleteList( &clients );
+		//DeleteList( &events );
 #  else
 		MSG Msg;
-		if( GetMessage( &Msg, NULL, 0, 0 ) )
+		if( PeekMessage( &Msg, NULL, 0, 0, PM_REMOVE ) )
 		{
          if( !Msg.hwnd ||  // try something NEW here - an AND instead of OR
              Msg.message == SOCKMSG_CLOSE )
@@ -1441,7 +1458,9 @@ static PTRSZVAL CPROC NetworkThreadProc( PTHREAD thread )
 
 		if( !ProcessNetworkMessages(0) )
 		{
-			//WaitMessage();
+#ifndef UNDER_CE
+			WaitMessage();
+#endif
 			//Sleep( 10 );
 		}
 	}
@@ -2433,21 +2452,24 @@ SOCKADDR *CreateLocal(_16 nMyPort)
 
 LOGICAL CompareAddress( SOCKADDR *sa1, SOCKADDR *sa2 )
 {
-	if( ((SOCKADDR_IN*)sa1)->sin_family == ((SOCKADDR_IN*)sa2)->sin_family )
+	if( sa1 && sa2 )
 	{
-		switch( ((SOCKADDR_IN*)sa1)->sin_family )
+		if( ((SOCKADDR_IN*)sa1)->sin_family == ((SOCKADDR_IN*)sa2)->sin_family )
 		{
-		case AF_INET:
- 			{
-				SOCKADDR_IN *sin1 = (SOCKADDR_IN*)sa1;
-				SOCKADDR_IN *sin2 = (SOCKADDR_IN*)sa2;
-				if( MemCmp( sin1, sin2, sizeof( SOCKADDR_IN ) ) == 0 )
-               return 1;
+			switch( ((SOCKADDR_IN*)sa1)->sin_family )
+			{
+			case AF_INET:
+				{
+					SOCKADDR_IN *sin1 = (SOCKADDR_IN*)sa1;
+					SOCKADDR_IN *sin2 = (SOCKADDR_IN*)sa2;
+					if( MemCmp( sin1, sin2, sizeof( SOCKADDR_IN ) ) == 0 )
+						return 1;
+				}
+				break;
+			default:
+				xlprintf( LOG_ALWAYS )( WIDE("unhandled address type passed to compare, resulting FAILURE") );
+				return 0;
 			}
-			break;
-		default:
-			xlprintf( LOG_ALWAYS )( WIDE("unhandled address type passed to compare, resulting FAILURE") );
-         return 0;
 		}
 	}
    return 0;

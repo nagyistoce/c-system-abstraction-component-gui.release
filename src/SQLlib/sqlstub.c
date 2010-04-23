@@ -1640,7 +1640,7 @@ int DumpInfoEx( PODBC odbc, PVARTEXT pvt, SQLSMALLINT type, SQLHANDLE *handle, L
 			{
             if( odbc->flags.bConnected )
 					if( g.feedback_handler ) g.feedback_handler( WIDE("SQL Connection Lost...\nWaiting for reconnect...") );
-				lprintf( "This is 'connection lost' (not tempoary)" );
+				_lprintf(DBG_RELAY)( "[%s] This is 'connection lost' (not tempoary)", odbc->info.pDSN );
 
 				if( !bOpening )
 				{

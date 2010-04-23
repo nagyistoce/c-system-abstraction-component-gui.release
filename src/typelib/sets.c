@@ -13,6 +13,8 @@
 
 
 #include <stdhdrs.h>
+#include <deadstart.h>
+#include <sqlgetoption.h>
 #include <sharemem.h>
 #include <logging.h>
 
@@ -27,7 +29,7 @@
 #undef ForAllInSet
 
 //----------------------------------------------------------------------------
-static int bLog = 1; // put into a global structure, and configure.
+static int bLog; // put into a global structure, and configure.
 
 #ifdef __cplusplus 
 namespace sack {
@@ -36,6 +38,13 @@ namespace sack {
 		using namespace sack::memory;
 		using namespace sack::logging;
 
+#endif
+
+#ifndef __NO_OPTIONS__
+PRELOAD( InitSetLogging )
+{
+	bLog = SACK_GetProfileIntEx( "SACK", "type library/sets/Enable Logging", 0, TRUE );
+}
 #endif
 
 void DeleteSet( GENERICSET **ppSet )

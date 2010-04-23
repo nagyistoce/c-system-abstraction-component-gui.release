@@ -28,19 +28,13 @@ static void CPROC SetIntTRUE( PTRSZVAL psvInt, PSI_CONTROL unused )
 }
 #endif
 
-#ifndef __STATIC__
-PUBLIC( int, _SQLPromptINIValue )
-#else
-int _SQLPromptINIValue
-#endif
-(
-													 CTEXTSTR lpszSection,
-													 CTEXTSTR lpszEntry,
-													 CTEXTSTR lpszDefault,
-													 TEXTSTR lpszReturnBuffer,
-													 int cbReturnBuffer,
-													 CTEXTSTR filename
-													)
+int _SQLPromptINIValue(			 CTEXTSTR lpszSection,
+					 CTEXTSTR lpszEntry,
+					 CTEXTSTR lpszDefault,
+					 TEXTSTR lpszReturnBuffer,
+					 int cbReturnBuffer,
+					 CTEXTSTR filename
+		)
 {
 #ifndef __NO_GUI__
 	PSI_CONTROL frame;

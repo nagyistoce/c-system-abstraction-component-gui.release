@@ -33,7 +33,7 @@ endif()
 
 add_library( ${PROJECT_NAME} SHARED ${SOURCES} )
 
-string( REGEX REPLACE "(.*)\\.(.*)" "\\1_\\2" TARGET_LABEL ${PROJECT_NAME} )
+string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   DEFINE_SYMBOL INTERSHELL_SOURCE
                   COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL} -D__NO_ANIMATION__"
@@ -42,7 +42,8 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 )
 
 target_link_libraries( ${PROJECT_NAME} sack_widgets ${SACK_LIBRARY} )
-install_default_dest_binary( ${PROJECT_NAME} )
+install_literal_product( ${PROJECT_NAME} InterShell ) 
+#install_default_dest_binary( ${PROJECT_NAME} )
 
 include_directories( 
   ${CMAKE_CURRENT_SOURCE_DIR}

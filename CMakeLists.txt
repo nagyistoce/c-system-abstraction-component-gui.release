@@ -293,6 +293,7 @@ set( PSI_SOURCES
   src/psilib/popups.c
   src/psilib/xml_load.c
   src/psilib/xml_save.c
+  src/psilib/option_frame.c
   src/systraylib/systray.c
 )
 

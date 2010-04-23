@@ -79,6 +79,15 @@ static void convert( P_64 outtime, time_t *time )
 
 //-----------------------------------------------------------------------
 
+_64 GetTimeAsFileTime ( void )
+{
+	SYSTEMTIME st;
+   FILETIME result;
+	GetLocalTime( &st );
+	SystemTimeToFileTime( &st, &result );
+   return *(_64*)&result;
+}
+
  _64  GetFileWriteTime( CTEXTSTR name ) // last modification time.
 {
 #ifdef _WIN32

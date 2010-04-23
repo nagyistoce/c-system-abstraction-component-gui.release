@@ -165,12 +165,17 @@ void DoSHA1( PSIZE_FILE file )
 	TEXTCHAR filename[256];
 	SHA1Context Sha1Context;
 	POINTER memmap;
-	snprintf( filename, sizeof( filename ), WIDE("%s/%s"), file->path->word, file->file->word );
-	memmap = OpenSpace( NULL, filename, &size );
-	SHA1Reset( &Sha1Context );
-	SHA1Input( &Sha1Context, (uint8_t*)memmap, size );
-	SHA1Result( &Sha1Context, file->SHA1 );
-	CloseSpace( memmap );
+	if( file->path && file->file )
+	{
+		snprintf( filename, sizeof( filename ), WIDE("%s/%s"), file->path->word, file->file->word );
+		memmap = OpenSpace( NULL, filename, &size );
+		SHA1Reset( &Sha1Context );
+		SHA1Input( &Sha1Context, (uint8_t*)memmap, size );
+		SHA1Result( &Sha1Context, file->SHA1 );
+		CloseSpace( memmap );
+	}
+	else
+      DebugBreak();
 }
 
 //-------------------------------------------------------------------------
@@ -268,7 +273,7 @@ PDICT_ENTRY AddDictEntry( PTREEROOT *root, CTEXTSTR name )
 
 	len = strlen( name );
 	pde = (PDICT_ENTRY)Allocate( sizeof( DICT_ENTRY ) + len*sizeof(pde->word[0]));
-	StrCpyEx( pde->word, name, len );
+	StrCpyEx( pde->word, name, len + 1 );
 	if( !AddBinaryNode( *root, pde, (PTRSZVAL)pde->word ) )
 	{
 		Release( pde );
@@ -1104,8 +1109,8 @@ void BuildFontCache( void )
 		CTEXTSTR name = OSALOT_GetEnvironmentVariable( "windir" );
       int len;
 		TEXTSTR tmp = NewArray( TEXTCHAR, len = strlen( name ) + 10 );
+      snprintf( tmp, len * sizeof( TEXTCHAR ), "%s\\fonts", name );
       lprintf( "... %s", tmp );
-      snprintf( tmp, len, "%s\\fonts", name );
 		Release( (POINTER)name );
 		while( ScanFiles( tmp, WIDE("*.ttf\t*.fon\t*.TTF\t*.pcf.gz\t*.pf?\t*.fnt\t*.psf.gz"), &data
 							 , ListFontFile, SFF_SUBCURSE, 0 ) );
