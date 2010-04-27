@@ -103,10 +103,13 @@ static void CPROC EditPageFont(PTRSZVAL psv, PSI_CONTROL pc )
 Font* CreateAFont( CTEXTSTR name, Font font, POINTER data, _32 datalen )
 {
 	ValidatedControlData( PCanvasData, menu_surface.TypeID, canvas, g.single_frame );
+	if( datalen > 1000000 ) DebugBreak();
+	{
 	PFONT_PRESET preset = _CreateAFont( canvas, name, font, data, datalen );
    if( preset )
 		return &preset->font;
-   return NULL;
+	return NULL;
+	}
 }
 
 void CPROC SetCurrentPreset( PTRSZVAL psv, PSI_CONTROL list, PLISTITEM pli )

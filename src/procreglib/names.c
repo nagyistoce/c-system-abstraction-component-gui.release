@@ -682,7 +682,7 @@ PROCREG_PROC( LOGICAL, RegisterFunctionExx )( PCLASSROOT root
 		{
 			int len;
 			TEXTSTR new_root_func_name = NewArray( TEXTCHAR, len = ( func_name - root_func_name ) );
-			StrCpyEx( new_root_func_name, root_func_name, len - 1 );
+			StrCpyEx( new_root_func_name, root_func_name, len );
 			new_root_func_name[len-1] = 0;
 			//lprintf( "trimmed name would be %s  /   %s", new_root_func_name, func_name );
 			class_root = GetClassTree( class_root, (PCLASSROOT)new_root_func_name );

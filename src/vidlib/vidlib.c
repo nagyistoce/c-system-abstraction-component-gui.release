@@ -4981,16 +4981,12 @@ static RENDER_INTERFACE VidInterface = { InitDisplay
                                        , (void (CPROC*)(PRENDERER, RedrawCallback, PTRSZVAL)) SetRedrawHandler
                                        , (void (CPROC*)(PRENDERER, KeyProc, PTRSZVAL)) SetKeyboardHandler
 													,  SetLoseFocusHandler
-#if ACTIVE_MESSAGE_IMPLEMENTED
                                           , NULL
-#endif
                                        , (void (CPROC*)(S_32 *, S_32 *)) GetMousePosition
                                        , (void (CPROC*)(PRENDERER, S_32, S_32)) SetMousePosition
                                        , HasFocus  // has focus
-#if ACTIVE_MESSAGE_IMPLEMENTED
                                        , NULL         // SendMessage
 													, NULL         // CrateMessage
-#endif
                                        , GetKeyText
                                        , IsKeyDown
                                        , KeyDown

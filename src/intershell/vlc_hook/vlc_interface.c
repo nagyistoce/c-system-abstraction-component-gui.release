@@ -723,7 +723,7 @@ struct my_vlc_interface *CreateInstance( CTEXTSTR url )
    return pmyi;
 }
 
-struct my_vlc_interface *CreateInstanceIn( PSI_CONTROL pc, CTEXTSTR url )
+struct my_vlc_interface *CreateInstanceInEx( PSI_CONTROL pc, CTEXTSTR url, CTEXTSTR extra_opts )
 {
 	struct my_vlc_interface *pmyi;
 	pmyi = FindInstance( url );
@@ -760,7 +760,7 @@ struct my_vlc_interface *CreateInstanceIn( PSI_CONTROL pc, CTEXTSTR url )
 						" --no-osd"
 						" --no-audio"
 						//" --file-caching=0"
-						" --plugin-path=%s/%s"
+						" --plugin-path=%s\\%s"
 						" --vout=vmem"
 						" --vmem-data=%ld"
 						" --vmem-width=%ld"
@@ -769,6 +769,7 @@ struct my_vlc_interface *CreateInstanceIn( PSI_CONTROL pc, CTEXTSTR url )
 						" --vmem-chroma=RV32"
 						" --vmem-lock=%ld"
 						" --vmem-unlock=%ld"
+                  " %s"
 						//, OSALOT_GetEnvironmentVariable( "MY_LOAD_PATH" )
 					  , l.vlc_config
 					  , l.vlc_path
@@ -783,6 +784,7 @@ struct my_vlc_interface *CreateInstanceIn( PSI_CONTROL pc, CTEXTSTR url )
 #endif
 					  , lock_frame
 					  , unlock_frame
+					  , extra_opts?extra_opts:""
 					  );
 			lprintf( "Creating instance with %s", GetText( VarTextPeek( pvt ) ) );
 			ParseIntoArgs( GetText( VarTextPeek( pvt ) ), &argc, &argv );
@@ -880,6 +882,7 @@ struct my_vlc_interface *CreateInstanceOn( PRENDERER renderer, CTEXTSTR name, LO
 					" --vmem-chroma RV32"
                " --vmem-lock %ld"
 					" --vmem-unlock %ld"
+               " %s"
 				  , l.vlc_path
 				  , "plugins"
 				  , pmyi
@@ -892,6 +895,7 @@ struct my_vlc_interface *CreateInstanceOn( PRENDERER renderer, CTEXTSTR name, LO
 #endif
 				  , lock_frame
 				  , unlock_frame
+               , ""//extra_opts
 				  );
 
       lprintf( "Creating instance with %s", GetText( VarTextPeek( pvt ) ) );
@@ -998,7 +1002,7 @@ struct my_vlc_interface * PlayItemInEx( PSI_CONTROL pc, CTEXTSTR url_name, CTEXT
 	struct my_vlc_interface *pmyi = FindInstance( url_name );
 	if( !pmyi )
 	{
-		pmyi = CreateInstanceIn( pc, url_name );
+		pmyi = CreateInstanceInEx( pc, url_name, extra_opts );
 
 		pmyi->ml = vlc.libvlc_media_list_new( pmyi->inst PASS_EXCEPT_PARAM );
 		vlc.raise (&pmyi->ex);
@@ -1008,7 +1012,8 @@ struct my_vlc_interface * PlayItemInEx( PSI_CONTROL pc, CTEXTSTR url_name, CTEXT
 
 		if( extra_opts )
 		{
-			vlc.libvlc_media_add_option( pmyi->m, extra_opts PASS_EXCEPT_PARAM );
+			lprintf( "Adding options: %s", extra_opts );
+			//vlc.libvlc_media_add_option( pmyi->m, extra_opts PASS_EXCEPT_PARAM );
 			vlc.raise( &pmyi->ex);
 		}
 		vlc.libvlc_media_list_add_media( pmyi->ml, pmyi->m PASS_EXCEPT_PARAM );

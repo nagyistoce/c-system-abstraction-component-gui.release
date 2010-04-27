@@ -157,6 +157,7 @@ SACK_NAMESPACE
    <link Colors>    */
 #define BASE_COLOR_WHITE         Color( 255, 255, 255 )
 #define BASE_COLOR_ORANGE        Color( 204,96,7 )
+#define BASE_COLOR_NICE_ORANGE   Color( 0xE9, 0x7D, 0x26 )
 #define BASE_COLOR_PURPLE        0xFF7A117C
 #ifdef __cplusplus
 

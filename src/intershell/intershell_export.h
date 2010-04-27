@@ -354,7 +354,7 @@ INTERSHELL_PROC_PTR( void, HidePageExx )( PSI_CONTROL pc_canvas DBG_PASS);
 //   tend/issue/perform these types of verbs may fail, and this is the only
 //   sort of thing at the moment that happens... perhaps renaming this to
 // button_abort_function could be done?
-// INTERSHELL_PROC_PTR( void, InterShell_DisableButtonPageChange )( PMENU_BUTTON button );
+INTERSHELL_PROC_PTR( void, InterShell_DisableButtonPageChange )( PMENU_BUTTON button );
 
 INTERSHELL_PROC_PTR( PVARIABLE, CreateLabelVariable )( CTEXTSTR name, enum label_variable_types type, CPOINTER data );
 INTERSHELL_PROC_PTR( PVARIABLE, CreateLabelVariableEx )( CTEXTSTR name, enum label_variable_types type, CPOINTER data, PTRSZVAL psv );
