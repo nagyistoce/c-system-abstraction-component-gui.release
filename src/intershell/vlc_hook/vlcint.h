@@ -7,6 +7,7 @@
 
 #include <controls.h>
 
+XTRN struct my_vlc_interface *PlayItemAgainst( Image image, CTEXTSTR opts );
 XTRN void PlayItem( CTEXTSTR thing );
 XTRN struct my_vlc_interface *PlayItemIn( PSI_CONTROL pc, CTEXTSTR url_name );
 XTRN struct my_vlc_interface * PlayItemInEx( PSI_CONTROL pc, CTEXTSTR url_name, CTEXTSTR extra_opts );

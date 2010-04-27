@@ -286,7 +286,8 @@ void DrawBannerCaption( PSI_CONTROL pc, PBANNER banner, Image surface, TEXTCHAR 
 	_32 w, h, maxw = 0;
 	_32 char_h;
    int had_bounds;
-	TEXTCHAR *start = caption, *end;
+	CTEXTSTR start = caption;
+	CTEXTSTR end;
 	if( banner->bit_flags.bounds_set )
 	{
       // be kinda nice to be able to result this to the control to get a partial update to screen...
@@ -975,6 +976,159 @@ PSI_CONTROL GetBannerControl( PBANNER banner )
 		return NULL;
 	return banner->frame;
 }
+
+//--------------------------------------------------------------------------
+
+struct banner_confirm_local
+{
+   CTEXTSTR name;
+	struct {
+		BIT_FIELD bNoResult : 1;
+		BIT_FIELD key_result : 1;
+		BIT_FIELD key_result_yes : 1;
+		BIT_FIELD key_result_no : 1;
+		BIT_FIELD bLog : 1;
+	} flags;
+   PTHREAD pWaiting;
+   PBANNER banner;
+	DoConfirmProc dokey;
+};
+
+typedef struct banner_confirm_local *PCONFIRM_BANNER;
+typedef struct banner_confirm_local CONFIRM_BANNER;
+PLIST confirmation_banners;
+
+struct thread_params {
+   CTEXTSTR type;
+   int yesno;
+	CTEXTSTR msg;
+	DoConfirmProc dokey;
+   int received;
+};
+
+
+static PCONFIRM_BANNER GetWaitBanner( CTEXTSTR name )
+{
+	INDEX idx;
+	PCONFIRM_BANNER cb;
+	LIST_FORALL( confirmation_banners, idx, PCONFIRM_BANNER, cb )
+	{
+		if( StrCaseCmp( name, cb->name ) == 0 )
+		{
+         break;
+		}
+	}
+	if( !cb )
+	{
+		cb = New( CONFIRM_BANNER );
+      MemSet( cb, 0, sizeof( CONFIRM_BANNER ) );
+		cb->name = StrDup( name );
+      AddLink( &confirmation_banners, cb );
+	}
+   return cb;
+}
+
+void BannerAnswerYes( CTEXTSTR type )
+{
+	PCONFIRM_BANNER cb = GetWaitBanner( type );
+	if( cb->banner )
+	{
+		cb->flags.key_result_yes = 1;
+		cb->flags.key_result_no = 0;
+		cb->flags.key_result = 1;
+		RemoveBanner( cb->banner );
+	}
+}
+void BannerAnswerNo( CTEXTSTR type )
+{
+	PCONFIRM_BANNER cb = GetWaitBanner( type );
+	if( cb->banner )
+	{
+		cb->flags.key_result_no = 1;
+		cb->flags.key_result_yes = 0;
+		cb->flags.key_result = 1;
+		RemoveBanner( cb->banner );
+	}
+}
+
+static PTRSZVAL CPROC Confirm( PTHREAD thread )
+{
+	struct thread_params *parms = ( struct thread_params * )GetThreadParam( thread );
+	CTEXTSTR msg;
+	int result;
+   int yesno;
+	PCONFIRM_BANNER cb = GetWaitBanner( parms->type );
+   // only one ...
+	cb->dokey = parms->dokey;
+	msg = parms->msg;
+   yesno = parms->yesno;
+	parms->received = 1;
+   cb->pWaiting = thread;
+	result = CreateBannerEx( NULL, &cb->banner, parms->msg, BANNER_TOP|(yesno?BANNER_OPTION_YESNO:(BANNER_CLICK|BANNER_TIMEOUT))
+								  , (yesno?0:5000) );
+	if( cb->flags.bLog )
+		lprintf( "returned from banner..." );
+
+	if( cb->flags.key_result )
+	{
+      // consume the result
+      cb->flags.key_result = 0;
+		if( cb->flags.key_result_yes )
+		{
+			if( cb->dokey )
+				cb->dokey();
+			cb->dokey = NULL;
+			return 1;
+		}
+      return 0;
+	}
+	else
+	{
+		if( cb->flags.bLog )
+         lprintf( "Banner yesno was clicked..." );
+		if( result )
+		{
+         lprintf( "Okay do that ... invoke pending event." );
+			if( cb->dokey )
+				cb->dokey();
+			cb->dokey = NULL;
+		}
+	}
+	if( cb->flags.bNoResult )
+	{
+		if( cb->flags.bLog )
+			lprintf( "Result already consumed..." );
+      return -1;
+	}
+
+	if( cb->flags.bLog )
+		lprintf( "Yes no is %d", result );
+   cb->flags.bNoResult = 1;
+   return result;
+
+
+}
+
+static int BannerThreadConfirmEx( CTEXTSTR type, CTEXTSTR msg, DoConfirmProc dokey, int yesno )
+{
+	struct thread_params parms;
+   parms.type = type;
+   parms.received = 0;
+	parms.dokey = dokey;
+	parms.msg = msg;
+	parms.yesno = yesno;
+	ThreadTo( Confirm, (PTRSZVAL)&parms );
+	while( !parms.received )
+      Relinquish();
+	return 0;
+}
+
+int BannerThreadConfirm( CTEXTSTR type, CTEXTSTR msg, DoConfirmProc dokey )
+{
+   return BannerThreadConfirmEx( type, msg, dokey, TRUE );
+}
+
+//--------------------------------------------------------------------------
 
 #ifdef __cplusplus_cli
 #include <vcclr.h>

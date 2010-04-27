@@ -1298,12 +1298,13 @@ typedef struct render_interface_tag
        
        \ \                                                                                 */
 #if ACTIVE_MESSAGE_IMPLEMENTED
-    RENDER_PROC_PTR( void, SetDefaultHandler)    ( PRENDERER, GeneralCallback, PTRSZVAL );
-
+			 RENDER_PROC_PTR( void, SetDefaultHandler)    ( PRENDERER, GeneralCallback, PTRSZVAL );
+#else
+       POINTER junk1;
+#endif
     /* <combine sack::image::render::GetMousePosition@S_32 *@S_32 *>
        
 		 \ \                                                           */
-#endif
     RENDER_PROC_PTR( void, GetMousePosition)     ( S_32 *x, S_32 *y );
     /* <combine sack::image::render::SetMousePosition@PRENDERER@S_32@S_32>
        
@@ -1318,6 +1319,9 @@ typedef struct render_interface_tag
 #if ACTIVE_MESSAGE_IMPLEMENTED
     RENDER_PROC_PTR( int, SendActiveMessage)     ( PRENDERER dest, PACTIVEMESSAGE msg );
     RENDER_PROC_PTR( PACTIVEMESSAGE , CreateActiveMessage) ( int ID, int size, ... );
+#else
+	 POINTER junk2;
+	 POINTER junk3;
 #endif
     /* <combine sack::image::render::GetKeyText@int>
        

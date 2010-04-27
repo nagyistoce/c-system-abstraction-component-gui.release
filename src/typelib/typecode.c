@@ -971,7 +971,7 @@ PDATAQUEUE  CreateLargeDataQueueEx( INDEX size, INDEX entries, INDEX expand DBG_
 
  LOGICAL  DequeData ( PDATAQUEUE *ppdq, POINTER result )
 {
-   int p;
+   LOGICAL p;
    INDEX tmp;
    if( ppdq && *ppdq )
       while( LockedExchange( &((*ppdq)->Lock), 1 ) )
@@ -991,6 +991,37 @@ PDATAQUEUE  CreateLargeDataQueueEx( INDEX size, INDEX entries, INDEX expand DBG_
 					, (*ppdq)->Size );
       p = 1;
       (*ppdq)->Bottom = tmp;
+   }
+   (*ppdq)->Lock = 0;
+   return p;
+}
+
+//--------------------------------------------------------------------------
+
+ LOGICAL  UnqueData ( PDATAQUEUE *ppdq, POINTER result )
+{
+   LOGICAL p;
+   INDEX tmp;
+   if( ppdq && *ppdq )
+      while( LockedExchange( &((*ppdq)->Lock), 1 ) )
+         Relinquish();
+   else
+   	return 0;
+
+   p = 0;
+   if( (*ppdq)->Bottom != (*ppdq)->Top )
+   {
+      tmp = (*ppdq)->Top;
+		if( tmp )
+			tmp--;
+		else
+			tmp = ((*ppdq)->Cnt)-1;
+		if( result )
+			MemCpy( result
+					, (*ppdq)->data + tmp * (*ppdq)->Size
+					, (*ppdq)->Size );
+      p = 1;
+      (*ppdq)->Top = tmp;
    }
    (*ppdq)->Lock = 0;
    return p;

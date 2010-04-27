@@ -72,6 +72,11 @@ BANNER_PROC( _32, GetBannerFontHeight )( void );
 BANNER_PROC( PRENDERER, GetBannerRenderer )( PBANNER banner );
 BANNER_PROC( PSI_CONTROL, GetBannerControl )( PBANNER banner );
 
+typedef void (CPROC *DoConfirmProc)( void );
+BANNER_PROC( int, BannerThreadConfirm )( CTEXTSTR type, CTEXTSTR msg, DoConfirmProc dokey );
+void BannerAnswerYes( CTEXTSTR type );
+void BannerAnswerNo( CTEXTSTR type );
+
 
 #define BannerNoWait( text ) CreateBannerEx( NULL, NULL, text, BANNER_NOWAIT|BANNER_DEAD, 0 )
 #define BannerTopNoWait( text ) CreateBannerEx( NULL, NULL, text, BANNER_NOWAIT|BANNER_DEAD|BANNER_TOP, 0 )

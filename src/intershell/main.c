@@ -5087,7 +5087,7 @@ GetCommonButtonControls
 , InterShell_DisablePageUpdate					
 , RestoreCurrentPage						
 , HidePageExx
-//, NULL //InterShell_DisableButtonPageChange			
+, NULL //InterShell_DisableButtonPageChange
 , CreateLabelVariable					
 , CreateLabelVariableEx					
 , LabelVariableChanged					
