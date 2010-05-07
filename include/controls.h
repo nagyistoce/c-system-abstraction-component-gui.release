@@ -1,12 +1,9 @@
 #ifndef SOURCE_PSI2
 #define SOURCE_PSI2
 #endif
+
 #ifndef __CONTROLS_DEFINED__
 #define __CONTROLS_DEFINED__
-
-#define MK_PSI_VERSION(ma,mi)  (((ma)<<8)|(mi))
-#define PSI_VERSION            MK_PSI_VERSION(1,1)
-#define REQUIRE_PSI(ma,mi)    ( PSI_VERSION >= MK_PSI_VERSION(ma,mi) )
 
 //---------------------------------------------------------------
 // PSI Version comments
@@ -25,7 +22,215 @@
 
 #include <psi/namespaces.h>
 
-PSI_NAMESPACE
+SACK_NAMESPACE
+
+
+/* PSI is Panther's Slick Interface.
+   
+   This is a control library which handles custom controls and
+   regions within a form. This isn't a window manager.
+   
+   
+   
+   PSI_CONTROL is the primary structure that this uses. It
+   esists as a pointer to a structure, the content of which
+   should never be accessed by the real world. For purposes of
+   documentation these structures (in controlstruc.h) are
+   presented, but they are inaccessable from outside of SACK
+   itself, and will not be provided in the SDK.
+   
+   
+   
+   A PSI_CONTROL can represent a 'Frame' which contains other
+   controls. A Frame owns a PRENDERER which it uses to present
+   its content to the display. A frame can have an outside
+   border, and provides the ability to click on the border and
+   resize the form. The frame can use a custom image, which will
+   be automatically portioned up and used as corner pieces, edge
+   pieces, and may automatically set the default background
+   color for forms. The frame draws directly on the Image from
+   the PRENDERER, and all controls know only their image.
+   Controls are based on sub-images on the frame's displayed
+   image, so when they draw they are drawing directly on the
+   buffer targeted to the display. The image library prohibits
+   any operations that go outside the bounds of a sub-image;
+   though, the user can request the color buffer pointer from an
+   image, and may draw directly anywhere on that surface.
+   
+   
+   
+   Controls are implemented as a pair of sub-images on the color
+   buffer of the renderer. The pair is the image containing the
+   border of the control, and a sub-image inside that
+   representing the drawable area of a control. When created,
+   controls are always sized including their frame, this allow
+   positioning controls inside a frame without regard to how
+   much extra space might have been added. The size of the Frame
+   control outside, is handled differently, and is created with
+   the size of the inside of the control. The area of the render
+   surface is expanded outside this. There are BorderOptionTypes
+   that can control whether the border on the frame is handled
+   as an expansion or not.
+   
+   
+   
+   Controls are all drawn using an internal table of colors
+   which can be index using ControlColorTypes with SetBaseColor
+   and GetBaseColor.
+   
+   
+   
+   If the fancy border frame image is used for a control, then
+   the color of the center pixel is set into the NORMAL color
+   index.
+   
+   
+   
+   What else can I say about controls...
+   
+   
+   
+   Any control can contain any other control, but there is a
+   specific container type Frame that is commonly used for
+   dialogs. The top level control can display on a renderer. If
+   a sub-control is told to show, then it is divorced from and
+   opened in a new popup renderer.
+   History
+   Control registration was done original by filling in a
+   CONTROL_REGISTRATION structure, and passing that structure to
+   PSI to register. This method is still available, and is
+   certainly more straight forward method of use, but it's not
+   the easier method or the current method.
+   
+   Currently, a registration structure is still used, but only
+   the first few elements are actually filled out, the functions
+   to handle a control's events are declared by fancy macros.
+   
+   This relies on the deadstart features of compiler working,
+   but there are fewer places to have to remember to make
+   changes, and controls are much more straight forward to
+   implement, and extend as required, without necessarily
+   requiring everything to be done all at once. Methods
+   registered this way MUST be static, otherwise compiler errors
+   will result; they MUST have the correct return type for the
+   method specified, and they must have the correct parameters.
+   \Examples of each method supported will be provided with each
+   method's documentation. These are nasty macros that insert a
+   bit of magic code between the 'static int' and the parameters
+   specified. The names of the parameter values to the callback
+   are up to the user, but the types must match. This is a very
+   exact method, that cannot be circumvented using bad
+   typecasting.
+   Example
+   This is a custom control that shows red or green.
+   <code lang="c++">
+   struct control_data
+   {
+       // declare some data that you want to have associated with your control.
+       CDATA color;
+       _32 last_buttons; // used to track when a click happens
+   };
+   
+   EasyRegisterControl( WIDE( "simple" ), sizeof( struct ball_timer_data ) );
+   
+   // define the function called when a new 'simple' control is created.
+   static int OnCreateCommon( WIDE( "simple" ) )( PSI_CONTROL pc )
+   {
+       MyValidatedControlData( struct control_data*, my_data, pc );
+       if( my_data )
+       {
+           // assign a color to start
+           my_data-\>color = BASE_COLOR_RED;
+           return 1;
+       }
+       return 0;
+   }
+   
+   // define a method to draw the control
+   static int OnDrawCommon( WIDE( "simple" ) )( PSI_CONTROL pc )
+   {
+       MyValidatedControlData( struct control_data*, my_data, pc );
+       if( my_data )
+       {
+           Image image = GetControlSufrace( pc );
+           BlatColor( image, my_data-\>color );
+           return 1;  // return that the draw happened.
+       }
+       return 0;  // return no draw - prevents update.
+   }
+   
+   // define a handler when the simple control is clicked.
+   static int OnMouseCommon( WIDE( "simple" ) )( PSI_CONTROL pc, S_32 x, S_32 y, _32 b )
+   {
+   </code>
+   <code>
+       MyValidatedControlData( struct control_data*, my_data, pc );
+       // this checks to see if any mouse button goes down
+       if( MAKE_NEWBUTTON( b, my_data-\>last_buttons ) )
+       {
+           if( my_data-\>color == BASE_COLOR_RED )
+               my_data-\>color = BASE_COLOR_GREEN;
+           else
+               my_data-\>color = BASE_COLOR_RED;
+           // tell the control to update.
+           SmudgeCommon( pc );
+       }
+       // save this button state as the prior button state for future checks
+       my_data-\>last_buttons = b;
+   </code>
+   <code lang="c++">
+   }
+   </code>
+   See Also
+   OnCreateCommon
+   
+   OnDrawCommon
+   
+   OnMouseCommon
+   
+   OnKeyCommon
+   
+   OnCommonFocus
+   
+   OnDestroyCommon
+   
+   
+   
+   \-- Less common
+   
+   OnMoveCommon
+   
+   OnSizeCommon
+   
+   OnMotionCommon
+   
+   OnHideCommon
+   
+   OnRevealCommon
+   
+   OnPropertyEdit
+   
+   OnPropertyEditOkay
+   
+   OnPropertyEditCancel
+   
+   OnPropertyEditDone
+   
+   
+   
+   \--- Much Less used
+   
+   OnEditFrame                                                                           */
+_PSI_NAMESPACE
+
+
+// this was never implemented.
+#define MK_PSI_VERSION(ma,mi)  (((ma)<<8)|(mi))
+// this was never implemented.
+#define PSI_VERSION            MK_PSI_VERSION(1,1)
+// this was never implemented.
+#define REQUIRE_PSI(ma,mi)    ( PSI_VERSION >= MK_PSI_VERSION(ma,mi) )
+
 
 #ifdef BCC16
 #ifdef PSI_SOURCE
@@ -83,14 +288,6 @@ PSI_NAMESPACE
 	/*, PTRSZVAL nID, ... );*/
 #endif
 
-// hmm upon loading the thing from disk, need to query the callbacks of the application to
-// request the correct ptrszvals...
-enum {
-    MSG_ControlInit = MSG_EventUser
-     , MSG_ButtonDraw
-    , MSG_ButtonClick
-};
-
 enum {
     COMMON_PROC_ANY
      , COMMON_PROC_DRAW
@@ -119,58 +316,96 @@ enum {
 #define PCOMMON PSI_CONTROL
 #define PCONTROL PSI_CONTROL
 #endif
+/* <combine sack::PSI>
+   
+   A handle to a PSI control or frame. The User's data is stored
+   as the first member of this structure, so de-referencing the
+   pointer twice gets the user data. All PSI functions work
+   against PSI_CONTROL. Once upon a time this was just PSI_CONTROL,
+   and so the methods for registering to handle events on the
+   control still reference 'Common'.
+   Remarks
+   <code lang="c++">
+   PSI_CONTROL control;
+   POINTER user_data;
+   user_data = *(POINTER*)control;
+   </code>                                                       */
 typedef struct common_control_frame *PSI_CONTROL;
 
 #define COMMON_BUTTON_WIDTH 55
 #define COMMON_BUTTON_HEIGHT 19
 #define COMMON_BUTTON_PAD 5
 
-// normal case needs to be 0 - but this is the thickest - go figure.
-#define BORDER_NORMAL            0
-#define BORDER_NONE              3
-#define BORDER_THIN              1
-#define BORDER_THINNER           2
-#define BORDER_DENT              4
-#define BORDER_THIN_DENT         5
-#define BORDER_THICK_DENT        6
-#define BORDER_TYPE           0x0f // 16 different frame types standard...
+/* This enumeration defines flags that can be used to specify
+   the border of controls.                                    */
+enum BorderOptionTypes {
+ BORDER_NORMAL        =     0, // normal case needs to be 0 - but this is the thickest - go figure.
+ BORDER_NONE          =     3, /* The control has no border - this overrides all other styles;
+    no caption, no border at all, the surface drawable area is
+    the same as the control's outer area.                        */
+ 
+ BORDER_THIN          =     1, /* This is a 3 pixel frame line that indicates a stack up. */
+ 
+ BORDER_THINNER       =     2, /* a thin line, that is a raised edge. */
+ 
+ BORDER_DENT          =     4, /* A dent is a 3 pixel line which is a thin etch-line that is 1
+    step in, 1 across and 1 step up.                             */
+ 
+ BORDER_THIN_DENT     =     5, /* a thin dent border is an etch line */
+ 
+ BORDER_THICK_DENT    =     6, /* A thick etch line - that is a step in, and a step out, so the
+    content is the same level as its parent.                      */
+ 
+ BORDER_TYPE          =  0x0f, // 16 different frame types standard...
 
-#define BORDER_INVERT         0x80
-#define BORDER_CAPTION        0x40
-#define BORDER_NOCAPTION      0x20
-#define BORDER_INVERT_THINNER (BORDER_THINNER|BORDER_INVERT)
-#define BORDER_INVERT_THIN    (BORDER_THIN|BORDER_INVERT)
-#define BORDER_BUMP           (BORDER_DENT|BORDER_INVERT)
+ BORDER_INVERT        =  0x80, /* This modifies styles like BORDER_BUMP to make them
+    BORDER_DENT.                                       */
+ 
+ BORDER_CAPTION       =  0x40, /* Border should include a space to show the text of the control
+    as a caption.                                                 */
+ 
+ BORDER_NOCAPTION     =  0x20, /* Make sure that the border does NOT have a caption space. */
+ 
+ BORDER_INVERT_THINNER=  (BORDER_THINNER|BORDER_INVERT), /* A even thinner line which is an indent. */
+ 
+ BORDER_INVERT_THIN   =  (BORDER_THIN|BORDER_INVERT), /* It's a thin frame (3 pixels?) which is a descent step frame
+    ... so instead of being stacked 'up' it's stacked 'down'.   */
+ 
+ BORDER_BUMP          =  (BORDER_DENT|BORDER_INVERT), /* Draws a 3 pixel frame around a control - it is 1 up 1 acros
+    and 1 down - a thin bump line.                              */
+ 
 
-#define BORDER_NOMOVE         0x0100 // not really a border really...
-#define BORDER_CLOSE          0x0200 // well okay maybe these are border traits
-#define BORDER_RESIZABLE      0x0400 // can resize this window with a mouse
-#define BORDER_WITHIN         0x0800 // frame is on the surface of parent...
+ BORDER_NOMOVE        =  0x0100, /* This indicates that the frame bordered by this does not move. */
+ BORDER_CLOSE         =  0x0200, // well okay maybe these are border traits
+ BORDER_RESIZABLE     =  0x0400, // can resize this window with a mouse
+ BORDER_WITHIN        =  0x0800, // frame is on the surface of parent...
 
-#define BORDER_WANTMOUSE      0x1000 // frame surface desires any unclaimed mouse calls
-#define BORDER_EXCLUSIVE      0x2000 // frame wants exclusive application input.
-// by default controls are scalable.
-#define BORDER_FRAME          0x4000 // marks controls which were done with 'create frame', and without BORDER_WITHIN
-#define BORDER_FIXED          0x8000 // scale does not apply to coordinates... otherwise it will be...
+ BORDER_WANTMOUSE     =  0x1000, // frame surface desires any unclaimed mouse calls
+ BORDER_EXCLUSIVE     =  0x2000, // frame wants exclusive application input.
 
-#define BORDER_NO_EXTRA_INIT        0x010000 // control is private to psi library(used for scrollbars in listboxes, etc) and as such does not call 'extra init'
+ BORDER_FRAME         =  0x4000, // marks controls which were done with 'create frame', and without BORDER_WITHIN
+ BORDER_FIXED         =  0x8000, // scale does not apply to coordinates... otherwise it will be... by default controls are scalable.
+
+ BORDER_NO_EXTRA_INIT =        0x010000, // control is private to psi library(used for scrollbars in listboxes, etc) and as such does not call 'extra init'
+};
 
 // these are the indexes for base color
-#define HIGHLIGHT           0
-#define NORMAL              1
-#define SHADE               2
-#define SHADOW              3
-#define TEXTCOLOR           4
-#define CAPTION             5
-#define CAPTIONTEXTCOLOR    6
-#define INACTIVECAPTION    7
-#define INACTIVECAPTIONTEXTCOLOR 8
-#define SELECT_BACK         9
-#define SELECT_TEXT         10
-#define EDIT_BACKGROUND     11
-#define EDIT_TEXT           12
-#define SCROLLBAR_BACK     13
-
+enum ControlColorTypes {
+ HIGHLIGHT           = 0,
+ NORMAL              = 1,
+ SHADE               = 2,
+ SHADOW              = 3,
+ TEXTCOLOR           = 4,
+ CAPTION             = 5,
+ CAPTIONTEXTCOLOR    = 6,
+ INACTIVECAPTION     = 7,
+ INACTIVECAPTIONTEXTCOLOR = 8,
+ SELECT_BACK         = 9,
+ SELECT_TEXT         = 10,
+ EDIT_BACKGROUND     = 11,
+ EDIT_TEXT           = 12,
+ SCROLLBAR_BACK      = 13
+};
 // these IDs are used to designate default control IDs for
 // buttons...
 #define TXT_STATIC -1
@@ -187,6 +422,9 @@ typedef struct common_control_frame *PSI_CONTROL;
 #endif
 #endif
 
+#ifdef __cplusplus
+namespace old_constants {
+#endif
 // enumeration for control->nType                    
 //enum {
 #define	CONTROL_FRAME  0// master level control framing...
@@ -224,29 +462,66 @@ typedef struct common_control_frame *PSI_CONTROL;
 
 #define  BUILTIN_CONTROL_COUNT 16 // last known builtin control...
 #define  USER_CONTROL   128 // should be sufficiently high as to not conflict with common controls
-
-
+#ifdef __cplusplus
+}
+#endif
 //};
 
 _MENU_NAMESPACE
+/* This is an item on a menu. (AppendMenuItem can return this I
+   think)                                                       */
 typedef struct menuitem_tag *PMENUITEM;
+/* This is a popup menu or sub-menu. */
 typedef struct menu_tag *PMENU;
 
 #ifndef MENU_DRIVER_SOURCE
+/* <combine sack::PSI::popup::draw_popup_item_tag>
+   
+   \ \                                             */
+/* <combine sack::PSI::popup::draw_popup_item_tag>
+   
+   \ \                                             */
+/* This is used when a custom drawn menu item is used. Allows
+   user code to draw onto the menu.                           */
 typedef struct draw_popup_item_tag 
 {
-    PTRSZVAL psvUser; // ID param of append menu item
+   // ID param of append menu item
+    PTRSZVAL psvUser; 
+    /* Optional states an item might be in. */
+    /* <combine sack::containers::text::format_info_tag::flags@1>
+       
+       \ \                                                        */
     struct {
+        /* Menu item is in a selected state. (Mouse Over) */
         _32 selected : 1;
+        /* Menu item has a checkmark on it. */
         _32 checked  : 1;
     } flags;
+    /* Define options which may be passed to measure an item or to
+       have an item drawn.                                         */
     union {
+        /* Information which should be filled in when measuring popup
+           items.                                                     */
+        /* <combine sack::PSI::popup::draw_popup_item_tag::union@1::measure@1>
+           
+           \ \                                                                 */
         struct {
+            /* Height of the menu item. */
+            /* Width of the menu item. */
             _32 width, height;
         } measure;
+        /* Contains information passed when the draw is required. */
+        /* <combine sack::PSI::popup::draw_popup_item_tag::union@1::draw@1>
+           
+           \ \                                                              */
         struct {
+            /* x to draw into */
+            /* y coordinate to start drawing at. */
             S_32 x, y;
+            /* Width to draw. */
+            /* Height to draw. */
             _32 width, height;
+            /* Image to draw into. */
             Image image;
         } draw;
     };
@@ -269,6 +544,11 @@ PSI_PROC( CDATA, GetBaseColor )( INDEX idx );
 #ifdef CONTROL_SOURCE
 #define MKPFRAME(hvideo) ((PSI_CONTROL)(((PTRSZVAL)(hvideo))|1))
 #endif
+/* Update the border type of a control.  See BorderOptionTypes
+   Parameters
+   pc :      control to modify the border
+   BorderType :  new border style
+ */
 PSI_PROC( void, SetCommonBorderEx )( PSI_CONTROL pc, _32 BorderType DBG_PASS);
 #define SetCommonBorder(pc,b) SetCommonBorderEx(pc,b DBG_SRC)
 //PSI_PROC( void, SetCommonBorder )( PSI_CONTROL pc, _32 BorderType );
@@ -293,6 +573,10 @@ typedef int (CPROC*ControlInitProc)( PSI_CONTROL, va_list );
 #else
 typedef int (CPROC*ControlInitProc)( PTRSZVAL, PSI_CONTROL, _32 ID );
 #endif
+/* \Internal event callback definition. After creation, an
+   initializer is available to call on controls to pass
+   \arguments to. This is more useful for loading from an XML
+   \file where the control may have specified extra data.     */
 typedef int (CPROC*FrameInitProc)( PTRSZVAL, PSI_CONTROL, _32 ID );
 PSI_PROC( void, SetFrameInit )( PSI_CONTROL, ControlInitProc, PTRSZVAL );
 PSI_PROC( CTEXTSTR, GetControlTypeName)( PSI_CONTROL pc );
@@ -302,6 +586,15 @@ PSI_PROC( CTEXTSTR, GetControlTypeName)( PSI_CONTROL pc );
 PSI_PROC( PSI_CONTROL, CreateFrameFromRenderer )( CTEXTSTR caption
                                                          , _32 BorderTypeFlags
 														 , PRENDERER pActImg );
+/* Attach a frame to a renderer. Not sure which is sized to
+   which if they are not the same size... probably the control
+   is sized to the display.
+   Parameters
+   pcf :      control to attach to the display frame
+   pActImg :  the display surface to use to show the control.
+   
+   Returns
+   the control which was being attached to a display surface.  */
 PSI_PROC( PSI_CONTROL, AttachFrameToRenderer )( PSI_CONTROL pcf, PRENDERER pActImg );
 // any control on a frame may be passed, and
 // the top level
@@ -317,18 +610,56 @@ PSI_PROC( void, GetPhysicalCoordinate )( PSI_CONTROL relative_to, S_32 *_x, S_32
 #define DestroyFrame(pf) DestroyControlEx( pf DBG_SRC )
 #endif
 PSI_PROC( int, SaveFrame )( PSI_CONTROL pFrame, CTEXTSTR file );
+/* This is actually a load/save namespace. These functions are
+   used to save and load frames and their layouts to and from
+   XML.                                                        */
 _XML_NAMESPACE
 
+/* Unused. Please Delete. */
 PSI_PROC( void, SetFrameInitProc )( PSI_CONTROL pFrame, ControlInitProc InitProc, PTRSZVAL psvInit );
+/* Saves the current layout and controls of a frame. Can be
+   recreated later with LoadXMLFrame.
+   Parameters
+   frame :  Frame to save with all of its contents.
+   file\ :  filename to save XML frame into.                */
 PSI_PROC( int, SaveXMLFrame )( PSI_CONTROL frame, CTEXTSTR file );
 
-// results with the frame and all controls created
-// whatever extra init needs to be done... needs to be done
-PSI_PROC( PSI_CONTROL, LoadXMLFrameEx )( CTEXTSTR file DBG_PASS ); // if parent, use DisplayFrameOver()
+/* results with the frame and all controls created
+   whatever extra init needs to be done... needs to be done
+   if parent, use DisplayFrameOver().
+                                                          
+                                                          If frame is specified in parameters, and is not NULL, then
+                                                          this window is stacked against the other one so it is always
+                                                          above the other window.
+                                                          Parameters
+                                                          file\ :     name of XML file to read and pass to ParseXMLFrame
+                                                          frame :     frame to stack this frame against. (specify parent
+                                                                      window.)
+                                                          DBG_PASS :  passed to track allocation responsiblity.          */
+	PSI_PROC( PSI_CONTROL, LoadXMLFrameEx )( CTEXTSTR file DBG_PASS );
+	/* Handles recreating a frame from an XML description.
+   
+   
+   Parameters
+   buffer :    buffer to parse with XML frame loader
+   size :      length of the buffer in bytes.
+   DBG_PASS :  passed to track allocation responsiblity. */
 PSI_PROC( PSI_CONTROL, ParseXMLFrameEx )( POINTER buffer, _32 size DBG_PASS );
+/* <combine sack::PSI::xml::LoadXMLFrameEx@CTEXTSTR file>
+   
+   \ \                                                    */
 PSI_PROC( PSI_CONTROL, LoadXMLFrameOverEx )( PSI_CONTROL frame, CTEXTSTR file DBG_PASS );
+/* <combine sack::PSI::xml::LoadXMLFrameOverEx@PSI_CONTROL@CTEXTSTR file>
+   
+   \ \                                                                    */
 #define LoadXMLFrameOver(parent,file) LoadXMLFrameOverEx( parent,file DBG_SRC )
+/* <combine sack::PSI::xml::LoadXMLFrameEx@CTEXTSTR file>
+   
+   \ \                                                    */
 #define LoadXMLFrame(file) LoadXMLFrameEx( file DBG_SRC )
+/* <combine sack::PSI::xml::ParseXMLFrameEx@POINTER@_32 size>
+   
+   \ \                                                        */
 #define ParseXMLFrame(p,s) ParseXMLFrameEx( (p),(s) DBG_SRC )
 _XML_NAMESPACE_END
 USE_XML_NAMESPACE
@@ -337,7 +668,29 @@ USE_XML_NAMESPACE
 PSI_PROC( PSI_CONTROL, LoadFrameFromMemory )( POINTER info, _32 size, PSI_CONTROL hAbove, FrameInitProc InitProc, PTRSZVAL psv  );
 PSI_PROC( PSI_CONTROL, LoadFrameFromFile )( FILE *in, PSI_CONTROL hAbove, FrameInitProc InitProc, PTRSZVAL psv  );
 PSI_PROC( PSI_CONTROL, LoadFrame )( CTEXTSTR file, PSI_CONTROL hAbove, FrameInitProc InitProc, PTRSZVAL psv );
+/* methods to edit frames at runtime. */
 _PROP_NAMESPACE
+/* Turns edit features of a frame on and off.
+   Parameters
+   pf :       frame to set the edit state of
+   bEnable :  if TRUE, enable edit. if FALSE, disable edit.
+   
+   Example
+   <code lang="c#">
+   PSI_CONTROL frame = CreateFrame( "test", 0, 0, 100, 100, BORDER_NORMAL, NULL );
+   EditFrame( frame );
+   </code>
+   This turns on edit features of a frame, right click you can
+   add a new registered control, controls have hotspots on them,
+   if you right click on a hotspot, then you can edit properties
+   of that control like it's control ID.
+   
+   
+   
+   
+   Note
+   When LoadXMLFrame fails to find the file, a frame is created
+   and edit enabled like this.                                                     */
 PSI_PROC( void, EditFrame )( PSI_CONTROL pf, int bEnable );
 _PROP_NAMESPACE_END
 PSI_PROC( void, GetFramePosition )( PSI_CONTROL pf, int *x, int *y );
@@ -407,12 +760,27 @@ PSI_PROC( void, UpdateFrameEx )( PSI_CONTROL pf
 										 , int w, int h DBG_PASS );
 #define UpdateFrame(pf,x,y,w,h) UpdateFrameEx(pf,x,y,w,h DBG_SRC )
 
+/* \INTERNAL
+   
+   This is for internal organization, events and routines the
+   mouse uses and features it adds to the PSI control... like
+   issuing auto updates on unlock... well... it's internal
+   anyhow                                                     */
 _MOUSE_NAMESPACE
+/* Releases a use. This is the oppsite of AddWait(). */
 PSI_PROC( void, ReleaseCommonUse )( PSI_CONTROL pc );
+/* This one is public, Sets the mouse position relative to a
+   point in a frame.
+   Parameters
+   frame :  frame to position the mouse relative to
+   x :      x of the mouse
+   y :      y of the mouse                                   */
 PSI_PROC( void, SetFrameMousePosition )( PSI_CONTROL frame, int x, int y );
+/* Captures the mouse to the current control, it's like an
+   OwnMouse for a control.                                 */
 PSI_PROC( void, CaptureCommonMouse )( PSI_CONTROL pc, LOGICAL bCapture );
 _MOUSE_NAMESPACE_END
-USE_PSI_MOUSE_NAMESPACE
+USE_MOUSE_NAMESPACE
 
 PSI_PROC( Font, GetCommonFontEx )( PSI_CONTROL pc DBG_PASS );
 #define GetCommonFont(pc) GetCommonFontEx( pc DBG_SRC )
@@ -472,6 +840,7 @@ PSI_PROC( PSI_CONTROL, CreateCommonExx)( PSI_CONTROL pContainer
 #define CreateCommon(pc,nt,x,y,w,h,id,caption) CreateCommonExx(pc,NULL,nt,x,y,w,h,id,caption,0,NULL DBG_SRC)
 */
 
+/* returns the TypeID of the control, this can be used to validate the data received from the control.*/
 #undef ControlType
 PSI_PROC( INDEX, ControlType)( PSI_CONTROL pc );
 
@@ -533,7 +902,7 @@ PSI_PROC( PSI_CONTROL, MakeNamedControl )( PSI_CONTROL pContainer
 												 , _32 nID
 												 //, ...
 												 );
-PSI_PROC( PCOMMON, MakeNamedCaptionedControlByName )( PCOMMON pContainer
+PSI_PROC( PSI_CONTROL, MakeNamedCaptionedControlByName )( PSI_CONTROL pContainer
 																	 , CTEXTSTR pType
 																	 , int x, int y
 																	 , int w, int h
@@ -620,6 +989,9 @@ PSI_PROC( void, RestoreBackground )( PSI_CONTROL pc, P_IMAGE_RECTANGLE r );
 // output to the physical surface the rectangle of the control's surface specified.
 PSI_PROC( void, UpdateSomeControls )( PSI_CONTROL pc, P_IMAGE_RECTANGLE pRect );
 
+PSI_PROC( void, SetUpdateRegionEx )( PSI_CONTROL pc, S_32 rx, S_32 ry, _32 rw, _32 rh DBG_PASS );
+#define SetUpdateRegion(pc,x,y,w,h) SetUpdateRegionEx( pc,x,y,w,h DBG_SRC )
+
 
 PSI_PROC( void, EnableCommonUpdates )( PSI_CONTROL frame, int bEnable );
 #define EnableFrameUpdates(pf,e) EnableCommonUpdates( (PSI_CONTROL)pf, e )
@@ -651,7 +1023,21 @@ PSI_PROC( void, DestroyControlEx)( PSI_CONTROL pc DBG_PASS);
 PSI_PROC( void, SetNoFocus)( PSI_CONTROL pc );
 PSI_PROC( void *, ControlExtraData)( PSI_CONTROL pc );
 _PROP_NAMESPACE
+/* Show a dialog to edit a control's properties.
+   Parameters
+   control :  pointer to a control to edit the properties of.
+   
+   TODO
+   Add an example image of this.                              */
 PSI_PROC( int, EditControlProperties )( PSI_CONTROL control );
+/* Shows a dialog to edit the properties of the frame (the outer
+   container control.) Borders matter, title, size, position...
+   TODO
+   Add ability to specify parent frame for stacking.
+   Parameters
+   frame :  frame to edit properties of
+   x :      x of the left of the edit dialog
+   y :      y of the top of the edit dialog                      */
 PSI_PROC( int, EditFrameProperties )( PSI_CONTROL frame, S_32 x, S_32 y );
 _PROP_NAMESPACE_END
 USE_PROP_NAMESPACE
@@ -665,18 +1051,23 @@ PSI_PROC( void, AddCommonButtonsEx)( PSI_CONTROL pf
                                 , int *done, CTEXTSTR donetext
                                 , int *okay, CTEXTSTR okaytext );
 PSI_PROC( void, AddCommonButtons)( PSI_CONTROL pf, int *done, int *okay );
-PSI_PROC( void, SetCommonButtons)( PCOMMON pf, int *pdone, int *pokay );
+PSI_PROC( void, SetCommonButtons)( PSI_CONTROL pf, int *pdone, int *pokay );
 PSI_PROC( void, InitCommonButton )( PSI_CONTROL pc, int *value );
 
 PSI_PROC( void, CommonLoop)( int *done, int *okay ); // perhaps give a callback for within the loop?
 PSI_PROC( void, CommonWait)( PSI_CONTROL pf ); // perhaps give a callback for within the loop?
 PSI_PROC( void, CommonWaitEndEdit)( PSI_CONTROL *pf ); // a frame in edit mode, once edit mode done, continue
 PSI_PROC( void, ProcessControlMessages)(void);
-//------ BUTTONS ------------
+/* Buttons. Clickable buttons, Radio buttons and checkboxes. */
 _BUTTON_NAMESPACE
+/* Symbol which can be used as an attribute of a button to not
+   show the button border (custom drawn buttons)               */
 #define BUTTON_NO_BORDER 0x0001
-//CONTROL_DEFINE( Button );
+/* Defined function signature for the event attached to a button
+   when the button is clicked.                                   */
 typedef void (CPROC *ButtonPushMethod)(PTRSZVAL,PSI_CONTROL);
+/* A function signature for the event attached to a "Custom
+   Button" when it is drawn, this function is called.       */
 typedef void (CPROC*ButtonDrawMethod)(PTRSZVAL psv, PSI_CONTROL pc);
 CONTROL_PROC(Button,(CTEXTSTR,void (CPROC*PushMethod)(PTRSZVAL psv, PSI_CONTROL pc)
 						  , PTRSZVAL Data));
@@ -687,20 +1078,72 @@ PSI_PROC( void, GetButtonPushMethod )( PSI_CONTROL pc, ButtonPushMethod *method,
 PSI_PROC( PSI_CONTROL, SetButtonPushMethod )( PSI_CONTROL pc, ButtonPushMethod method, PTRSZVAL psv );
 PSI_PROC( PSI_CONTROL, SetButtonAttributes )( PSI_CONTROL pc, int attr ); // BUTTON_ flags...
 PSI_PROC( PSI_CONTROL, SetButtonDrawMethod )( PSI_CONTROL pc, ButtonDrawMethod method, PTRSZVAL psv );
-// drop a - attr is a user private thing...
+/* An all-in-one macro to create a Slider control, set the
+   callback, and set direction options.
+   Parameters
+   f :            frame to create the button in
+   x :            left coordinate of the control
+   y :            top coordinate of the control
+   w :            how wide the control is
+   h :            how tall to make the control
+   nID :          ID of the control (any numeric ID you want to
+                  call it)
+   a :            SliderDirection
+   c :            caption \- text for the button.
+   update_proc :  button click callback function.
+                  ButtonPushMethod.
+   user_data :    user data to pass to callback when it is
+                  invoked.
+   
+   Returns
+   PSI_CONTROL that is a button.                                */
 #define MakeButton(f,x,y,w,h,id,c,a,p,d) SetButtonAttributes( SetButtonPushMethod( MakeCaptionedControl(f,NORMAL_BUTTON,x,y,w,h,id,c), p, d ), a )
 
-//CONTROL_PROC( ImageButton, (Image pImage
-//									, void (CPROC*PushMethod)(PTRSZVAL psv, PSI_CONTROL pc)
-//									, PTRSZVAL Data) );
-PCONTROL PSIMakeImageButton( PCOMMON parent, int x, int y, int w, int h, _32 ID
+PSI_CONTROL PSIMakeImageButton( PSI_CONTROL parent, int x, int y, int w, int h, _32 ID
 							 , Image pImage
-							 , void (CPROC*PushMethod)(PTRSZVAL psv, PCONTROL pc)
+							 , void (CPROC*PushMethod)(PTRSZVAL psv, PSI_CONTROL pc)
 							 , PTRSZVAL Data );
-// drop a - attr is a user private thing...
+/* An all-in-one macro to create a Slider control, set the
+   callback, and set direction options.
+   Parameters
+   f :            frame to create the button in
+   x :            left coordinate of the control
+   y :            top coordinate of the control
+   w :            how wide the control is
+   h :            how tall to make the control
+   nID :          ID of the control (any numeric ID you want to
+                  call it)
+   a :            SliderDirection
+   c :            caption \- text for the button.
+   update_proc :  button click callback function.
+                  ButtonPushMethod.
+   user_data :    user data to pass to callback when it is
+                  invoked.
+   
+   Returns
+   PSI_CONTROL that is a button.                                */
 #define MakeImageButton(f,x,y,w,h,id,c,a,p,d) SetButtonPushMethod( SetButtonAttributes( SetButtonImage( MakeControl(f,IMAGE_BUTTON,x,y,w,h,id),c),a),p,d)
 PSI_PROC( PSI_CONTROL, SetButtonImage )( PSI_CONTROL pc, Image image );
 
+/* An all-in-one macro to create a Slider control, set the
+   callback, and set direction options.
+   Parameters
+   f :            frame to create the button in
+   x :            left coordinate of the control
+   y :            top coordinate of the control
+   w :            how wide the control is
+   h :            how tall to make the control
+   nID :          ID of the control (any numeric ID you want to
+                  call it)
+   a :            SliderDirection
+   c :            caption \- text for the button.
+   update_proc :  button click callback function.
+                  ButtonPushMethod.
+   user_data :    user data to pass to callback when it is
+                  invoked.
+   
+   Returns
+   PSI_CONTROL that is a button.                                */
 #define MakeCustomDrawnButton(f,x,y,w,h,id,a,dr,p,d) SetButtonPushMethod( SetButtonDrawMethod( SetButtonAttributes( MakeControl(f,CUSTOM_BUTTON,x,y,w,h,id),a ), dr, d ), p,d)
 
 
@@ -710,26 +1153,59 @@ PSI_PROC( int, IsButtonPressed)( PSI_CONTROL pc );
 PSI_PROC( PSI_CONTROL, SetButtonGroupID )(PSI_CONTROL pc, int nGroupID );
 PSI_PROC( PSI_CONTROL, SetButtonCheckedProc )( PSI_CONTROL pc
 														, void (CPROC*CheckProc)(PTRSZVAL psv, PSI_CONTROL pc)
-														, PTRSZVAL psv );
-#define RADIO_CALL_ALL 0
-#define RADIO_CALL_CHECKED   1
-#define RADIO_CALL_UNCHECKED 2
-#define RADIO_CALL_CHANGED   (RADIO_CALL_CHECKED|RADIO_CALL_UNCHECKED)
+															, PTRSZVAL psv );
+/* Attributes that affect behavior of radio buttons. */
+enum RadioButtonAttributes{
+ RADIO_CALL_ALL       = 0, /* Call event callback on every change. */
+ 
+ RADIO_CALL_CHECKED   = 1, /* Call the click callback when the button is checked. */
+ 
+ RADIO_CALL_UNCHECKED = 2, /* Call event callback when the button is unchecked. */
+ 
+		RADIO_CALL_CHANGED   = (RADIO_CALL_CHECKED|RADIO_CALL_UNCHECKED) /* Call when the check state of a button changes. */
+		
+};
 
+/* An all-in-one macro to create a Slider control, set the
+   callback, and set direction options.
+   Parameters
+   f :            frame to create the button in
+   x :            left coordinate of the control
+   y :            top coordinate of the control
+   w :            how wide the control is
+   h :            how tall to make the control
+   nID :          ID of the control (any numeric ID you want to
+                  call it)
+   a :            SliderDirection
+   c :            caption \- text for the button.
+   update_proc :  button click callback function.
+                  ButtonPushMethod.
+   user_data :    user data to pass to callback when it is
+                  invoked.
+   
+   Returns
+   PSI_CONTROL that is a button.                                */
 #define MakeRadioButton(f,x,y,w,h,id,t,gr,a,p,d) SetCheckButtonHandler( SetButtonGroupID( SetButtonAttributes( MakeCaptionedControl(f,RADIO_BUTTON,x,y,w,h,id,t), a ), gr ), p, d )
-//CONTROL_PROC( RadioButton, (_32 GroupID, CTEXTSTR text
-//                                , void (CPROC*CheckProc)(PTRSZVAL psv, PSI_CONTROL pc)
-//              , PTRSZVAL psv) );
 
-// check buttons are radio buttons with GroupID == 0
-//CONTROL_PROC( CheckButton, (CTEXTSTR text
-//                        , void (CPROC*CheckProc)(PTRSZVAL psv, PSI_CONTROL pc)
-//									, PTRSZVAL psv) );
-//PSI_CONTROL PSIMakeCheckButton( PSI_CONTROL parent, int x, int y, int w, int h, _32 ID
-//                           , _32 attr
-//									, CTEXTSTR text
-//									, void (CPROC*CheckProc)(PTRSZVAL psv, PSI_CONTROL pc)
-//									, PTRSZVAL psv );
+/* An all-in-one macro to create a Slider control, set the
+   callback, and set direction options.
+   Parameters
+   f :            frame to create the button in
+   x :            left coordinate of the control
+   y :            top coordinate of the control
+   w :            how wide the control is
+   h :            how tall to make the control
+   nID :          ID of the control (any numeric ID you want to
+                  call it)
+   a :            SliderDirection
+   c :            caption \- text for the button.
+   update_proc :  button click callback function.
+                  ButtonPushMethod.
+   user_data :    user data to pass to callback when it is
+                  invoked.
+   
+   Returns
+   PSI_CONTROL that is a button.                                */
 #define MakeCheckButton(f,x,y,w,h,id,t,a,p,d) SetCheckButtonHandler( SetButtonAttributes( SetButtonGroupID( MakeCaptionedControl(f,RADIO_BUTTON,x,y,w,h,id,t),0),a),p,d)
 PSI_PROC( PSI_CONTROL, SetRadioButtonGroup )( PSI_CONTROL, int group_id );
 PSI_PROC( PSI_CONTROL, SetCheckButtonHandler )( PSI_CONTROL
@@ -743,62 +1219,230 @@ PSI_PROC( void, SetButtonColor )( PSI_CONTROL pc, CDATA color );
 _BUTTON_NAMESPACE_END
 USE_BUTTON_NAMESPACE
 
-//------ Static Text -----------
-_TEXT_NAMESPACE
-#define TEXT_NORMAL     0x00
-#define TEXT_VERTICAL   0x01
-#define TEXT_CENTER     0x02
-#define TEXT_RIGHT      0x04
-#define TEXT_FRAME_BUMP 0x10
-#define TEXT_FRAME_DENT 0x20
+/* Static Text - this control just shows simple text on a
+   dialog. Non selectable.
+                                                          */
+	_TEXT_NAMESPACE
+	/* Attributes which can be passed to SetTextControlAttributes. */
+	enum TextControlAttributes {
+ TEXT_NORMAL     = 0x00, /* Normal Text. */
+ 
+ TEXT_VERTICAL   = 0x01,/* Text is centered vertical, else it is top aligned. */
+ 
+ TEXT_CENTER     = 0x02, /* Text is center justified. */
+ 
+ TEXT_RIGHT      = 0x04, /* Text is right justified. */
+ 
+ TEXT_FRAME_BUMP = 0x10, /* frame of the text control is bump frame (1 up, 1 down thin
+    frame)                                                     */
+ 
+			TEXT_FRAME_DENT = 0x20 /* Frame of control is a dent (1 down, 1 up ) */
+			
+	};
+/* \ \ 
+   Parameters
+   pf :   frame to create the control in
+   x :   left coordinate of control
+   y :   top coordinate of the control
+   w :   width of the control
+   h :   height of the control
+   ID :  an integer to identify the control
+   text :   text to initialize the control with
+   flags :   Attributes \- can be one or more of TextControlAttributes
+   
+   Returns
+   a PSI_CONTROL which is an text control.               */
 #define MakeTextControl( pf,x,y,w,h,id,text,flags ) SetTextControlAttributes( MakeCaptionedControl( pf, STATIC_TEXT, x, y, w,h, id, text ), flags )
-PSI_PROC( void, SetControlAlignment )( PCOMMON pc, int align );
+/* Set the alignment of the text in the TextControl.
+   Parameters
+   pc :     a "TextControl" control.
+   align :  A flag from TextControlAttributes        */
+PSI_PROC( void, SetControlAlignment )( PSI_CONTROL pc, int align );
 
-// offset is a pixel specifier... +/- amount from it's normal position.
-// returns if any text remains visible (true is visible, false is no longer visible, allowing
-// upper level application to reset to 0 offset.
-PSI_PROC( LOGICAL, SetControlTextOffset )( PCOMMON pc, int offset );
-PSI_PROC( LOGICAL, GetControlTextOffsetMinMax )( PCOMMON pc, int *min_offset, int *max_offset );
+/* offset is a pixel specifier... +/- amount from it's normal
+   position. returns if any text remains visible (true is
+   visible, false is no longer visible, allowing upper level
+   application to reset to 0 offset.
+   
+   The least amount and maximum effective amount can be received
+   from GetControlTextOffsetMinMax.
+   Parameters
+   pc :      a Text control.
+   offset :  offset to apply to the text.
+   
+   Returns
+   TRUE if ti was a valid control, else FALSE.                   */
+PSI_PROC( LOGICAL, SetControlTextOffset )( PSI_CONTROL pc, int offset );
+/* Get the minimum and maximum offsets that can be applied to a
+   text control based on its justification attributes before the
+   text will not be drawn in the control. This can be used to
+   marquee the text in from the left with the first update
+   showing text, until the last bit of text scrolls out at the
+   end.
+   Parameters
+   pc :          A STATIC_TEXT_NAME control.
+   min_offset :  pointer to an integer that is filled with the
+                 least amount that can be set for an offset
+                 before text is not shown.
+   max_offset :  pointer to an integer that is filled with the
+                 most amount of offset that can be set before
+                 text is not shown.
+   
+   Returns
+   TRUE if a valid Text control was passed.
+   
+   FALSE otherwise.
+   See Also
+   SetControlTextOffset                                          */
+PSI_PROC( LOGICAL, GetControlTextOffsetMinMax )( PSI_CONTROL pc, int *min_offset, int *max_offset );
 
 CAPTIONED_CONTROL_PROC( TextControl, (void) );
+/* Sets attributes of the text control.
+   Parameters
+   pc :     a STATIC_TEXT_NAME control.
+   flags :  one or move values combined from
+            TextControlAttributes.           */
 PSI_PROC( PSI_CONTROL, SetTextControlAttributes )( PSI_CONTROL pc, int flags );
+/* Sets the foreground and background of a text control.
+   Parameters
+   pc :    a Text control
+   fore :  CDATA describing the foreground color to use
+   back :  CDATA describing the background color to use. 0 is no
+           color, and only the foreground text is output. See
+           PutString.                                            */
 PSI_PROC( void, SetTextControlColors )( PSI_CONTROL pc, CDATA fore, CDATA back );
 _TEXT_NAMESPACE_END
 USE_TEXT_NAMESPACE
 
-//------- Edit Control ---------
-_EDIT_NAMESPACE
-#define EDIT_READONLY 0x01
-#define EDIT_PASSWORD 0x02
+/* Edit Control. This is a control that allows for text input. It
+   also works as a drop file acceptor, and the name of the file
+   or folder being dropped on it is entered as text.              */
+	_EDIT_NAMESPACE
+	/* Options which can be passed to the MakeEditControl macro. */
+	enum EditControlOptions {
+		EDIT_READONLY = 0x01, /* Option to set READONLY on create. */
+		
+		EDIT_PASSWORD = 0x02 /* Option to set password style on create. */
+		
+	};
 CAPTIONED_CONTROL_PROC( EditControl, (CTEXTSTR text) );
+/* This enters the text into the edit field as if it were typed.
+   This respects things like marked region auto delete. It's not
+   the same as SetText, but will insert at the position the
+   cursor is at.
+   Parameters
+   control :  control to type into
+   text :     the text to type.                                  */
 PSI_PROC( void, TypeIntoEditControl )( PSI_CONTROL control, CTEXTSTR text );
 
+/* \ \ 
+   Parameters
+   f :   frame to create the control in
+   x :   left coordinate of control
+   y :   top coordinate of the control
+   w :   width of the control
+   h :   height of the control
+   ID :  an integer to identify the control
+   t :   text to initialize the control with
+   a :   Attributes \- can be one or more of EditControlOptions
+   
+   Returns
+   a PSI_CONTROL which is an edit control.               */
 #define MakeEditControl(f,x,y,w,h,id,t,a) SetEditControlPassword( SetEditControlReadOnly( MakeCaptionedControl( f,EDIT_FIELD,x,y,w,h,id,t ) \
 	, ( a & EDIT_READONLY)?TRUE:FALSE )   \
 	, ( a & EDIT_PASSWORD)?TRUE:FALSE )
+/* Sets an edit control into read only mode. This actually means
+   that the user cannot enter data, and can only see what is in
+   it. The difference between this and a text control is the
+   border and background style.
+   Parameters
+   pc :         edit control to set readonly
+   bReadOnly :  if TRUE, sets readonly. If false, clears readonly.
+   
+   Returns
+   The PSI Control passed is returned, for nesting.                */
 PSI_PROC( PSI_CONTROL, SetEditControlReadOnly )( PSI_CONTROL pc, LOGICAL bReadOnly );
+/* If password style is set, then the text in the edit field is
+   shown as ******.
+   Parameters
+   pc :         pointer to an edit control
+   bPassword :  if TRUE, Sets style to password, if FALSE, clears
+                password style.                                   */
 PSI_PROC( PSI_CONTROL, SetEditControlPassword )( PSI_CONTROL pc, LOGICAL bPassword );
-//PSI_PROC( void, SetEditAttributes )( pc, a );
-#define SetEditFont SetCommonFont
 //PSI_PROC( void, SetEditFont )( PSI_CONTROL pc, Font font );
 // Use GetControlText/SetControlText
 _EDIT_NAMESPACE_END
 USE_EDIT_NAMESPACE
 
-//------- Slider Control --------
-_SLIDER_NAMESPACE
-#define SLIDER_HORIZ 1
-#define SLIDER_VERT  0
+/* Slider Control - this is a generic control that has a minimum
+   value, and a maximum value, and a clickable knob that can
+   select a value inbetween.
+   
+   the maximum value may be less than the minimum value, the
+   current selected value will be between these.
+   
+   A horizontal slider, the value for minimum is on the left. A
+   vertical slider, the value for minimum is on the bottom.      */
+	_SLIDER_NAMESPACE
+	/* These are values to pass to SetSliderOptions to control the
+	   slider's direction.                                         */
+	enum SliderDirection {
+		SLIDER_HORIZ =1, /* Slider is horizontal. That is the knob moves left and right. The
+		   value as minimum is at the left, and the value maximum is at
+		   the right. numerically minimum can be more than maximum.         */
+		
+			SLIDER_VERT  =0 /* Slider is vertical. That is the knob moves up and down. The
+			   value as minimum is at the bottom, and the value maximum is
+			   at the top. numerically minimum can be more than maximum.   */
+			
+	};
+/* An all-in-one macro to create a Slider control, set the
+   callback, and set direction options.
+   Parameters
+   pf :           frame to create the slider in
+   x :            left coordinate of the control
+   y :            top coordinate of the control
+   w :            how wide the control is
+   h :            how tall to make the control
+   nID :          ID of the control (any numeric ID you want to
+                  call it)
+   opt :          SliderDirection
+   update_proc :  callback to which gets called when the slider's
+                  current value changes.
+   user_data :    user data to pass to callback when it is
+                  invoked.                                        */
 #define MakeSlider(pf,x,y,w,h,nID,opt,updateproc,updateval) SetSliderOptions( SetSliderUpdateHandler( MakeControl(pf,SLIDER_CONTROL,x,y,w,h,nID ), updateproc,updateval ), opt)
 //CONTROL_PROC( Slider, (
 typedef void (CPROC*SliderUpdateProc)(PTRSZVAL psv, PSI_CONTROL pc, int val);
+/* Set the new minimum, maximum and current for the slider.
+   Parameters
+   pc :       pointer to a slider control \- does nothing
+              otherwise.
+   min :      new minimum value for the mimimum amount to scale.
+   current :  the current selected value. (should be between
+              min\-max)
+   max :      new maximum value which can be selected.           */
 PSI_PROC( void, SetSliderValues)( PSI_CONTROL pc, int min, int current, int max );
+/* Set's the slider's direction. (horizontal or vertical)
+   Parameters
+   pc :    slider control
+   opts :  SliderDirection                                */
 PSI_PROC( PSI_CONTROL, SetSliderOptions )( PSI_CONTROL pc, int opts );
+/* Set a callback function to allow responding to changes in the
+   slider.
+   Parameters
+   pc :                 pointer to a slider control
+   SliderUpdateEvent :  callback to a user function when the
+                        slider's value changes.
+   psvUser :            data to pass to callback function when
+                        invoked.                                 */
 PSI_PROC( PSI_CONTROL, SetSliderUpdateHandler )( PSI_CONTROL pc, SliderUpdateProc, PTRSZVAL psvUser );
 _SLIDER_NAMESPACE_END
 USE_SLIDER_NAMESPACE
 
-//------- Font Control --------
+/* Font Control - Really this is all about a font picker. The
+   data used to create the font to show can be retreived to be
+   saved for later recreation.                                 */
 _FONTS_NAMESPACE
 #ifndef FONT_RENDER_SOURCE
 // types of data which may result...
@@ -810,14 +1454,20 @@ _FONTS_NAMESPACE
 // Image text operations (PutString, PutCharacter)
 // result font selection data can be resulted in the area referenced by
 // the pointer, and size pointer...
-
+//
 // actual work done here for pUpdateFontFor(NULL) ...
 // if pUpdateFontFor is not null, an apply button will appear, allowing the actual
 // control to be updated to the chosen font.
-
-// scale_width, height magically apply... and are saved in the
-// font data structure for re-rendering... if a font is rendered here
-// the same exact font result will be acheived using RenderScaledFont( pdata )
+//
+/* scale_width, height magically apply... and are saved in the
+   font data structure for re-rendering... if a font is rendered
+   here the same exact font result will be acheived using
+   RenderScaledFont( pdata )
+   Parameters
+   width_scale :   pointer to a scalar fraction to scale
+                   the font by
+   height_scale :  pointer to a scalar fraction to scale
+                   the font by                                          */
 PSI_PROC( Font, PickScaledFontWithUpdate )( S_32 x, S_32 y
 														, PFRACTION width_scale
 														, PFRACTION height_scale
@@ -825,16 +1475,35 @@ PSI_PROC( Font, PickScaledFontWithUpdate )( S_32 x, S_32 y
 														 // resulting parameters for the data and size of data
 														 // which may be passe dto RenderFontData
 														, POINTER *pFontData
-														, PCOMMON pAbove
+														, PSI_CONTROL pAbove
 														, void (CPROC *UpdateFont)( PTRSZVAL psv, Font font )
 														, PTRSZVAL psvUpdate );
 
+/* <combine sack::PSI::font::PickScaledFontWithUpdate@S_32@S_32@PFRACTION@PFRACTION@P_32@POINTER *@PSI_CONTROL@void __cdecl *UpdateFont PTRSZVAL psv\, Font font@PTRSZVAL>
+   
+   PickFontWithUpdate can be used to receive event notices when
+   the font is changed, allowing immediately refresh using the
+   changed font.
+   
+   
+   Parameters
+   x :              x screen position to put the dialog
+   y :              y screen position to put the dialog
+   pFontDataSize :  pointer to a 32 bit value to receive the font
+                    data length. (can ba NULL to ignore)
+   pFontData :      pointer to pointer to get font_data. (can ba
+                    NULL to ignore)
+   pAbove :         pointer to a frame to stack this one above.
+   UpdateFont :     user callback passed the psvUpdate data and
+                    the Font that has been updated.
+   psvUpdate :      user data to pass to use callback when
+                    invoked.                                                                                                                                           */
 PSI_PROC( Font, PickFontWithUpdate )( S_32 x, S_32 y
 										  , P_32 pFontDataSize
 											// resulting parameters for the data and size of data
 											// which may be passe dto RenderFontData
 										  , POINTER *pFontData
-										  , PCOMMON pAbove
+										  , PSI_CONTROL pAbove
 										  , void (CPROC *UpdateFont)( PTRSZVAL psv, Font font )
 												, PTRSZVAL psvUpdate );
 // pick font for uses pickfontwithupdate where the update procedure
@@ -847,28 +1516,51 @@ PSI_PROC( Font, PickFontFor )( S_32 x, S_32 y
 									  , PSI_CONTROL pAbove
 									  , PSI_CONTROL pUpdateFontFor );
 
+/* Pick a font. This shows a dialog
+   Parameters
+   x :          screen location of the dialog
+   y :          screen location of the dialog
+   size :       pointer to a 32 bit value to receive the length
+                of the font's data
+   pFontData :  pointer to a pointer to be filled with the
+                address of a FONTDATA describing the chosen font.
+   pAbove :     parent window to make sure this is stacked above.
+   
+   Example
+   <code lang="c++">
+   POINTER data = NULL; // gets filled with font data - initialize to NULL or a previously returned FONTDATA.
+   _32 data_length = 0; // result font data length.
+   
+   Font font = PickFont( 0, 0, &amp;data_length, &amp;data, NULL );
+   
+   {
+       // and like I really need to exemplify saving a block of data...
+       \FILE *file = fopen( "font_description", "wb" );
+       fwrite( data, 1, data_length, file );
+       fclose( file );
+   }
+   </code>                                                                                                    */
 PSI_PROC( Font, PickFont)( S_32 x, S_32 y
                                   , P_32 size, POINTER *pFontData
 								 , PSI_CONTROL pAbove );
+/* <combine sack::PSI::font::PickScaledFontWithUpdate@S_32@S_32@PFRACTION@PFRACTION@P_32@POINTER *@PSI_CONTROL@void __cdecl *UpdateFont PTRSZVAL psv\, Font font@PTRSZVAL>
+   
+   \ \                                                                                                                                                                 */
 #define PickScaledFont( x,y,ws,hs,size,fd,pa) PickScaledFontWithUpdate( x,y,ws,hs,size,fd,pa,NULL,0)
 
 // this can take the resulting data from a pick font operation
 // and result in a font... concerns at the moment are for cases
 // of trying to use the same  string on different systems (different font
 // locations) and getting a same (even similar?) result
-//PSI_PROC( Font, RenderFont)( POINTER data, _32 flags ); // flags ? override?
-//PSI_PROC( Font, RenderFontData )( PFONTDATA pfd );
-//PSI_PROC( Font, RenderFontFileEx )( CTEXTSTR file, _32 width, _32 height, _32 flags, P_32 size, POINTER *pFontData );
-//PSI_PROC( Font, RenderFontFile )( CTEXTSTR file, _32 width, _32 height, _32 flags );
-//#define RenderFontFile(file,w,h,flags) RenderFontFileEx(file,w,h,flags,NULL,NULL)
 //PSI_PROC( void, DestroyFont)( Font *font );
 // takes an already rendered font, and writes it to a file.
 // at the moment this will not work with display services....
 PSI_PROC( void, DumpFontFile )( CTEXTSTR name, Font font );
-PSI_PROC( void, DumpFrameContents )( PCOMMON pc );
 
 _FONTS_NAMESPACE_END
 USE_FONTS_NAMESPACE
+
+PSI_PROC( void, DumpFrameContents )( PSI_CONTROL pc );
 
 //------- ListBox Control --------
 _LISTBOX_NAMESPACE
@@ -888,7 +1580,7 @@ PSI_PROC( int, GetListboxMultiSelect )( PSI_CONTROL ); // returns only multisele
 PSI_PROC( void, ResetList)( PSI_CONTROL pc );
 // put an item at end of list.
 PSI_PROC( PLISTITEM, AddListItem)( PSI_CONTROL pc, const CTEXTSTR text );
-PSI_PROC( PLISTITEM, AddListItemEx)( PSI_CONTROL pc, int nLevel, const CTEXTSTR text );
+PSI_PROC( PLISTITEM, AddListItemEx)( PSI_CONTROL pc, int nLevel, CTEXTSTR text );
 // put an item after a known item... NULL to add at head of list.
 PSI_PROC( PLISTITEM, InsertListItem)( PSI_CONTROL pc, PLISTITEM pAfter, CTEXTSTR text );
 PSI_PROC( PLISTITEM, InsertListItemEx)( PSI_CONTROL pc, PLISTITEM pAfter, int nLevel, CTEXTSTR text );
@@ -926,9 +1618,9 @@ PSI_PROC( void, EnumListItems )( PSI_CONTROL pc
 										 , PLISTITEM pliStart
 										 , void (CPROC *HandleListItem )(PTRSZVAL,PSI_CONTROL,PLISTITEM)
 										 , PTRSZVAL psv );
-PSI_PROC( void, EnumSelectedListItems )( PCONTROL pc
+PSI_PROC( void, EnumSelectedListItems )( PSI_CONTROL pc
 													, PLISTITEM pliStart
-													, void (CPROC *HandleListItem )(PTRSZVAL,PCOMMON,PLISTITEM)
+													, void (CPROC *HandleListItem )(PTRSZVAL,PSI_CONTROL,PLISTITEM)
 													, PTRSZVAL psv );
 PSI_PROC( PSI_CONTROL, GetItemListbox )( PLISTITEM pli );
 
@@ -945,23 +1637,66 @@ PSI_PROC(PSI_CONTROL, MakeGridBox)( PSI_CONTROL pf, int options, int x, int y, i
                                  int viewport_x, int viewport_y, int total_x, int total_y,
                                  int row_thickness, int column_thickness, PTRSZVAL nID );
 #endif
-//------- Popup Menus ------------
-// popup interface.... these are mimics of windows... 
-// and at some point should internally alias to popup code - 
-//    if I ever get it back
+/* * ------ Popup Menus ----------- *
+   popup interface.... these are mimics of windows... and at
+   some point should internally alias to popup code - if I ever
+   get it back.
+   
+   
+   
+   Actually, I depricated my own implementation (maybe on Linux
+   they could resemble working), but since I cloned the Windows
+   API, I just fell back to standard windows popups instead.    */
 
 _MENU_NAMESPACE
 
 
 
+/* Create a popup menu which can have items added to it. This is
+   not shown until TrackPopup is called.
+   Parameters
+   None.                                                         */
 PSI_PROC( PMENU, CreatePopup)( void );
+/* Destroys a popup menu.
+   Parameters
+   pm :  menu to delete   */
 PSI_PROC( void, DestroyPopup)( PMENU pm );
+/* Clears all entries on a menu.
+   Parameters
+   pm :  menu to clear           */
 PSI_PROC( void, ResetPopup)( PMENU pm );
-// get sub-menu data...
+/* get sub-menu data...
+   Parameters
+   pm :    PMENU to get popup data for... 
+   item :  Item on the menu to get the popup menu for. */
 PSI_PROC( void *,GetPopupData)( PMENU pm, int item );
+/* Add a new item to a popup menu
+   Parameters
+   pm :     menu to add items to
+   type :   type of the item (MF_TEXT,MF_POPUP, MF_SEPARATOR ?) 
+   dwID :   ID of item. (PMENU of a popup menu if it's a popup
+            item)
+   pData :  text data of the item (unless separator)             */
 PSI_PROC( PMENUITEM, AppendPopupItem)( PMENU pm, int type, PTRSZVAL dwID, CPOINTER pData );
+/* Set a checkmark on a menu item.
+   Parameters
+   pm :     menu containing the item to check
+   dwID :   ID of the item to check
+   state :  (MF_CHECKED, MF_UNCHECKED?)       */
 PSI_PROC( PMENUITEM, CheckPopupItem)( PMENU pm, _32 dwID, _32 state );
+/* Delete a single item from a menu.
+   Parameters
+   pm :     menu containing the item to delete
+   dwID :   ID of the item to delete
+   state :  (?)                                */
 PSI_PROC( PMENUITEM, DeletePopupItem)( PMENU pm, _32 dwID, _32 state );
+/* This Shows a popup on the screen, and waits until it returns
+   with a result. I guess this is actually the internal routine
+   used for handling selected popup items on popup menus.
+   Parameters
+   hMenuSub :  sub menu to track
+   parent :    parent menu that has started tracking a
+               submenu.                                         */
 PSI_PROC( int, TrackPopup)( PMENU hMenuSub, PSI_CONTROL parent );
 _MENU_NAMESPACE_END
 USE_MENU_NAMESPACE
@@ -982,19 +1717,54 @@ PSI_PROC( int, PSI_OpenFile)( CTEXTSTR basepath, CTEXTSTR types, TEXTSTR result 
 //------- Scroll Control --------
 #define SCROLL_HORIZONTAL 1
 #define SCROLL_VERITCAL   0
+/* This is a scrollbar type control. It's got an up/down or
+   left/right arrow, and a thumb that can be clicked on. Used by
+   the listbox control.                                          */
 _SCROLLBAR_NAMESPACE
-   // types of UpdateProc and for MoveScrollBar
-#define UPD_1UP       0
-#define UPD_1DOWN     1
-#define UPD_RANGEUP   2
-#define UPD_RANGEDOWN 3
-#define UPD_THUMBTO   4
-
+	// types values for MoveScrollBar
+	enum MoveScrollBarTypes{
+ UPD_1UP       = 0, /* Moved UP by one. */
+ 
+ UPD_1DOWN     = 1, /* Moved DOWN by one. */
+ 
+ UPD_RANGEUP   = 2, /* Moved UP by one range. */
+ 
+ UPD_RANGEDOWN = 3, /* Moved DOWN by one range. */
+ 
+ UPD_THUMBTO   = 4 /* Position of the thumb has changed to something. */
+ 
+	};
+/* \ \ 
+   Parameters
+   pc :     SCROLLBAR_CONTROL_NAME
+   min :    minimum value (needs to be less than max)
+   cur :    current value (should be between min to max
+   range :  how many of the values to span
+   max :    max value
+   
+   Remarks
+   The range of the control controls how wide the thumb control
+   is. It should reflect things like how many of the maximum
+   items are showing in a list.                                 */
 PSI_PROC( void, SetScrollParams)( PSI_CONTROL pc, int min, int cur, int range, int max );
 CONTROL_PROC( ScrollBar, (_32 attr) );
+/* Set the event callback for when the position on the control
+   changes.
+   Parameters
+   pc :        a SCROLLBAR_CONTROL_NAME.
+   callback :  the address of the function to call when the
+               position changes.
+   data :      user data passed to the event function when it is
+               invoked.                                          */
 PSI_PROC( void, SetScrollUpdateMethod)( PSI_CONTROL pc
                     , void (CPROC*UpdateProc)(PTRSZVAL psv, int type, int current)
                                                   , PTRSZVAL data );
+/* move the scrollbar. operations to specify move are +1, -1, +1
+   range, -1 range. the MOVE_THUMB operation is actually passed
+   to the event callback?
+   Parameters
+   pc :    control that is a SCROLLBAR_CONTROL_NAME
+   type :  a value from MoveScrollBarTypes                       */
 PSI_PROC( void, MoveScrollBar )( PSI_CONTROL pc, int type );
 _SCROLLBAR_NAMESPACE_END
 USE_SCROLLBAR_NAMESPACE
@@ -1002,14 +1772,62 @@ USE_SCROLLBAR_NAMESPACE
 //------- Misc Controls (and widgets) --------
 _SHEETS_NAMESPACE
 #define MakeSheetControl(c,x,y,w,h,id) MakeControl(c,SHEET_CONTROL,x,y,w,h,id)
-//CONTROL_PROC( SheetControl, (void) );
+/* Adds a sheet to a tab control. A sheet is just another
+   PSI_CONTROL frame.
+   Parameters
+   pControl :  control to add the page to
+   contents :  frame control to add                       */
 PSI_PROC( void, AddSheet )( PSI_CONTROL pControl, PSI_CONTROL contents );
+/* Removes a sheet from a tab control.
+   Parameters
+   pControl :  tab control to remove the sheet from
+   ID :        identifier of the sheet to remove.   */
 PSI_PROC( int, RemoveSheet )( PSI_CONTROL pControl, _32 ID );
+/* Request a sheet control by ID.
+   Parameters
+   pControl :  tab control to get a sheet from.
+   ID :        the ID of the page to get from the tab control.
+   
+   Returns
+   Control that is the sheet that was added as the specified ID. */
 PSI_PROC( PSI_CONTROL, GetSheet )( PSI_CONTROL pControl, _32 ID );
+/* Gets a control from a specific sheet in the tab control
+   Parameters
+   pControl :   tab control to get the control from a sheet of.
+   IDSheet :    identifier of the sheet to get a control from
+   IDControl :  identifier of the control on a sheet in the tab
+                control.
+   
+   Returns
+   Control that has the requested ID on the requested page, if
+   found. Otherwise NULL.                                       */
 PSI_PROC( PSI_CONTROL, GetSheetControl )( PSI_CONTROL pControl, _32 IDSheet, _32 IDControl );
+/* \returns the integer ID of the selected sheet.
+   Parameters
+   pControl :  Sheet control to get the current sheet ID from. */
 PSI_PROC( PSI_CONTROL, GetCurrentSheet )( PSI_CONTROL pControl );
+/* Set which property sheet is currently selected.
+   Parameters
+   pControl :  Sheet Control.
+   ID :        ID of the page control to select.   */
 PSI_PROC( void, SetCurrentSheet )( PSI_CONTROL pControl, _32 ID );
+/* Get the size of sheets for this sheet control. So the page
+   creator can create a page that is the correct size for the
+   sheet dialog.
+   Parameters
+   pControl :  tab control to get the sheet size for
+   width :     pointer to a 32 bit unsigned value to receive the
+               width sheets should be.
+   height :    pointer to a 32 bit unsigned value to receive the
+               height sheets should be.                          */
 PSI_PROC( int, GetSheetSize )( PSI_CONTROL pControl, _32 *width, _32 *height );
+/* Sets a page as disabled. Disabled tabs cannot be clicked on
+   to select.
+   Parameters
+   pControl :  tab control containing sheet to disable or enable.
+   ID :        ID of the sheet to disable.
+   bDisable :  TRUE to disable the page, FALSE to re\-enable the
+               page.                                              */
 PSI_PROC( void, DisableSheet )( PSI_CONTROL pControl, _32 ID, LOGICAL bDisable );
 
 // Tab images are sliced and diced across the vertical center of the image
@@ -1022,26 +1840,30 @@ PSI_PROC( void, SetSheetTabImages )( PSI_CONTROL pControl, _32 ID, Image active,
 // wise to set the sheet's text color on the tab...
 // Initial tabs are black and white, with inverse black/white text...
 PSI_PROC( void, SetTabTextColors )( PSI_CONTROL pControl, CDATA cActive, CDATA cInactive );
+/* Sets the active and inactive colors for text.
+   Parameters
+   pControl :   sheet control to set the tab attribute of
+   ID :         ID of the sheet to set the tab color attributes for
+   cActive :    Color of the text when the tab is active.
+   cInactive :  Color of the text when the tab is inactive.         */
 PSI_PROC( void, SetSheetTabTextColors )( PSI_CONTROL pControl, _32 ID, CDATA cActive, CDATA cInactive );
 _SHEETS_NAMESPACE_END
 USE_SHEETS_NAMESPACE
 
 
 //------- Misc Controls (and widgets) --------
-	PSI_PROC( void, SimpleMessageBox )( PSI_CONTROL parent, const CTEXTSTR title, const CTEXTSTR content );
+	PSI_PROC( void, SimpleMessageBox )( PSI_CONTROL parent, CTEXTSTR title, CTEXTSTR content );
 // result is the address of a user buffer to read into, reslen is the size of that buffer.
 // question is put above the question... pAbove is the window which this one should be placed above (lock-stacked)
-PSI_PROC( int, SimpleUserQuery )( TEXTSTR result, int reslen, CTEXTSTR question, PCOMMON pAbove );
+PSI_PROC( int, SimpleUserQuery )( TEXTSTR result, int reslen, CTEXTSTR question, PSI_CONTROL pAbove );
 
 PSI_PROC( void, RegisterResource )( CTEXTSTR appname, CTEXTSTR resource_name, int ID, int resource_name_range, CTEXTSTR type_name );
 // assuming one uses a
-#define SimpleRegisterResource( name, typename ) RegisterResource( "application", #name, name, 1, typename );
-#define EasyRegisterResource( domain, name, typename ) RegisterResource( domain, #name, name, 1, typename );
-#define EasyRegisterResourceRange( domain, name, range, typename ) RegisterResource( domain, #name, name, range, typename );
-#define SimpleRegisterAppResource( name, typename, class ) RegisterResource( "application/" class, #name, name, 1, typename );
+#define SimpleRegisterResource( name, typename ) RegisterResource( WIDE("application"), WIDE(#name), name, 1, typename );
+#define EasyRegisterResource( domain, name, typename ) RegisterResource( domain, WIDE(#name), name, 1, typename );
+#define EasyRegisterResourceRange( domain, name, range, typename ) RegisterResource( domain, WIDE(#name), name, range, typename );
+#define SimpleRegisterAppResource( name, typename, class ) RegisterResource( WIDE("application/") class, WIDE(#name), name, 1, typename );
 
-//------- INI Prompt for option library (static)
-#ifdef __STATIC__
 PSI_PROC( int, _SQLPromptINIValue )(
 												CTEXTSTR lpszSection,
 												CTEXTSTR lpszEntry,
@@ -1050,23 +1872,54 @@ PSI_PROC( int, _SQLPromptINIValue )(
 												int cbReturnBuffer,
 												CTEXTSTR filename
 											  );
-#endif
+
+/* This namespace is not completely implemented (if at all). At
+   the start it looked good, and a lot of it was a
+   copy-insert-modify of the existing functions, it wasn't that
+   much work to lay out. But then looking at the content of the
+   interface, and realizing that each individual registered
+   component needed to have custom methods associated with it,
+   it will be a different sort of project to support dynamic
+   remote controls... so we look at how WPF did it, and that is
+   a solution, I suppose.                                       */
+_PSI_INTERFACE_NAMESPACE
+
+// hmm upon loading the thing from disk, need to query the callbacks of the application to
+// request the correct ptrszvals...
+enum {
+    MSG_ControlInit = MSG_EventUser
+     , MSG_ButtonDraw
+    , MSG_ButtonClick
+};
 
 
-
+/* Quick wrapper to make consistant call method signatures for
+   interface methods.                                          */
 #define PSI_PROC_PTR( type, name ) type (CPROC*name)
-typedef struct control_interface_tag
+/* Begin a basic interface to PSI to consider extending PSI
+   across a message service.                                */
+struct control_interface_tag
 {
 
 PSI_PROC_PTR( PRENDER_INTERFACE, SetControlInterface)( PRENDER_INTERFACE DisplayInterface );
+/* <combine sack::PSI::SetControlImageInterface@PIMAGE_INTERFACE>
+   
+   \ \                                                            */
 PSI_PROC_PTR( PIMAGE_INTERFACE, SetControlImageInterface )( PIMAGE_INTERFACE DisplayInterface );
 
+/* <combine sack::PSI::AlignBaseToWindows>
+   
+   \ \                                     */
 PSI_PROC_PTR( void, AlignBaseToWindows)( void );
-// see indexes above.
 PSI_PROC_PTR( void, SetBaseColor )( INDEX idx, CDATA c );
+/* <combine sack::PSI::GetBaseColor@INDEX>
+   
+   \ \                                     */
 PSI_PROC_PTR( CDATA, GetBaseColor )( INDEX idx );
 
-//-------- Frame and generic control functions --------------
+/* <combine sack::PSI::CreateFrame@CTEXTSTR@int@int@int@int@_32@PSI_CONTROL>
+   
+   \ \                                                                       */
 PSI_PROC_PTR( PSI_CONTROL, CreateFrame)( CTEXTSTR caption, int x, int y
                                         , int w, int h
                                         , _32 BorderFlags
@@ -1075,161 +1928,309 @@ PSI_PROC_PTR( PSI_CONTROL, CreateFrame)( CTEXTSTR caption, int x, int y
 PSI_PROC_PTR( PSI_CONTROL, CreateFrameFromRenderer )( CTEXTSTR caption
                                                          , _32 BorderTypeFlags
                                                          , PRENDERER pActImg );
+/* <combine sack::PSI::DestroyCommonEx@PSI_CONTROL *ppc>
+   
+   \ \                                                   */
 PSI_PROC_PTR( void, DestroyFrameEx)( PSI_CONTROL pf DBG_PASS );
 
+/* <combine sack::PSI::FrameBorderX@_32>
+   
+   \ \                                   */
 PSI_PROC_PTR( int, FrameBorderX )( _32 flags );
+/* <combine sack::PSI::FrameBorderXOfs@_32>
+   
+   \ \                                      */
 PSI_PROC_PTR( int, FrameBorderXOfs )( _32 flags );
+/* <combine sack::PSI::FrameBorderY@PSI_CONTROL@_32@CTEXTSTR>
+   
+   \ \                                                        */
 PSI_PROC_PTR( int, FrameBorderY )( _32 flags, CTEXTSTR caption );
+/* <combine sack::PSI::FrameBorderYOfs@PSI_CONTROL@_32@CTEXTSTR>
+   
+   \ \                                                           */
 PSI_PROC_PTR( int, FrameBorderYOfs )( _32 flags, CTEXTSTR caption );
+/* <combine sack::PSI::DisplayFrame@PSI_CONTROL>
+   
+   \ \                                           */
 PSI_PROC_PTR( void, DisplayFrame)( PSI_CONTROL pf );
+/* <combine sack::PSI::SizeCommon@PSI_CONTROL@_32@_32>
+   
+   \ \                                                 */
 PSI_PROC_PTR( void, SizeCommon)( PSI_CONTROL pf, _32 w, _32 h );
+/* <combine sack::PSI::SizeCommonRel@PSI_CONTROL@_32@_32>
+   
+   \ \                                                    */
 PSI_PROC_PTR( void, SizeCommonRel)( PSI_CONTROL pf, _32 w, _32 h );
 PSI_PROC_PTR( void, MoveCommon)( PSI_CONTROL pf, S_32 x, S_32 y );
+/* <combine sack::PSI::MoveCommonRel@PSI_CONTROL@S_32@S_32>
+   
+   \ \                                                      */
 PSI_PROC_PTR( void, MoveCommonRel)( PSI_CONTROL pf, S_32 x, S_32 y );
+/* <combine sack::PSI::MoveSizeCommon@PSI_CONTROL@S_32@S_32@_32@_32>
+   
+   \ \                                                               */
 PSI_PROC_PTR( void, MoveSizeCommon)( PSI_CONTROL pf, S_32 x, S_32 y, _32 w, _32 h );
 PSI_PROC_PTR( void, MoveSizeCommonRel)( PSI_CONTROL pf, S_32 x, S_32 y, _32 w, _32 h );
+/* <combine sack::PSI::GetControl@PSI_CONTROL@int>
+   
+   \ \                                             */
 PSI_PROC_PTR( PSI_CONTROL, GetControl)( PSI_CONTROL pf, int ID );
+/* <combine sack::PSI::GetCommonUserData@PSI_CONTROL>
+   
+   \ \                                                */
 PSI_PROC_PTR( PTRSZVAL, GetFrameUserData )( PSI_CONTROL pf );
 PSI_PROC_PTR( void, SetFrameUserData )( PSI_CONTROL pf, PTRSZVAL psv );
+/* <combine sack::PSI::UpdateFrameEx@PSI_CONTROL@int@int@int@int h>
+   
+   \ \                                                              */
 PSI_PROC_PTR( void, UpdateFrame )( PSI_CONTROL pf
                                             , int x, int y
                                             , int w, int h );
+/* <combine sack::PSI::_mouse::SetFrameMousePosition@PSI_CONTROL@int@int>
+   
+   \ \                                                                    */
 PSI_PROC_PTR( void, SetFrameMousePosition )( PSI_CONTROL frame, int x, int y );
 
-//PSI_PROC_PTR void SetDefaultOkayID( PSI_CONTROL pFrame, int nID );
-//PSI_PROC_PTR void SetDefaultCancelID( PSI_CONTROL pFrame, int nID );
-
-//-------- Generic control functions --------------
+/* <combine sack::PSI::GetFrame@PSI_CONTROL>
+   
+   \ \                                       */
 PSI_PROC_PTR( PSI_CONTROL, GetFrame)( PSI_CONTROL pc );
+/* <combine sack::PSI::GetNearControl@PSI_CONTROL@int>
+   
+   \ \                                                 */
 PSI_PROC_PTR( PSI_CONTROL, GetNearControl)( PSI_CONTROL pc, int ID );
+/* <combine sack::PSI::GetCommonTextEx@PSI_CONTROL@TEXTSTR@int@int>
+   
+   \ \                                                              */
 PSI_PROC_PTR( void, GetControlTextEx)( PSI_CONTROL pc, TEXTSTR buffer, int buflen, int bCString );
+/* <combine sack::PSI::SetControlText@PSI_CONTROL@CTEXTSTR>
+   
+   \ \                                                      */
 PSI_PROC_PTR( void, SetControlText)( PSI_CONTROL pc, CTEXTSTR text );
+/* <combine sack::PSI::SetCommonFocus@PSI_CONTROL>
+   
+   \ \                                             */
 PSI_PROC_PTR( void, SetControlFocus)( PSI_CONTROL pf, PSI_CONTROL pc );
+/* <combine sack::PSI::EnableControl@PSI_CONTROL@int>
+   
+   \ \                                                */
 PSI_PROC_PTR( void, EnableControl)( PSI_CONTROL pc, int bEnable );
+/* <combine sack::PSI::IsControlEnabled@PSI_CONTROL>
+   
+   \ \                                               */
 PSI_PROC_PTR( int, IsControlEnabled)( PSI_CONTROL pc );
+/* <combine sack::PSI::GetControlSurface@PSI_CONTROL>
+   
+   \ \                                                */
 PSI_PROC_PTR( Image,GetControlSurface)( PSI_CONTROL pc );
 PSI_PROC_PTR( void, SetCommonDraw )( PSI_CONTROL pf, void (CPROC*Draw)( PTRSZVAL, PSI_CONTROL pc ), PTRSZVAL psv );
 PSI_PROC_PTR( void, SetCommonKey )( PSI_CONTROL pf, void (CPROC*Key)(PTRSZVAL,_32), PTRSZVAL psv );
 PSI_PROC_PTR( void, SetCommonMouse)( PSI_CONTROL pc, void (CPROC*MouseMethod)(PTRSZVAL, S_32 x, S_32 y, _32 b ),PTRSZVAL psv );
-//PSI_PROC_PTR void SetControlKey( PSI_CONTROL pc, void (*KeyMethod)( PSI_CONTROL pc, int key ) );
+
+/* <combine sack::PSI::UpdateControlEx@PSI_CONTROL pc>
+   
+   \ \                                                 */
 PSI_PROC_PTR( void, UpdateControlEx)( PSI_CONTROL pc DBG_PASS);
+/* <combine sack::PSI::GetControlID@PSI_CONTROL>
+   
+   \ \                                           */
 PSI_PROC_PTR( int, GetControlID)( PSI_CONTROL pc );
 
 PSI_PROC_PTR( void, DestroyControlEx)( PSI_CONTROL pc DBG_PASS );
+/* <combine sack::PSI::SetNoFocus@PSI_CONTROL>
+   
+   \ \                                         */
 PSI_PROC_PTR( void, SetNoFocus)( PSI_CONTROL pc );
+/* <combine sack::PSI::ControlExtraData@PSI_CONTROL>
+   
+   \ \                                               */
 PSI_PROC_PTR( void*, ControlExtraData)( PSI_CONTROL pc );
+/* <combine sack::PSI::OrphanCommon@PSI_CONTROL>
+   
+   \ \                                           */
 PSI_PROC_PTR( void, OrphanCommon )( PSI_CONTROL pc );
+/* <combine sack::PSI::AdoptCommon@PSI_CONTROL@PSI_CONTROL@PSI_CONTROL>
+   
+   \ \                                                                  */
 PSI_PROC_PTR( void, AdoptCommon )( PSI_CONTROL pFoster, PSI_CONTROL pElder, PSI_CONTROL pOrphan );
 
-//------ General Utilities ------------
-// adds OK and Cancel buttons based off the 
-// bottom right of the frame, and when pressed set
-// either done (cancel) or okay(OK) ... 
-// could do done&ok or just done - but we're bein cheesey
+/* <combine sack::PSI::AddCommonButtonsEx@PSI_CONTROL@int *@CTEXTSTR@int *@CTEXTSTR>
+   
+   \ \                                                                               */
 PSI_PROC_PTR( void, AddCommonButtonsEx)( PSI_CONTROL pf
                                 , int *done, CTEXTSTR donetext
                                 , int *okay, CTEXTSTR okaytext );
+/* <combine sack::PSI::AddCommonButtons@PSI_CONTROL@int *@int *>
+   
+   \ \                                                           */
 PSI_PROC_PTR( void, AddCommonButtons)( PSI_CONTROL pf, int *done, int *okay );
 
-PSI_PROC_PTR( void, CommonLoop)( int *done, int *okay ); // perhaps give a callback for within the loop?
+PSI_PROC_PTR( void, CommonLoop)( int *done, int *okay ); 
+/* <combine sack::PSI::ProcessControlMessages>
+   
+   \ \                                         */
 PSI_PROC_PTR( void, ProcessControlMessages)(void);
-//------ BUTTONS ------------
+
+/* <combine sack::PSI::button::PressButton@PSI_CONTROL@int>
+   
+   \ \                                                      */
 PSI_PROC_PTR( void, PressButton)( PSI_CONTROL pc, int bPressed );
+/* <combine sack::PSI::button::IsButtonPressed@PSI_CONTROL>
+   
+   \ \                                                      */
 PSI_PROC_PTR( int, IsButtonPressed)( PSI_CONTROL pc );
 
+/* <combine sack::PSI::button::GetCheckState@PSI_CONTROL>
+   
+   \ \                                                    */
 PSI_PROC_PTR( int, GetCheckState)( PSI_CONTROL pc );
+/* <combine sack::PSI::button::SetCheckState@PSI_CONTROL@int>
+   
+   \ \                                                        */
 PSI_PROC_PTR( void, SetCheckState)( PSI_CONTROL pc, int nState );
 
-//------ Static Text -----------
-//#define MakeTextControl( pf,x,y,w,h,id,text,flags ) MakeCaptionedControl( pf, STATIC_TEXT, x, y, w,h, id, text, flags )
-//PSI_PROC_PTR( PSI_CONTROL, MakeTextControl)( PSI_CONTROL pf, int flags, int x, int y, int w, int h
-//                        , PTRSZVAL nID, ... );
+/* <combine sack::PSI::text::SetTextControlColors@PSI_CONTROL@CDATA@CDATA>
+   
+   \ \                                                                     */
 PSI_PROC_PTR( void, SetTextControlColors )( PSI_CONTROL pc, CDATA fore, CDATA back );
 
-//------- Edit Control ---------
-// Use GetControlText/SetControlText
-
-//------- Slider Control --------
-//PSI_PROC_PTR( PSI_CONTROL, MakeSlider)( PSI_CONTROL pf, int flags, int x, int y, int w, int h, PTRSZVAL nID, ... );
+/* <combine sack::PSI::slider::SetSliderValues@PSI_CONTROL@int@int@int>
+   
+   \ \                                                                  */
 PSI_PROC_PTR( void, SetSliderValues)( PSI_CONTROL pc, int min, int current, int max );
 
-//------- Color Control --------
-// common dialog to get a color... returns TRUE if *result is set
-// if result is NULL color is not returned, but still can set presets...
+/* <combine sack::PSI::colorwell::PickColor@CDATA *@CDATA@PSI_CONTROL>
+   
+   \ \                                                                 */
 PSI_PROC_PTR( int, PickColor)( CDATA *result, CDATA original, PSI_CONTROL pAbove );
-
-//------- Font Control --------
+/* <combine sack::PSI::font::PickFont@S_32@S_32@P_32@POINTER *@PSI_CONTROL>
+   
+   \ \                                                                      */
 PSI_PROC_PTR( Font, PickFont)( S_32 x, S_32 y
                                   , P_32 size, POINTER *pFontData
                                   , PSI_CONTROL pAbove );
-PSI_PROC_PTR( Font, RenderFont)( POINTER data, _32 flags );
-//PSI_PROC_PTR( Font, RenderFontFile )( CTEXTSTR file, _32 width, _32 height, _32 flags );
-
-//------- ListBox Control --------
-
-//#define MakeListBox(pf,x,y,w,h,nID,opt) SetListboxTree( MakeControl(pf,LISTBOX_CONTROL,x,y,w,h,nID,opt), (opt & LISTOPT_TREE)?TRUE:FALSE )
-//PSI_PROC_PTR( PSI_CONTROL, MakeListBox)( PSI_CONTROL pf, int options, int x, int y, int w, int h, PTRSZVAL nID, ... );
-
+/* <combine sack::PSI::listbox::ResetList@PSI_CONTROL>
+   
+   \ \                                                 */
 PSI_PROC_PTR( void, ResetList)( PSI_CONTROL pc );
+/* <combine sack::PSI::listbox::InsertListItem@PSI_CONTROL@PLISTITEM@CTEXTSTR>
+   
+   \ \                                                                         */
 PSI_PROC_PTR( PLISTITEM, InsertListItem)( PSI_CONTROL pc, PLISTITEM prior, CTEXTSTR text );
+/* <combine sack::PSI::listbox::InsertListItemEx@PSI_CONTROL@PLISTITEM@int@CTEXTSTR>
+   
+   \ \                                                                               */
 PSI_PROC_PTR( PLISTITEM, InsertListItemEx)( PSI_CONTROL pc, PLISTITEM prior, int nLevel, CTEXTSTR text );
 PSI_PROC_PTR( PLISTITEM, AddListItem)( PSI_CONTROL pc, const CTEXTSTR text );
+/* <combine sack::PSI::listbox::AddListItemEx@PSI_CONTROL@int@CTEXTSTR>
+   
+   \ \                                                                  */
 PSI_PROC_PTR( PLISTITEM, AddListItemEx)( PSI_CONTROL pc, int nLevel, const CTEXTSTR text );
+/* <combine sack::PSI::listbox::DeleteListItem@PSI_CONTROL@PLISTITEM>
+   
+   \ \                                                                */
 PSI_PROC_PTR( void, DeleteListItem)( PSI_CONTROL pc, PLISTITEM hli );
+/* <combine sack::PSI::listbox::SetItemData@PLISTITEM@PTRSZVAL>
+   
+   \ \                                                          */
 PSI_PROC_PTR( void, SetItemData)( PLISTITEM hli, PTRSZVAL psv );
+/* <combine sack::PSI::listbox::GetItemData@PLISTITEM>
+   
+   \ \                                                 */
 PSI_PROC_PTR( PTRSZVAL, GetItemData)( PLISTITEM hli );
+/* <combine sack::PSI::listbox::GetItemText@PLISTITEM@int@TEXTSTR>
+   
+   \ \                                                             */
 PSI_PROC_PTR( void, GetItemText)( PLISTITEM hli, TEXTSTR buffer, int bufsize );
+/* <combine sack::PSI::listbox::GetSelectedItem@PSI_CONTROL>
+   
+   \ \                                                       */
 PSI_PROC_PTR( PLISTITEM, GetSelectedItem)( PSI_CONTROL pc );
 PSI_PROC_PTR( void, SetSelectedItem)( PSI_CONTROL pc, PLISTITEM hli );
+/* <combine sack::PSI::listbox::SetCurrentItem@PSI_CONTROL@PLISTITEM>
+   
+   \ \                                                                */
 PSI_PROC_PTR( void, SetCurrentItem)( PSI_CONTROL pc, PLISTITEM hli );
+/* <combine sack::PSI::listbox::FindListItem@PSI_CONTROL@CTEXTSTR>
+   
+   \ \                                                             */
 PSI_PROC_PTR( PLISTITEM, FindListItem)( PSI_CONTROL pc, CTEXTSTR text );
+/* <combine sack::PSI::listbox::GetNthItem@PSI_CONTROL@int>
+   
+   \ \                                                      */
 PSI_PROC_PTR( PLISTITEM, GetNthItem )( PSI_CONTROL pc, int idx );
-
-
+/* <combine sack::PSI::listbox::SetSelChangeHandler@PSI_CONTROL@SelectionChanged@PTRSZVAL>
+   
+   \ \                                                                                     */
 PSI_PROC_PTR( void, SetSelChangeHandler)( PSI_CONTROL pc, SelectionChanged proc, PTRSZVAL psvUser );
 PSI_PROC_PTR( void, SetDoubleClickHandler)( PSI_CONTROL pc, DoubleClicker proc, PTRSZVAL psvUser );
 
-//------- GridBox Control --------
 #ifdef __LINUX__
 PSI_PROC_PTR(PSI_CONTROL, MakeGridBox)( PSI_CONTROL pf, int options, int x, int y, int w, int h,
                                  int viewport_x, int viewport_y, int total_x, int total_y,
                                  int row_thickness, int column_thickness, PTRSZVAL nID );
 #endif
-//------- Popup Menus ------------
-// popup interface.... these are mimics of windows... 
+/* <combine sack::PSI::popup::CreatePopup>
+   
+   \ \                                     */
 PSI_PROC_PTR( PMENU, CreatePopup)( void );
+/* <combine sack::PSI::popup::DestroyPopup@PMENU>
+   
+   \ \                                            */
 PSI_PROC_PTR( void, DestroyPopup)( PMENU pm );
-// get sub-menu data...
+/* <combine sack::PSI::popup::GetPopupData@PMENU@int>
+   
+   \ \                                                */
 PSI_PROC_PTR( void *,GetPopupData)( PMENU pm, int item );
+/* <combine sack::PSI::popup::AppendPopupItem@PMENU@int@PTRSZVAL@CPOINTER>
+   
+   \ \                                                                     */
 PSI_PROC_PTR( PMENUITEM, AppendPopupItem)( PMENU pm, int type, PTRSZVAL dwID, CPOINTER pData );
 PSI_PROC_PTR( PMENUITEM, CheckPopupItem)( PMENU pm, _32 dwID, _32 state );
+/* <combine sack::PSI::popup::DeletePopupItem@PMENU@_32@_32>
+   
+   \ \                                                       */
 PSI_PROC_PTR( PMENUITEM, DeletePopupItem)( PMENU pm, _32 dwID, _32 state );
 PSI_PROC_PTR( int, TrackPopup)( PMENU hMenuSub, PSI_CONTROL parent );
-
-//------- Color Control --------
-// these are basic basic file selection dialogs... 
-// the concept is valid, and they should be common like controls...
 PSI_PROC_PTR( int, PSI_OpenFile)( CTEXTSTR basepath, CTEXTSTR types, CTEXTSTR result );
-// this may be used for save I think....
+/* <combine sack::PSI::PSI_OpenFile@CTEXTSTR@CTEXTSTR@TEXTSTR>
+   
+   \ \                                                         */
 PSI_PROC_PTR( int, PSI_OpenFileEx)( CTEXTSTR basepath, CTEXTSTR types, CTEXTSTR result, int Create );
-
-//------- Scroll Control --------
+/* <combine sack::PSI::scrollbar::SetScrollParams@PSI_CONTROL@int@int@int@int>
+   
+   \ \                                                                         */
 PSI_PROC_PTR( void, SetScrollParams)( PSI_CONTROL pc, int min, int cur, int range, int max );
 PSI_PROC_PTR( PSI_CONTROL, MakeScrollBar)( PSI_CONTROL pf, int x, int y, int w, int h, PTRSZVAL nID, int flags );
+/* <combine sack::PSI::scrollbar::SetScrollUpdateMethod@PSI_CONTROL@void __cdecl*UpdateProcPTRSZVAL psv\, int type\, int current@PTRSZVAL>
+   
+   \ \                                                                                                                                     */
 PSI_PROC_PTR( void, SetScrollUpdateMethod)( PSI_CONTROL pc
                     , void (CPROC*UpdateProc)(PTRSZVAL psv, int type, int current)
                     , PTRSZVAL data );
+/* <combine sack::PSI::scrollbar::MoveScrollBar@PSI_CONTROL@int>
+   
+   \ \                                                           */
 PSI_PROC_PTR( void, MoveScrollBar )( PSI_CONTROL pc, int type );
-
-//------- Misc Controls (and widgets) --------
+/* <combine sack::PSI::SimpleMessageBox@PSI_CONTROL@CTEXTSTR@CTEXTSTR>
+   
+   \ \                                                                 */
 PSI_PROC_PTR( void, SimpleMessageBox )( PSI_CONTROL parent, CTEXTSTR title, CTEXTSTR content );
-
-//------- new things go here...
+/* <combine sack::PSI::HideFrame@PSI_CONTROL>
+   
+   \ \                                        */
 PSI_PROC_PTR( void, HideFrame )( PSI_CONTROL pf );
+/* <combine sack::PSI::UpdateCommonEx@PSI_CONTROL@int bDraw>
+   
+   \ \                                                       */
 PSI_PROC_PTR( void, UpdateCommonEx )( PSI_CONTROL pc, int bDraw );
-} CONTROL_INTERFACE, *PCONTROL_INTERFACE;
+};
+/* Type that is a pointer to a control interface. */
+typedef struct control_interface_tag *PCONTROL_INTERFACE;
 
+/* Gets the interface. */
 PCONTROL_INTERFACE GetControlInterface( void );
+/* Releases an interface when you are done with it. */
 void DropControlInterface( void );
 
 #ifdef USE_CONTROL_INTERFACE
@@ -1321,7 +2322,6 @@ void DropControlInterface( void );
 #define PickColor                   ALIAS_WRAPPER(PickColor)
 //------- Font Control --------
 #define PickFont                    ALIAS_WRAPPER(PickFont)
-#define RenderFont                  ALIAS_WRAPPER(RenderFont)
 
 //------- ListBox Control --------
 #define MakeListBox                 ALIAS_WRAPPER(MakeListBox)
@@ -1459,7 +2459,6 @@ void DropControlInterface( void );
 #define MSG_PickColor                   MSG_ID(PickColor)
 //------- Font Control --------
 #define MSG_PickFont                    MSG_ID(PickFont)
-#define MSG_RenderFont                  MSG_ID(RenderFont)
 
 //------- ListBox Control --------
 #define MSG_MakeListBox                 MSG_ID(MakeListBox)
@@ -1504,10 +2503,13 @@ void DropControlInterface( void );
 #define MSG_SetScrollUpdateMethod       MSG_ID(SetScrollUpdateMethod)
 
 #endif
+_PSI_INTERFACE_NAMESPACE_END
+
 
 #define GetFrameSurface GetControlSurface
 
 PSI_NAMESPACE_END
+
 USE_PSI_NAMESPACE
 
 #include <psi/edit.h>

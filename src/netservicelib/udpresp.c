@@ -2,6 +2,7 @@
 #define NETSERVICE_SOURCE
 #endif
 
+#include <stdhdrs.h>
 #include <network.h>
 #include <sharemem.h>
 #define DO_LOGGING

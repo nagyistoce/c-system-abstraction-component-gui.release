@@ -28,15 +28,24 @@
 #include <msgprotocol.h>
 
 #ifdef __cplusplus
+#define _CLIENT_NAMESPACE namespace client {
 #define MSGCLIENT_NAMESPACE SACK_NAMESPACE namespace msg { namespace client {
 #define MSGCLIENT_NAMESPACE_END }} SACK_NAMESPACE_END
-
 #else
+#define _CLIENT_NAMESPACE
 #define MSGCLIENT_NAMESPACE 
 #define MSGCLIENT_NAMESPACE_END
 
 #endif
-MSGCLIENT_NAMESPACE
+SACK_NAMESPACE
+   _MSG_NAMESPACE
+	/* Defines methods and macros for use as a client of a service. */
+	_CLIENT_NAMESPACE
+
+#define MSG_DEFAULT_RESULT_BUFFER_MAX (sizeof( _32 ) * 2048)
+
+	// not realy sure where this doc goes
+   //
 // result is TRUE/FALSE.  Successful registration will result TRUE.
 // a timeout to the master message service
 // only [functions, entries] or [event_handler]
@@ -47,8 +56,6 @@ MSGCLIENT_NAMESPACE
 //  --- above comments are somewhat invalid --- events have bee biased
 //   to have event 0 be the first user event... system events have the
 // MSB (most sig bit) set.
-
-#define MSG_DEFAULT_RESULT_BUFFER_MAX (sizeof( _32 ) * 2048)
 
 
 // the result is a RouteID.  (ie. or MsgBase)...

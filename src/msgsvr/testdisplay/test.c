@@ -14,11 +14,16 @@ typedef struct global_tag
 
 GLOBAL g;
 
+#ifdef UNDER_CE
+int APIENTRY WinMain( HINSTANCE h, HINSTANCE p, LPCSTR cmd, int nCmdShow )
+{
+#else
 int main( void )
 {
+#endif
 	PRENDERER display;
    g.Render = GetDisplayInterface();
-   SetSystemLog( SYSLOG_FILE, stdout );
+   //SetSystemLog( SYSLOG_FILE, stdout );
 	display = OpenDisplaySizedAt( 0, 150, 150, 50, 50 );
 	if( !display )
 	{

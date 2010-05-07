@@ -1,6 +1,6 @@
 
 #include <configscript.h>
-#include <../../include/banner.h>
+#include "../../include/banner.h"
 
 static struct {
 	CDATA back_color;
@@ -19,31 +19,31 @@ static struct {
 	} flags;
 } l;
 
-int HandleArgs( int argc, char **argv )
+int HandleArgs( int argc, TEXTCHAR **argv )
 {
 
    PVARTEXT pvt = NULL;
 	int arg = 1;
 	if( argc == 1 )
 	{
-		MessageBox( NULL, "Available Arguments\n"
-					  " -back $aarrggbb  : set background color in hex, alpha, red, green, blue [default black]\n"
-					  " -text $aarrggbb  : set text color in hex, alpha, red, green, blue [default white]\n"
-					  " -lines N  : Set the target number of lines (font height, bigger number is smaller) [default 20]\n"
-					  " -cols N  : Set the target number of columns (font width, bigger number is smaller) [default 30]\n"
-					  " -file <filename>  : Use contents fo the file specified for text\n"
-					  " -display N : specify which display to show on\n"
-					  " -notop : shows the banner as not topmost (default is top).\n"
-					  " -yesno : shows the Yes/No buttons, and returns error level 0 for yes and 1 for no.\n"
-					  " -okcancel : shows the Okay/Cancel buttons, and returns error level 0 for yes and 1 for no.\n"
-					  " -yesno and -okaycancel : returns error level 0 for yes and 1 for no, 2 for cancel, 3 for ok.\n"
-					  " \n"
-					  " any other unknown argument or other word will show as text.\n"
-					  " banner_command -back $20800010 -text $FF70A080 Show \"This Text On\" Banner\n"
-                 "   - the prior command will show 3 lines 'show', 'this text on', 'banner'"
-					  " banner_command Show \"\\\"This Text On\\\"\" Banner\n"
-                 "   - the prior command shows how to include showing quotes"
-					 , "Usage"
+		MessageBox( NULL, WIDE( "Available Arguments\n" )
+					  WIDE( " -back $aarrggbb  : set background color in hex, alpha, red, green, blue [default black]\n" )
+					  WIDE( " -text $aarrggbb  : set text color in hex, alpha, red, green, blue [default white]\n" )
+					  WIDE( " -lines N  : Set the target number of lines (font height, bigger number is smaller) [default 20]\n" )
+					  WIDE( " -cols N  : Set the target number of columns (font width, bigger number is smaller) [default 30]\n" )
+					  WIDE( " -file <filename>  : Use contents fo the file specified for text\n" )
+					  WIDE( " -display N : specify which display to show on\n" )
+					  WIDE( " -notop : shows the banner as not topmost (default is top).\n" )
+					  WIDE( " -yesno : shows the Yes/No buttons, and returns error level 0 for yes and 1 for no.\n" )
+					  WIDE( " -okcancel : shows the Okay/Cancel buttons, and returns error level 0 for yes and 1 for no.\n" )
+					  WIDE( " -yesno and -okaycancel : returns error level 0 for yes and 1 for no, 2 for cancel, 3 for ok.\n" )
+					  WIDE( " \n" )
+					  WIDE( " any other unknown argument or other word will show as text.\n" )
+					  WIDE( " banner_command -back $20800010 -text $FF70A080 Show \"This Text On\" Banner\n" )
+					WIDE( "   - the prior command will show 3 lines 'show', 'this text on', 'banner'" )
+					  WIDE( " banner_command Show \"\\\"This Text On\\\"\" Banner\n" )
+                 WIDE( "   - the prior command shows how to include showing quotes" )
+					 , WIDE( "Usage" )
 					 , MB_OK );
       return 0;
 	}
@@ -54,7 +54,7 @@ int HandleArgs( int argc, char **argv )
 	{
 		if( argv[arg][0]=='-' )
 		{
-			if( StrCaseCmp( argv[arg]+1, "back" ) == 0 )
+			if( StrCaseCmp( argv[arg]+1, WIDE( "back" ) ) == 0 )
 			{
 				// blah
 				arg++;
@@ -67,7 +67,7 @@ int HandleArgs( int argc, char **argv )
 					LineRelease( tmp2 );
 				}
 			}
-			else if( StrCaseCmp( argv[arg]+1, "text" ) == 0 )
+			else if( StrCaseCmp( argv[arg]+1, WIDE( "text" ) ) == 0 )
 			{
 				arg++;
 				if( arg < argc )
@@ -80,31 +80,43 @@ int HandleArgs( int argc, char **argv )
 				}
 
 			}
-			else if( StrCaseCmp( argv[arg]+1, "lines" ) == 0 )
+			else if( StrCaseCmp( argv[arg]+1, WIDE( "lines" ) ) == 0 )
 			{
 				arg++;
 				if( arg < argc )
 				{
-               l.lines = atoi( argv[arg] );
+#ifdef UNICODE
+					l.lines = _wtoi( argv[arg] );
+#else
+					l.lines = atoi( argv[arg] );
+#endif
 				}
 			}
-			else if( StrCaseCmp( argv[arg]+1, "cols" ) == 0 )
+			else if( StrCaseCmp( argv[arg]+1, WIDE( "cols" ) ) == 0 )
 			{
 				arg++;
 				if( arg < argc )
 				{
+#ifdef UNICODE
+               l.columns = _wtoi( argv[arg] );
+#else
                l.columns = atoi( argv[arg] );
+#endif
 				}
 			}
-			else if( StrCaseCmp( argv[arg]+1, "display" ) == 0 )
+			else if( StrCaseCmp( argv[arg]+1, WIDE( "display" ) ) == 0 )
 			{
 				arg++;
 				if( arg < argc )
 				{
+#ifdef UNICODE
+               l.display = _wtoi( argv[arg] );
+#else
                l.display = atoi( argv[arg] );
+#endif
 				}
 			}
-			else if( StrCaseCmp( argv[arg]+1, "file" ) == 0 )
+			else if( StrCaseCmp( argv[arg]+1, WIDE( "file" ) ) == 0 )
 			{
 				// blah
 				arg++;
@@ -122,15 +134,15 @@ int HandleArgs( int argc, char **argv )
 					}
 				}
 			}
-			else if( StrCaseCmp( argv[arg]+1, "notop" ) == 0 )
+			else if( StrCaseCmp( argv[arg]+1, WIDE( "notop" ) ) == 0 )
 			{
             l.flags.bTop = 0;
 			}
-			else if( StrCaseCmp( argv[arg]+1, "yesno" ) == 0 )
+			else if( StrCaseCmp( argv[arg]+1, WIDE( "yesno" ) ) == 0 )
 			{
             l.flags.bYesNo = 1;
 			}
-			else if( StrCaseCmp( argv[arg]+1, "okcancel" ) == 0 )
+			else if( StrCaseCmp( argv[arg]+1, WIDE( "okcancel" ) ) == 0 )
 			{
             l.flags.bOkayCancel = 1;
 			}
@@ -139,10 +151,10 @@ int HandleArgs( int argc, char **argv )
 				if( !pvt )
 				{
 					pvt = VarTextCreate();
-					vtprintf( pvt, "%s", argv[arg] );
+					vtprintf( pvt, WIDE( "%s" ), argv[arg] );
 				}
 				else
-					vtprintf( pvt, "\n%s", argv[arg] );
+					vtprintf( pvt, WIDE( "\n%s" ), argv[arg] );
 			}
 		}
 		else
@@ -150,10 +162,10 @@ int HandleArgs( int argc, char **argv )
 			if( !pvt )
 			{
 				pvt = VarTextCreate();
-            vtprintf( pvt, "%s", argv[arg] );
+            vtprintf( pvt, WIDE( "%s" ), argv[arg] );
 			}
          else
-            vtprintf( pvt, "\n%s", argv[arg] );
+            vtprintf( pvt, WIDE( "\n%s" ), argv[arg] );
 		}
       arg++;
 	}
@@ -164,7 +176,7 @@ int HandleArgs( int argc, char **argv )
 
 	if( !l.text )
 	{
-      l.text = "INVALID COMMAND LINE\nARGUMENTS" ;
+      l.text = WIDE( "INVALID COMMAND LINE\nARGUMENTS" ) ;
 	}
 	else
 	{
@@ -188,13 +200,24 @@ int HandleArgs( int argc, char **argv )
    return 1;
 }
 
+#ifdef UNDER_CE
+int APIENTRY WinMain( HINSTANCE hInst, HINSTANCE hPrev, LPWSTR lpCmd, int nCmdShow )
+{
+	int argc; 
+	TEXTCHAR **argv;
+	ParseIntoArgs( lpCmd, &argc, &argv );
 
+#else
 int main( int argc, char **argv )
+#endif
 {
    int result;
 	PBANNER banner = NULL;
+	lprintf( WIDE("Started...") );
+	lprintf( WIDE( "Started..." ) );
 	if( !HandleArgs( argc, argv ) )
       return 0;
+	lprintf( WIDE( "Started..." ) );
 
 	if( !l.back_color )
       l.back_color = 0xFF000000;
@@ -215,9 +238,12 @@ int main( int argc, char **argv )
 
 	{
 		int result2 = WaitForBanner( banner );
-      lprintf( "result is %d", result,result2 );
+      lprintf( WIDE( "result is %d" ), result,result2 );
 		return result;
 	}
 
    return 0;
 }
+#ifdef UNDER_CE
+}
+#endif

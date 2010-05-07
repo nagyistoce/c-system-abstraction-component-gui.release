@@ -14,15 +14,15 @@
 #ifdef _MSC_VER 
 #define PNG_INTERNAL
 #endif
-#if defined( __LINUX__ ) || defined( __CYGWIN__ )
+#if defined( __GNUC__ ) || defined( __LINUX__ ) || defined( __CYGWIN__ )
 #include <zlib.h>
 #include <pngconf.h>
 #include <png.h>
 #else
 #include <setjmp.h>
-#include <zlib/zlib.h> // include this before, and we get the types we need...
-#include <png/pngconf.h>
-#include <png/png.h>
+#include <zlib.h> // include this before, and we get the types we need...
+#include <pngconf.h>
+#include <png.h>
 #endif
 
 #define IMAGE_LIBRARY_SOURCE

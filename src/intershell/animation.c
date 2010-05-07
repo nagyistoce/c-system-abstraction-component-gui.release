@@ -150,7 +150,7 @@ mng_bool MNG_DECL my_mng_errorproc (mng_handle  hHandle,
 //---------------------------------------------------------------------------
 mng_uint32 MNG_DECL my_mng_gettickcount (mng_handle hHandle )
 {
-	return GetTickCount();
+	return tickGetTick();
 }
 
 //---------------------------------------------------------------------------

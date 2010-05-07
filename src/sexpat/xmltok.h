@@ -6,7 +6,7 @@
 #define XmlTok_INCLUDED 1
 
 #ifdef __cplusplus
-//extern "C" {
+extern "C" {
 #endif
 
 /* The following token may be returned by XmlContentTok */
@@ -111,8 +111,8 @@
 
 typedef struct position {
   /* first line and first column are 0 not 1 */
-  unsigned long lineNumber;
-  unsigned long columnNumber;
+  XML_Size lineNumber;
+  XML_Size columnNumber;
 } POSITION;
 
 typedef struct {
@@ -310,7 +310,7 @@ XmlInitUnknownEncodingNS(void *mem,
                          CONVERTER convert,
                          void *userData);
 #ifdef __cplusplus
-//}
+}
 #endif
 
 #endif /* not XmlTok_INCLUDED */

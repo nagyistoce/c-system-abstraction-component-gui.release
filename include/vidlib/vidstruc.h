@@ -1,15 +1,34 @@
 #ifndef VIDEO_STRUCTURE_DEFINED
 #define VIDEO_STRUCTURE_DEFINED
 
+#ifndef RENDER_NAMESPACE
+# ifdef __cplusplus
+#  define RENDER_NAMESPACE namespace sack { namespace image { namespace render {
+#  define RENDER_NAMESPACE_END }}}
+# else
+#  define RENDER_NAMESPACE
+#  define RENDER_NAMESPACE_END
+
+//extern "C" {
+# endif
+#endif
+
+
 //#include <vfw.h>
 #include <imglib/imagestruct.h>
 #ifdef __WINDOWS__
-#include <gl\gl.h>         // Header File For The OpenGL32 Library
-#include <gl\glu.h>        // Header File For The GLu32 Library
+# ifndef _ARM_
+#  include <gl\gl.h>         // Header File For The OpenGL32 Library
+#  include <gl\glu.h>        // Header File For The GLu32 Library
+# else
+#  define __NO_OPENGL__
+# endif
 #endif
+
 #ifndef PRENDERER
-#define PRENDERER struct HVIDEO_tag *
+# define PRENDERER struct HVIDEO_tag *
 #endif
+
 #include <sack_types.h>
 #include <timers.h> // criticalsection
 #include <vidlib/keydef.h>
@@ -22,29 +41,39 @@
 
 RENDER_NAMESPACE
 
-
+//DOM-IGNORE-BEGIN
  /* this will probably break when we try to build without OPenGL */
 typedef struct PBOInfo
 {
 	int index; // increment to flop between pboIds
+   /* the next pixel buffer object to draw into. */
    int nextIndex;
 #define PBO_COUNT 2
-#ifdef __WINDOWS__
+#ifndef __NO_OPENGL__
+# ifdef __WINDOWS__
 	 GLuint pboIds[PBO_COUNT];           // IDs of PBOs
+# endif
 #endif
+	 /* buffer to read into. */
 	 Image dest_buffer;
 	 PCDATA raw; // the raw pixels mapped from the card... re-stuffed into an image... which then must be moved to a context.
 } PBO_Info, *PPBO_Info;
-
+//DOM-IGNORE-END
+/* Private structure for Vidlib. See PRENDERER. Exposed, but
+   applications should use appropriate methods in render
+   namespace.                                                */
 typedef struct HVIDEO_tag
 {
+//DOM-IGNORE-BEGIN
    KEYBOARD kbd;
 	PKEYDEFINE KeyDefs;
    CRITICALSECTION cs;
 	struct ImageFile_tag *pImage;
-   char *pTitle; // window title... need this if we draw manually anyhow
+   TEXTCHAR *pTitle; // window title... need this if we draw manually anyhow
 #ifdef _WIN32
 	HWND hWndOutput;
+   // this is the thread that created the hwndoutput (events get dispatched to this.)
+   PTHREAD pThreadWnd;
 	// do opengl rendering to this... then move from window to window the updated stuff for layered window openGL junk.
    HWND hWndOutputFake;
 
@@ -54,11 +83,11 @@ typedef struct HVIDEO_tag
 	   S_32 x;
 	   S_32 y;
    } cursor_bias;
-#ifdef __LINUX__
-#define HDC void*
-#endif
+#  ifdef __LINUX__
+#    define HDC void*
+#  endif
 	HDC hDCOutput; // handle to the window....
-#ifdef _OPENGL_ENABLED
+#  ifdef _OPENGL_ENABLED
    int nFractures, nFracturesAvail;
 	int _prior_fracture;
 	struct fracture_tag{
@@ -72,19 +101,19 @@ typedef struct HVIDEO_tag
 		HGLRC    hRC;     // Permanent Rendering Context
 
 	} *pFractures;
-#ifdef _OPENGL_DRIVER
+#    ifdef _OPENGL_DRIVER
 	Image pAppImage; // this is the image returned for the application's reference.  The real image is a larger surface than this.
    GLuint		texture[1]; // texture that is this real image...
-#endif
-#endif
-#ifndef _OPENGL_DRIVER
+#    endif
+#  endif
+#  ifndef _OPENGL_DRIVER
 	HBITMAP hBm;
 	HDC hDCBitmap; // hdcMem
 	HDC hDCFakeWindow;
 	HDC hDCFakeBitmap; // compatible dc with window, not the window, and selected bitmap
 	HBITMAP hOldFakeBm;
    PPBO_Info PBO;
-#endif
+#  endif
 #endif
 	THREAD_ID thread;
 	struct {
@@ -125,7 +154,7 @@ typedef struct HVIDEO_tag
 		BIT_FIELD event_dispatched : 1;
 		BIT_FIELD bHidden : 1;
 		BIT_FIELD bCaptured : 1;
-		BIT_FIELD bShowing : 1;
+		//BIT_FIELD bShowing : 1;
 		BIT_FIELD bHiding : 1;
 		BIT_FIELD bHidden_while_showing : 1;
 		BIT_FIELD bShown_while_hiding : 1;
@@ -171,6 +200,7 @@ typedef struct HVIDEO_tag
    // this is the structure of the bitmap created the uhmm window drawing surface just before the window surface itself.
 	//BITMAPINFO bmInfo;
    //HDRAWDIB hDd;
+//DOM-IGNORE-END
 
 
 } VIDEO, *PVIDEO;

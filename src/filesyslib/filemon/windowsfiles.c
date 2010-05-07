@@ -102,7 +102,7 @@ PTRSZVAL CPROC MonitorFileThread( PTHREAD pThread )
 {
    PMONITOR monitor = (PMONITOR)GetThreadParam( pThread );
 	DWORD dwResult;
-	monitor->DoScanTime = GetTickCount() - 1; // scan next tick
+	monitor->DoScanTime = timeGetTime() - 1; // scan next tick
 	monitor->hChange = FindFirstChangeNotification( monitor->directory
 																 , FALSE
 																 , FILE_NOTIFY_CHANGE_FILE_NAME
@@ -141,7 +141,7 @@ PTRSZVAL CPROC MonitorFileThread( PTHREAD pThread )
                break;
 				}
             if( !monitor->DoScanTime )
-					monitor->DoScanTime = GetTickCount() - 1;
+					monitor->DoScanTime = timeGetTime() - 1;
         }
         //else if( dwResult == WAIT_TIMEOUT )
 		  //{
@@ -169,7 +169,7 @@ FILEMONITOR_PROC( PMONITOR, MonitorFiles )( CTEXTSTR directory, int scan_delay )
     if( l.flags.bLog ) Log1( WIDE("Going to start monitoring changes to: %s"), directory );
     monitor = (PMONITOR)Allocate( sizeof( MONITOR ) );
     MemSet( monitor, 0, sizeof( MONITOR ) );
-	 strcpy( monitor->directory, directory );
+	 StrCpyEx( monitor->directory, directory, sizeof( monitor->directory )/sizeof(TEXTCHAR) );
 	 //strcpy( monitor->mask, mask );
 	 monitor->scan_delay = scan_delay;
     monitor->free_scan_delay = 5000;

@@ -2,7 +2,7 @@
 #include <network.h>
 
 #include <sharemem.h>
-char result[8192];
+PVARTEXT result;
 
 int main( int argc, char **argv, char **env )
 {
@@ -11,7 +11,8 @@ int main( int argc, char **argv, char **env )
     {
         printf( WIDE("usage: %s <hostname>\n"), argv[0] );
         return -1;
-    }
+	 }
+    result = VarTextCreateEx( 10000, 1000 );
     DoWhois( argv[1], NULL, result );
     printf( WIDE("%s"), result );
     return 0;

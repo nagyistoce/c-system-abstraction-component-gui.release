@@ -1,12 +1,8 @@
 
 
-MORE_TARGETS=$(SACK_BASE)/include/sqlite3.h
-
-LIBNAME=sqlite3
-SRCS=sqlite3
-CXFLAGS=-DSQLITE_SOURCE
+LITERAL_LIBNAME=sqlite3.interface
+SRCS=sqlite3 sqlite_interface
+CXFLAGS=-DSQLITE_SOURCE -DUSE_SQLITE
 
 include $(SACK_BASE)/makefiles/makefile.single
 
-$(SACK_BASE)/include/sqlite3.h: sqlite3.h
-	cp $< $@

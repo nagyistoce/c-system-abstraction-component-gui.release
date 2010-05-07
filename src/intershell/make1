@@ -21,7 +21,7 @@ INCLUDEDIRS=$(SACK_BASE)/src/pos/include
 # keypad is required to be built before paper_issue which uses
 # functions exported by keypad.
 
-VLC_PATH=M:/vlc-1.0.0/sdk/include
+VLC_PATH=e:/tools/vlc32-1.0.5/sdk/include
 export VLC_PATH
 PROJECTS=clock tasks graph \
 	windows_shell  \

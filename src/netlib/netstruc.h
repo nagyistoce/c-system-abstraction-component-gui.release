@@ -16,7 +16,7 @@
 
 // started using this symbol more in the later days of disabling logging...
 //#define VERBOSE_DEBUG
-
+//#define LOG_STARTUP_SHUTDOWN
 // Define this symbol to use Log( ghLog, WIDE("") ) to log pending
 // write status...
 //#define LOG_PENDING
@@ -26,6 +26,7 @@
 
 //TODO: modify the client struct to contain the MAC addr
 
+#define USE_WSA_EVENTS
 
 #ifndef CLIENT_DEFINED
 #define CLIENT_DEFINED
@@ -147,7 +148,9 @@ struct NetworkClient
 	LOGICAL        bDraining;    // byte sink functions.... JAB:980202
 	LOGICAL        bDrainExact;  // length does not matter - read until one empty read.
 	int            nDrainLength;
-
+#if defined( USE_WSA_EVENTS )
+   WSAEVENT event;
+#endif
 	CRITICALSECTION csLock;      // per client lock.
 	PTHREAD pWaiting; // Thread which is waiting for a result...
 	PendingBuffer RecvPending, FirstWritePending; // current incoming buffer
@@ -200,6 +203,11 @@ LOCATION struct network_global_data{
 	INDEX tcp_protocolv6;
 	INDEX udp_protocolv6;
 #endif
+#if defined( USE_WSA_EVENTS )
+   WSAEVENT event;
+#endif
+	_32 dwReadTimeout;
+   _32 dwConnectTimeout;
 }
 *global_network_data; // aka 'g'
 

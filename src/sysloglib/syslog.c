@@ -16,38 +16,31 @@
 #define COMPUTE_CPU_FREQUENCY
 
 //#undef UNICODE
-#ifdef BCC16
-#include <winsock.h>
-#else
-#include <loadsock.h>
-#endif
 
 #ifdef __LCC__
 #include <intrinsics.h>
-#endif
-#ifdef BCC16
-#include <time.h>
 #endif
 
 #ifdef __UNIX__
 #include <unistd.h>
 #include <sys/time.h>
 #include <time.h>
-#include <sharemem.h> // is bad read ptr
 #include <stdarg.h>
 #endif
 
 #include <stdhdrs.h>
+#include <loadsock.h>
 #ifdef __WINDOWS__
+#ifndef _ARM_
 #include <io.h> // unlink
 #endif
+#endif
 #include <stdio.h>
-#include <sack_types.h>
 #include <deadstart.h>
 
 #include <idle.h>
 #include <logging.h>
-
+#include <filesys.h>
 // okay this brings TIGHT integration.... but standardization for core levels.
 #include <filesys.h>
 #ifndef __NO_OPTIONS__
@@ -58,6 +51,7 @@ LOGGING_NAMESPACE
 #endif
 
 
+int cannot_log;
 static _64 cpu_tick_freq;
 // flags that control the operation of system logging....
 static struct state_flags{
@@ -94,7 +88,7 @@ static struct state_flags{
 static TEXTCHAR *pProgramName;
 static UserLoggingCallback UserCallback;
 
-static enum syslog_types logtype = SYSLOG_NONE;
+static enum syslog_types logtype = SYSLOG_AUTO_FILE;
 
 #ifdef _DEBUG
 static _32 nLogLevel = LOG_NOISE + 1000; // default log EVERYTHING
@@ -108,27 +102,17 @@ static SOCKET   hSock = INVALID_SOCKET;
 static int bCPUTickWorks = 1; // assume this works, until it fails
 static _64 tick_bias;
 
-//----------------------------------------------------------------------------
-//#if !defined(__STATIC__) && ( defined( _WIN32 ) || defined( BCC16 ) )
-#ifndef BAG
-#ifndef __STATIC__
-LIBMAIN()
-{
-	return 1;
-}
-LIBEXIT()
-{
-	return 1;
-}
-LIBMAIN_END();
-#endif
-#endif
 
+static void DoSystemLog( const TEXTCHAR *buffer );
+//----------------------------------------------------------------------------
 
 // we should really wait until the very end to cleanup?
 PRIORITY_ATEXIT( CleanSyslog, ATEXIT_PRIORITY_SYSLOG )
 {
 	enum syslog_types _logtype = logtype;
+	if( ( _logtype == SYSLOG_AUTO_FILE && file ) || ( _logtype != SYSLOG_AUTO_FILE && _logtype == SYSLOG_NONE ) )
+		lprintf( WIDE( "Final log - syslog closed." ) );
+   return;
 	pProgramName = NULL; // this was dynamic allocated memory, and it is now gone.
 	if( ( _logtype == SYSLOG_AUTO_FILE && file ) || ( _logtype != SYSLOG_AUTO_FILE && _logtype == SYSLOG_NONE ) )
 		lprintf( WIDE( "Final log - syslog closed." ) );
@@ -219,33 +203,52 @@ _64 GetCPUTick(void )
 		{
 			bCPUTickWorks = 0;
 			cpu_tick_freq = 1;
-			tick_bias = lasttick - ( GetTickCount() * 1000 );
+			tick_bias = lasttick - ( timeGetTime()/*GetTickCount()*/ * 1000 );
          tick = lasttick + 1; // more than prior, but no longer valid.
 		}
       lasttick = tick;
 		return tick;
-#elif defined( _MSC_VER )
+#elif defined( _MSC_VER ) 
 #ifdef _M_CEE_PURE
 	  //return System::DateTime::now;
 	  return 0;
 #else
-		_64 tick;
+#   if defined( _WIN64 )
+	    _64 tick = __rdtsc();
+#   else
+		static _64 tick;
+#if _ARM_ 
+		tick = tick+1;
+#else
 		_asm rdtsc;
 		_asm mov dword ptr [tick], eax;
 		_asm mov dword ptr [tick + 4], edx;
+#endif
+#   endif
 		if( !lasttick )
 			lasttick = tick;
 		else if( tick < lasttick )
 		{
 			bCPUTickWorks = 0;
 			cpu_tick_freq = 1;
-			tick_bias = lasttick - ( GetTickCount() * 1000 );
-         tick = lasttick + 1; // more than prior, but no longer valid.
+			tick_bias = lasttick - ( timeGetTime()/*GetTickCount()*/ * 1000 );
+         	tick = lasttick + 1; // more than prior, but no longer valid.
 		}
-      lasttick = tick;
+      	lasttick = tick;
+		return tick;
+		if( !lasttick )
+			lasttick = tick;
+		else if( tick < lasttick )
+		{
+			bCPUTickWorks = 0;
+			cpu_tick_freq = 1;
+			tick_bias = lasttick - ( timeGetTime()/*GetTickCount()*/ * 1000 );
+         	tick = lasttick + 1; // more than prior, but no longer valid.
+		}
+      	lasttick = tick;
 		return tick;
 #endif
-#elif defined( GCC ) && !defined( __arm__ )
+#elif defined( __GNUC__ ) && !defined( __arm__ )
 		union {
 			_64 tick;
 			PREFIX_PACKED struct { _32 low, high; } PACKED parts;
@@ -257,7 +260,7 @@ _64 GetCPUTick(void )
 		{
 			bCPUTickWorks = 0;
 			cpu_tick_freq = 1;
-			tick_bias = lasttick - ( GetTickCount() * 1000 );
+			tick_bias = lasttick - ( timeGetTime()/*GetTickCount()*/ * 1000 );
          tick.tick = lasttick + 1; // more than prior, but no longer valid.
 		}
       lasttick = tick.tick;
@@ -266,7 +269,7 @@ _64 GetCPUTick(void )
 		DebugBreak();
 #endif
 	}
-	return tick_bias + (GetTickCount() * 1000);
+	return tick_bias + (timeGetTime()/*GetTickCount()*/ * 1000);
 }
 
 _64 GetCPUFrequency( void )
@@ -275,14 +278,14 @@ _64 GetCPUFrequency( void )
 	{
 		_64 cpu_tick, _cpu_tick;
 		_32 tick, _tick;
-      cpu_tick = _cpu_tick = GetCPUTick();
-		tick = _tick = GetTickCount();
+		cpu_tick = _cpu_tick = GetCPUTick();
+		tick = _tick = timeGetTime()/*GetTickCount()*/;
 		cpu_tick_freq = 0;
-		while( bCPUTickWorks && ( ( tick = GetTickCount() ) - _tick ) < 250 );
+		while( bCPUTickWorks && ( ( tick = timeGetTime()/*GetTickCount()*/ ) - _tick ) < 25 );
 		{
 			cpu_tick = GetCPUTick();
 		}
-      if( bCPUTickWorks )
+		if( bCPUTickWorks )
 			cpu_tick_freq = ( ( cpu_tick - _cpu_tick ) / ( tick - _tick ) )  / 1000; // microseconds;
 	}
 #else
@@ -291,67 +294,98 @@ _64 GetCPUFrequency( void )
    return cpu_tick_freq;
 }
 
-char filepath[256];
-
-void SetDefaultName( char *extra )
+void SetDefaultName( CTEXTSTR path, CTEXTSTR name, CTEXTSTR extra )
 {
-	char *newpath;
+	TEXTCHAR *newpath;
 	size_t len;
-	newpath = (char*)malloc( len = 9 + strlen( filepath ) + (extra?strlen(extra):0) + 5 );
+	static CTEXTSTR filepath;// = GetProgramPath();
+	static CTEXTSTR filename;// = GetProgramName();
+	if( path )
+	{
+		if( filepath )
+         Release( (POINTER)filepath );
+		filepath = StrDup( path );
+	}
+	if( name )
+	{
+		if( filename )
+			Release( (POINTER)filename );
+		filename = StrDup( name );
+	}
+	if( !filepath )
+		filepath = StrDup( GetProgramPath() );
+	if( !filename )
+      filename = StrDup( GetProgramName() );
+	// this has to come from C heap.. my init isn't done yet probably and
+   // sharemem will just fail.  (it's probably trying to log... )
+	newpath = (TEXTCHAR*)malloc( len = sizeof(TEXTCHAR)*(9 + strlen( filepath ) + strlen( filename ) + (extra?strlen(extra):0) + 5) );
 #ifdef __cplusplus_cli
-	snprintf( newpath, len, "%s%s.cli.log", filepath, extra?extra:"" );
+	snprintf( newpath, len, "%s/%s%s.cli.log", filepath, filename, extra?extra:"" );
 #else
-	snprintf( newpath, len, "%s%s.log", filepath, extra?extra:"" );
+	snprintf( newpath, len, WIDE("%s/%s%s.log"), filepath, filename, extra?extra:WIDE("") );
 #endif
-	gFilename = strdup( newpath ); // use the C heap.
-	free( newpath ); // get rid of this ...
+	gFilename = newpath;//( newpath ); // use the C heap.
+	//free( newpath ); // get rid of this ...
 }
 
 #ifndef __NO_OPTIONS__
 static void LoadOptions( char *filename )
 {
+	flags.bLogSourceFile = SACK_GetProfileIntEx( GetProgramName()
+															 , WIDE( "SACK/Logging/Log Source File")
+															 , flags.bLogSourceFile, TRUE );
+
+	if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Enable File Log" )
+#ifdef _DEBUG
+                           , 1
+#else
+									, 0
+#endif
+									, TRUE ) )
+	{
+		logtype = SYSLOG_AUTO_FILE;
+		flags.bLogOpenAppend = 0;
+		flags.bLogOpenBackup = 1;
+		flags.bLogProgram = 0;
+	}
+   // set all default parts of the name.
+   SetDefaultName( NULL, NULL, NULL );
    // this overrides options with options available from SQL database.
-	if( SACK_GetProfileIntEx( GetProgramName(), "SACK/Logging/Default Log Location is current directory", 0, TRUE ) )
+	if( SACK_GetProfileIntEx( GetProgramName(), WIDE("SACK/Logging/Default Log Location is current directory"), 0, TRUE ) )
 	{
 		// override filepath, if log exception.
-		TEXTSTR program = StrDup( filename );
 		TEXTCHAR buffer[256];
 		GetCurrentPath( buffer, sizeof( buffer ) );
-		snprintf( filepath, sizeof( filepath ), "%s/%s", buffer, program );
-      SetDefaultName( NULL );
-		Release( program );
+		SetDefaultName( buffer, NULL, NULL );
 	}
 	else
 	{
 		TEXTCHAR buffer[256];
 		// if this is blank, then length result from getprofilestring is 0, and default is with the program.
 		// so I'll lave functionality as expected for a default.
-		SACK_GetProfileStringEx( GetProgramName(), "SACK/Logging/Default Log Location", "", buffer, sizeof( buffer ), TRUE );
+		SACK_GetProfileStringEx( GetProgramName(), WIDE( "SACK/Logging/Default Log Location" ), WIDE( "" ), buffer, sizeof( buffer ), TRUE );
 		if( buffer[0] )
 		{
-			TEXTSTR program = StrDup( filename );
-			snprintf( filepath, sizeof( filepath ), "%s/%s", buffer, program );
-			SetDefaultName( NULL );
-			Release( program );
+			SetDefaultName( buffer, NULL, NULL );
 		}
 	}
 
 
-	nLogLevel = SACK_GetProfileIntEx( GetProgramName(), "SACK/Logging/Default Log Level (1001:all, 100:least)", nLogLevel, TRUE );
-	flags.bLogThreadID = SACK_GetProfileIntEx( GetProgramName(), "SACK/Logging/Log Thread ID", 0, TRUE );
-	flags.bLogProgram = SACK_GetProfileIntEx( GetProgramName(), "SACK/Logging/Log Program", 0, TRUE );
-	flags.bLogSourceFile = SACK_GetProfileIntEx( GetProgramName(), "SACK/Logging/Log Source File", 1, TRUE );
-	if( SACK_GetProfileIntEx( GetProgramName(), "SACK/Logging/Log CPU Tick Time and Delta", 0, TRUE ) )
+	nLogLevel = SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Default Log Level (1001:all, 100:least)" ), nLogLevel, TRUE );
+	flags.bLogThreadID = SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Thread ID" ), 0, TRUE );
+	flags.bLogProgram = SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Program" ), 0, TRUE );
+	flags.bLogSourceFile = SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Source File" ), 1, TRUE );
+	if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log CPU Tick Time and Delta" ), 0, TRUE ) )
 	{
 		SystemLogTime( SYSLOG_TIME_CPU|SYSLOG_TIME_DELTA );
 	}
-	else if( SACK_GetProfileIntEx( GetProgramName(), "SACK/Logging/Log Time as Delta", 0, TRUE ) )
+	else if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Time as Delta" ), 0, TRUE ) )
 	{
 		SystemLogTime( SYSLOG_TIME_HIGH|SYSLOG_TIME_DELTA );
 	}
-	else if( SACK_GetProfileIntEx( GetProgramName(), "SACK/Logging/Log Time", 1, TRUE ) )
+	else if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Time" ), 1, TRUE ) )
 	{
-		if( SACK_GetProfileIntEx( GetProgramName(), "SACK/Logging/Log Date", 1, TRUE ) )
+		if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Date" ), 1, TRUE ) )
 		{
 			SystemLogTime( SYSLOG_TIME_LOG_DAY|SYSLOG_TIME_HIGH );
 		}
@@ -363,117 +397,30 @@ static void LoadOptions( char *filename )
 }
 #endif
 
-#ifdef __WATCOM_CPLUSPLUS__
-#pragma initialize 35
-#endif
-PRIORITY_PRELOAD( InitSyslog, SYSLOG_PRELOAD_PRIORITY )
-{
-#ifdef _WIN32
-   CTEXTSTR filename;
-	// make sure we only read up to 4 ... might have to add our own .log entirely
-	// or maybe it's a dot only file extension?
-	{
-		TEXTCHAR *ext;
-		// computes default filepath  (where logs are)
-      // and current filename
-		GetModuleFileName( NULL, filepath, sizeof( filepath ) - 4 );
-		ext = strrchr( filepath, '.' );
-		if( ext )
-		{
-			ext[0] = 0;
-		}
-		filename = pathrchr( filepath );
-		if( filename )
-			filename++;
-		else
-			filename = filepath;
-	}
-#  ifdef UNICODE
-   //lprintf( "This will be bad." ); ... not really it's allocated in non (tmp) heap
-	pProgramName = StrDup( filename );
-#  else
-	pProgramName = strdup( filename );
-#  endif
 
-	SetDefaultName( NULL );
-#else
-	//logtype = SYSLOG_FILE;
-	//file = stderr;
-	//fprintf( stderr, WIDE("Syslog Initializing, debug mode, startup stderr\n") );
-	{
-		//char filename[256];
-		//char buf[256], 
-		char *pb;
-		int n;
-		n = readlink("/proc/self/exe",filepath,256);
-		if( n >= 0 )
-		{
-			filepath[n]=0; //linux
-			if( !n )
-			{
-				strcpy( filepath, WIDE(".") );
-				filepath[ n = readlink( WIDE("/proc/curproc/"),filepath,sizeof(filepath))]=0; // fbsd
-			}
-		}
-		else
-			strcpy( filepath, WIDE(".")) ;
-		pb = strrchr(filepath,'/');
-		if( pb )
-		{
-			//pb[0]=0;
-			pb++;
-		}
-#  ifdef UNICODE
-		pProgramName = StrDup( pb );
-#  else
-		pProgramName = strdup( pb );
-#  endif
-      SetDefaultName( NULL );
-	}
-#endif
+static int init_complete;
+void InitSyslog( void )
+{
+	if( init_complete )
+		return;
+	init_complete =1 ;
 
 #ifdef _DEBUG
-   // actually this is unusable in _MSC_VER.
-#  if defined( _MSC_VER )
-	logtype = SYSLOG_SYSTEM;
-#  else
-#    ifdef _WIN32
-
-#       ifdef  __WATCOMC__
 	// this is just a quick way to stub this out... based on compiler switches.
    // very sorry this causes 'expression in statement always true'
-	if( 1 )
-#       else
-	// this is just a quick way to stub this out... based on compiler switches.
-   // very sorry this causes 'expression in statement always false'
-	if( 0 )
-#       endif
 	{
 		/* using SYSLOG_AUTO_FILE option does not require this to be open.
 		 * it is opened on demand.
        */
 		logtype = SYSLOG_AUTO_FILE;
-      flags.bLogOpenAppend = 0;
+		flags.bLogOpenAppend = 0;
 		flags.bLogOpenBackup = 1;
 		flags.bLogSourceFile = 1;
+		flags.bLogThreadID = 0;
 		flags.bLogProgram = 0;
-      SystemLogTime( SYSLOG_TIME_HIGH );
+		SystemLogTime( SYSLOG_TIME_HIGH );
 		//lprintf( WIDE("Syslog Initializing, debug mode, startup programname.log\n") );
 	}
-	else
-	{
-      logtype = SYSLOG_UDPBROADCAST;
-	}
-#    else
-	{
-		logtype = SYSLOG_AUTO_FILE;
-		flags.bLogOpenAppend = 0;
-      flags.bLogOpenBackup = 1;
-		flags.bLogSourceFile = 1;
-      SystemLogTime( SYSLOG_TIME_CPU|SYSLOG_TIME_DELTA );
-	}
-#    endif
-#  endif
 #else
     // stderr?
 	logtype = SYSLOG_NONE;
@@ -487,8 +434,13 @@ PRIORITY_PRELOAD( InitSyslog, SYSLOG_PRELOAD_PRIORITY )
 	flags.bInitialized = 1;
 }
 
-//#endif
+#if !defined( UNDER_CE ) || 1
 
+PRIORITY_PRELOAD( InitSyslogPreload, SYSLOG_PRELOAD_PRIORITY )
+{
+   InitSyslog();
+}
+#endif //UNDER_CE
 //----------------------------------------------------------------------------
 CTEXTSTR GetTimeEx( int bUseDay )
 {
@@ -572,6 +524,7 @@ static TEXTCHAR *GetTimeHigh( void )
 #ifdef WIN32
 	static SYSTEMTIME _st;
 	SYSTEMTIME st, st_save;
+
 	if( flags.bUseDeltaTime )
 	{
 		GetLocalTime( &st );
@@ -581,7 +534,7 @@ static TEXTCHAR *GetTimeHigh( void )
 		st.wMilliseconds -= _st.wMilliseconds;
 		if( st.wMilliseconds & 0x8000 )
 		{
-			st.wMilliseconds += 1000;
+			st.wMilliseconds = (st.wMilliseconds+1000) & 0xFFFF;
 			st.wSecond--;
 		}
 		st.wSecond -= _st.wSecond;
@@ -726,12 +679,18 @@ static TEXTCHAR *GetTimeHighest( void )
 		lasttick = tick;
 	if( flags.bUseDeltaTime )
 	{
-		int ofs = sprintf( timebuffer, WIDE("%20lld") WIDE(" "), tick );
-		PrintCPUDelta( timebuffer + ofs, sizeof( timebuffer ), lasttick, tick );
+#ifdef UNICODE
+		int ofs = 0;
+		snprintf( timebuffer, sizeof( timebuffer ), WIDE("%20lld") WIDE(" "), tick );
+		ofs += StrLen( timebuffer );
+#else
+		int ofs = snprintf( timebuffer, sizeof( timebuffer ), WIDE("%20lld") WIDE(" "), tick );
+#endif
+		PrintCPUDelta( timebuffer + ofs, sizeof( timebuffer ) - ofs, lasttick, tick );
 		lasttick = tick;
 	}
 	else
-		sprintf( timebuffer, WIDE("%20") _64fs, tick );
+		snprintf( timebuffer, sizeof( timebuffer ), WIDE("%20") _64fs, tick );
 	// have to find a generic way to get this from _asm( rdtsc );
 	return timebuffer;
 }
@@ -741,11 +700,17 @@ static CTEXTSTR GetLogTime( void )
 	if( flags.bLogTime )
 	{
 		if( flags.bLogHighTime )
+		{
 			return GetTimeHigh();
+		}
 		else if( flags.bLogCPUTime )
+		{
 			return GetTimeHighest();
+		}
 		else
+		{
 			return GetTime();
+		}
 	}
 	return WIDE("");
 }
@@ -764,8 +729,10 @@ static LOGICAL bLogging;
 
 static void UDPSystemLog( const TEXTCHAR *message )
 {
+#ifdef HAVE_IDLE
 	while( bLogging )
 		Idle();
+#endif
 	bLogging = 1;
 	if( !bStarted )
 	{
@@ -820,7 +787,7 @@ static void UDPSystemLog( const TEXTCHAR *message )
 #else
 #define SENDBUF message
 #endif
-		nSent = sendto( hSock, SENDBUF, nSend, 0
+		nSent = sendto( hSock, (const char *)SENDBUF, nSend, 0
 						  ,(logtype == SYSLOG_UDPBROADCAST)?&saLogBroadcast:&saLog, sizeof( SOCKADDR ) );
 #ifdef __cplusplus_cli
 		Release( tmp );
@@ -884,12 +851,12 @@ static void FileSystemLog( CTEXTSTR message )
 
 static void BackupFile( const TEXTCHAR *source, int source_name_len, int n )
 {
-	FILE *file;
-	Fopen( file, source, WIDE("rt") );
-	if( file )
+	FILE *testfile;
+	testfile = sack_fopen( 0, source, WIDE("rt") );
+	if( testfile )
 	{
 		TEXTCHAR backup[256];
-		fclose( file );
+		sack_fclose( testfile );
 		// move file to backup..
 		snprintf( backup, sizeof( backup ), WIDE("%*.*s.%d")
 				  , source_name_len
@@ -902,24 +869,37 @@ static void BackupFile( const TEXTCHAR *source, int source_name_len, int n )
 							, n+1 );
 		}
 		else
-			unlink( source );
-		rename( source, backup );
+			sack_unlink( source );
+      //lprintf( WIDE( "%s->%s" ), source, backup );
+		sack_rename( source, backup );
 	}
 }
 
 
-static void DoSystemLog( const TEXTCHAR *buffer )
+void DoSystemLog( const TEXTCHAR *buffer )
 {
+	if( !init_complete )
+	{
+		if( logtype == SYSLOG_AUTO_FILE && !file )
+		{
+			// cannot log until system log is complete
+			return;
+		}
+		if( ( logtype == SYSLOG_UDPBROADCAST ) || ( logtype == SYSLOG_UDP ) )
+         return;
+	}
 	if( logtype == SYSLOG_UDP
 		|| logtype == SYSLOG_UDPBROADCAST )
 		UDPSystemLog( buffer );
 	else if( ( logtype == SYSLOG_FILE ) || ( logtype == SYSLOG_AUTO_FILE ) )
 	{
 		if( logtype == SYSLOG_AUTO_FILE )
+		{
 			if( !file && gFilename )
 			{
 				int n_retry = 0;
-retry_again:
+			retry_again:
+				logtype = SYSLOG_NONE;
 				if( flags.bLogOpenBackup )
 				{
 					BackupFile( gFilename, (int)strlen( gFilename ), 1 );
@@ -928,15 +908,17 @@ retry_again:
 					Fopen( file, gFilename, WIDE("at+") );
 				if( file )
 					fseek( file, 0, SEEK_END );
-            else
+				else
 					Fopen( file, gFilename, WIDE("wt") );
+				logtype = SYSLOG_AUTO_FILE;
+
 				if( !file )
 				{
 					if( n_retry < 5 )
 					{
 						TEXTCHAR tmp[10];
-						sprintf( tmp, "%d", n_retry++ );
-						SetDefaultName( tmp );
+						snprintf( tmp, sizeof( tmp ), WIDE("%d"), n_retry++ );
+						SetDefaultName( NULL, NULL, tmp );
 						goto retry_again;
 					}
 					else
@@ -944,6 +926,7 @@ retry_again:
 					logtype = SYSLOG_NONE;
 				}
 			}
+		}
 		FileSystemLog( buffer );
 	}
 #ifdef _WIN32
@@ -971,7 +954,13 @@ void SystemLogFL( const TEXTCHAR *message FILELINE_PASS )
 	static TEXTCHAR sourcefile[256];
 	CTEXTSTR logtime;
 	static _32 lock;
+	if( cannot_log )
+      return;
+#ifdef __WINDOWS__
+	while( InterlockedExchange( (long volatile*)&lock, 1 ) ) Relinquish();
+#else
 	while( LockedExchange( &lock, 1 ) ) Relinquish();
+#endif
    logtime = GetLogTime();
 	if( flags.bLogSourceFile )
 	{
@@ -999,7 +988,7 @@ void SystemLogFL( const TEXTCHAR *message FILELINE_PASS )
 				  , flags.bLogProgram?WIDE("@"):WIDE("")
 				  , message );
 	DoSystemLog( buffer );
-   lock = 0;
+	lock = 0;
 }
 
 #undef SystemLogEx
@@ -1013,12 +1002,12 @@ void SystemLogEx ( const TEXTCHAR *message DBG_PASS )
 }
 
 #undef SystemLog
-SYSLOG_PROC( void, SystemLog )( const TEXTCHAR *message )
+ void  SystemLog ( const TEXTCHAR *message )
 {
-	SystemLogFL( message FILELINE_NULL );
+	SystemLogFL( message, NULL, 0 );
 }
 
-SYSLOG_PROC( void, LogBinaryFL )( P_8 buffer, _32 size FILELINE_PASS )
+ void  LogBinaryFL ( P_8 buffer, _32 size FILELINE_PASS )
 {
 	int nOut = size;
 	P_8 data = buffer;
@@ -1036,23 +1025,48 @@ SYSLOG_PROC( void, LogBinaryFL )( P_8 buffer, _32 size FILELINE_PASS )
 		int ofs = 0;
 		int x;
 		ofs = 0;
+#ifdef UNICODE
+		//lprintf( "..." );
+		return;
 		for ( x=0; x<nOut && x<16; x++ )
-			ofs += snprintf( cOut+ofs, sizeof(cOut)-ofs, WIDE("%02X "), (unsigned char)data[x] );
+		{
+			snprintf( cOut+ofs, sizeof(cOut)-sizeof(TEXTCHAR)*ofs, WIDE("%02X "), (unsigned char)data[x] );
+			ofs += StrLen( cOut + ofs );
+		}
 
 		for ( x=0; x<nOut && x<16; x++ )
 		{
 			if( data[x] >= 32 && data[x] < 127 )
-				ofs += snprintf( cOut+ofs, sizeof(cOut)-ofs, WIDE("%c"), (unsigned char)data[x] );
+			{
+				ofs += snprintf( cOut+ofs, sizeof(cOut)-sizeof(TEXTCHAR)*ofs, WIDE("%c"), (unsigned char)data[x] );
+				ofs += StrLen( cOut + ofs );
+			}
 			else
-				ofs += snprintf( cOut+ofs, sizeof(cOut)-ofs, WIDE(".") );
+			{
+				snprintf( cOut+ofs, sizeof(cOut)-sizeof(TEXTCHAR)*ofs, WIDE(".") );
+				ofs += StrLen( cOut + ofs );
+
+			}
 		}
+#else
+		for ( x=0; x<nOut && x<16; x++ )
+			ofs += snprintf( cOut+sizeof(TEXTCHAR)*ofs, sizeof(cOut)-sizeof(TEXTCHAR)*ofs, WIDE("%02X "), (unsigned char)data[x] );
+
+		for ( x=0; x<nOut && x<16; x++ )
+		{
+			if( data[x] >= 32 && data[x] < 127 )
+				ofs += snprintf( cOut+sizeof(TEXTCHAR)*ofs, sizeof(cOut)-sizeof(TEXTCHAR)*ofs, WIDE("%c"), (unsigned char)data[x] );
+			else
+				ofs += snprintf( cOut+sizeof(TEXTCHAR)*ofs, sizeof(cOut)-sizeof(TEXTCHAR)*ofs, WIDE(".") );
+		}
+#endif
 		SystemLogFL( cOut FILELINE_RELAY );
 		nOut -= 16;
 		data += 16;
 	}
 }
 #undef LogBinaryEx
-SYSLOG_PROC( void, LogBinaryEx )( P_8 buffer, _32 size DBG_PASS )
+ void  LogBinaryEx ( P_8 buffer, _32 size DBG_PASS )
 {
 #ifdef _DEBUG
 	LogBinaryFL( buffer,size DBG_RELAY );
@@ -1061,18 +1075,18 @@ SYSLOG_PROC( void, LogBinaryEx )( P_8 buffer, _32 size DBG_PASS )
 #endif
 }
 #undef LogBinary
-SYSLOG_PROC( void, LogBinary )( P_8 buffer, _32 size )
+ void  LogBinary ( P_8 buffer, _32 size )
 {
-	LogBinaryFL( buffer,size FILELINE_NULL );
+	LogBinaryFL( buffer,size, NULL, 0 );
 }
 
-SYSLOG_PROC( void, SetSystemLog )( enum syslog_types type, const void *data )
+ void  SetSystemLog ( enum syslog_types type, const void *data )
 {
 	if( file )
 	{
 		fclose( file );
 		file = NULL;
-	}	
+	}
 	if( type == SYSLOG_FILE )
 	{
 		if( data )
@@ -1099,7 +1113,7 @@ SYSLOG_PROC( void, SetSystemLog )( enum syslog_types type, const void *data )
 	//SystemLog( WIDE("thing is: ") STRSYM( (SYSLOG_EXTERN) ) );
 }
 
-SYSLOG_PROC( void, SystemLogTime )( LOGICAL enable )
+ void  SystemLogTime ( LOGICAL enable )
 {
 	flags.bLogTime = FALSE;
 	flags.bUseDay = FALSE;
@@ -1130,75 +1144,6 @@ static struct next_lprint_info{
 	int nLine;
 } next_lprintf;
 
-// may have to switch based on the version of gnuc here...
-//#if defined( HAVE_GOOD_VA_ARGS ) || defined( __GNUC__ )
-//---------------------------------------------------------------------------
-SYSLOG_PROC( void, _vlprintf )( int argsize, CTEXTSTR format, va_list args )
-{
-	if( next_lprintf.nLevel & LOG_CUSTOM )
-	{
-	// apply log custom bits to only compare bits which
-	// the user may specify, then compare that value with the
-	// bits which have been specified as enabled... if this fails,
-	// this message is not enabled.
-		if( !(( next_lprintf.nLevel & LOG_CUSTOM_BITS ) & nLogCustom ) )
-			return;
-      // perform some clever mask based on something else...
-	}
-	else if( next_lprintf.nLevel > nLogLevel )
-		return;
-	if( logtype != SYSLOG_NONE )
-	{
-		CTEXTSTR logtime = GetLogTime();
-		//va_list _args = args;
-		int ofs;
-		TEXTCHAR buffer[1023];
-		TEXTCHAR threadid[32];
-
-		if( logtime[0] )
-			ofs = snprintf( buffer, 1023, WIDE("%s|")
-							  , logtime );
-		else
-			ofs = 0;
-		// argsize - the program's giving us file and line
-		// debug for here or not, this must be used.
-		if( argsize )
-		{
-			CTEXTSTR pFile;
-#ifndef _LOG_FULL_FILE_NAMES
-			CTEXTSTR p, prog;
-#endif
-			_32 nLine;
-			if( ( pFile = next_lprintf.pFile ) )
-			{
-#ifndef _LOG_FULL_FILE_NAMES
-				for( p = pFile + strlen(pFile) -1;p > pFile;p-- )
-					if( p[0] == '/' || p[0] == '\\' )
-					{
-						pFile = p+1;break;
-					}
-				for( prog = pProgramName + strlen(pProgramName) -1;prog > pProgramName;prog-- )
-					if( prog[0] == '/' || prog[0] == '\\' )
-					{
-						pFile = p+1;break;
-					}
-#endif
-				nLine = next_lprintf.nLine;
-				if( flags.bLogThreadID )
-					snprintf( threadid, sizeof( threadid ), WIDE("%") _64fX WIDE("~"), GetMyThreadID() );
-				ofs += snprintf( buffer + ofs, 1023 - ofs, WIDE("%s%s%s%s(%") _32f WIDE("):")
-									, flags.bLogThreadID?threadid:WIDE("")
-									, flags.bLogProgram?pProgramName:WIDE("")
-									, flags.bLogProgram?WIDE("@"):WIDE("")
-									, pFile, nLine );
-			}
-			ofs += vsnprintf( buffer + ofs, 1023 - ofs, format, args );
-		}
-		DoSystemLog( buffer );
-	}
-}
-//#endif
-
 static INDEX CPROC _null_vlprintf ( CTEXTSTR format, va_list args )
 {
    return 0;
@@ -1206,8 +1151,23 @@ static INDEX CPROC _null_vlprintf ( CTEXTSTR format, va_list args )
 
 static PLINKQUEUE buffers;
 
+
 static INDEX CPROC _real_vlprintf ( CTEXTSTR format, va_list args )
 {
+#if 1
+   // this can be used to force logging early to stdout
+	if( !init_complete )
+	{
+		logtype = SYSLOG_FILE;
+		file = stdout ;
+		SystemLogTime( SYSLOG_TIME_CPU|SYSLOG_TIME_DELTA );
+
+      init_complete = 1;
+		flags.bLogSourceFile = 1;
+	}
+#endif
+	if( cannot_log )
+		return 0;
 	if( logtype != SYSLOG_NONE )
 	{
 		CTEXTSTR logtime = GetLogTime();
@@ -1217,18 +1177,36 @@ static INDEX CPROC _real_vlprintf ( CTEXTSTR format, va_list args )
 		TEXTCHAR *buffer;
 		TEXTCHAR threadid[32];
 
+		cannot_log = 1;
 		if( !buffers )
+		{
+			int n;
 			buffers = CreateLinkQueue();
+			for( n = 0; n < 6; n++ )
+				EnqueLink( &buffers, (POINTER)1 );
+			for( n = 0; n < 6; n++ )
+            DequeLink( &buffers );
+		}
 
 		buffer = (TEXTCHAR*)DequeLink( &buffers );
 		if( !buffer )
 		{
-			buffer = NewArray( TEXTCHAR, 4096 );
+			buffer = (TEXTCHAR*)malloc( 4096 );//NewArray( TEXTCHAR, 4096 );
 		}
+      // at this point we're not doing internal allocations...
+      cannot_log = 0;
 
 		if( logtime[0] )
+#ifdef UNDER_CE
+		{
+			StringCbPrintf( buffer, 4096, WIDE("%s|")
+							  , logtime );
+		   ofs = StrLen( buffer );
+		}
+#else
 			ofs = snprintf( buffer, 4095, WIDE("%s|")
 							  , logtime );
+#endif
 		else
 			ofs = 0;
 		// argsize - the program's giving us file and line
@@ -1254,13 +1232,23 @@ static INDEX CPROC _real_vlprintf ( CTEXTSTR format, va_list args )
 				nLine = next_lprintf.nLine;
 				if( flags.bLogThreadID )
 					snprintf( threadid, sizeof( threadid ), WIDE("%") _64fX WIDE("~"), GetMyThreadID() );
-				ofs += snprintf( buffer + ofs, 4095 - ofs, WIDE("%s%s%s%s(%") _32f WIDE("):")
+#ifdef UNDER_CE
+				snprintf( buffer + ofs, 4095 - ofs, WIDE("%s%s%s%s(%") _32f WIDE("):")
 									, flags.bLogThreadID?threadid:WIDE("")
 									, flags.bLogProgram?pProgramName:WIDE("")
 									, flags.bLogProgram?WIDE("@"):WIDE("")
 									, pFile, nLine );
+				ofs += StrLen( buffer + ofs );
+#else
+				snprintf( buffer + ofs, 4095 - ofs, WIDE("%s%s%s%s(%") _32f WIDE("):")
+									, flags.bLogThreadID?threadid:WIDE("")
+									, flags.bLogProgram?pProgramName:WIDE("")
+									, flags.bLogProgram?WIDE("@"):WIDE("")
+									, pFile, nLine );
+				ofs += StrLen( buffer + ofs );
+#endif
 			}
-			ofs += vsnprintf( buffer + ofs, 4095 - ofs, format, args );
+			vsnprintf( buffer + ofs, 4095 - ofs, format, args );
 		}
 		DoSystemLog( buffer );
 		EnqueLink( &buffers, buffer );
@@ -1282,9 +1270,14 @@ static INDEX CPROC _null_lprintf( CTEXTSTR f, ... )
 }
 
 
-SYSLOG_PROC( RealVLogFunction, _vxlprintf )( _32 level DBG_PASS )
+ RealVLogFunction  _vxlprintf ( _32 level DBG_PASS )
 {
-   //EnterCriticalSec( &next_lprintf.cs );
+	//EnterCriticalSec( &next_lprintf.cs );
+	if( !init_complete )
+	{
+		return _null_vlprintf;
+	}
+
 #if _DEBUG
 	next_lprintf.pFile = pFile;
 	next_lprintf.nLine = nLine;
@@ -1324,27 +1317,6 @@ RealLogFunction _xlprintf( _32 level DBG_PASS )
    return _null_lprintf;
 }
 
-/*
-SYSLOG_PROC( void, _lprintf )( int argsize, CTEXTSTR format , ... )
-{
-	va_list args;
-	va_start( args, format );
-	_vlprintf( argsize, format, args );
-}
-*/
-
-#if 0
-// this is for classic code compatibility.
-// one day someone should say screw it, delete this, and make everyone compile distclean.
-//#undef lprintf
-SYSLOG_PROC( void, lprintf )( int argsize, CTEXTSTR format , ... )
-{
-	va_list args;
-	va_start( args, format );
-	_vlprintf( argsize, format, args );
-}
-#endif
-
 #ifdef __WATCOMC__
 // # again - WATCOM Compiler warning here, function
 // defined, but never referenced.  This is true,
@@ -1380,16 +1352,11 @@ void SetSystemLoggingLevel( _32 nLevel )
 		nLogLevel = nLevel;
 }
 
-CTEXTSTR GetProgramName( void )
-{
-   return pProgramName;
-}
-
 void SetSyslogOptions( FLAGSETTYPE *options )
 {
-   // the mat operations don't turn into valid bitfield operators. (watcom)
+	// the mat operations don't turn into valid bitfield operators. (watcom)
 	flags.bLogOpenAppend = TESTFLAG( options, SYSLOG_OPT_OPENAPPEND )?1:0; // open for append, else open for write
-   flags.bLogOpenBackup = TESTFLAG( options, SYSLOG_OPT_OPEN_BACKUP )?1:0; // open for append, else open for write
+	flags.bLogOpenBackup = TESTFLAG( options, SYSLOG_OPT_OPEN_BACKUP )?1:0; // open for append, else open for write
 	flags.bLogProgram = TESTFLAG( options, SYSLOG_OPT_LOG_PROGRAM_NAME )?1:0; // open for append, else open for write
 	flags.bLogThreadID = TESTFLAG( options, SYSLOG_OPT_LOG_THREAD_ID )?1:0; // open for append, else open for write
 	flags.bLogSourceFile = TESTFLAG( options, SYSLOG_OPT_LOG_SOURCE_FILE )?1:0; // open for append, else open for write

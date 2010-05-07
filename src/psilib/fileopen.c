@@ -37,7 +37,7 @@ void CPROC AddFile( PTRSZVAL user, CTEXTSTR pathname, int flags )
    if( flags & SFF_DRIVE )
    {
       TEXTCHAR buffer[10];
-      sprintf( buffer, WIDE("-%c-"), pathname[0] );
+      snprintf( buffer, sizeof( buffer ), WIDE("-%c-"), pathname[0] );
       newitem = AddListItem( pLoading, buffer );
       SetItemData( newitem, (PTRSZVAL)flags );
    }
@@ -128,7 +128,7 @@ void CPROC FileDouble( PTRSZVAL psv, PCONTROL pc, PLISTITEM hli )
          else
 			{
             name[strlen(name)-1] = 0;
-            sprintf( pfod->basepath, WIDE("%s/%s"), pfod->basepath, name );
+            snprintf( pfod->basepath, sizeof(pfod->basepath), WIDE("%s/%s"), pfod->basepath, name );
          }
          LoadList( pc, pfod );
       }
@@ -156,7 +156,7 @@ int PSI_PickFile( PSI_CONTROL parent, CTEXTSTR basepath, CTEXTSTR types, TEXTSTR
 	// auto configure open file dialog - well for now let us start at
 	// the current working directory...
 	S_32 x, y;
-	PCOMMON frame;
+	PSI_CONTROL frame;
 	PCONTROL pcList;
 	FILEOPENDATA fod;
 
@@ -166,7 +166,7 @@ int PSI_PickFile( PSI_CONTROL parent, CTEXTSTR basepath, CTEXTSTR types, TEXTSTR
 	if( !basepath || (strcmp( basepath, WIDE(".") )== 0) )
 		GetCurrentPath(fod.basepath, sizeof( fod.basepath ) );
 	else
-		strcpy( fod.basepath, basepath );
+		StrCpyEx( fod.basepath, basepath, sizeof( fod.basepath ) / sizeof(TEXTCHAR) );
 	fod.done = 0;
 	fod.okay = 0;
 	MakeEditControl( frame, 5, 5, 240, 20, TXT_PATHNAME, NULL, 0 );
@@ -176,7 +176,7 @@ int PSI_PickFile( PSI_CONTROL parent, CTEXTSTR basepath, CTEXTSTR types, TEXTSTR
 
 	SetDoubleClickHandler( pcList, FileDouble, (PTRSZVAL)&fod );
 	SetSelChangeHandler( pcList, FileSingle, (PTRSZVAL)&fod );
-	strcpy( fod.currentmask, WIDE("*") );
+	StrCpyEx( fod.currentmask, WIDE("*"), sizeof( fod.currentmask ) / sizeof(TEXTCHAR) );
 	LoadList( pcList, &fod );
 
 	AddCommonButtons( frame, &fod.done, &fod.okay );

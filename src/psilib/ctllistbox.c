@@ -1348,7 +1348,7 @@ PSI_PROC( void, GetListItemText )( PLISTITEM hli, TEXTSTR buffer, int bufsize )
 {
 	if( hli )
 	{
-		strncpy( buffer, ((PLISTITEM)hli)->text, bufsize-1 );
+		StrCpyEx( buffer, ((PLISTITEM)hli)->text, ((bufsize)/sizeof(TEXTCHAR))-1 );
 		buffer[bufsize-1] = 0;
 	}
 }
@@ -1642,7 +1642,7 @@ PSI_CONTROL GetItemListbox( PLISTITEM pli )
 #include <psi.h>
 static CONTROL_REGISTRATION
 listbox = { LISTBOX_CONTROL_NAME
-			 , { {110, 73}, sizeof( LISTBOX ), BORDER_INVERT_THIN }
+			 , { {110, 73}, sizeof( LISTBOX ), BORDER_INVERT_THIN|BORDER_NOCAPTION }
 			 , InitListBox
 			 , NULL
 			 , RenderListBox

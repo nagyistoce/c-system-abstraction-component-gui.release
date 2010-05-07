@@ -3,6 +3,7 @@
 /* this flag is defined in controlstruc.h...
  *
  * #define DEBUG_BORDER_DRAWING
+ * #define QUICK_DEBUG_BORDER_FLAGS // simple set - tracks who sets border where
  *
  */
 
@@ -374,7 +375,7 @@ void CPROC DrawThinnerFrameInverted( PCOMMON pc )
 	Image window = pc->Window;
 	_32 width = window->width;
 	_32 height = window->height;
-   if( pc->flags.bInitial || pc->flags.bHidden ) return;
+	if( pc->flags.bInitial || pc->flags.bHidden ) return;
 	do_hline( window, 0, 0, width-1, basecolors[SHADOW] );
 	do_hline( window, 1, 1, width-2, basecolors[SHADE] );
 
@@ -746,18 +747,11 @@ void CPROC SetDrawBorder( PCOMMON pc )
 
 //---------------------------------------------------------------------------
 
-PSI_PROC( void, SetCommonBorderEx )( PCOMMON pc, _32 BorderType DBG_PASS )
+void UpdateSurface( PCOMMON pc )
 {
 	_32 border;
 	_32 width, height;
-#ifdef DEBUG_BORDER_FLAGS
-	_xlprintf(LOG_NOISE DBG_RELAY)( WIDE("Setting border to %08x(%08x,%08x) %08x"), pc, pc->parent, pc->device, BorderType );
-#endif
-	pc->BorderType = BorderType;
 	border = pc->BorderType;
-	//if( !pc->parent
-	//	&& !pc->device ) // not parent and not border...
-	//	border = BORDER_NONE;
 	width = pc->rect.width;
 	height = pc->rect.height;
 	pc->surface_rect.x = FrameBorderXOfs(border);
@@ -769,7 +763,7 @@ PSI_PROC( void, SetCommonBorderEx )( PCOMMON pc, _32 BorderType DBG_PASS )
 #ifdef DEBUG_BORDER_FLAGS
 		lprintf( WIDE("- - - -- -- -  -- - -  ---- position is like %d,%d  %d,%d")
 				 , pc->surface_rect.x, pc->surface_rect.y
-              , pc->surface_rect.width, pc->surface_rect.height );
+				 , pc->surface_rect.width, pc->surface_rect.height );
 #endif
 		MoveImage( pc->Surface, pc->surface_rect.x, pc->surface_rect.y );
 		ResizeImage( pc->Surface, pc->surface_rect.width, pc->surface_rect.height );
@@ -784,8 +778,17 @@ PSI_PROC( void, SetCommonBorderEx )( PCOMMON pc, _32 BorderType DBG_PASS )
 										  , pc->surface_rect.y
 										  , pc->surface_rect.width
 										  , pc->surface_rect.height );
-
+		//lprintf( WIDE("Resulting surface is %p in %p"), pc->Surface, pc->Window );
 	}
+}
+
+PSI_PROC( void, SetCommonBorderEx )( PCOMMON pc, _32 BorderType DBG_PASS )
+{
+#ifdef QUICK_DEBUG_BORDER_FLAGS
+	_xlprintf(LOG_NOISE DBG_RELAY)( WIDE("Setting border to %08x(%08x,%08x) %08x"), pc, pc->parent, pc->device, BorderType );
+#endif
+	pc->BorderType = BorderType;
+	UpdateSurface( pc );
 	SetDrawBorder( pc );
 }
 PSI_NAMESPACE_END

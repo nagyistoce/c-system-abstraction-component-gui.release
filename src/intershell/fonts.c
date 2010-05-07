@@ -7,20 +7,23 @@
 #include "fonts.h"
 
 #include <psi.h>
+
+INTERSHELL_NAMESPACE
+
 extern CONTROL_REGISTRATION menu_surface;
 
 
 PRELOAD( RegisterFontConfigurationIDs )
 {
-	EasyRegisterResource( "intershell/font", BTN_PICKFONT, NORMAL_BUTTON_NAME );
-	EasyRegisterResource( "intershell/font", BTN_PICKFONT_PRICE, NORMAL_BUTTON_NAME );
-	EasyRegisterResource( "intershell/font", BTN_PICKFONT_QTY, NORMAL_BUTTON_NAME );
-	EasyRegisterResource( "intershell/font", BTN_EDITFONT, NORMAL_BUTTON_NAME );
+	EasyRegisterResource( WIDE( "intershell/font" ), BTN_PICKFONT, NORMAL_BUTTON_NAME );
+	EasyRegisterResource( WIDE( "intershell/font" ), BTN_PICKFONT_PRICE, NORMAL_BUTTON_NAME );
+	EasyRegisterResource( WIDE( "intershell/font" ), BTN_PICKFONT_QTY, NORMAL_BUTTON_NAME );
+	EasyRegisterResource( WIDE( "intershell/font" ), BTN_EDITFONT, NORMAL_BUTTON_NAME );
 }
 
-typedef struct font_preset_tag
+typedef struct font_preset
 {
-   char *name;
+   TEXTCHAR *name;
 	Font font;
 	POINTER fontdata;
    _32 fontdatalen;
@@ -100,10 +103,13 @@ static void CPROC EditPageFont(PTRSZVAL psv, PSI_CONTROL pc )
 Font* CreateAFont( CTEXTSTR name, Font font, POINTER data, _32 datalen )
 {
 	ValidatedControlData( PCanvasData, menu_surface.TypeID, canvas, g.single_frame );
+	if( datalen > 1000000 ) DebugBreak();
+	{
 	PFONT_PRESET preset = _CreateAFont( canvas, name, font, data, datalen );
    if( preset )
 		return &preset->font;
-   return NULL;
+	return NULL;
+	}
 }
 
 void CPROC SetCurrentPreset( PTRSZVAL psv, PSI_CONTROL list, PLISTITEM pli )
@@ -117,7 +123,7 @@ static void CPROC CreatePageFont( PTRSZVAL psv, PSI_CONTROL pc )
 {
 	ValidatedControlData( PCanvasData, menu_surface.TypeID, canvas, g.single_frame );
 	PFONT_SELECT font_select = (PFONT_SELECT)psv;
-	char name_buffer[256];
+	TEXTCHAR name_buffer[256];
 	//if( !font_select->selected_font )
 	{
 		if( !SimpleUserQuery(  name_buffer, sizeof( name_buffer )
@@ -240,13 +246,13 @@ Font *SelectAFont( PSI_CONTROL parent, CTEXTSTR*default_name )
    return NULL;
 }
 
-OnSaveCommon( WIDE("Common Fonts") )( FILE *out )
+OnSaveCommon( WIDE( "Common Fonts" ) )( FILE *out )
 {
    PFONT_PRESET preset;
 	INDEX idx;
 	LIST_FORALL( l.fonts, idx, PFONT_PRESET, preset )
 	{
-      char *data;
+      TEXTCHAR *data;
       if( preset->fontdata && preset->fontdatalen )
       {
 			EncodeBinaryConfig( &data, preset->fontdata, preset->fontdatalen );
@@ -262,15 +268,17 @@ OnSaveCommon( WIDE("Common Fonts") )( FILE *out )
 
 static PTRSZVAL CPROC RecreateFont( PTRSZVAL psv, arg_list args )
 {
-   PARAM( args, char *, name );
+	PARAM( args, TEXTCHAR *, name );
 	PARAM( args, _32, length );
 	PARAM( args, POINTER, data );
-   CreateAFont( name, NULL, data, length );
-   return 0;
+	CreateAFont( name, NULL, data, length );
+	return 0;
 }
 
-OnLoadCommon( WIDE("Common Fonts") )( PCONFIG_HANDLER pch )
+OnLoadCommon( WIDE( "Common Fonts" ) )( PCONFIG_HANDLER pch )
 {
 	AddConfigurationMethod( pch, WIDE("font preset %m=%B"), RecreateFont );
 }
+
+INTERSHELL_NAMESPACE_END
 

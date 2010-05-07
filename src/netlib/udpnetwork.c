@@ -8,6 +8,8 @@
 #else
 #define ioctl ioctlsocket
 #endif
+#include <stdhdrs.h>
+
 #include "netstruc.h"
 #include <network.h>
 #include <sharemem.h>
@@ -76,8 +78,9 @@ NETWORK_PROC( PCLIENT, CPPServeUDPAddr )( SOCKADDR *pAddr
        				*(((unsigned char *)pAddr)+7) );
 #endif
       if (bind(pc->Socket,&pc->saSource,sizeof(SOCKADDR)))
-      {
-         Log3( WIDE("%s(%d): Bind Fail: %d"), __FILE__, __LINE__, WSAGetLastError() );
+		{
+			DumpAddr( "BIND FAIL:", &pc->saSource );
+         lprintf( WIDE("Bind Fail: %d"), WSAGetLastError() );
 	      InternalRemoveClientEx( pc, TRUE, FALSE );
    	   LeaveCriticalSec( &pc->csLock );
 	      return NULL;
@@ -92,6 +95,10 @@ NETWORK_PROC( PCLIENT, CPPServeUDPAddr )( SOCKADDR *pAddr
    }
 
 #ifdef _WIN32
+#  ifdef USE_WSA_EVENTS
+	pc->event = WSACreateEvent();
+	WSAEventSelect( pc->Socket, pc->event, FD_READ|FD_WRITE );
+#  else
    if (WSAAsyncSelect( pc->Socket, 
                        g.ghWndNetwork,
                        SOCKMSG_UDP, 
@@ -101,7 +108,8 @@ NETWORK_PROC( PCLIENT, CPPServeUDPAddr )( SOCKADDR *pAddr
       InternalRemoveClientEx( pc, TRUE, FALSE );
       LeaveCriticalSec( &pc->csLock );
       return NULL;
-   }
+	}
+#  endif
 #else
    {
       int t = TRUE;
@@ -389,7 +397,7 @@ NETWORK_PROC( int, doUDPRead )( PCLIENT pc, POINTER lpBuffer, int nBytes )
 {
 	if( pc->RecvPending.dwAvail )
 	{
-		lprintf( "Read already pending for %d... not doing anything for this one.."
+		lprintf( WIDE("Read already pending for %d... not doing anything for this one..")
               , pc->RecvPending.dwAvail );
 		return FALSE;
 	}
@@ -399,6 +407,14 @@ NETWORK_PROC( int, doUDPRead )( PCLIENT pc, POINTER lpBuffer, int nBytes )
 	pc->RecvPending.buffer.p = lpBuffer;
 	{
 		pc->dwFlags |= CF_READPENDING;
+
+      // we are now able to read, so schedule the socket.
+#ifdef USE_WSA_EVENTS
+#ifdef LOG_NOTICES
+		lprintf( "SET GLOBAL EVENT" );
+#endif
+		SetEvent( g.event );
+#endif
 #ifdef __UNIX__
 		{
 			WakeThread( g.pThread );
@@ -443,6 +459,12 @@ int FinishUDPRead( PCLIENT pc )
       {
       case WSAEWOULDBLOCK: // NO data returned....
           pc->dwFlags |= CF_READPENDING;
+#ifdef USE_WSA_EVENTS
+#ifdef LOG_NOTICES
+			 lprintf( "SET GLOBAL EVENT" );
+#endif
+			 SetEvent( g.event );
+#endif
 #ifdef __UNIX__
           {
               WakeThread( g.pThread );

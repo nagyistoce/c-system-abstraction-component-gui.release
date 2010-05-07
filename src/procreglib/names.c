@@ -6,6 +6,7 @@
 
 //#define DEBUG_GLOBAL_REGISTRATION
 #define REGISTRY_STRUCTURE_DEFINED
+//#define PROCREG_SOURCE
 // include this first so we can have the namespace...
 #include <procreg.h>
 #undef REGISTRY_STRUCTURE_DEFINED
@@ -22,7 +23,12 @@ struct procreg_local_tag {
 	PTREEROOT NameIndex;
 	PTREEDEFSET TreeNodes;
 	PNAMESET NameSet;
+
 	PNAMESPACE NameSpace;
+	PLIST TransationSpaces;
+
+   int translations; // open group ID
+
 	TEXTCHAR *config_filename;
 	FILE *file;
    //gcroot<System::IO::FileStream^> fs;
@@ -56,7 +62,7 @@ int CPROC SavedNameCmpEx(CTEXTSTR dst, CTEXTSTR src, size_t srclen)
 	// case insensitive loop..
 	//lprintf( WIDE("Compare %s(%d) vs %s(%d)"), src, l1, dst, l2 );
 	// interesting... first sort by length
-   // and then by content?
+	// and then by content?
 	//if( l1 != l2 )
     //  return l2-l1;
 	do {
@@ -65,15 +71,15 @@ int CPROC SavedNameCmpEx(CTEXTSTR dst, CTEXTSTR src, size_t srclen)
          l1 = 0; // no more length .. should have gotten a matched length on dst...
 			break;
 		}
-		if ( ((f = (unsigned char)(*(dst++))) >= 'A') && (f <= 'Z') )
+		if ( ((f = (TEXTCHAR)(*(dst++))) >= 'A') && (f <= 'Z') )
 			f -= ('A' - 'a');
-		if ( ((last = (unsigned char)(*(src++))) >= 'A') && (last <= 'Z') )
+		if ( ((last = (TEXTCHAR)(*(src++))) >= 'A') && (last <= 'Z') )
 			last -= ('A' - 'a');
 		--l2;
       --l1;
 	} while ( l2 && l1 && (f == last) );
-   //lprintf( WIDE("Results to compare...%d,%d  %c,%c"), l1, l2, f, last );
-   // if up to the end of some portion of the strings matched...
+	//lprintf( WIDE("Results to compare...%d,%d  %c,%c"), l1, l2, f, last );
+	// if up to the end of some portion of the strings matched...
 	if( !f && !last )
 	{
 		return 0;
@@ -106,7 +112,7 @@ static TEXTSTR StripName( TEXTSTR buf, CTEXTSTR name )
 	int escape = 0;
 	if( !name )
 	{
-      buf[0] = 0;
+		buf[0] = 0;
 		return buf;
 	}
 	while( name[0] )
@@ -179,7 +185,7 @@ static CTEXTSTR DressName( TEXTSTR buf, CTEXTSTR name )
 			savebuf[0]++;
 			(*buf++) = name[0];
 		}
-      name++;
+		name++;
 	}
    buf[0] = 0;
    return savebuf + 1;
@@ -189,7 +195,6 @@ static CTEXTSTR DressName( TEXTSTR buf, CTEXTSTR name )
 
 static CTEXTSTR DoSaveName( CTEXTSTR stripped, size_t len )
 {
-	//unsigned char len = strlen( stripped );
 	PNAMESPACE space = l.NameSpace;
 	TEXTCHAR *p;
 	// cannot save 0 length strings.
@@ -205,22 +210,22 @@ static CTEXTSTR DoSaveName( CTEXTSTR stripped, size_t len )
 		if( p )
 			return ((CTEXTSTR)p);
 	}
-   for( space = l.NameSpace; space; space = space->next )
+	for( space = l.NameSpace; space; space = space->next )
 	{
 		p = space->buffer;
 		while( p[0] && len )
 		{
-         //lprintf( WIDE("Compare %s(%d) vs %s(%d)"), p+1, p[0], stripped,len );
+			//lprintf( WIDE("Compare %s(%d) vs %s(%d)"), p+1, p[0], stripped,len );
 			if( SavedNameCmpEx( p+1, stripped, len ) == 0 )
 			{
-            return (CTEXTSTR)p+1;
+				return (CTEXTSTR)p+1;
 			}
 			p +=
-#ifdef __ARM__
+#if defined( __ARM__ ) || defined( UNDER_CE )
             (
 #endif
 				 p[0]
-#ifdef __ARM__
+#if defined( __ARM__ ) || defined( UNDER_CE )
 				+3 ) & 0xFC;
 #endif
 				;
@@ -244,13 +249,13 @@ static CTEXTSTR DoSaveName( CTEXTSTR stripped, size_t len )
 			LinkThing( l.NameSpace, space );
 		}
 
-		MemCpy( p = space->buffer + space->nextname + 1, stripped,(_32)(len + 1) );
+		MemCpy( p = space->buffer + space->nextname + 1, stripped,(_32)(sizeof( TEXTCHAR)*(len + 1)) );
 		p[len] = 0; // make sure we get a null terminator...
-		alloclen = len + 2;
+		alloclen = (len + 2);
 					// +2 1 for byte of len, 1 for nul at end.
 
 		space->buffer[space->nextname] = (TEXTCHAR)(alloclen);
-#ifdef __ARM__
+#if defined( __ARM__ ) || defined( UNDER_CE )
 		alloclen = ( alloclen + 3 ) & 0xFC;
 					// +3&0xFC rounds to next full dword segment
 					// arm requires this name be aligned on a dword boundry
@@ -271,7 +276,7 @@ static CTEXTSTR SaveName( CTEXTSTR name )
 {
 	if( name )
 	{
-		size_t len = strlen( name );
+		size_t len = StrLen( name );
 		size_t n;
 		for( n = 0; n < len; n++ )
 			if( name[n] == '\\' || name[n] == '/' )
@@ -290,7 +295,7 @@ CTEXTSTR SaveNameConcatN( CTEXTSTR name1, ... )
 	// space concat since that's eaten by strip...
 	TEXTCHAR stripbuffer[256];
 	size_t len = 0;
-   CTEXTSTR namex;
+	CTEXTSTR namex;
 	va_list args;
 	va_start( args, name1 );
 
@@ -302,8 +307,8 @@ CTEXTSTR SaveNameConcatN( CTEXTSTR name1, ... )
 		// concat order for libraries is
 		// args, return type, library, library_procname
 		// this is appeneded to the key value FUNCTION
-      //lprintf( WIDE("Concatting %s"), namex );
-		newlen = strlen( StripName( stripbuffer + len, namex ) );
+		//lprintf( WIDE("Concatting %s"), namex );
+		newlen = StrLen( StripName( stripbuffer + len, namex ) );
 		//if( newlen )
 		newlen++;
 		len += newlen;
@@ -318,7 +323,33 @@ CTEXTSTR SaveNameConcatN( CTEXTSTR name1, ... )
 CTEXTSTR SaveText( CTEXTSTR text )
 #define SaveNameConcat(n1,n2) SaveNameConcatN( (n1),(n2),NULL )
 {
-	return DoSaveName( text, strlen( text ) );
+	return DoSaveName( text, StrLen( text ) );
+}
+
+//---------------------------------------------------------------------------
+
+CTEXTSTR TranslateText( CTEXTSTR text )
+{
+	return NULL;
+}
+
+//---------------------------------------------------------------------------
+
+void LoadTranslation( CTEXTSTR translation_name, CTEXTSTR filename )
+{
+   //FILE *input = sack_fopen( l.translations, filename, "rb" );
+}
+
+//---------------------------------------------------------------------------
+
+void SaveNames( void )
+{
+}
+
+//---------------------------------------------------------------------------
+
+void RecoverNames( void )
+{
 }
 
 //---------------------------------------------------------------------------
@@ -345,7 +376,7 @@ static void CPROC KillName( POINTER user, PTRSZVAL key )
 //---------------------------------------------------------------------------
 
 // p would be the global space, but it's also already set in it's correct spot
-static void CPROC InitGlobalSpace( POINTER p, _32 size )
+static void CPROC InitGlobalSpace( POINTER p, PTRSZVAL size )
 {
 	(*(struct procreg_local_tag*)p).Names = (PTREEDEF)GetFromSet( TREEDEF, &(*(struct procreg_local_tag*)p).TreeNodes );
 	(*(struct procreg_local_tag*)p).Names->Magic = MAGIC_TREE_NUMBER;
@@ -369,6 +400,8 @@ PRIORITY_PRELOAD( InitProcreg, NAMESPACE_PRELOAD_PRIORITY )
 	//DebugBreak();
 #endif
 	SimpleRegisterAndCreateGlobalWithInit( procreg_local_data, InitGlobalSpace );
+	//l.translations = GetFileGroup( WIDE("Translations"), WIDE("translations") );
+
 }
 
 //---------------------------------------------------------------------------
@@ -384,8 +417,8 @@ static PTREEDEF AddClassTree( PTREEDEF class_root, TEXTCHAR *name, PTREEROOT roo
 
 		classname->tree.Magic = MAGIC_TREE_NUMBER;
 		classname->tree.Tree = root;
-      classname->flags.bTree = TRUE;
-      //lprintf( WIDE("Adding class tree thing %s to %s"), name, classname->name );
+		classname->flags.bTree = TRUE;
+		//lprintf( WIDE("Adding class tree thing %s to %s"), name, classname->name );
 		if( !AddBinaryNode( class_root->Tree, classname, (PTRSZVAL)classname->name ) )
 		{
 			Log( WIDE("For some reason could not add new class tree to tree!") );
@@ -424,7 +457,7 @@ PTREEDEF GetClassTreeEx( PTREEDEF root, PTREEDEF _name_class, PTREEDEF alias, LO
 	class_root = root;
 
 	if(
-#ifdef __ARM__
+#if defined( __ARM__ ) || defined( UNDER_CE )
 	  // if its odd, it comes from the name space
       // (savename)
 		(((PTRSZVAL)class_root)&0x3) ||
@@ -439,7 +472,7 @@ PTREEDEF GetClassTreeEx( PTREEDEF root, PTREEDEF _name_class, PTREEDEF alias, LO
 	if( _name_class )
 	{
 		if(
-#ifdef __ARM__
+#if defined( __ARM__ ) || defined( UNDER_CE )
 	  // if its odd, it comes from the name space
       // (savename)
 		    !(((PTRSZVAL)_name_class)&0x3) &&
@@ -454,7 +487,7 @@ PTREEDEF GetClassTreeEx( PTREEDEF root, PTREEDEF _name_class, PTREEDEF alias, LO
 			//TEXTCHAR *original;
 			TEXTCHAR *end, *start;
 			CTEXTSTR name_class = (CTEXTSTR)_name_class;
-			size_t len = strlen( name_class ) + 1;
+			size_t len = StrLen( name_class ) + 1;
 			PNAME new_root;
 			if( len > buflen )
 			{
@@ -582,11 +615,11 @@ int AddNode( PTREEDEF class_root, POINTER data, PTRSZVAL key )
 {
 	if( class_root )
 	{
-      TEXTCHAR buf[256];
+		TEXTCHAR buf[256];
 		PNAME oldname = (PNAME)FindInBinaryTree( class_root->Tree, (PTRSZVAL)DressName( buf, (CTEXTSTR)key ) );
 		if( oldname )
 		{
-         Log( WIDE("Name already in the tree...") );
+			Log( WIDE("Name already in the tree...") );
 			return FALSE;
 		}
 		else
@@ -595,13 +628,13 @@ int AddNode( PTREEDEF class_root, POINTER data, PTRSZVAL key )
 			if( !AddBinaryNode( class_root->Tree, data, key ) )
 			{
 				Log( WIDE("For some reason could not add new name to tree!") );
-            return FALSE;
+				return FALSE;
 			}
 		}
 		return TRUE;
 	}
-   Log( WIDE("Nowhere to add the node...") );
-   return FALSE;
+	Log( WIDE("Nowhere to add the node...") );
+	return FALSE;
 }
 
 //---------------------------------------------------------------------------
@@ -649,7 +682,7 @@ PROCREG_PROC( LOGICAL, RegisterFunctionExx )( PCLASSROOT root
 		{
 			int len;
 			TEXTSTR new_root_func_name = NewArray( TEXTCHAR, len = ( func_name - root_func_name ) );
-			StrCpyEx( new_root_func_name, root_func_name, len - 1 );
+			StrCpyEx( new_root_func_name, root_func_name, len );
 			new_root_func_name[len-1] = 0;
 			//lprintf( "trimmed name would be %s  /   %s", new_root_func_name, func_name );
 			class_root = GetClassTree( class_root, (PCLASSROOT)new_root_func_name );
@@ -673,7 +706,7 @@ PROCREG_PROC( LOGICAL, RegisterFunctionExx )( PCLASSROOT root
 				if( !oldname->data.proc.proc )
 				{
 					// old branch location might have existed, but no value assigned...
-					lprintf( "overloading prior %p with %p and %p with %p"
+					lprintf( WIDE( "overloading prior %p with %p and %p with %p" )
 							 , oldname->data.proc.proc, proc
 							 , oldname->data.proc.name, newname->data.proc.name
 							 );
@@ -731,8 +764,8 @@ PROCREG_PROC( LOGICAL, RegisterFunctionExx )( PCLASSROOT root
 						name++;
 					else
 						name = pFile;
-					RegisterValue( (CTEXTSTR)&newname->tree, "Source File", name );
-					RegisterIntValue( (CTEXTSTR)&newname->tree, "Source Line", nLine );
+					RegisterValue( (CTEXTSTR)&newname->tree, WIDE( "Source File" ), name );
+					RegisterIntValue( (CTEXTSTR)&newname->tree, WIDE( "Source Line" ), nLine );
 				}
 #endif
 			}
@@ -974,8 +1007,8 @@ void DumpRegisteredNamesWork( PTREEDEF tree, int level )
 				{
 					size_t tmp;
 					vtprintf( pvt, WIDE("%s "), p );
-					tmp = strlen( p ) + 1;
-               len-= tmp;
+					tmp = StrLen( p ) + 1;
+					len-= tmp;
 					p += tmp;
 				}
 				vtprintf( pvt, WIDE("*%p"), name->data.proc.proc );
@@ -1116,7 +1149,7 @@ PROCREG_PROC( CTEXTSTR, GetNextRegisteredName )( PCLASSROOT *data )
 			return name->name;
 		}
 	}
-   return NULL;
+	return NULL;
 
 }
 #else
@@ -1186,22 +1219,10 @@ PROCREG_PROC( int, RegisterValueExx )( PCLASSROOT root, CTEXTSTR name_class, CTE
 			}
 			else
 			{
-            /*
-		if( oldname->flags.bValue )
-		{
-lprintf(  WIDE("%s"), oldname->name );
-					if( oldname->flags.bIntVal )
-				lprintf(  WIDE("[%ld]"), oldname->data.name.iValue );
-			if( oldname->flags.bStringVal )
-				lprintf(  WIDE("\"%s\""), oldname->data.name.sValue );
-				}
-            */
-			//if( oldname->flags.bStringVal )
-			//		Release( (POINTER)oldname->data.name.sValue );
-			oldname->flags.bStringVal = 1;
+				oldname->flags.bStringVal = 1;
 				oldname->data.name.sValue = SaveName( value );
 			}
-	}
+		}
 		else
 		{
 			PNAME newname = GetFromSet( NAME, &l.NameSet ); //Allocate( sizeof( NAME ) );
@@ -1280,17 +1301,19 @@ int GetRegisteredStaticValue( PCLASSROOT root, CTEXTSTR name_class
 
 PROCREG_PROC( CTEXTSTR, GetRegisteredValueExx )( PCLASSROOT root, CTEXTSTR name_class, CTEXTSTR name, int bIntVal )
 {
-	PTREEDEF class_root = GetClassTree( root, (PCLASSROOT)name_class );
-   TEXTCHAR buf[256];
-	PNAME oldname = (PNAME)FindInBinaryTree( class_root->Tree, (PTRSZVAL)DressName( buf, name ));
+	PTREEDEF class_root;
+	TEXTCHAR buf[256];
+	PNAME oldname;
+	class_root = GetClassTree( root, (PCLASSROOT)name_class );
+	oldname = (PNAME)FindInBinaryTree( class_root->Tree, (PTRSZVAL)DressName( buf, name ));
 	if( oldname )
 	{
-      if( bIntVal )
+		if( bIntVal )
 			return (CTEXTSTR)oldname->data.name.iValue;
 		else if( oldname->flags.bStringVal )
 			return oldname->data.name.sValue;
 	}
-   return NULL;
+	return NULL;
 }
 #ifdef __cplusplus
 PROCREG_PROC( CTEXTSTR, GetRegisteredValueExx )( CTEXTSTR root, CTEXTSTR name_class, CTEXTSTR name, int bIntVal )
@@ -1358,9 +1381,9 @@ PROCREG_PROC( PCLASSROOT, RegisterClassAlias )( CTEXTSTR original, CTEXTSTR alia
 PROCREG_PROC( PTRSZVAL, RegisterDataTypeEx )( PCLASSROOT root
 												 , CTEXTSTR classname
 												 , CTEXTSTR name
-												 , INDEX size
-												 , void (CPROC *Open)(POINTER,_32)
-												 , void (CPROC *Close)(POINTER,_32) )
+												 , PTRSZVAL size
+												 , void (CPROC *Open)(POINTER,PTRSZVAL)
+												 , void (CPROC *Close)(POINTER,PTRSZVAL) )
 {
 	PTREEDEF class_root = GetClassTreeEx( root, (PCLASSROOT)classname, NULL, TRUE );
 	if( class_root )
@@ -1388,9 +1411,9 @@ PROCREG_PROC( PTRSZVAL, RegisterDataTypeEx )( PCLASSROOT root
 
 PROCREG_PROC( PTRSZVAL, RegisterDataType )( CTEXTSTR classname
 												 , CTEXTSTR name
-												 , INDEX size
-												 , void (CPROC *Open)(POINTER,_32)
-												 , void (CPROC *Close)(POINTER,_32) )
+												 , PTRSZVAL size
+												 , void (CPROC *Open)(POINTER,PTRSZVAL)
+												 , void (CPROC *Close)(POINTER,PTRSZVAL) )
 {
    return RegisterDataTypeEx( l.Names, classname, name, size, Open, Close );
 }
@@ -1402,13 +1425,13 @@ PROCREG_PROC( PTRSZVAL, MakeRegisteredDataTypeEx)( PCLASSROOT root
 																 , CTEXTSTR name
 																 , CTEXTSTR instancename
 																 , POINTER data
-																 , _32 datasize
+																 , PTRSZVAL datasize
 																 )
 {
 	PTREEDEF class_root = GetClassTree( root, (PCLASSROOT)classname );
 	if( class_root )
 	{
-      TEXTCHAR buf[256];
+      	TEXTCHAR buf[256];
 		PNAME pName = (PNAME)FindInBinaryTree( class_root->Tree, (PTRSZVAL)DressName( buf, name ));
 		if( !pName )
 			pName = (PNAME)RegisterDataTypeEx( root, classname, name, datasize, NULL, NULL );
@@ -1487,7 +1510,7 @@ PROCREG_PROC( PTRSZVAL, CreateRegisteredDataTypeEx)( PCLASSROOT root
 					if( !( p = FindInBinaryTree( pDataDef->instances.Tree, (PTRSZVAL)instancename ) ) )
 					{
 #ifdef DEBUG_GLOBAL_REGISTRATION
-						lprintf( "Allocating new struct data :%"_32f, pDataDef->size );
+						lprintf( WIDE( "Allocating new struct data :%" )_32f, pDataDef->size );
 #endif
 						p = Allocate( pDataDef->size );
 						MemSet( p, 0, pDataDef->size );
@@ -1500,7 +1523,7 @@ PROCREG_PROC( PTRSZVAL, CreateRegisteredDataTypeEx)( PCLASSROOT root
 #ifdef DEBUG_GLOBAL_REGISTRATION
 					else
 					{
-                  lprintf( "Resulting with previuosly created instance." );
+                  lprintf( WIDE("Resulting with previuosly created instance.") );
 					// increment instances referenced so that close does not
 					// destroy - fortunatly this is persistant data, and therefore
 					// doesn't get destroyed yet.
@@ -1614,10 +1637,10 @@ static PTRSZVAL CPROC HandleAlias( PTRSZVAL psv, arg_list args )
 	PARAM( args, TEXTCHAR*, originalname );
 	TEXTCHAR fullservicename[256];
 	TEXTCHAR fulloriginalname[256];
-   sprintf( fullservicename, WIDE("system/interfaces/%s"), servicename );
-	sprintf( fulloriginalname, WIDE("system/interfaces/%s"), originalname );
+    snprintf( fullservicename, sizeof( fullservicename), WIDE("system/interfaces/%s"), servicename );
+	snprintf( fulloriginalname, sizeof( fulloriginalname), WIDE("system/interfaces/%s"), originalname );
 	RegisterClassAlias( fulloriginalname, fullservicename );
-   return psv;
+	return psv;
 }
 
 //-----------------------------------------------------------------------
@@ -1626,8 +1649,8 @@ static PTRSZVAL CPROC HandleModule( PTRSZVAL psv, arg_list args )
 {
 	PARAM( args, TEXTCHAR*, module );
 	LoadPrivateFunction( module, NULL );
-   return psv;
-}
+	return psv;
+}	
 
 //-----------------------------------------------------------------------
 
@@ -1636,7 +1659,11 @@ static PTRSZVAL CPROC HandleModulePath( PTRSZVAL psv, arg_list args )
 	PARAM( args, TEXTSTR, filepath );
 #ifdef _WIN32
 	{
-		TEXTSTR e1, e2, oldpath, newpath;
+		TEXTSTR e1, e2;
+#ifndef UNDER_CE
+		// no environment
+		TEXTSTR oldpath, newpath;
+#endif
 		e1 = strrchr( filepath, '\\' );
 		e2 = strrchr( filepath, '/' );
 		if( e1 && e2 && ( e1 > e2 ) )
@@ -1648,19 +1675,24 @@ static PTRSZVAL CPROC HandleModulePath( PTRSZVAL psv, arg_list args )
 		else if( e2 )
          e2[0] = 0;
 
+# ifndef UNDER_CE
 		oldpath = (TEXTCHAR*)getenv( WIDE("PATH") );
 		if( !StrStr( oldpath, filepath ) )
 		{
-			newpath = (TEXTCHAR*)Allocate( (_32)(strlen( oldpath ) + 1 + strlen(filepath)) );
-			sprintf( newpath, WIDE("%s;%s"), filepath, oldpath );
-#ifdef __WINDOWS__
+			int len;
+			newpath = (TEXTCHAR*)Allocate( len=(_32)(StrLen( oldpath ) + 1 + StrLen(filepath)) );
+			snprintf( newpath, sizeof(TEXTCHAR)*len, WIDE("%s;%s"), filepath, oldpath );
+#   ifndef UNDER_CE
+#     ifdef __WINDOWS__
 			SetEnvironmentVariable( WIDE("PATH"), newpath );
-#else
+#     else
 			setenv( WIDE("PATH"), newpath );
-#endif
+#     endif
+#   endif
 			lprintf( WIDE("Updated path to %s from %s"), newpath, oldpath );
 			Release( newpath );
 		}
+# endif
 	}
 #elif defined( __LINUX__ )
 	{
@@ -1679,7 +1711,7 @@ static PTRSZVAL CPROC HandleModulePath( PTRSZVAL psv, arg_list args )
 		oldpath = getenv( WIDE("LD_LIBRARY_PATH") );
 		if( !strstr( oldpath, filepath ) )
 		{
-			newpath = (TEXTCHAR*)Allocate( strlen( oldpath ) + 1 + strlen(filepath) );
+			newpath = (TEXTCHAR*)Allocate( StrLen( oldpath ) + 1 + StrLen(filepath) );
 			sprintf( newpath, WIDE("%s;%s"), filepath, oldpath );
 			setenv( WIDE("LD_LIBRARY_PATH"), newpath, 1 );
 			lprintf( WIDE("Updated library path to %s from %s"), newpath, oldpath );
@@ -1733,11 +1765,15 @@ static void ReadConfiguration( void )
 		AddConfigurationMethod( pch, WIDE("module path %m"), HandleModulePath );
 
 		{
+#ifdef HAVE_ENVIRONMENT
 			CTEXTSTR filepath = getenv( WIDE("MY_LOAD_PATH") );
+#else
+			CTEXTSTR filepath = NULL;
+#endif
 			TEXTSTR loadname;
 			int success = FALSE;
 			if( !filepath )
-            filepath = WIDE(".");
+				filepath = WIDE(".");
 			if( l.config_filename )
 			{
 				success = ProcessConfigurationFile( pch, l.config_filename, 0 );
@@ -1745,13 +1781,14 @@ static void ReadConfiguration( void )
 				{
 					if( filepath )
 					{
-						loadname = NewArray( TEXTCHAR, (_32)strlen( filepath ) + (_32)strlen( l.config_filename ) + 2 );
+						int len;
+						loadname = NewArray( TEXTCHAR, len = (_32)StrLen( filepath ) + (_32)StrLen( l.config_filename ) + 2 );
 #ifdef __STATIC__
 #define STATIC WIDE(".static")
 #else
 #define STATIC
 #endif
-						sprintf( loadname, WIDE("%s/%s"), filepath, l.config_filename?l.config_filename:WIDE("interface.conf") STATIC );
+						snprintf( loadname, sizeof(TEXTCHAR)*len, WIDE("%s/%s"), filepath, l.config_filename?l.config_filename:WIDE("interface.conf") STATIC );
 					}
 					else
 					{
@@ -1767,8 +1804,8 @@ static void ReadConfiguration( void )
 				if( filepath )
 				{
 					size_t len;
-					loadname = NewArray( TEXTCHAR, (_32)(len = strlen( filepath ) + strlen( WIDE("interface.conf") STATIC ) + 2) );
-					snprintf( loadname, len, WIDE("%s/%s"), filepath, WIDE("interface.conf") STATIC );
+					loadname = NewArray( TEXTCHAR, (_32)(len = StrLen( filepath ) + StrLen( WIDE("interface.conf") STATIC ) + 2) );
+					snprintf( loadname, sizeof(TEXTCHAR)*len, WIDE("%s/%s"), filepath, WIDE("interface.conf") STATIC );
 				}
 				else
 				{
@@ -1811,7 +1848,7 @@ POINTER GetInterface( CTEXTSTR pServiceName )
 	ReadConfiguration();
 	if( pServiceName )
 	{
-		sprintf( interface_name, WIDE("system/interfaces/%s"), pServiceName );
+		snprintf( interface_name, sizeof( interface_name ), WIDE("system/interfaces/%s"), pServiceName );
 		load = GetRegisteredProcedure( (PCLASSROOT)interface_name, POINTER, load, (void) );
 		//lprintf( WIDE("GetInterface for %s is %p"), pServiceName, load );
 		if( load )
@@ -1822,8 +1859,12 @@ POINTER GetInterface( CTEXTSTR pServiceName )
 		}
 		else
 		{
-			lprintf( WIDE("Did not find load procedure for:[%s] (dumping names from /system/interface/* so you can see what might be availalbe)"), interface_name );
-		   DumpRegisteredNamesFrom(GetClassRoot("system/interfaces"));
+			if( !GetRegisteredValueExx( (PCLASSROOT)interface_name, NULL, WIDE( "Logged" ), 1 ) )
+			{
+				lprintf( WIDE("Did not find load procedure for:[%s] (dumping names from /system/interface/* so you can see what might be availalbe)"), interface_name );
+				DumpRegisteredNamesFrom(GetClassRoot(WIDE( "system/interfaces" )));
+				RegisterValueExx( (PCLASSROOT)interface_name, NULL, WIDE( "Logged" ), 1, (CTEXTSTR)1 );
+			}
 		}
 	}
 	return NULL;
@@ -1836,7 +1877,7 @@ PROCREG_PROC( void, DropInterface )( TEXTCHAR *pServiceName, POINTER interface_d
 	TEXTCHAR interfacename[256];
 	void (CPROC *unload)( POINTER );
 	ReadConfiguration();
-	sprintf( interfacename, WIDE("system/interfaces/%s"), pServiceName );
+	snprintf( interfacename, sizeof(interfacename), WIDE("system/interfaces/%s"), pServiceName );
 	unload = GetRegisteredProcedure( (PCLASSROOT)interfacename, void, unload, (POINTER) );
 	if( unload )
 		unload( interface_drop );
@@ -1857,14 +1898,14 @@ ATEXIT( DeleteRegistry )
    //DoDeleteRegistry( l.root );
 }
 
-void RegisterAndCreateGlobalWithInit( POINTER *ppGlobal, _32 global_size, CTEXTSTR name, void (CPROC*Open)(POINTER,_32) )
+void RegisterAndCreateGlobalWithInit( POINTER *ppGlobal, PTRSZVAL global_size, CTEXTSTR name, void (CPROC*Open)(POINTER,PTRSZVAL) )
 {
 	POINTER *ppGlobalMain;
 	POINTER p;
 
 	if( ppGlobal == (POINTER*)&procreg_local_data )
 	{
-		_32 size = global_size;
+		PTRSZVAL size = global_size;
 		_32 created;
 		TEXTCHAR spacename[32];
 		if( procreg_local_data != NULL )
@@ -1873,7 +1914,7 @@ void RegisterAndCreateGlobalWithInit( POINTER *ppGlobal, _32 global_size, CTEXTS
 			return;
 		}
 #ifdef DEBUG_GLOBAL_REGISTRATION
-		lprintf( "Opening space..." );
+		lprintf( WIDE("Opening space...") );
 #endif
 		snprintf( spacename, sizeof( spacename ), WIDE("%s:%08LX"), name, (GetMyThreadID()) >> 32 );
 		// hmm application only shared space?
@@ -1966,7 +2007,7 @@ void RegisterAndCreateGlobalWithInit( POINTER *ppGlobal, _32 global_size, CTEXTS
 	}
 }
 
-void RegisterAndCreateGlobal( POINTER *ppGlobal, _32 global_size, CTEXTSTR name )
+void RegisterAndCreateGlobal( POINTER *ppGlobal, PTRSZVAL global_size, CTEXTSTR name )
 {
    RegisterAndCreateGlobalWithInit( ppGlobal, global_size, name, NULL );
 }

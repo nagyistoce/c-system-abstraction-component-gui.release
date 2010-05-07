@@ -36,7 +36,7 @@ typedef struct node_data_tag
 
 static PNODE_DATA last_node;
 static INDEX last_option;
-static char last_value[256];
+static TEXTCHAR last_value[256];
 
 int CPROC FillList( PTRSZVAL psv, CTEXTSTR name, _32 ID, int flags );
 
@@ -119,20 +119,20 @@ PUBLIC( int, InitOptionList )( PTRSZVAL psv, PCONTROL pc, _32 ID )
 
 static void CPROC OptionSelectionChanged( PTRSZVAL psvUser, PCONTROL pc, PLISTITEM hli )
 {
-   char buffer[512];
+	char buffer[512];
 	PNODE_DATA pnd = (PNODE_DATA)GetItemData( hli );
 	last_option = pnd->ID_Option;
-   last_node = pnd;
+	last_node = pnd;
 	if( pnd->ID_Value != INVALID_INDEX )
 	{
-      lprintf( WIDE("Set value to real value.") );
+		lprintf( WIDE("Set value to real value.") );
 		GetOptionStringValue( pnd->ID_Value, buffer, sizeof( buffer ) );
-      strcpy( last_value, buffer );
+		StrCpyEx( last_value, buffer, sizeof(last_value)/sizeof(last_value[0]) );
 		SetCommonText( GetNearControl( pc, EDT_OPTIONVALUE ), buffer );
 	}
 	else
 	{
-      lprintf( WIDE("Set to blank value - no value on branch.") );
+		lprintf( WIDE("Set to blank value - no value on branch.") );
 		last_value[0] = 0;
 		SetCommonText( GetNearControl( pc, EDT_OPTIONVALUE ), WIDE("") );
 	}
@@ -142,7 +142,7 @@ void CPROC UpdateValue( PTRSZVAL psv, PCOMMON pc )
 {
 	char value[256];
 	GetControlText( GetNearControl( pc, EDT_OPTIONVALUE ), value, sizeof(value) );
-	if( strcmp( value, last_value ) != 0 )
+	if( StrCmp( value, last_value ) != 0 )
 	{
       SetOptionStringValue( last_node->ID_Option, value );
 	}
@@ -194,7 +194,7 @@ int EditOptions( void )
 		list = MakeListBox( frame, 5, 5, LIST_SIZE, 310, LST_OPTIONMAP, 0 );
 		SetListboxIsTree( list, TRUE );
 		SetSelChangeHandler( list, OptionSelectionChanged, NULL );
-      SetListItemOpenHandler( list, HandleItemOpened, NULL );
+      	SetListItemOpenHandler( list, HandleItemOpened, NULL );
 		MakeEditControl( frame, RIGHT_START, 35, 175, 25, EDT_OPTIONVALUE, WIDE("blah"), 0 );
 
 
@@ -219,11 +219,16 @@ int EditOptions( void )
    return 1;
 }
 
+#ifdef _MSC_VER
+int APIENTRY WinMain( HINSTANCE hInst, HINSTANCE hInstPrev, LPSTR lpCmd, int nCmdShow )
+{
+	int argc;
+	char **argv;
+	ParseIntoArgs( lpCmd, &argc, &argv );
+#else
 int main( int argc, char **argv )
 {
-	//SetSystemLog( SYSLOG_FILE, stdout );
-   SystemLogTime( SYSLOG_TIME_HIGH|SYSLOG_TIME_DELTA );
-	SetAllocateDebug( TRUE );
+#endif
 	if( argc > 1 )
 	{
 		PODBC o;

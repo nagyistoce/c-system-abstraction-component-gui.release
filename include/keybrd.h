@@ -18,6 +18,7 @@
 #define KEY_ALT_DOWN        0x40000000
 #define KEY_CONTROL_DOWN    0x20000000
 #define KEY_SHIFT_DOWN      0x10000000
+#define KEY_MOD_DOWN (KEY_ALT_DOWN|KEY_CONTROL_DOWN)
 #define KEY_ALPHA_LOCK_ON   0x08000000
 #define KEY_NUM_LOCK_ON     0x04000000
 
@@ -213,29 +214,52 @@
 
 #ifdef __cplusplus
 namespace sack {
+	namespace image {
 	namespace render {
+		/* namespace to define keyboard structure and handling. This
+		   keyboard event subsystem should be revisited someday.     */
 		namespace keyboard {
-//extern "C" {
 #endif
 
+			/* Keyboard state tracking structure... not very optimal...
+			   \internal usage might be different.                      */
+			enum KeyUpDownState {
+KEYISUP   =2,
+KEYISDOWN =1
+			};
+
+/* <combine sack::image::render::keyboard::keyboard_tag>
+   
+   \ \                                                   */
+/* <combine sack::image::render::keyboard::keyboard_tag>
+   
+   \ \                                                   */
 typedef struct keyboard_tag
 {
-#define NUM_KEYS 256  // one byte index... more than sufficient
-#define KEYISUP   2
-#define KEYISDOWN 1
+#define NUM_KEYS 256  
+   /* one byte index... more than sufficient
+      
+      if character in array is '1' key is down, '2' key is up. */
    char keyupdown[NUM_KEYS];
+   /* Indicator that the key is a double-tap, not just a single.
+      "!! is different that "!" "!                               */
    char keydouble[NUM_KEYS];
+   /* time of the last key event */
    unsigned int  keytime[NUM_KEYS];
-   unsigned char key[NUM_KEYS];
-   // void (*Proc)(PTRSZVAL psv)[NUM_KEYS][8]; 
+   /* I'm not sure, maybe it's the printable key char? */
+		unsigned char key[NUM_KEYS];
+#if 0
+	// void (*Proc)(PTRSZVAL psv)[NUM_KEYS][8];
+#endif
 } KEYBOARD, *PKEYBOARD;
 
 
 #ifdef __cplusplus
 		};
+		};
 	};
-}; // namespace sack namespace render namespace keyboard
-using namespace sack::render::keyboard;
+}; // namespace sack namespace image namespace render namespace keyboard
+using namespace sack::image::render::keyboard;
 //} // extern "C"
 #endif
 

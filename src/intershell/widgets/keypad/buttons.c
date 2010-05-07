@@ -19,6 +19,8 @@ typedef struct key_button_tag *PKEY_BUTTON;
 
 #include "../include/buttons.h"
 
+#define BUTTON_NAME WIDE("fancy button")
+
 typedef struct text_placement_tag
 {
 	DeclareLink( struct text_placement_tag );
@@ -36,7 +38,7 @@ typedef struct text_placement_tag
 	Font *font;
    Font last_font; // last time we looked at (*font) this is what it was.
 	CDATA text;
-   char *content;
+   TEXTCHAR *content;
 }TEXT_PLACEMENT;
 
 
@@ -77,7 +79,7 @@ typedef struct key_button_tag
 		CDATA color;
       S_16 alpha;
 	}background;
-	char *content; // nul terminated strings concatenated...
+	TEXTCHAR *content; // nul terminated strings concatenated...
 	//Font font;
 	CDATA text_color;
 	void (CPROC *PressHandler)( PTRSZVAL psv, PKEY_BUTTON key );
@@ -129,7 +131,7 @@ static LOCAL l;
  // since the fancy_button is actually a custom-drawn button
  // with methods overridden to handle default mouse behavior, etc
 // have to figure out a way to define subclasses...
-EasyRegisterControlWithBorder( "fancy button", sizeof( KEY_BUTTON ), BORDER_NONE );
+EasyRegisterControlWithBorder( BUTTON_NAME, sizeof( KEY_BUTTON ), BORDER_NONE );
 
 void CPROC PressKeyButton( PKEY_BUTTON key, PCONTROL pc )
 {
@@ -240,7 +242,7 @@ static int CPROC HandleMouse( PSI_CONTROL pc, S_32 x, S_32 y, _32 b )
    return 1;
 }
 
-static void OnMoveCommon( "fancy button" )( PSI_CONTROL pc, LOGICAL bMoving )
+static void OnMoveCommon( BUTTON_NAME )( PSI_CONTROL pc, LOGICAL bMoving )
 {
 	if( !bMoving )
 	{
@@ -263,7 +265,7 @@ static void OnMoveCommon( "fancy button" )( PSI_CONTROL pc, LOGICAL bMoving )
 	}
 }
 
-static void OnSizeCommon( "fancy button" )( PSI_CONTROL pc, LOGICAL bSizing )
+static void OnSizeCommon( BUTTON_NAME )( PSI_CONTROL pc, LOGICAL bSizing )
 {
 	if( !bSizing )
 	{
@@ -284,7 +286,7 @@ static void OnSizeCommon( "fancy button" )( PSI_CONTROL pc, LOGICAL bSizing )
 	}
 }
 
-static int  OnMouseCommon("fancy button")( PSI_CONTROL pc, S_32 x, S_32 y, _32 b )
+static int  OnMouseCommon(BUTTON_NAME)( PSI_CONTROL pc, S_32 x, S_32 y, _32 b )
 {
    return HandleMouse( pc, x, y, b );
 }
@@ -342,7 +344,7 @@ void CPROC DrawGlareLayer( PTRSZVAL psv_control, PRENDERER renderer )
 }
 //------------------------------------------------------------------------------------
 
-static int OnCreateCommon("fancy button")( PCOMMON pc )
+static int OnCreateCommon(BUTTON_NAME)( PCOMMON pc )
 {
 	MyValidatedControlData( PKEY_BUTTON, button, pc );
 	if( button )
@@ -376,7 +378,7 @@ static int OnCreateCommon("fancy button")( PCOMMON pc )
    return 1;
 }
 
-static void OnHideCommon( "fancy button" )( PSI_CONTROL pc )
+static void OnHideCommon( BUTTON_NAME )( PSI_CONTROL pc )
 {
 	MyValidatedControlData( PKEY_BUTTON, button, pc );
 	if( button->flags.bLayered )
@@ -386,7 +388,7 @@ static void OnHideCommon( "fancy button" )( PSI_CONTROL pc )
    button->flags.bShown = 0;
 }
 
-static void OnRevealCommon( "fancy button" )( PSI_CONTROL pc )
+static void OnRevealCommon( BUTTON_NAME )( PSI_CONTROL pc )
 {
 	MyValidatedControlData( PKEY_BUTTON, button, pc );
 
@@ -467,8 +469,8 @@ void LoadButtonTheme( void )
 			l.default_theme.buttons.iMask = NULL;
 		}
 
-		retval =  SACK_GetPrivateProfileString(szTheme,"GLARE","images/glare.png"
-														,szBuffer, sizeof(szBuffer), gIniFileName);
+		retval =  SACK_GetPrivateProfileStringEx(szTheme,"GLARE","images/glare.png"
+														,szBuffer, sizeof(szBuffer), gIniFileName, TRUE);
 		if (strncmp(szBuffer, WIDE("NULL"), 4)  )
 		{
 			l.default_theme.buttons.iGlare = LoadImageFile( szBuffer );
@@ -480,8 +482,8 @@ void LoadButtonTheme( void )
 			l.default_theme.buttons.iGlare = NULL;
 		}
 
-		retval =  SACK_GetPrivateProfileString(szTheme,"PRESSED","images/ridge_down.png"
-														,szBuffer, sizeof(szBuffer), gIniFileName);
+		retval =  SACK_GetPrivateProfileStringEx(szTheme,"PRESSED","images/ridge_down.png"
+														,szBuffer, sizeof(szBuffer), gIniFileName, TRUE);
 		if (strncmp(szBuffer, WIDE("NULL"), 4)  )
 		{
 			l.default_theme.buttons.iPressed = LoadImageFile( szBuffer );
@@ -493,8 +495,8 @@ void LoadButtonTheme( void )
 			l.default_theme.buttons.iPressed = NULL;
 		}
 
-		retval =  SACK_GetPrivateProfileString(szTheme,"NORMAL","images/ridge_up.png"
-														,szBuffer, sizeof(szBuffer), gIniFileName);
+		retval =  SACK_GetPrivateProfileStringEx(szTheme,"NORMAL","images/ridge_up.png"
+														,szBuffer, sizeof(szBuffer), gIniFileName, TRUE);
 		if (strncmp(szBuffer, WIDE("NULL"), 4)  )
 		{
 			l.default_theme.buttons.iNormal = LoadImageFile( szBuffer );
@@ -506,8 +508,8 @@ void LoadButtonTheme( void )
 			l.default_theme.buttons.iNormal = NULL;
 		}
 
-		l.default_theme.buttons.color =  SACK_GetPrivateProfileInt(szTheme,"Color",0x63F00013,gIniFileName);
-		l.default_theme.buttons.style =  SACK_GetPrivateProfileInt(szTheme,"Style",0, gIniFileName);
+		l.default_theme.buttons.color =  SACK_GetPrivateProfileIntEx(szTheme,"Color",0x63F00013,gIniFileName, TRUE);
+		l.default_theme.buttons.style =  SACK_GetPrivateProfileIntEx(szTheme,"Style",0, gIniFileName, TRUE);
 		l.flags.theme_loaded = 1;
 	}
 #endif
@@ -553,14 +555,14 @@ int CPROC DrawButtonText( PSI_CONTROL pc, Image surface, PKEY_BUTTON key )
 		for( layout = key->layout; layout; layout = NextThing( layout ) )
 		{
 			_32 w, h;
-         S_32 xofs = 0, yofs = 0;
+			S_32 xofs = 0, yofs = 0;
 			UpdateLayoutPosition( key, layout );
 			if( layout->flags.bHorizCenter || layout->flags.bDrawRightJust)
 			{
 				GetStringSizeFont( layout->content, &w, &h, layout->last_font );
 				if( layout->flags.bDrawRightJust )
 				{
-               xofs = -w;
+					xofs = -w;
 				}
 				if( layout->flags.bHorizCenter )
 				{
@@ -927,7 +929,7 @@ void DrawButtonLayers( PKEY_BUTTON key, Image surface, PSI_CONTROL pc)
 		}
 }
 
-static int OnDrawCommon( "fancy button" )( PCONTROL pc )
+static int OnDrawCommon( BUTTON_NAME )( PCONTROL pc )
 {
 	CTEXTSTR text;
 	//CDATA foreground = 0;
@@ -1208,7 +1210,7 @@ void GetKeySimplePressEvent( PKEY_BUTTON key
 void SetKeyPressNamedEvent( PKEY_BUTTON key, CTEXTSTR PressHandlerName, PTRSZVAL psvPress )
 {
 	SimplePressHandler handler;
-	char realname[256];
+	TEXTCHAR realname[256];
    snprintf( realname, sizeof(realname), WIDE("sack/widgets/keypad/press handler/%s"), PressHandlerName );
 
 	handler = GetRegisteredProcedure2( realname, void, WIDE("on_keypress_event"), (PTRSZVAL) );
@@ -1262,7 +1264,7 @@ PKEY_BUTTON MakeKeyExx( PCOMMON frame
 
 	}
    // make sure everything is zero... (specially with release mode)
-	pc = MakeNamedControl( frame, "fancy button"
+	pc = MakeNamedControl( frame, BUTTON_NAME
 								, x, y, width, height // position?
 								, 0  // ID
 								);
@@ -1430,7 +1432,7 @@ PTEXT_PLACEMENT AddKeyLayout( PKEY_BUTTON pKey, int x, int y, Font *font, CDATA 
    layout->last_font = (Font)INVALID_INDEX;
 	layout->font = font;
 	layout->text = color;
-   layout->content = "";
+   layout->content = WIDE( "" );
 	if( flags & BUTTON_FIELD_CENTER )
 		layout->flags.bHorizCenter = 1;
 	if( flags & BUTTON_FIELD_RIGHT )

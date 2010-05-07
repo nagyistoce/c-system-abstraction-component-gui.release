@@ -7,12 +7,14 @@
 
 #include <controls.h>
 
+XTRN struct my_vlc_interface *PlayItemAgainst( Image image, CTEXTSTR opts );
 XTRN void PlayItem( CTEXTSTR thing );
 XTRN struct my_vlc_interface *PlayItemIn( PSI_CONTROL pc, CTEXTSTR url_name );
 XTRN struct my_vlc_interface * PlayItemInEx( PSI_CONTROL pc, CTEXTSTR url_name, CTEXTSTR extra_opts );
 XTRN void StopItem( struct my_vlc_interface *);
 XTRN struct my_vlc_interface *PlayItemOn( PRENDERER renderer, CTEXTSTR url_name );
 XTRN struct my_vlc_interface * PlayItemOnEx( PRENDERER renderer, CTEXTSTR url_name, CTEXTSTR extra_opts );
+XTRN struct my_vlc_interface * PlayItemOnExx( PRENDERER renderer, CTEXTSTR url_name, CTEXTSTR extra_opts, int transparent );
 XTRN void HoldUpdates( void );
 XTRN void ReleaseUpdates( void );
 

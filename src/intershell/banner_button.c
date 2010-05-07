@@ -1,7 +1,10 @@
 
 #include "widgets/include/banner.h"
+#include "intershell_local.h"
 #include "intershell_export.h"
 #include "intershell_registry.h"
+
+INTERSHELL_NAMESPACE
 
 typedef struct banner_button BANNER_BUTTON, *PBANNER_BUTTON;
 
@@ -39,19 +42,20 @@ static struct {
 
 PRELOAD( RegisterResources )
 {
-	EasyRegisterResource( "InterShell/banner", CHECKBOX_TOPMOST            , RADIO_BUTTON_NAME );
-	EasyRegisterResource( "InterShell/banner", CHECKBOX_CONTINUE            , RADIO_BUTTON_NAME );
-	EasyRegisterResource( "InterShell/banner", CHECKBOX_YESNO            , RADIO_BUTTON_NAME );
-	EasyRegisterResource( "InterShell/banner", CHECKBOX_OKAYCANCEL            , RADIO_BUTTON_NAME );
-	EasyRegisterResource( "InterShell/banner", CHECKBOX_NOCLICK         , RADIO_BUTTON_NAME );
-	EasyRegisterResource( "InterShell/banner", CHECKBOX_EXPLORER         , RADIO_BUTTON_NAME );
-	EasyRegisterResource( "InterShell/banner", EDIT_BANNER_DELAY           , EDIT_FIELD_NAME );
-	EasyRegisterResource( "InterShell/banner", EDIT_BANNER_TEXT           , EDIT_FIELD_NAME );
+	EasyRegisterResource( WIDE( "InterShell/banner" ), CHECKBOX_TOPMOST            , RADIO_BUTTON_NAME );
+	EasyRegisterResource( WIDE( "InterShell/banner" ), CHECKBOX_CONTINUE            , RADIO_BUTTON_NAME );
+	EasyRegisterResource( WIDE( "InterShell/banner" ), CHECKBOX_YESNO            , RADIO_BUTTON_NAME );
+	EasyRegisterResource( WIDE( "InterShell/banner" ), CHECKBOX_OKAYCANCEL            , RADIO_BUTTON_NAME );
+	EasyRegisterResource( WIDE( "InterShell/banner" ), CHECKBOX_NOCLICK         , RADIO_BUTTON_NAME );
+	EasyRegisterResource( WIDE( "InterShell/banner" ), CHECKBOX_EXPLORER         , RADIO_BUTTON_NAME );
+	EasyRegisterResource( WIDE( "InterShell/banner" ), EDIT_BANNER_DELAY           , EDIT_FIELD_NAME );
+	EasyRegisterResource( WIDE( "InterShell/banner" ), EDIT_BANNER_TEXT           , EDIT_FIELD_NAME );
 
-	EasyRegisterResource( "InterShell/banner", EDIT_CONTROL_TEXT           , EDIT_FIELD_NAME );
+	EasyRegisterResource( WIDE( "InterShell/banner" ), EDIT_CONTROL_TEXT           , EDIT_FIELD_NAME );
 }
 
-OnCreateMenuButton( "Banner Message" )( PMENU_BUTTON button )
+#define MAKE_BANNER_MESSAGE WIDE("Banner Message")
+OnCreateMenuButton( MAKE_BANNER_MESSAGE )( PMENU_BUTTON button )
 {
 	PBANNER_BUTTON banner = New( BANNER_BUTTON );
 	MemSet( banner, 0, sizeof( *banner ) );
@@ -59,10 +63,10 @@ OnCreateMenuButton( "Banner Message" )( PMENU_BUTTON button )
 	return (PTRSZVAL)banner;
 }
 
-OnKeyPressEvent( "Banner Message" )( PTRSZVAL psvBanner )
+OnKeyPressEvent( MAKE_BANNER_MESSAGE )( PTRSZVAL psvBanner )
 {
 	PBANNER_BUTTON banner = (PBANNER_BUTTON)psvBanner;
-	char buffer[256];
+	TEXTCHAR buffer[256];
 	int yes_no;
 	_32 timeout = 0;
    _32 delay = 0;
@@ -102,7 +106,8 @@ OnKeyPressEvent( "Banner Message" )( PTRSZVAL psvBanner )
 	//BannerMessage( "Yo, whatcha want!?" );
 }
 
-OnCreateMenuButton( "Banner Message Remove" )( PMENU_BUTTON button )
+#define REMOVE_BANNER_MESSAGE WIDE( "Banner Message Remove" )
+OnCreateMenuButton( REMOVE_BANNER_MESSAGE )( PMENU_BUTTON button )
 {
 	// this button should only exist as an invisible/macro button....
 	PBANNER_BUTTON banner = New( BANNER_BUTTON );
@@ -111,7 +116,7 @@ OnCreateMenuButton( "Banner Message Remove" )( PMENU_BUTTON button )
 	return (PTRSZVAL)banner;
 }
 
-OnKeyPressEvent( "Banner Message Remove" )( PTRSZVAL psvBanner )
+OnKeyPressEvent( REMOVE_BANNER_MESSAGE )( PTRSZVAL psvBanner )
 {
 	PBANNER_BUTTON banner = (PBANNER_BUTTON)psvBanner;
 	INDEX idx;
@@ -123,71 +128,13 @@ OnKeyPressEvent( "Banner Message Remove" )( PTRSZVAL psvBanner )
 	//BannerMessage( "Yo, whatcha want!?" );
 }
 
-void StripConfigString( TEXTSTR out, CTEXTSTR in )
-{
-	// convert \r\n to literal characters...
-	if( !in )
-	{
-		out[0] = 0;
-		return;
-	}
-	for( ; in[0]; in++,out++ )
-	{
-		if( in[0] == '\\' )
-		{
-			switch( in[1] )
-			{
-			case 'n':
-				in++;
-				out[0] = '\n';
-				break;
-			default:
-				out[0] = in[1];
-				in++;
-				break;
-			}
-		}
-		else
-			out[0] = in[0];
-	}
-	out[0] = in[0];
-}
-
-void ExpandConfigString( TEXTSTR out, CTEXTSTR in )
-{
-	// convert \r\n to literal characters...
-	if( !in )
-	{
-		out[0] = 0;
-		return;
-	}
-	for( ; in[0]; in++,out++ )
-	{
-		if( in[0] == '\n' )
-		{
-			out[0] = '\\';
-			out++;
-			out[0] = 'n';
-		}
-		else if( in[0] == '\\' )
-		{
-			out[0] = '\\';
-			out++;
-			out[0] = '\\';
-		}
-		else
-			out[0] = in[0];
-	}
-	out[0] = in[0];
-}
-
-OnConfigureControl( "Banner Message" )( PTRSZVAL psvBanner, PSI_CONTROL parent )
+OnConfigureControl( MAKE_BANNER_MESSAGE )( PTRSZVAL psvBanner, PSI_CONTROL parent )
 {
 	PBANNER_BUTTON banner = (PBANNER_BUTTON)psvBanner;
-	PSI_CONTROL frame = LoadXMLFrameOver( parent, "EditBannerMessage.isFrame" );
+	PSI_CONTROL frame = LoadXMLFrameOver( parent, WIDE( "EditBannerMessage.isFrame" ) );
 	if( frame )
 	{
-		char buffer[256];
+		TEXTCHAR buffer[256];
 		int okay = 0;
 		int done = 0;
 		// some sort of check button for topmost
@@ -196,7 +143,7 @@ OnConfigureControl( "Banner Message" )( PTRSZVAL psvBanner, PSI_CONTROL parent )
 		// color?
 		// image name?
 		// if delay is set, make sure that the banner is unclickable.
-		snprintf( buffer, sizeof( buffer ), "%d", banner->delay );
+		snprintf( buffer, sizeof( buffer ), WIDE( "%d" ), banner->delay );
 		SetControlText( GetControl( frame, EDIT_BANNER_DELAY ), buffer );
 		ExpandConfigString( buffer, banner->text );
 		SetCheckState( GetControl( frame, CHECKBOX_NOCLICK ), banner->flags.forced_delay );
@@ -207,7 +154,7 @@ OnConfigureControl( "Banner Message" )( PTRSZVAL psvBanner, PSI_CONTROL parent )
 		SetCheckState( GetControl( frame, CHECKBOX_CONTINUE ), banner->flags.allow_continue );
 		SetControlText( GetControl( frame, EDIT_BANNER_TEXT ), buffer );
 		{
-			char buffer[256];
+			TEXTCHAR buffer[256];
 			InterShell_GetButtonText( banner->button, buffer, sizeof( buffer ) );
 			SetControlText( GetControl( frame, EDIT_CONTROL_TEXT ), buffer );
 		}
@@ -218,8 +165,8 @@ OnConfigureControl( "Banner Message" )( PTRSZVAL psvBanner, PSI_CONTROL parent )
 		CommonWait( frame );
 		if( okay )
 		{
-			char buffer[256];
-			char buffer2[256];
+			TEXTCHAR buffer[256];
+			TEXTCHAR buffer2[256];
 			GetControlText( GetControl( frame, EDIT_BANNER_DELAY ), buffer, sizeof( buffer ) );
 			banner->delay = atoi( buffer );
 			banner->flags.allow_continue = GetCheckState( GetControl( frame, CHECKBOX_CONTINUE ) );
@@ -243,21 +190,21 @@ OnConfigureControl( "Banner Message" )( PTRSZVAL psvBanner, PSI_CONTROL parent )
 
 
 
-OnSaveControl( "Banner Message" )( FILE *file, PTRSZVAL psvBanner )
+OnSaveControl( MAKE_BANNER_MESSAGE )( FILE *file, PTRSZVAL psvBanner )
 {
-	char buffer[256];
-	char buffer2[256];
+	TEXTCHAR buffer[256];
+	TEXTCHAR buffer2[256];
 	PBANNER_BUTTON banner = (PBANNER_BUTTON)psvBanner;
 	ExpandConfigString( buffer, banner->text );
 	ExpandConfigString( buffer2, buffer );
-	fprintf( file, "banner text=%s\n", buffer2 );
-	fprintf( file, "banner timeout=%d\n", banner->delay );
-	fprintf( file, "banner continue=%s\n", banner->flags.allow_continue?"yes":"no" );
-	fprintf( file, "banner force delay=%s\n", banner->flags.forced_delay?"yes":"no" );
-	fprintf( file, "banner topmost=%s\n", banner->flags.bTopmost?"yes":"no" );
-	fprintf( file, "banner yes or no=%s\n", banner->flags.yes_no?"yes":"no" );
-	fprintf( file, "banner explorer=%s\n", banner->flags.explorer?"yes":"no" );
-	fprintf( file, "banner okay or cancel=%s\n", banner->flags.okay_cancel?"yes":"no" );
+	fprintf( file, WIDE( "banner text=%s\n" ), buffer2 );
+	fprintf( file, WIDE( "banner timeout=%d\n" ), banner->delay );
+	fprintf( file, WIDE( "banner continue=%s\n" ), banner->flags.allow_continue?WIDE( "yes" ):WIDE( "no" ) );
+	fprintf( file, WIDE( "banner force delay=%s\n" ), banner->flags.forced_delay?WIDE( "yes" ):WIDE( "no" ) );
+	fprintf( file, WIDE( "banner topmost=%s\n" ), banner->flags.bTopmost?WIDE( "yes" ):WIDE( "no" ) );
+	fprintf( file, WIDE( "banner yes or no=%s\n" ), banner->flags.yes_no?WIDE( "yes" ):WIDE( "no" ) );
+	fprintf( file, WIDE( "banner explorer=%s\n" ), banner->flags.explorer?WIDE( "yes" ):WIDE( "no" ) );
+	fprintf( file, WIDE( "banner okay or cancel=%s\n" ), banner->flags.okay_cancel?WIDE( "yes" ):WIDE( "no" ) );
 }
 
 
@@ -333,15 +280,16 @@ static PTRSZVAL CPROC ConfigSetBannerOkayCancel( PTRSZVAL psvBanner, arg_list ar
 	return psvBanner;
 }
 
-OnLoadControl( "Banner Message" )( PCONFIG_HANDLER pch, PTRSZVAL psvBanner )
+OnLoadControl( MAKE_BANNER_MESSAGE )( PCONFIG_HANDLER pch, PTRSZVAL psvBanner )
 {
-	AddConfigurationMethod( pch, "banner text=%m", ConfigSetBannerText );
-	AddConfigurationMethod( pch, "banner timeout=%i", ConfigSetBannerTimeout );
-	AddConfigurationMethod( pch, "banner continue=%b", ConfigSetBannerContinue );
-	AddConfigurationMethod( pch, "banner force delay=%b", ConfigSetBannerForced );
-	AddConfigurationMethod( pch, "banner topmost=%b", ConfigSetBannerTopmost );
-	AddConfigurationMethod( pch, "banner yes or no=%b", ConfigSetBannerYesNo );
-	AddConfigurationMethod( pch, "banner explorer=%b", ConfigSetBannerExplorer );
-	AddConfigurationMethod( pch, "banner okay or cancel=%b", ConfigSetBannerOkayCancel );
+	AddConfigurationMethod( pch, WIDE( "banner text=%m" ), ConfigSetBannerText );
+	AddConfigurationMethod( pch, WIDE( "banner timeout=%i" ), ConfigSetBannerTimeout );
+	AddConfigurationMethod( pch, WIDE( "banner continue=%b" ), ConfigSetBannerContinue );
+	AddConfigurationMethod( pch, WIDE( "banner force delay=%b" ), ConfigSetBannerForced );
+	AddConfigurationMethod( pch, WIDE( "banner topmost=%b" ), ConfigSetBannerTopmost );
+	AddConfigurationMethod( pch, WIDE( "banner yes or no=%b" ), ConfigSetBannerYesNo );
+	AddConfigurationMethod( pch, WIDE( "banner explorer=%b" ), ConfigSetBannerExplorer );
+	AddConfigurationMethod( pch, WIDE( "banner okay or cancel=%b" ), ConfigSetBannerOkayCancel );
 }
 
+INTERSHELL_NAMESPACE_END

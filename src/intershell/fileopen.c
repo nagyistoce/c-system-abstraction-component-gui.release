@@ -21,10 +21,10 @@ filter == something like "Bodies\0*.Body\0"
 #define HWND int
 #define BOOL int
 #endif
-LOGICAL SelectExistingFile( PSI_CONTROL parent, char * szFile, _32 buflen, char * filter )
+LOGICAL SelectExistingFile( PSI_CONTROL parent, TEXTCHAR * szFile, _32 buflen, TEXTCHAR * filter )
 {
 #ifdef COMPAT_MODE
-   return PSI_PickFile( parent, ".", filter, szFile, buflen, FALSE );
+   return PSI_PickFile( parent, WIDE( "." ), filter, szFile, buflen, FALSE );
 #else
 #ifdef __WINDOWS__
    OPENFILENAME ofn;       // common dialog box structurechar szFile[260];       // buffer for filenameHWND hwnd;              // owner windowHANDLE hf;              // file handle// Initialize OPENFILENAMEZeroMemory(&ofn, sizeof(OPENFILENAME));
@@ -50,12 +50,12 @@ LOGICAL SelectExistingFile( PSI_CONTROL parent, char * szFile, _32 buflen, char 
 			q[0] = 0;
 			if( p[0] ) p++;
 			q++;
-         p = start;
+			p = start;
 			while( p[0] && p[0] != '\t' )
 			{
 				q[0] = p[0];
 				p++;
-            q++;
+				q++;
 			}
 			q[0] = 0;
 			if( p[0] ) p++;
@@ -84,10 +84,10 @@ LOGICAL SelectExistingFile( PSI_CONTROL parent, char * szFile, _32 buflen, char 
 }
 
 //------------------------------------------
-LOGICAL SelectNewFile( PSI_CONTROL parent, char * szFile, _32 buflen, char * filter )
+LOGICAL SelectNewFile( PSI_CONTROL parent, TEXTCHAR * szFile, _32 buflen, TEXTCHAR * filter )
 {
 #ifdef COMPAT_MODE
-   return PSI_PickFile( parent, ".", filter, szFile, buflen, TRUE );
+   return PSI_PickFile( parent, WIDE( "." ), filter, szFile, buflen, TRUE );
 #else
 #ifdef __WINDOWS__
    

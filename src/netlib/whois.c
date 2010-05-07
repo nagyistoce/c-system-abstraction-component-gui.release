@@ -1,3 +1,4 @@
+#include <stdhdrs.h>
 #define LIBRARY_DEF
 #include <stdio.h>
 #ifdef __LINUX__
@@ -13,9 +14,9 @@ SACK_NETWORK_NAMESPACE
 
 char DefaultServer[] = "whois.nsiregistry.net:43"; //whois";
 
-LOGICAL DoWhois( CTEXTSTR pHost, CTEXTSTR pServer, TEXTSTR pResult )
+LOGICAL DoWhois( CTEXTSTR pHost, CTEXTSTR pServer, PVARTEXT pvtResult )
 {
-	TEXTCHAR *pStartResult = pResult;
+	//TEXTCHAR *pStartResult = pResult;
 	SOCKET S;
 	SOCKADDR *sa1;
 	// hey if noone started it by now - they ain't gonna, and I will.
@@ -23,13 +24,13 @@ LOGICAL DoWhois( CTEXTSTR pHost, CTEXTSTR pServer, TEXTSTR pResult )
 	//SetSystemLog( SYSLOG_FILE, stdout );
 	if( !pHost )
 	{
-		sprintf( pResult, WIDE("Must specify a host, handle, or domain name\n") );
+		vtprintf( pvtResult, WIDE("Must specify a host, handle, or domain name\n") );
 		return FALSE;
 	}
 	S = socket( 2,1,6 );
 	if( S == INVALID_SOCKET )
 	{
-		sprintf( pResult, WIDE("Could not allocate socket resource\n") );
+		vtprintf( pvtResult, WIDE("Could not allocate socket resource\n") );
 		return FALSE;
 	}
 
@@ -39,7 +40,7 @@ LOGICAL DoWhois( CTEXTSTR pHost, CTEXTSTR pServer, TEXTSTR pResult )
 	sa1 = CreateSockAddress( pServer, 43 );
 	if( connect( S, sa1, sizeof(*sa1) ) )
 	{
-		sprintf( pResult, WIDE("Failed to connect (%d)\n"), WSAGetLastError());
+		vtprintf( pvtResult, WIDE("Failed to connect (%d)\n"), WSAGetLastError());
 		closesocket( S );
 		return FALSE;
 	}
@@ -52,29 +53,34 @@ LOGICAL DoWhois( CTEXTSTR pHost, CTEXTSTR pServer, TEXTSTR pResult )
 
 		if( send( S, buf, l, 0 ) != l )
 		{
-			sprintf( pResult, WIDE("Failed to be able to write data to the network\n") );
+			vtprintf( pvtResult, WIDE("Failed to be able to write data to the network\n") );
 			closesocket( S );
 			return FALSE;
 		}
 
 		// insert WAIT FOR RESPONCE code....
-		//pResult += sprintf( pResult, WIDE("Version 1.0   ADA Software Developers, Inc.  Copyright 1999.\n") );
+		//vtprintf( pvtResult, WIDE("Version 1.0   ADA Software Developers, Inc.  Copyright 1999.\n") );
 		while( ( l = recv( S, buf, sizeof( buf ), 0 ) ) > 0 )
 		{
 			if( l < sizeof(buf) )
 				buf[l] = 0;
-			pResult += sprintf( pResult, WIDE("%s"), buf );
+			vtprintf( pvtResult, WIDE("%s"), buf );
 		}
 		{
-			char *pNext, *pEnd;;
-			if( ( pNext = strstr( pStartResult, WIDE("Whois Server: ") ) ) )
+			char *pNext, *pEnd;
+			PTEXT result = VarTextGet( pvtResult );
+			if( ( pNext = strstr( GetText( result ), WIDE("Whois Server: ") ) ) )
 			{
 				pNext += 14;
 				pEnd = pNext;
 				while( *pEnd != '\n' )
 					pEnd++;
+				pEnd[0] = ':';
+				pEnd[1] = '4';
+				pEnd[2] = '3';
+				pEnd[3] = 0;
 				strcpy( pEnd, WIDE(":43") ); // whois" );
-				DoWhois( pHost, pNext, pStartResult );
+				DoWhois( pHost, pNext, pvtResult );
 			}
 		}
 	}

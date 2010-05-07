@@ -7,9 +7,6 @@
 #include <sack_types.h>
 #include <typelib.h> // leach, assuming this will be compiled with this part at least.
 
-#ifdef TYPELIB_SOURCE
-#define DEADSTART_SOURCE
-#endif
 
 #ifdef __cplusplus
 #define USE_SACK_DEADSTART_NAMESPACE using namespace sack::app::deadstart;
@@ -21,12 +18,19 @@
 #define SACK_DEADSTART_NAMESPACE_END
 #endif
 
-#ifdef DEADSTART_SOURCE
-#define DEADSTART_PROC TYPELIB_PROC
-#else
-#define DEADSTART_PROC TYPELIB_PROC
+#ifdef TYPELIB_SOURCE
+#define DEADSTART_SOURCE
 #endif
+#    define DEADSTART_CALLTYPE CPROC
+#  if defined( _TYPELIBRARY_SOURCE_STEAL )
+#    define DEADSTART_PROC type DEADSTART_CALLTYPE name type CPROC name
+#  elif defined( _TYPELIBRARY_SOURCE )
+#    define DEADSTART_PROC EXPORT_METHOD
+#  else
+#    define DEADSTART_PROC IMPORT_METHOD
+#  endif
 
+/* Application namespace. */
 SACK_DEADSTART_NAMESPACE
 
 
@@ -52,38 +56,27 @@ SACK_DEADSTART_NAMESPACE
 #define DEFAULT_PRELOAD_PRIORITY (DEADSTART_PRELOAD_PRIORITY-1)
 #define DEADSTART_PRELOAD_PRIORITY 70
 
-#ifdef __WATCOMC__
-#define default_name_for_deadstart_runner "RunDeadstart_"
-#endif
-#ifdef _MSC_VER
-#define default_name_for_deadstart_runner "_RunDeadstart"
-#endif
-#if defined( __CYGWIN__ )
-#define default_name_for_deadstart_runner "RunDeadstart"
-#endif
-
-
 // proc, proc_name, priority DEADSTART_PRIORTY_,unused to hack in self reference of static symbol
 // this will trick most compilers.
 // uses a compiler-native function (not cproc)
-DEADSTART_PROC( void, RegisterPriorityStartupProc)( void(*)(void), CTEXTSTR,int,void* unused, CTEXTSTR,int);
-DEADSTART_PROC( void, RegisterPriorityShutdownProc)( void(*)(void), CTEXTSTR,int,void* unused, CTEXTSTR,int);
-DEADSTART_PROC( void, SuspendDeadstart )( void );
-DEADSTART_PROC( void, InvokeDeadstart )(void);
-DEADSTART_PROC( void, InvokeExits )(void);
-DEADSTART_PROC( void, MarkRootDeadstartComplete )( void );
+DEADSTART_PROC  void DEADSTART_CALLTYPE  RegisterPriorityStartupProc( void(*)(void), CTEXTSTR,int,void* unused, CTEXTSTR,int);
+DEADSTART_PROC  void DEADSTART_CALLTYPE  RegisterPriorityShutdownProc( void(*)(void), CTEXTSTR,int,void* unused, CTEXTSTR,int);
+DEADSTART_PROC  void DEADSTART_CALLTYPE  SuspendDeadstart ( void );
+DEADSTART_PROC  void DEADSTART_CALLTYPE  InvokeDeadstart (void);
+DEADSTART_PROC  void DEADSTART_CALLTYPE  InvokeExits (void);
+DEADSTART_PROC  void DEADSTART_CALLTYPE  MarkRootDeadstartComplete ( void );
 
 #ifdef __LINUX__
 // call this after a fork().  Otherwise, it will falsely invoke shutdown when it exits.
-DEADSTART_PROC( void, DispelDeadstart )( void );
+DEADSTART_PROC  void DEADSTART_CALLTYPE  DispelDeadstart ( void );
 #endif
 
-#if defined( __cplusplus) 
+#if ( defined( __cplusplus) || defined( _WIN64 ) ) && 0 
 
 #define PRIORITY_PRELOAD(name,priority) static void name(void); \
    static class schedule_##name {   \
      public:schedule_##name() {    \
-	RegisterPriorityStartupProc( name,#name,priority,(void*)this,__FILE__,__LINE__ );\
+	RegisterPriorityStartupProc( name,#name,priority,(void*)this,WIDE__FILE__,__LINE__ );\
 	  }  \
 	} do_schedul_##name;     \
 	static void name(void)
@@ -97,14 +90,14 @@ DEADSTART_PROC( void, DispelDeadstart )( void );
 #define ATEXIT_PRIORITY(name,priority) static void name(void); \
    static class schedule_##name {   \
      public:schedule_##name() {    \
-	RegisterPriorityShutdownProc( name,#name,priority,(void*)this,__FILE__,__LINE__ );\
+	RegisterPriorityShutdownProc( name,#name,priority,(void*)this,WIDE__FILE__,__LINE__ );\
 	  }  \
 	} do_schedul_##name;     \
 	static void name(void)
 #define PRIORITY_ATEXIT(name,priority) static void name(void); \
    static class shutdown_##name {   \
 	public:shutdown_##name() {    \
-   RegisterPriorityShutdownProc( name,#name,priority,(void*)this,__FILE__,__LINE__ );\
+   RegisterPriorityShutdownProc( name,#name,priority,(void*)this,WIDE__FILE__,__LINE__ );\
 	/*name(); / * call on destructor of static object.*/ \
 	  }  \
 	} do_shutdown_##name;     \
@@ -120,9 +113,6 @@ DEADSTART_PROC( void, DispelDeadstart )( void );
 //------------------------------------------------------------------------------------
 #elif defined( __WATCOMC__ )
 #pragma off (check_stack)
-#if defined( _MSC_VER )
-#error both watcom and MSC_VER?!?!?!
-#endif
 /* code taken from openwatcom/bld/watcom/h/rtinit.h */
 typedef unsigned char   __type_rtp;
 typedef unsigned short  __type_pad;
@@ -144,50 +134,25 @@ struct rt_init // structure placed in XI/YI segment
 /* end code taken from openwatcom/bld/watcom/h/rtinit.h */
 
 
-/* in the main program is a routine which is referenced in dynamic mode...
- need to redo this macro in the case of static linking...
-
- */
-
-//------------------------------------------------------------------------------------
-//  WIN32 basic methods... on wait
-//------------------------------------------------------------------------------------
-
-
-#ifdef _legacy_reverse_link_app_
-#define InvokeDeadstart() do {                                              \
-	TEXTCHAR myname[256];HMODULE mod;GetModuleFileName( NULL, (LPSTR)myname, sizeof( myname ) );\
-	mod=LoadLibrary((LPSTR)myname);if(mod){        \
-   void(*rsp)(void); \
-	if((rsp=((void(*)(void))(GetProcAddress( mod, default_name_for_deadstart_runner))))){rsp();}else{lprintf( WIDE("Hey failed to get proc %d"), GetLastError() );}\
-	FreeLibrary( mod); }} while(0)
-#endif
-
-//------------------------------------------------------------------------------------
-// MSVC Starup/atexit registration methods...
-//------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------
 // watcom
 //------------------------------------------------------------------------------------
-#ifdef __WATCOMC__
 //void RegisterStartupProc( void (*proc)(void) );
 
 
-#ifdef __cplusplus
-#else
 #define PRIORITY_PRELOAD(name,priority) static void schedule_##name(void); static void name(void); \
 	static struct rt_init __based(__segname("XI")) name##_ctor_label={0,(DEADSTART_PRELOAD_PRIORITY-1),schedule_##name}; \
 	static void schedule_##name(void) {                 \
-	RegisterPriorityStartupProc( name,#name,priority,&name##_ctor_label,__FILE__,__LINE__ );\
+	RegisterPriorityStartupProc( name,#name,priority,&name##_ctor_label,WIDE__FILE__,__LINE__ );\
 	}                                       \
 	static void name(void)
 #define ATEXIT_PRIORITY(name,priority) static void schedule_exit_##name(void); static void name(void); \
 	static struct rt_init __based(__segname("XI")) name##_dtor_label={0,69,schedule_exit_##name}; \
 	static void schedule_exit_##name(void) {                                              \
-	RegisterPriorityShutdownProc( name,#name,priority,&name##_dtor_label,__FILE__,__LINE__ );\
+	RegisterPriorityShutdownProc( name,#name,priority,&name##_dtor_label,WIDE__FILE__,__LINE__ );\
 	}                                       \
 	static void name(void)
-#endif
+
 // syslog runs preload at priority 65
 // message service runs preload priority 66
 // deadstart itself tries to run at priority 70 (after all others have registered)
@@ -201,8 +166,6 @@ struct rt_init // structure placed in XI/YI segment
 // however this routine is only triggered in windows by calling
 // BAG_Exit(nn) which is aliased to replace exit(n) automatically
 
-#ifdef __cplusplus
-#else
 #define PRIORITY_ATEXIT(name,priority) ATEXIT_PRIORITY( name,priority)
 /*
 static void name(void); static void name##_x_(void);\
@@ -210,18 +173,16 @@ static void name(void); static void name##_x_(void);\
 	static void name##_x_(void) { char myname[256];myname[0]=*(CTEXTSTR)&name##_dtor_label;GetModuleFileName(NULL,myname,sizeof(myname));name(); } \
 	static void name(void)
   */
-#endif
 #define ROOT_ATEXIT(name) ATEXIT_PRIORITY(name,ATEXIT_PRIORITY_ROOT)
 #define ATEXIT(name)      PRIORITY_ATEXIT(name,ATEXIT_PRIORITY_DEFAULT)
 // if priority_atexit is used with priority 0 - the proc is scheduled into
 // atexit, and exit() is then invoked.
 //#define PRIORITY_ATEXIT(name,priority) ATEXIT_PRIORITY(name,priority )
 
-#endif
 //------------------------------------------------------------------------------------
 // Linux
 //------------------------------------------------------------------------------------
-#elif defined( __LINUX__ )
+#elif defined( __GNUC__ )
 
 /* code taken from openwatcom/bld/watcom/h/rtinit.h */
 typedef unsigned char   __type_rtp;
@@ -246,7 +207,7 @@ struct rt_init // structure placed in XI/YI segment
                           //   completed entries
     __type_rtp  scheduled; // has this been scheduled? (0 if no)
     __type_rtp  priority; // - priority (0-highest 255-lowest)
-#if defined( __LINUX64__ ) ||defined( __arm__ )
+#if defined( __LINUX64__ ) ||defined( __arm__ )||defined( __GNUC__ )
 #define INIT_PADDING ,{0}
 	 char padding[1]; // need this otherwise it's 23 bytes and that'll be bad.
 #else
@@ -278,7 +239,7 @@ struct rt_init // structure placed in XI/YI segment
 #define PRIORITY_PRELOAD(name,priority) static void name(void); \
    static class schedule_##name {   \
      public:schedule_##name() {    \
-	        RegisterPriorityStartupProc( name,#name,priority,this,__FILE__,__LINE__ );\
+	        RegisterPriorityStartupProc( name,#name,priority,this,WIDE__FILE__,__LINE__ );\
     }\
 	} do_schedul_##name;     \
 	static void name(void)
@@ -291,7 +252,7 @@ struct rt_init // structure placed in XI/YI segment
 #define ATEXIT_PRIORITY(name,priority) static void name(void); \
    static class schedule_##name {   \
      public:schedule_##name() {    \
-        RegisterPriorityShutdownProc( name,#name,priority,this,__FILE__,__LINE__ ); \
+        RegisterPriorityShutdownProc( name,#name,priority,this,WIDE__FILE__,__LINE__ ); \
       }\
 	} do_schedul_##name;     \
 	static void name(void)
@@ -303,7 +264,7 @@ struct rt_init // structure placed in XI/YI segment
 	  __attribute__((section("deadstart_list"))) \
 	={0,0,pr INIT_PADDING    \
 	 ,__LINE__,name         \
-	 ,__FILE__        \
+	 ,WIDE__FILE__        \
 	,#name        \
 	JUNKINIT(name)}; \
 	static void name(void)
@@ -312,7 +273,7 @@ typedef void(*atexit_priority_proc)(void (*)(void),CTEXTSTR,int,CTEXTSTR,int);
 #define PRIORITY_ATEXIT(name,priority) static void name(void); static void atexit##name(void) __attribute__((constructor));  \
 void atexit##name(void)                                                  \
 {                                                                        \
-	RegisterPriorityShutdownProc(name,#name,priority,NULL,__FILE__,__LINE__);                          \
+	RegisterPriorityShutdownProc(name,#name,priority,NULL,WIDE__FILE__,__LINE__);                          \
 }                                                                          \
 void name(void)
 #endif
@@ -389,7 +350,7 @@ struct rt_init // structure placed in XI/YI segment
 	mod=LoadLibrary(myname);DebugBreak();if(mod){\
    typedef void (*x)(void);void(*rsp)( x,const CTEXTSTR,int,const CTEXTSTR,int); \
 	if((rsp=((void(*)(void(*)(void),const CTEXTSTR,int,const CTEXTSTR,int))(GetProcAddress( mod, WIDE("RegisterPriorityStartupProc"))))))\
-	{rsp( name,#name,priority,__FILE__,__LINE__ );}}\
+	{rsp( name,#name,priority,WIDE__FILE__,__LINE__ );}}\
      FreeLibrary( mod); \
     }\
 	} do_schedul_##name;     \
@@ -407,7 +368,7 @@ struct rt_init // structure placed in XI/YI segment
 	mod=LoadLibrary(myname);if(mod){\
    typedef void (*x)(void);void(*rsp)( x,const CTEXTSTR,int,const CTEXTSTR,int); \
 	if((rsp=((void(*)(void(*)(void),const CTEXTSTR,int,const CTEXTSTR,int))(GetProcAddress( mod, WIDE("RegisterPriorityShutdownProc"))))))\
-	{rsp( name,#name,priority,__FILE__,__LINE__ );}}\
+	{rsp( name,#name,priority,WIDE__FILE__,__LINE__ );}}\
      FreeLibrary( mod); \
       }\
 	} do_schedul_##name;     \
@@ -424,8 +385,8 @@ void atexit##name(void)                                                  \
 	mod=LoadLibrary(myname);if(mod){\
    typedef void (*x)(void);void(*rsp)( x,const CTEXTSTR,int,const CTEXTSTR,int); \
 	if((rsp=((void(*)(void(*)(void),const CTEXTSTR,int,const CTEXTSTR,int))(GetProcAddress( mod, WIDE("RegisterPriorityShutdownProc"))))))\
-	 {rsp( name,#name,priority,__FILE__,__LINE__ );}\
-	 else atexit_failed##name(name,priority,#name,__FILE__,__LINE__);        \
+	 {rsp( name,#name,priority,WIDE__FILE__,__LINE__ );}\
+	 else atexit_failed##name(name,priority,#name,WIDE__FILE__,__LINE__);        \
 	}\
      FreeLibrary( mod); \
 	}             \
@@ -436,7 +397,7 @@ void name( void) \
 	  __attribute__((section("deadstart_list"))) \
 	={0,0,pr INIT_PADDING    \
 	 ,__LINE__,name         \
-	 ,__FILE__        \
+	 ,WIDE__FILE__        \
 	,#name        \
 	JUNKINIT(name)}; \
 	static void name(void)
@@ -470,8 +431,7 @@ void name( void) \
 //------------------------------------------------------------------------------------
 // WIN32 MSVC
 //------------------------------------------------------------------------------------
-#elif defined( _MSC_VER )
-
+#elif defined( _MSC_VER ) && defined( _WIN32 )
 //#define PRELOAD(name) __declspec(allocate(".CRT$XCAA")) void CPROC name(void)
 
 //#pragma section(".CRT$XCA",long,read)
@@ -483,14 +443,10 @@ void name( void) \
 
 /////// also the variables to be put into these segments
 #if defined( __cplusplus_cli )
-#if defined( __cplusplus_cli )
 #define LOG_ERROR(n) System::Console::WriteLine( gcnew System::String(n) + gcnew System::String( myname) ) )
 #else
 #define LOG_ERROR(n) SystemLog( n )
-#endif
 
-
-#else
 #define _STARTSEG_ ".CRT$XIZ"
 #define _STARTSEG2_ ".CRT$XCZ"
 #define _ENDSEG_ ".CRT$YIZ"
@@ -507,7 +463,7 @@ void name( void) \
 
 #define PRIORITY_PRELOAD(name,priority) static void name(void); \
 	static int schedule_##name(void) {                 \
-	RegisterPriorityStartupProc( name,#name,priority,0/*chance to use label to reference*/,__FILE__,__LINE__ );\
+	RegisterPriorityStartupProc( name,WIDE(#name),priority,0/*chance to use label to reference*/,WIDE__FILE__,__LINE__ );\
 	return 0; \
 	}                                       \
 	/*static __declspec(allocate(_STARTSEG_)) void (CPROC*pointer_##name)(void) = schedule_##name;*/ \
@@ -518,7 +474,7 @@ void name( void) \
 #define ATEXIT_PRIORITY(name,priority) static void schedule_exit_##name(void); static void name(void); \
 	static struct rt_init __based(__segname("XI")) name##_dtor_label={0,69,schedule_exit_##name}; \
 	static void schedule_exit_##name(void) {                                              \
-	RegisterPriorityShutdownProc( name,#name,priority,&name##_dtor_label,__FILE__,__LINE__ );\
+	RegisterPriorityShutdownProc( name,#name,priority,&name##_dtor_label,WIDE__FILE__,__LINE__ );\
 	}                                       \
 */
 
@@ -541,8 +497,8 @@ void atexit##name(void)                                                  \
 	/*lprintf( WIDE("Do pr_atexit %s"), #name ); */                             \
 	f=(atexit_priority_proc)GetProcAddress( hMod = LoadLibrary( NULL )    \
 										  , WIDE("RegisterShutdownProc") );              \
-	if(f) f(name,priority,#name,__FILE__,__LINE__);                          \
-	else atexit_failed##name(name,priority,#name,__FILE__,__LINE__);        \
+	if(f) f(name,priority,WIDE(#name),WIDE__FILE__,__LINE__);                          \
+	else atexit_failed##name(name,priority,WIDE(#name),WIDE__FILE__,__LINE__);        \
    FreeLibrary(hMod); /*optional*/                                         \
 }                                                                          \
 void name(void)

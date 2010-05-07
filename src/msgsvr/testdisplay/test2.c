@@ -13,8 +13,13 @@ typedef struct global_tag {
 GLOBAL g;
 
 
-int main( void )
+#ifdef UNDER_CE
+int APIENTRY WinMain( HINSTANCE h, HINSTANCE p, int cmd, int nCmdShow )
 {
+#else
+	int main( void )
+{
+#endif
 	PRENDERER display[3];
 	Image image[3];
 

@@ -20,3 +20,9 @@ static_release-.*$
 memory.dump$
 /p$
 .aps$
+include/sqlite3\.h
+include/zlib
+include/genxml
+include/png
+include/sexpat
+
