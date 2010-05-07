@@ -29,14 +29,14 @@ static PSPRITE MakeSpriteEx( DBG_VOIDPASS )
    return ps;
 }
 
-IMAGE_PROC(  PSPRITE, MakeSpriteImageEx )( ImageFile *Image DBG_PASS)
+  PSPRITE  MakeSpriteImageEx ( ImageFile *Image DBG_PASS)
 {
    PSPRITE ps = MakeSpriteEx( DBG_VOIDRELAY );
    ps->image = Image;
    return ps;
 }
 
-IMAGE_PROC(  PSPRITE, MakeSpriteImageFileEx )( CTEXTSTR fname DBG_PASS )
+  PSPRITE  MakeSpriteImageFileEx ( CTEXTSTR fname DBG_PASS )
 {
    PSPRITE ps = MakeSpriteEx( DBG_VOIDRELAY );
    ps->image = LoadImageFileEx( fname DBG_RELAY );

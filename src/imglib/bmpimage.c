@@ -32,7 +32,7 @@ namespace sack {
 		namespace loader {
 #endif
 
-#if !defined( _WINGDI_H ) && !defined( _WINGDI_ )
+#if !defined( _WINGDI_H ) && !defined( _WINGDI_ ) && !defined( UNDER_CE )
 
 typedef PREFIX_PACKED struct tagBITMAPFILEHEADER { // bmfh
    _16    bfType;
@@ -112,8 +112,20 @@ typedef struct {
 #endif
 
 /* compare _MSC_VER to some constant when you fail to compile here... and this will define missing structure */
-#if ( (__WATCOMC__ <= 1250 ) || defined __LINUX__ ) && !defined( _MSC_VER ) && !defined( __CYGWIN__ )
+#if UNDER_CE || ( (__WATCOMC__ <= 1250 ) || defined __LINUX__ ) && !defined( _MSC_VER ) && !defined( __CYGWIN__ ) && !defined( _WINGDI_H) 
 //#if (WINVER >= 0x0500)
+typedef long    FXPT2DOT30;
+typedef struct tagCIEXYZ {
+    FXPT2DOT30  ciexyzX;
+    FXPT2DOT30  ciexyzY;
+    FXPT2DOT30  ciexyzZ;
+} CIEXYZ;
+typedef struct tagCIEXYZTRIPLE {
+    CIEXYZ  ciexyzRed;
+    CIEXYZ  ciexyzGreen;
+    CIEXYZ  ciexyzBlue;
+} CIEXYZTRIPLE;
+
 typedef struct {
         _32        bV5Size;
         S_32       bV5Width;
@@ -378,9 +390,11 @@ Image ImageRawBMPFile (_8* ptr, _32 filesize)
 	case sizeof( BITMAPV5HEADER ):
 		return Bitmap5ToImageFile( (BITMAPV5HEADER*)(ptr), ptr + bmp->biSize );
       break;
+#ifndef UNDER_CE
 	case sizeof( BITMAPV4HEADER ):
 		//return Bitmap5ToImageFile( (BITMAPV5HEADER*)(ptr), ptr + bmp->biSize );
 		break;
+#endif
 	}
 	return NULL;
 }

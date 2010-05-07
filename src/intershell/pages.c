@@ -14,6 +14,9 @@
  *    page/Page Changer
  *    page/title
  */
+#ifndef INTERSHELL_SOURCE
+#define INTERSHELL_SOURCE
+#endif
 
 #include <stdhdrs.h> // DebugBreak()
 #include <sharemem.h>
@@ -27,6 +30,8 @@
 #include "widgets/include/banner.h"
 
 #include <psi.h>
+
+INTERSHELL_NAMESPACE
 
 extern CONTROL_REGISTRATION menu_surface;
 
@@ -162,7 +167,7 @@ int InvokePageChange( void )
 {
 	CTEXTSTR name;
 	PCLASSROOT data = NULL;
-	for( name = GetFirstRegisteredName( TASK_PREFIX "/common/change page", &data );
+	for( name = GetFirstRegisteredName( TASK_PREFIX WIDE( "/common/change page" ), &data );
 		  name;
 		  name = GetNextRegisteredName( &data ) )
 	{
@@ -183,7 +188,7 @@ int InvokeAllowPageChange( void )
 {
 	CTEXTSTR name;
 	PCLASSROOT data = NULL;
-	for( name = GetFirstRegisteredName( TASK_PREFIX "/common/change page", &data );
+	for( name = GetFirstRegisteredName( TASK_PREFIX WIDE( "/common/change page" ), &data );
 		  name;
 		  name = GetNextRegisteredName( &data ) )
 	{
@@ -204,7 +209,7 @@ void UpdateButtonExx( PMENU_BUTTON button, int bEndingEdit DBG_PASS )
 #define UpdateButtonEx( button, edit ) UpdateButtonExx( button, edit DBG_SRC )
 {
 	int bShow;
-	//_xlprintf( LOG_NOISE DBG_RELAY )( "Begin update (%s) button.... (from somwhere)", button->pTypeName );
+	//_xlprintf( LOG_NOISE DBG_RELAY )( WIDE( "Begin update (%s) button.... (from somwhere)" ), button->pTypeName );
 	if( !bEndingEdit )
 	{
 		/* better to validate this, so off-page controls don't accidentatlly
@@ -213,18 +218,18 @@ void UpdateButtonExx( PMENU_BUTTON button, int bEndingEdit DBG_PASS )
 		PCanvasData canvas = GetCanvas( GetCommonParent( QueryGetControl( button ) ) );
 		// doesn't matter ... we're not on this button's page..
 
-		//lprintf( "probably not g.flags.multi_edit ( %d )",  g.flags.multi_edit );
-      //lprintf( "real button page %p is %p ?", InterShell_GetPhysicalButton( button )->page, canvas->current_page );
+		//lprintf( WIDE( "probably not g.flags.multi_edit ( %d )" ),  g.flags.multi_edit );
+      //lprintf( WIDE( "real button page %p is %p ?" ), InterShell_GetPhysicalButton( button )->page, canvas->current_page );
 		if( !g.flags.multi_edit && InterShell_GetPhysicalButton( button )->page != canvas->current_page )
 			return;
 	}
 
 	if( button->flags.bInvisible )
 	{
-		//lprintf( "invisible buttons (macro components... ) special process )" );
+		//lprintf( WIDE( "invisible buttons (macro components... ) special process )" ) );
 		// call the showcontrol on it... it might know it's parent container to update colors...
 		InvokeShowControl( button );
-		//lprintf( "Okay... then what ? smudge this?" );
+		//lprintf( WIDE( "Okay... then what ? smudge this?" ) );
       FlushToKey( InterShell_GetPhysicalButton( button ) );
 		SmudgeCommon( QueryGetControl( InterShell_GetPhysicalButton( button ) ) );
       return;
@@ -237,7 +242,7 @@ void UpdateButtonExx( PMENU_BUTTON button, int bEndingEdit DBG_PASS )
    // if it's not on a page, it might just be in a macro...
 	if( !button->page && !button->container_button )
 	{
-		//lprintf( "Somehow a button is not on a page...(DEBUG)" );
+		//lprintf( WIDE( "Somehow a button is not on a page...(DEBUG)" ) );
 		DebugBreak();
 	}
 	if( button->psvUser &&
@@ -245,7 +250,7 @@ void UpdateButtonExx( PMENU_BUTTON button, int bEndingEdit DBG_PASS )
 	{
 		if( g.flags.bInitFinished )
 		{
-			//lprintf( "Show control!.. final fixup? ");
+			//lprintf( WIDE( "Show control!.. final fixup? " ));
 			InvokeShowControl( button );
 		}
 		bShow = 1;
@@ -255,15 +260,16 @@ void UpdateButtonExx( PMENU_BUTTON button, int bEndingEdit DBG_PASS )
 		
 	if( button->flags.bCustom )
 	{
-		char rootname[256];
+		TEXTCHAR rootname[256];
 		void (CPROC*f)(PTRSZVAL);
 		if( bShow )
 		{
 			if( g.flags.bInitFinished )
 			{
-				//lprintf( "Show control!.. final fixup? ");
+				//lprintf( WIDE( "Show control!.. final fixup? " ));
 				InvokeShowControl( button );
 			}
+			//lprintf( WIDE( "Show control!.. final fixup? " ));
 			//bShow = 1;
 			RevealCommon( QueryGetControl( button ) );
 		}
@@ -274,7 +280,7 @@ void UpdateButtonExx( PMENU_BUTTON button, int bEndingEdit DBG_PASS )
 		}
 		snprintf( rootname
 				  , sizeof( rootname )
-				  , TASK_PREFIX "/button/%s"
+				  , TASK_PREFIX WIDE( "/button/%s" )
 				  , button->pTypeName );
 		f = GetRegisteredProcedure2( rootname, void, WIDE("show_button"), (PTRSZVAL) );
 		if( f )
@@ -318,13 +324,13 @@ void UpdateButtonExx( PMENU_BUTTON button, int bEndingEdit DBG_PASS )
 }
 
 // added pc_canvas very late to supprot shellgetnamedpage
-void RestorePage( PSI_CONTROL pc_canvas, PCanvasData canvas, PPAGE_DATA page, int bFull )
+void RestorePageEx( PSI_CONTROL pc_canvas, PCanvasData canvas, PPAGE_DATA page, int bFull, int was_active )
 {
 	PPAGE_DATA prior;
 	INDEX idx;
    //int failures = 0;
 	PMENU_BUTTON control;
-	lprintf( WIDE("restore page...") );
+	//_lprintf(DBG_RELAY)( WIDE("restore page... %d"), was_active );
 	if( g.flags.multi_edit )
 	{
 		if( page->frame )  // why wouldn't a page have a frame?
@@ -335,35 +341,41 @@ void RestorePage( PSI_CONTROL pc_canvas, PCanvasData canvas, PPAGE_DATA page, in
 	prior = canvas->current_page;
 	do
 	{
+		//lprintf( WIDE( "page set to %p" ), page );
 		canvas->current_page = page;
 		if( !InvokePageChange() ) // some method rejected page access.
 		{
-         if( !prior )
+			if( !prior )
 			{
-				page = ShellGetNamedPage( pc_canvas, "next" );
+				page = ShellGetNamedPage( pc_canvas, WIDE( "next" ) );
 				if( !page || page == canvas->default_page )
 				{
-               BannerMessage( "Failure to find an accessable page, exiting." );
+					BannerMessage( WIDE( "Failure to find an accessable page, exiting." ) );
 					exit(0);
 				}
 			}
+			//lprintf( "page set to %p", prior );
 			canvas->current_page = prior;
 			if( prior && !InvokePageChange() ) // some method rejected page access.
 			{
 				// we have to be sure we can be on this page too, since we 'left'
 				// that is we went to another page..
-            canvas->current_page = prior = NULL;
+				//lprintf( "page set to %p", NULL );
+				canvas->current_page = prior = NULL;
 			}
 		}
 	} while( !canvas->current_page );
-	if( canvas->current_page )
+	if( was_active )
 	{
-		canvas->current_page->flags.bActive = 1;
-		LIST_FORALL( canvas->current_page->controls, idx, PMENU_BUTTON, control )
+		if( canvas->current_page )
 		{
-			// full flag will cause the control to get reinitialized
-			// all parameters will get set.
-			UpdateButtonEx( control, bFull );
+			canvas->current_page->flags.bActive = 1;
+			LIST_FORALL( canvas->current_page->controls, idx, PMENU_BUTTON, control )
+			{
+				// full flag will cause the control to get reinitialized
+				// all parameters will get set.
+				UpdateButtonEx( control, bFull );
+			}
 		}
 	}
 }
@@ -380,13 +392,13 @@ void RestoreCurrentPage( PSI_CONTROL pc_canvas )
 /* this is function has a duplicately named function in main.c */
 static void CPROC ChooseImage( PTRSZVAL psv, PSI_CONTROL button )
 {
-	char buffer[256];
+	TEXTCHAR buffer[256];
 	// was attempting to make a general select here
 	// so that it would find smoe related text field
 	// but then the button needs to register a style sheet with PSI property dialog...
 	// need to make some other things, maybe some in-InterShell controls for editing button glares?
 
-	if( SelectExistingFile( button, buffer, sizeof( buffer ), "*.png\t*.gif\t*.jpg" ) )
+	if( SelectExistingFile( button, buffer, sizeof( buffer ), WIDE( "*.png\t*.gif\t*.jpg" ) ) )
 		SetControlText( GetNearControl( button, TXT_IMAGE_NAME ), buffer );
 
 }
@@ -395,31 +407,35 @@ static void CPROC ChooseImage( PTRSZVAL psv, PSI_CONTROL button )
 /* this is function has a duplicately named function in main.c */
 static void CPROC ChooseAnimation( PTRSZVAL psv, PSI_CONTROL button )
 {
-	char buffer[256];
+	TEXTCHAR buffer[256];
 	// was attempting to make a general select here
 	// so that it would find smoe related text field
 	// but then the button needs to register a style sheet with PSI property dialog...
 	// need to make some other things, maybe some in-InterShell controls for editing button glares?
 
-	if( SelectExistingFile( button, buffer, sizeof( buffer ),"*.mng" ) )
+	if( SelectExistingFile( button, buffer, sizeof( buffer ),WIDE( "*.mng" ) ) )
 		SetControlText( GetNearControl( button, TXT_ANIMATION_NAME ), buffer );
 
 }
 
 //-------------------------------------------------------------------------
 
-void HidePageEx( PSI_CONTROL pc_canvas )
+void HidePageExx( PSI_CONTROL pc_canvas DBG_PASS )
 {
 	ValidatedControlData( PCanvasData, menu_surface.TypeID, canvas, pc_canvas );
 	if( g.flags.multi_edit )
 	{
 		return;
 	}
-	if( canvas && canvas->current_page )
+	if( canvas && canvas->current_page
+//		&& canvas->current_page->flags.bActive
+	  )
 	{
 		INDEX idx;
 		PMENU_BUTTON control;
 		PPAGE_DATA page;
+		if( !canvas->current_page->flags.bActive )
+         _lprintf(DBG_RELAY)( WIDE( "hiding a non active page" ) );
 		if( canvas->current_page )
 			canvas->current_page->flags.bActive = 0;
 		if( canvas->pPageMenu )
@@ -427,27 +443,30 @@ void HidePageEx( PSI_CONTROL pc_canvas )
 		if( canvas->current_page )
 		{
 			page = canvas->current_page;
-			lprintf( "Hiding a page... hiding all controls... controls have the option to cause themselves to show... " );
+			//lprintf( WIDE( "Hiding a page... hiding all controls... controls have the option to cause themselves to show... " ) );
 			LIST_FORALL( page->controls, idx, PMENU_BUTTON, control )
 			{
 				HideCommon( QueryGetControl( control ) );
 			}
 		}
-		canvas->current_page = NULL;
+		//_lprintf(DBG_RELAY)( WIDE( "page set to %p" ), NULL );
+		//canvas->current_page = NULL;
 	}
 }
 
 //-------------------------------------------------------------------------
 
-void ChangePages( PSI_CONTROL pc_canvas, PPAGE_DATA page )
+void ChangePagesEx( PSI_CONTROL pc_canvas, PPAGE_DATA page DBG_PASS )
 {
 	PCanvasData canvas = GetCanvas( pc_canvas );
 	// page becomes the new current page... the current page
 	// is disabled, adn the new page reenabled..
 	static BIT_FIELD bChanging; // : 1; // already changing a page.
+	int active;
+
 	if( bChanging )
 	{
-      xlprintf(LOG_ALWAYS)( "Page change dropped, was already changing pages" );
+      xlprintf(LOG_ALWAYS)( WIDE( "Page change dropped, was already changing pages" ) );
 		return;
 	}
    bChanging = TRUE;
@@ -455,7 +474,7 @@ void ChangePages( PSI_CONTROL pc_canvas, PPAGE_DATA page )
 	{
 		RestorePage( pc_canvas, canvas, page, FALSE );
 		ForceDisplayFront( GetFrameRenderer( page->frame ) );
-		lprintf( "Someone requested a switch page... perhaps we should entertain doing some display thing to set focus to the page..." );
+		lprintf( WIDE( "Someone requested a switch page... perhaps we should entertain doing some display thing to set focus to the page..." ) );
 	   bChanging = FALSE;
 		return;   // don't hide any controls on any page....
 	}
@@ -465,14 +484,25 @@ void ChangePages( PSI_CONTROL pc_canvas, PPAGE_DATA page )
 	   bChanging = FALSE;
 		return;
 	}
+
    //DumpFrameContents( g.frame );
 	//lprintf( WIDE("-------------------------------------- ChangePages -------------------------------------") );
    bChanging = TRUE;
 	if( !g.flags.bPageUpdateDisabled )
 		EnableCommonUpdates( pc_canvas, FALSE );
-	HidePageEx( pc_canvas );
-	//canvas->current_page = page;
-	RestorePage( pc_canvas, canvas, page, FALSE );
+
+	{
+		int was_active;
+      //_lprintf(DBG_RELAY)( "%p ", canvas->current_page );
+		if( !canvas->current_page || ( canvas->current_page && canvas->current_page->flags.bActive ) )
+			was_active = 1;
+		else
+			was_active = 0;
+		HidePageEx( pc_canvas );
+		//canvas->current_page = page;
+		RestorePageEx( pc_canvas, canvas, page, FALSE, was_active);
+	}
+
 	//lprintf( WIDE("================ SOMETHING SHOULD HAPPEN HERE ===========================") );
 	// I dunno about all this....
 	if( !g.flags.bPageUpdateDisabled )
@@ -629,7 +659,7 @@ int ShellSetCurrentPage( CTEXTSTR name )
 
 PSI_CONTROL SelectTextWidget( void )
 {
-	PSI_CONTROL frame = LoadXMLFrame( "SelectFileButton.isFrame" );
+	PSI_CONTROL frame = LoadXMLFrame( WIDE( "SelectFileButton.isFrame" ) );
 	{
       //InitListbox( ) ;
 	}
@@ -652,14 +682,14 @@ void AdjustControlPositions( PCanvasData canvas, PPAGE_DATA page )
 		pc = QueryGetControl( control );
 		GetFrameSize( pc, &w, &h );
 		GetFramePosition( pc, &x, &y );
-      lprintf( "Input control was (real) %d,%d %d,%d", x, y, w, h );
-      lprintf( "Input control was (part) %Ld,%Ld %Ld,%Ld", control->x, control->y, control->w, control->h );
+      lprintf( WIDE( "Input control was (real) %d,%d %d,%d" ), x, y, w, h );
+      lprintf( WIDE( "Input control was (part) %Ld,%Ld %Ld,%Ld" ), control->x, control->y, control->w, control->h );
 		control->x = COMPUTEPARTOFX( x, page->grid.nPartsX );
 		control->y = COMPUTEPARTOFY( y, page->grid.nPartsY );
 		control->w = COMPUTEPARTOFX( w, page->grid.nPartsX );
 		control->h = COMPUTEPARTOFY( h, page->grid.nPartsY );
-		lprintf( "Output control was %Ld,%Ld %Ld,%Ld", control->x, control->y, control->w, control->h );
-      lprintf( "Output real is %Ld,%Ld %Ld,%Ld", PARTX( control->x ), PARTY( control->y )
+		lprintf( WIDE( "Output control was %Ld,%Ld %Ld,%Ld" ), control->x, control->y, control->w, control->h );
+      lprintf( WIDE( "Output real is %Ld,%Ld %Ld,%Ld" ), PARTX( control->x ), PARTY( control->y )
 							, PARTW( control->x, control->w ), PARTH( control->y, control->h ) );
 		MoveSizeControl( QueryGetControl( control ), PARTX( control->x ), PARTY( control->y )
 							, PARTW( control->x, control->w ), PARTH( control->y, control->h ) );
@@ -700,7 +730,7 @@ void EditCurrentPageProperties(PSI_CONTROL parent, PCanvasData canvas)
 			MakeEditControl( frame, 130, 143, 240, 18, TXT_ANIMATION_NAME, canvas->current_page->background, 0 );
 			button = MakeButton( frame, 89, 143, 36, 18, BTN_PICKANIMFILE, WIDE("..."), 0, ChooseAnimation, (PTRSZVAL)frame );
 
-			SaveXMLFrame( frame, "InterShellPageProperty.isFrame" );
+			SaveXMLFrame( frame, WIDE( "InterShellPageProperty.isFrame" ) );
          		//SetCommonUserData( button, l.file_text_field );
 
          /*
@@ -727,10 +757,10 @@ void EditCurrentPageProperties(PSI_CONTROL parent, PCanvasData canvas)
 		SetControlText( GetControl( frame, TXT_ANIMATION_NAME ), canvas->current_page->background );
 
 		{
-			char buffer[25];
-			snprintf( buffer, sizeof( buffer ), "%d", _cols = canvas->current_page->grid.nPartsX );
+			TEXTCHAR buffer[25];
+			snprintf( buffer, sizeof( buffer ), WIDE( "%d" ), _cols = canvas->current_page->grid.nPartsX );
 			SetControlText( GetControl( frame, EDIT_PAGE_GRID_PARTS_X ), buffer );
-			snprintf( buffer, sizeof( buffer ), "%d", _rows = canvas->current_page->grid.nPartsY );
+			snprintf( buffer, sizeof( buffer ), WIDE( "%d" ), _rows = canvas->current_page->grid.nPartsY );
 			SetControlText( GetControl( frame, EDIT_PAGE_GRID_PARTS_Y ), buffer );
 		}
 	}
@@ -741,7 +771,7 @@ void EditCurrentPageProperties(PSI_CONTROL parent, PCanvasData canvas)
 	lprintf( WIDE("Wait complete... %d %d"), okay, done );
 	if( okay )
 	{
-		char buffer[256];
+		TEXTCHAR buffer[256];
 		GetControlText( GetControl( frame, TXT_IMAGE_NAME ), buffer, sizeof( buffer ) );
 		// Get info from dialog...
 		canvas->current_page->background_color = GetColorFromWell( GetControl( frame, CLR_BACKGROUND ) );
@@ -800,7 +830,7 @@ void AddPage( PCanvasData canvas, PPAGE_DATA page )
 		AppendPopupItem( canvas->pPageMenu, MF_STRING, MNU_CHANGE_PAGE + nPage, page->title );
 	}
 	else
-		lprintf( WIDE("Failed to add new item %s to page menu (more than %d pages!)"), page->title?page->title:"DEFAULT PAGE", nPage );
+		lprintf( WIDE("Failed to add new item %s to page menu (more than %d pages!)"), page->title?page->title:WIDE( "DEFAULT PAGE" ), nPage );
 	if( nPage < MNU_DESTROY_PAGE_MAX - MNU_DESTROY_PAGE )
 	{
 		AppendPopupItem( canvas->pPageDestroyMenu, MF_STRING, MNU_DESTROY_PAGE + nPage, page->title );
@@ -838,7 +868,7 @@ PPAGE_DATA CreateAPage( void )
 
 void CreateNewPage( PSI_CONTROL pc_canvas, PCanvasData canvas )
 {
-	char pagename[256];
+	TEXTCHAR pagename[256];
 	if( SimpleUserQuery( pagename, sizeof( pagename ), WIDE("Enter Page Name")
 							 , pc_canvas ) )
 	{
@@ -848,6 +878,7 @@ void CreateNewPage( PSI_CONTROL pc_canvas, PCanvasData canvas )
 		page->grid.nPartsX = canvas->current_page->grid.nPartsX;
 		page->grid.nPartsY = canvas->current_page->grid.nPartsY;
 		AddPage( canvas, page );
+	lprintf( WIDE( "page set to %p" ), page );
 		canvas->current_page = page;
 		//SaveButtonConfig( pc_canvas );
 	}
@@ -858,23 +889,27 @@ void CreateNewPage( PSI_CONTROL pc_canvas, PCanvasData canvas )
 void RenamePage( PSI_CONTROL pc_canvas )
 {
 	PCanvasData canvas = GetCanvas( pc_canvas );
-	char pagename[256];
+	TEXTCHAR pagename[256];
 	if( SimpleUserQuery( pagename, sizeof( pagename ), WIDE("Enter New Page Name")
 							 , pc_canvas ) )
 	{
 		PPAGE_DATA page = GetPageFromFrame( pc_canvas );
-		if( page == canvas->default_page )
+		if( page )
 		{
-			InsertStartupPage( pc_canvas, pagename );
-			if( g.flags.multi_edit )
+			if( page == canvas->default_page )
 			{
-				DisplayFrame( canvas->current_page->frame );
+				InsertStartupPage( pc_canvas, pagename );
+				if( g.flags.multi_edit )
+				{
+					DisplayFrame( canvas->current_page->frame );
 			}
-		}
-		else
-		{
-			Release( (POINTER)page->title );
-			page->title = StrDup( pagename );
+			}
+			else
+			{
+				if( page->title )
+					Release( (POINTER)page->title );
+				page->title = StrDup( pagename );
+			}
 		}
 		//SaveButtonConfig( pc_canvas );
 	}
@@ -885,17 +920,14 @@ void RenamePage( PSI_CONTROL pc_canvas )
 //---------------------------------------------------------------------------
 
 OnCreateMenuButton( PAGE_CHANGER_NAME )( PMENU_BUTTON button )
-//PTRSZVAL CPROC CreatePageChanger( PMENU_BUTTON button )
 {
 	// add layout, and set title on button...
 	// well...
-	InterShell_SetButtonText( button, "Change_Page" );
-	InterShell_SetButtonStyle( button, "bicolor square" );
+	InterShell_SetButtonText( button, WIDE( "Change_Page" ) );
+	InterShell_SetButtonStyle( button, WIDE( "bicolor square" ) );
 	InterShell_SetButtonColors( button, BASE_COLOR_WHITE,BASE_COLOR_GREEN,BASE_COLOR_BLACK, 0 );
 	{
-		PPAGE_CHANGER page_changer = New( PAGE_CHANGER );
-		page_changer->button = button;
-		return (PTRSZVAL)page_changer;
+		return (PTRSZVAL)button;//page_changer;
 	}
 	return 0;
 }
@@ -907,27 +939,10 @@ OnDestroyControl( PAGE_CHANGER_NAME )( PTRSZVAL psv )
    Release( (PPAGE_DATA)psv );
 }
 
-void InterShell_DisableButtonPageChange( PMENU_BUTTON button )
-{
-	// set a one shot flag to disable the change associated with this button.
-   if( button )
-		button->flags.bIgnorePageChange = 1;
-}
-
-static void OnCopyControl( PAGE_CHANGER_NAME )( PTRSZVAL psv )
-{
-	PPAGE_CHANGER page = (PPAGE_CHANGER)psv;
-	if( page )
-	{
-		/* Nothing else to copy here... */
-      /* Oops... */
-	}
-
-}
-
 #undef UpdateButtonEx
 PUBLIC( void, UpdateButtonEx )( PMENU_BUTTON button, int bEndingEdit  )
 {
    UpdateButtonExx( button, bEndingEdit DBG_SRC );
 }
+INTERSHELL_NAMESPACE_END
 

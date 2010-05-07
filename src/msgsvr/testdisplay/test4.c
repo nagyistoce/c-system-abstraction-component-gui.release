@@ -16,8 +16,13 @@ static GLOBAL g;
 
 #include <logging.h>
 
-int main( void )
+#ifdef UNDER_CE
+int APIENTRY WinMain( HINSTANCE h, HINSTANCE p, LPTSTR cmd, int nCmdShow )
 {
+#else
+	int main( void )
+{
+#endif
 	CDATA result;
    PRENDERER display;
 	SetSystemLog( SYSLOG_FILENAME, WIDE("Test3.Log") );

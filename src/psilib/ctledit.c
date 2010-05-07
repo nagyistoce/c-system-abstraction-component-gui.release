@@ -14,7 +14,7 @@ PSI_EDIT_NAMESPACE
 //---------------------------------------------------------------------------
 
 typedef struct edit {
-	PCOMMON pc;
+	PSI_CONTROL pc;
 	struct {
 		int insert:1;
 		_32 bPassword : 1; // hide data content.
@@ -59,7 +59,7 @@ CTEXTSTR GetString( PEDIT pe, CTEXTSTR text, int length )
 
 //---------------------------------------------------------------------------
 
-CUSTOM_CONTROL_DRAW( DrawEditControl, ( PCOMMON pc ) )
+CUSTOM_CONTROL_DRAW( DrawEditControl, ( PSI_CONTROL pc ) )
 {
 	ValidatedControlData( PEDIT, EDIT_FIELD, pe, pc );
 	Font font;
@@ -190,8 +190,8 @@ CUSTOM_CONTROL_DRAW( DrawEditControl, ( PCOMMON pc ) )
 
 //---------------------------------------------------------------------------
 
-static int OnMouseCommon( EDIT_FIELD_NAME )( PCOMMON pc, S_32 x, S_32 y, _32 b )
-//CUSTOM_CONTROL_MOUSE(  MouseEditControl, ( PCOMMON pc, S_32 x, S_32 y, _32 b ) )
+static int OnMouseCommon( EDIT_FIELD_NAME )( PSI_CONTROL pc, S_32 x, S_32 y, _32 b )
+//CUSTOM_CONTROL_MOUSE(  MouseEditControl, ( PSI_CONTROL pc, S_32 x, S_32 y, _32 b ) )
 {
 	static int _b;
 	ValidatedControlData( PEDIT, EDIT_FIELD, pe, pc );
@@ -336,15 +336,15 @@ void CutEditText( PEDIT pe, PTEXT *caption )
     pe->select_end = -1;
 }
 
-static void InsertAChar( PEDIT pe, PTEXT *caption, char ch )
+static void InsertAChar( PEDIT pe, PTEXT *caption, TEXTCHAR ch )
 {
 	if( (pe->nCaptionUsed+1) >= pe->nCaptionSize )
 	{
 		PTEXT newtext;
 		pe->nCaptionSize += 16;
 		newtext = SegCreate( pe->nCaptionSize );
-		strncpy( GetText( newtext ), GetText( *caption )
-				 , pe->nCaptionUsed );
+		StrCpyEx( GetText( newtext ), GetText( *caption )
+				 , (pe->nCaptionUsed+1) ); // include the NULL, the buffer will be large enough.
 		SetTextSize( newtext, pe->nCaptionUsed );
 		GetText( newtext )[pe->nCaptionUsed] = 0;
 		LineRelease( *caption );
@@ -450,10 +450,17 @@ static void Copy( PEDIT pe, PTEXT *caption )
 {
 	TEXTCHAR data[1024];
 	GetMarkedText( pe, caption, data, sizeof( data ) );
+#ifndef UNDER_CE
 	if( data[0] && OpenClipboard(NULL) )
 	{
 		size_t nLen = strlen( data ) + 1;
-		HGLOBAL mem = GlobalAlloc( GMEM_MOVEABLE, nLen );
+		HGLOBAL mem = GlobalAlloc( 
+#ifndef _ARM_
+			GMEM_MOVEABLE
+#else
+				0
+#endif
+			, nLen );
 		MemCpy( GlobalLock( mem ), data, nLen );
 		GlobalUnlock( mem );
 		EmptyClipboard();
@@ -461,6 +468,7 @@ static void Copy( PEDIT pe, PTEXT *caption )
 		CloseClipboard();
 		GlobalFree( mem );
 	}
+#endif
 }
 
 //---------------------------------------------------------------------------
@@ -476,9 +484,10 @@ static void Cut( PEDIT pe, PTEXT *caption )
 }
 #endif
 
-CUSTOM_CONTROL_KEY( KeyEditControl, ( PCOMMON pc, _32 key ) )
+CUSTOM_CONTROL_KEY( KeyEditControl, ( PSI_CONTROL pc, _32 key ) )
 {
-   ValidatedControlData( PEDIT, EDIT_FIELD, pe, pc );
+	ValidatedControlData( PEDIT, EDIT_FIELD, pe, pc );
+   int used_key = 0;
 	char ch;
 	if( !pe || pe->flags.bReadOnly )
 		return 0;
@@ -533,6 +542,7 @@ CUSTOM_CONTROL_KEY( KeyEditControl, ( PCOMMON pc, _32 key ) )
 					}
 					SmudgeCommon( pc );
 				}
+            used_key = 1;
 				break;
 			}
 		case KEY_RIGHT:
@@ -564,6 +574,7 @@ CUSTOM_CONTROL_KEY( KeyEditControl, ( PCOMMON pc, _32 key ) )
 					}
 					SmudgeCommon( pc );
 				}
+            used_key = 1;
 				break;
 			}
 		case KEY_END:
@@ -589,6 +600,7 @@ CUSTOM_CONTROL_KEY( KeyEditControl, ( PCOMMON pc, _32 key ) )
 			}
 			pe->cursor_pos = pe->nCaptionUsed;
 			SmudgeCommon( pc );
+			used_key = 1;
 			break;
 		case KEY_HOME:
 			if( key & KEY_SHIFT_DOWN )
@@ -613,6 +625,7 @@ CUSTOM_CONTROL_KEY( KeyEditControl, ( PCOMMON pc, _32 key ) )
 			}
 			pe->cursor_pos = 0;
 			SmudgeCommon( pc );
+			used_key = 1;
 			break;
 		case KEY_DELETE:
 			if( pe->select_start >= 0 && pe->select_end >= 0 )
@@ -624,6 +637,7 @@ CUSTOM_CONTROL_KEY( KeyEditControl, ( PCOMMON pc, _32 key ) )
 				CutEditText( pe, &pc->caption.text );
 			}
 			SmudgeCommon( pc );
+			used_key = 1;
 			break;
 		case KEY_BACKSPACE:
 			//Log( WIDE("Backspace?!") );
@@ -639,12 +653,15 @@ CUSTOM_CONTROL_KEY( KeyEditControl, ( PCOMMON pc, _32 key ) )
 				}
 			}
 			SmudgeCommon( pc );
+			used_key = 1;
 			break;
 		case KEY_ESCAPE:
 			InvokeDefault( (PCONTROL)pc, INV_CANCEL );
+			used_key = 1;
 			break;
 		case KEY_ENTER:
 			InvokeDefault( (PCONTROL)pc, INV_OKAY );
+			used_key = 1;
 			break;
 		default:
 			//Log2( WIDE("Got Key: %08x(%c)"), key, key & 0xFF );
@@ -658,16 +675,17 @@ CUSTOM_CONTROL_KEY( KeyEditControl, ( PCOMMON pc, _32 key ) )
 				InsertAChar( pe, &pc->caption.text, ch );
 				SmudgeCommon( pc );
 				//printf( WIDE("Key: %d(%c)\n"), ch,ch );
+				used_key = 1;
 			}
 			break;
 		}
 	}
-	return 1;
+	return used_key;
 }
 
 //---------------------------------------------------------------------------
 
-PCOMMON SetEditControlReadOnly( PCOMMON pc, LOGICAL bEnable )
+PSI_CONTROL SetEditControlReadOnly( PSI_CONTROL pc, LOGICAL bEnable )
 {
 	ValidatedControlData( PEDIT, EDIT_FIELD, pe, pc );
 	if( pe )
@@ -680,7 +698,7 @@ PCOMMON SetEditControlReadOnly( PCOMMON pc, LOGICAL bEnable )
 
 //---------------------------------------------------------------------------
 
-PCOMMON SetEditControlPassword( PCOMMON pc, LOGICAL bEnable )
+PSI_CONTROL SetEditControlPassword( PSI_CONTROL pc, LOGICAL bEnable )
 {
 	ValidatedControlData( PEDIT, EDIT_FIELD, pe, pc );
 	if( pe )
@@ -693,7 +711,7 @@ PCOMMON SetEditControlPassword( PCOMMON pc, LOGICAL bEnable )
 
 //---------------------------------------------------------------------------
 
-void CPROC ChangeEditCaption( PCOMMON pc )
+void CPROC ChangeEditCaption( PSI_CONTROL pc )
 {
    ValidatedControlData( PEDIT, EDIT_FIELD, pe, pc );
     if( !pc->caption.text )
@@ -719,7 +737,7 @@ void CPROC ChangeEditCaption( PCOMMON pc )
 /*
 void SetEditFont( PCONTROL pc, Font font )
 {
-   SetCommonFont( (PCOMMON)pc, font );
+   SetCommonFont( (PSI_CONTROL)pc, font );
 }
 */
 
@@ -746,12 +764,12 @@ static int CPROC FocusChanged( PCONTROL pc, LOGICAL bFocused )
 //---------------------------------------------------------------------------
 #undef MakeEditControl
 
-	int CPROC InitEditControl( PCOMMON pControl );
-int CPROC ConfigEditControl( PCOMMON pc )
+	int CPROC InitEditControl( PSI_CONTROL pControl );
+int CPROC ConfigEditControl( PSI_CONTROL pc )
 {
 	return InitEditControl(pc);
 }
-PCOMMON CPROC MakeEditControl( PCOMMON pFrame, int attr
+PSI_CONTROL CPROC MakeEditControl( PSI_CONTROL pFrame, int attr
 									  , int x, int y, int w, int h
 									  , PTRSZVAL nID, TEXTCHAR *caption )
 {
@@ -766,7 +784,7 @@ void CPROC GrabFilename( PSI_CONTROL pc, CTEXTSTR name, S_32 x, S_32 y )
 	SetControlText( pc, name );
 }
 
-int CPROC InitEditControl( PCOMMON pc )
+int CPROC InitEditControl( PSI_CONTROL pc )
 {
 	ValidatedControlData( PEDIT, EDIT_FIELD, pe, pc );
 	if( pe )
@@ -781,7 +799,7 @@ int CPROC InitEditControl( PCOMMON pc )
 #include <psi.h>
 CONTROL_REGISTRATION
 edit_control = { EDIT_FIELD_NAME
-					, { {73, 21}, sizeof( EDIT ), BORDER_INVERT_THIN }
+					, { {73, 21}, sizeof( EDIT ), BORDER_INVERT_THIN|BORDER_NOCAPTION }
 					, InitEditControl
 					, NULL
 					, DrawEditControl

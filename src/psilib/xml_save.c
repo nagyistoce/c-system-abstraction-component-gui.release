@@ -1,6 +1,6 @@
 #include <stdhdrs.h>
 #include <sharemem.h>
-#include <genxml/genx.h>
+#include <../src/genx/genx.h>
 #include "controlstruc.h"
 #include <filedotnet.h>
 PSI_XML_NAMESPACE
@@ -11,7 +11,7 @@ typedef struct context_tag
 	TEXTCHAR *name;
 	PVARTEXT vt;
 	_32 nChildren;
-	PCOMMON pc; // current control...
+	PSI_CONTROL pc; // current control...
 
 	genxWriter w;
 
@@ -38,7 +38,7 @@ typedef struct local_tag
 
 static LOCAL l;
 
-void WriteCommonData( PCOMMON pc )
+void WriteCommonData( PSI_CONTROL pc )
 {
 	PVARTEXT out = VarTextCreateExx( 10000, 5000 );
 	for( ; pc; pc = pc->next )
@@ -50,21 +50,13 @@ void WriteCommonData( PCOMMON pc )
 		l.current_context->pc = pc;
 		genxAddText(l.current_context->w, (constUtf8)"\n");
 		genxStartElement( l.current_context->eControl );
-		sprintf( buf, WIDE("psi/control/%d"), pc->nType );
+		snprintf( buf, sizeof( buf ), WIDE("psi/control/%d"), pc->nType );
 		genxAddAttribute( l.current_context->aType, (constUtf8)GetRegisteredValue( buf, WIDE("Type") ) );
-		sprintf( buf, WIDE("%") _32f WIDE(",") WIDE("%") _32f, pc->original_rect.x, pc->original_rect.y );
+		snprintf( buf, sizeof( buf ), WIDE("%") _32f WIDE(",") WIDE("%") _32f, pc->original_rect.x, pc->original_rect.y );
 		genxAddAttribute( l.current_context->aPosition, (constUtf8)buf );
-		if( !pc->parent )
-		{
-			if( pc->flags.bInitial )
-				sprintf( buf, WIDE("%") _32f WIDE(",") WIDE("%") _32f, pc->rect.width, pc->rect.height );
-			else
-				sprintf( buf, WIDE("%") _32f WIDE(",") WIDE("%") _32f, pc->surface_rect.width, pc->surface_rect.height );
-		}
-		else
-			sprintf( buf, WIDE("%") _32f WIDE(",") WIDE("%") _32f, pc->original_rect.width, pc->original_rect.height );
+		snprintf( buf, sizeof( buf ), WIDE("%") _32f WIDE(",") WIDE("%") _32f, pc->original_rect.width, pc->original_rect.height );
 		genxAddAttribute( l.current_context->aSize, (constUtf8)buf );
-		sprintf( buf, WIDE("%") _32fx WIDE(""), pc->BorderType );
+		snprintf( buf, sizeof( buf ), WIDE("%") _32fx WIDE(""), pc->BorderType );
 		genxAddAttribute( l.current_context->aBorder, (constUtf8)buf );
 
 		// Let's not write the number of this ID anymore...
@@ -73,7 +65,7 @@ void WriteCommonData( PCOMMON pc )
 		genxAddAttribute( l.current_context->aIDName, (constUtf8)pc->pIDName );
 		if( pc->flags.bEditLoaded )
 		{
-			sprintf( buf, WIDE("%d"), pc->flags.bNoEdit );
+			snprintf( buf, sizeof( buf ), WIDE("%d"), pc->flags.bNoEdit );
 			genxAddAttribute( l.current_context->aEdit, (constUtf8)buf);
 		}
 
@@ -88,7 +80,7 @@ void WriteCommonData( PCOMMON pc )
 			TEXTCHAR id[32];
          PVARTEXT out = VarTextCreate();
 			snprintf( id, sizeof( id ), WIDE("psi/control/%d/rtti"), pc->nType );
-			if( ( Save=GetRegisteredProcedure( id, int, save,(PCOMMON,PVARTEXT)) ) )
+			if( ( Save=GetRegisteredProcedure( id, int, save,(PSI_CONTROL,PVARTEXT)) ) )
 			{
 				PTEXT data;
 				Save( pc, out );
@@ -99,7 +91,7 @@ void WriteCommonData( PCOMMON pc )
 					LineRelease( data );
 				}
 			}
-			if( ( Save=GetRegisteredProcedure( id, int, extra save,(PCOMMON,PVARTEXT)) ) )
+			if( ( Save=GetRegisteredProcedure( id, int, extra save,(PSI_CONTROL,PVARTEXT)) ) )
 			{
 				PTEXT data;
 				Save( pc, out );
@@ -115,7 +107,7 @@ void WriteCommonData( PCOMMON pc )
 		if( l.current_context->nChildren )
 		{
 			l.current_context->pc = pc;
-			sprintf( buf, WIDE("%") _32f WIDE(""), l.current_context->nChildren );
+			snprintf( buf, sizeof( buf ), WIDE("%") _32f WIDE(""), l.current_context->nChildren );
 			genxAddAttribute( l.current_context->aChildren, (constUtf8)buf );
          l.current_context->nChildren = 0;
 		}
@@ -150,7 +142,7 @@ genxSender senderprocs = { WriteBuffer
 								 , WriteBufferBounded
 								 , Flush };
 
-int SaveXMLFrame( PCOMMON frame, CTEXTSTR file )
+int SaveXMLFrame( PSI_CONTROL frame, CTEXTSTR file )
 {
 	//FILE *out = fopen( file, WIDE("wb") );
 	XML_CONTEXT context;
@@ -230,15 +222,15 @@ int SaveXMLFrame( PCOMMON frame, CTEXTSTR file )
 
 		{
 			FILE *out;
-			Fopen( out, l.current_context->name, WIDE("wt") );
+			out = sack_fopen( 0, l.current_context->name, WIDE("wt") );
 			if( out )
 			{
 				PTEXT text = VarTextGet( l.current_vt );
-				fwrite( GetText( text ), sizeof( TEXTCHAR ), GetTextSize( text ), out );
+				sack_fwrite( GetText( text ), sizeof( TEXTCHAR ), GetTextSize( text ), out );
 				LineRelease( text );
 				// this is just a shot hand copy
 				//VarTextDestroy( &l.current_vt );
-				fclose( out );
+				sack_fclose( out );
 			}
 			else
 			{

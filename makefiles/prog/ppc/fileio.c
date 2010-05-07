@@ -84,6 +84,18 @@ int CurrentFileDepend( void )
 
 //----------------------------------------------------------------------
 
+// unused thought the CPP main might use this ...
+int CurrentFileDepth( void )
+{
+	int n = 0;
+   PFILETRACK pft;
+   for( pft = pFileStack; pft; n++, pft = pft->prior );
+   return n;
+}
+
+
+//----------------------------------------------------------------------
+
 void SetCurrentPath( char *path )
 {
 	strcpy( g.pCurrentPath.data.data, path );
@@ -318,6 +330,8 @@ void WriteLineInfo( char *name, int line )
 		{
          strcpy( LastFileWritten, GetCurrentFileName() );
 			LastLineWritten = line;
+			if( g.flags.bWriteLineInfo )
+			{
 			if( g.flags.bLineUsesLineKeyword )
 			{
 				fprintf( out, WIDE("#line %d \"%s\"\n")
@@ -334,6 +348,7 @@ void WriteLineInfo( char *name, int line )
 						 , LastLineWritten
 						 , LastFileWritten
 						 );
+			}
 			}
 	   }
    }
@@ -479,8 +494,14 @@ int OpenNewInputFile( char *name, char *pFile, int nLine, int bDepend, int bNext
       pftNew->nIfLevel = g.nIfLevels;
       strcpy( pftNew->name, name );
       strcpy( pftNew->longname, tmp );
-      FixSlashes( pftNew->longname );
-      pftNew->line = NULL;
+		FixSlashes( pftNew->longname );
+
+		// move the current line to the current file... (so we can log #include?)
+		pftNew->line = NULL;
+
+		pftNew->pNextWord = pft->pNextWord;
+      pft->pNextWord = NULL;
+
       pftNew->output = pft->output;
       pftNew->pParsed = NULL;
       pftNew->pNextWord = NULL;
@@ -729,7 +750,23 @@ Restart:
                         if( pStart != pNew )
                            SegAppend( SegBreak( pStart ), p );
                         else
-                           pNew = p;
+									pNew = p;
+								if( g.flags.keep_comments
+									&& ( g.flags.keep_includes && CurrentFileDepth() == 1 )
+									|| !g.flags.keep_includes )
+								{
+									PTEXT pOut;
+									pOut = BuildLineEx( pStart, FALSE DBG_SRC );
+									if( pOut )
+									{
+										if( g.flags.bWriteLine )
+										{
+											WriteCurrentLineInfo();
+										}
+										WriteLine( GetTextSize( pOut ), GetText( pOut ) );
+										LineRelease( pOut );
+									}
+								}
                         LineRelease( pStart );
                         pStart = NULL;
                         goto ContinueNoIncrement;
@@ -747,8 +784,24 @@ Restart:
 									{
 										fprintf( stddbg, WIDE("while line In block comment...") );
 									}
+									if( g.flags.keep_comments
+										&& ( g.flags.keep_includes && CurrentFileDepth() == 1 )
+										|| !g.flags.keep_includes )
+									{
+										PTEXT pOut;
+										pOut = BuildLineEx( pNew, FALSE DBG_SRC );
+										if( pOut )
+										{
+											if( g.flags.bWriteLine )
+											{
+												WriteCurrentLineInfo();
+											}
+											WriteLine( GetTextSize( pOut ), GetText( pOut ) );
+											LineRelease( pOut );
+										}
+									}
                            LineRelease( pNew );
-                           goto GetNewLine;
+									goto GetNewLine;
                         }
                         // else there is something before left...
                         SegBreak( pStart );
@@ -763,14 +816,46 @@ Restart:
                      {
                         p = NEXTLINE( p );
                         SegBreak( p );
-                        LineRelease( pNew );
-                        pNew = p;
+								if( g.flags.keep_comments
+									&& ( g.flags.keep_includes && CurrentFileDepth() == 1 )
+									|| !g.flags.keep_includes )
+								{
+									PTEXT pOut;
+									pOut = BuildLineEx( pNew, FALSE DBG_SRC );
+									if( pOut )
+									{
+										if( g.flags.bWriteLine )
+										{
+											WriteCurrentLineInfo();
+										}
+										WriteLine( GetTextSize( pOut ), GetText( pOut ) );
+										LineRelease( pOut );
+									}
+								}
+								LineRelease( pNew );
+								pNew = p;
                         goto ContinueNoIncrement;
                      }
                      else
                      {
                         // entire line within block comment...
                         //printf( WIDE("in block comment... ") );
+								if( g.flags.keep_comments
+									&& ( g.flags.keep_includes && CurrentFileDepth() == 1 )
+									|| !g.flags.keep_includes )
+								{
+									PTEXT pOut;
+									pOut = BuildLineEx( pNew, FALSE DBG_SRC );
+									if( pOut )
+									{
+										if( g.flags.bWriteLine )
+										{
+											WriteCurrentLineInfo();
+										}
+										WriteLine( GetTextSize( pOut ), GetText( pOut ) );
+										LineRelease( pOut );
+									}
+								}
                         LineRelease( pNew );
                         goto GetNewLine;
                      }
@@ -816,13 +901,50 @@ Restart:
                      {
                         // releasing the whole line...
                         //printf( WIDE("Whole line commented...\n") );
+								if( g.flags.keep_comments
+									&& ( g.flags.keep_includes && CurrentFileDepth() == 1 )
+									|| !g.flags.keep_includes )
+								{
+									PTEXT pOut;
+									// throw in a newline, comments end up above the actual line
+									// should force a #line indicator also?
+                           //SegAppend( pNew, SegCreate(0));
+									pOut = BuildLineEx( pNew, FALSE DBG_SRC );
+									if( pOut )
+									{
+										if( g.flags.bWriteLine )
+										{
+											WriteCurrentLineInfo();
+										}
+										WriteLine( GetTextSize( pOut ), GetText( pOut ) );
+										LineRelease( pOut );
+									}
+								}
                         LineRelease( pNew );
                         goto GetNewLine;
                      }
                      SegBreak( pStart );
-                     LineRelease( pStart );
-                     break;
-                  }
+							if( g.flags.keep_comments
+								&& ( g.flags.keep_includes && CurrentFileDepth() == 1 )
+								|| !g.flags.keep_includes )
+							{
+								PTEXT pOut;
+								// throw in a newline, comments end up above the actual line
+								// should force a #line indicator also?
+								pOut = BuildLineEx( pStart, FALSE DBG_SRC );
+								if( pOut )
+								{
+									if( g.flags.bWriteLine )
+									{
+											WriteCurrentLineInfo();
+									}
+									WriteLine( GetTextSize( pOut ), GetText( pOut ) );
+									LineRelease( pOut );
+								}
+							}
+							LineRelease( pStart );
+							break;
+						}
                }
             }
             else if( pText[0] == '*' )
@@ -884,19 +1006,67 @@ Restart:
                if( pStart == pNew )
                {
                	//printf( WIDE("In Block comment(3)...\n") );
-                  LineRelease( pNew );
+						if( g.flags.keep_comments
+							&& ( g.flags.keep_includes && CurrentFileDepth() == 1 )
+							|| !g.flags.keep_includes )
+						{
+							PTEXT pOut;
+							pOut = BuildLineEx( pNew, FALSE DBG_SRC );
+							if( pOut )
+							{
+								if( g.flags.bWriteLine )
+								{
+									WriteCurrentLineInfo();
+								}
+								WriteLine( GetTextSize( pOut ), GetText( pOut ) );
+								LineRelease( pOut );
+							}
+						}
+						LineRelease( pNew );
                   goto GetNewLine; // this block started here and was whole line
                }
                SegBreak( pStart );
                LineRelease( pStart );
-            }
+					if( g.flags.keep_comments
+						&& ( g.flags.keep_includes && CurrentFileDepth() == 1 )
+						|| !g.flags.keep_includes )
+					{
+						PTEXT pOut;
+						pOut = BuildLineEx( pStart, FALSE DBG_SRC );
+						if( pOut )
+						{
+							if( g.flags.bWriteLine )
+							{
+								WriteCurrentLineInfo();
+							}
+							WriteLine( GetTextSize( pOut ), GetText( pOut ) );
+							LineRelease( pOut );
+						}
+					}
+				}
             else
             {
               	//printf( WIDE("In Block comment(3)...\n") );
                // ignore this line completely!
-               LineRelease( pNew );
-               goto GetNewLine;
-            }
+					if( g.flags.keep_comments
+						&& ( g.flags.keep_includes && CurrentFileDepth() == 1 )
+						|| !g.flags.keep_includes )
+					{
+						PTEXT pOut;
+						pOut = BuildLineEx( pNew, FALSE DBG_SRC );
+						if( pOut )
+						{
+							if( g.flags.bWriteLine )
+							{
+								WriteCurrentLineInfo();
+							}
+							WriteLine( GetTextSize( pOut ), GetText( pOut ) );
+							LineRelease( pOut );
+						}
+					}
+					LineRelease( pNew );
+					goto GetNewLine;
+				}
          }
       }
    }while( !pNew );

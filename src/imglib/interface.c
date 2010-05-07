@@ -116,18 +116,18 @@ IMAGE_INTERFACE RealImageInterface = {
 												 , SetSpriteHotspot
 												 , SetSpritePosition
                                      , UnmakeSprite
-                                     , GetGlobalFonts
+//                                     , GetGlobalFonts
 };
 
 #undef GetImageInterface
 #undef DropImageInterface
 static POINTER CPROC _ImageGetImageInterface( void )
 {
-   RealImageInterface._global_font_data = GetGlobalFonts();
+   //RealImageInterface._global_font_data = GetGlobalFonts();
    return &RealImageInterface;
 }
 
-IMAGE_PROC( PIMAGE_INTERFACE, GetImageInterface )( void )
+ PIMAGE_INTERFACE  GetImageInterface ( void )
 {
    return (PIMAGE_INTERFACE)_ImageGetImageInterface();
 }
@@ -137,8 +137,8 @@ static void CPROC _ImageDropImageInterface( POINTER p )
 {
 }
 #ifndef __STATIC__
-#if !(defined( SACK_BAG_DEFINED ) && defined( __LINUX__ ))
-IMAGE_PROC( void, DropImageInterface )( PIMAGE_INTERFACE p )
+#if !(defined( SACK_BAG_EXPORTS ) && defined( __LINUX__ ))
+ void  DropImageInterface ( PIMAGE_INTERFACE p )
 {
    _ImageDropImageInterface(p );
 }
@@ -153,7 +153,11 @@ PRIORITY_PRELOAD( ImageRegisterInterface, IMAGE_PRELOAD_PRIORITY )
 #ifdef SACK_BAG_EXPORTS
 #define NAME WIDE("image")
 #else
+#ifdef UNDER_CE
+#define NAME WIDE("image")
+#else
 #define NAME WIDE("real_image")
+#endif
 #endif
 
 	RegisterInterface( NAME, _ImageGetImageInterface, _ImageDropImageInterface );
@@ -164,7 +168,7 @@ PRIORITY_PRELOAD( ImageRegisterInterface, IMAGE_PRELOAD_PRIORITY )
 //   and the related changes may not exist in assembly objects.
 //   The only safe method is C anyhow.  AND it's not that slow
 //   what with modern compilers and all.
-   SetBlotMethod( BLOT_MMX );
+   SetBlotMethod( BLOT_C );
 //#else
 	// cleans up declarations.
 //   SetBlotMethod( BLOT_C );

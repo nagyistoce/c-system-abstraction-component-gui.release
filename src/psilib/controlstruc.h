@@ -4,10 +4,12 @@
 #include <stdio.h>
 #include <procreg.h>
 #include <fractions.h>
+#include <controls.h>
 #include "global.h"
 //#include <vidlib.h>
 
 //#define DEBUG_BORDER_DRAWING
+//#define QUICK_DEBUG_BORDER_FLAGS
 
 PSI_NAMESPACE
 // define this to prevent multiple definition to application 
@@ -16,41 +18,41 @@ PSI_NAMESPACE
 
 // default_width, default_height,
 #define CONTROL_PROC_DEF( controltype, type, name, _args )                  \
-	int CPROC Init##name( PCOMMON pControl );  \
-	int CPROC Config##name( PCOMMON pc ) { return Init##name(pc); } \
-   int CPROC Init##name( PCOMMON pc )
+	int CPROC Init##name( PSI_CONTROL pControl );  \
+	int CPROC Config##name( PSI_CONTROL pc ) { return Init##name(pc); } \
+   int CPROC Init##name( PSI_CONTROL pc )
 
 #define CAPTIONED_CONTROL_PROC_DEF( controltype, type, name, _args )                  \
-	int CPROC Init##name( PCOMMON pControl );  \
-	int CPROC Config##name( PCOMMON pc ) { return Init##name(pc); } \
-   int CPROC Init##name( PCOMMON pc )
+	int CPROC Init##name( PSI_CONTROL pControl );  \
+	int CPROC Config##name( PSI_CONTROL pc ) { return Init##name(pc); } \
+   int CPROC Init##name( PSI_CONTROL pc )
 
 
 #define CONTROL_PROC_DEF_EX( controltype, type, name, _args) \
-   int CPROC Init##name( PCOMMON );  \
-	int CPROC Config##name( PCOMMON pc ) { return Init##name(pc); } \
-	int CPROC Init##name( PCOMMON pc )
+   int CPROC Init##name( PSI_CONTROL );  \
+	int CPROC Config##name( PSI_CONTROL pc ) { return Init##name(pc); } \
+	int CPROC Init##name( PSI_CONTROL pc )
 
 #define ARG( type, name ) PARAM( args, type, name )
 #define FP_ARG( type, name, funcargs ) FP_PARAM( args, type, name, funcargs )
 
 
 #ifdef GCC
-#define CONTROL_INIT(name) CONTROL_PROPERTIES( name )(PCOMMON pControl)      \
-{ return NULL; } CONTROL_PROPERTIES_APPLY( name )(PCOMMON pc,PCOMMON page) { ; }    \
-   int CPROC Init##name ( PTRSZVAL psv, PCOMMON pControl, _32 ID )
+#define CONTROL_INIT(name) CONTROL_PROPERTIES( name )(PSI_CONTROL pControl)      \
+{ return NULL; } CONTROL_PROPERTIES_APPLY( name )(PSI_CONTROL pc,PSI_CONTROL page) { ; }    \
+   int CPROC Init##name ( PTRSZVAL psv, PSI_CONTROL pControl, _32 ID )
 
 #define CONTROL_INIT_EX(name)  \
-   int CPROC Init##name ( PTRSZVAL psv, PCOMMON pControl, _32 ID )
+   int CPROC Init##name ( PTRSZVAL psv, PSI_CONTROL pControl, _32 ID )
 //#error Need to figure out how to register control Inits
 
 #else
-#define CONTROL_INIT(name)  CONTROL_PROPERTIES( name )(PCOMMON pc)      \
-{ return NULL; } CONTROL_PROPERTIES_APPLY( name )(PCOMMON pc,PCOMMON page) { ; }   \
-   int CPROC Init##name ( PCOMMON pc, va_list args )
+#define CONTROL_INIT(name)  CONTROL_PROPERTIES( name )(PSI_CONTROL pc)      \
+{ return NULL; } CONTROL_PROPERTIES_APPLY( name )(PSI_CONTROL pc,PSI_CONTROL page) { ; }   \
+   int CPROC Init##name ( PSI_CONTROL pc, va_list args )
 
 #define CONTROL_INIT_EX(name)  \
-   int CPROC Init##name ( PCOMMON pc, va_list args )
+   int CPROC Init##name ( PSI_CONTROL pc, va_list args )
 //#error Need to figure out how to register control Inits
 #endif
 
@@ -61,16 +63,20 @@ PSI_NAMESPACE
 #define PROP_HEIGHT 240
 #define PROP_PAD 5
 
-typedef struct common_control_frame*PCOMMON;
-
-struct control;
-
-typedef PCOMMON (CPROC*GetControlPropSheet)( PCOMMON );
+/* \Internal event callback definition. Request an additional
+   page to add to the control property edit dialog.           */
+typedef PSI_CONTROL (CPROC*GetControlPropSheet)( PSI_CONTROL );
 #define CONTROL_PROPERTIES( name )  OnPropertyEdit( TOSTR(name) )
 
-typedef void (CPROC*ApplyControlPropSheet)( PCOMMON, PCOMMON );
+/* \Internal defintion of the callback to invoke when a property
+   sheet is requested to be applied when editing the control.    */
+typedef void (CPROC*ApplyControlPropSheet)( PSI_CONTROL, PSI_CONTROL );
 #define CONTROL_PROPERTIES_APPLY( name )  OnPropertyEditOkay( TOSTR(name) )
-typedef void (CPROC*DoneControlPropSheet)( PCOMMON );
+/* Tells a control that the edit process is done with the
+   property sheet requested.
+   
+   \Internal event callback definition.                   */
+typedef void (CPROC*DoneControlPropSheet)( PSI_CONTROL );
 #define CONTROL_PROPERTIES_DONE( name )  OnPropertyEditDone( TOSTR(name) )
 
 //typedef struct subclass_control_tag {
@@ -79,7 +85,7 @@ typedef void (CPROC*DoneControlPropSheet)( PCOMMON );
 
 //#define ControlType(pc) ((pc)->nType)
 
-enum {
+enum HotspotLocations {
    SPOT_NONE // 0 = no spot locked...
     , SPOT_TOP_LEFT
     , SPOT_TOP
@@ -92,18 +98,46 @@ enum {
     , SPOT_BOTTOM_RIGHT
 };
 
+/* \Internal event callback definition. Draw border, this
+   usually pointing to an internal function, but may be used for
+   a control to draw a custom border.                            */
 typedef void (CPROC*_DrawBorder)        ( struct common_control_frame * );
+/* \Internal event callback definition. This is called when the
+   control needs to draw itself. This happens when SmudgeCommon
+   is called on the control or on a parent of the control.      */
 typedef int (CPROC*__DrawThySelf)       ( struct common_control_frame * );
+/* \Internal event callback definition. A mouse event is
+   happening over the control.                           */
 typedef int (CPROC*__MouseMethod)       ( struct common_control_frame *, S_32 x, S_32 y, _32 b );
+/* \Internal event callback definition. A key has been pressed. */
 typedef int (CPROC*__KeyProc)           ( struct common_control_frame *, _32 );
+/* \Internal event callback definition. The caption of a control
+   is changing (Edit control uses this).                         */
 typedef void (CPROC*_CaptionChanged)    ( struct common_control_frame * );
+/* \Internal event callback definition. Destruction of the
+   control is in progress. Allow control to free internal
+   resources.                                              */
 typedef void (CPROC*_Destroy)           ( struct common_control_frame * );
+/* \Internal event callback definition.
+   
+   A control has been added to this control. */
 typedef void (CPROC*_AddedControl)      ( struct common_control_frame *, struct common_control_frame *pcAdding );
+/* \Internal event callback definition. The focus of a control
+   is changing.                                                */
 typedef void (CPROC*_ChangeFocus)       ( struct common_control_frame *, LOGICAL bFocused );
-typedef void (CPROC*_Resize)            ( struct common_control_frame *, LOGICAL bSizing ); // if not sizing, is sized
-typedef void (CPROC*_PosChanging)       ( struct common_control_frame *, LOGICAL bMoving );	// if not moving, moved, received before and after control update
+/* \Internal event callback definition. Called when a control is
+	   being resized. Width or height changing.                      */
+typedef void (CPROC*_Resize)            ( struct common_control_frame *, LOGICAL bSizing );
+/* \Internal event callback definition. Called when the
+   control's position (x,y) is changing.                */
+typedef void (CPROC*_PosChanging)       ( struct common_control_frame *, LOGICAL bMoving );	
+/* \Internal event callback definition. Triggered when edit on a
+   frame is started.                                             */
 typedef void (CPROC*_BeginEdit)         ( struct common_control_frame * );
+/* \Internal event callback definition. Ending control editing. */
 typedef void (CPROC*_EndEdit)           ( struct common_control_frame * );
+/* \Internal event callback definition. A file has been dropped
+   on the control.                                              */
 typedef void (CPROC*_AcceptDroppedFiles)( struct common_control_frame *, CTEXTSTR filename, S_32 x, S_32 y );
 
 
@@ -117,9 +151,10 @@ typedef void (CPROC*_AcceptDroppedFiles)( struct common_control_frame *, CTEXTST
 #define InvokeResultingMethod(result,pc,name,args)  if( (pc) && (pc)->name ) { int n; for( n = 0; (pc) && n < (pc)->n##name; n++ ) if( (pc)->name[n] ) if( (result)=(pc)->name[n]args ) break; }
 #define InvokeSingleMethod(pc,name,args)  if( (pc)->name ) { (pc)->name args; }
 
-typedef struct edit_state_tag {
+struct edit_state_tag {
 
-   PCOMMON pCurrent;
+//DOM-IGNORE-BEGIN
+   PSI_CONTROL pCurrent;
    // so we can restore keystrokes to the control
    // and/or relay unused keys to the control...
    // perhaps should override draw this way
@@ -130,13 +165,14 @@ typedef struct edit_state_tag {
    //void (CPROC*PriorKeyProc)( PTRSZVAL psv, _32 );
 	//PTRSZVAL psvPriorKey;
    DeclMethod( _KeyProc );
-   //void (CPROC*_PriorKeyProc)( PCOMMON pc, _32 );
+   //void (CPROC*_PriorKeyProc)( PSI_CONTROL pc, _32 );
 
    IMAGE_POINT hotspot[9];
    IMAGE_RECTANGLE bound;
    IMAGE_POINT bias; // pCurrent upper left corner kinda on the master frame
-   S_32 _x, _y; // marked x, y when the hotspot was grabbed...
-               // should also do a cumulative change delta off
+	S_32 _x, _y; // marked x, y when the hotspot was grabbed...
+
+   // should also do a cumulative change delta off
 	// this to lock the mouse in position...
 	S_32 delxaccum, delyaccum;
 
@@ -153,13 +189,17 @@ typedef struct edit_state_tag {
       _32 bHotSpotsActive : 1;
    } flags;
 	_32 BorderType;
-} EDIT_STATE, *PEDIT_STATE;
+//DOM-IGNORE-END
+};
+typedef struct edit_state_tag EDIT_STATE;
+typedef struct edit_state_tag *PEDIT_STATE;
 
-typedef struct physical_device_interface
+struct physical_device_interface
 {
+//DOM-IGNORE-BEGIN
    PRENDERER pActImg; // any control can have a physical renderer...
    struct common_control_frame * common; // need this to easily back track...
-   struct {
+   struct device_flags {
       _32 bDragging : 1; // frame is being moved
       _32 bSizing       : 1; // flags for when frame is sizable
       _32 bSizing_left  : 1;
@@ -198,19 +238,25 @@ typedef struct physical_device_interface
    // this is unused yet...
    //int (CPROC*InitControl)(PTRSZVAL, struct common_control_frame *, _32);// match ControlInitProc(controls.h)
 	PTRSZVAL psvInit;
-} PHYSICAL_DEVICE, *PPHYSICAL_DEVICE;
+//DOM-IGNORE-END
+};
+typedef struct physical_device_interface PHYSICAL_DEVICE;
+typedef struct physical_device_interface*PPHYSICAL_DEVICE;
 
 
 typedef struct common_button_data {
+//DOM-IGNORE-BEGIN
 	PTHREAD thread;
    int *okay_value;
 	int *done_value;
-	struct {
+	struct button_flags {
 		_32 bWaitOnEdit : 1;
 	} flags;
+//DOM-IGNORE-END
 } COMMON_BUTTON_DATA, *PCOMMON_BUTTON_DATA;
 
 
+//DOM-IGNORE-BEGIN
 
 typedef struct common_control_frame
 {
@@ -223,88 +269,167 @@ typedef struct common_control_frame
 	// bad coding, and useless calls to fetch values
    // from the object...
 	POINTER pUser;
-	//PSUBCLASSES pSubClasses;
-
+   // the user may also set a DWORD value associated with a control.
 	PTRSZVAL psvUser;
 
-   int nType; // need this to align control and frame duality
-   CTEXTSTR pTypeName;
-	int nID; // unique control ID ....
-   CTEXTSTR pIDName; // don't release this, this references the tree's name.
+	// this is the numeric type ID of the control.  Although, now
+   // controls are mostly tracked with their name.
+   int nType; 
+   /* Name of the type this control is. Even if a control is
+      created by numeric Type ID, it still gets its name from the
+      procedure registry.                                         */
+	CTEXTSTR pTypeName;
+   // unique control ID ....
+	int nID;
+   // this is the text ID registered...
+   CTEXTSTR pIDName; 
 	//----------------
-	// gprivate data here....
 	// the data above this point may be known by
 	// external sources...
 
-	Image Surface; // just the data portion of the control
+	/* just the data portion of the control */
+	Image Surface;
 	Image OriginalSurface; // just the data portion of the control
 
+	/* flags that affect a control's behavior or state.
+	                                                    */
+	/* <combine sack::psi::common_control_frame::flags@1>
+	   
+	   \ \                                                */
 	struct {
-      _32 bFocused : 1;
-      //_32 bEditing : 1; // shared flag - for frames passed as controls
-      _32 bDestroy : 1; // destroyed - and at next opportunity will be...
-		_32 bSizing : 1; // set when a size op begins to void draw done during size
-      _32 bInitial : 1; // used to make Frame more 'Pop' Up...
-		_32 bNoUpdate : 1;// set to disable updates
-		_32 bHiddenParent : 1; // this control was explicitly set hidden.. don't unhide.
-		_32 bHidden : 1; // can't see it, can't touch it.
-		_32 bScaled : 1; // scale currently applies.
+      /* Control is currently keyboard focused. */
+		_32 bFocused : 1;
+      // destroyed - and at next opportunity will be...
+		_32 bDestroy : 1; 
+      // set when a size op begins to void draw done during size
+		_32 bSizing : 1; 
+      // used to make Frame more 'Pop' Up...
+		_32 bInitial : 1; 
+      // set to disable updates
+		_32 bNoUpdate : 1;
+      // this control was explicitly set hidden.. don't unhide.
+		_32 bHiddenParent : 1; 
+      // can't see it, can't touch it.
+		_32 bHidden : 1; 
+      // scale currently applies.
+		_32 bScaled : 1; 
+		/* control gets no keyboard focus. */
 		_32 bNoFocus:1;
-		_32 bDisable : 1; // greyed out state?
-      //--------------
-      _32 bAlign:2;  // 0 = default alignment 1 = left, 2 = center 3 = right
-      _32 bVertical:1;// draw veritcal instead of horizontal
-		_32 bInvert:1;  // draw opposite/upside down from normal
-		_32 bDirty : 1; // needs DrawThySelf called...
-		_32 bCleaning : 1; // DrawThySelf has been called...
-		_32 bDirtyBorder : 1; // only need to update the control's frame... (focus change)
-		_32 bParentCleaned : 1; // parent drew, therefore this needs to draw, and it's an initial draw.
-		_32 bTransparent : 1; // saves it's original surface and restores it before invoking the control draw.
-		_32 bAdoptedChild : 1;
-		_32 children_cleaned : 1; // children were cleaned by an internal update... don't draw again.
-		_32 private_control : 1; // no extra init, and no save, this is a support control created for a master control
-		_32 detached : 1;
-		_32 auto_opened : 1;  // edit mode enabled visibility of this window and opened it.
-		_32 bFirstCleaning : 1; // first time this is being cleaned (during the course of refresh this could be called many times)
-		_32 bNoEdit : 1; // frame was loaded from XML, and desires that EditFrame not be enablable.
-		_32 bEditSet : 1;
-		_32 bEditLoaded : 1; // this came from the XML file.
-		_32 bUpdating : 1; // an update event is already being done, bail on this and all children?
-		_32 bOpenGL : 1; // enable only real draw events in video thread.  (post invalidate only)
-		_32 bChildDirty : 1; // needs DrawThySelf called... // collect these, so a master level draw can be done down. only if a control or it's child is dirty.
-		_32 bRestoring : 1; // there is a frame caption update (with flush to display) which needs to be locked....
-		_32 bShown : 1; // got at least one frame redraw event (focus happens before first draw)
+      // greyed out state?
+		_32 bDisable : 1; 
+       // 0 = default alignment 1 = left, 2 = center 3 = right
+		_32 bAlign:2;
+      // draw veritcal instead of horizontal
+		_32 bVertical:1;
+       // draw opposite/upside down from normal
+		_32 bInvert:1;
+      // needs DrawThySelf called...
+		_32 bDirty : 1;
+      // DrawThySelf has been called...
+		_32 bCleaning : 1;
+      // only need to update the control's frame... (focus change)
+		_32 bDirtyBorder : 1;
+      // parent drew, therefore this needs to draw, and it's an initial draw.
+		_32 bParentCleaned : 1;
+      // saves it's original surface and restores it before invoking the control draw.
+		_32 bTransparent : 1; 
 
+		/* Adopted children are not automatically saved in XML files. */
+		_32 bAdoptedChild : 1;
+      // children were cleaned by an internal update... don't draw again.
+		_32 children_cleaned : 1;
+      // no extra init, and no save, this is a support control created for a master control
+		_32 private_control : 1; 
+		/* control has been temporarily displaced from its parent
+		   control.                                               */
+			_32 detached : 1;
+         // edit mode enabled visibility of this window and opened it.
+			_32 auto_opened : 1;
+         // first time this is being cleaned (during the course of refresh this could be called many times)
+			_32 bFirstCleaning : 1;
+         // frame was loaded from XML, and desires that EditFrame not be enablable.
+		_32 bNoEdit : 1; 
+		/* Edit has been enabled on the control. */
+			_32 bEditSet : 1;
+         // this came from the XML file.
+			_32 bEditLoaded : 1;
+         // an update event is already being done, bail on this and all children?
+			_32 bUpdating : 1;
+         // enable only real draw events in video thread.  (post invalidate only)
+			_32 bOpenGL : 1;
+         // needs DrawThySelf called... // collect these, so a master level draw can be done down. only if a control or it's child is dirty.
+			_32 bChildDirty : 1;
+         // there is a frame caption update (with flush to display) which needs to be locked....
+			_32 bRestoring : 1;
+         // got at least one frame redraw event (focus happens before first draw)
+		_32 bShown : 1; 
+		/* Set when resized by a mouse drag, causes a dirty state. */
+			_32 bResizedDirty : 1;
+         // during control update the effective surface region was set while away.
+		_32 bUpdateRegionSet : 1; 
 	} flags;
 
 
+	/* Information about the caption of a control. */
+	/* <combine sack::psi::common_control_frame::caption@1>
+	   
+	   \ \                                                  */
 	struct {
+		/* This is the font that applies to the current control. If it
+		   is NULL, then it uses the parent controls' font. If that's
+		   null, it keeps searching up until it finds a font or results
+		   NULL and uses the default internal font.                     */
 		Font font;
+		/* This is actually a PFONTDATA.
+		                                 */
 		POINTER fontdata;
+      /* Length of the PFONTDATA. */
       _32 fontdatalen;
+      /* Text of the control's caption. */
       PTEXT text;
 	} caption;
 
 
-	// maybe I can get pointers to this....
-   IMAGE_RECTANGLE original_rect; // original size.
-   FRACTION scalex, scaley; // applied to original_rect to get...
-   IMAGE_RECTANGLE rect;  // the actual rect of the control...
-	IMAGE_RECTANGLE surface_rect;
-   IMAGE_RECTANGLE detached_at; // size and position of detachment.
-   PPHYSICAL_DEVICE device;
-   Image Window; // includes frame/caption of control
-
-	_32 InUse; // actively processing - only when decremented to 0 do we destroy...
-   _32 NotInUse; // fake counter to allow ReleaseCommonUse to work.
-	_32 InWait; // waitinig for a responce... when both inuse and inwait become 0 destroy can happy.
+    // original size the control was created at (before the border is applied)
+   IMAGE_RECTANGLE original_rect;
+   /* the scalex that is applied to creation of controls within
+      this control. Modifies the width of a control and X
+      positioning.                                              */
+		FRACTION scalex;
+   /* the scaley that is applied to creation of controls within
+      this control. Modifies the height of a control and Y
+      positioning.                                              */
+		FRACTION scaley;
+      // the actual rect of the control...
+   IMAGE_RECTANGLE rect;  
+	/* This is the rectangle that describes where the surface of the
+	   control is relative to is outside position.                   */
+		IMAGE_RECTANGLE surface_rect;
+      // size and position of detachment.
+   IMAGE_RECTANGLE detached_at; 
+   /* this is the output device that the control is being rendered
+      to.                                                          */
+	PPHYSICAL_DEVICE device;
+   // includes border/caption of control
+   Image Window; 
+ // actively processing - only when decremented to 0 do we destroy...
+	_32 InUse;
+   // fake counter to allow ReleaseCommonUse to work.
+   _32 NotInUse; 
+	// waitinig for a responce... when both inuse and inwait become 0 destroy can happy.
    // otherwise when inuse reduces to 0, draw events are dispatched.
+	_32 InWait;
+	/* This is a pointer to the prior control in a frame. */
+	/* pointer to the first child control in this one. */
+	/* pointer to the next control within this control's parent. */
+	/* pointer to the control that contains this control. */
 	struct common_control_frame *child, *parent, *next, *prior;
    // maybe I can get pointers to this....
 
 	_32 BorderType;
    // also declare a method above of the same name...
 	int draw_result;
+
    DeclMethod( _DrawThySelf );
    // also declare a method above of the same name...
    DeclMethod( _MouseMethod );
@@ -326,37 +451,66 @@ typedef struct common_control_frame
    DeclSingleMethod( BeginEdit );
    DeclSingleMethod( EndEdit );
    DeclMethod( AcceptDroppedFiles );
-	COMMON_BUTTON_DATA pCommonButtonData;
-	IMAGE_RECTANGLE dirty_rect;
+	/* Pointer to common button data. Common buttons are the Okay
+	   and Cancel buttons that are commonly on dialogs.           */
+		COMMON_BUTTON_DATA pCommonButtonData;
+      // invalidating an arbitrary rect, this is the intersection of the parent's dirty rect on this
+		IMAGE_RECTANGLE dirty_rect;   
+      // during update this may be set, and should be used for the update region insted of control surface
+	IMAGE_RECTANGLE update_rect;  
+   /* A copy of the name that the frame was loaded from or saved
+      to. For subsequent save when the control is edited.        */
    CTEXTSTR save_name;
    int nExtra; // size above common required...
 } FR_CT_COMMON, *PCONTROL;
+//DOM-IGNORE-END
 
 //---------------------------------------------------------------------------
 
 // each control has itself a draw border method.
-//void CPROC DrawBorder( PTRSZVAL psv, PCOMMON pc );
+//void CPROC DrawBorder( PTRSZVAL psv, PSI_CONTROL pc );
 // check box uses these... ???
-void CPROC DrawThinFrame( PCOMMON pc );
-void CPROC DrawThinnerFrame( PCOMMON pc );
-void CPROC DrawThinFrameInverted( PCOMMON pc );
-void CPROC DrawThinnerFrameInverted( PCOMMON pc );
+void CPROC DrawThinFrame( PSI_CONTROL pc );
+void CPROC DrawThinnerFrame( PSI_CONTROL pc );
+void CPROC DrawThinFrameInverted( PSI_CONTROL pc );
+void CPROC DrawThinnerFrameInverted( PSI_CONTROL pc );
 void CPROC DrawThinFrameImage( Image pc );
+/* Draw a 2 pixel frame around a control.
+   Parameters
+   pc :  COntrol to draw a thinner frame on;. */
 void CPROC DrawThinnerFrameImage( Image pc );
 void CPROC DrawThinFrameInvertedImage( Image pc );
 void CPROC DrawThinnerFrameInvertedImage( Image pc );
 
 void GetCurrentDisplaySurface( PPHYSICAL_DEVICE device );
 _MOUSE_NAMESPACE
+/* This is an internal routine which sets the hotspot drawing
+   coordiantes. Prepares for drawing, but doesn't draw.       */
 void SetupHotSpots( PEDIT_STATE pEditState );
-void DrawHotSpots( PCOMMON pf, PEDIT_STATE pEditState );
+/* Routine in mouse space which draws hotspots on the frame
+   indicating areas that can be manipulated on a control. Otherwise
+   controls are fully active, and you can use them as you are
+   developing. Hotspots are drawn in WHITE unless the mouse is
+   captured by one, then the spot is RED.
+   
+   
+   Parameters
+   pf :  frame being edited.
+   pe :  pointer to the current edit state containing information
+         like the currently active control for editing on a frame.  */
+void DrawHotSpotsEx( PSI_CONTROL pf, PEDIT_STATE pEditState DBG_PASS );
+/* <combine sack::psi::_mouse::DrawHotSpotsEx@PSI_CONTROL@PEDIT_STATE pEditState>
+   
+   \ \                                                                        */
+#define DrawHotSpots(pf,pe) DrawHotSpotsEx(pf,pe DBG_SRC)
+//void DrawHotSpots( PSI_CONTROL pf, PEDIT_STATE pEditState );
 _MOUSE_NAMESPACE_END
-void SmudgeSomeControls( PCOMMON pc, P_IMAGE_RECTANGLE pRect );
-void DetachFrameFromRenderer( PCOMMON pc );
-void IntelligentFrameUpdateAllDirtyControls( PCOMMON pc DBG_PASS );
+void SmudgeSomeControls( PSI_CONTROL pc, P_IMAGE_RECTANGLE pRect );
+void DetachFrameFromRenderer( PSI_CONTROL pc );
+void IntelligentFrameUpdateAllDirtyControls( PSI_CONTROL pc DBG_PASS );
 
 _BUTTON_NAMESPACE
-//	void InvokeButton( PCOMMON pc );
+//	void InvokeButton( PSI_CONTROL pc );
 _BUTTON_NAMESPACE_END
 
 // dir 0 here only... in case we removed ourself from focusable
@@ -368,23 +522,52 @@ _BUTTON_NAMESPACE_END
 void FixFrameFocus( PPHYSICAL_DEVICE pf, int dir );
 
 _MOUSE_NAMESPACE
-#define INV_OKAY   0
-#define INV_CANCEL 1
-int InvokeDefault( PCOMMON pc, int type );
+	/* Specifies symbols for which default control to press -
+	   default accept or default cancel.                      */
+	enum MouseInvokeType {
+ INV_OKAY   = 0, /* Invoke Button OK. */
+ 
+ INV_CANCEL = 1 /* Invoke Button Cancel. */
+ 
+	};
+/* Invokes a default button on a frame.
+   Parameters
+   pc :    frame to invoke the event on
+   type :  type of Event from MouseInvokeType. */
+int InvokeDefault( PSI_CONTROL pc, int type );
 
-void AddUseEx( PCOMMON pc DBG_PASS);
+/* Add a usage counter to a control. Controls in use have redraw
+   events blocked.                                               */
+void AddUseEx( PSI_CONTROL pc DBG_PASS);
+/* <combine sack::psi::_mouse::AddUseEx@PSI_CONTROL pc>
+   
+   \ \                                              */
 #define AddUse( pc ) AddUseEx( pc DBG_SRC )
 
-void DeleteUseEx( PCOMMON *pc DBG_PASS );
+/* Removes a use added by AddUse. COntrols in use cannot update. */
+void DeleteUseEx( PSI_CONTROL *pc DBG_PASS );
+/* <combine sack::psi::_mouse::DeleteUseEx@PSI_CONTROL *pc>
+   
+   \ \                                                  */
 #define DeleteUse(pc) DeleteUseEx( &pc DBG_SRC )
 
-void AddWaitEx( PCOMMON pc DBG_PASS);
+/* Adds a wait to a control. This prevents drawing while the
+   system is out of a drawable state.                        */
+void AddWaitEx( PSI_CONTROL pc DBG_PASS);
+/* <combine sack::psi::_mouse::AddWaitEx@PSI_CONTROL pc>
+   
+   \ \                                               */
 #define AddWait( pc ) AddWaitEx( pc DBG_SRC )
 
-void DeleteWaitEx( PCOMMON *pc DBG_PASS );
-#define DeleteWait(pc) DeleteWaitEx( &pc DBG_SRC )
+/* Removes a wait added by AddWait */
+void DeleteWaitEx( PSI_CONTROL *pc DBG_PASS );
+#define DeleteWait(pc) DeleteWaitEx( &pc DBG_SRC ) /* <combine sack::psi::_mouse::DeleteWaitEx@PSI_CONTROL *pc>
+                                                      
+                                                      \ \                                                   */
+
 _MOUSE_NAMESPACE_END
 USE_MOUSE_NAMESPACE
+#define PCOMMON PSI_CONTROL
 
 PSI_NAMESPACE_END
 

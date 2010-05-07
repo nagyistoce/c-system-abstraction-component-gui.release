@@ -22,7 +22,7 @@ int main( void )
 	printf( "begin=%p\n", begin );
 	printf( "end=%p\n", end );
 	printf( "extra=%ld\n", ((PTRSZVAL)end - (PTRSZVAL)begin)%sizeof( struct rt_init ) );
-	for( current = begin+1; current < end; current++ )
+	for( current = begin; current < end; current++ )
 	{
 		printf( "Entry %p(%d) = %s %s(%d)\n"
 				, current, (current-begin)

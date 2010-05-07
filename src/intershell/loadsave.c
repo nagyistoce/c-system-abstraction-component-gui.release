@@ -3,21 +3,19 @@
 #include <stdhdrs.h>
 
 #if defined( __WINDOWS__ ) || defined( _MSC_VER )
+#ifndef UNDER_CE
 #include <io.h> // unlink() // also no chsize() (if I can get it to work)
+#endif
 #else
 #include <unistd.h> // unlink()
 #endif
 #include <stdio.h>
 #include <sharemem.h>
 #include <configscript.h>
-/* these are quick hacks implemented to generilize the above */
-/* they should perhaps be moved out to intershell_registry.h for use by OnSave and OnLoad method */
-#define MakeElem( w, name, text ) genxElement name = genxDeclareElement( w, NULL, text, &l.status )
-#define MakeAttr( w, name, text ) genxAttribute name = genxDeclareAttribute( w, NULL, text, &l.status )
-#define AddAttr( attr, format, ... ) { char tmp[256]; snprintf( tmp, sizeof( tmp ), format,## __VA_ARGS__ ); genxAddAttribute( attr, (constUtf8)tmp ); }
 
 #include <filesys.h> // pathrchr
-#include <sexpat/sexpat.h>
+#include <../sexpat/expat.h>
+//#include <sexpat/sexpat.h>
 #include "intershell_local.h"
 #include "resource.h"
 #include <pssql.h>
@@ -29,6 +27,13 @@
 
 #include "pages.h"
 
+INTERSHELL_NAMESPACE
+
+/* these are quick hacks implemented to generilize the above */
+/* they should perhaps be moved out to intershell_registry.h for use by OnSave and OnLoad method */
+#define MakeElem( w, name, text ) genxElement name = genxDeclareElement( w, NULL, text, &l.status )
+#define MakeAttr( w, name, text ) genxAttribute name = genxDeclareAttribute( w, NULL, text, &l.status )
+#define AddAttr( attr, format, ... ) { TEXTCHAR tmp[256]; snprintf( tmp, sizeof( tmp ), format,## __VA_ARGS__ ); genxAddAttribute( attr, (constUtf8)tmp ); }
 
 extern CONTROL_REGISTRATION menu_surface;
 
@@ -85,7 +90,7 @@ static PTRSZVAL CPROC ResetConfig( PTRSZVAL psv, arg_list args )
 		if( current_button )
 		{
 #ifdef DEBUG_CONIG_STATE
-			lprintf( "Previous psvUser was %p is now %p", current_button->psvUser, psv );
+			lprintf( WIDE( "Previous psvUser was %p is now %p" ), current_button->psvUser, psv );
 #endif
 			current_button->psvUser = psv;
 		}
@@ -96,7 +101,7 @@ static PTRSZVAL CPROC ResetConfig( PTRSZVAL psv, arg_list args )
 	if( current_button )
 	{
 #ifdef DEBUG_CONIG_STATE
-		lprintf( "Button's psv is %ld",current_button->psvUser );
+		lprintf( WIDE( "Button's psv is %ld" ),current_button->psvUser );
 #endif
 		return current_button->psvUser;
 	}
@@ -112,7 +117,7 @@ static PTRSZVAL CPROC ResetCanvasConfig( PTRSZVAL psv, arg_list args )
 	{
 		RestorePage( pc_canvas, canvas, canvas->current_page, TRUE );
 	}
-	ShellSetCurrentPageEx( pc_canvas, "first" );
+	ShellSetCurrentPageEx( pc_canvas, WIDE( "first" ) );
    // really this behaves more like a pop configuration.
 	EndConfiguration( my_current_handler );
 	return psv;
@@ -127,7 +132,7 @@ static PTRSZVAL CPROC ResetMainCanvasConfig( PTRSZVAL psv, arg_list args )
 	{
 		RestorePage( pc_canvas, canvas, canvas->current_page, TRUE );
 	}
-	//ShellSetCurrentPageEx( pc_canvas, "first" );
+	//ShellSetCurrentPageEx( pc_canvas, WIDE( "first" ) );
 	return psv;
 }
 //---------------------------------------------------------------------------
@@ -167,14 +172,14 @@ PTRSZVAL CPROC UnhandledLine( PTRSZVAL psv, CTEXTSTR line )
 		if( current_button )
 		{
 			AddLink( &current_button->extra_config, StrDup( line ) );
-         lprintf( "Unhandled line added to current button..." );
+         lprintf( WIDE( "Unhandled line added to current button..." ) );
 		}
 		else
 		{
 			AddLink( &l.unhandled_global_lines, StrDup( line ) );
-         lprintf( "Unhandled line added to global config button..." );
+         lprintf( WIDE( "Unhandled line added to global config button..." ) );
 		}
-		xlprintf(LOG_ALWAYS)( "Received unhandled line: %s", line );
+		xlprintf(LOG_ALWAYS)( WIDE( "Received unhandled line: %s" ), line );
 	}
 	return psv;
 }
@@ -187,7 +192,7 @@ PTRSZVAL CPROC ProcessLast( PTRSZVAL psv )
 	if( current_button )
 	{
 #ifdef DEBUG_CONIG_STATE
-		lprintf( "POP BUTTON" );
+		lprintf( WIDE( "POP BUTTON" ) );
 #endif
 		PopLink( &l.current_button );
 	}
@@ -203,11 +208,11 @@ PTRSZVAL CPROC ProcessLast( PTRSZVAL psv )
 
 PLIST prior_configs;
 
-LOGICAL BeginSubConfiguration( char *control_type_name, const char *end_type_name )
+LOGICAL BeginSubConfiguration( TEXTCHAR *control_type_name, const TEXTCHAR *end_type_name )
 {
-	//lprintf( "Beginning a sub configuration for %s ending at %s", control_type_name, end_type_name );
-	char buf[256];
-   snprintf( buf, sizeof( buf ), "%s/%s", control_type_name, end_type_name );
+	//lprintf( WIDE( "Beginning a sub configuration for %s ending at %s" ), control_type_name, end_type_name );
+	TEXTCHAR buf[256];
+   snprintf( buf, sizeof( buf ), WIDE( "%s/%s" ), control_type_name, end_type_name );
 	if( !BeginNamedConfiguration( my_current_handler, buf ) )
 	{
 		// these have to be added to this one.
@@ -216,19 +221,19 @@ LOGICAL BeginSubConfiguration( char *control_type_name, const char *end_type_nam
 		AddConfigurationMethod( my_current_handler, end_type_name, ResetConfig );
 		SetConfigurationUnhandled( my_current_handler, UnhandledLine );
 		{
-			char rootname[256];
+			TEXTCHAR rootname[256];
 			void (CPROC*f)(PCONFIG_HANDLER,PTRSZVAL);
 			PMENU_BUTTON   current_button = (PMENU_BUTTON)PeekLink( &l.current_button );
 #ifdef DEBUG_CONIG_STATE
-			lprintf( "Push current (%s end at %s)button. (double push, cause we may be calling a macro which will change this state?)", control_type_name, end_type_name );
+			lprintf( WIDE( "Push current (%s end at %s)button. (double push, cause we may be calling a macro which will change this state?)" ), control_type_name, end_type_name );
 #endif
 			PushLink( &l.current_button
 					  , current_button );
-			snprintf( rootname, sizeof( rootname ), TASK_PREFIX "/control/%s", control_type_name );
+			snprintf( rootname, sizeof( rootname ), TASK_PREFIX WIDE( "/control/%s" ), control_type_name );
 			f = GetRegisteredProcedure2( rootname, void, WIDE("control_config"), (PCONFIG_HANDLER,PTRSZVAL) );
 			if( f )
 			{
-				//lprintf( "Gave control a chance to register additional methods on current config... " );
+				//lprintf( WIDE( "Gave control a chance to register additional methods on current config... " ) );
 				f( my_current_handler, current_button?current_button->psvUser:0 );
 			}
 
@@ -237,13 +242,13 @@ LOGICAL BeginSubConfiguration( char *control_type_name, const char *end_type_nam
 			{
 				CTEXTSTR name;
 				PCLASSROOT data = NULL;
-				//lprintf( "Gave control a chance to register additional security methods on current config... " );
-				for( name = GetFirstRegisteredName( TASK_PREFIX "/common/Load Security", &data );
+				//lprintf( WIDE( "Gave control a chance to register additional security methods on current config... " ) );
+				for( name = GetFirstRegisteredName( TASK_PREFIX WIDE( "/common/Load Security" ), &data );
 					 name;
 					  name = GetNextRegisteredName( &data ) )
 				{
 					void (CPROC*f)(PCONFIG_HANDLER);
-					//snprintf( rootname, sizeof( rootname ), TASK_PREFIX "/common/save common/%s", name );
+					//snprintf( rootname, sizeof( rootname ), TASK_PREFIX WIDE( "/common/save common/%s" ), name );
 					f = GetRegisteredProcedure2( (CTEXTSTR)data, void, name, (PCONFIG_HANDLER) );
 					if( f )
 						f( my_current_handler );
@@ -259,7 +264,7 @@ LOGICAL BeginSubConfiguration( char *control_type_name, const char *end_type_nam
 		// recoveredconfig, don't need to call application to have additional config methods..
       return TRUE;
 	}
-   //lprintf( "Done setting up subconfig" );
+   //lprintf( WIDE( "Done setting up subconfig" ) );
 }
 
 //---------------------------------------------------------------------------
@@ -294,7 +299,7 @@ static PTRSZVAL CPROC AddDisallowedSystemShow( PTRSZVAL psv, arg_list args )
 
 PTRSZVAL CPROC CreateNewControl( PTRSZVAL psv, arg_list args )
 {
-	PARAM( args, char *, type );
+	PARAM( args, TEXTCHAR *, type );
 	PARAM( args, _64, col );
 	PARAM( args, _64, row );
 	// this will be backwards compatible if we should
@@ -320,10 +325,10 @@ PTRSZVAL CPROC CreateNewControl( PTRSZVAL psv, arg_list args )
 		// then tries invoke "key_create" issue_pos/control/key_create
 		// then tries "button_create"
 		// then tries "contained_button_create"
-		if( strncmp( type, WIDE("generic"), 7 ) == 0 )
+		if( StrCaseCmpEx( type, WIDE("generic"), 7 ) == 0 )
 		{
 			PMENU_BUTTON button;
-			char *control_type_name = strchr( type, ' ' );
+			TEXTCHAR *control_type_name = strchr( type, ' ' );
 			if( control_type_name )
 			{
             LOGICAL bRecovered;
@@ -338,7 +343,6 @@ PTRSZVAL CPROC CreateNewControl( PTRSZVAL psv, arg_list args )
 						  , button = CreateSomeControl( pc_canvas, col, row, width, height, control_type_name ) );
 				if( button )
 				{
-#define GetRegisteredProcedure2(nc,rtype,name,args) (rtype (CPROC*)args)GetRegisteredProcedureEx((nc),#rtype, name, #args )
 					bRecovered = BeginSubConfiguration( control_type_name, WIDE("control done") );
                if( !bRecovered )
 						if( !button->flags.bNoCreateMethod )
@@ -348,8 +352,8 @@ PTRSZVAL CPROC CreateNewControl( PTRSZVAL psv, arg_list args )
 				{
 					if( button && button->flags.bListbox )
 					{
-						AddConfigurationMethod( my_current_handler, "multi select? %b lazy? %b", SetListMultiLazySelect );
-						AddConfigurationMethod( my_current_handler, "multi select? %b", SetListMultiSelect );
+						AddConfigurationMethod( my_current_handler, WIDE( "multi select? %b lazy? %b" ), SetListMultiLazySelect );
+						AddConfigurationMethod( my_current_handler, WIDE( "multi select? %b" ), SetListMultiSelect );
 					}
 					//lprintf( "Adding configuration to button thing " );
 					AddConfigurationMethod( my_current_handler, WIDE("Allow show on %m" ), AddAllowedSystemShow );
@@ -362,7 +366,7 @@ PTRSZVAL CPROC CreateNewControl( PTRSZVAL psv, arg_list args )
 			}
 			else
 			{
-				lprintf( "Unknown control name: %s", type );
+				lprintf( WIDE( "Unknown control name: %s" ), type );
 			}
 		}
 	}
@@ -373,7 +377,7 @@ void SetCurrentLoadingButton( PMENU_BUTTON button )
 {
 	/* replace the current button with some specified button , this is specifically for use by macros! */
 #ifdef DEBUG_CONIG_STATE
-	lprintf( "Set (push)current button" );
+	lprintf( WIDE( "Set (push)current button" ) );
 #endif
    //PopLink( &l.current_button );
 	PushLink( &l.current_button, button );
@@ -438,7 +442,7 @@ PTRSZVAL CPROC SetMenuBackgroundColor( PTRSZVAL psv, arg_list args )
 
 PTRSZVAL CPROC SetMenuBackground( PTRSZVAL psv, arg_list args )
 {
-	PARAM( args, char *, filename );
+	PARAM( args, TEXTCHAR *, filename );
 	PCanvasData canvas = GetCanvas( (PSI_CONTROL)PeekLink( &l.current_canvas ) );
 	if( canvas->current_page->background ) Release( (POINTER)canvas->current_page->background );
 	if( canvas->current_page->background_image ) UnmakeImageFile( canvas->current_page->background_image );
@@ -467,7 +471,7 @@ PTRSZVAL CPROC SetMenuButtonImageMargin( PTRSZVAL psv, arg_list args )
 }
 PTRSZVAL CPROC SetMenuButtonImage( PTRSZVAL psv, arg_list args )
 {
-	PARAM( args, char *, text );
+	PARAM( args, TEXTCHAR *, text );
 	PMENU_BUTTON   current_button = (PMENU_BUTTON)PeekLink( &l.current_button );
 	if( current_button )
 		InterShell_SetButtonImage( current_button, text );
@@ -478,7 +482,7 @@ PTRSZVAL CPROC SetMenuButtonImage( PTRSZVAL psv, arg_list args )
 
 PTRSZVAL CPROC SetMenuButtonText( PTRSZVAL psv, arg_list args )
 {
-	PARAM( args, char *, text );
+	PARAM( args, TEXTCHAR *, text );
 	PMENU_BUTTON   current_button = (PMENU_BUTTON)PeekLink( &l.current_button );
 	if( current_button )
 	{
@@ -493,7 +497,7 @@ PTRSZVAL CPROC SetMenuButtonText( PTRSZVAL psv, arg_list args )
 
 PTRSZVAL CPROC SetButtonRound( PTRSZVAL psv, arg_list args )
 {
-	PARAM( args, char *, type );
+	PARAM( args, TEXTCHAR *, type );
 	PMENU_BUTTON   current_button = (PMENU_BUTTON)PeekLink( &l.current_button );
 	if( current_button )
 	{
@@ -679,7 +683,7 @@ PTRSZVAL CPROC SetMenuRowCols( PTRSZVAL psv, arg_list args )
 //---------------------------------------------------------------------------
 
 #if 0
-static PTRSZVAL CPROC EndConfig( PTRSZVAL psv, char *line )
+static PTRSZVAL CPROC EndConfig( PTRSZVAL psv, TEXTCHAR *line )
 {
 	if( line )
 	{
@@ -738,7 +742,7 @@ void PublicAddCommonButtonConfig( PMENU_BUTTON button )
 
 PTRSZVAL CPROC CreateTitledPage( PTRSZVAL psv, arg_list args )
 {
-	PARAM( args, char *, title );
+	PARAM( args, TEXTCHAR *, title );
 	PSI_CONTROL pc_canvas = (PSI_CONTROL)PeekLink( &l.current_canvas );
    CreateNamedPage( pc_canvas, title );
 	return psv;
@@ -760,7 +764,7 @@ void AddCommonCanvasConfig( PCONFIG_HANDLER pch )
 	AddConfigurationMethod( pch, WIDE("Allow Multi Run? %b"), SetAllowMultiInstance );
 
 	AddConfigurationMethod( pch, WIDE("control %m at %i,%i sized %i,%i"), CreateNewControl );
-	AddConfigurationMethod( my_current_handler, "Canvas Done", ResetCanvasConfig );
+	AddConfigurationMethod( my_current_handler, WIDE( "Canvas Done" ), ResetCanvasConfig );
 	AddConfigurationMethod( my_current_handler, WIDE("page layout %i by %i"), SetMenuRowCols );
 }
 
@@ -769,13 +773,13 @@ void BeginCanvasConfiguration( PSI_CONTROL pc_canvas )
 	/*
 	 * need to create a new canvas here?
 	 */
-   //lprintf( "Push new canvas" );
+   //lprintf( WIDE( "Push new canvas" ) );
 	PushLink( &l.current_canvas, pc_canvas );
 	BeginConfiguration( my_current_handler );
 
-	//AddConfigurationMethod( my_current_handler, "Canvas Done", ResetCanvasConfig );
+	//AddConfigurationMethod( my_current_handler, WIDE( "Canvas Done" ), ResetCanvasConfig );
 	//AddConfigurationMethod( my_current_handler, WIDE("page layout %i by %i"), SetMenuRowCols );
-	AddConfigurationMethod( my_current_handler, "Canvas Done", ResetCanvasConfig );
+	AddConfigurationMethod( my_current_handler, WIDE( "Canvas Done" ), ResetCanvasConfig );
 	AddCommonCanvasConfig( my_current_handler );
 	SetConfigurationUnhandled( my_current_handler, UnhandledLine );
 }
@@ -785,7 +789,7 @@ void InvokeLoadCommon( void )
 {
 		CTEXTSTR name;
 		PCLASSROOT data = NULL;
-		for( name = GetFirstRegisteredName( TASK_PREFIX "/common/common_config", &data );
+		for( name = GetFirstRegisteredName( TASK_PREFIX WIDE( "/common/common_config" ), &data );
 			 name;
 			  name = GetNextRegisteredName( &data ) )
 		{
@@ -794,7 +798,7 @@ void InvokeLoadCommon( void )
 			if( f )
 			{
 				TEXTCHAR buf[256];
-				snprintf( buf, sizeof( buf ), "%s:%s", name, WIDE("executed") );
+				snprintf( buf, sizeof( buf ), WIDE( "%s:%s" ), name, WIDE("executed") );
 				if( !GetRegisteredIntValue( (CTEXTSTR)data, buf ) )
 				{
 					RegisterIntValue( (CTEXTSTR)data, buf, 1 );
@@ -808,7 +812,7 @@ void LoadButtonConfig( PSI_CONTROL pc_canvas, TEXTSTR filename )
 {
 	PCONFIG_HANDLER pch;
 	//ValidatedControlData( PCanvasData, menu_surface.TypeID, canvas, g.single_frame );
-   //lprintf( "Push initial current canvas" );
+   //lprintf( WIDE( "Push initial current canvas" ) );
 	PushLink( &l.current_canvas, pc_canvas );
 	my_current_handler = pch = CreateConfigurationEvaluator();
 	// if this is not done first, then the system will default to 5.
@@ -821,7 +825,7 @@ void LoadButtonConfig( PSI_CONTROL pc_canvas, TEXTSTR filename )
 	AddConfigurationMethod( pch, WIDE("%m button down=%m"), SetRoundDown );
 	AddConfigurationMethod( pch, WIDE("%m button mask=%m"), SetRoundMask );
 	// BeginCanvasConfiguration( g.single_frame );
-	AddConfigurationMethod( pch, "Canvas Done", ResetMainCanvasConfig );
+	AddConfigurationMethod( pch, WIDE( "Canvas Done" ), ResetMainCanvasConfig );
 	SetConfigurationUnhandled( pch, UnhandledLine );
 	AddCommonCanvasConfig( pch );
 
@@ -832,23 +836,25 @@ void LoadButtonConfig( PSI_CONTROL pc_canvas, TEXTSTR filename )
 		&& !g.flags.forceload ) // force load, don't read from config..
 	{
 		_32 buflen;
-		char *buffer;
+		TEXTCHAR *buffer;
 		//lprintf( WIDE("long wait...") );
 		if( g.flags.bSQLConfig )
 		{
 			BannerNoWait( WIDE("Read SQL Config...") );
+#ifndef __NO_OPTIONS__
 #ifndef __NO_SQL__
 #ifndef __ARM__
 			if( SACK_GetProfileBlobOdbc( NULL, WIDE("intershell/configuration"), filename, &buffer, &buflen ) )
 			{
-				FILE *out = fopen( filename, WIDE("wb") );
+				FILE *out = sack_fopen( 0, filename, WIDE("wb") );
 				if( out )
 				{
-					fwrite( buffer, buflen, 1, out );
-					fclose( out );
+					sack_fwrite( buffer, buflen, 1, out );
+					sack_fclose( out );
 				}
 				Release( buffer );
 			}
+#endif
 #endif
 #endif
 		}
@@ -861,15 +867,21 @@ void LoadButtonConfig( PSI_CONTROL pc_canvas, TEXTSTR filename )
 		if( g.flags.forceload )
 		{
 			FILE *file;
-			_32 size = 0;
-        		 _32 real_file_size = 0;
-			POINTER mem = OpenSpace( NULL, filename, &size );
+			PTRSZVAL size = 0;
+        		 PTRSZVAL real_file_size = 0;
+			POINTER mem = 
+#ifdef UNDER_CE
+				NULL;
+#else
+				OpenSpace( NULL, filename, &size );
+#endif
 			if( mem && size )
 			{
-				file = fopen( filename, "rb" );
-				fseek( file, 0, SEEK_END );
+				file = sack_fopen( 0, filename, WIDE("rb") );
+				sack_fseek( file, 0, SEEK_END );
 				real_file_size = ftell( file );
-				fclose( file );
+				sack_fclose( file );
+
 				if( g.flags.restoreload )
 				{
 					TEXTSTR ext;
@@ -881,9 +893,9 @@ void LoadButtonConfig( PSI_CONTROL pc_canvas, TEXTSTR filename )
 					*/
 
 					// with this, there are overloaded equivalent functions
-					// which make typecast ierrelvant.  THe input is a char *
+					// which make typecast ierrelvant.  THe input is a TEXTCHAR *
 					// which is a wriatable string for sure...
-					// The C Code results with const char * caues ti acceps a const char *
+					// The C Code results with const TEXTCHAR * caues ti acceps a const TEXTCHAR *
 					// cause it can, since the function does not modify the content...
 					// but then the rsult type and the passed type must be the same....
 					ext =
@@ -896,22 +908,22 @@ void LoadButtonConfig( PSI_CONTROL pc_canvas, TEXTSTR filename )
 #endif
 #else
 					// see comments in the above cplusplus section....
-					ext = (char*)StrRChr( (const char *)filename, '.' );
+					ext = (TEXTCHAR*)StrRChr( (const TEXTCHAR *)filename, '.' );
 					ext[0] = 0;
-					ext = (char*)pathrchr( (const char *)filename );
+					ext = (TEXTCHAR*)pathrchr( (const TEXTCHAR *)filename );
 #endif
 					if( ext )
 					{
-						//char *newname = StrDup( ext + 1 ); // derr - need to copy this before releasing it....
+						//TEXTCHAR *newname = StrDup( ext + 1 ); // derr - need to copy this before releasing it....
 						/* if there was a pathpart on it for some reason, get rid of it
 						*/
 						//Release( g.config_filename );
 						//g.config_filename = newname;
 					}
 				}
-#ifndef __NO_SQL__
+#ifndef __NO_OPTIONS__
 #ifndef __ARM__
-				SACK_WriteProfileBlobOdbc( NULL, TASK_PREFIX "/configuration", filename, (char*)mem, real_file_size );
+				SACK_WriteProfileBlobOdbc( NULL, TASK_PREFIX "/configuration", filename, (TEXTCHAR*)mem, real_file_size );
 #endif
 #endif
 				g.flags.forceload = 0;
@@ -924,16 +936,16 @@ void LoadButtonConfig( PSI_CONTROL pc_canvas, TEXTSTR filename )
 #ifndef __ARM__
 		if( g.flags.restoreload )
 		{
-			_32 size = 0;
+			PTRSZVAL size = 0;
 			POINTER mem = OpenSpace( NULL, filename, &size );
 			FILE *file;
-			_32 real_file_size = 0;
+			PTRSZVAL real_file_size = 0;
 			if( mem && size )
 			{
-				file = fopen( filename, "rb" );
-				fseek( file, 0, SEEK_END );
+				file = sack_fopen( 0, filename, WIDE( "rb" ) );
+				sack_fseek( file, 0, SEEK_END );
 				real_file_size = ftell( file );
-				fclose( file );
+				sack_fclose( file );
 				if( g.flags.restoreload )
 				{
 					TEXTSTR ext;
@@ -944,9 +956,9 @@ void LoadButtonConfig( PSI_CONTROL pc_canvas, TEXTSTR filename )
 						StrRChr( filename, '.' );
 					ext[0] = 0;
 				}
-				file = fopen( filename, "wb" );
-				fwrite( mem, 1, real_file_size, file );
-				fclose( file );
+				file = sack_fopen( 0, filename, WIDE("wb") );
+				sack_fwrite( mem, 1, real_file_size, file );
+				sack_fclose( file );
 			}
 		}
 #endif
@@ -966,7 +978,7 @@ CTEXTSTR EscapeMenuString( CTEXTSTR string )
 {
 	if( string )
 	{
-		static char *escaped;
+		static TEXTCHAR *escaped;
 		static int len;
 		int pos = 0;
 		int this_len = strlen( string );
@@ -977,7 +989,7 @@ CTEXTSTR EscapeMenuString( CTEXTSTR string )
 		{
 			if( escaped )
 				Release( escaped );
-			escaped = NewArray( char, len = this_len * 2 );
+			escaped = NewArray( TEXTCHAR, len = this_len * 2 );
 		}
 		while( string[0] )
 		{
@@ -1056,7 +1068,7 @@ void DumpCommonButton( FILE *file, PMENU_BUTTON button )
 
 void XML_DumpCommonButton( genxWriter w, PMENU_BUTTON button )
 {
-	static char buffer[4096];
+	static TEXTCHAR buffer[4096];
 	int offset = 0;
    // this is just a quick hack, it's a lot of typing still to port this...
 	MakeAttr( w, generic_xx, "generic" );
@@ -1118,10 +1130,9 @@ void InterShell_SaveCommonButtonParameters( FILE *file )
 
 void DumpGeneric( FILE *file, PMENU_BUTTON button )
 {
-#define GetRegisteredProcedure2(nc,rtype,name,args) (rtype (CPROC*)args)GetRegisteredProcedureEx((nc),#rtype, name, #args )
    void (CPROC*f)(FILE*,PMENU_BUTTON,PTRSZVAL);
    void (CPROC*f2)(FILE*,PTRSZVAL);
-	char rootname[256];
+	TEXTCHAR rootname[256];
 	saving = button;
 	if( button->pTypeName )
 	{
@@ -1139,14 +1150,14 @@ void DumpGeneric( FILE *file, PMENU_BUTTON button )
 			int multi;
 			int lazy;
 			GetListboxMultiSelectEx( button->control.control, &multi, &lazy );
-			fprintf( file, "multi select?%s lazy?%s\n"
-				, multi?"yes":"no" 
-					 , multi?(lazy?"yes":"no"):"no"
+			fprintf( file, WIDE( "multi select?%s lazy?%s\n" )
+				, multi?WIDE( "yes" ):WIDE( "no" ) 
+					 , multi?(lazy?WIDE( "yes" ):WIDE( "no" )):WIDE( "no" )
 				);
 		}
 		if( !button->flags.bCustom )
 		{
-			snprintf( rootname, sizeof( rootname ), TASK_PREFIX "/control/%s", button->pTypeName );
+			snprintf( rootname, sizeof( rootname ), TASK_PREFIX WIDE( "/control/%s" ), button->pTypeName );
 			f = GetRegisteredProcedure2( rootname, void, WIDE("button_save"), (FILE*,PMENU_BUTTON,PTRSZVAL) );
 			if( f )
 			{
@@ -1156,7 +1167,7 @@ void DumpGeneric( FILE *file, PMENU_BUTTON button )
 				// add additional security plugin stuff...
 				CTEXTSTR name;
 				PCLASSROOT data = NULL;
-				for( name = GetFirstRegisteredName( TASK_PREFIX "/common/Save Security", &data );
+				for( name = GetFirstRegisteredName( TASK_PREFIX WIDE( "/common/Save Security" ), &data );
 					 name;
 					  name = GetNextRegisteredName( &data ) )
 				{
@@ -1168,7 +1179,7 @@ void DumpGeneric( FILE *file, PMENU_BUTTON button )
 				}
 			}
 		}
-		snprintf( rootname, sizeof( rootname ), TASK_PREFIX "/control/%s", button->pTypeName );
+		snprintf( rootname, sizeof( rootname ), TASK_PREFIX WIDE( "/control/%s" ), button->pTypeName );
 		f2 = GetRegisteredProcedure2( rootname, void, WIDE("control_save"), (FILE*,PTRSZVAL) );
 		if( f2 )
 		{
@@ -1200,10 +1211,9 @@ void DumpGeneric( FILE *file, PMENU_BUTTON button )
 
 void XML_DumpGeneric( genxWriter w, PMENU_BUTTON button )
 {
-#define GetRegisteredProcedure2(nc,rtype,name,args) (rtype (CPROC*)args)GetRegisteredProcedureEx((nc),#rtype, name, #args )
    //void (CPROC*f)(genxWriter,PMENU_BUTTON,PTRSZVAL);
    void (CPROC*f2)(genxWriter,PTRSZVAL);
-	char rootname[256];
+	TEXTCHAR rootname[256];
    MakeElem( w, generic_dump_region, (constUtf8)"control" );
 	MakeAttr( w, location, (constUtf8)"position" );
    MakeAttr( w, size, (constUtf8)"size" );
@@ -1213,9 +1223,9 @@ void XML_DumpGeneric( genxWriter w, PMENU_BUTTON button )
 
 	genxStartElement( generic_dump_region );
 
-   AddAttr( location, "%lld,%lld", button->x, button->y );
-   AddAttr( size, "%lld,%lld", button->x, button->y );
-   AddAttr( control_type, "%s", button->pTypeName );
+   AddAttr( location, WIDE("%")_64f WIDE(",%")_64f, button->w, button->h );
+   AddAttr( size, WIDE("%")_64fs WIDE(",%")_64fs, button->x, button->y );
+   AddAttr( control_type, WIDE( "%s" ), button->pTypeName );
 
 	if( button->pTypeName )
 	{
@@ -1223,15 +1233,15 @@ void XML_DumpGeneric( genxWriter w, PMENU_BUTTON button )
 		{
 			int multi;
 			int lazy;
-         MakeAttr( w, attr_multiselect, (constUtf8)"multi-select" );
-			MakeAttr( w, attr_lazy, (constUtf8)"lazy" );
+         MakeAttr( w, attr_multiselect, (constUtf8)WIDE( "multi-select" ) );
+			MakeAttr( w, attr_lazy, (constUtf8)WIDE( "lazy" ) );
 
 			GetListboxMultiSelectEx( button->control.control, &multi, &lazy );
 
-			AddAttr( attr_multiselect, "%s", multi?"yes":"no" );
-			AddAttr( attr_lazy, "%s", lazy?"yes":"no" );
+			AddAttr( attr_multiselect, WIDE( "%s" ), multi?WIDE( "yes" ):WIDE( "no" ) );
+			AddAttr( attr_lazy, WIDE( "%s" ), lazy?WIDE( "yes" ):WIDE( "no" ) );
 		}
-		snprintf( rootname, sizeof( rootname ), TASK_PREFIX "/control/%s", button->pTypeName );
+		snprintf( rootname, sizeof( rootname ), TASK_PREFIX WIDE( "/control/%s" ), button->pTypeName );
 		f2 = GetRegisteredProcedure2( rootname, void, WIDE("control_save_xml"), (genxWriter,PTRSZVAL) );
 		if( f2 )
 		{
@@ -1275,7 +1285,7 @@ void InvokeSavePage( FILE *file, PPAGE_DATA page )
 {
 	CTEXTSTR name;
 	PCLASSROOT data = NULL;
-	for( name = GetFirstRegisteredName( TASK_PREFIX "/common/save page", &data );
+	for( name = GetFirstRegisteredName( TASK_PREFIX WIDE( "/common/save page" ), &data );
 		  name;
 		  name = GetNextRegisteredName( &data ) )
 	{
@@ -1293,7 +1303,7 @@ void XML_InvokeSavePage( genxWriter w, PPAGE_DATA page )
 {
 	CTEXTSTR name;
 	PCLASSROOT data = NULL;
-	for( name = GetFirstRegisteredName( TASK_PREFIX "/common/xml save page", &data );
+	for( name = GetFirstRegisteredName( TASK_PREFIX WIDE( "/common/xml save page" ), &data );
 		  name;
 		  name = GetNextRegisteredName( &data ) )
 	{
@@ -1326,11 +1336,7 @@ void SaveAPage( FILE *file, PPAGE_DATA page )
 	LIST_FORALL( page->controls, idx, PMENU_BUTTON, button )
 	{
 		fprintf( file
-#ifdef _MSC_VER
-				 , WIDE("control generic %s at %lld,%lld sized %lld,%lld\n")
-#else
-				 , WIDE("control generic %s at %Ld,%Ld sized %Ld,%Ld\n")
-#endif
+				 , WIDE("control generic %s at %")_64fs WIDE(",%")_64fs WIDE(" sized %")_64f WIDE(",%")_64f WIDE("\n")
 				 , button->pTypeName
 				 , button->x, button->y
 				 , button->w, button->h );
@@ -1346,7 +1352,7 @@ void XML_SaveAPage( genxWriter w, PPAGE_DATA page )
 	PMENU_BUTTON button;
 	INDEX idx;
 	//genxStatus status;
-   //char tmp[256];
+   //TEXTCHAR tmp[256];
    MakeElem( w, page_element, (constUtf8)"page" );
    //MakeAttr( w, aspect, "aspect" );
    //MakeAttr( w, layout, "layout" );
@@ -1396,16 +1402,16 @@ void SaveSQLButtonConfig( void )
    // the method to store information should support undo capability?
 }
 
-void RenameConfig( char *config_filename, char *source, int source_name_len, int n )
+void RenameConfig( TEXTCHAR *config_filename, TEXTCHAR *source, int source_name_len, int n )
 {
 	FILE *file;
-	file = fopen( source, WIDE("rt") );
+	file = sack_fopen( 0, source, WIDE("rt") );
 	if( file )
 	{
-      char backup[256];
-		fclose( file );
+		TEXTCHAR backup[256];
+		sack_fclose( file );
 		// move file to backup..
-		snprintf( backup, sizeof( backup ), "%*.*s.AutoConfigBackup%d"
+		snprintf( backup, sizeof( backup ), WIDE( "%*.*s.AutoConfigBackup%d" )
 				  , source_name_len
 				  , source_name_len
 				  , config_filename, n );
@@ -1416,8 +1422,8 @@ void RenameConfig( char *config_filename, char *source, int source_name_len, int
 							, n+1 );
 		}
 		else
-			unlink( source );
-		rename( source, backup );
+			sack_unlink( source );
+		sack_rename( source, backup );
 	}
 }
 
@@ -1459,14 +1465,14 @@ void SaveCanvasConfiguration( FILE *file, PSI_CONTROL pc_canvas )
 				SaveAPage( file, page );
 			}
 		}
-		fprintf( file, "Canvas Done\n" );
+		fprintf( file, WIDE( "Canvas Done\n" ) );
 	}
 }
 
 void SaveCanvasConfiguration_XML( genxWriter w, PSI_CONTROL pc_canvas )
 {
 	ValidatedControlData( PCanvasData, menu_surface.TypeID, canvas, pc_canvas );
-   MakeElem( w, canvas_element, (constUtf8)"canvas" );
+   MakeElem( w, canvas_element, (constUtf8)WIDE( "canvas" ) );
 	if( canvas )
 	{
 		genxStartElement( canvas_element );
@@ -1480,12 +1486,12 @@ void SaveCanvasConfiguration_XML( genxWriter w, PSI_CONTROL pc_canvas )
 			}
 		}
 		genxEndElement( w );
-		//fprintf( file, "Canvas Done\n" );
+		//fprintf( file, WIDE( "Canvas Done\n" ) );
 	}
 }
 
 
-void SaveButtonConfig( PSI_CONTROL pc_canvas, char *filename )
+void SaveButtonConfig( PSI_CONTROL pc_canvas, TEXTCHAR *filename )
 {
 	FILE *file;
    //ValidatedControlData( PCanvasData, menu_surface.TypeID, canvas, pc_canvas );
@@ -1501,13 +1507,13 @@ void SaveButtonConfig( PSI_CONTROL pc_canvas, char *filename )
 
 	RenameConfig( filename, filename, strlen( filename ), 1 );
 
-	file = fopen( filename, WIDE("wt") );
+	file = sack_fopen( 0, filename, WIDE("wt") );
 	if( file )
 	{
       //fprintf( file, WIDE("[config]\n") ); // make this look like an INI so some standard tools work.
 		//fprintf( file, WIDE("\n\n") );
 
-#define fn(n) ((n)?EscapeMenuString(n):"")
+#define fn(n) ((n)?EscapeMenuString(n):WIDE(""))
 		{
 			INDEX idx;
 			PGLARE_SET glare_set;
@@ -1529,7 +1535,7 @@ void SaveButtonConfig( PSI_CONTROL pc_canvas, char *filename )
 		{
 			CTEXTSTR name;
 			PCLASSROOT data = NULL;
-			for( name = GetFirstRegisteredName( TASK_PREFIX "/common/save common", &data );
+			for( name = GetFirstRegisteredName( TASK_PREFIX WIDE( "/common/save common" ), &data );
 				 name;
 				  name = GetNextRegisteredName( &data ) )
 			{
@@ -1555,9 +1561,9 @@ void SaveButtonConfig( PSI_CONTROL pc_canvas, char *filename )
 		// someday this config file should be encrypted or something
       // since it is meant to be machine readable only.
 		if( g.flags.bNoEditSet )
-			fprintf( file, "Allow Edit? %s\n", g.flags.bNoEdit?"No":"Yes" );
+			fprintf( file, WIDE( "Allow Edit? %s\n" ), g.flags.bNoEdit?WIDE( "No" ):WIDE( "Yes" ) );
 		if( g.flags.bAllowMultiSet )
-			fprintf( file, "Allow Multi Run? %s\n", g.flags.bAllowMultiLaunch?"Yes":"No" );
+			fprintf( file, WIDE( "Allow Multi Run? %s\n" ), g.flags.bAllowMultiLaunch?WIDE( "Yes" ):WIDE( "No" ) );
 
 
 		// -- additional code for XML output...
@@ -1565,9 +1571,9 @@ void SaveButtonConfig( PSI_CONTROL pc_canvas, char *filename )
 		genxEndDocument( w );
 		{
 			PTEXT text = VarTextGet( pvt );
-			fprintf( file, "# Begin XML Expirament\n# " );
+			fprintf( file, WIDE( "# Begin XML Expirament\n# " ) );
 			//fwrite( GetText( text ), sizeof( TEXTCHAR ), GetTextSize( text ), file );
-         fprintf( file, "\n\n" );
+			fprintf( file, WIDE( "\n\n" ) );
 			LineRelease( text );
 		}
 		VarTextDestroy( &pvt );
@@ -1576,18 +1582,18 @@ void SaveButtonConfig( PSI_CONTROL pc_canvas, char *filename )
 
 		SaveCanvasConfiguration( file, pc_canvas );
 
-		fclose( file );
+		sack_fclose( file );
 	}
 #ifndef __ARM__
 	if( g.flags.bSQLConfig )
 		if( !g.flags.local_config )
 		{
-			_32 size = 0;
+			PTRSZVAL size = 0;
 			POINTER mem = OpenSpace( NULL, filename, &size );
 			if( mem && size )
 			{
-#ifndef __NO_SQL__
-				SACK_WriteProfileBlobOdbc( NULL, TASK_PREFIX "/configuration", filename, (char*)mem, size );
+#ifndef __NO_OPTIONS__
+				SACK_WriteProfileBlobOdbc( NULL, TASK_PREFIX "/configuration", filename, (TEXTCHAR*)mem, size );
 #endif
 				g.flags.forceload = 0;
 				CloseSpace( mem );
@@ -1595,4 +1601,5 @@ void SaveButtonConfig( PSI_CONTROL pc_canvas, char *filename )
 		}
 #endif
 }
+INTERSHELL_NAMESPACE_END
 

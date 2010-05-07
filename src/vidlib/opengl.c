@@ -1,4 +1,4 @@
-
+#ifndef UNDER_CE
 #define NEED_REAL_IMAGE_STRUCTURE
 
 #include <stdhdrs.h>
@@ -6,8 +6,10 @@
 #include <sharemem.h>
 #include <timers.h>
 #include <logging.h>
+#ifndef UNDER_CE
 #include <gl\gl.h>         // Header File For The OpenGL32 Library
 #include <gl\glu.h>        // Header File For The GLu32 Library
+#endif
 //#include <gl\glaux.h>    // Header File For The Glaux Library
 #include <imglib/imagestruct.h>
 #include <vidlib/vidstruc.h>
@@ -948,3 +950,4 @@ void ReadBuffer( PPBO_Info pbo )
 
 
 RENDER_NAMESPACE_END
+#endif

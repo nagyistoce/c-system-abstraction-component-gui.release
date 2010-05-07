@@ -4,8 +4,8 @@
  */
 
 // not unicode!
-#undef UNICODE
-#undef _UNICODE
+//#undef UNICODE
+//#undef _UNICODE
 
 
 #define GENX_VERSION "beta5"
@@ -173,10 +173,10 @@ static void deallocate(genxWriter w, void * data)
 static utf8 copy(genxWriter w, constUtf8 from)
 {
   utf8 temp;
-
-  if ((temp = (utf8) allocate(w, strlen((const char *) from) + 1)) == NULL)
+  int len;
+  if ((temp = (utf8) allocate(w, len = (strlen((const char *) from) + 1))) == NULL)
     return NULL;
-  strcpy((char *) temp, (const char *) from);
+  memcpy( temp, from, (len) );
   return temp;
 }
 
@@ -216,12 +216,12 @@ static void endCollect(collector * c)
 static genxStatus collectString(genxWriter w, collector * c, constUtf8 string)
 {
   int sl = strlen((const char *) string);
-
   if (sl >= c->space)
     if ((w->status = growCollector(w, c, sl)) != GENX_SUCCESS)
       return GENX_ALLOC_FAILED;
 
-  strcpy((char *) c->buf, (const char *) string);
+  memcpy( c->buf, string, (sl+1)*sizeof(TEXTCHAR) );
+  //StrCpy((char *) c->buf, (const char *) string);
   return GENX_SUCCESS;
 }
 

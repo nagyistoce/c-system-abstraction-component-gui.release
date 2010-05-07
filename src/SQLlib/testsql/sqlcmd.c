@@ -6,12 +6,14 @@
 void Usage( int bFull )
 {
 	if( bFull )
-		fprintf( stderr, "usage: %s [DSN or Sqlite db file]\n", GetProgramName() );
+		fprintf( stderr, "usage: %s [-f <script file>] [DSN or Sqlite db file]\n", GetProgramName() );
 
 	fprintf( stderr, WIDE("Command must start with '?', '!' or '='.\n") );
 	fprintf( stderr, WIDE("?<query> results go to the current output, or the screen if non specified before\n") );
 	fprintf( stderr, WIDE("!<command> - issues command to \n") );
 	fprintf( stderr, WIDE("=<table>@<DSN><,DSN>,...> setup output to these DSN's for next command or query result\n") );
+	fprintf( stderr, WIDE("?!<query> results go to the current output (with replace instead of insert), or the screen if non specified before\n") );
+	fprintf( stderr, WIDE("\q on a new line - quit\n") );
 }
 
 void CPROC ShowSQLStates( CTEXTSTR message )
@@ -21,6 +23,7 @@ void CPROC ShowSQLStates( CTEXTSTR message )
 
 int main( int argc, char **argv )
 {
+   FILE *input = stdin;
    PVARTEXT pvt_cmd;
 	TEXTCHAR readbuf[4096];
 	TEXTCHAR *buf;
@@ -29,6 +32,7 @@ int main( int argc, char **argv )
 	CTEXTSTR select_into;
 	PLIST output = NULL;
 	PLIST outputs = NULL;
+   int arg_ofs = 0;
    SQLSetFeedbackHandler( ShowSQLStates );
 	//SetAllocateDebug( TRUE );
 	//SetAllocateLogging( TRUE );
@@ -36,7 +40,19 @@ int main( int argc, char **argv )
 		Usage( 1 );
 	else
 	{
-		default_odbc = ConnectToDatabase( argv[1] );
+      while( argv[1+arg_ofs] && ( argv[1+arg_ofs][0] == '-' ) )
+		{
+			switch( argv[1+arg_ofs][1] )
+			{
+			case 'f':
+				arg_ofs++;
+				input = fopen( argv[1+arg_ofs], "rt" );
+            break;
+			}
+			arg_ofs++;
+		}
+		if( argv[1+arg_ofs] )
+			default_odbc = ConnectToDatabase( argv[1 + arg_ofs] );
 	}
 	SetHeapUnit( 4096 * 1024 ); // 4 megs expansion if needed...
 	pvt_cmd = VarTextCreateExx( 10000, 50000 );
@@ -44,7 +60,7 @@ int main( int argc, char **argv )
 
 	while( (buf = readbuf), fgets( readbuf + offset
 					, sizeof( readbuf ) - offset
-					, stdin ) )
+					, input ) )
 	{
 		CTEXTSTR *result = NULL;
 		int len;
@@ -53,17 +69,22 @@ int main( int argc, char **argv )
 		len = strlen( buf );
 		if( buf[0] == '#' )
 			continue;
-		if( buf[len-1] == '\n' )
+		if( ( len > 0 ) && buf[len-1] == '\n' )
 		{
 			len--;
 			buf[len] = 0;
 		}
 
-		if( !buf[0] )
+		if( strcmp( buf, "\\q" ) == 0 )
+			break;
+
+		if( !buf[0] && VarTextLength( pvt_cmd ) == 0 )
 			continue;
 
-		if( buf[len-1] == '\\' )
+		if( ( len > 0 ) && buf[len-1] == '\\' )
 		{
+			buf[len-1] = 0;
+         len--;
 			vtprintf( pvt_cmd, "%s", buf );
          offset = 0;
 			//offset = (len - 1); // read over the slash
@@ -71,7 +92,8 @@ int main( int argc, char **argv )
 		}
 		else
 		{
-			vtprintf( pvt_cmd, "%s", buf );
+			if( len > 0 )
+				vtprintf( pvt_cmd, "%s", buf );
 			offset = 0;
 		}
 
@@ -80,9 +102,16 @@ int main( int argc, char **argv )
 		if( buf[0] == '?' )
 		{
 			int fields;
+			int replace = 0;
+         int ofs = 1;
 			CTEXTSTR *columns;
 			TEXTSTR *_columns;
 			PVARTEXT pvt = NULL;
+			if( buf[1] == '!' )
+			{
+				replace = 1;
+            ofs = 2;
+			}
 			if( output )
 			{
 				if( !select_into || !select_into[0] )
@@ -93,7 +122,7 @@ int main( int argc, char **argv )
 				}
 				pvt = VarTextCreateExx( 10000, 50000 );
 			}
-			if( SQLRecordQuery( default_odbc, buf +1, &fields, &result, &columns ) )
+			if( SQLRecordQuery( default_odbc, buf + ofs, &fields, &result, &columns ) )
 			{
 				int count = 0;
 				int first = 1;
@@ -113,7 +142,7 @@ int main( int argc, char **argv )
 				{
 					if( pvt && first )
 					{
-						vtprintf( pvt, "insert ignore into `%s` (", select_into );
+						vtprintf( pvt, "%s into `%s` (", replace?"replace":"insert ignore", select_into );
 						{
 							int first = 1;
 							int n;

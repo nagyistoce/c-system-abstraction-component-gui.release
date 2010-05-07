@@ -348,7 +348,9 @@ static int CPROC ButtonKeyProc( PSI_CONTROL pc, _32 key )
    //printf( WIDE("Key: %08x\n"), key );
 	if( key & 0x80000000 )
 	{
-		if( ( ( key & 0xFF ) == KEY_SPACE ) ||
+      int keymod = KEY_MOD( key );
+		if( !keymod &&
+			( ( key & 0xFF ) == KEY_SPACE ) ||
 			( ( key & 0xFF ) == KEY_ENTER ) )
 		{
 			InvokeButton( pc );
@@ -410,7 +412,7 @@ CTEXTSTR GetMethodName( POINTER Method, CTEXTSTR type, CTEXTSTR method )
 	TEXTCHAR buffer[256];
 	if( !Method )
 		return NULL;
-	sprintf( buffer, WIDE("psi/methods/%s/%s"), type, method );
+	snprintf( buffer, sizeof( buffer ), WIDE("psi/methods/%s/%s"), type, method );
 	for( name = GetFirstRegisteredName( buffer, &data );
 		 name;
 		  name = GetNextRegisteredName( &data ) )
@@ -1021,7 +1023,7 @@ PSI_CONTROL SetButtonPushMethod( PSI_CONTROL pc, ButtonPushMethod method, PTRSZV
 
 CONTROL_REGISTRATION
 normal_button = { NORMAL_BUTTON_NAME
-					 , { {73, 21}, sizeof( BUTTON ), BORDER_THIN }
+					 , { {73, 21}, sizeof( BUTTON ), BORDER_THIN|BORDER_NOCAPTION }
 					 , InitButton
 					 , NULL
 					 , ButtonDraw
@@ -1034,7 +1036,7 @@ normal_button = { NORMAL_BUTTON_NAME
 					 , NULL // ButtonLoadProc
 },
 image_button = { IMAGE_BUTTON_NAME
-					, { {73, 21}, sizeof( BUTTON ), BORDER_THIN }
+					, { {73, 21}, sizeof( BUTTON ), BORDER_THIN|BORDER_NOCAPTION }
 					, ConfigureImageButton// init
                , NULL
 					, ButtonDraw
@@ -1047,7 +1049,7 @@ image_button = { IMAGE_BUTTON_NAME
 					, NULL // load
 },
 custom_button = { CUSTOM_BUTTON_NAME
-					 , { {73, 21}, sizeof( BUTTON ), BORDER_THIN }
+					 , { {73, 21}, sizeof( BUTTON ), BORDER_THIN|BORDER_NOCAPTION }
 					 , ConfigureCustomDrawnButton
 					 , NULL
 					 , ButtonDraw
@@ -1060,7 +1062,7 @@ custom_button = { CUSTOM_BUTTON_NAME
 
 },
 radio_button = { RADIO_BUTTON_NAME
-					, { {73, 21}, sizeof( CHECK ) + 100, BORDER_NONE}
+					, { {73, 21}, sizeof( CHECK ) + 100, BORDER_NONE|BORDER_NOCAPTION}
 					, ConfigureCheckButton// init
                , NULL
 					, DrawCheckButton

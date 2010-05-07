@@ -15,18 +15,11 @@
 #define PROCEDURE_REGISTRY_LIBRARY_DEFINED
 #include <sack_types.h>
 #include <deadstart.h>
-#ifdef BCC16
-#ifdef PROCREG_SOURCE
-#define PROCREG_PROC(type,name) type STDPROC _export name
-#else
-#define PROCREG_PROC(type,name) type STDPROC name
-#endif
-#else
+
 #ifdef PROCREG_SOURCE
 #define PROCREG_PROC(type,name) EXPORT_METHOD type CPROC name
 #else
 #define PROCREG_PROC(type,name) IMPORT_METHOD type CPROC name
-#endif
 #endif
 
 
@@ -36,15 +29,57 @@
 #include <vcclr.h>
 using namespace System;
 #endif
-#define PROCREG_NAMESPACE namespace sack { namespace system { namespace registry {
+#   define _INTERFACE_NAMESPACE namespace interface {
+#   define _INTERFACE_NAMESPACE_END }
+#define PROCREG_NAMESPACE namespace sack { namespace app { namespace registry {
+#define _PROCREG_NAMESPACE namespace registry {
+#define _APP_NAMESPACE namespace app { 
 #define PROCREG_NAMESPACE_END }}}
 //extern "C"  {
 #else
-#define PROCREG_NAMESPACE 
+#   define _INTERFACE_NAMESPACE
+#   define _INTERFACE_NAMESPACE_END
+#define _PROCREG_NAMESPACE 
+#define _APP_NAMESPACE 
+#define PROCREG_NAMESPACE
 #define PROCREG_NAMESPACE_END
 #endif
 
-PROCREG_NAMESPACE
+SACK_NAMESPACE
+/* Deadstart is support which differs per compiler, but allows
+   applications access a C++ feature - static classes with
+   constructors that initialize at loadtime, but, have the
+   feature that you can create threads. Deadstart code is run
+   after the DLL load lock under windows that prevents creation
+   of threads; however, deadstart is run before main. Deadstart
+   routines can have a priority. Certain features require others
+   to be present always. This allows explicit control of
+   priority unlink using classes with static constructors, which
+   requires ordering of objects to provide linking order. Also
+   provides a similar registration mechanism for atexit, but
+   extending with priority. Deadstop registrations are done
+   sometime during normal C atexit() handling, but may be
+   triggered first by calling BAG_Exit.
+   
+   Registry offers support to register functions, and data under
+   a hierarchy of names. Names are kept in a string cache, which
+   applications can take benefit of. Strings will exist only a
+   single time. This table could be saved, and a look-aside
+   table for language translation purposes. Registry is the
+   support that the latest PSI relies on for registering event
+   callbacks for controls. The registry was always used, but,
+   the access to it was encapsulated by DoRegisterControl
+   registering the appropriate methods.                          */
+	_APP_NAMESPACE
+   /*Contains methods dealing with registering routines and values
+   in memory. Provisions are available to save the configuration
+   state, but the best that can be offered here would be a
+   translation tool for text strings. The namespace is savable,
+   but most of the content of the registration space are short
+   term pointers. Namespace containing registry namespace.
+   Contains application features... I guess.
+   
+   
 // POINTER in these two are equal to (void(*)(void))
 // but - that's rarely the most useful thing... so
 
@@ -85,6 +120,8 @@ PROCREG_NAMESPACE
 // registrant and the requestor... this provides for full name
 // dressing, return type and paramter type may both cause
 // overridden functions to occur...
+   */
+_PROCREG_NAMESPACE
 
 
 #ifndef REGISTRY_STRUCTURE_DEFINED
@@ -95,11 +132,7 @@ PROCREG_NAMESPACE
 	// as valid as this is.
 	typedef struct tree_def_tag *PCLASSROOT;
 #else
-#ifdef PROCREG_SOURCE
-	typedef struct tree_def_tag *PCLASSROOT;
-#else
 	typedef CTEXTSTR PCLASSROOT;
-#endif
 #endif
 
 	typedef void (CPROC *PROCEDURE)(void);
@@ -139,7 +172,7 @@ PROCREG_PROC( PCLASSROOT, GetClassRoot )( PCLASSROOT class_name );
 PROCREG_PROC( PCLASSROOT, GetClassRootEx )( PCLASSROOT root, PCLASSROOT name_class );
 #endif
 
-PROCREG_PROC( void, SetInterfaceConfigFile )( char *filename );
+PROCREG_PROC( void, SetInterfaceConfigFile )( TEXTCHAR *filename );
 
 
 // data is a &(POINTER data = NULL);
@@ -239,8 +272,8 @@ PROCREG_PROC( PROCEDURE, GetRegisteredProcedureExxx )( PCLASSROOT root
 																	 , CTEXTSTR parms
 																	 );
 #define GetRegisteredProcedureExx(root,nc,rt,n,a) ((rt (CPROC*)a)GetRegisteredProcedureExxx(root,nc,_WIDE(#rt),n,_WIDE(#a)))
-#define GetRegisteredProcedure2(nc,rtype,name,args) (rtype (CPROC*)args)GetRegisteredProcedureEx((nc),#rtype, name, #args )
-#define GetRegisteredProcedureNonCPROC(nc,rtype,name,args) (rtype (*)args)GetRegisteredProcedureEx((nc),#rtype, name, #args )
+#define GetRegisteredProcedure2(nc,rtype,name,args) (rtype (CPROC*)args)GetRegisteredProcedureEx((nc),WIDE(#rtype), name, WIDE(#args) )
+#define GetRegisteredProcedureNonCPROC(nc,rtype,name,args) (rtype (*)args)GetRegisteredProcedureEx((nc),WIDE(#rtype), name, WIDE(#args) )
 
 PROCREG_PROC( PROCEDURE, GetRegisteredProcedureEx )( PCLASSROOT name_class
 																	, CTEXTSTR returntype
@@ -297,7 +330,7 @@ PROCREG_PROC( LOGICAL, RegisterFunctionExx )( CTEXTSTR root
 #define RegisterFunctionExx(r,nc,pn,rt,proc,args,lib,rn) RegisterFunctionExx(r,nc,pn,rt,proc,args,lib,rn DBG_SRC)
 #define RegisterFunctionEx( root,proc,rt,pn,a) RegisterFunctionExx( root,NULL,pn,rt,(PROCEDURE)(proc),a,NULL,NULL )
 #ifndef TARGETNAME 
-#define TARGETNAME "sack"
+#define TARGETNAME WIDE("sack")
 #endif
 #define RegisterFunction( nc,proc,rt,pn,a) RegisterFunctionExx( (PCLASSROOT)NULL,nc,pn,rt,(PROCEDURE)(proc),a,TARGETNAME,NULL )
 
@@ -333,7 +366,7 @@ PROCREG_PROC( int, GetRegisteredIntValue )( CTEXTSTR name_class, CTEXTSTR name )
 PROCREG_PROC( int, GetRegisteredIntValue )( PCLASSROOT name_class, CTEXTSTR name );
 #endif
 
-typedef void (CPROC*OpenCloseNotification)( POINTER, _32 );
+typedef void (CPROC*OpenCloseNotification)( POINTER, PTRSZVAL );
 #define PUBLIC_DATA( public, struct, open, close )    \
 	PRELOAD( Data_##open##_##close ) { \
 	RegisterDataType( WIDE("system/data/structs")  \
@@ -350,7 +383,7 @@ typedef void (CPROC*OpenCloseNotification)( POINTER, _32 );
    (type*)CreateRegisteredDataType( WIDE("system/data/structs"), public, instname )
 PROCREG_PROC( PTRSZVAL, RegisterDataType )( CTEXTSTR classname
 												 , CTEXTSTR name
-												 , INDEX size
+												 , PTRSZVAL size
 												 , OpenCloseNotification open
 												 , OpenCloseNotification close );
 PROCREG_PROC( PTRSZVAL, CreateRegisteredDataType)( CTEXTSTR classname
@@ -360,7 +393,7 @@ PROCREG_PROC( PTRSZVAL, CreateRegisteredDataType)( CTEXTSTR classname
 PROCREG_PROC( PTRSZVAL, RegisterDataTypeEx )( PCLASSROOT root
 													, CTEXTSTR classname
 													, CTEXTSTR name
-													, INDEX size
+													, PTRSZVAL size
 													, OpenCloseNotification Open
 													, OpenCloseNotification Close );
 
@@ -397,6 +430,7 @@ PROCREG_PROC( int, ReleaseRegisteredFunctionEx )( PCLASSROOT root
 													  );
 #define ReleaseRegisteredFunction(nc,pn) ReleaseRegisteredFunctionEx(NULL,nc,pn)
 
+/* This is a macro used to paste two symbols together. */
 #define paste(a,b) _WIDE(a##b)
 
 
@@ -405,7 +439,7 @@ PROCREG_PROC( int, ReleaseRegisteredFunctionEx )( PCLASSROOT root
 	PRELOAD( paste(Register##name##Button,line) ) {  \
 	SimpleRegisterMethod( task WIDE("/") classtype, paste(name,line)  \
 	, _WIDE(#returntype), methodname, _WIDE(#argtypes) ); \
-   RegisterValue( task "/" classtype "/" methodname, "Description", desc ); \
+   RegisterValue( task WIDE("/") classtype WIDE("/") methodname, "Description", desc ); \
 }                                                                          \
 	static returntype CPROC paste(name,line)
 
@@ -422,7 +456,6 @@ PROCREG_PROC( int, ReleaseRegisteredFunctionEx )( PCLASSROOT root
 
 #define __DefineRegistryMethod(task,name,classtype,classbase,methodname,returntype,argtypes,line)   \
 	___DefineRegistryMethod(task,name,classtype,classbase,methodname,returntype,argtypes,line)
-
 
 #define _DefineRegistryMethod(task,name,classtype,classbase,methodname,returntype,argtypes,line)   \
 	static returntype __DefineRegistryMethod(task,name,classtype,classbase,methodname,returntype,argtypes,line)
@@ -441,6 +474,45 @@ PROCREG_PROC( int, ReleaseRegisteredFunctionEx )( PCLASSROOT root
 }                                                                          \
 	static returntype CPROC paste(name,line)
 
+/* <combine sack::app::registry::SimpleRegisterMethod>
+   
+   General form to build a registered procedure. Used by simple
+   macros to create PRELOAD'ed registered functions. This flavor
+   requires the user to provide 'static' and a return type that
+   matches the return type specified in the macro. This makes
+   usage most C-like, and convenient to know what the return
+   value of a function should be (if any).
+   
+   
+   Parameters
+   priority :    The preload priority to load at.
+   task :        process level name registry. This would be
+                 "Intershell" or "psi" or some other base prefix.
+                 The prefix can contain a path longer than 1
+                 level.
+   name :        This is the function name to build. (Can be used
+                 for link debugging sometimes)
+   classtype :   class of the name being registered
+   methodname :  name of the routine to register
+   returntype :  the literal type of the return type of this
+                 function (void, int, PStruct* )
+   argtypes :    Argument signature of the routine in parenthesis
+   line :        this is usually filled with __LINE__ so that the
+                 same function name (name) will be different in
+                 different files (even in the same file)
+   
+   Remarks
+   This registers a routine at the specified preload priority.
+   Registers under [task]/[classname]/methodname. The name of
+   the registered routine from a C perspective is [name][line]. This
+   function is not called directly, but will only be referenced
+   from the registered name.
+   
+   
+   
+   
+   Example
+   See <link sack::app::registry::GetFirstRegisteredNameEx@PCLASSROOT@CTEXTSTR@PCLASSROOT *, GetFirstRegisteredNameEx> */
 #define __DefineRegistryMethodP(priority,task,name,classtype,classbase,methodname,returntype,argtypes,line)   \
 	___DefineRegistryMethodP(priority,task,name,classtype,classbase,methodname,returntype,argtypes,line)
 
@@ -462,18 +534,79 @@ PROCREG_PROC( int, ReleaseRegisteredFunctionEx )( PCLASSROOT root
 #define DefineRegistrySubMethod(task,name,classtype,classbase,methodname,subname,returntype,argtypes)  \
 	_DefineRegistrySubMethod(task,name,classtype,classbase,methodname,subname,returntype,argtypes,__LINE__)
 
-// attempts to use dynamic linking functions to resolve passed global name
-				// if that fails, then a type is registered for this global, and an instance
-				// created, so that that instance may be reloaded again, otherwise the
-				// data in the main application is used... actually we should depreicate the dynamic
-// loading part, and just register the type.
-PROCREG_PROC( void, RegisterAndCreateGlobal )( POINTER *ppGlobal, _32 global_size, CTEXTSTR name );
-#define SimpleRegisterAndCreateGlobal( name ) 	RegisterAndCreateGlobal( (POINTER*)&name, sizeof( *name ), #name )
-// Init routine is called, otherwise a 0 filled space is returned.
-// Init routine is passed the pointer to the global and the size of the global block
-// the global data block is zero initialized.
-PROCREG_PROC( void, RegisterAndCreateGlobalWithInit )( POINTER *ppGlobal, _32 global_size, CTEXTSTR name, void (CPROC*Init)(POINTER,_32) );
-#define SimpleRegisterAndCreateGlobalWithInit( name,init ) 	RegisterAndCreateGlobalWithInit( (POINTER*)&name, sizeof( *name ), #name, init )
+/* attempts to use dynamic linking functions to resolve passed
+   global name if that fails, then a type is registered for this
+   global, and an instance created, so that that instance may be
+   reloaded again, otherwise the data in the main application is
+   used... actually we should deprecate the dynamic loading
+   part, and just register the type.
+   
+   
+   
+   SimpleRegisterAndCreateGlobal Simply registers the type as a
+   global variable type. Allows creation of the global space
+   later.
+   Parameters
+   name :         name of the pointer to global type to create.<p />text
+                  string to register this created global as.
+   ppGlobal :     address of the pointer to global memory.
+   global_size :  size of the global area to create
+   Example
+   <code lang="c++">
+   typedef struct {
+      int data;
+   } my_global;
+   my_global *global;
+   
+   PRELOAD( Init )
+   {
+       SimpleRegisterAndCreateGlobal( global );
+   }
+   </code>                                                               */
+PROCREG_PROC( void, RegisterAndCreateGlobal )( POINTER *ppGlobal, PTRSZVAL global_size, CTEXTSTR name );
+/* <combine sack::app::registry::RegisterAndCreateGlobal@POINTER *@PTRSZVAL@CTEXTSTR>
+   
+   \ \                                                                                   */
+#define SimpleRegisterAndCreateGlobal( name ) 	RegisterAndCreateGlobal( (POINTER*)&name, sizeof( *name ), WIDE(#name) )
+/* Init routine is called, otherwise a 0 filled space is
+   returned. Init routine is passed the pointer to the global
+   and the size of the global block the global data block is
+   zero initialized.
+   Parameters
+   ppGlobal :     Address of the pointer to the global region
+   global_size :  size of the global region to create
+   name :         name of the global region to register (so
+                  future users get back the same data area)
+   Init :         function to call to initialize the region when
+                  created. (doesn't have to be a global. Could be
+                  used to implement types that have class
+                  constructors \- or not, since there's only one
+                  instance of a global \- this is more for
+                  singletons).
+   Example
+   <code>
+   typedef struct {
+      int data;
+   } my_global;
+   my_global *global;
+   </code>
+   <code lang="c++">
+   
+   void __cdecl InitRegion( POINTER region, PTRSZVAL region_size )
+   {
+       // do something to initialize 'region'
+   }
+   
+   PRELOAD( InitGlobal )
+   {
+       SimpleRegisterAndCreateGlobalWithInit( global, InitRegion );
+   }
+   </code>                                                          */
+PROCREG_PROC( void, RegisterAndCreateGlobalWithInit )( POINTER *ppGlobal, PTRSZVAL global_size, CTEXTSTR name, void (CPROC*Init)(POINTER,PTRSZVAL) );
+/* <combine sack::app::registry::RegisterAndCreateGlobalWithInit@POINTER *@PTRSZVAL@CTEXTSTR@void __cdecl*InitPOINTER\,PTRSZVAL>
+   
+   \ \                                                                                                                              */
+#define SimpleRegisterAndCreateGlobalWithInit( name,init ) 	RegisterAndCreateGlobalWithInit( (POINTER*)&name, sizeof( *name ), WIDE(#name), init )
 
 /* a tree dump will result with dictionary names that may translate automatically. */
 /* This has been exported as a courtesy for StrDup.
@@ -495,7 +628,7 @@ PROCREG_NAMESPACE_END
 //PROCREG_PROC( PCLASSROOT, GetClassRootEx )( CTEXTSTR root, PCLASSROOT name_class );
 //PROCREG_PROC( PCLASSROOT, GetClassRootEx )( PCLASSROOT root, PCLASSROOT name_class );
 
-	using namespace sack::system::registry;
+	using namespace sack::app::registry;
 #endif
 
 #endif

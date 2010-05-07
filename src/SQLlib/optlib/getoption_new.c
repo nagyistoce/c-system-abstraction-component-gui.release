@@ -55,7 +55,7 @@ extern OPTION_GLOBAL og;
 //#define OPTION_ROOT_VALUE INVALID_INDEX
 #define OPTION_ROOT_VALUE 0
 
-INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const char *pBranch, const char *pValue, int bCreate )
+INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const char *pBranch, const char *pValue, int bCreate DBG_PASS )
 //#define GetOptionIndex( f,b,v ) GetOptionIndexEx( OPTION_ROOT_VALUE, f, b, v, FALSE )
 {
    const char **start = NULL;
@@ -84,7 +84,6 @@ INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const ch
 	InitMachine();
    // resets the search/browse cursor... not empty...
 	FamilyTreeReset( GetOptionTree( odbc ) );
-   SetSQLLoggingDisable( og.Option, TRUE );
    while( system || program || file || pBranch || pValue || start )
    {
 #ifdef DETAILED_LOGGING
@@ -160,11 +159,11 @@ INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const ch
 		}
 
 		{
-         INDEX IDName = SQLReadNameTable(odbc,namebuf,OPTION_NAME,"name_id");
+         INDEX IDName = SQLReadNameTable(odbc,namebuf,OPTION_NAME,"name_id" );
 
-			PushSQLQueryEx(odbc);
+			PushSQLQueryExEx(odbc DBG_RELAY );
          snprintf( query, sizeof( query )
-                 , WIDE("select option_id from "OPTION_MAP" where parent_option_id=%ld and name_id=%d")
+                 , "select option_id from "OPTION_MAP" where parent_option_id=%ld and name_id=%d"
                  , parent
 					  , IDName );
          //lprintf( "doing %s", query );
@@ -175,7 +174,7 @@ INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const ch
                // this is the only place where ID must be set explicit...
 					// otherwise our root node creation failes if said root is gone.
                //lprintf( "New entry... create it..." );
-               snprintf( query, sizeof( query ), WIDE("Insert into "OPTION_MAP"(`parent_option_id`,`name_id`) values (%ld,%lu)"), parent, IDName );
+               snprintf( query, sizeof( query ), "Insert into "OPTION_MAP"(`parent_option_id`,`name_id`) values (%ld,%lu)", parent, IDName );
                if( SQLCommand( odbc, query ) )
                {
                   ID = FetchLastInsertID( odbc, OPTION_MAP, WIDE("option_id") );
@@ -193,7 +192,7 @@ INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const ch
 #endif
 					parent = ID;
 					//lprintf( WIDE("Adding new option to family tree... ") );
-					FamilyTreeAddChild( GetOptionTree( odbc ), (POINTER)(ID+1), (PTRSZVAL)StrDup( namebuf ) );
+					FamilyTreeAddChild( GetOptionTree( odbc ), (POINTER)(ID+1), (PTRSZVAL)SaveText( namebuf ) );
                PopODBCEx( odbc );
                continue; // get out of this loop, continue outer.
             }
@@ -201,7 +200,6 @@ INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const ch
             lprintf( WIDE("Option tree corrupt.  No option option_id=%ld"), ID );
 #endif
             PopODBCEx( odbc );
-				SetSQLLoggingDisable( og.Option, FALSE );
             return INVALID_INDEX;
          }
          else
@@ -216,18 +214,17 @@ INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const ch
 				//else
             //   value = INVALID_INDEX;
             //sscanf( result, WIDE("%lu"), &parent );
-            FamilyTreeAddChild( GetOptionTree( odbc ), (POINTER)(parent+1), (PTRSZVAL)StrDup( namebuf ) );
+            FamilyTreeAddChild( GetOptionTree( odbc ), (POINTER)(parent+1), (PTRSZVAL)SaveText( namebuf ) );
          }
          PopODBCEx( odbc );
       }
    }
-   SetSQLLoggingDisable( og.Option, FALSE );
    return parent;
 }
 
 //------------------------------------------------------------------------
 
-_32 NewGetOptionStringValue( PODBC odbc, INDEX optval, char *buffer, _32 len )
+_32 NewGetOptionStringValue( PODBC odbc, INDEX optval, char *buffer, _32 len DBG_PASS )
 {
    char query[256];
    CTEXTSTR result = NULL;
@@ -236,8 +233,7 @@ _32 NewGetOptionStringValue( PODBC odbc, INDEX optval, char *buffer, _32 len )
    _32 result_len = 0;
    len--;
 
-	SetSQLLoggingDisable( odbc, TRUE );
-   snprintf( query, sizeof( query ), WIDE("select override_value_id from "OPTION_EXCEPTION" ")
+   snprintf( query, sizeof( query ), "select override_value_id from "OPTION_EXCEPTION" "
             "where ( apply_from<=now() or apply_from=0 )"
             "and ( apply_until>now() or apply_until=0 )"
             "and ( system_id=%d or system_id=0 )"
@@ -250,11 +246,11 @@ _32 NewGetOptionStringValue( PODBC odbc, INDEX optval, char *buffer, _32 len )
 	for( SQLQuery( odbc, query, &result ); result; FetchSQLResult( odbc, &result ) )
 	{
 		_optval = optval;
-		sscanf( result, "%" _32f, &optval );
+		sscanf( result, WIDE("%") _32f, &optval );
 		if( (!optval) || ( optval == INVALID_INDEX ) )
 			optval = _optval;
 	}
-	snprintf( query, sizeof( query ), WIDE("select string from "OPTION_VALUES" where option_id=%ld"), optval );
+	snprintf( query, sizeof( query ), "select string from "OPTION_VALUES" where option_id=%ld", optval );
 	// have to push here, the result of the prior is kept outstanding
    // if this was not pushed, the prior result would evaporate.
 	PushSQLQueryEx( odbc );
@@ -276,7 +272,6 @@ _32 NewGetOptionStringValue( PODBC odbc, INDEX optval, char *buffer, _32 len )
 	}
 	PopODBCEx( odbc );
    PopODBCEx( odbc );
-	SetSQLLoggingDisable( odbc, FALSE );
    return result_len;
 }
 
@@ -292,7 +287,7 @@ int NewGetOptionBlobValueOdbc( PODBC odbc, INDEX optval, char **buffer, _32 *len
 	lprintf( WIDE("do query for value string...") );
 #endif
 	if( SQLRecordQueryf( odbc, NULL, &result, NULL
-							  , WIDE("select `binary`,length(`binary`) from "OPTION_BLOBS" where option_id=%ld")
+							  , "select `binary`,length(`binary`) from "OPTION_BLOBS" where option_id=%ld"
 							  , optval ) )
 	{
       int success = FALSE;
@@ -314,17 +309,16 @@ int NewGetOptionBlobValueOdbc( PODBC odbc, INDEX optval, char **buffer, _32 *len
 
 INDEX NewCreateValue( PODBC odbc, INDEX value, CTEXTSTR pValue )
 {
-   char insert[256];
+   TEXTCHAR insert[256];
 	CTEXTSTR result=NULL;
    TEXTSTR newval = EscapeSQLBinary( odbc, pValue, StrLen( pValue ) );
    int IDValue;
-	SetSQLLoggingDisable( odbc, TRUE );
 	if( pValue == NULL )
-		snprintf( insert, sizeof( insert ), WIDE("insert into ")OPTION_BLOBS WIDE(" (`option_id`,`blob` ) values (%lu,'')")
+		snprintf( insert, sizeof( insert ), "insert into "OPTION_BLOBS " (`option_id`,`blob` ) values (%lu,'')"
 				  , value
 				  );
 	else
-		snprintf( insert, sizeof( insert ), WIDE("insert into ")OPTION_VALUES WIDE(" (`option_id`,`string` ) values (%lu,%s%s%s)")
+		snprintf( insert, sizeof( insert ), "insert into "OPTION_VALUES " (`option_id`,`string` ) values (%lu,%s%s%s)"
 				  , value
 				  ,pValue?"\'":""
 				  , pValue?newval:"NULL"
@@ -340,7 +334,6 @@ INDEX NewCreateValue( PODBC odbc, INDEX value, CTEXTSTR pValue )
       IDValue = INVALID_INDEX;
 	}
    Release( newval );
-	SetSQLLoggingDisable( odbc, FALSE );
    return value;
 }
 

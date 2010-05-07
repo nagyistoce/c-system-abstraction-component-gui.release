@@ -248,14 +248,14 @@ static int CPROC ScrollBarMouse( PCONTROL pc, S_32 x, S_32 y, _32 b )
 
 //---------------------------------------------------------------------------
 
-static void CPROC BottomPushed( PTRSZVAL psvBar, PCOMMON pc )
+static void CPROC BottomPushed( PTRSZVAL psvBar, PSI_CONTROL pc )
 {
    MoveScrollBar( (PCONTROL)psvBar, UPD_1DOWN );
 }
 
 //---------------------------------------------------------------------------
 
-static void CPROC DrawBottomButton( PTRSZVAL psv, PCOMMON pc )
+static void CPROC DrawBottomButton( PTRSZVAL psv, PSI_CONTROL pc )
 {
 	Image surface = pc->Surface;
 	if( surface )
@@ -434,7 +434,7 @@ PSI_CONTROL SetScrollBarAttributes( PSI_CONTROL pc, int attr )
 }
 
 //CONTROL_PROC_DEF( SCROLLBAR_CONTROL, SCROLLBAR, ScrollBar, ()  )
-int CPROC ConfigureScrollBar( PCOMMON pc )
+int CPROC ConfigureScrollBar( PSI_CONTROL pc )
 {
    //ARG( _32, attr );
 	ValidatedControlData( PSCROLLBAR, SCROLLBAR_CONTROL, psb, pc );
@@ -488,15 +488,15 @@ void SetScrollUpdateMethod( PCONTROL pc
 	}
 }
 
-static void CPROC ResizeScrollbar( PCOMMON pc )
+static void CPROC ResizeScrollbar( PSI_CONTROL pc )
 {
 	ValidatedControlData( PSCROLLBAR, SCROLLBAR_CONTROL, psb, pc );
 	if( psb )
 	{
 		S_32 width = 15;
-		ScaleCoords( (PCOMMON)pc, &width, NULL );
+		ScaleCoords( (PSI_CONTROL)pc, &width, NULL );
 		// resize the scrollbar accordingly...
-      lprintf( "Getting a resize on the scrollbar..." );
+		//lprintf( WIDE( "Getting a resize on the scrollbar..." ) );
 		if( psb->attr & SCROLL_HORIZONTAL )
 		{
 			MoveSizeCommon( psb->pcTopButton, 0, 0
@@ -528,7 +528,7 @@ PRIORITY_PRELOAD( RegisterScrollBar,PSI_PRELOAD_PRIORITY )
    DoRegisterControl( &scroll_bar );
 	SimpleRegisterMethod( WIDE("psi/control/") SCROLLBAR_CONTROL_NAME WIDE("/rtti")
 							  , ResizeScrollbar
-							  , WIDE("void"), WIDE("resize"), WIDE("(PCOMMON)") );
+							  , WIDE("void"), WIDE("resize"), WIDE("(PSI_CONTROL)") );
 }
 
 PSI_SCROLLBAR_NAMESPACE_END

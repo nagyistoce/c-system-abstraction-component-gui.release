@@ -1,8 +1,14 @@
+/* Includes networking as appropriate for the target platform. Providing
+   compatibility definitions as are lacking between platforms...
+   or perhaps appropriate name aliasing to the correct types.            */
 #ifndef INCLUDED_SOCKET_LIBRARY
 #define INCLUDED_SOCKET_LIBRARY
 
 #if defined( _WIN32 ) || defined( __CYGWIN__ )
 //#ifndef __cplusplus_cli
+#ifdef UNDER_CE
+#define USE_WSA_EVENTS
+#endif
 #include <winsock2.h>
 #include <sack_types.h>
 #ifdef __CYGWIN__

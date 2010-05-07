@@ -1,7 +1,7 @@
 #define BUILD_TESTS to build test projects...
 # 
 
-CXFLAGS1:=-DSOURCE_PSI2 -DSYSTRAY_LIBRARAY -DBAG -DPSI_SOURCE $(if $(__NO_OPTIONS__),-D__NO_OPTIONS__,)
+CXFLAGS1:=-DSOURCE_PSI2 -DSYSTRAY_LIBRARAY -DBAG -DPSI_SOURCE $(if $(__NO_OPTIONS__),-D__NO_OPTIONS__,) -DFORCE_NO_INTERFACE
 
 
 LIBNAME1=bag.psi
@@ -62,7 +62,7 @@ LINK_LIBDIRS1=$(shell freetype-config --libs|sed 's/-l[^ ]*//g;s/-Wl[^ ]*//g;s/-
 SYSLIBS1+=$(shell freetype-config --libs|sed 's/-L[^ ]*//g;s/-l//g;s/-Wl[^ ]*//g' )
 endif
 else
-INCLUDEDIRS+=$(SACK_BASE)/src/freetype-2.3.7/include
+INCLUDEDIRS+=$(SACK_BASE)/src/freetype-2.3.12/include
 endif
 
 ####################################

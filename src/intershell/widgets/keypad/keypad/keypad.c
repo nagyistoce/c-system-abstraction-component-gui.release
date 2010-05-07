@@ -6,6 +6,7 @@
 
 
 #include <intershell_export.h>
+#include <intershell_registry.h>
 
 #include "../../include/banner.h"
 #define KEYPAD_ISP_SOURCE

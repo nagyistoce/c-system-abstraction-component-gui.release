@@ -34,7 +34,7 @@ typedef struct task_tag
 	//CDATA color, textcolor;
 	//char pImage[256];
 	PLIST spawns;
-	struct menu_button_tag *button;
+	struct menu_button *button;
 	CDATA highlight_normal_color;  // kept when button is loaded from button normal background color
 	CDATA highlight_color;
 	PLIST allowed_run_on;
@@ -42,7 +42,7 @@ typedef struct task_tag
 } LOAD_TASK, *PLOAD_TASK;
 
 
-PLOAD_TASK CPROC CreateTask( struct menu_button_tag * );
+PLOAD_TASK CPROC CreateTask( struct menu_button * );
 void DestroyTask( PLOAD_TASK *ppTask );
 
 //void CPROC RunATask( PTRSZVAL psv );

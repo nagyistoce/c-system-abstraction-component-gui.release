@@ -143,7 +143,7 @@ RENDER_PROC( PKEYDEFINE, CreateKeyBinder )( void )
 {
 	PKEYDEFINE KeyDef = (PKEYDEFINE)Allocate( sizeof( KEYDEFINE ) * 256 );
 	MemSet( KeyDef, 0, sizeof( KEYDEFINE ) * 256 );
-   return KeyDef;
+	return KeyDef;
 }
 
 RENDER_PROC( void, DestroyKeyBinder )( PKEYDEFINE pKeyDef )
@@ -222,7 +222,10 @@ RENDER_PROC( int, HandleKeyEvents )( PKEYDEFINE pKeyDefs, _32 key )
 	int keymod = KEY_MOD(key);
 #ifdef LOG_KEY_EVENTS
    if( l.flags.bLogKeyEvent )
-	lprintf( WIDE("Key event for %08lx ... %d %s %s %s"), key, keycode, keymod&1?"SHIFT":"", keymod&2?"CTRL":"", keymod&4?"ALT":"" );
+		lprintf( WIDE("Key event for %08lx ... %d %s %s %s")
+				 , key
+				 , keycode
+				 , keymod&1?"SHIFT":"", keymod&2?"CTRL":"", keymod&4?"ALT":"" );
 #endif
 	if( pKeyDefs[keycode].mod[keymod].flags.bFunction )
 	{
@@ -243,13 +246,13 @@ RENDER_PROC( int, HandleKeyEvents )( PKEYDEFINE pKeyDefs, _32 key )
 			{
 #ifdef LOG_KEY_EVENTS
 				if( l.flags.bLogKeyEvent )
-					lprintf("extended key method configured" );
+					lprintf(WIDE( "extended key method configured" ) );
 #endif
 				if( pKeyDefs[keycode].mod[keymod].data.extended_key_trigger )
 				{
 #ifdef LOG_KEY_EVENTS
 					if( l.flags.bLogKeyEvent )
-						lprintf("extended key method configured" );
+						lprintf(WIDE( "extended key method configured" ) );
 #endif
 					pKeyDefs[keycode].mod[keymod].data.extended_key_trigger( pKeyDefs[keycode].mod[keymod].extended_key_psv
 																							, key );
@@ -261,13 +264,13 @@ RENDER_PROC( int, HandleKeyEvents )( PKEYDEFINE pKeyDefs, _32 key )
 			{
 #ifdef LOG_KEY_EVENTS
 				if( l.flags.bLogKeyEvent )
-					lprintf("not extended key method" );
+					lprintf(WIDE( "not extended key method" ) );
 #endif
 				if( pKeyDefs[keycode].mod[keymod].data.trigger )
 				{
 #ifdef LOG_KEY_EVENTS
 					if( l.flags.bLogKeyEvent )
-						lprintf("extended key method configured" );
+						lprintf(WIDE( "extended key method configured" ) );
 #endif
 					pKeyDefs[keycode].mod[keymod].data.trigger( pKeyDefs[keycode].mod[keymod].psv, key );
 				}
@@ -275,10 +278,14 @@ RENDER_PROC( int, HandleKeyEvents )( PKEYDEFINE pKeyDefs, _32 key )
                return 0;
 			}
 		}
+		if( l.flags.bLogKeyEvent )
+			lprintf( WIDE( "Probably handled..." ) );
 		// for consistancy better just say we handled this key
 		return 1;
 	}
-   return 0;
+	if( l.flags.bLogKeyEvent )
+		lprintf( WIDE( "not handled..." ) );
+	return 0;
 }
 
 RENDER_NAMESPACE_END

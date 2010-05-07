@@ -4,7 +4,7 @@ all .DEFAULT:
 else
 
 
-__NO_GUI__=1
+#__NO_GUI__=1
 __LINK_MINIMAL__=1
 
 #CLIENTLIB=bag.pssql

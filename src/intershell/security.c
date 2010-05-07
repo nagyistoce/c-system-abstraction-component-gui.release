@@ -61,8 +61,8 @@ INDEX ReadLoginFrame( PSI_CONTROL frame, PMENU_BUTTON button )
 {
 	//PSI_CONTROL list = GetNearControl( frame, LST_SELECT_USER );
 	PSI_CONTROL password = GetNearControl( frame, EDT_PASSWORD );
-	char p[256];
-   INDEX iLogin;
+	TEXTCHAR p[256];
+	INDEX iLogin;
 	GetControlText( password, p, sizeof( p ) );
 #if 0
 	dialog.user_id = (_32)GetItemData( GetSelectedItem( GetNearControl( frame, LST_SELECT_USER ) ) );
@@ -142,12 +142,12 @@ PTRSZVAL CreateSecurityContext( PMENU_BUTTON button )
          PTRSZVAL psv_context;
 			CTEXTSTR name;
 			PCLASSROOT data = NULL;
-			for( name = GetFirstRegisteredName( TASK_PREFIX "/common/Test Security", &data );
+			for( name = GetFirstRegisteredName( TASK_PREFIX WIDE( "/common/Test Security" ), &data );
 				 name;
 				  name = GetNextRegisteredName( &data ) )
 			{
 				PTRSZVAL (CPROC*f)(PMENU_BUTTON);
-				//snprintf( rootname, sizeof( rootname ), TASK_PREFIX "/common/save common/%s", name );
+				//snprintf( rootname, sizeof( rootname ), TASK_PREFIX WIDE( "/common/save common/%s" ), name );
 				f = GetRegisteredProcedure2( (CTEXTSTR)data, PTRSZVAL, name, (PMENU_BUTTON) );
 				if( f )
 				{
@@ -173,12 +173,12 @@ void CloseSecurityContext( PMENU_BUTTON button, PTRSZVAL psvSecurity )
 			//PTRSZVAL psv_context;
 			CTEXTSTR name;
 			PCLASSROOT data = NULL;
-			for( name = GetFirstRegisteredName( TASK_PREFIX "/common/Close Security", &data );
+			for( name = GetFirstRegisteredName( TASK_PREFIX WIDE( "/common/Close Security" ), &data );
 				 name;
 				  name = GetNextRegisteredName( &data ) )
 			{
 				void (CPROC*f)(PMENU_BUTTON,PTRSZVAL);
-				//snprintf( rootname, sizeof( rootname ), TASK_PREFIX "/common/save common/%s", name );
+				//snprintf( rootname, sizeof( rootname ), TASK_PREFIX WIDE( "/common/save common/%s" ), name );
 				f = GetRegisteredProcedure2( (CTEXTSTR)data, void, name, (PMENU_BUTTON,PTRSZVAL) );
 				if( f )
 				{
@@ -195,7 +195,7 @@ void CPROC SelectEditSecurity( PTRSZVAL psv, PSI_CONTROL listbox, PLISTITEM pli 
 		//TEXTCHAR invoke[256];
 		void (CPROC*f)(PMENU_BUTTON);
 		name = (CTEXTSTR)GetItemData( pli );
-		f = GetRegisteredProcedure2( (CTEXTSTR)"intershell/common/Edit Security", void, name, (PMENU_BUTTON) );
+		f = GetRegisteredProcedure2( (CTEXTSTR)WIDE( "intershell/common/Edit Security" ), void, name, (PMENU_BUTTON) );
 		if( f )
 			f( (PMENU_BUTTON)psv );
 	}
@@ -215,14 +215,14 @@ void CPROC EditSecurity( PTRSZVAL psv, PSI_CONTROL button )
 	}
 	else
 	{
-      SimpleMessageBox( button, "No selected security module", "No Selection" );
+      SimpleMessageBox( button, WIDE( "No selected security module" ), WIDE( "No Selection" ) );
 	}
 }
 
 
 void CPROC EditSecurityNoList( PTRSZVAL psv, PSI_CONTROL button )
 {
-	SimpleMessageBox( button, "No listbox to select security module", "NO SECURITY LIST" );
+	SimpleMessageBox( button, WIDE( "No listbox to select security module" ), WIDE( "NO SECURITY LIST" ) );
 
 }
 

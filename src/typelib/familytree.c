@@ -65,7 +65,7 @@ typedef struct familyroot_tag FAMILYTREE;
 
 //----------------------------------------------------------------------------
 
-TYPELIB_PROC( PFAMILYTREE, CreateFamilyTree )( int (CPROC*Compare)(PTRSZVAL old,PTRSZVAL new_key),
+ PFAMILYTREE  CreateFamilyTree ( int (CPROC*Compare)(PTRSZVAL old,PTRSZVAL new_key),
 															 void (CPROC*Destroy)( POINTER user, PTRSZVAL key ) )
 {
 	PFAMILYTREE root = (PFAMILYTREE)Allocate( sizeof( FAMILYTREE ) );
@@ -84,7 +84,7 @@ enum {
 
 //----------------------------------------------------------------------------
 
-TYPELIB_PROC( POINTER, FamilyTreeFindChild )( PFAMILYTREE root
+ POINTER  FamilyTreeFindChild ( PFAMILYTREE root
 													 , PTRSZVAL psvKey )
 {
 	PFAMILYNODE node = root->lastfound;
@@ -113,7 +113,7 @@ TYPELIB_PROC( POINTER, FamilyTreeFindChild )( PFAMILYTREE root
 
 //----------------------------------------------------------------------------
 
-TYPELIB_PROC( void, FamilyTreeReset )( PFAMILYTREE *option_tree )
+ void  FamilyTreeReset ( PFAMILYTREE *option_tree )
 {
 	if( !option_tree )
 		return;
@@ -125,7 +125,7 @@ TYPELIB_PROC( void, FamilyTreeReset )( PFAMILYTREE *option_tree )
 
 //----------------------------------------------------------------------------
 
-TYPELIB_PROC( void, FamilyTreeAddChild )( PFAMILYTREE *root, POINTER userdata, PTRSZVAL key )
+ void  FamilyTreeAddChild ( PFAMILYTREE *root, POINTER userdata, PTRSZVAL key )
 {
 	if( root )
 	{

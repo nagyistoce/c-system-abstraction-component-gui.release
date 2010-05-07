@@ -4,7 +4,9 @@
 #include <string.h>
 #if defined( _WIN32 ) && !defined( __TURBOC__ )
 #include <stdhdrs.h> // windows lean_and_mean
+#ifndef UNDER_CE
 #include <io.h>  // findfirst,findnext, fileinfo
+#endif
 #else
 #include <dirent.h> // opendir etc..
 #include <sys/stat.h>
@@ -24,13 +26,13 @@ FILESYS_NAMESPACE
 #endif
 //--------------------------------------------------------------------------
 
-FILESYS_PROC( int, CompareMask )( CTEXTSTR mask, CTEXTSTR name, int keepcase )
+ int  CompareMask ( CTEXTSTR mask, CTEXTSTR name, int keepcase )
 {
 	int m = 0, n = 0;
 	int anymatch;
 	int wasanymatch, wasmaskmatch;
 	int matchone;
-	char namech, maskch;
+	TEXTCHAR namech, maskch;
 	if( !mask )
 		return 1;
 	if( !name )
@@ -179,7 +181,7 @@ static void CPROC MatchFile( PTRSZVAL psvUser, CTEXTSTR name, int flags )
    buffer->result_len = snprintf( buffer->buffer, buffer->len, WIDE("%s"), name );
 }
 
-FILESYS_PROC( int, GetMatchingFileName )( CTEXTSTR filemask, int flags, TEXTSTR pResult, int nResult )
+ int  GetMatchingFileName ( CTEXTSTR filemask, int flags, TEXTSTR pResult, int nResult )
 {
 	void *info = NULL;
 	RESULT_BUFFER result_buf;
@@ -196,29 +198,44 @@ FILESYS_PROC( int, GetMatchingFileName )( CTEXTSTR filemask, int flags, TEXTSTR 
 
 #if defined( _WIN32 ) && !defined( __TURBOC__ )
 
-#ifdef UNICODE
+#ifdef UNDER_CE
+#define finddata_t WIN32_FIND_DATA
+#define findfirst FindFirstFile
+#define findnext  FindNextFile
+#define findclose FindClose
+#else
+#  ifdef UNICODE
 #define finddata_t _wfinddata_t
 #define findfirst _wfindfirst
 #define findnext  _wfindnext
 #define findclose _findclose
-#else
+#  else
 #define finddata_t _finddata_t
 #define findfirst _findfirst
 #define findnext  _findnext
 #define findclose _findclose
+#  endif
 #endif
+
+
 typedef struct myfinddata {
-#ifdef _MSC_VER
-	intptr_t
-#else
+# ifdef _MSC_VER
+#define HANDLECAST (HANDLE)
+	HANDLE
+# else
+#define HANDLECAST
 	int 
-#endif
+# endif
 		handle;
-#ifdef UNICODE
+# ifdef UNDER_CE
+	WIN32_FIND_DATA fd;
+# else
+#  ifdef UNICODE
 	struct _wfinddata_t fd;
-#else
+#  else
    struct finddata_t fd;
-#endif
+#  endif
+# endif
    TEXTCHAR buffer[MAX_PATH_NAME];
 } MFD, *PMFD;
 
@@ -227,7 +244,7 @@ typedef struct myfinddata {
 #define findbuffer(pInfo) ( ((PMFD)(*pInfo))->buffer)
 
 
-FILESYS_PROC( int, ScanFiles )( CTEXTSTR base
+ int  ScanFiles ( CTEXTSTR base
            , CTEXTSTR mask
            , void **pInfo
            , void CPROC Process( PTRSZVAL psvUser, CTEXTSTR name, int flags )
@@ -236,19 +253,18 @@ FILESYS_PROC( int, ScanFiles )( CTEXTSTR base
 {
 	int sendflags;
 	TEXTCHAR basename[256];
-   if( base )
-		strcpy( basename, base );
+	if( base )
+		StrCpy( basename, base );
 	else
 	{
 		CTEXTSTR p = pathrchr( mask );
 		if( p )
 		{
-			strncpy( basename, mask, p - mask );
-			basename[p-mask] = 0;
-            mask = p + 1;
+			StrCpyEx( basename, mask, p - mask + 1 );
+			mask = p + 1;
 		}
 		else
-			strcpy( basename, WIDE(".") );
+			StrCpyEx( basename, WIDE("."), sizeof( basename ) / sizeof( TEXTCHAR ) );
 	}
 	if( !*pInfo )
 	{
@@ -256,7 +272,7 @@ FILESYS_PROC( int, ScanFiles )( CTEXTSTR base
    		snprintf( findmask, sizeof(findmask), WIDE("%s/*"), basename );
 		*pInfo = Allocate( sizeof( MFD ) );
 		findhandle(pInfo) = findfirst( findmask, finddata(pInfo) );
-		if( findhandle(pInfo) == -1 )
+		if( findhandle(pInfo) == HANDLECAST -1 )
 		{
       		findclose( findhandle(pInfo) );
 			Release( *pInfo );
@@ -275,16 +291,33 @@ FILESYS_PROC( int, ScanFiles )( CTEXTSTR base
 			return 0;
 		}
 	}
+#ifdef UNDER_CE
+   if( !strcmp( WIDE("."), finddata(pInfo)->cFileName ) ||
+       !strcmp( WIDE(".."), finddata(pInfo)->cFileName ) )
+#else
    if( !strcmp( WIDE("."), finddata(pInfo)->name ) ||
        !strcmp( WIDE(".."), finddata(pInfo)->name ) )
+#endif
    	goto getnext;
-   if( flags & SFF_NAMEONLY )
-   	strncpy( findbuffer( pInfo ), finddata(pInfo)->name, MAX_PATH_NAME );
+	if( flags & SFF_NAMEONLY )
+#ifdef UNDER_CE
+		strncpy( findbuffer( pInfo ), finddata(pInfo)->cFileName, MAX_PATH_NAME );
+#else
+		strncpy( findbuffer( pInfo ), finddata(pInfo)->name, MAX_PATH_NAME );
+#endif
    else 
-	   snprintf( findbuffer( pInfo ), MAX_PATH_NAME, WIDE("%s/%s"), basename, finddata(pInfo)->name );
+#ifdef UNDER_CE
+		snprintf( findbuffer( pInfo ), MAX_PATH_NAME, WIDE("%s/%s"), basename, finddata(pInfo)->cFileName );
+#else
+	snprintf( findbuffer( pInfo ), MAX_PATH_NAME, WIDE("%s/%s"), basename, finddata(pInfo)->name );
+#endif
 	findbuffer( pInfo )[MAX_PATH_NAME-1] = 0; // force nul termination...
    if( ( flags & (SFF_DIRECTORIES|SFF_SUBCURSE) )
+#ifdef UNDER_CE
+       && finddata(pInfo)->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY )
+#else
        && finddata(pInfo)->attrib & _A_SUBDIR )
+#endif
    {
 		if( flags & SFF_DIRECTORIES )
 		{
@@ -293,7 +326,11 @@ FILESYS_PROC( int, ScanFiles )( CTEXTSTR base
          return 1;
 		}
 		if( flags & SFF_NAMEONLY ) // if nameonly - have to rebuild the correct name.
+#ifdef UNDER_CE
+			snprintf( findbuffer( pInfo ), MAX_PATH_NAME, WIDE("%s/%s"), basename, finddata(pInfo)->cFileName );
+#else
 			snprintf( findbuffer( pInfo ), MAX_PATH_NAME, WIDE("%s/%s"), basename, finddata(pInfo)->name );
+#endif
 		if( flags & SFF_SUBCURSE  )
    	{
 			void *data = NULL;
@@ -302,8 +339,17 @@ FILESYS_PROC( int, ScanFiles )( CTEXTSTR base
    	goto getnext;
 	}
 	if( ( sendflags = SFF_DIRECTORY, ( ( flags & SFF_DIRECTORIES ) 
+#ifdef UNDER_CE
+			&& ( finddata(pInfo)->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) ) )
+#else
 			&& ( finddata(pInfo)->attrib & _A_SUBDIR ) ) )
-		|| ( sendflags = 0, CompareMask( mask, finddata(pInfo)->name
+#endif
+|| ( sendflags = 0, CompareMask( mask
+#ifdef UNDER_CE
+										 , finddata(pInfo)->cFileName
+#else
+										 , finddata(pInfo)->name
+#endif
 												  // yes this is silly - but it's correct...
 												 , (flags & SFF_IGNORECASE)?0:0 ) ) )
    { 
@@ -316,9 +362,12 @@ FILESYS_PROC( int, ScanFiles )( CTEXTSTR base
 
 //---------------------------------------------------------------------------
 
-FILESYS_PROC( void, ScanDrives )( void (CPROC*Process)(PTRSZVAL user, CTEXTSTR letter, int flags)
+ void  ScanDrives ( void (CPROC*Process)(PTRSZVAL user, CTEXTSTR letter, int flags)
 									, PTRSZVAL user )
 {
+#ifdef UNDER_CE
+	Process( user, WIDE(""), SFF_DRIVE );
+#else
 	_32 drives;
 	int i;
 	drives = GetLogicalDrives();
@@ -333,6 +382,7 @@ FILESYS_PROC( void, ScanDrives )( void (CPROC*Process)(PTRSZVAL user, CTEXTSTR l
 				Process( user, name, SFF_DRIVE );
 		}
 	}
+#endif
 
 }
 
@@ -346,7 +396,7 @@ typedef struct myfinddata {
 } MFD, *PMFD;
 
 //---------------------------------------------------------------------------
-FILESYS_PROC( int, ScanFiles )( CTEXTSTR base
+ int  ScanFiles ( CTEXTSTR base
            , CTEXTSTR mask
            , void **pInfo
            , void CPROC Process( PTRSZVAL psvUser, CTEXTSTR name, int flags )
@@ -455,7 +505,7 @@ FILESYS_PROC( int, ScanFiles )( CTEXTSTR base
 //---------------------------------------------------------------------------
 
 
-FILESYS_PROC( void, ScanDrives )( void(*Process)(PTRSZVAL user, CTEXTSTR letter, int flags)
+ void  ScanDrives ( void(*Process)(PTRSZVAL user, CTEXTSTR letter, int flags)
                                  , PTRSZVAL psv )
 {
 

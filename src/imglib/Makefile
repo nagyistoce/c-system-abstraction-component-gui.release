@@ -10,7 +10,7 @@ LITERAL_LIBNAME1=$(if $(FORCE_NO_INTERFACE),,$(if $(shell $(uname)),bag.real_ima
 
 CXFLAGS1=-DBAG
 
-INCLUDEDIRS=$(if $(shell $(uname)),,$(SACK_BASE)/include/jpeg $(SACK_BASE)/include/png $(SACK_BASE)/include/imglib)
+INCLUDEDIRS=$(if $(shell $(uname)),,$(SACK_BASE)/src/freetype-2.3.12/include $(SACK_BASE)/src/jpeg-8a $(SACK_BASE)/src/libpng-1.4.1 $(SACK_BASE)/src/zlib-1.2.4 $(SACK_BASE)/include/imglib)
 
 C_SRCS=gifimage bmpimage font lucidaconsole \
       sprite sprite_common image line \

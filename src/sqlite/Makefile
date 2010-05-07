@@ -2,7 +2,7 @@
 
 #MORE_TARGETS+=sqliteh.h
 
-all .DEFAULT: sqlite3.c
+all .DEFAULT: #sqlite3.c
 	make -f Makefile.bag
 
 

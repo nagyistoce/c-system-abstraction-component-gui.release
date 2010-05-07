@@ -2,7 +2,7 @@
 #include <controls.h>
 
 
-DYNAMIC_IMPORT void link_vlc_stream( void );
+IMPORT_METHOD void link_vlc_stream( void );
 
 
 int main( void )

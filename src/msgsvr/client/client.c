@@ -117,7 +117,7 @@ struct ServiceEventHandler_tag
 	POINTER msg;
 	_32 *len;
 	_32 last_check_tick;
-	TEXTCHAR servicename[1];
+	TEXTSTR servicename;
 };
 
 // registration of a service results in a new
@@ -263,11 +263,11 @@ typedef struct global_tag
 	#define IPC_EXCL	2
 #define msgget(name,n,opts) ( (opts) & IPC_CREAT )		\
 	? ( ( (opts) & IPC_EXCL)									  \
-	  ? ( OpenMsgQueue( name, NULL, 0 )						\
+	  ? ( SackOpenMsgQueue( name, NULL, 0 )						\
 		 ? MSGFAIL													 \
-		 : CreateMsgQueue( name, MSGQSIZE, NULL, 0 ))	  \
-	  : CreateMsgQueue( name, MSGQSIZE, NULL, 0 ))		 \
-	: OpenMsgQueue( name, NULL, 0 )
+		 : SackCreateMsgQueue( name, MSGQSIZE, NULL, 0 ))	  \
+	  : SackCreateMsgQueue( name, MSGQSIZE, NULL, 0 ))		 \
+	: SackOpenMsgQueue( name, NULL, 0 )
 	//#define msgget(name,n,opts ) CreateMsgQueue( name, MSGQSIZE, NULL, 0 )
 	#define msgctl(n,o,f) 
 	#define MSGFAIL NULL
@@ -330,7 +330,7 @@ int SendInMultiMessageEx( _32 routeID, _32 MsgID, _32 parts, BUFFER_LENGTH_PAIR 
 		if( len + ofs > 8192 )
 		{
 		// wow - this is a BIG message - lets see - what can we do?
-			errno = E2BIG;
+			SetLastError( E2BIG );
 			lprintf( WIDE("Length of message is too big to transport...%") _32f WIDE(" (len %") _32f WIDE(" ofs %") _32f WIDE(")"), len + ofs, len, ofs );
 			LeaveCriticalSec( &g.csMsgTransact );
 			return FALSE;
@@ -406,7 +406,7 @@ static int PrivateSendDirectedServerMultiMessageEx( _32 DestID
 	//if( len > 8188 )
 	//{
 		// wow - this is a BIG message - lets see - what can we do?
-		//errno = E2BIG;
+		//SetLastError( E2BIG );
 		//lprintf( WIDE("Lenght of message is too big to transport...") );
 		//return FALSE;
 	//}
@@ -419,7 +419,7 @@ static int PrivateSendDirectedServerMultiMessageEx( _32 DestID
 		if( len + ofs > 8192 )
 		{
 		// wow - this is a BIG message - lets see - what can we do?
-			errno = E2BIG;
+			SetLastError( E2BIG );
 			lprintf( WIDE("Length of message is too big to transport...%") _32f WIDE(" (len %") _32f WIDE(" ofs %") _32f WIDE(")"), len + ofs, len, ofs );
 			return FALSE;
 		}
@@ -510,7 +510,7 @@ static PEVENTHANDLER PrivateSendServerMultiMessageEx( _32 *MessageID, _32 *bias,
 			{
             DebugBreak();
 				Log( WIDE("Client attempting to send an invalid message ID") );
-				errno = EINVAL;
+				SetLastError( EINVAL );
 				return NULL;
 			}
 			else
@@ -800,7 +800,7 @@ static int GetAMessageEx( MSGQ_TYPE msgq, CTEXTSTR q, int flags DBG_PASS )
 			}
 			if( g.MessageLen == -1 )
 			{
-				if( errno == ENOMSG )
+				if( GetLastError() == ENOMSG )
 				{
 					lprintf( WIDE("No message... nowait was set?") );
 					return 0;
@@ -2023,13 +2023,18 @@ static MSGQ_TYPE OpenQueueEx( TEXTCHAR *name, int key, int flags DBG_PASS )
 #define OpenQueue(n,k,f)  OpenQueueEx( n,k,f DBG_SRC )
 #endif
 {
+	static TEXTCHAR errbuf[256];
 	MSGQ_TYPE queue;
 	if( g.flags.bMasterServer )
 	{
 		queue = msgget( name, key, IPC_CREAT|IPC_EXCL|0666 );
 		if( queue == MSGFAIL )
 		{
-			lprintf( WIDE("Failed to create message Q for \"%s\":%s for") DBG_FILELINEFMT, name, strerror(errno) DBG_RELAY );
+			//strerror_s(errbuf, sizeof( errbuf ), errno);
+         errbuf[0] = 0;
+			lprintf( WIDE("Failed to create message Q for \"%s\":%s for") DBG_FILELINEFMT, name
+				, errbuf
+				DBG_RELAY );
 			queue = msgget( name, key, 0 );
 			if( queue == MSGFAIL )
 			{
@@ -2043,7 +2048,11 @@ static MSGQ_TYPE OpenQueueEx( TEXTCHAR *name, int key, int flags DBG_PASS )
 				queue = msgget( name, key, IPC_CREAT|IPC_EXCL|0666 );
 				if( queue == MSGFAIL )
 				{
-					lprintf( WIDE("Failed to open message Q for \"%s\":%s"), name, strerror(errno) );
+					//strerror_s(errbuf, sizeof( errbuf ), errno);
+					errbuf[0] = 0;
+					lprintf( WIDE("Failed to open message Q for \"%s\":%s"), name
+						, errbuf
+						);
 				}
 			}
 		}
@@ -2054,7 +2063,11 @@ static MSGQ_TYPE OpenQueueEx( TEXTCHAR *name, int key, int flags DBG_PASS )
 		if( queue == MSGFAIL )
 		{
 #ifdef DEBUG_MSGQ_OPEN
-			lprintf( WIDE("Failed to create message Q for \"%s\":%s for ") DBG_FILELINEFMT, name, strerror(errno) DBG_RELAY );
+			//strerror_s(errbuf, sizeof( errbuf ), errno);
+         errbuf[0] = 0;
+			lprintf( WIDE("Failed to create message Q for \"%s\":%s for ") DBG_FILELINEFMT, name
+				, errbuf
+				DBG_RELAY );
 #endif
 			//lprintf( WIDE("Failed to open message Q for \")%s\":%s", name, strerror(errno) );
 		}
@@ -2796,7 +2809,7 @@ static void EndClient( PSERVICE_CLIENT client )
 			//lprintf( "^^^" );
 			//lprintf( "vvv" );
 			while( msgrcv( g.msgq_event, MSGTYPE msg, 8192, client->pid, IPC_NOWAIT ) >= 0 ||
-					errno != ENOMSG )
+					GetLastError() != ENOMSG )
 				Log( WIDE("Flushed a message to dead client from event") );
 			//lprintf( "^^^" );
 		}
@@ -2954,7 +2967,7 @@ static _32 _LoadService( CTEXTSTR service
 		EnterCriticalSec( &g.csLoading );
 		pHandler = (PEVENTHANDLER)Allocate( (_32)(sizeof( EVENTHANDLER ) + strlen( service )) );
 		MemSet( pHandler, 0, sizeof( EVENTHANDLER ) );
-		strcpy( pHandler->servicename, service );
+		pHandler->servicename = StrDup( service );
 		//lprintf( WIDE("Allocating local structure which manages our connection to this service...") );
  
 		pHandler->MyMsgBase = g.nMsgCounter;
@@ -3009,7 +3022,7 @@ static _32 _LoadService( CTEXTSTR service
 		pHandler = (PEVENTHANDLER)Allocate( (_32)( sizeof( EVENTHANDLER ) + strlen( WIDE("local_events") ) ) );
 		MemSet( pHandler, 0, sizeof( EVENTHANDLER ) );
 		pHandler->ServiceID = g.my_message_id;
-		strcpy( pHandler->servicename, WIDE("local_events") );
+		pHandler->servicename = StrDup( WIDE("local_events") );
 		//lprintf( WIDE("opening local only service... we're making up numbers here.") );
 		MsgInfo[0] = g.nMsgCounter; // msgbase 0.
 		MsgInfo[1] = (_32)256; // all events.
@@ -3313,7 +3326,11 @@ CLIENTMSG_PROC( int, SendOutMessageEx )( PQMSG buffer, int len DBG_PASS )
 	int stat;
 	if( ( stat = msgsnd( g.msgq_out, MSGTYPE (buffer), len, 0 ) ) < 0 )
 	{
-		lprintf( WIDE("Error sending message: %s"), strerror(errno) );
+		TEXTCHAR msg[256];
+		//strerror_s(errbuf, sizeof( errbuf ), errno);
+		msg[0] = 0;
+		lprintf( WIDE("Error sending message: %s")
+			, msg );
 	}
 	return stat;
 }

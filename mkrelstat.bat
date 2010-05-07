@@ -1,6 +1,8 @@
 :set NOTQUIET=1
 set MAKE=make
+
 %MAKE% DEST=static_release 
+%MAKE% DEST=static_release -C src/SQLlib/testsql
 %MAKE% DEST=static_release -C src/utils/shell
 %MAKE% DEST=static_release -C src/utils/launcher
 %MAKE% DEST=static_release -C src/utils/top_picker

@@ -1,7 +1,7 @@
 
 
 #include <stdio.h>
-#include <sack_types.h>
+#include <stdhdrs.h>
 #include <deadstart.h>
 
 int APIENTRY DllMain( HINSTANCE hinst, int reason, void *x )
