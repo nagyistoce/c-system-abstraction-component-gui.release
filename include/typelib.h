@@ -282,12 +282,6 @@ TYPELIB_PROC  POINTER TYPELIB_CALLTYPE      PeekLink         ( PLINKSTACK *pls )
 // thought about adding these, but decided on creating a limited stack instead.
 //TYPELIB_PROC  POINTER TYPELIB_CALLTYPE      StackLength      ( PLINKSTACK *pls );
 //TYPELIB_PROC  POINTER TYPELIB_CALLTYPE      PopLinkEx        ( PLINKSTACK *pls, int position );
-// thought about adding these, but decided on creating a limited stack instead.
-//TYPELIB_PROC( POINTER,     StackLength      )( PLINKSTACK *pls );
-//TYPELIB_PROC( POINTER,     PopLinkEx        )( PLINKSTACK *pls, int position );
-// thought about adding these, but decided on creating a limited stack instead.
-//TYPELIB_PROC( POINTER,     StackLength      )( PLINKSTACK *pls );
-//TYPELIB_PROC( POINTER,     PopLinkEx        )( PLINKSTACK *pls, int position );
 
 #define CreateLinkStack()  CreateLinkStackEx( DBG_VOIDSRC ) 
 #define DeleteLinkStack(p) DeleteLinkStackEx((p) DBG_SRC)

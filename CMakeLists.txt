@@ -611,7 +611,6 @@ add_definitions( -D__OBSCURE_STREAM_INTERNALS )
   endif()
 
 add_subdirectory( src/msgsvr/server )
-add_subdirectory( src/msgsvr/server )
 
 if( NOT SACK_ONLY )
  if( BUILD_INTERSHELL )
