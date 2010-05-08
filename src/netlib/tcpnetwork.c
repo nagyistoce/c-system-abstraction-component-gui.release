@@ -102,53 +102,41 @@ void AcceptClient(PCLIENT pListen)
    // new client will be locked... 
 	if( !pNewClient )
 	{
-      SOCKADDR junk;
-#ifdef __WINDOWS__
-		nTemp = sizeof(SOCKADDR);
-#else
-		nTemp = (pListen->saSource.sa_family==AF_INET)?sizeof(struct sockaddr):110;
-#endif
-		Log("GetFreeNetwork() returned NULL. Exiting AcceptClient");
-		closesocket( accept( pListen->Socket, &junk ,&nTemp	));
+      SOCKADDR *junk = AllocAddr();
+		nTemp = MAGIC_SOCKADDR_LENGTH;
+		Log("GetFreeNetwork() returned NULL. Exiting AcceptClient, accept and drop connection");
+		closesocket( accept( pListen->Socket, junk ,&nTemp	));
+      ReleaseAddress( junk );
 		return;
 	}
 
    // without setting this value - the pointer to the value
    // contains a value which may be less than a valid address
    // length... usually didn't JAB: 980203
-#ifdef __WINDOWS__
-	nTemp = sizeof(SOCKADDR);
-#else
-	nTemp = (pListen->saSource.sa_family==AF_INET)?sizeof(struct sockaddr):110;
-#endif
-   //nTemp = sizeof( pNewClient->saClient );
+	nTemp = MAGIC_SOCKADDR_LENGTH;
 
-   pNewClient->Socket = accept( pListen->Socket,
-										 &pNewClient->saClient
+   pNewClient->Socket = accept( pListen->Socket
+										, pNewClient->saClient
 										,&nTemp
 										);
 
 #ifdef LOG_SOCKET_CREATION
 	Log2( WIDE("Accepted socket %d  (%d)"), pNewClient->Socket, nTemp );
 #endif
-	//DumpAddr( WIDE("Client's Address"), &pNewClient->saClient );
+	//DumpAddr( WIDE("Client's Address"), pNewClient->saClient );
 	{
 #ifdef __LINUX__
 		socklen_t
 #else
 			int
 #endif
-			nLen = sizeof( pNewClient->saSource );
-#ifdef __WINDOWS__
-		nLen = sizeof(SOCKADDR);
-#else
-		nLen = (pNewClient->saClient.sa_family==AF_INET)?sizeof(struct sockaddr):110;
-#endif
-		if( getsockname( pNewClient->Socket, &pNewClient->saSource, &nLen ) )
+			nLen = MAGIC_SOCKADDR_LENGTH;
+		if( !pNewClient->saSource )
+			pNewClient->saSource = AllocAddr();
+		if( getsockname( pNewClient->Socket, pNewClient->saSource, &nLen ) )
 		{
-         lprintf( WIDE("getsockname errno = %d"), errno );
+			lprintf( WIDE("getsockname errno = %d"), errno );
 		}
-		//pNewClient->saSource = pListen->saSource;
 	}
    pNewClient->read.ReadComplete = pListen->read.ReadComplete;
    pNewClient->psvRead = pListen->psvRead;
@@ -247,12 +235,12 @@ NETWORK_PROC( PCLIENT, CPPOpenTCPListenerAddrEx )(SOCKADDR *pAddr
 	}
 	//	pListen->Socket = socket( *(_16*)pAddr, SOCK_STREAM, 0 );
 #ifdef __WINDOWS__
-	pListen->Socket = OpenSocket( TRUE/*v4*/, TRUE, FALSE );
+	pListen->Socket = OpenSocket( ((*(_16*)pAddr) == AF_INET)?TRUE:FALSE, TRUE, FALSE );
 	if( pListen->Socket == INVALID_SOCKET )
 #endif
 		pListen->Socket = socket( *(_16*)pAddr
 										, SOCK_STREAM
-										, ((*(_16*)pAddr) == AF_INET)?IPPROTO_TCP:0 );
+										, (((*(_16*)pAddr) == AF_INET)||((*(_16*)pAddr) == AF_INET6))?IPPROTO_TCP:0 );
 #ifdef LOG_SOCKET_CREATION
 	lprintf( "Created new socket %d", pListen->Socket );
 #endif
@@ -308,7 +296,7 @@ NETWORK_PROC( PCLIENT, CPPOpenTCPListenerAddrEx )(SOCKADDR *pAddr
 		LeaveCriticalSec( &pListen->csLock );
 		return NULL;
 	}
-	pListen->saSource = *pAddr;
+	pListen->saSource = DuplicateAddress( pAddr );
 
 	if(listen(pListen->Socket,5) == SOCKET_ERROR )
 	{
@@ -392,12 +380,12 @@ static PCLIENT InternalTCPClientAddrExx(SOCKADDR *lpAddr,
 	{
 		// use the sockaddr to switch what type of socket this is.
 #ifdef __WINDOWS__
-		pResult->Socket = OpenSocket( TRUE/*v4*/, TRUE, FALSE );
+		pResult->Socket = OpenSocket( ((*(_16*)lpAddr) == AF_INET)?TRUE:FALSE, TRUE, FALSE );
       if( pResult->Socket == INVALID_SOCKET )
 #endif
 			pResult->Socket=socket( *(_16*)lpAddr
 										 , SOCK_STREAM
-										 , ((*(_16*)lpAddr) == AF_INET)?IPPROTO_TCP:0 );
+										 , (((*(_16*)lpAddr) == AF_INET)||((*(_16*)lpAddr) == AF_INET6))?IPPROTO_TCP:0 );
 #ifdef LOG_SOCKET_CREATION
 		lprintf( "Created new socket %d", pResult->Socket );
 #endif
@@ -433,7 +421,7 @@ static PCLIENT InternalTCPClientAddrExx(SOCKADDR *lpAddr,
             }
             fcntl( pResult->Socket, F_SETFL, O_NONBLOCK );
 #endif
-            pResult->saClient = *lpAddr;
+            pResult->saClient = DuplicateAddress( lpAddr );
 
             // set up callbacks before asynch select...
             pResult->connect.CPPThisConnected= pConnectComplete;
@@ -449,13 +437,8 @@ static PCLIENT InternalTCPClientAddrExx(SOCKADDR *lpAddr,
 				                  
             pResult->dwFlags |= CF_CONNECTING;
 				//DumpAddr( WIDE("Connect to"), &pResult->saClient );
-				if( ( err = connect( pResult->Socket, &pResult->saClient
-#ifdef __WINDOWS__
-										 ,sizeof(SOCKADDR)
-#else
-										 ,(pResult->saClient.sa_family==AF_INET)?sizeof(struct sockaddr):110
-#endif
-										 ) ) )
+				if( ( err = connect( pResult->Socket, pResult->saClient
+										 , SOCKADDR_LENGTH( pResult->saClient ) ) ) )
             {
                 _32 dwError;
                 dwError = WSAGetLastError();
