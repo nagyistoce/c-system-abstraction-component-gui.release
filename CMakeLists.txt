@@ -87,7 +87,8 @@ endif ( UNIX )
 OPTION( BUILD_INTERSHELL "Build InterShell" ON )
 OPTION( SACK_ONLY "Build only sack library, and include structure?" OFF )
 OPTION( __WINDOWS__ "Enable specific windows features" ${__WINDOWS__} )
-OPTION( __LINUX__ "Enable specific linux features (disable __WINDOWS__)" OFF )
+OPTION( __LINUX__ "Enable specific linux features (disable __WINDOWS__)" ${UNIX} )
+OPTION( __LINUX64__ "Enable specific linux features (disable __WINDOWS__)" OFF )
 OPTION( __ARM__ "Enable specific arm-linux features (disable __WINDOWS__)" OFF )
 OPTION( USE_ODBC "Use Odbc" 1 )
 OPTION( USE_OPTIONS "Use Option Code all internal option usage (and don't include option code)" 1 )
@@ -123,8 +124,10 @@ add_definitions( -DSACK_CORE_BUILD )
 
 if( __LINUX__ )
    add_definitions( -D__LINUX__ )
-#   set( ExtraFlags "${ExtraFlags} -D__LINUX__" )
 endif( __LINUX__ )
+if( __LINUX64__ )
+   add_definitions( -D__LINUX64__ )
+endif( __LINUX64__ )
 
 
 if( USE_ODBC OR USE_SQLITE )
@@ -336,6 +339,7 @@ set(BASE_SOURCES ${BASE_SOURCES} ${SACK_MSG_SERVICES}
   src/netlib/whois.c
   src/systemlib/spawntask.c
   src/filesyslib/filemon/allfiles.c
+  src/filesyslib/winfiles.c
 )
 if( __LINUX__ )
 set(BASE_SOURCES ${BASE_SOURCES}
@@ -344,7 +348,6 @@ set(BASE_SOURCES ${BASE_SOURCES}
 else( __LINUX__ )
 set(BASE_SOURCES ${BASE_SOURCES}
   src/filesyslib/filemon/windowsfiles.c
-  src/filesyslib/winfiles.c
 )
 endif( __LINUX__ )
 
@@ -353,7 +356,11 @@ set( Extraflags "${ExtraFlags} -D__NO_MSGSVR__" )
 set( CMAKE_C_STANDARD_LIBRARIES_INIT "" )
 endif()
 
-
+if( __WINDOWS__ )
+set( MSG_QUEUE_SOURCES
+  src/typelib/msgqueue.c
+)
+endif( __WINDOWS__ )
 
 set(BASE_SOURCES  ${BASE_SOURCES}
   src/sysloglib/syslog.c
@@ -362,10 +369,10 @@ set(BASE_SOURCES  ${BASE_SOURCES}
   src/typelib/binarylist.c
   src/typelib/familytree.c
   src/typelib/input.c
-  src/typelib/msgqueue.c
   src/typelib/sets.c
   src/typelib/text.c
   src/typelib/typecode.c
+  ${MSG_QUEUE_SOURCES}
   src/timerlib/timers.c
   src/idlelib/idle.c
   src/fractionlib/fractions.c
@@ -444,14 +451,20 @@ endif( NOT WATCOM )
 
 if( BUILD_MONOLITHIC )
 
+if( NOT __NO_GUI__ )
+set( BASE_SOURCES ${BASE_SOUCES} 
+    ${IMAGE_SOURCES} 
+    ${VIDLIB_SOURCES} 
+    ${PSI_SOURCES} 
+)
+endif( NOT __NO_GUI__ )
+
+
 add_library( sack_bag SHARED 
   ${FIRST_GCC_LIBRARY_SOURCE} 
     ${BASE_SOURCES} 
     ${ODBC_SOURCES}
     ${BAG_SQLITE_SOURCES}
-    ${IMAGE_SOURCES} 
-    ${VIDLIB_SOURCES} 
-    ${PSI_SOURCES} 
     ${JPEG_SOURCE}
     ${ZLIB_SOURCE}
     ${PNG_SOURCE}
@@ -474,6 +487,7 @@ SET_TARGET_PROPERTIES(sack_bag PROPERTIES LINK_FLAGS "option resource=all_resour
 endif()
 
 set( SACK_LIBRARY sack_bag )
+set( SACK_LIBRARIES sack_bag )
 
 if( __WINDOWS__ )
   if( __ARM__ )
@@ -628,12 +642,16 @@ add_definitions( -D__OBSCURE_STREAM_INTERNALS )
 
 add_subdirectory( src/displaylib )
 
+if( NOT __NO_GUI__ )
 add_subdirectory( src/msgsvr/server )
+endif( NOT __NO_GUI__ )
 
 if( NOT SACK_ONLY )
- if( BUILD_INTERSHELL )
-  add_subdirectory( src/intershell )
- endif( BUILD_INTERSHELL )
+ if( NOT __NO_GUI__ )
+  if( BUILD_INTERSHELL )
+   add_subdirectory( src/intershell )
+  endif( BUILD_INTERSHELL )
+ endif( NOT __NO_GUI__ )
 
 # parts of SDK ...
 add_subdirectory( include )
@@ -642,14 +660,18 @@ add_subdirectory( src/utils/runner )
 add_subdirectory( data )
 # includes some testdata in tstdisplay...
 # the test programs do not have install targets, but they will end up building...
-add_subdirectory( src/msgsvr/testdisplay )
+ if( NOT __NO_GUI__ )
+  add_subdirectory( src/msgsvr/testdisplay )
+ endif( NOT __NO_GUI__ )
 #add_subdirectory( src/bench/mem )
 
 endif( NOT SACK_ONLY )
 
+ if( NOT __NO_GUI__ )
 if( USE_OPTIONS )
  add_subdirectory( src/SQLlib/optlib/editoption )
 endif( USE_OPTIONS )
+ endif( NOT __NO_GUI__ )
 
 
 if( BUILD_ELTANIN )
@@ -659,7 +681,7 @@ if( BUILD_ALTANIK )
 add_subdirectory( ${BUILD_ALTANIK_ROOT} altanik )
 endif( BUILD_ALTANIK )
 
-
+add_subdirectory( src/netlib/user )
 
 set( CMAKE_C_STANDARD_LIBRARIES_INIT "" )
 
