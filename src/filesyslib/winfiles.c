@@ -127,7 +127,7 @@ TEXTSTR sack_prepend_path( int group, CTEXTSTR filename )
 	TEXTSTR result = PrependBasePath( group, filegroup, filename );
 	return result;
 }
-
+#if defined( __WINDOWS__ )
 HANDLE sack_open( int group, CTEXTSTR filename, int opts, ... )
 {
 	HANDLE handle;
@@ -301,15 +301,20 @@ int sack_write( HANDLE file_handle, CPOINTER buffer, int size )
    DWORD dwLastWrittenResult;
 	return (WriteFile( (HANDLE)file_handle, (POINTER)buffer, size, &dwLastWrittenResult, NULL )?dwLastWrittenResult:-1 );
 }
+#endif //defined( __WINDOWS__ )
 
 int sack_unlink( CTEXTSTR filename )
 {
+#ifdef __LINUX__
+   return unlink( filename );
+#else
    int okay;
    struct Group *filegroup = (struct Group *)GetLink( &l.groups, 0 );
    TEXTSTR tmp = PrependBasePath( 0, filegroup, filename );
 	okay = DeleteFile(tmp);
 	Release( tmp );
    return !okay; // unlink returns TRUE is 0, else error...
+#endif
 }
 
 struct file *FindFileByFILE( FILE *file_file )
@@ -409,7 +414,11 @@ struct file *FindFileByFILE( FILE *file_file )
 
  int  sack_rename ( CTEXTSTR file_source, CTEXTSTR new_name )
 {
+#ifdef __WINDOWS__
 	return MoveFile( file_source, new_name );
+#else
+	return rename( file_source, new_name );
+#endif
 }
 
 
