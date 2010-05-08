@@ -12,6 +12,43 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <sack_types.h>
+
+#if defined( MINGW_SUX )
+/* Address information */
+typedef struct addrinfoA {
+    int             ai_flags;
+    int             ai_family;
+    int             ai_socktype;
+    int             ai_protocol;
+    size_t          ai_addrlen;
+    char            *ai_canonname;
+    struct sockaddr *ai_addr;
+    struct addrinfoA *ai_next;
+} ADDRINFOA;
+typedef ADDRINFOA   *PADDRINFOA;
+typedef struct addrinfoW {
+    int                 ai_flags;
+    int                 ai_family;
+    int                 ai_socktype;
+    int                 ai_protocol;
+    size_t              ai_addrlen;
+    PWSTR               ai_canonname;
+    struct sockaddr     *ai_addr;
+    struct addrinfoW    *ai_next;
+} ADDRINFOW;
+typedef ADDRINFOW   *PADDRINFOW;
+#ifdef UNICODE
+typedef ADDRINFOW   ADDRINFOT;
+typedef ADDRINFOW   *PADDRINFOT;
+#else
+typedef ADDRINFOA   ADDRINFOT;
+typedef ADDRINFOA   *PADDRINFOT;
+#endif
+typedef ADDRINFOA   ADDRINFO;
+typedef ADDRINFOA   *LPADDRINFO;
+
+#endif
+
 #ifdef __CYGWIN__
 // just need this simple symbol
 typedef int socklen_t;
@@ -30,7 +67,7 @@ typedef int socklen_t;
 #include <errno.h>
 #include <net/if.h>
 #define SOCKET int
-#define SOCKADDR struct sockaddr 
+#define SOCKADDR struct sockaddr
 #define SOCKET_ERROR -1
 //#define HWND int // unused params...
 #define WSAEWOULDBLOCK EAGAIN
@@ -73,7 +110,6 @@ struct win_sockaddr_in {
         struct  win_in_addr sin_addr;
         char    sin_zero[8];
 };
-
 
 typedef struct win_sockaddr_in SOCKADDR_IN;
 #endif

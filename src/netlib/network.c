@@ -163,8 +163,9 @@ NETWORK_PROC( int, GetMacAddress)(PCLIENT pc )//int get_mac_addr (char *device, 
 	//int fd;
 	struct arpreq arpr;
    struct ifconf ifc;
-   MemSet( &arpr, 0, sizeof( arpr ) );
-	MemCpy( &arpr.arp_pa, &pc->saClient, sizeof( SOCKADDR ) );
+	MemSet( &arpr, 0, sizeof( arpr ) );
+   lprintf( "this is broken." );
+	MemCpy( &arpr.arp_pa, pc->saClient, sizeof( SOCKADDR ) );
 	arpr.arp_ha.sa_family = AF_INET;
 	{
 		char buf[256];
@@ -263,10 +264,12 @@ void DumpLists( void )
 
 //----------------------------------------------------------------------------
 
-static SOCKADDR *AllocAddr( void )
+SOCKADDR *AllocAddr( void )
 {
-	SOCKADDR *lpsaAddr=(SOCKADDR*)Allocate(sizeof(SOCKADDR_IN)< 256?256:sizeof( SOCKADDR_IN));
-   MemSet( lpsaAddr, 0, sizeof(SOCKADDR_IN) );
+#define MAGIC_LENGTH sizeof(SOCKADDR_IN)< 256?256:sizeof( SOCKADDR_IN)
+	SOCKADDR *lpsaAddr=(SOCKADDR*)Allocate( MAGIC_SOCKADDR_LENGTH + sizeof(PTRSZVAL) );
+   lpsaAddr = (SOCKADDR*)( ( (PTRSZVAL)lpsaAddr ) + sizeof(PTRSZVAL) );
+   MemSet( lpsaAddr, 0, MAGIC_SOCKADDR_LENGTH );
    return lpsaAddr;
 }
 //----------------------------------------------------------------------------
@@ -1462,22 +1465,6 @@ static PTRSZVAL CPROC NetworkThreadProc( PTHREAD thread )
 	while( !g.pThread ) // creator won't pass until bThreadInitComplete is set.
 		Relinquish();
 
-#ifdef __WINDOWS__
-	{
-		ADDRINFOA *result;
-		ADDRINFOA *test;
-		getaddrinfo( "d3c0re", NULL, NULL, &result );
-		for( test = result; test; test = test->ai_next )
-		{
-			if( test->ai_family == AF_INET )
-			{
-            SOCKADDR *tmp;
-				AddLink( &g.addresses, tmp = AllocAddr() );
-            MemCpy( tmp, test->ai_addr, test->ai_addrlen );
-			}
-		}
-	}
-#endif
 	bThreadInitComplete = TRUE;
 	while(g.pThread && !g.bQuit)
 	{
@@ -1998,6 +1985,7 @@ void ReallocClients( _16 wClients, int nUserData )
 		for( n = 0; n < pClientSlab->count; n++ )
 		{
 			pClientSlab->client[n].Socket = INVALID_SOCKET; // unused sockets on all clients.
+         pClientSlab->client[n].saClient = AllocAddr();
 			AddAvailable( pClientSlab->client + n );
 		}
       AddLink( &g.ClientSlabs, pClientSlab );
@@ -2075,6 +2063,22 @@ NETWORK_PROC( LOGICAL, NetworkWait )(HWND hWndNotify,_16 wClients,int wUserData)
 		if( gethostname( buffer, sizeof( buffer ) ) == 0)
 			g.system_name = DupCStr( buffer );
 	}
+#ifdef __WINDOWS__
+	{
+		ADDRINFO *result;
+		ADDRINFO *test;
+		getaddrinfo( g.system_name, NULL, NULL, &result );
+		for( test = result; test; test = test->ai_next )
+		{
+			//if( test->ai_family == AF_INET )
+			{
+            SOCKADDR *tmp;
+				AddLink( &g.addresses, tmp = AllocAddr() );
+            MemCpy( tmp, test->ai_addr, test->ai_addrlen );
+			}
+		}
+	}
+#endif
 
    //Log( WIDE("Network Initialize Complete!") );
    return bThreadInitOkay;  // return status of thread initialization
@@ -2157,13 +2161,13 @@ NETWORK_PROC( PTRSZVAL, GetNetworkLong )(PCLIENT lpClient,int nLong)
       switch( nLong )
       {
       case GNL_IP:  // IP of destination
-         return *(_32*)(lpClient->saClient.sa_data+2);
+         return *(_32*)(lpClient->saClient->sa_data+2);
       case GNL_PORT:  // port of server...  STUPID PATCH?!  maybe...
-         return ntohs( *(_16*)(lpClient->saClient.sa_data) );
+         return ntohs( *(_16*)(lpClient->saClient->sa_data) );
       case GNL_MYPORT:  // port of server...  STUPID PATCH?!  maybe...
-         return ntohs( *(_16*)(lpClient->saSource.sa_data) );
+         return ntohs( *(_16*)(lpClient->saSource->sa_data) );
 		case GNL_MYIP: // IP of myself (after connect?)
-			return *(_32*)(lpClient->saSource.sa_data+2);
+			return *(_32*)(lpClient->saSource->sa_data+2);
 
 			//TODO if less than zero return a (high/low)portion of the  hardware address (MAC).
       }
@@ -2194,8 +2198,10 @@ NETWORK_PROC( _16, GetNetworkWord )(PCLIENT lpClient,int nWord)
 
 NETWORK_PROC( SOCKADDR *, DuplicateAddress )( SOCKADDR *pAddr ) // return a copy of this address...
 {
+   POINTER tmp = (POINTER)( ( (PTRSZVAL)pAddr ) - sizeof(PTRSZVAL) );
 	SOCKADDR *dup = AllocAddr();
-	dup[0] = pAddr[0];
+   POINTER tmp2 = (POINTER)( ( (PTRSZVAL)dup ) - sizeof(PTRSZVAL) );
+	MemCpy( tmp2, tmp, MAGIC_SOCKADDR_LENGTH + sizeof(PTRSZVAL) );
    return dup;
 }
 
@@ -2257,8 +2263,9 @@ SOCKADDR *CreateAddress( _32 dwIP,_16 nHisPort)
 SOCKADDR *CreateRemote(CTEXTSTR lpName,_16 nHisPort)
 {
 	SOCKADDR_IN *lpsaAddr;
-	PHOSTENT phe;
+   int conversion_success = FALSE;
 #ifndef __WINDOWS__
+	PHOSTENT phe;
 	// a IP type name will never have a / in it, therefore
 	// we can assume it's a unix type address....
 	if( lpName && strchr( lpName, '/' ) )
@@ -2268,41 +2275,109 @@ SOCKADDR *CreateRemote(CTEXTSTR lpName,_16 nHisPort)
 	if (!lpsaAddr)
 		return(NULL);
 
-	lpsaAddr->sin_family       = AF_INET;         // InetAddress Type.
-
 	// if it's a numeric name... attempt to use as an address.
+#ifdef __LINUX__
 	if( lpName &&
-		( lpName[0] >= '0' && lpName[0] <= '9' ) )
+		( lpName[0] >= '0' && lpName[0] <= '9' )
+	  && StrChr( lpName, '.' ) )
 	{
 #ifdef UNICODE
 		char *tmp = CStrDup( lpName );
-		lpsaAddr->sin_addr.s_addr = inet_addr(tmp);
+		if( inet_pton( AF_INET, tmp, (struct in_addr*)&lpsaAddr->sin_addr ) > 0 )
+		{
+			lpsaAddr->sin_family       = AF_INET;         // InetAddress Type.
+			conversion_success = TRUE;
+		}
 		Release( tmp );
 #else
-		lpsaAddr->sin_addr.s_addr = inet_addr(lpName);
+		if( inet_pton( AF_INET, lpName, (struct in6_addr*)&lpsaAddr->sin_addr ) > 0 )
+		{
+			lpsaAddr->sin_family       = AF_INET;         // InetAddress Type.
+			conversion_success = TRUE;
+		}
 #endif
 	}
-	else
+	else 	if( lpName &&
+		( lpName[0] >= '0' && lpName[0] <= '9' )
+				&& StrChr( lpName, ':' )!=StrRChr( lpName, ':' ) )
+	{
+#ifdef UNICODE
+		char *tmp = CStrDup( lpName );
+		if( inet_pton( AF_INET6, tmp, (struct in_addr*)&lpsaAddr->sin_addr ) > 0 )
+		{
+			lpsaAddr->sin_family       = AF_INET6;         // InetAddress Type.
+			conversion_success = TRUE;
+		}
+		Release( tmp );
+#else
+		if( inet_pton( AF_INET6, lpName, (struct in6_addr*)&lpsaAddr->sin_addr ) > 0 )
+		{
+			lpsaAddr->sin_family       = AF_INET6;         // InetAddress Type.
+			conversion_success = TRUE;
+		}
+#endif
+	}
+#endif
+   if( !conversion_success )
 	{
 		if( lpName )
 		{
-			char *tmp = CStrDup( lpName );
-			if (!(phe=gethostbyname(tmp)))
+#ifdef __WINDOWS__
 			{
-				// could not find the name in the host file.
-				Log1( WIDE("Could not Resolve to %s"), lpName );
-				Release(lpsaAddr);
-				Release( tmp );
-				return(NULL);
+				ADDRINFO *result;
+				ADDRINFO *test;
+				getaddrinfo( lpName, NULL, NULL, &result );
+				for( test = result; test; test = test->ai_next )
+				{
+					//SOCKADDR *tmp;
+					//AddLink( &g.addresses, tmp = AllocAddr() );
+					MemCpy( lpsaAddr, test->ai_addr, test->ai_addrlen );
+					SET_SOCKADDR_LENGTH( lpsaAddr, test->ai_addrlen );
+               break;
+				}
 			}
-			Release( tmp );
-			lpsaAddr->sin_family       = AF_INET;         // InetAddress Type.
+#else //__WINDOWS__
+
+			char *tmp = CStrDup( lpName );
+			if(!(phe=gethostbyname(tmp)))
+			{
+				if( !(phe=gethostbyname2(tmp,AF_INET6) ) )
+				{
+					if( !(phe=gethostbyname2(tmp,AF_INET) ) )
+					{
+ 						// could not find the name in the host file.
+						Log1( WIDE("Could not Resolve to %s"), lpName );
+						Release(lpsaAddr);
+						Release( tmp );
+						return(NULL);
+					}
+					else
+					{
+						lprintf( "Strange, gethostbyname failed, but AF_INET worked..." );
+						SET_SOCKADDR_LENGTH( pc->saLastClient, 16 );
+						lpsaAddr->sin_family = AF_INET;
+					}
+				}
+				else
+				{
+					SET_SOCKADDR_LENGTH( pc->saLastClient, 28 );
+					lpsaAddr->sin_family = AF_INET6;         // InetAddress Type.
+				}
+			}
+			else
+			{
+				Release( tmp );
+				SET_SOCKADDR_LENGTH( pc->saLastClient, 16 );
+				lpsaAddr->sin_family = AF_INET;         // InetAddress Type.
+			}
 			memcpy( &lpsaAddr->sin_addr.s_addr,           // save IP address from host entry.
-				phe->h_addr,
-				phe->h_length);
+					 phe->h_addr,
+					 phe->h_length);
+#endif
 		}
 		else
 		{
+			lpsaAddr->sin_family      = AF_INET;         // InetAddress Type.
 			lpsaAddr->sin_addr.s_addr = 0;
 		}
 	}
@@ -2356,10 +2431,10 @@ NETWORK_PROC( SOCKADDR *,CreateSockAddress)( CTEXTSTR name, _16 nDefaultPort )
 // blah... should process a ip:port - but - default port?!
 	_32 bTmpName = 0;
 	TEXTSTR tmp;
-	SOCKADDR *sa;
+	SOCKADDR *sa = NULL;
 	TEXTCHAR *port;
 	_16 wPort;
-	if( ( port = strrchr( (TEXTSTR)name, ':' ) ) )
+	if( name && ( port = strrchr( (TEXTSTR)name, ':' ) ) )
 	{
 		tmp = StrDup( name );
 		bTmpName = 1;
@@ -2393,61 +2468,10 @@ NETWORK_PROC( SOCKADDR *,CreateSockAddress)( CTEXTSTR name, _16 nDefaultPort )
 			port[-1] = ':';  // incase we obliterated it
 		}
 	}
-	else // no port specification...
+	else  // no port specification...
 	{
-		CTEXTSTR pp;
-		TEXTCHAR c = name[0];
-				 //Log1( WIDE("%s does not have a ':'"), name );
-		if( ( c >= '0' ) && ( c <= '9' ) )
-		{
-		//Log( WIDE("is numeric...") );
-			if( ( pp = (TEXTCHAR*)StrChr( name, '.' ) ) )
-			{
-			//Log( WIDE("And should be an IP number") );
-				sa = CreateRemote( name, nDefaultPort );
-			}
-			else
-			{
-			//Log( WIDE("And should be a port number only") );
-			// port only....
-				sa = CreateRemote( NULL, (_16)atoi( name ) );
-			}
-		}
-		else
-		{
-			//Log( WIDE("Is not numeric") );
-			if( ( pp = StrChr( name, '.' ) ) )
-			{
-				//Log( WIDE("Does not contain a '.' ") );
-				sa = CreateRemote( name, nDefaultPort );
-			}
-			else
-			{
-				struct servent *pse;
-			//pse = getservbyname( name, WIDE("tcp") );
-				//if( !pse )
-			//   pse = getservbyname( name, WIDE("udp") );
-			//if( !pse )
-				char *tmp = CStrDup( name );
-				pse = getservbyname( tmp, NULL );
-				Release( tmp );
-				if( !pse )
-				{
-				//Log( WIDE("No service name found - trying as an IP name") );
-					sa = CreateRemote( name, (_16)nDefaultPort );
-					if( !sa )
-					{
-						Log( WIDE("Could not resolve service name supplied") );
-						return 0;
-					}
-				}
-				else
-				{
-				//Log( WIDE("Name was a service name") );
-					sa = CreateRemote( NULL, ntohs(pse->s_port) );
-				}
-			}
-		}
+		//Log1( WIDE("%s does not have a ':'"), name );
+		sa = CreateRemote( name, nDefaultPort );
 	}
 	if( bTmpName ) Release( tmp );
 	return sa;
@@ -2526,14 +2550,15 @@ LOGICAL IsThisAddressMe( SOCKADDR *addr, _16 myport )
 
 void ReleaseAddress(SOCKADDR *lpsaAddr)
 {
-   Release(lpsaAddr);
+   // sockaddr is often skewed from what I would expect it.
+   Release ((POINTER)( ( (PTRSZVAL)lpsaAddr ) - sizeof(PTRSZVAL) ));
 }
 
 //----------------------------------------------------------------------------
 // creates class C broadcast address
 SOCKADDR *CreateBroadcast(_16 nPort)
 {
-   SOCKADDR_IN *bcast=(SOCKADDR_IN*)Allocate(sizeof(SOCKADDR_IN));
+   SOCKADDR_IN *bcast=(SOCKADDR_IN*)AllocAddr();
    SOCKADDR *lpMyAddr;
    if (!bcast)
       return(NULL);
@@ -2550,8 +2575,8 @@ SOCKADDR *CreateBroadcast(_16 nPort)
 
 void DumpSocket( PCLIENT pc )
 {
-	DumpAddr( WIDE("REMOT"), &pc->saClient );
-	DumpAddr( WIDE("LOCAL"), &pc->saSource );
+	DumpAddr( WIDE("REMOT"), pc->saClient );
+	DumpAddr( WIDE("LOCAL"), pc->saSource );
    return;
 }
 

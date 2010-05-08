@@ -48,10 +48,10 @@ NETWORK_PROC( PCLIENT, CPPServeUDPAddr )( SOCKADDR *pAddr
    }
 
 #ifdef __WINDOWS__
-	pc->Socket = OpenSocket(TRUE/*v4*/,FALSE, FALSE);
+	pc->Socket = OpenSocket(((*(_16*)pAddr) == AF_INET)?TRUE:FALSE,FALSE, FALSE);
 	if( pc->Socket == INVALID_SOCKET )
 #endif
-		pc->Socket = socket(PF_INET,SOCK_DGRAM,0);
+		pc->Socket = socket(PF_INET,SOCK_DGRAM,(((*(_16*)pAddr) == AF_INET)||((*(_16*)pAddr) == AF_INET6))?IPPROTO_UDP:0);
    if( pc->Socket == INVALID_SOCKET )
    {
       Log( WIDE("UDP Socket Fail") );
@@ -64,7 +64,7 @@ NETWORK_PROC( PCLIENT, CPPServeUDPAddr )( SOCKADDR *pAddr
 #endif
    pc->dwFlags |= CF_UDP;
 
-   if( pAddr? pc->saSource = *pAddr,1:0 )
+   if( pAddr? pc->saSource = DuplicateAddress( pAddr ),1:0 )
    {
 #ifdef LOG_SOCKET_CREATION
       Log8( WIDE(" %03d,%03d,%03d,%03d,%03d,%03d,%03d,%03d"),
@@ -77,9 +77,9 @@ NETWORK_PROC( PCLIENT, CPPServeUDPAddr )( SOCKADDR *pAddr
        				*(((unsigned char *)pAddr)+6),
        				*(((unsigned char *)pAddr)+7) );
 #endif
-      if (bind(pc->Socket,&pc->saSource,sizeof(SOCKADDR)))
+      if (bind(pc->Socket,pc->saSource,SOCKADDR_LENGTH(pc->saSource)))
 		{
-			DumpAddr( "BIND FAIL:", &pc->saSource );
+			DumpAddr( "BIND FAIL:", pc->saSource );
          lprintf( WIDE("Bind Fail: %d"), WSAGetLastError() );
 	      InternalRemoveClientEx( pc, TRUE, FALSE );
    	   LeaveCriticalSec( &pc->csLock );
@@ -125,9 +125,9 @@ NETWORK_PROC( PCLIENT, CPPServeUDPAddr )( SOCKADDR *pAddr
 	if( pReadComplete )
 	{
    	if( pc->dwFlags & CF_CPPREAD )
-	      pc->read.CPPReadCompleteEx( pc->psvRead, NULL, 0, &pc->saSource );
+	      pc->read.CPPReadCompleteEx( pc->psvRead, NULL, 0, pc->saSource );
 		else
-			pc->read.ReadCompleteEx( pc, NULL, 0, &pc->saSource );
+			pc->read.ReadCompleteEx( pc, NULL, 0, pc->saSource );
 	}
 
 #ifdef LOG_SOCKET_CREATION
@@ -189,8 +189,8 @@ LOGICAL GuaranteeAddr( PCLIENT pc, SOCKADDR *sa )
 
    if( sa )
    {
-      pc->saClient=*sa;
-      if( *(int*)(pc->saClient.sa_data+2) == -1 )
+      pc->saClient=DuplicateAddress( sa );
+      if( *(int*)(pc->saClient->sa_data+2) == -1 )
          broadcast = TRUE;
       else
 			broadcast = FALSE;
@@ -344,7 +344,7 @@ NETWORK_PROC( LOGICAL, SendUDPEx )( PCLIENT pc, CPOINTER pBuf, int nSize, SOCKAD
 {
    int nSent;
    if( !sa)
-		sa = &pc->saClient;
+		sa = pc->saClient;
 	if( !pc )
       return FALSE;
    /*
@@ -362,8 +362,8 @@ NETWORK_PROC( LOGICAL, SendUDPEx )( PCLIENT pc, CPOINTER pBuf, int nSize, SOCKAD
                    (const char*)pBuf,
                    nSize,
                    0
-                   ,(sa)?sa:&pc->saClient
-                   ,sizeof( SOCKADDR ) 
+                   ,(sa)?sa:pc->saClient
+                   , SOCKADDR_LENGTH((sa)?sa:pc->saClient )
                    );
    if( nSent < 0 )
    {
@@ -435,7 +435,7 @@ int FinishUDPRead( PCLIENT pc )
 #else
 		int
 #endif
-		Size=sizeof(SOCKADDR);  // echoed from server.
+		Size=MAGIC_SOCKADDR_LENGTH;  // echoed from server.
 
    if( !pc->RecvPending.buffer.p || !pc->RecvPending.dwAvail )  
    {
@@ -443,11 +443,14 @@ int FinishUDPRead( PCLIENT pc )
 		return FALSE;
 	}
 	//do{
-   nReturn = recvfrom( pc->Socket, 
+	if( !pc->saLastClient )
+		pc->saLastClient = AllocAddr();
+	nReturn = recvfrom( pc->Socket,
                        (char*)pc->RecvPending.buffer.p,
                        pc->RecvPending.dwAvail,0,
-                       &pc->saLastClient,
-                       &Size);// get address...
+                       pc->saLastClient,
+							 &Size);// get address...
+   SET_SOCKADDR_LENGTH( pc->saLastClient, Size );
 	//lprintf( WIDE("Recvfrom result:%d"), nReturn );
 
    if (nReturn == SOCKET_ERROR)
@@ -493,11 +496,11 @@ int FinishUDPRead( PCLIENT pc )
    if( pc->read.ReadCompleteEx )
    {
    	if( pc->dwFlags & CF_CPPREAD )
-	      pc->read.CPPReadCompleteEx( pc->psvRead, pc->RecvPending.buffer.p, nReturn, &pc->saLastClient );
+	      pc->read.CPPReadCompleteEx( pc->psvRead, pc->RecvPending.buffer.p, nReturn, pc->saLastClient );
 		else
 		{
          //lprintf( WIDE("Calling UDP complete %p %p %d"), pc, pc->RecvPending.buffer.p, nReturn );
-			pc->read.ReadCompleteEx( pc, pc->RecvPending.buffer.p, nReturn, &pc->saLastClient );
+			pc->read.ReadCompleteEx( pc, pc->RecvPending.buffer.p, nReturn, pc->saLastClient );
 		}
 	}
 	//}while(1);

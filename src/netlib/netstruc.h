@@ -33,6 +33,12 @@
 
 SACK_NETWORK_NAMESPACE
 
+#define MAGIC_SOCKADDR_LENGTH sizeof(SOCKADDR_IN)< 256?256:sizeof( SOCKADDR_IN)
+
+// this might have to be like sock_addr_len_t
+#define SOCKADDR_LENGTH(sa) ( (int)*(PTRSZVAL*)( ( (PTRSZVAL)sa ) - sizeof(PTRSZVAL) ) )
+#define SET_SOCKADDR_LENGTH(sa,size) ( ( *(PTRSZVAL*)( ( (PTRSZVAL)sa ) - sizeof(PTRSZVAL) ) ) = size )
+
 // used by the network thread dispatched network layer messages...
 #define SOCKMSG_UDP (WM_USER+1)  // messages for UDP use this window Message
 #define SOCKMSG_TCP (WM_USER+2)  // Messages for TCP use this Window Message
@@ -100,9 +106,9 @@ typedef struct PendingBuffer
 
 struct NetworkClient
 {
-	struct sockaddr saClient;  //Dest Address
-	struct sockaddr saSource;  //Local Address of this port ...
-	struct sockaddr saLastClient; // use this for UDP recvfrom
+	SOCKADDR *saClient;  //Dest Address
+	SOCKADDR *saSource;  //Local Address of this port ...
+	SOCKADDR *saLastClient; // use this for UDP recvfrom
 	_8     hwClient[6];
 	_8     hwSource[6];
 	//  ServeUDP( WIDE("SourceIP"), SourcePort );
@@ -244,6 +250,8 @@ void TerminateClosedClientEx( PCLIENT pc DBG_PASS );
 void InternalRemoveClientExx(PCLIENT lpClient, LOGICAL bBlockNofity, LOGICAL bLinger DBG_PASS );
 #define InternalRemoveClientEx(c,b,l) InternalRemoveClientExx(c,b,l DBG_SRC)
 #define InternalRemoveClient(c) InternalRemoveClientEx(c, FALSE, FALSE )
+
+SOCKADDR *AllocAddr( void );
 
 #define CLIENT_DEFINED
 
