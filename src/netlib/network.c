@@ -2341,7 +2341,7 @@ SOCKADDR *CreateRemote(CTEXTSTR lpName,_16 nHisPort)
 #else //__WINDOWS__
 
 			char *tmp = CStrDup( lpName );
-			if(!(phe=gethostbyname(tmp)))
+			if( 1 )//!(phe=gethostbyname(tmp)))
 			{
 				if( !(phe=gethostbyname2(tmp,AF_INET6) ) )
 				{
@@ -2358,12 +2358,28 @@ SOCKADDR *CreateRemote(CTEXTSTR lpName,_16 nHisPort)
 						lprintf( "Strange, gethostbyname failed, but AF_INET worked..." );
 						SET_SOCKADDR_LENGTH( lpsaAddr, 16 );
 						lpsaAddr->sin_family = AF_INET;
+			memcpy( &lpsaAddr->sin_addr.s_addr,           // save IP address from host entry.
+					 phe->h_addr,
+					 phe->h_length);
 					}
 				}
 				else
 				{
 					SET_SOCKADDR_LENGTH( lpsaAddr, 28 );
 					lpsaAddr->sin_family = AF_INET6;         // InetAddress Type.
+#if note
+  {
+    __SOCKADDR_COMMON (sin6_);
+    in_port_t sin6_port;        /* Transport layer port # */
+    uint32_t sin6_flowinfo;     /* IPv6 flow information */
+    struct in6_addr sin6_addr;  /* IPv6 address */
+    uint32_t sin6_scope_id;     /* IPv6 scope-id */
+  };
+#endif
+
+					memcpy( ((struct sockaddr_in6*)lpsaAddr)->sin6_addr.s6_addr,           // save IP address from host entry.
+							 phe->h_addr,
+							 phe->h_length);
 				}
 			}
 			else
@@ -2371,10 +2387,10 @@ SOCKADDR *CreateRemote(CTEXTSTR lpName,_16 nHisPort)
 				Release( tmp );
 				SET_SOCKADDR_LENGTH( lpsaAddr, 16 );
 				lpsaAddr->sin_family = AF_INET;         // InetAddress Type.
-			}
 			memcpy( &lpsaAddr->sin_addr.s_addr,           // save IP address from host entry.
 					 phe->h_addr,
 					 phe->h_length);
+			}
 #endif
 		}
 		else
