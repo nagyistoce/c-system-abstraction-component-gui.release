@@ -25,10 +25,12 @@
 #endif
 
 #ifdef __cplusplus
+#define _CONSOLE_NAMESPACE namespace console {
 #define PSI_CONSOLE_NAMESPACE PSI_NAMESPACE namespace console {
 #define PSI_CONSOLE_NAMESPACE_END } PSI_NAMESPACE_END
 #define USE_PSI_CONSOLE_NAMESPACE using namespace sack::psi::console
 #else
+#define _CONSOLE_NAMESPACE
 #define PSI_CONSOLE_NAMESPACE 
 #define PSI_CONSOLE_NAMESPACE_END 
 #define USE_PSI_CONSOLE_NAMESPACE
@@ -38,13 +40,16 @@
 
 #include <controls.h>
 
-PSI_CONSOLE_NAMESPACE
+PSI_NAMESPACE
+	_CONSOLE_NAMESPACE
 PSI_CONSOLE_PROC( void, PSIConsoleLoadFile )( PSI_CONTROL pc, CTEXTSTR filename );
 PSI_CONSOLE_PROC( void, PSIConsoleSaveFile )( PSI_CONTROL pc, CTEXTSTR filename );
 
 PSI_CONSOLE_PROC( int, vpcprintf )( PSI_CONTROL pc, CTEXTSTR format, va_list args );
 PSI_CONSOLE_PROC( int, pcprintf )( PSI_CONTROL pc, CTEXTSTR format, ... );
 PSI_CONSOLE_PROC( int, PSIConsoleOutput )( PSI_CONTROL pc, PTEXT lines );
+PSI_CONSOLE_PROC( void, PSIConsoleInputEvent )( PSI_CONTROL pc, void(CPROC*Event)(PTRSZVAL,PTEXT), PTRSZVAL psv );
+
 PSI_CONSOLE_NAMESPACE_END;
 
 USE_PSI_CONSOLE_NAMESPACE;

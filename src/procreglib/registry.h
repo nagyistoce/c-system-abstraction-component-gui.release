@@ -101,14 +101,11 @@ typedef struct tree_def_tag
 #define MAXTREEDEFSPERSET 256
 DeclareSet( TREEDEF );
 
-// pass the pointer and the size of the pointer's data space being opened/closed
-typedef void (CPROC *InitDeinit)( POINTER, _32 );
-
 typedef struct data_class_def_tag
 {
    int size;
-	InitDeinit Open;
-   InitDeinit Close;
+   OpenCloseNotification Open;
+   OpenCloseNotification Close;
    INDEX unique;
    TREEDEF instances;
 } DATADEF, *PDATADEF;

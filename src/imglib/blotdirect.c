@@ -329,7 +329,7 @@ namespace image {
 // w, h is height and width of the image to use.
 // default behavior is to omit copying 0 pixels for transparency
 // overlays....
-IMAGE_PROC( void, BlotImageSizedEx )( ImageFile *pifDest, ImageFile *pifSrc
+ void  BlotImageSizedEx ( ImageFile *pifDest, ImageFile *pifSrc
                               , S_32 xd, S_32 yd
                               , S_32 xs, S_32 ys
                               , _32 ws, _32 hs
@@ -339,7 +339,8 @@ IMAGE_PROC( void, BlotImageSizedEx )( ImageFile *pifDest, ImageFile *pifSrc
 {
 #define BROKEN_CODE
    PCDATA po, pi;
-   int  hd, wd, oo, oi;
+   int  hd, wd;
+   _32 oo, oi; // treated as an adder... it is unsigned by math, but still results correct offset?
    static _32 lock;
 	va_list colors;
 	va_start( colors, method );
@@ -580,7 +581,7 @@ IMAGE_PROC( void, BlotImageSizedEx )( ImageFile *pifDest, ImageFile *pifSrc
 }
 // copy all of pifSrc to the destination - placing the upper left
 // corner of pifSrc on the point specified.
-IMAGE_PROC( void, BlotImageEx )( ImageFile *pifDest, ImageFile *pifSrc, S_32 xd, S_32 yd, _32 nTransparent, _32 method, ... )
+ void  BlotImageEx ( ImageFile *pifDest, ImageFile *pifSrc, S_32 xd, S_32 yd, _32 nTransparent, _32 method, ... )
 {
 	va_list colors;
 	CDATA r;

@@ -1,5 +1,5 @@
 
 PSI_NAMESPACE
-void DrawFrameCaption( PCOMMON );
+void DrawFrameCaption( PSI_CONTROL );
 PSI_NAMESPACE_END
 

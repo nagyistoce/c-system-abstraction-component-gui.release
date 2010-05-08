@@ -1,4 +1,5 @@
 
+#include <stdhdrs.h>
 #include <stdio.h>
 #include <logging.h>
 
@@ -10,50 +11,50 @@
 #endif
 //---------------------------------------------------------------------------
 
-FRACTION_PROC( int, sLogFraction )( TEXTCHAR *string, PFRACTION x )
+ int  sLogFraction ( TEXTCHAR *string, PFRACTION x )
 {
 	if( x->denominator < 0 )
 	{
 		if( x->numerator > -x->denominator )
-			return sprintf( string, WIDE("-%d %d/%d")
+			return snprintf( string, 31, WIDE("-%d %d/%d")
 						, x->numerator / (-x->denominator)
 						, x->numerator % (-x->denominator), -x->denominator );
 		else
-			return sprintf( string, WIDE("-%d/%d"), x->numerator, -x->denominator );
+			return snprintf( string, 31, WIDE("-%d/%d"), x->numerator, -x->denominator );
 	}
 	else
 	{
 		if( x->numerator > x->denominator )
-			return sprintf( string, WIDE("%d %d/%d")
+			return snprintf( string, 31, WIDE("%d %d/%d")
 						, x->numerator / x->denominator
 						, x->numerator % x->denominator, x->denominator );
 		else
-			return sprintf( string, WIDE("%d/%d"), x->numerator, x->denominator );
+			return snprintf( string, 31, WIDE("%d/%d"), x->numerator, x->denominator );
 	}
 }
 
 //---------------------------------------------------------------------------
 
-FRACTION_PROC( int, sLogCoords )( TEXTCHAR *string, PCOORDPAIR pcp )
+ int  sLogCoords ( TEXTCHAR *string, PCOORDPAIR pcp )
 {
 	TEXTCHAR *start = string;
-	string += sprintf( string, WIDE("(") );
+	string += snprintf( string, 2, WIDE("(") );
 	string += sLogFraction( string, &pcp->x );
-	string += sprintf( string, WIDE(",") );
+	string += snprintf( string, 2, WIDE(",") );
 	string += sLogFraction( string, &pcp->y );
-	string += sprintf( string, WIDE(")") );
+	string += snprintf( string, 2, WIDE(")") );
 	return (int)(string - start);
 }
 
-FRACTION_PROC( void, LogCoords )( PCOORDPAIR pcp )
+ void  LogCoords ( PCOORDPAIR pcp )
 {
 	TEXTCHAR buffer[256];
 	TEXTCHAR *string = buffer;
-	string += sprintf( string, WIDE("(") );
+	string += snprintf( string, 2, WIDE("(") );
 	string += sLogFraction( string, &pcp->x );
-	string += sprintf( string, WIDE(",") );
+	string += snprintf( string, 2, WIDE(",") );
 	string += sLogFraction( string, &pcp->y );
-	string += sprintf( string, WIDE(")") );
+	string += snprintf( string, 2, WIDE(")") );
 	Log( buffer );
 }
 //---------------------------------------------------------------------------
@@ -76,7 +77,7 @@ static void NormalizeFraction( PFRACTION f )
 
 //---------------------------------------------------------------------------
 
-FRACTION_PROC( PFRACTION, AddFractions )( PFRACTION base, PFRACTION offset )
+ PFRACTION  AddFractions ( PFRACTION base, PFRACTION offset )
 {
 	if( !offset->numerator ) // 0 addition either way is same.
 		return base;
@@ -160,7 +161,7 @@ FRACTION_PROC( PFRACTION, AddFractions )( PFRACTION base, PFRACTION offset )
 
 //---------------------------------------------------------------------------
 
-FRACTION_PROC( void, AddCoords )( PCOORDPAIR base, PCOORDPAIR offset )
+ void  AddCoords ( PCOORDPAIR base, PCOORDPAIR offset )
 {
 	AddFractions( &base->x, &offset->x );
 	AddFractions( &base->y, &offset->y );
@@ -168,7 +169,7 @@ FRACTION_PROC( void, AddCoords )( PCOORDPAIR base, PCOORDPAIR offset )
 
 //---------------------------------------------------------------------------
 
-FRACTION_PROC( PFRACTION, ScaleFraction )( PFRACTION result, S_32 value, PFRACTION f )
+ PFRACTION  ScaleFraction ( PFRACTION result, S_32 value, PFRACTION f )
 {
 	result->numerator = value * f->numerator;
 	result->denominator = f->denominator;
@@ -178,7 +179,7 @@ FRACTION_PROC( PFRACTION, ScaleFraction )( PFRACTION result, S_32 value, PFRACTI
 
 //---------------------------------------------------------------------------
 
-FRACTION_PROC( _32, ScaleValue )( PFRACTION f, S_32 value )
+ _32  ScaleValue ( PFRACTION f, S_32 value )
 {
 	S_32 result = 0;
 if( f->denominator )
@@ -188,7 +189,7 @@ if( f->denominator )
 
 //---------------------------------------------------------------------------
 
-FRACTION_PROC( _32, InverseScaleValue )( PFRACTION f, S_32 value )
+ _32  InverseScaleValue ( PFRACTION f, S_32 value )
 {
 	S_32 result =0;
 if( f->numerator )
@@ -198,7 +199,7 @@ if( f->numerator )
 
 //---------------------------------------------------------------------------
 
-FRACTION_PROC( S_32, ReduceFraction )( PFRACTION f )
+ S_32  ReduceFraction ( PFRACTION f )
 {
 	return ( f->numerator ) / f->denominator;
 }

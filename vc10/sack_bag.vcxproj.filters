@@ -14,175 +14,187 @@
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
     <Filter Include="Source Files\BAG Source Files">
-      <UniqueIdentifier>{4ecdef30-541c-41db-b5a8-fd8e3b27131c}</UniqueIdentifier>
+      <UniqueIdentifier>{c9bfc309-1962-4cbd-abb5-2775d466edad}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\Configuration Callback Conglomeration">
-      <UniqueIdentifier>{63460cca-a454-4cef-86ad-b60880d30d8b}</UniqueIdentifier>
+      <UniqueIdentifier>{fa1e402f-8baa-4acf-ac6a-68af65850bdd}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\Event Based Networking">
-      <UniqueIdentifier>{63a6b4ed-ec82-4141-a6a6-7dddd85401fd}</UniqueIdentifier>
+      <UniqueIdentifier>{808a8a83-d010-42aa-83e2-a87357210bb7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\Event Based Networking\Headers">
-      <UniqueIdentifier>{e76be563-d80c-4454-be14-733e6d53c236}</UniqueIdentifier>
+      <UniqueIdentifier>{687b0b81-0465-4dd4-aa9e-5671f5f55de0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\Event Based Networking\Private Includes">
-      <UniqueIdentifier>{f9ceef47-b46a-4ba4-9f68-8606ab89edcd}</UniqueIdentifier>
+      <UniqueIdentifier>{3aa9d506-6d34-40dc-8e98-4918b322de98}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\File System Utilitarian Garbage">
-      <UniqueIdentifier>{c14e809a-3e76-4be0-89c7-77d9d8801c8e}</UniqueIdentifier>
+      <UniqueIdentifier>{46ca53f0-8f5e-4e22-be9c-5f0c3fee9064}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\File System Utilitarian Garbage\File System Monitoring Utility">
-      <UniqueIdentifier>{61f02299-16ef-4012-82af-477cd2389766}</UniqueIdentifier>
+      <UniqueIdentifier>{897bf65f-7b40-4a4c-9b64-5ff8ca833fe8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\File System Utilitarian Garbage\File System Monitoring Utility\Private Includes">
-      <UniqueIdentifier>{1b53c125-d6ce-49c1-ae40-ade44dc8e8f3}</UniqueIdentifier>
+      <UniqueIdentifier>{014da14f-9647-495f-9bed-46548860b148}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\Freetype Library">
-      <UniqueIdentifier>{e86df978-3369-4c1e-baab-9677175b79a9}</UniqueIdentifier>
+      <UniqueIdentifier>{309e50a7-aa72-48c1-bca6-e45368659b1c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\General Task based System Utilities %28processes/tasks%29">
-      <UniqueIdentifier>{7c36661e-c049-4122-b4c7-4a1822a0cca1}</UniqueIdentifier>
+      <UniqueIdentifier>{d4692734-9eeb-470a-a845-04dc90874f64}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\GENX Library">
-      <UniqueIdentifier>{77c3cfa4-c469-445f-bf4f-30957a148c87}</UniqueIdentifier>
+      <UniqueIdentifier>{c9372ede-fa11-4e92-b80e-2f17e799b65c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\Global Constructor Hack">
-      <UniqueIdentifier>{048a9c9f-eb3b-4064-a371-0727126739a2}</UniqueIdentifier>
+      <UniqueIdentifier>{7b80e84b-f184-4c65-9336-e9d572f7d0b5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\Integer Fraction Library">
-      <UniqueIdentifier>{c8ab7760-b040-41bd-8373-f79cefa0afe0}</UniqueIdentifier>
+      <UniqueIdentifier>{1af751df-2875-48c0-bfb7-f24e5de62326}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\JPEG Library">
-      <UniqueIdentifier>{498696ce-31f4-4ad9-a6fb-76b66034b4d3}</UniqueIdentifier>
+      <UniqueIdentifier>{019bf136-2604-4874-af85-fdb69e439d75}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\JPEG Library\Headers">
-      <UniqueIdentifier>{52ef98f7-ca3e-4ed9-b3ed-06d2458e39e8}</UniqueIdentifier>
+      <UniqueIdentifier>{5c4e6efc-dc7a-45f8-a8e9-a30612bbbf5e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\Memory Allocation">
-      <UniqueIdentifier>{54311015-6f56-451d-b14b-af19a0fb8a69}</UniqueIdentifier>
+      <UniqueIdentifier>{4c07b43a-06a9-4d4b-8b0b-6c7f0a910030}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\Memory Allocation\headers">
-      <UniqueIdentifier>{3c6710ed-34f4-452f-a0ed-00c89b6ec9bf}</UniqueIdentifier>
+      <UniqueIdentifier>{cac5d42a-864d-4e4f-9e84-21cc115520bd}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\Memory Allocation\Private Headers">
-      <UniqueIdentifier>{6abb19e3-1ed5-4fe0-9371-58e54d0cbff4}</UniqueIdentifier>
+      <UniqueIdentifier>{b6ccba39-a870-4309-99b2-87d4147bf351}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\Message Service">
-      <UniqueIdentifier>{9a324546-3fa0-47d5-9c52-8d540b0f2bd2}</UniqueIdentifier>
+      <UniqueIdentifier>{37b69e50-a383-433f-94cd-a0f13a5b3831}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\Message Service\Headers">
-      <UniqueIdentifier>{a42a300d-f8c9-4eed-83fb-78d59647a241}</UniqueIdentifier>
+      <UniqueIdentifier>{9b0f28ce-9fa9-43ba-ab5d-56db7c4f7cf0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\MNG library">
-      <UniqueIdentifier>{0a805c4c-f700-4081-ac8d-e6208a49d138}</UniqueIdentifier>
+      <UniqueIdentifier>{e964338d-2671-4dfd-a30d-25cc1ee7443b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\Network Service Discovery">
-      <UniqueIdentifier>{48d41cf9-ce05-44ad-8759-a9eb96ed2170}</UniqueIdentifier>
+      <UniqueIdentifier>{faad3d97-600e-4a92-90e0-959808924478}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\Option Library">
-      <UniqueIdentifier>{88d5f4ec-d7f7-41cb-986c-56af3e4c39c9}</UniqueIdentifier>
+      <UniqueIdentifier>{62c69ea8-eba7-449e-bfd6-06c17de80512}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\Option Library\Headers">
-      <UniqueIdentifier>{f8fbc9d3-42ae-44ac-8537-e3e4e89e8cbd}</UniqueIdentifier>
+      <UniqueIdentifier>{88800d36-bd11-46c4-b3a7-aa61e777407b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\Option Library\Headers\private">
-      <UniqueIdentifier>{fc88a81b-3733-4a85-9ca7-8c3f554392d4}</UniqueIdentifier>
+      <UniqueIdentifier>{4e5b1238-5f7c-445b-a2a7-96673d554a51}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\PNG Library">
-      <UniqueIdentifier>{398e2c08-6d74-4761-95f2-338cab4a95aa}</UniqueIdentifier>
+      <UniqueIdentifier>{738a5641-8efb-4848-bfe7-7533c8ad941b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\PNG Library\Headers">
-      <UniqueIdentifier>{a436dfac-a6d8-45ec-ad35-4961d6931bd9}</UniqueIdentifier>
+      <UniqueIdentifier>{19fbb5a2-f3d4-4fe7-a86e-d30ac0ea77c8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\Process, Procedure and Type Registration">
-      <UniqueIdentifier>{03159796-83bb-4d64-abcf-9bbfd13fd2b3}</UniqueIdentifier>
+      <UniqueIdentifier>{0ea3ca7f-c65b-49d4-a058-775c870b8d38}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\Process, Procedure and Type Registration\Headers">
-      <UniqueIdentifier>{d5a124c8-94c5-4dd2-bc6c-4c6d43746a13}</UniqueIdentifier>
+      <UniqueIdentifier>{61313010-0ccc-49e9-9f27-090569787a34}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\Program Logging Facility">
-      <UniqueIdentifier>{af4d2c64-8d7d-4f5e-9a2b-366f7ca274ac}</UniqueIdentifier>
+      <UniqueIdentifier>{0985a7b6-43a6-46b2-96e3-5d3c4d03d453}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\SEXPAT Library">
-      <UniqueIdentifier>{7ec7459a-7794-496e-808f-429d132f4617}</UniqueIdentifier>
+      <UniqueIdentifier>{46390edc-0da6-41c4-8011-382b4d649c9f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\SEXPAT Library\headers">
-      <UniqueIdentifier>{79233700-d869-4563-8c51-0829f6a8ecb0}</UniqueIdentifier>
+      <UniqueIdentifier>{9ae831a9-721d-448b-aa20-f557056dea08}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\SHA1 Library">
-      <UniqueIdentifier>{a13f50ae-7ddf-49a6-9af1-e46499eb53e2}</UniqueIdentifier>
+      <UniqueIdentifier>{584d4b9b-e665-491a-baf2-6008e0022585}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\SNMP Library">
-      <UniqueIdentifier>{129f837e-822d-4c5f-89c8-89d75fe4c14d}</UniqueIdentifier>
+      <UniqueIdentifier>{86b89cf7-0316-49e2-91b0-7304c8101601}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\SQL Library">
-      <UniqueIdentifier>{e50bdde2-74ca-41b4-bbe3-994ba61d0564}</UniqueIdentifier>
+      <UniqueIdentifier>{9d8f2407-344d-4fd9-9383-ab97aed3f461}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\SQL Library\headers">
-      <UniqueIdentifier>{05a2ef10-259c-43fc-b091-48bdad9023ee}</UniqueIdentifier>
+      <UniqueIdentifier>{a837d4ab-87d6-40c7-bd54-305a6852f467}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\SQL Library\SQLite">
-      <UniqueIdentifier>{271f5c8a-02ef-4edf-8053-2b91826ea02b}</UniqueIdentifier>
+      <UniqueIdentifier>{299fa784-f0a6-4b5a-9df4-068f04c867e8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\SQL Library\SQLite\NewFilter1">
-      <UniqueIdentifier>{5e738b16-67b9-4e5e-b17d-11ad3f7fbf5a}</UniqueIdentifier>
+      <UniqueIdentifier>{801a6ee2-15c4-4072-96f7-722374a28c5d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\Timers and Threads">
-      <UniqueIdentifier>{212dfe58-1b30-434a-b726-f90c60c93e58}</UniqueIdentifier>
+      <UniqueIdentifier>{410e82c9-a73b-4319-ab76-60963c4554e2}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\Timers and Threads\Idle Support%28Thread sharing%29">
-      <UniqueIdentifier>{9ade8ca3-b7ef-4566-8a87-e3071eafc4b1}</UniqueIdentifier>
+      <UniqueIdentifier>{a2465a2d-08c4-42ab-840a-74a167c70000}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\Types and Containers">
-      <UniqueIdentifier>{69bb3c79-732e-45fd-8e1d-d7c8aa116fba}</UniqueIdentifier>
+      <UniqueIdentifier>{eca49b77-7b63-447f-ad44-a65e0c528dc1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\Types and Containers\headers">
-      <UniqueIdentifier>{00144d62-c1ae-4754-874c-67ca7ae2fc4c}</UniqueIdentifier>
+      <UniqueIdentifier>{cbd4a8e4-19bb-47c8-93dd-e3861cd3f56f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\Vector Math Library">
-      <UniqueIdentifier>{216ff0da-1ee8-4090-818d-24da4c22b7ea}</UniqueIdentifier>
+      <UniqueIdentifier>{a1793396-1754-4e50-9942-92f5bcc3be6a}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\Vector Math Library\headers">
-      <UniqueIdentifier>{ff6f3f3e-9935-4755-a467-010ed7d05833}</UniqueIdentifier>
+      <UniqueIdentifier>{5624891f-d5fa-481b-a511-40b9523da209}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\Z lib - standard">
-      <UniqueIdentifier>{41043c17-0cc9-4243-be6f-d62a4537f79a}</UniqueIdentifier>
+      <UniqueIdentifier>{f57b2ce3-2366-47c6-ba60-d12a04c449ad}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG Source Files\Z lib - standard\Headers">
-      <UniqueIdentifier>{20a81d96-86c3-4dae-a3ba-a365f91542e6}</UniqueIdentifier>
+      <UniqueIdentifier>{959fe072-d1c2-4ae0-b25b-f5f3e249a056}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\zzip">
+      <UniqueIdentifier>{10aefaef-aa88-45b3-a8be-e1502d0b2fcb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\zzip\Headers">
+      <UniqueIdentifier>{b0ceec47-dc1f-498d-82c2-8d0a1b14e851}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\zzip\Sources">
+      <UniqueIdentifier>{560e98b2-de15-4403-aa8c-4a41653c8d03}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG.image Source Files">
-      <UniqueIdentifier>{7446829d-2eba-4518-81b8-6e80c65fd34c}</UniqueIdentifier>
+      <UniqueIdentifier>{48090b70-bce5-4555-a3dc-ab5443faded9}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG.image Source Files\Assembly">
-      <UniqueIdentifier>{becf903c-a2fc-4180-bcec-95701bd9b011}</UniqueIdentifier>
+      <UniqueIdentifier>{bfe77d89-d665-4d96-ac51-7b9c9bfda834}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG.image Source Files\Assembly\Utility Assembly %28Headers%29">
-      <UniqueIdentifier>{389344e8-0ff4-4576-b2d2-3056d4b8383f}</UniqueIdentifier>
+      <UniqueIdentifier>{f3547aa5-805c-42b3-bcd9-59896724f304}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG.image Source Files\Headers">
-      <UniqueIdentifier>{afa5a962-3a8c-44c8-a3b5-43df782a05c9}</UniqueIdentifier>
+      <UniqueIdentifier>{89f5c92b-99fd-48b2-b8b7-a13a5d1a9f9e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG.image Source Files\Headers\Private">
-      <UniqueIdentifier>{3eab3f0f-1dee-4493-8404-506aff31a7df}</UniqueIdentifier>
+      <UniqueIdentifier>{eb4d4bfe-3aa2-4f80-9017-4e82759a1ffa}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG.PSI Source Files">
-      <UniqueIdentifier>{e655c052-2387-44b7-83d2-dea21e1f7797}</UniqueIdentifier>
+      <UniqueIdentifier>{7f6ed4e0-0b21-4b1f-b644-391fe595b318}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG.PSI Source Files\Headers">
-      <UniqueIdentifier>{7f4ee68c-c873-47f4-b4b1-93c44b2de8e5}</UniqueIdentifier>
+      <UniqueIdentifier>{ef1589ed-84f9-4989-902c-406ae212d99f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG.PSI Source Files\PSI.Console">
-      <UniqueIdentifier>{64b24772-5957-47ad-8450-6d9409e336ef}</UniqueIdentifier>
+      <UniqueIdentifier>{4506ab54-3229-4f97-8bd3-9d40c1e068b1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG.PSI Source Files\PSI.Console\headers">
-      <UniqueIdentifier>{bc248c76-2bbd-4dec-974b-edfe03f54b39}</UniqueIdentifier>
+      <UniqueIdentifier>{bd3bf0d1-e916-4018-8095-f672bea1fc93}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG.video Source Files">
-      <UniqueIdentifier>{c3dfa2d1-025e-4335-b367-24b07905d560}</UniqueIdentifier>
+      <UniqueIdentifier>{8e69d44a-cea5-4c64-8e00-c785a2345fad}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\BAG.video Source Files\Headers">
-      <UniqueIdentifier>{425a92e0-02e8-47b3-9caf-4073dd4b1fda}</UniqueIdentifier>
+      <UniqueIdentifier>{b1d03307-fcd0-4870-9a16-b6cef45c7933}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\SNMP Library\Headers">
+      <UniqueIdentifier>{dd739fc8-7ca7-48e8-b738-9f96de1ee65c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -1120,6 +1132,9 @@
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\snmp\libsnmp.h">
+      <Filter>Source Files\BAG Source Files\SNMP Library\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

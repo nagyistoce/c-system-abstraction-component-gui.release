@@ -3,10 +3,15 @@
 #include <psi/shadewell.h>
 #include <logging.h>
 	
-int main( void )
+#ifdef UNDER_CE
+int APIENTRY WinMain( HINSTANCE h, HINSTANCE p, LPCSTR cmd, int nCmdShow )
 {
+#else
+int main( void )
+	{
+#endif
 	CDATA result;
-	SetSystemLog( SYSLOG_FILENAME, WIDE("Test3.Log") );
+	//SetSystemLog( SYSLOG_FILENAME, WIDE("Test3.Log") );
 	//SetAllocateLogging( TRUE );
 
   //SetBlotMethod( BLOT_MMX );

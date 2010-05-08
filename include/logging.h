@@ -17,46 +17,11 @@
 #include <stdarg.h>
 #include <sack_types.h>
 
-#ifdef BCC16
+#define SYSLOG_API CPROC
 #ifdef SYSLOG_SOURCE
-#define SYSLOG_PROC(type,name) type STDPROC _export name
+#define SYSLOG_PROC EXPORT_METHOD
 #else
-#define SYSLOG_PROC(type,name) type STDPROC name
-#endif
-#else
-#if !defined(__STATIC__) && !defined(__UNIX__)
-#ifdef SYSLOG_SOURCE
-#define SYSLOG_PROC(type,name) EXPORT_METHOD type CPROC name
-#else
-#define SYSLOG_PROC(type,name) IMPORT_METHOD type CPROC name
-#endif
-#else
-#ifdef SYSLOG_SOURCE
-#define SYSLOG_PROC(type,name) EXPORT_METHOD type CPROC name
-#else
-#define SYSLOG_PROC(type,name) extern type CPROC name
-#endif
-#endif
-#endif
-
-enum syslog_types {
-SYSLOG_NONE     =   -1 // disable any log output.
-,SYSLOG_UDP      =    0
-,SYSLOG_FILE     =    1
-,SYSLOG_FILENAME =    2
-,SYSLOG_SYSTEM   =    3
-,SYSLOG_UDPBROADCAST= 4
-// Allow user to specify a void UserCallback( char * )
-// which recieves the formatted output.
-,SYSLOG_CALLBACK    = 5
-,SYSLOG_AUTO_FILE = SYSLOG_FILE + 100
-};
-#if defined( _DEBUG ) && !defined( NO_LOGGING )
-#define DO_LOGGING
-#endif
-// this was forced, force no_logging off...
-#if defined( DO_LOGGING )
-#undef NO_LOGGING
+#define SYSLOG_PROC IMPORT_METHOD
 #endif
 
 
@@ -67,33 +32,111 @@ SYSLOG_NONE     =   -1 // disable any log output.
 #define LOGGING_NAMESPACE 
 #define LOGGING_NAMESPACE_END
 #endif
+/* Handles log output. Logs can be directed to UDP directed, or
+   broadcast, or localhost, or to a file location, and under
+   windows the debugging console log.
+   
+   
+   
+   lprintf
+   
+   SetSystemLog
+   
+   SystemLogTime
+   
+   
+   
+   there are options, when options code is enabled, which
+   control logging output and format. Log file location can be
+   specified generically for instance.... see Options.          */
 LOGGING_NAMESPACE
+
+
+/* \Parameters for SetSystemLog() to specify where the logging
+   should go.                                                  */
+enum syslog_types {
+SYSLOG_NONE     =   -1 // disable any log output.
+, /* Set logging to off. */
+SYSLOG_UDP      =    0
+, /* Send messages UDP localhost port 514. 127.0.0.1:514. */
+SYSLOG_FILE     =    1
+, /* Set logging to output to a file. The file passed is a FILE*. This
+   may be a FILE* like stdout, stderr, or some file the
+   application opens.                                                */
+SYSLOG_FILENAME =    2
+, /* Set logging to go to a file, pass the string text name of the
+   \file to open as the second parameter of SetSystemLog.        */
+SYSLOG_SYSTEM   =    3
+, /* Specify that logging should go to system (this actually means
+   Windows system debugging channel. OutputDebugString() ).      */
+SYSLOG_UDPBROADCAST= 4
+// Allow user to specify a void UserCallback( char * )
+// which recieves the formatted output.
+, /* Send logging messages on UDP full broadcast address port 514. */
+SYSLOG_CALLBACK    = 5
+, /* Send Logging to a specified user callback to handle. This
+   lets logging go anywhere else that's not already thought of. */
+SYSLOG_AUTO_FILE = SYSLOG_FILE + 100 /* Send logging to a file. If the file is not open, open the
+   \file. If no logging happens, no log file is created.     */
+
+};
+
+#if !defined( NO_LOGGING )
+#define DO_LOGGING
+#endif
+// this was forced, force no_logging off...
+#if defined( DO_LOGGING )
+#undef NO_LOGGING
+#endif
+
 
 #ifdef __LINUX__
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 
-SYSLOG_PROC( LOGICAL, IsBadReadPtr )( CPOINTER pointer, PTRSZVAL len );
+SYSLOG_PROC  LOGICAL SYSLOG_API  IsBadReadPtr ( CPOINTER pointer, PTRSZVAL len );
 #endif
 
-SYSLOG_PROC( CTEXTSTR, GetPackedTime )( void );
+SYSLOG_PROC  CTEXTSTR SYSLOG_API  GetPackedTime ( void );
 
 
 // 
 typedef void (CPROC*UserLoggingCallback)( CTEXTSTR log_string );
-SYSLOG_PROC( void, SetSystemLog )( enum syslog_types type, const void *data );
-SYSLOG_PROC( void, ProtectLoggedFilenames )( LOGICAL bEnable );
+SYSLOG_PROC  void SYSLOG_API  SetSystemLog ( enum syslog_types type, const void *data );
+SYSLOG_PROC  void SYSLOG_API  ProtectLoggedFilenames ( LOGICAL bEnable );
 
-SYSLOG_PROC( void, SystemLogFL )( CTEXTSTR FILELINE_PASS );
-SYSLOG_PROC( void, SystemLogEx )( CTEXTSTR DBG_PASS );
-SYSLOG_PROC( void, SystemLog )( CTEXTSTR );
-SYSLOG_PROC( void, LogBinaryFL )( P_8 buffer, _32 size FILELINE_PASS );
-SYSLOG_PROC( void, LogBinaryEx )( P_8 buffer, _32 size DBG_PASS );
-SYSLOG_PROC( void, LogBinary )( P_8 buffer, _32 size );
+SYSLOG_PROC  void SYSLOG_API  SystemLogFL ( CTEXTSTR FILELINE_PASS );
+SYSLOG_PROC  void SYSLOG_API  SystemLogEx ( CTEXTSTR DBG_PASS );
+SYSLOG_PROC  void SYSLOG_API  SystemLog ( CTEXTSTR );
+SYSLOG_PROC  void SYSLOG_API  LogBinaryFL ( P_8 buffer, _32 size FILELINE_PASS );
+SYSLOG_PROC  void SYSLOG_API  LogBinaryEx ( P_8 buffer, _32 size DBG_PASS );
+SYSLOG_PROC  void SYSLOG_API  LogBinary ( P_8 buffer, _32 size );
 // logging level defaults to 1000 which is log everything
-SYSLOG_PROC( void, SetSystemLoggingLevel )( _32 nLevel );
+SYSLOG_PROC  void SYSLOG_API  SetSystemLoggingLevel ( _32 nLevel );
 #ifdef _DEBUG
+/* Log a binary buffer. Logs lines representing 16 bytes of data
+   at a time. The hex of each byte in a buffer followed by the
+   text is logged.
+   
+   
+   
+   
+   Example
+   <code lang="c#">
+   char sample[] = "sample string";
+   
+   LogBinary( sample, sizeof( sample ) );
+   </code>
+   
+   Results with the following output in the log...
+   <code>
+   
+    73 61 6D 70 6C 65 20 73 74 72 69 6E 67 00 sample string.
+   </code>
+   
+   The '.' at the end of 'sample string' is a non printable
+   character. characters 0-31 and 127+ are printed as '.'.       */
 #define LogBinary(buf,sz) LogBinaryFL((P_8)buf,sz DBG_SRC )
 #define SystemLog(buf)    SystemLogFL(buf DBG_SRC )
 #else
@@ -111,29 +154,63 @@ typedef INDEX (CPROC*RealLogFunction)(CTEXTSTR format,...)
 	__attribute__ ((__format__ (__printf__, 1, 2)))
 #endif
 	;
-SYSLOG_PROC( RealVLogFunction, _vxlprintf )( _32 level DBG_PASS );
-SYSLOG_PROC( RealLogFunction, _xlprintf )( _32 level DBG_PASS );
-SYSLOG_PROC( CTEXTSTR, GetProgramName )( void );
+SYSLOG_PROC  RealVLogFunction SYSLOG_API  _vxlprintf ( _32 level DBG_PASS );
+SYSLOG_PROC  RealLogFunction SYSLOG_API  _xlprintf ( _32 level DBG_PASS );
 
 // utility function to format a cpu delta into a buffer...
 // end-start is always printed... therefore tick_end-0 is
 // print absolute time... formats as millisecond.NNN
-SYSLOG_PROC( void, PrintCPUDelta )( char *buffer, int buflen, _64 tick_start, _64 tick_end );
+SYSLOG_PROC  void SYSLOG_API  PrintCPUDelta ( TEXTCHAR *buffer, int buflen, _64 tick_start, _64 tick_end );
 // return the current CPU tick
-SYSLOG_PROC( _64, GetCPUTick )( void );
+SYSLOG_PROC  _64 SYSLOG_API  GetCPUTick ( void );
 // result in nano seconds - thousanths of a millisecond...
-SYSLOG_PROC( _32, ConvertTickToMicrosecond )( _64 tick );
-SYSLOG_PROC( _64, GetCPUFrequency )( void );
-SYSLOG_PROC( CTEXTSTR, GetTimeEx )( int bUseDay );
+SYSLOG_PROC  _32 SYSLOG_API  ConvertTickToMicrosecond ( _64 tick );
+SYSLOG_PROC  _64 SYSLOG_API  GetCPUFrequency ( void );
+SYSLOG_PROC  CTEXTSTR SYSLOG_API  GetTimeEx ( int bUseDay );
 
-SYSLOG_PROC( void, SetSyslogOptions )( FLAGSETTYPE *options );
+SYSLOG_PROC  void SYSLOG_API  SetSyslogOptions ( FLAGSETTYPE *options );
+/* When setting options using SetSyslogOptions() these are the
+   defines for the bits passed.
+   
+   SYSLOG_OPT_OPENAPPEND - the file, when opened, will be opened
+   for append.
+   
+   SYSLOG_OPT_OPEN_BACKUP - the file, if it exists, will be
+   renamed automatically.
+   
+   SYSLOG_OPT_LOG_PROGRAM_NAME - enable logging the program
+   executable (probably the same for all messages, unless they
+   are network)
+   
+   SYSLOG_OPT_LOG_THREAD_ID - enables logging the unique process
+   and thread ID.
+   
+   SYSLOG_OPT_LOG_SOURCE_FILE - enable logging source file
+   information. See <link DBG_PASS>
+   
+   SYSLOG_OPT_MAX - used for declaring a flagset to pass to
+   setoptions.                                                   */
 enum system_logging_option_list {
-	SYSLOG_OPT_OPENAPPEND
-										  , SYSLOG_OPT_OPEN_BACKUP
-                                , SYSLOG_OPT_LOG_PROGRAM_NAME
-                                , SYSLOG_OPT_LOG_THREAD_ID
-										  , SYSLOG_OPT_LOG_SOURCE_FILE
-                                , SYSLOG_OPT_MAX
+		/* the file, when opened, will be opened for append.
+		 */
+		SYSLOG_OPT_OPENAPPEND
+										  ,  /* the file, if it exists, will be renamed automatically.
+										  */
+										  SYSLOG_OPT_OPEN_BACKUP
+                                
+                                , /* enable logging the program executable (probably the same for
+                                   all messages, unless they are network)
+                                                                                                */
+                                 SYSLOG_OPT_LOG_PROGRAM_NAME
+										  , /* enables logging the unique process and thread ID.
+										                                                       */
+                                 SYSLOG_OPT_LOG_THREAD_ID
+                                , /* enable logging source file information. See <link DBG_PASS>
+                                                                                               */
+										   SYSLOG_OPT_LOG_SOURCE_FILE
+										  , /* used for declaring a flagset to pass to setoptions. */
+										  SYSLOG_OPT_MAX
+                                
 };
 
 // this solution was developed to provide the same
@@ -142,23 +219,10 @@ enum system_logging_option_list {
 // and that extra parenthesis exist after this... therefore the remaining
 // expression must be ignored... thereofre when defining a NULL function
 // this will result in other warnings, about ignored, or meaningless expressions
-#ifdef JIM_BUILD
-#define JIM 0
-#else
-#ifdef BAG
-// okay only demote SACK/BAG jim debuglevels
-#define JIM 100
-#else
-// I dunno just a little louder for external things
-// that use lprintf?
-#define JIM 0// make my logging messages just that much quieter.
-#endif
-#endif
-
 # if defined( DO_LOGGING )
-#  define vlprintf      _vxlprintf(LOG_NOISE+JIM DBG_SRC)
-#  define lprintf       _xlprintf(LOG_NOISE+JIM DBG_SRC)
-#  define _lprintf(DBG_VOIDRELAY)       _xlprintf(LOG_NOISE+JIM DBG_RELAY)
+#  define vlprintf      _vxlprintf(LOG_NOISE DBG_SRC)
+#  define lprintf       _xlprintf(LOG_NOISE DBG_SRC)
+#  define _lprintf(DBG_VOIDRELAY)       _xlprintf(LOG_NOISE DBG_RELAY)
 #  define xlprintf(level)       _xlprintf(level DBG_SRC)
 #  define vxlprintf(level)       _vxlprintf(level DBG_SRC)
 # else
@@ -170,6 +234,17 @@ enum system_logging_option_list {
 #   define vxlprintf(level)      (1)?(0):
 #  else
 #   define vlprintf(f,...)
+/* use printf formating to output to the log. (log printf).
+   
+   
+   Parameters
+   Format :  Just like printf, the format string to print.
+   ... :     extra arguments passed as required for the format.
+   
+   Example
+   <code lang="c++">
+      lprintf( "Test Logging %d %d", 13, __LINE__ );
+   </code>                                                      */
 #   define lprintf(f,...)
 #   define  _lprintf(DBG_VOIDRELAY)       lprintf
 #   define xlprintf(level) lprintf
@@ -186,16 +261,37 @@ enum {
 	  // to provide a good scaling for levels of logging
 	LOG_ALWAYS = 1 // unless logging is disabled, this will be logged
 	, LOG_ERRORS = 50 // logging level set to 50 or more will cause this to log
-	, LOG_ERROR = LOG_ERRORS // logging level set to 50 or more will cause this to log
-	, LOG_WARNINGS = 500 // .......
-	, LOG_WARNING = LOG_WARNINGS // .......
-   , LOG_ADVISORY = 625
-   , LOG_ADVISORIES = LOG_ADVISORY
-	, LOG_INFO = 750
-	  , LOG_NOISE = 1000
-     , LOG_DEBUG = 2000
-	, LOG_CUSTOM = 0x40000000 // not quite a negative number, but really big
-	, LOG_CUSTOM_DISABLE = 0x20000000 // not quite a negative number, but really big
+	, /* Specify a logging level which only ERROR level logging is
+	   logged.                                                   */
+	 LOG_ERROR = LOG_ERRORS // logging level set to 50 or more will cause this to log
+	, /* Specify that this message is of ERROR importance. */
+	 LOG_WARNINGS = 500 // .......
+	, /* Set logging level to log warnings and errors. */
+	 LOG_WARNING = LOG_WARNINGS // .......
+   , /* Use to specify that the log message is a warning level
+      message.                                               */
+    LOG_ADVISORY = 625
+   , /* Specify that the this message is an advisory level. */
+    LOG_ADVISORIES = LOG_ADVISORY
+	, /* A symbol to specify to log Adviseries, Warnings and Error
+	   level messages only.                                      */
+	 LOG_INFO = 750
+	  , /* A moderate logging level, which is near maximum verbosity of
+	     logging.                                                     */
+	   LOG_NOISE = 1000
+     , /* Define that the message is just noisy - though verbosly
+        informative, it's level is less critical than even INFO. */
+      LOG_DEBUG = 2000
+	, /* Specify the message is of DEBUG importance, which is far
+	   above even NOISY. If debug logging is enabled, all logging,
+	   ERROR, WARNING, ADVISORY, INFO, NOISY and DEBUG will be
+	   logged.                                                     */
+	 LOG_CUSTOM = 0x40000000 // not quite a negative number, but really big
+	, /* A bit with LOG_CUSTOM might be enabled, and the lower bits
+	   under 0x40000000 (all bits 0x3FFFFFFF ) can be used to
+	   indicate a logging type. Then SetLoggingLevel can be passed a
+	   mask of bits to filter types of messages.                     */
+	 LOG_CUSTOM_DISABLE = 0x20000000 // not quite a negative number, but really big
 	// bits may be user specified or'ed with this value
 	// such that ...
 	// Example 1:SetSystemLoggingLevel( LOG_CUSTOM | 1 ) will
@@ -212,14 +308,17 @@ enum {
 #if 0 // just delete this line... endif remains.
 #endif
 
-#define SYSLOG_TIME_DISABLE 0
-#define SYSLOG_TIME_ENABLE  1 // enable is anything not zero.
-#define SYSLOG_TIME_HIGH    2
-#define SYSLOG_TIME_LOG_DAY 4
-#define SYSLOG_TIME_DELTA   8
-#define SYSLOG_TIME_CPU    16 // logs cpu ticks... implied delta
-// this is a flag set consisting of 0 or'ed with the preceeding symbols
-SYSLOG_PROC( void, SystemLogTime )( _32 enable );
+ // this is a flag set consisting of 0 or more or'ed symbols
+enum SyslogTimeSpecifications {
+ SYSLOG_TIME_DISABLE = 0, // disable time logging
+ SYSLOG_TIME_ENABLE  = 1, // enable is anything not zero.
+ SYSLOG_TIME_HIGH    = 2, // specify to log milliseconds
+ SYSLOG_TIME_LOG_DAY = 4, // log the year/month/day also
+ SYSLOG_TIME_DELTA   = 8, // log the difference in time instead of the absolute time
+ SYSLOG_TIME_CPU     =16 // logs cpu ticks... implied delta
+};
+/* Specify how time is logged. */
+SYSLOG_PROC void SYSLOG_API SystemLogTime( _32 enable );
 
 #if !defined( DO_LOGGING ) || defined( NO_LOGGING )
 // any kinda semi decent compiler will optimize this gone...
@@ -244,16 +343,49 @@ SYSLOG_PROC( void, SystemLogTime )( _32 enable );
 #endif
 
 #define OutputLogString(s) SystemLog(s)
+/* Depricated. Logs a format string that takes 0 parameters.
+   See Also
+   <link sack::logging::lprintf, lprintf>                    */
 #define Log(s)                                   lprintf( WIDE("%s"), s )
+/* Depricated. Logs a format string that takes 1 parameter.
+   See Also
+   <link sack::logging::lprintf, lprintf>                    */
 #define Log1(s,p1)                               lprintf( s, p1 )
+/* Depricated. Logs a format string that takes 2 parameters.
+   See Also
+   <link sack::logging::lprintf, lprintf>                    */
 #define Log2(s,p1,p2)                            lprintf( s, p1, p2 )
+/* Depricated. Logs a format string that takes 3 parameters.
+   See Also
+   <link sack::logging::lprintf, lprintf>                    */
 #define Log3(s,p1,p2,p3)                         lprintf( s, p1, p2, p3 )
+/* Depricated. Logs a format string that takes 4 parameters.
+   See Also
+   <link sack::logging::lprintf, lprintf>                    */
 #define Log4(s,p1,p2,p3,p4)                      lprintf( s, p1, p2, p3,p4)
+/* Depricated. Logs a format string that takes 5 parameters.
+   See Also
+   <link sack::logging::lprintf, lprintf>                    */
 #define Log5(s,p1,p2,p3,p4,p5)                   lprintf( s, p1, p2, p3,p4,p5)
+/* Depricated. Logs a format string that takes 6 parameters.
+   See Also
+   <link sack::logging::lprintf, lprintf>                    */
 #define Log6(s,p1,p2,p3,p4,p5,p6)                lprintf( s, p1, p2, p3,p4,p5,p6)
+/* Depricated. Logs a format string that takes 7 parameters.
+   See Also
+   <link sack::logging::lprintf, lprintf>                    */
 #define Log7(s,p1,p2,p3,p4,p5,p6,p7)             lprintf( s, p1, p2, p3,p4,p5,p6,p7 )
+/* Depricated. Logs a format string that takes 8 parameters.
+   See Also
+   <link sack::logging::lprintf, lprintf>                    */
 #define Log8(s,p1,p2,p3,p4,p5,p6,p7,p8)          lprintf( s, p1, p2, p3,p4,p5,p6,p7,p8 )
+/* Depricated. Logs a format string that takes 9 parameters.
+   See Also
+   <link sack::logging::lprintf, lprintf>                    */
 #define Log9(s,p1,p2,p3,p4,p5,p6,p7,p8,p9)       lprintf( s, p1, p2, p3,p4,p5,p6,p7,p8,p9 )
+/* Depricated. Logs a format string that takes 10 parameters.
+   See Also
+   <link sack::logging::lprintf, lprintf>                    */
 #define Log10(s,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10)  lprintf( s, p1, p2, p3,p4,p5,p6,p7,p8,p9,p10 )
 
 #endif

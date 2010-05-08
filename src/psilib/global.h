@@ -1,16 +1,6 @@
 #ifndef GLOBAL_STRUCTURE_DEFINED
 #define GLOBAL_STRUCTURE_DEFINED
 
-#ifdef __cplusplus_cli
-#  undef USE_INTERFACES
-#else
-#  ifdef FORCE_NO_INTERFACE
-#    undef USE_INTERFACES
-#  else
-#    define USE_INTERFACES
-#  endif
-#endif
-
 #define g global_psi_structure
 #ifndef PSI_SERVICE
 #  ifndef FORCE_NO_INTERFACE
@@ -20,6 +10,16 @@
 #  endif
 #endif
 #include <image.h>
+
+#ifdef __cplusplus_cli
+#  undef USE_INTERFACES
+#else
+#  ifdef FORCE_NO_INTERFACE
+#    undef USE_INTERFACES
+#  else
+#    define USE_INTERFACES
+#  endif
+#endif
 
 #ifndef PSI_SERVICE
 #  ifndef FORCE_NO_INTERFACE
@@ -33,6 +33,7 @@
 
 PSI_NAMESPACE
 
+//DOM-IGNORE-BEGIN
 typedef struct global_tag
 {
 #ifndef PSI_SERVICE
@@ -92,6 +93,9 @@ extern
 #    endif
 #  endif
 #endif
+/* This is the structure PSI uses to track .... what? The
+   application has to know its own handles... what does PSI keep
+   anyhow? most methods are registered now.                      */
 PSI_GLOBAL g
 #ifndef CONTROL_BASE
 ;
@@ -121,6 +125,7 @@ PSI_GLOBAL g
             } };
 
 #endif
+//DOM-IGNORE-END
 
 #ifndef CONTROL_BASE
 extern

@@ -1,22 +1,10 @@
 #include <pssql.h>
+// sqloptint.h leaves namespace open.
+// these headers should really be collapsed.
 #include <sqloptint.h>
 
 
-#ifdef __cplusplus
-#define _OPTION_NAMESPACE namespace options {
-#define _OPTION_NAMESPACE_END };
-#define USE_OPTION_NAMESPACE 	using namespace sack::options;
-
-#else
-#define _OPTION_NAMESPACE
-#define _OPTION_NAMESPACE_END
-#define USE_OPTION_NAMESPACE
-#endif
-
-#define SACK_OPTION_NAMESPACE SACK_NAMESPACE _OPTION_NAMESPACE
-#define SACK_OPTION_NAMESPACE_END _OPTION_NAMESPACE_END SACK_NAMESPACE_END
-
-SACK_OPTION_NAMESPACE
+//SACK_OPTION_NAMESPACE
 
 #define SQLGetProfileInt SACK_GetProfileInt
 //#define SQLGetProfileBlob SACK_GetProfileBlob
@@ -83,6 +71,6 @@ SQLGETOPTION_PROC( void, NewDuplicateOption )( PODBC odbc, INDEX iRoot, CTEXTSTR
 SQLGETOPTION_PROC( void, BeginBatchUpdate )( void );
 SQLGETOPTION_PROC( void, EndBatchUpdate )( void );
 
-_OPTION_NAMESPACE_END SACK_NAMESPACE_END
+_OPTION_NAMESPACE_END _SQL_NAMESPACE_END SACK_NAMESPACE_END
 
 USE_OPTION_NAMESPACE

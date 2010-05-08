@@ -243,8 +243,8 @@ int GetTableColumns( PTABLE table, PTEXT *word DBG_PASS )
 	if( GetText( *word )[0] != '(' )
 	{
 		PTEXT line;
-		lprintf( "Failed to find columns... extra data between table name and columns...." );
-		lprintf( "Failed at %s", GetText( line = BuildLine( *word ) ) );
+		lprintf( WIDE( "Failed to find columns... extra data between table name and columns...." ) );
+		lprintf( WIDE( "Failed at %s" ), GetText( line = BuildLine( *word ) ) );
 		LineRelease( line );
 		return FALSE;
 	}
@@ -262,18 +262,18 @@ int GetTableColumns( PTABLE table, PTEXT *word DBG_PASS )
 		//	(*word) = NEXTLINE( *word );
 		if( !GrabName( word, &name, &bQuoted  DBG_SRC) )
 		{
-			lprintf( "Failed column parsing..." );
+			lprintf( WIDE( "Failed column parsing..." ) );
 		}
 		else
 		{
 			if( !bQuoted )
 			{
-				if( StrCaseCmp( name, "PRIMARY" ) == 0 )
+				if( StrCaseCmp( name, WIDE( "PRIMARY" ) ) == 0 )
 				{
-					if( StrCaseCmp( GetText(*word), "KEY" ) == 0 )
+					if( StrCaseCmp( GetText(*word), WIDE( "KEY" ) ) == 0 )
 					{
 						(*word) = NEXTLINE( *word );
-						if( StrCaseCmp( GetText(*word), "USING" ) == 0 )
+						if( StrCaseCmp( GetText(*word), WIDE( "USING" ) ) == 0 )
 						{
 							(*word) = NEXTLINE( *word );
                      // next word is the type, skip that word too....
@@ -283,15 +283,15 @@ int GetTableColumns( PTABLE table, PTEXT *word DBG_PASS )
 					}
 					else
 					{
-						lprintf( "PRIMARY keyword without KEY keyword is invalid." );
+						lprintf( WIDE( "PRIMARY keyword without KEY keyword is invalid." ) );
 						DebugBreak();
 					}
 					Release( name );
 				}
-				else if( StrCaseCmp( name, "UNIQUE" ) == 0 )
+				else if( StrCaseCmp( name, WIDE( "UNIQUE" ) ) == 0 )
 				{
-					if( ( StrCaseCmp( GetText(*word), "KEY" ) == 0 )
-						|| ( StrCaseCmp( GetText(*word), "INDEX" ) == 0 ) )
+					if( ( StrCaseCmp( GetText(*word), WIDE( "KEY" ) ) == 0 )
+						|| ( StrCaseCmp( GetText(*word), WIDE( "INDEX" ) ) == 0 ) )
 					{
 						// skip this word.
 						(*word) = NEXTLINE( *word );
@@ -299,8 +299,8 @@ int GetTableColumns( PTABLE table, PTEXT *word DBG_PASS )
 					AddIndexKey( table, word, 1, 0, 1 );
 					Release( name );
 				}
-				else if( ( StrCaseCmp( name, "INDEX" ) == 0 )
-					   || ( StrCaseCmp( name, "KEY" ) == 0 ) )
+				else if( ( StrCaseCmp( name, WIDE( "INDEX" ) ) == 0 )
+					   || ( StrCaseCmp( name, WIDE( "KEY" ) ) == 0 ) )
 				{
 					AddIndexKey( table, word, 1, 0, 0 );
 					Release( name );
@@ -345,90 +345,90 @@ int GetTableExtra( PTABLE table, PTEXT *word )
 void LogTable( PTABLE table )
 {
 	FILE *out;
-	out = fopen( "sparse.txt", "at" );
+	Fopen( out, WIDE("sparse.txt"), WIDE("at") );
 	if( out )
 	{
 		if( table )
 		{
 			int n;
-			fprintf( out, "\n" );
-			fprintf( out, "//--------------------------------------------------------------------------\n" );
-			fprintf( out, "// %s \n", table->name );
-			fprintf( out, "// Total number of fields = %d\n", table->fields.count );
-			fprintf( out, "// Total number of keys = %d\n", table->keys.count );
-			fprintf( out, "//--------------------------------------------------------------------------\n" );
-			fprintf( out, "\n" );
-			fprintf( out, "FIELD %s_fields[] = {\n", table->name );
+			fprintf( out, WIDE( "\n" ) );
+			fprintf( out, WIDE( "//--------------------------------------------------------------------------\n" ) );
+			fprintf( out, WIDE( "// %s \n" ), table->name );
+			fprintf( out, WIDE( "// Total number of fields = %d\n" ), table->fields.count );
+			fprintf( out, WIDE( "// Total number of keys = %d\n" ), table->keys.count );
+			fprintf( out, WIDE( "//--------------------------------------------------------------------------\n" ) );
+			fprintf( out, WIDE( "\n" ) );
+			fprintf( out, WIDE( "FIELD %s_fields[] = {\n" ), table->name );
 			for( n = 0; n < table->fields.count; n++ )
-				fprintf( out, "\t%s{%s%s%s, %s%s%s, %s%s%s }\n"
-					, n?", ":""
-					, table->fields.field[n].name?"\"":""
-					, table->fields.field[n].name?table->fields.field[n].name:"NULL"
-					, table->fields.field[n].name?"\"":""
-					, table->fields.field[n].type?"\"":""
-					, table->fields.field[n].type?table->fields.field[n].type:"NULL"
-					, table->fields.field[n].type?"\"":""
-					, table->fields.field[n].extra?"\"":""
-					, table->fields.field[n].extra?table->fields.field[n].extra:"NULL"
-					, table->fields.field[n].extra?"\"":""
+				fprintf( out, WIDE( "\t%s{%s%s%s, %s%s%s, %s%s%s }\n" )
+					, n?WIDE( ", " ):WIDE( "" )
+					, table->fields.field[n].name?WIDE("\""):WIDE( "" )
+					, table->fields.field[n].name?table->fields.field[n].name:WIDE( "NULL" )
+					, table->fields.field[n].name?WIDE("\""):WIDE( "" )
+					, table->fields.field[n].type?WIDE("\""):WIDE( "" )
+					, table->fields.field[n].type?table->fields.field[n].type:WIDE( "NULL" )
+					, table->fields.field[n].type?WIDE("\""):WIDE( "" )
+					, table->fields.field[n].extra?WIDE("\""):WIDE( "" )
+					, table->fields.field[n].extra?table->fields.field[n].extra:WIDE( "NULL" )
+					, table->fields.field[n].extra?WIDE("\""):WIDE( "" )
 				);
-			fprintf( out, "};\n" );
-			fprintf( out, "\n" );
+			fprintf( out, WIDE( "};\n" ) );
+			fprintf( out, WIDE( "\n" ) );
 			if( table->keys.count )
 			{
-				fprintf( out, "DB_KEY_DEF %s_keys[] = { \n", table->name );
+				fprintf( out, WIDE( "DB_KEY_DEF %s_keys[] = { \n" ), table->name );
 				for( n = 0; n < table->keys.count; n++ )
 				{
 					int m;
-					fprintf( out, "#ifdef __cplusplus\n" );
-					fprintf( out, "\t%srequired_key_def( %d, %d, %s%s%s, \"%s\" )\n"
+					fprintf( out, WIDE( "#ifdef __cplusplus\n" ) );
+					fprintf( out, WIDE("\t%srequired_key_def( %d, %d, %s%s%s, \"%s\" )\n")
 							 , n?", ":""
 							 , table->keys.key[n].flags.bPrimary
 							 , table->keys.key[n].flags.bUnique
-							 , table->keys.key[n].name?"\"":""
-							 , table->keys.key[n].name?table->keys.key[n].name:"NULL"
-							 , table->keys.key[n].name?"\"":""
+							 , table->keys.key[n].name?WIDE("\""):WIDE(""  )
+							 , table->keys.key[n].name?table->keys.key[n].name:WIDE("NULL")
+							 , table->keys.key[n].name?WIDE("\""):WIDE("")
 							 , table->keys.key[n].colnames[0] );
 					if( table->keys.key[n].colnames[1] )
-						fprintf( out, ", ... columns are short this is an error.\n" );
-					fprintf( out, "#else\n" );
-					fprintf( out, "\t%s{ {%d,%d}, %s%s%s, { "
-							 , n?", ":""
+						fprintf( out, WIDE( ", ... columns are short this is an error.\n" ) );
+					fprintf( out, WIDE( "#else\n" ) );
+					fprintf( out, WIDE( "\t%s{ {%d,%d}, %s%s%s, { " )
+							 , n?WIDE( ", " ):WIDE( "" )
 							 , table->keys.key[n].flags.bPrimary
 							 , table->keys.key[n].flags.bUnique
-							 , table->keys.key[n].name?"\"":""
-							 , table->keys.key[n].name?table->keys.key[n].name:"NULL"
-							 , table->keys.key[n].name?"\"":""
+							 , table->keys.key[n].name?WIDE("\""):WIDE( "" )
+							 , table->keys.key[n].name?table->keys.key[n].name:WIDE( "NULL" )
+							 , table->keys.key[n].name?WIDE("\""):WIDE( "" )
 							 );
 					for( m = 0; table->keys.key[n].colnames[m]; m++ )
-						fprintf( out, "%s\"%s\""
-								 , m?", ":""
+						fprintf( out, WIDE("%s\"%s\"")
+								 , m?WIDE( ", " ):WIDE( "" )
 								 , table->keys.key[n].colnames[m] );
-					fprintf( out, " } }\n" );
-					fprintf( out, "#endif\n" );
+					fprintf( out, WIDE( " } }\n" ) );
+					fprintf( out, WIDE( "#endif\n" ) );
 				}
-				fprintf( out, "};\n" );
-				fprintf( out, "\n" );
+				fprintf( out, WIDE( "};\n" ) );
+				fprintf( out, WIDE( "\n" ) );
 			}
-			fprintf( out, "\n" );
-			fprintf( out, "TABLE %s = { \"%s\" \n", table->name, table->name );
-			fprintf( out, "	 , FIELDS( %s_fields )\n", table->name );
+			fprintf( out, WIDE( "\n" ) );
+			fprintf( out, WIDE("TABLE %s = { \"%s\" \n"), table->name, table->name );
+			fprintf( out, WIDE( "	 , FIELDS( %s_fields )\n" ), table->name );
          if( table->keys.count )
-				fprintf( out, "	 , TABLE_KEYS( %s_keys )\n", table->name );
+				fprintf( out, WIDE( "	 , TABLE_KEYS( %s_keys )\n" ), table->name );
          else
-				fprintf( out, "	 , { 0, NULL }\n" );
-			fprintf( out, "	, { 0 }\n" );
-			fprintf( out, "	, NULL\n" );
-			fprintf( out, "	, NULL\n" );
-			fprintf( out, "	,NULL\n" );
-			fprintf( out, "};\n" );
-			fprintf( out, "\n" );
+				fprintf( out, WIDE( "	 , { 0, NULL }\n" ) );
+			fprintf( out, WIDE( "	, { 0 }\n" ) );
+			fprintf( out, WIDE( "	, NULL\n" ) );
+			fprintf( out, WIDE( "	, NULL\n" ) );
+			fprintf( out, WIDE( "	,NULL\n" ) );
+			fprintf( out, WIDE( "};\n" ) );
+			fprintf( out, WIDE( "\n" ) );
 		}
 		else
 		{
-			fprintf( out, "//--------------------------------------------------------------------------\n" );
-			fprintf( out, "// No Table\n" );
-			fprintf( out, "//--------------------------------------------------------------------------\n" );
+			fprintf( out, WIDE( "//--------------------------------------------------------------------------\n" ) );
+			fprintf( out, WIDE( "// No Table\n" ) );
+			fprintf( out, WIDE( "//--------------------------------------------------------------------------\n" ) );
 		}
 		fclose( out );
 	}

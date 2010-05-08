@@ -1,6 +1,6 @@
 #define USES_INTERSHELL_INTERFACE
 #define DEFINES_INTERSHELL_INTERFACE
-#define DEFINE_DEFAULT_IMAGE_INTERFACE
+//#define DEFINE_DEFAULT_IMAGE_INTERFACE
 #include <psi.h>
 #include <intershell_export.h>
 #include <intershell_registry.h>

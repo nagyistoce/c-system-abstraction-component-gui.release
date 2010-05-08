@@ -2,7 +2,7 @@
 MORE_PROJECTS=intershell/Makefile
 
 ifndef VLC_PATH
-VLC_PATH=d:/tools/vlc-0.9.8a/sdk/include
+VLC_PATH=c:/tools/vlc-1.0.5/sdk/include
 export VLC_PATH
 endif
 

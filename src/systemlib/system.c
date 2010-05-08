@@ -39,10 +39,16 @@ static struct {
 	struct system_local_flags{
 		BIT_FIELD bLog : 1;
 	} flags;
-} l;
+	CTEXTSTR filename;  // pointer to just filename part...
 
+} local_systemlib;
+
+#define l local_systemlib
+
+#ifdef HAVE_ENVIRONMENT
 CTEXTSTR OSALOT_GetEnvironmentVariable(CTEXTSTR name)
 {
+
 #ifdef __WINDOWS__
 	static int env_size;
 	static TEXTCHAR *env;
@@ -115,61 +121,60 @@ void OSALOT_PrependEnvironmentVariable(CTEXTSTR name, CTEXTSTR value)
    Release( newpath );
 #endif
 }
-
-PRELOAD( SetupSystemOptions )
-{
-#ifndef __NO_OPTIONS__
-	l.flags.bLog = SACK_GetProfileIntEx( GetProgramName(), "SACK/System/Enable Logging", 0, TRUE );
 #endif
-}
 
-#ifdef __WATCOM_CPLUSPLUS__
-#pragma initialize 36
-#endif
-PRIORITY_PRELOAD( SetupPath, OSALOT_PRELOAD_PRIORITY )
+static void SetupSystemServices( void )
 {
 #ifdef _WIN32
 	{
-		TEXTCHAR *oldpath;
-		TEXTCHAR *newpath;
+
+#ifdef HAVE_ENVIRONMENT
+		int length;
+#endif
 		TEXTCHAR filepath[256];
 		TEXTCHAR *ext, *e1, *e2;//, *filename;
 		GetModuleFileName( NULL, filepath, sizeof( filepath ) );
-		ext = strrchr( filepath, '.' );
+		ext = (TEXTSTR)StrRChr( (CTEXTSTR)filepath, '.' );
 		if( ext )
-			strcpy( ext, WIDE(".log") );
-		e1 = strrchr( filepath, '\\' );
-		e2 = strrchr( filepath, '/' );
-		if( e1 && e2 && ( e1 > e2 ) )
-			e1[0] = 0;
-		else if( e1 && e2 )
-			e2[0] = 0;
-		else if( e1 )
-			e1[0] = 0;
-		else if( e2 )
-			e2[0] = 0;
-
-		l.load_path = StrDup( filepath );
-		if( !SetEnvironmentVariable( WIDE("MY_LOAD_PATH"), filepath ) )
-			lprintf( WIDE("FAILED SET LOADPATH") );
-
-		//lprintf( WIDE("Defined MY_LOAD_PATH as %s %s"), filepath, getenv( WIDE("MY_LOAD_PATH") ) );
+			ext[0] = 0;
+      e1 = (TEXTSTR)pathrchr( filepath );
+		if( e1 )
 		{
-			int oldlen;
-			oldpath = NewArray( TEXTCHAR, oldlen = ( GetEnvironmentVariable( WIDE("PATH"), NULL, 0 ) + 1 ) );
-			GetEnvironmentVariable( WIDE("PATH"), oldpath, oldlen );
+			e1[0] = 0;
+			l.filename = StrDup( e1 + 1 );
+			l.load_path = StrDup( filepath );
 		}
-		newpath = NewArray( TEXTCHAR, (_32)(strlen( oldpath ) + 2 + strlen(filepath)) );
-		sprintf( newpath, WIDE("%s;%s"), filepath, oldpath );
-		SetEnvironmentVariable( WIDE("PATH"), newpath );
-		//lprintf( WIDE("Updated path to %s"), newpath );
-		//lprintf( WIDE("Update path from %s"), oldpath );
-		//lprintf( WIDE("Updated is now %s"), getenv( WIDE("PATH") ) );
-		Release( newpath );
-		Release( oldpath );
+		else
+		{
+         l.filename = StrDup( filepath );
+			l.load_path = StrDup( "" );
+		}
 
-		GetCurrentPath( filepath, sizeof( filepath ) );
-		SetEnvironmentVariable( WIDE( "MY_WORK_PATH" ), filepath );
+#ifdef HAVE_ENVIRONMENT
+		{
+			TEXTCHAR *oldpath;
+			TEXTCHAR *newpath;
+			if( !SetEnvironmentVariable( WIDE("MY_LOAD_PATH"), filepath ) )
+			{
+				//lprintf( WIDE("FAILED SET LOADPATH") );
+			}
+			//lprintf( WIDE("Defined MY_LOAD_PATH as %s %s"), filepath, getenv( WIDE("MY_LOAD_PATH") ) );
+			{
+				int oldlen;
+				oldpath = NewArray( TEXTCHAR, oldlen = ( GetEnvironmentVariable( WIDE("PATH"), NULL, 0 ) + 1 ) );
+				GetEnvironmentVariable( WIDE("PATH"), oldpath, oldlen );
+			}
+			newpath = NewArray( TEXTCHAR, length=(_32)(strlen( oldpath ) + 2 + strlen(filepath)) );
+			snprintf( newpath, length, WIDE("%s;%s"), filepath, oldpath );
+			SetEnvironmentVariable( WIDE("PATH"), newpath );
+			//lprintf( WIDE("Updated is now %s"), getenv( WIDE("PATH") ) );
+			Release( newpath );
+			Release( oldpath );
+
+			GetCurrentPath( filepath, sizeof( filepath ) );
+			SetEnvironmentVariable( WIDE( "MY_WORK_PATH" ), filepath );
+		}
+#endif
 	}
 #else
 // this might be clever to do, auto export the LD_LIBRARY_PATH
@@ -236,6 +241,22 @@ PRIORITY_PRELOAD( SetupPath, OSALOT_PRELOAD_PRIORITY )
 	}
 #endif
 }
+
+#ifdef __WATCOM_CPLUSPLUS__
+#pragma initialize 36
+#endif
+PRIORITY_PRELOAD( SetupPath, OSALOT_PRELOAD_PRIORITY )
+{
+   SetupSystemServices();
+}
+
+#ifndef __NO_OPTIONS__
+PRELOAD( SetupSystemOptions )
+{
+	l.flags.bLog = SACK_GetProfileIntEx( GetProgramName(), "SACK/System/Enable Logging", 0, TRUE );
+}
+#endif
+
 //--------------------------------------------------------------------------
 
 #ifdef WIN32
@@ -263,16 +284,18 @@ void CPROC EndTaskWindow( PTASK_INFO task )
 
 LOGICAL CPROC StopProgram( PTASK_INFO task )
 {
+#ifndef UNDER_CE
 	if( !GenerateConsoleCtrlEvent( CTRL_C_EVENT, task->pi.dwProcessId ) )
 	{
       lprintf( "Failed to send CTRL_C_EVENT %d", GetLastError() );
 		if( !GenerateConsoleCtrlEvent( CTRL_BREAK_EVENT, task->pi.dwProcessId ) )
 		{
 			lprintf( "Failed to send CTRL_BREAK_EVENT %d", GetLastError() );
-         return FALSE;
+         	return FALSE;
 		}
 	}
-   return TRUE;
+#endif
+    return TRUE;
 }
 
 PTRSZVAL CPROC TerminateProgram( PTASK_INFO task )
@@ -318,7 +341,7 @@ PTRSZVAL CPROC TerminateProgram( PTASK_INFO task )
 				}
 			}
 			else
-            lprintf( "Would have close handles rudely." );
+            lprintf( WIDE( "Would have close handles rudely." ) );
 #else
          kill( task->pid, SIGTERM );
 			// wait a moment for it to die...
@@ -438,7 +461,12 @@ SYSTEM_PROC( PTASK_INFO, LaunchProgramEx )( CTEXTSTR program, CTEXTSTR path, PCT
 	if( ( CreateProcess( NULL //program
 						  , GetText( cmdline )
 						  , NULL, NULL, FALSE
-						  , CREATE_NEW_PROCESS_GROUP|CREATE_NEW_CONSOLE
+						  , 
+#ifdef UNDER_CE 
+						  0
+#else
+						  CREATE_NEW_PROCESS_GROUP|CREATE_NEW_CONSOLE
+#endif
 						  , NULL
 						  , path
 						  , &task->si
@@ -446,7 +474,12 @@ SYSTEM_PROC( PTASK_INFO, LaunchProgramEx )( CTEXTSTR program, CTEXTSTR path, PCT
 		( CreateProcess( program
 						 , GetText( cmdline )
 						 , NULL, NULL, FALSE
-						 , CREATE_NEW_PROCESS_GROUP|CREATE_NEW_CONSOLE
+						 , 
+#ifdef UNDER_CE 
+						  0
+#else
+						  CREATE_NEW_PROCESS_GROUP|CREATE_NEW_CONSOLE
+#endif
 						 , NULL
 						 , path
 						 , &task->si
@@ -454,7 +487,12 @@ SYSTEM_PROC( PTASK_INFO, LaunchProgramEx )( CTEXTSTR program, CTEXTSTR path, PCT
 		( CreateProcess( program
 						 , NULL // GetText( cmdline )
 						 , NULL, NULL, FALSE
-						 , CREATE_NEW_PROCESS_GROUP|CREATE_NEW_CONSOLE
+						 , 
+#ifdef UNDER_CE 
+						  0
+#else
+						  CREATE_NEW_PROCESS_GROUP|CREATE_NEW_CONSOLE
+#endif
 						 , NULL
 						 , path
 						 , &task->si
@@ -582,13 +620,19 @@ SYSTEM_PROC( generic_function, LoadFunctionExx )( CTEXTSTR libname, CTEXTSTR fun
 	PLIBRARY library = libraries;
 	while( library )
 	{
-		if( strcmp( library->name, libname ) == 0 )
+		if( StrCmp( library->name, libname ) == 0 )
 			break;
 		library = library->next;
 	}
+   // don't really NEED anything else, in case we need to start before deadstart invokes.
+	if( !l.load_path )
+	{
+		lprintf( WIDE( "Init Load Path" ) );
+		SetupSystemServices();
+	}
 	if( !library )
 	{
-		size_t maxlen = strlen( l.load_path ) + 1 + strlen( libname ) + 1;
+		size_t maxlen = sizeof( TEXTCHAR ) * (strlen( l.load_path ) + 1 + strlen( libname ) + 1 );
 		library = (PLIBRARY)Allocate( sizeof( LIBRARY ) + ((maxlen<0xFFFFFF)?(_32)maxlen:0) );
 		library->name = library->full_name
 						  + snprintf( library->full_name, maxlen, WIDE("%s/"), l.load_path );
@@ -657,33 +701,34 @@ SYSTEM_PROC( generic_function, LoadFunctionExx )( CTEXTSTR libname, CTEXTSTR fun
 		}
 		if( !function )
 		{
-			function = (PFUNCTION)Allocate( sizeof( FUNCTION ) + ( (_32)strlen( funcname ) + 1 ) );
-			strcpy( function->name, funcname );
+			int len;
+			function = (PFUNCTION)Allocate( sizeof( FUNCTION ) + (len=(sizeof(TEXTCHAR)*( (_32)strlen( funcname ) + 1 ) ) ) );
+			snprintf( function->name, len, WIDE( "%s" ), funcname );
 			function->library = library;
 			function->references = 0;
 #ifdef _WIN32
 #ifdef __cplusplus_cli
 			char *procname = CStrDup( function->name );
 			if( l.flags.bLog )
-				lprintf( "Get:%s", procname );
+				lprintf( WIDE( "Get:%s" ), procname );
 			if( !(function->function = (generic_function)GetProcAddress( library->library, procname )) )
 #else
   			if( l.flags.bLog )
-  				lprintf( "Get:%s", function->name );
+  				lprintf( WIDE( "Get:%s" ), function->name );
 			if( !(function->function = (generic_function)GetProcAddress( library->library, function->name )) )
 #endif
 			{
 				TEXTCHAR tmpname[128];
-				sprintf( tmpname, WIDE("_%s"), funcname );
+				snprintf( tmpname, sizeof( tmpname ), WIDE("_%s"), funcname );
 #ifdef __cplusplus_cli
 				char *procname = CStrDup( tmpname );
 				if( l.flags.bLog )
-					lprintf( "Get:%s", procname );
+					lprintf( WIDE( "Get:%s" ), procname );
 				function->function = (generic_function)GetProcAddress( library->library, procname );
 				Release( procname );
 #else
 				if( l.flags.bLog )
-					lprintf( "Get:%s", function->name );
+					lprintf( WIDE( "Get:%s" ), function->name );
 				function->function = (generic_function)GetProcAddress( library->library, tmpname );
 #endif
 			}
@@ -780,7 +825,7 @@ SYSTEM_PROC( int, UnloadFunctionEx )( generic_function *f DBG_PASS )
 		    !(--function->references) )
 		{
 			UnlinkThing( function );
-         lprintf( "Should remove the node from the tree here... but it crashes intermittantly. (tree list is corrupted)" );
+			lprintf( WIDE( "Should remove the node from the tree here... but it crashes intermittantly. (tree list is corrupted)" ) );
 			//RemoveLastFoundNode( pFunctionTree );
 			library = function->library;
 			if( !library->functions )
@@ -839,6 +884,30 @@ TEXTSTR GetArgsString( PCTEXTSTR pArgs )
 	}
 	return args;
 }
+
+
+
+CTEXTSTR GetProgramName( void )
+{
+	if( !l.filename )
+	{
+      DebugBreak();
+		return NULL;
+	}
+   return l.filename;
+}
+
+CTEXTSTR GetProgramPath( void )
+{
+	if( !l.load_path )
+	{
+      DebugBreak();
+		return NULL;
+	}
+   return l.load_path;
+}
+
+
 
 SACK_SYSTEM_NAMESPACE_END
 

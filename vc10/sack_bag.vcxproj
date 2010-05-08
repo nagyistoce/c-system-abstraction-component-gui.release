@@ -154,38 +154,35 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.21006.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)\output$(Configuration)$(Platform)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\$(Configuration)_$(Platform)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\$(Configuration)_$(Platform)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)\$(Configuration)_$(Platform)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug C++|x64'">$(SolutionDir)$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug C++|x64'">$(SolutionDir)\$(Configuration)_$(Platform)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">$(Configuration)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug C++|x64'">$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug C++|x64'">true</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release C++|x64'">$(SolutionDir)$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release C++|x64'">$(SolutionDir)\$(Configuration)_$(Platform)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">$(Configuration)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release C++|x64'">$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">true</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release C++|x64'">true</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">$(SolutionDir)\output\debug\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">$(SolutionDir)\output\debug\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">$(SolutionDir)\$(Configuration)_$(Platform)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">$(SolutionDir)\$(Configuration)_$(Platform)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">$(ProjectDir)/../$(Configuration)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">$(ProjectDir)/../$(Configuration)\</IntDir>
     <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">false</IgnoreImportLibrary>
     <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">false</IgnoreImportLibrary>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">$(SolutionDir)$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">$(SolutionDir)\$(Configuration)_$(Platform)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">$(SolutionDir)\$(Configuration)_$(Platform)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">$(Configuration)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">$(Configuration)\</IntDir>
     <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">false</IgnoreImportLibrary>
@@ -242,7 +239,7 @@
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>wsock32.lib;opengl32.lib;iphlpapi.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>wsock32.lib;opengl32.lib;iphlpapi.lib;ws2_32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -263,16 +260,15 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <CompileAs>CompileAsC</CompileAs>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <SmallerTypeCheck>true</SmallerTypeCheck>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>wsock32.lib;opengl32.lib;iphlpapi.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>wsock32.lib;opengl32.lib;iphlpapi.lib;ws2_32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <SubSystem>Windows</SubSystem>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
-      <TargetMachine>MachineX86</TargetMachine>
+      <TargetMachine>MachineX64</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -292,7 +288,7 @@
       </PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>wsock32.lib;opengl32.lib;iphlpapi.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>wsock32.lib;opengl32.lib;iphlpapi.lib;ws2_32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>false</OptimizeReferences>
@@ -329,7 +325,7 @@
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
-      <TargetMachine>MachineX86</TargetMachine>
+      <TargetMachine>MachineX64</TargetMachine>
       <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
@@ -348,7 +344,7 @@
       <CompileAs>CompileAsCpp</CompileAs>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>wsock32.lib;opengl32.lib;iphlpapi.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>wsock32.lib;opengl32.lib;iphlpapi.lib;ws2_32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -378,7 +374,7 @@
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
-      <TargetMachine>MachineX86</TargetMachine>
+      <TargetMachine>MachineX64</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">
@@ -398,7 +394,7 @@
       </PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>wsock32.lib;opengl32.lib;iphlpapi.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>wsock32.lib;opengl32.lib;iphlpapi.lib;ws2_32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>false</OptimizeReferences>
@@ -434,7 +430,7 @@
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
-      <TargetMachine>MachineX86</TargetMachine>
+      <TargetMachine>MachineX64</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">
@@ -451,7 +447,7 @@
     </ClCompile>
     <Link>
       <RegisterOutput>false</RegisterOutput>
-      <AdditionalDependencies>wsock32.lib;opengl32.lib;iphlpapi.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>wsock32.lib;opengl32.lib;iphlpapi.lib;ws2_32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AssemblyDebug>true</AssemblyDebug>
       <GenerateMapFile>true</GenerateMapFile>
@@ -484,7 +480,7 @@
       <SubSystem>NotSet</SubSystem>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
-      <TargetMachine>MachineX86</TargetMachine>
+      <TargetMachine>MachineX64</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">
@@ -503,7 +499,7 @@
     </ClCompile>
     <Link>
       <RegisterOutput>false</RegisterOutput>
-      <AdditionalDependencies>wsock32.lib;opengl32.lib;iphlpapi.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>wsock32.lib;opengl32.lib;iphlpapi.lib;ws2_32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AssemblyDebug>true</AssemblyDebug>
       <GenerateMapFile>true</GenerateMapFile>
@@ -540,7 +536,7 @@
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
-      <TargetMachine>MachineX86</TargetMachine>
+      <TargetMachine>MachineX64</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -765,108 +761,126 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\snmplib\coexistance.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\snmplib\mib.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\snmplib\mibii.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\snmplib\mini-client.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\snmplib\new-parse.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\snmplib\parse.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\snmplib\snmp_api.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\snmplib\snmp_api_error.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\snmplib\snmp_api_util.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\snmplib\snmp_client.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\snmplib\snmp_dump.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\snmplib\snmp_error.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\snmplib\snmp_extra.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\snmplib\snmp_msg.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\snmplib\snmp_pdu.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\snmplib\snmp_vars.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\snmplib\version.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\libmng\libmng_callback_xs.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
@@ -875,6 +889,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\libmng\libmng_chunk_descr.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
@@ -883,6 +898,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\libmng\libmng_chunk_io.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
@@ -891,6 +907,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\libmng\libmng_chunk_prc.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
@@ -899,6 +916,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\libmng\libmng_chunk_xs.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
@@ -907,6 +925,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\libmng\libmng_cms.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
@@ -915,6 +934,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\libmng\libmng_display.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
@@ -923,6 +943,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\libmng\libmng_dither.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
@@ -931,6 +952,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\libmng\libmng_error.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
@@ -939,6 +961,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\libmng\libmng_filter.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
@@ -947,6 +970,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\libmng\libmng_hlapi.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
@@ -955,6 +979,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\libmng\libmng_jpeg.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
@@ -963,6 +988,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\libmng\libmng_object_prc.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
@@ -971,6 +997,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\libmng\libmng_pixels.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
@@ -979,6 +1006,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\libmng\libmng_prop_xs.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
@@ -987,6 +1015,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\libmng\libmng_read.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
@@ -995,6 +1024,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\libmng\libmng_trace.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
@@ -1003,6 +1033,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\libmng\libmng_write.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
@@ -1011,6 +1042,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\libmng\libmng_zlib.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">true</ExcludedFromBuild>
@@ -1019,6 +1051,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\netservicelib\udprequest.c" />
     <ClCompile Include="..\src\netservicelib\udpresp.c" />
@@ -1108,6 +1141,7 @@
     <ClCompile Include="..\src\psilib\console\WinLogic.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\snmp\libsnmp.h" />
     <ClInclude Include="..\src\memlib\sharestruc.h" />
     <ClInclude Include="..\include\sharemem.h" />
     <ClInclude Include="..\include\typelib.h" />
@@ -1123,221 +1157,122 @@
     <ClInclude Include="..\include\vectlib.h" />
     <ClInclude Include="..\include\vectypes.h" />
     <CustomBuild Include="..\src\genx\genx.h">
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">mkdir $(ProjectDir)..\include\genxml
-copy %(FullPath) $(ProjectDir)..\include\genxml
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|x64'">mkdir $(ProjectDir)..\include\genxml
-copy %(FullPath) $(ProjectDir)..\include\genxml
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">mkdir $(ProjectDir)..\include\genxmlcopy %(FullPath) $(ProjectDir)..\include\genxml</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|x64'">mkdir $(ProjectDir)..\include\genxmlcopy %(FullPath) $(ProjectDir)..\include\genxml</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">$(ProjectDir)..\include\genxml\genx.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug C++|x64'">$(ProjectDir)..\include\genxml\genx.h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">mkdir $(ProjectDir)..\include\genxml
-copy %(FullPath) $(ProjectDir)..\include\genxml
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">mkdir $(ProjectDir)..\include\genxml
-copy %(FullPath) $(ProjectDir)..\include\genxml
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">mkdir $(ProjectDir)..\include\genxmlcopy %(FullPath) $(ProjectDir)..\include\genxml</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">mkdir $(ProjectDir)..\include\genxmlcopy %(FullPath) $(ProjectDir)..\include\genxml</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">$(ProjectDir)..\include\genxml\genx.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">$(ProjectDir)..\include\genxml\genx.h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">mkdir $(ProjectDir)..\include\genxml
-copy %(FullPath) $(ProjectDir)..\include\genxml
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">mkdir $(ProjectDir)..\include\genxml
-copy %(FullPath) $(ProjectDir)..\include\genxml
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">mkdir $(ProjectDir)..\include\genxmlcopy %(FullPath) $(ProjectDir)..\include\genxml</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">mkdir $(ProjectDir)..\include\genxml
+copy %(FullPath) $(ProjectDir)..\include\genxml</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\include\genxml\genx.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)..\include\genxml\genx.h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">mkdir $(ProjectDir)..\include\genxml
-copy %(FullPath) $(ProjectDir)..\include\genxml
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release C++|x64'">mkdir $(ProjectDir)..\include\genxml
-copy %(FullPath) $(ProjectDir)..\include\genxml
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">mkdir $(ProjectDir)..\include\genxmlcopy %(FullPath) $(ProjectDir)..\include\genxml</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release C++|x64'">mkdir $(ProjectDir)..\include\genxmlcopy %(FullPath) $(ProjectDir)..\include\genxml</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">$(ProjectDir)..\include\genxml\genx.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release C++|x64'">$(ProjectDir)..\include\genxml\genx.h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">mkdir $(ProjectDir)..\include\genxml
-copy %(FullPath) $(ProjectDir)..\include\genxml
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">mkdir $(ProjectDir)..\include\genxml
-copy %(FullPath) $(ProjectDir)..\include\genxml
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">mkdir $(ProjectDir)..\include\genxmlcopy %(FullPath) $(ProjectDir)..\include\genxml</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">mkdir $(ProjectDir)..\include\genxmlcopy %(FullPath) $(ProjectDir)..\include\genxml</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">$(ProjectDir)..\include\genxml\genx.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">$(ProjectDir)..\include\genxml\genx.h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">mkdir $(ProjectDir)..\include\genxml
-copy %(FullPath) $(ProjectDir)..\include\genxml
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">mkdir $(ProjectDir)..\include\genxml
-copy %(FullPath) $(ProjectDir)..\include\genxml
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">mkdir $(ProjectDir)..\include\genxmlcopy %(FullPath) $(ProjectDir)..\include\genxml</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">mkdir $(ProjectDir)..\include\genxmlcopy %(FullPath) $(ProjectDir)..\include\genxml</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)..\include\genxml\genx.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)..\include\genxml\genx.h;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="..\src\sexpat\expat.h">
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">mkdir $(ProjectDir)..\include\sexpat
-copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat.h
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|x64'">mkdir $(ProjectDir)..\include\sexpat
-copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat.h
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">mkdir $(ProjectDir)..\include\sexpatcopy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat.h</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|x64'">mkdir $(ProjectDir)..\include\sexpatcopy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat.h</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">$(ProjectDir)..\include\sexpat\sexpat.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug C++|x64'">$(ProjectDir)..\include\sexpat\sexpat.h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">mkdir $(ProjectDir)..\include\sexpat
-copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat.h
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">mkdir $(ProjectDir)..\include\sexpat
-copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat.h
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">mkdir $(ProjectDir)..\include\sexpatcopy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat.h</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">mkdir $(ProjectDir)..\include\sexpatcopy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat.h</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">$(ProjectDir)..\include\sexpat\sexpat.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">$(ProjectDir)..\include\sexpat\sexpat.h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">mkdir $(ProjectDir)..\include\sexpat
-copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat.h
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">mkdir $(ProjectDir)..\include\sexpatcopy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat.h</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">mkdir $(ProjectDir)..\include\sexpat
-copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat.h
-</Command>
+copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat.h</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\include\sexpat\sexpat.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)..\include\sexpat\sexpat.h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">mkdir $(ProjectDir)..\include\sexpat
-copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat.h
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release C++|x64'">mkdir $(ProjectDir)..\include\sexpat
-copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat.h
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">mkdir $(ProjectDir)..\include\sexpatcopy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat.h</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release C++|x64'">mkdir $(ProjectDir)..\include\sexpatcopy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat.h</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">$(ProjectDir)..\include\sexpat\sexpat.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release C++|x64'">$(ProjectDir)..\include\sexpat\sexpat.h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">mkdir $(ProjectDir)..\include\sexpat
-copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat.h
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">mkdir $(ProjectDir)..\include\sexpat
-copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat.h
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">mkdir $(ProjectDir)..\include\sexpatcopy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat.h</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">mkdir $(ProjectDir)..\include\sexpatcopy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat.h</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">$(ProjectDir)..\include\sexpat\sexpat.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">$(ProjectDir)..\include\sexpat\sexpat.h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">mkdir $(ProjectDir)..\include\sexpat
-copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat.h
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">mkdir $(ProjectDir)..\include\sexpat
-copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat.h
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">mkdir $(ProjectDir)..\include\sexpatcopy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat.h</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">mkdir $(ProjectDir)..\include\sexpatcopy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat.h</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)..\include\sexpat\sexpat.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)..\include\sexpat\sexpat.h;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="..\src\sexpat\expat_external.h">
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">mkdir $(ProjectDir)..\include\sexpat
-copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat_external.h
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|x64'">mkdir $(ProjectDir)..\include\sexpat
-copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat_external.h
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">mkdir $(ProjectDir)..\include\sexpatcopy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat_external.h</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|x64'">mkdir $(ProjectDir)..\include\sexpatcopy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat_external.h</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">$(ProjectDir)..\include\sexpat\sexpat_external.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug C++|x64'">$(ProjectDir)..\include\sexpat\sexpat_external.h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">mkdir $(ProjectDir)..\include\sexpat
-copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat_external.h
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">mkdir $(ProjectDir)..\include\sexpat
-copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat_external.h
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">mkdir $(ProjectDir)..\include\sexpatcopy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat_external.h</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">mkdir $(ProjectDir)..\include\sexpatcopy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat_external.h</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">$(ProjectDir)..\include\sexpat\sexpat_external.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">$(ProjectDir)..\include\sexpat\sexpat_external.h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">mkdir $(ProjectDir)..\include\sexpat
-copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat_external.h
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">mkdir $(ProjectDir)..\include\sexpatcopy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat_external.h</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">mkdir $(ProjectDir)..\include\sexpat
-copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat_external.h
-</Command>
+copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat_external.h</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\include\sexpat\sexpat_external.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)..\include\sexpat\sexpat_external.h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">mkdir $(ProjectDir)..\include\sexpat
-copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat_external.h
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release C++|x64'">mkdir $(ProjectDir)..\include\sexpat
-copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat_external.h
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">mkdir $(ProjectDir)..\include\sexpatcopy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat_external.h</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release C++|x64'">mkdir $(ProjectDir)..\include\sexpatcopy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat_external.h</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">$(ProjectDir)..\include\sexpat\sexpat_external.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release C++|x64'">$(ProjectDir)..\include\sexpat\sexpat_external.h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">mkdir $(ProjectDir)..\include\sexpat
-copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat_external.h
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">mkdir $(ProjectDir)..\include\sexpat
-copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat_external.h
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">mkdir $(ProjectDir)..\include\sexpatcopy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat_external.h</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">mkdir $(ProjectDir)..\include\sexpatcopy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat_external.h</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">$(ProjectDir)..\include\sexpat\sexpat_external.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">$(ProjectDir)..\include\sexpat\sexpat_external.h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">mkdir $(ProjectDir)..\include\sexpat
-copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat_external.h
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">mkdir $(ProjectDir)..\include\sexpat
-copy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat_external.h
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">mkdir $(ProjectDir)..\include\sexpatcopy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat_external.h</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">mkdir $(ProjectDir)..\include\sexpatcopy %(FullPath) $(ProjectDir)..\include\sexpat\sexpat_external.h</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)..\include\sexpat\sexpat_external.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)..\include\sexpat\sexpat_external.h;%(Outputs)</Outputs>
     </CustomBuild>
     <ClInclude Include="..\src\SQLlib\sqlstruc.h" />
     <CustomBuild Include="..\src\libpng-1.2.40\png.h">
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">mkdir $(ProjectDir)..\include\png
-copy %(FullPath) $(ProjectDir)..\include\png
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|x64'">mkdir $(ProjectDir)..\include\png
-copy %(FullPath) $(ProjectDir)..\include\png
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">mkdir $(ProjectDir)..\include\pngcopy %(FullPath) $(ProjectDir)..\include\png</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|x64'">mkdir $(ProjectDir)..\include\pngcopy %(FullPath) $(ProjectDir)..\include\png</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">$(ProjectDir)..\include\png\png.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug C++|x64'">$(ProjectDir)..\include\png\png.h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">mkdir $(ProjectDir)..\include\png
-copy %(FullPath) $(ProjectDir)..\include\png
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">mkdir $(ProjectDir)..\include\png
-copy %(FullPath) $(ProjectDir)..\include\png
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">mkdir $(ProjectDir)..\include\pngcopy %(FullPath) $(ProjectDir)..\include\png</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">mkdir $(ProjectDir)..\include\pngcopy %(FullPath) $(ProjectDir)..\include\png</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">$(ProjectDir)..\include\png\png.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">$(ProjectDir)..\include\png\png.h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">mkdir $(ProjectDir)..\include\png
-copy %(FullPath) $(ProjectDir)..\include\png
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">mkdir $(ProjectDir)..\include\png
-copy %(FullPath) $(ProjectDir)..\include\png
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">mkdir $(ProjectDir)..\include\pngcopy %(FullPath) $(ProjectDir)..\include\png</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">mkdir $(ProjectDir)..\include\png
+copy %(FullPath) $(ProjectDir)..\include\png</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\include\png\png.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)..\include\png\png.h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">mkdir $(ProjectDir)..\include\png
-copy %(FullPath) $(ProjectDir)..\include\png
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">mkdir $(ProjectDir)..\include\png
-copy %(FullPath) $(ProjectDir)..\include\png
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">mkdir $(ProjectDir)..\include\pngcopy %(FullPath) $(ProjectDir)..\include\png</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">mkdir $(ProjectDir)..\include\pngcopy %(FullPath) $(ProjectDir)..\include\png</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">$(ProjectDir)..\include\png\png.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">$(ProjectDir)..\include\png\png.h;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="..\src\libpng-1.2.40\pngconf.h">
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">mkdir $(ProjectDir)..\include\png
-copy %(FullPath) $(ProjectDir)..\include\png
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|x64'">mkdir $(ProjectDir)..\include\png
-copy %(FullPath) $(ProjectDir)..\include\png
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">mkdir $(ProjectDir)..\include\pngcopy %(FullPath) $(ProjectDir)..\include\png</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|x64'">mkdir $(ProjectDir)..\include\pngcopy %(FullPath) $(ProjectDir)..\include\png</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">$(ProjectDir)..\include\png\pngconf.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug C++|x64'">$(ProjectDir)..\include\png\pngconf.h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">mkdir $(ProjectDir)..\include\png
-copy %(FullPath) $(ProjectDir)..\include\png
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">mkdir $(ProjectDir)..\include\png
-copy %(FullPath) $(ProjectDir)..\include\png
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">mkdir $(ProjectDir)..\include\pngcopy %(FullPath) $(ProjectDir)..\include\png</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">mkdir $(ProjectDir)..\include\pngcopy %(FullPath) $(ProjectDir)..\include\png</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">$(ProjectDir)..\include\png\pngconf.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">$(ProjectDir)..\include\png\pngconf.h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">mkdir $(ProjectDir)..\include\png
-copy %(FullPath) $(ProjectDir)..\include\png
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">mkdir $(ProjectDir)..\include\pngcopy %(FullPath) $(ProjectDir)..\include\png</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">mkdir $(ProjectDir)..\include\png
-copy %(FullPath) $(ProjectDir)..\include\png
-</Command>
+copy %(FullPath) $(ProjectDir)..\include\png</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\include\png\pngconf.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)..\include\png\pngconf.h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">mkdir $(ProjectDir)..\include\png
-copy %(FullPath) $(ProjectDir)..\include\png
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">mkdir $(ProjectDir)..\include\png
-copy %(FullPath) $(ProjectDir)..\include\png
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">mkdir $(ProjectDir)..\include\pngcopy %(FullPath) $(ProjectDir)..\include\png</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">mkdir $(ProjectDir)..\include\pngcopy %(FullPath) $(ProjectDir)..\include\png</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">$(ProjectDir)..\include\png\pngconf.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">$(ProjectDir)..\include\png\pngconf.h;%(Outputs)</Outputs>
     </CustomBuild>
@@ -1349,95 +1284,41 @@ copy %(FullPath) $(ProjectDir)..\include\png
     <ClInclude Include="..\src\zlib-1.2.3\inftrees.h" />
     <ClInclude Include="..\src\zlib-1.2.3\trees.h" />
     <CustomBuild Include="..\src\zlib-1.2.3\zconf.h">
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">mkdir $(ProjectDir)..\include\png
-copy %(FullPath) $(ProjectDir)..\include\png
-mkdir $(ProjectDir)..\include\zlib
-copy %(FullPath) $(ProjectDir)..\include\zlib
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|x64'">mkdir $(ProjectDir)..\include\png
-copy %(FullPath) $(ProjectDir)..\include\png
-mkdir $(ProjectDir)..\include\zlib
-copy %(FullPath) $(ProjectDir)..\include\zlib
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">mkdir $(ProjectDir)..\include\pngcopy %(FullPath) $(ProjectDir)..\include\pngmkdir $(ProjectDir)..\include\zlibcopy %(FullPath) $(ProjectDir)..\include\zlib</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|x64'">mkdir $(ProjectDir)..\include\pngcopy %(FullPath) $(ProjectDir)..\include\pngmkdir $(ProjectDir)..\include\zlibcopy %(FullPath) $(ProjectDir)..\include\zlib</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">$(ProjectDir)..\include\png\zconf.h;$(ProjectDir)..\include\zlib\zconf.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug C++|x64'">$(ProjectDir)..\include\png\zconf.h;$(ProjectDir)..\include\zlib\zconf.h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">mkdir $(ProjectDir)..\include\png
-copy %(FullPath) $(ProjectDir)..\include\png
-mkdir $(ProjectDir)..\include\zlib
-copy %(FullPath) $(ProjectDir)..\include\zlib
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">mkdir $(ProjectDir)..\include\png
-copy %(FullPath) $(ProjectDir)..\include\png
-mkdir $(ProjectDir)..\include\zlib
-copy %(FullPath) $(ProjectDir)..\include\zlib
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">mkdir $(ProjectDir)..\include\pngcopy %(FullPath) $(ProjectDir)..\include\pngmkdir $(ProjectDir)..\include\zlibcopy %(FullPath) $(ProjectDir)..\include\zlib</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">mkdir $(ProjectDir)..\include\pngcopy %(FullPath) $(ProjectDir)..\include\pngmkdir $(ProjectDir)..\include\zlibcopy %(FullPath) $(ProjectDir)..\include\zlib</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">$(ProjectDir)..\include\png\zconf.h;$(ProjectDir)..\include\zlib\zconf.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">$(ProjectDir)..\include\png\zconf.h;$(ProjectDir)..\include\zlib\zconf.h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">mkdir $(ProjectDir)..\include\zlib
-copy %(FullPath) $(ProjectDir)..\include\zlib
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">mkdir $(ProjectDir)..\include\zlibcopy %(FullPath) $(ProjectDir)..\include\zlib</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">mkdir $(ProjectDir)..\include\zlib
-copy %(FullPath) $(ProjectDir)..\include\zlib
-</Command>
+copy %(FullPath) $(ProjectDir)..\include\zlib</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\include\zlib\zconf.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)..\include\zlib\zconf.h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">mkdir $(ProjectDir)..\include\png
-copy %(FullPath) $(ProjectDir)..\include\png
-mkdir $(ProjectDir)..\include\zlib
-copy %(FullPath) $(ProjectDir)..\include\zlib
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">mkdir $(ProjectDir)..\include\png
-copy %(FullPath) $(ProjectDir)..\include\png
-mkdir $(ProjectDir)..\include\zlib
-copy %(FullPath) $(ProjectDir)..\include\zlib
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">mkdir $(ProjectDir)..\include\pngcopy %(FullPath) $(ProjectDir)..\include\pngmkdir $(ProjectDir)..\include\zlibcopy %(FullPath) $(ProjectDir)..\include\zlib</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">mkdir $(ProjectDir)..\include\pngcopy %(FullPath) $(ProjectDir)..\include\pngmkdir $(ProjectDir)..\include\zlibcopy %(FullPath) $(ProjectDir)..\include\zlib</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">$(ProjectDir)..\include\png\zconf.h;$(ProjectDir)..\include\zlib\zconf.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">$(ProjectDir)..\include\png\zconf.h;$(ProjectDir)..\include\zlib\zconf.h;%(Outputs)</Outputs>
     </CustomBuild>
     <ClInclude Include="..\src\zlib-1.2.3\zconf.in.h" />
     <CustomBuild Include="..\src\zlib-1.2.3\zlib.h">
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">mkdir $(ProjectDir)..\include\png
-copy %(FullPath) $(ProjectDir)..\include\png
-mkdir $(ProjectDir)..\include\zlib
-copy %(FullPath) $(ProjectDir)..\include\zlib
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|x64'">mkdir $(ProjectDir)..\include\png
-copy %(FullPath) $(ProjectDir)..\include\png
-mkdir $(ProjectDir)..\include\zlib
-copy %(FullPath) $(ProjectDir)..\include\zlib
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">mkdir $(ProjectDir)..\include\pngcopy %(FullPath) $(ProjectDir)..\include\pngmkdir $(ProjectDir)..\include\zlibcopy %(FullPath) $(ProjectDir)..\include\zlib</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|x64'">mkdir $(ProjectDir)..\include\pngcopy %(FullPath) $(ProjectDir)..\include\pngmkdir $(ProjectDir)..\include\zlibcopy %(FullPath) $(ProjectDir)..\include\zlib</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">$(ProjectDir)..\include\png\zlib.h;$(ProjectDir)..\include\zlib\zlib.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug C++|x64'">$(ProjectDir)..\include\png\zlib.h;$(ProjectDir)..\include\zlib\zlib.h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">mkdir $(ProjectDir)..\include\png
-copy %(FullPath) $(ProjectDir)..\include\png
-mkdir $(ProjectDir)..\include\zlib
-copy %(FullPath) $(ProjectDir)..\include\zlib
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">mkdir $(ProjectDir)..\include\png
-copy %(FullPath) $(ProjectDir)..\include\png
-mkdir $(ProjectDir)..\include\zlib
-copy %(FullPath) $(ProjectDir)..\include\zlib
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">mkdir $(ProjectDir)..\include\pngcopy %(FullPath) $(ProjectDir)..\include\pngmkdir $(ProjectDir)..\include\zlibcopy %(FullPath) $(ProjectDir)..\include\zlib</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">mkdir $(ProjectDir)..\include\pngcopy %(FullPath) $(ProjectDir)..\include\pngmkdir $(ProjectDir)..\include\zlibcopy %(FullPath) $(ProjectDir)..\include\zlib</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">$(ProjectDir)..\include\png\zlib.h;$(ProjectDir)..\include\zlib\zlib.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">$(ProjectDir)..\include\png\zlib.h;$(ProjectDir)..\include\zlib\zlib.h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">mkdir $(ProjectDir)..\include\zlib
-copy %(FullPath) $(ProjectDir)..\include\zlib
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">mkdir $(ProjectDir)..\include\zlibcopy %(FullPath) $(ProjectDir)..\include\zlib</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">mkdir $(ProjectDir)..\include\zlib
-copy %(FullPath) $(ProjectDir)..\include\zlib
-</Command>
+copy %(FullPath) $(ProjectDir)..\include\zlib</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\include\zlib\zlib.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)..\include\zlib\zlib.h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">mkdir $(ProjectDir)..\include\png
-copy %(FullPath) $(ProjectDir)..\include\png
-mkdir $(ProjectDir)..\include\zlib
-copy %(FullPath) $(ProjectDir)..\include\zlib
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">mkdir $(ProjectDir)..\include\png
-copy %(FullPath) $(ProjectDir)..\include\png
-mkdir $(ProjectDir)..\include\zlib
-copy %(FullPath) $(ProjectDir)..\include\zlib
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">mkdir $(ProjectDir)..\include\pngcopy %(FullPath) $(ProjectDir)..\include\pngmkdir $(ProjectDir)..\include\zlibcopy %(FullPath) $(ProjectDir)..\include\zlib</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">mkdir $(ProjectDir)..\include\pngcopy %(FullPath) $(ProjectDir)..\include\pngmkdir $(ProjectDir)..\include\zlibcopy %(FullPath) $(ProjectDir)..\include\zlib</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">$(ProjectDir)..\include\png\zlib.h;$(ProjectDir)..\include\zlib\zlib.h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">$(ProjectDir)..\include\png\zlib.h;$(ProjectDir)..\include\zlib\zlib.h;%(Outputs)</Outputs>
     </CustomBuild>
@@ -1475,40 +1356,28 @@ copy %(FullPath) $(ProjectDir)..\include\zlib
     <CustomBuild Include="..\src\procreglib\interface.conf">
       <DeploymentContent>true</DeploymentContent>
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">copy "%(FullPath)" "$(OutDir)"
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|x64'">copy "%(FullPath)" "$(OutDir)"
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">copy "%(FullPath)" "$(OutDir)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug C++|x64'">copy "%(FullPath)" "$(OutDir)"</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug C++|Win32'">$(OutDir)%(Identity);%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug C++|x64'">$(OutDir)%(Identity);%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">copy "%(FullPath)" "$(OutDir)"
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">copy "%(FullPath)" "$(OutDir)"
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">copy "%(FullPath)" "$(OutDir)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">copy "%(FullPath)" "$(OutDir)"</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug CLR|Win32'">$(OutDir)%(Identity);%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug CLR|x64'">$(OutDir)%(Identity);%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy "%(FullPath)" "$(OutDir)"
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">copy "%(FullPath)" "$(OutDir)"
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy "%(FullPath)" "$(OutDir)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">copy "%(FullPath)" "$(OutDir)"</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)%(Identity);%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)%(Identity);%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">copy "%(FullPath)" "$(OutDir)"
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release C++|x64'">copy "%(FullPath)" "$(OutDir)"
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">copy "%(FullPath)" "$(OutDir)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release C++|x64'">copy "%(FullPath)" "$(OutDir)"</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release C++|Win32'">$(OutDir)%(Identity);%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release C++|x64'">$(OutDir)%(Identity);%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">copy "%(FullPath)" "$(OutDir)"
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">copy "%(FullPath)" "$(OutDir)"
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">copy "%(FullPath)" "$(OutDir)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">copy "%(FullPath)" "$(OutDir)"</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release CLR|Win32'">$(OutDir)%(Identity);%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release CLR|x64'">$(OutDir)%(Identity);%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy "%(FullPath)" "$(OutDir)"
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">copy "%(FullPath)" "$(OutDir)"
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy "%(FullPath)" "$(OutDir)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">copy "%(FullPath)" "$(OutDir)"</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)%(Identity);%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)%(Identity);%(Outputs)</Outputs>
     </CustomBuild>
@@ -1516,10 +1385,8 @@ copy %(FullPath) $(ProjectDir)..\include\zlib
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
     </CustomBuild>
@@ -1527,10 +1394,8 @@ copy %(FullPath) $(ProjectDir)..\include\zlib
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
     </CustomBuild>
@@ -1538,10 +1403,8 @@ copy %(FullPath) $(ProjectDir)..\include\zlib
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
     </CustomBuild>
@@ -1549,10 +1412,8 @@ copy %(FullPath) $(ProjectDir)..\include\zlib
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
     </CustomBuild>
@@ -1560,10 +1421,8 @@ copy %(FullPath) $(ProjectDir)..\include\zlib
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
     </CustomBuild>
@@ -1571,10 +1430,8 @@ copy %(FullPath) $(ProjectDir)..\include\zlib
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
     </CustomBuild>
@@ -1582,10 +1439,8 @@ copy %(FullPath) $(ProjectDir)..\include\zlib
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
     </CustomBuild>
@@ -1593,10 +1448,8 @@ copy %(FullPath) $(ProjectDir)..\include\zlib
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
     </CustomBuild>
@@ -1604,10 +1457,8 @@ copy %(FullPath) $(ProjectDir)..\include\zlib
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
     </CustomBuild>
@@ -1615,10 +1466,8 @@ copy %(FullPath) $(ProjectDir)..\include\zlib
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
     </CustomBuild>
@@ -1626,10 +1475,8 @@ copy %(FullPath) $(ProjectDir)..\include\zlib
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
     </CustomBuild>
@@ -1637,10 +1484,8 @@ copy %(FullPath) $(ProjectDir)..\include\zlib
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
     </CustomBuild>
@@ -1648,10 +1493,8 @@ copy %(FullPath) $(ProjectDir)..\include\zlib
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
     </CustomBuild>
@@ -1659,10 +1502,8 @@ copy %(FullPath) $(ProjectDir)..\include\zlib
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
     </CustomBuild>
@@ -1670,10 +1511,8 @@ copy %(FullPath) $(ProjectDir)..\include\zlib
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
-</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">nasm.exe -f win32 -Xvc -i%(RootDir)%(Directory) -i$(SolutionDir)../sack/include/nasm/ -o "$(IntDir)%(FileName).obj" %(RootDir)%(Directory)\%(FileName).asm -D__WATCOM__</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(FileName).obj;%(Outputs)</Outputs>
     </CustomBuild>
@@ -1719,9 +1558,6 @@ copy %(FullPath) $(ProjectDir)..\include\zlib
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\trunk\xperdex\xperdex.classes\xperdex.classes.vc10.csproj">
-      <Project>{041e5a37-8678-451e-9500-ee3d7864c092}</Project>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

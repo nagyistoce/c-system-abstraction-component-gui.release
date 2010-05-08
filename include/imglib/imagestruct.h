@@ -9,35 +9,40 @@
 #include <image.h>
 
 
-#ifndef PSPRITE_METHOD
-#define PSPRITE_METHOD PSPRITE_METHOD
-//RENDER_NAMESPACE
-	typedef struct sprite_method_tag *PSPRITE_METHOD;
-//END_RENDER_NAMESPACE
-#endif
 
 
 IMAGE_NAMESPACE
 
-#define IF_FLAG_FREE   0x01 // this has been freed - but contains sub images
-#define IF_FLAG_HIDDEN 0x02 // moved beyond parent image's bound
-#define IF_FLAG_EXTERN_COLORS 0x04 // built with a *image from external sources
-#define IF_FLAG_HAS_CLIPS     0x08 // pay attention to (clips) array.
+#ifndef PSPRITE_METHOD
+#define PSPRITE_METHOD PSPRITE_METHOD
+/* pointer to a structure defining a sprite draw method this should be defined in render namespace...*/
+	typedef struct sprite_method_tag *PSPRITE_METHOD;
+#endif
+
+
+	/* Flags which may be combined in <link sack::image::ImageFile_tag::flags, Image.flags> */
+	enum ImageFlags {
+IF_FLAG_FREE   =0x01, // this has been freed - but contains sub images
+IF_FLAG_HIDDEN =0x02, // moved beyond parent image's bound
+IF_FLAG_EXTERN_COLORS =0x04, // built with a *image from external sources
+IF_FLAG_HAS_CLIPS     =0x08, // pay attention to (clips) array.
 
 // with no _X_STRING flag - characters are shown as literal character glyph.
-#define IF_FLAG_C_STRING      0x10 // strings on this use 'c' processing
-#define IF_FLAG_MENU_STRING   0x20 // strings on this use menu processing ( &underline )
-#define IF_FLAG_CONTROL_STRING 0x40 // strings use control chars (newline, tab)
-#define IF_FLAG_OWN_DATA   0x80 // this has been freed - but contains sub images
+IF_FLAG_C_STRING      =0x10, // strings on this use 'c' processing
+IF_FLAG_MENU_STRING   =0x20, // strings on this use menu processing ( &underline )
+IF_FLAG_CONTROL_STRING= 0x40, // strings use control chars (newline, tab)
+IF_FLAG_OWN_DATA =  0x80, // this has been freed - but contains sub images
 
 // DisplayLib uses this flag - indicates panel root
-#define IF_FLAG_USER1         0x10000 // please #define user flag to this
+IF_FLAG_USER1    =     0x10000, // please #define user flag to this
 // DisplayLib uses this flag - indicates is part of a displayed panel
-#define IF_FLAG_USER2         0x20000
-#define IF_FLAG_USER3         0x40000
+IF_FLAG_USER2    =     0x20000, /* An extra flag that can be used by users of the image library. */
 
-#define _DRAWPOINT_X 0
-#define _DRAWPOINT_Y 1
+IF_FLAG_USER3    =     0x40000 /* An extra flag that can be used by users of the image library. */
+
+	};
+//#define _DRAWPOINT_X 0
+//#define _DRAWPOINT_Y 1
 
 struct ImageFile_tag
 {
@@ -55,39 +60,78 @@ struct ImageFile_tag
    int height; /// Height of image.
 # endif
 #else
+   /* X coordinate of the image within another image. */
    int x;
+   /* Y coordinate of an image within another image. */
    int y;
    int width;   // desired height and width may not be actual cause of
 	int height;  // resizing of parent image....
+   int actual_x; // need this for sub images - otherwise is irrelavent
+   int actual_y;  /* Y coordinate of the image. probably 0 if a parent image. */
+   int actual_width;  // Width of image.
+   int actual_height; // Height of image.
+#endif
+//DOM-IGNORE-BEGIN
+
+   int pwidth; // width of real physical layer
+
+   // The image data.
+	PCOLOR image;   
+   /* a combination of <link ImageFlags, IF_FLAG_> (ImageFile Flag)
+      which apply to this image.                                    */
+   int flags;
+   /* This points to a peer image that existed before this one. If
+      NULL, there is no elder, otherwise, contains the next peer
+      image in the same parent image.                              */
+   /* Points to the parent image of a sub-image. (The parent image
+      contains this image)                                         */
+   /* Pointer to the youngest child sub-image. If there are no sub
+      images pChild will be NULL. Otherwise, pchild points at the
+      first of one or more sub images. Other sub images in this one
+      are found by following the pElder link of the pChild.         */
+   /* This points at a more recently created sub-image. (another
+      sub image within the same parent, but younger)             */
+			struct ImageFile_tag *pParent, *pChild, *pElder, *pYounger;
+      // effective x - clipped by reality real coordinate. 
+	           // (often eff_x = -real_x )
+	int eff_x; 
+	/* this is used internally for knowing what the effective y of
+	   the image is. If the sub-image spans a boundry of a parent
+	   image, then the effective Y that will be worked with is only
+	   a part of the subimage.                                      */
+		int eff_y;
+		// effective max - maximum coordinate...
+		int eff_maxx;
+		// effective maximum Y
+		int eff_maxy;
+		/* An extra rectangle that can be used to carry additional
+		 information like update region.                         */
+			IMAGE_RECTANGLE auxrect;
 #ifdef __cplusplus
 #ifndef __WATCOMC__ // watcom limits protections in structs to protected and public
 private:
 #endif
 #endif
-   int actual_x; // need this for sub images - otherwise is irrelavent
-   int actual_y;
-   int actual_width;  /// Width of image.
-   int actual_height; /// Height of image.
-#endif
-   int pwidth; // width of real physical layer
-  
-	PCOLOR image;   /// The image data.
-   int flags;
-   struct ImageFile_tag *pParent, *pChild, *pElder, *pYounger;
-	int eff_x; // effective x - clipped by reality real coordinate. 
-	           // (often eff_x = -real_x )
-	int eff_y; 
-	int eff_maxx; // effective max - maximum coordinate...
-	int eff_maxy; // effective
-	IMAGE_RECTANGLE auxrect;
 #ifdef _OPENGL_DRIVER
    /* gl context? */
 	int glSurface;
 #endif
-};// *Image, ImageFile;
+//DOM-IGNORE-END
+};
+
+/* The basic structure. This is referenced by applications as '<link sack::image::Image, Image>'
+   This is the primary type that the image library works with.
+   
+   This is the internal definition.
+   
+   This is a actual data content, Image is (ImageFile *).                                        */
 typedef struct ImageFile_tag ImageFile;
+/* A simple wrapper to add dynamic changing position and
+   orientation to an image. Sprites can be output at any angle. */
 struct sprite_tag
 {
+   /* Current location of the sprite's origin. */
+   /* Current location of the sprite's origin. */
    S_32 curx, cury;  // current x and current y for placement on image.
 	S_32 hotx, hoty;  // int of bitmap hotspot... centers cur on hot
    Image image;
@@ -108,6 +152,9 @@ struct sprite_tag
    S_32 miny, maxy; // after draw, these are the extent of the sprite.
    PSPRITE_METHOD pSpriteMethod;
 };
+/* A Sprite type. Adds position and rotation and motion factors
+   to an image. Hooks into the render system to get an update to
+   draw on a temporary layer after the base rendering is done.   */
 typedef struct sprite_tag SPRITE;
 
 
@@ -117,6 +164,10 @@ typedef struct sprite_tag SPRITE;
 // eff maxy - eff_minY???
 #define INVERTY(i,y)     ( (((i)->eff_maxy) - (y))/*+((i)->eff_y)*/)
 #else
+/* This is a macro is used when image data is inverted on a
+   platform. (Windows images, the first row of data is the
+   bottom of the image, all Image operations are specified from
+   the top-left as 0,0)                                         */
 #define INVERTY(i,y)     ((y) - (i)->eff_y)
 #endif
 #if defined(__cplusplus_cli ) && !defined( IMAGE_SOURCE )

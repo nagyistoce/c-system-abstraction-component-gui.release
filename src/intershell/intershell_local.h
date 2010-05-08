@@ -11,11 +11,6 @@
 #endif
 #endif
 
-typedef struct CanvasData  CanvasData, *PCanvasData;
-typedef struct page_data_tag PAGE_DATA, *PPAGE_DATA;
-
-
-
 
 #include <sack_types.h>
 #include <image.h>
@@ -25,22 +20,29 @@ typedef struct page_data_tag PAGE_DATA, *PPAGE_DATA;
 
 #include "widgets/include/buttons.h"
 
+#include "intershell_export.h"
+#include "loadsave.h"
+
+INTERSHELL_NAMESPACE
+
+typedef struct CanvasData  CanvasData, *PCanvasData;
+INTERSHELL_NAMESPACE_END
+
+#include "pages.h"
+
+INTERSHELL_NAMESPACE
+
 #ifdef INTERSHELL_SOURCE
 #define g global_pos_data
 #endif
 
 
 
-#include "pages.h"
-#include "intershell_export.h"
-#include "loadsave.h"
-#include "intershell_button.h"
-
 #define GLARE_FLAG_MULTISHADE 1
 #define GLARE_FLAG_SHADE 2
 
 typedef struct glare_set{
-	char *name;
+	TEXTCHAR *name;
 	struct {
 		BIT_FIELD bMultiShadeBackground : 1;
 		BIT_FIELD bShadeBackground : 1;
@@ -288,7 +290,7 @@ MENU_GLOBAL g;
 #endif
 
 PMENU_BUTTON CreateSomeControl( PSI_CONTROL pc_canvas, int x, int y, int w, int h
-										, char *name );
+										, CTEXTSTR name );
 void DestroyButton( PMENU_BUTTON button );
 
 
@@ -315,7 +317,7 @@ PSI_CONTROL OpenPageFrame( PPAGE_DATA page ); // used for multi edit to open eac
 
 PGLARE_SET GetGlareSet( CTEXTSTR name );
 
-PMENU_BUTTON CreateInvisibleControl( char *name );
+PMENU_BUTTON CreateInvisibleControl( TEXTCHAR *name );
 void ConfigureKeyEx( PCanvasData parent, PMENU_BUTTON button );
 void ConfigureKeyExx( PCanvasData parent, PMENU_BUTTON button, int bWaitComplete, int bIgnorePrivate );
 
@@ -350,6 +352,12 @@ void PublicAddCommonButtonConfig( PMENU_BUTTON button );
 void FixupButtonEx( PMENU_BUTTON button DBG_PASS );
 void FlushToKey( PMENU_BUTTON button );
 
+void SetMacroResult( int allow_continue );
+
+INTERSHELL_NAMESPACE_END
+
 #include "intershell_registry.h"
+
+
 
 #endif

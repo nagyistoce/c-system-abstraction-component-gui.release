@@ -4,44 +4,74 @@
 #include <controls.h>
 #include "vlcint.h"
 
+
+
 int main( int argc, char ** argv )
 {
    char *file_to_play;
 	_32 w, h;
+   int display = 0;
+	S_32 x, y;
+   static TEXTCHAR extra_opts[4096];
+	int ofs = 0;
+	int in_control = 0;
+   int make_top = 0;
+   int is_transparent = 0;
 	PLIST names = NULL;
 	SetSystemLog( SYSLOG_FILE, stderr );
-	GetDisplaySize( &w, &h );
 
-	w = 1024;
-   h = 768;
+	if( argc == 1 )
+	{
+		MessageBox( NULL, "usage for vlc tester...\n"
+					  " -display #  : show on display number\n"
+					  " -top : make topmost\n"
+					  " -control : use a control to host video\n"
+					  " -transparent : use transparent display\n"
+					 , "Usage", MB_OK );
+      return 0;
+	}
+
 	{
 		int n;
 		for( n = 1; n < argc; n++ )
 		{
-			AddLink( &names, argv[n] );
-		}
-		//PlayItem( argv[1] );
-		//while( 1 )
-		//   WakeableSleep( 100000 );
-		if( n == 1 )
-		{
-			//AddLink( &names, "F:\\temp\\videos\\CrapsHor1024.mpg" );
-			//AddLink( &names, "F:\\temp\\videos\\ElvisHor1024.mpg" );
-			//AddLink( &names, "F:\\temp\\videos\\HawXmasHor1024.mpg" );
-			//AddLink( &names, "F:\\temp\\videos\\HelloHor1024.mpg" );
-			//AddLink( &names, "F:\\temp\\videos\\OysterBarSushiHor1024.mpg" );
-			//AddLink( &names, "F:\\temp\\videos\\SalvatoresNowOpenHor1024.mpg" );
-			//AddLink( &names, "F:\\temp\\videos\\SeattlesBestHor1024.mpg" );
-			AddLink( &names, "m:\\tmp\\videos\\CrapsHor1024.mpg" );
-			AddLink( &names, "m:\\tmp\\videos\\ElvisHor1024.mpg" );
-			AddLink( &names, "m:\\tmp\\videos\\HawXmasHor1024.mpg" );
-			AddLink( &names, "m:\\tmp\\videos\\HelloHor1024.mpg" );
-			AddLink( &names, "m:\\tmp\\videos\\OysterBarSushiHor1024.mpg" );
-			AddLink( &names, "m:\\tmp\\videos\\SalvatoresNowOpenHor1024.mpg" );
-			AddLink( &names, "m:\\tmp\\videos\\SeattlesBestHor1024.mpg" );
+			if( argv[n][0] == '-' )
+			{
+				// with subcanvas support, this cannot function, sorry
+				// we get confused about which menu belongs to which frame
+				// some thought will have to be done to figure this one out.
+				if( stricmp( argv[n]+1, WIDE("display") ) == 0 )
+				{
+					display = atoi( argv[n+1] );
+					n++;
+				}
+				else if( stricmp( argv[n]+1, WIDE("transparent") ) == 0 )
+				{
+               is_transparent = 1;
+				}
+				else if( stricmp( argv[n]+1, WIDE("control") ) == 0 )
+				{
+               in_control = 1;
+				}
+				else if( stricmp( argv[n]+1, WIDE("top") ) == 0 )
+				{
+               make_top = 1;
+				}
+				else
+				{
+               ofs += snprintf( extra_opts + ofs, 4096 - ofs, "%s", argv[n]+1 );
+				}
+			}
+			else
+			{
+				AddLink( &names, argv[n] );
+			}
 		}
 	}
-	PlayList( names, 0, 0, w, h );
+
+
+	GetDisplaySizeEx( display, &x, &y, &w, &h );
+
 
 	lprintf( "EXCEPTION CAUSED EARLY BREAK?!" );
 	//return 0;
@@ -51,24 +81,26 @@ int main( int argc, char ** argv )
 		return 0;
 	}
 	{
-		PRENDERER transparent = OpenDisplaySizedAt( DISPLAY_ATTRIBUTE_LAYERED, w, h, 0, 0 );
-		PSI_CONTROL surface = CreateFrameFromRenderer( "Video Display", BORDER_NONE|BORDER_NOCAPTION, transparent );
-      DisableMouseOnIdle( transparent, TRUE );
-		//UpdateDisplay( transparent );
-		DisplayFrame( surface );
-		//MakeTopmost( transparent );
+		PRENDERER transparent = OpenDisplaySizedAt( is_transparent?DISPLAY_ATTRIBUTE_LAYERED:0, w, h, x, y );
+		PSI_CONTROL surface = in_control?CreateFrameFromRenderer( "Video Display"
+																				  , BORDER_NONE|BORDER_NOCAPTION
+																				  , transparent ):0;
+		DisableMouseOnIdle( transparent, TRUE );
+      if( surface )
+			DisplayFrame( surface );
+      else
+			UpdateDisplay( transparent );
+      if( make_top )
+			MakeTopmost( transparent );
 		{
-			static TEXTCHAR buf[4096];
-			int n;
-         int ofs = 0;
-			for(n = 2; n < argc; n++ )
+			CTEXTSTR tmp = (CTEXTSTR)GetLink( &names, 0 );
+			if( tmp )
 			{
-				if( strchr( argv[n], ' ' ) )
-					ofs += snprintf( buf, sizeof( buf ) - ofs, "\"%s\" ", argv[n] );
-				else
-					ofs += snprintf( buf, sizeof( buf ) - ofs, "%s ", argv[n] );
+				if( in_control )
+					PlayItemInEx( surface, tmp, extra_opts );
+            else
+					PlayItemOnExx( transparent, tmp, extra_opts, is_transparent );
 			}
-			PlayItemInEx( surface, argv[1], buf );
 		}
 		while( 1 )
 		{

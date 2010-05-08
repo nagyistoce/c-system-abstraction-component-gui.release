@@ -4,6 +4,10 @@
 #include <procreg.h>
 #include <filesys.h>
 #include <system.h>
+#define SQLLIB_SOURCE
+#ifdef USE_SQLITE_INTERFACE
+#define USES_SQLITE_INTERFACE
+#endif
 #include "sqlstruc.h"
 
 SQL_NAMESPACE
@@ -147,7 +151,7 @@ SQLSTUB_PROC( INDEX, GetLastInsertIDEx)( CTEXTSTR table, CTEXTSTR col DBG_PASS )
 #undef EscapeBinary
 #undef EscapeString
 
-SQLSTUB_PROC( TEXTSTR,EscapeSQLBinaryEx )( PODBC odbc, CTEXTSTR blob, _32 bloblen DBG_PASS )
+SQLSTUB_PROC( TEXTSTR,EscapeSQLBinaryEx )( PODBC odbc, CTEXTSTR blob, PTRSZVAL bloblen DBG_PASS )
 {
 	int type_mysql = 1;
 
@@ -155,7 +159,11 @@ SQLSTUB_PROC( TEXTSTR,EscapeSQLBinaryEx )( PODBC odbc, CTEXTSTR blob, _32 bloble
 	unsigned int n;
 	int targetlen;
 
-	if( odbc && ( odbc->flags.bSQLite || odbc->flags.bSQLite_native ) )
+	if( odbc && ( odbc->flags.bSQLite
+#ifdef USE_SQLITE
+					 || odbc->flags.bSQLite_native
+#endif
+					) )
       type_mysql = 0;
 
 	if( type_mysql )
@@ -220,13 +228,13 @@ SQLSTUB_PROC( TEXTSTR,EscapeSQLBinaryEx )( PODBC odbc, CTEXTSTR blob, _32 bloble
 	return result;
 }
 
-SQLSTUB_PROC( TEXTSTR,EscapeBinaryEx )( CTEXTSTR blob, _32 bloblen DBG_PASS )
+SQLSTUB_PROC( TEXTSTR,EscapeBinaryEx )( CTEXTSTR blob, PTRSZVAL bloblen DBG_PASS )
 {
    return EscapeSQLBinaryEx( NULL, blob, bloblen DBG_RELAY );
 }
 
 
-SQLSTUB_PROC( TEXTCHAR *,EscapeBinary )( CTEXTSTR blob, _32 bloblen )
+SQLSTUB_PROC( TEXTCHAR *,EscapeBinary )( CTEXTSTR blob, PTRSZVAL bloblen )
 {
 	return EscapeBinaryEx( blob, bloblen DBG_SRC );
 }
@@ -330,7 +338,7 @@ TEXTSTR DeblobifyString( CTEXTSTR blob, TEXTSTR outbuf, int outbuflen  )
 
 //---------------------------------------------------------------------------
 
-TEXTSTR RevertEscapeBinary( CTEXTSTR blob, _32 *bloblen )
+TEXTSTR RevertEscapeBinary( CTEXTSTR blob, PTRSZVAL *bloblen )
 {
 	TEXTCHAR *tmpnamebuf, *result;
 	int n;
@@ -548,8 +556,12 @@ SQLSTUB_PROC( int, SQLCreateTableEx )( PODBC odbc, CTEXTSTR filename, CTEXTSTR t
 		{
 			if( !pathchr( filename ) )
 			{
-            CTEXTSTR path = OSALOT_GetEnvironmentVariable( "MY_LOAD_PATH" );
-				snprintf( sec_file, sizeof( sec_file ), "%s/%s", path, filename );
+#ifndef HAVE_ENVIRONMENT
+            CTEXTSTR path = OSALOT_GetEnvironmentVariable( WIDE( "MY_LOAD_PATH" ) );
+				snprintf( sec_file, sizeof( sec_file ), WIDE( "%s/%s" ), path, filename );
+#else
+				snprintf( sec_file, sizeof( sec_file ), WIDE( "%s" ), filename );
+#endif
             Fopen( file, sec_file, WIDE("rt") );
 			}
 		}
@@ -559,7 +571,7 @@ SQLSTUB_PROC( int, SQLCreateTableEx )( PODBC odbc, CTEXTSTR filename, CTEXTSTR t
 			int gathering = FALSE;
 			TEXTCHAR *buf;
 			char fgets_buf[1024];
-			TEXTCHAR cmd[1024];
+         PVARTEXT pvt_cmd = VarTextCreate();
 			int nOfs = 0;
          if( !odbc->flags.bNoLogging )
 				lprintf( WIDE("Opened %s to read for table %s(%s)"), sec_file[0]?sec_file:filename, tablename,templatename );
@@ -620,12 +632,12 @@ SQLSTUB_PROC( int, SQLCreateTableEx )( PODBC odbc, CTEXTSTR filename, CTEXTSTR t
 										trailer[0] != ' ' &&
 										trailer[0] != '\t' )
 									trailer++;
-								sprintf( line, WIDE("%*.*s%s%s")
+								snprintf( line, sizeof( line ), WIDE("%*.*s%s%s")
 										 , (int)(tabname - p), (int)(tabname - p), p
 										 , templatename
 										 , trailer
 										 );
-								strcpy( buf, line );
+								StrCpyEx( buf, line, 1024 );
 								gathering = TRUE;
 							}
 							else
@@ -636,7 +648,7 @@ SQLSTUB_PROC( int, SQLCreateTableEx )( PODBC odbc, CTEXTSTR filename, CTEXTSTR t
 					}
 					if( gathering )
 					{
-						nOfs += sprintf( cmd + nOfs, WIDE("%s "), p );
+						nOfs += vtprintf( pvt_cmd, WIDE("%s "), p );
 						if( done )
 						{
 							if( options & CTO_DROP )
@@ -657,9 +669,11 @@ SQLSTUB_PROC( int, SQLCreateTableEx )( PODBC odbc, CTEXTSTR filename, CTEXTSTR t
 							//DebugBreak();
 							{
 								PTABLE table;
-								table = GetFieldsInSQL( cmd , 0 );
+                        PTEXT cmd = VarTextGet( pvt_cmd );
+								table = GetFieldsInSQL( GetText( cmd ), 1 );
 								CheckODBCTable( odbc, table, options );
 								DestroySQLTable( table );
+                        LineRelease( cmd );
 							}
 							break;
 						}
@@ -670,12 +684,13 @@ SQLSTUB_PROC( int, SQLCreateTableEx )( PODBC odbc, CTEXTSTR filename, CTEXTSTR t
 #endif
 			}
 			//lprintf( WIDE("Done with create...") );
+			VarTextDestroy( &pvt_cmd );
 			fclose( file );
 		}
 		else
 		{
 			lprintf( WIDE("Unable to open templatefile: %s or %s/%s"), filename
-					 , OSALOT_GetEnvironmentVariable( "MY_LOAD_PATH" )
+					 , OSALOT_GetEnvironmentVariable( WIDE( "MY_LOAD_PATH" ) )
                  , filename );
 
 		}
@@ -726,7 +741,7 @@ void DumpSQLTable( PTABLE table )
 	lprintf( "Table name: %s", table->name );
 	for( n = 0; n < table->fields.count; n++ )
 	{
-		lprintf( "Column %d '%s' [%s] [%s]"
+		lprintf( WIDE( "Column %d '%s' [%s] [%s]" )
               , n
 				 ,( (POINTER)table->fields.field[n].name )
 				 ,( (POINTER)table->fields.field[n].type )
@@ -739,10 +754,10 @@ void DumpSQLTable( PTABLE table )
 	}
 	for( n = 0; n < table->keys.count; n++ )
 	{
-		lprintf( "Key %s", table->keys.key[n].name?table->keys.key[n].name:"<NONAME>" );
+		lprintf( WIDE( "Key %s" ), table->keys.key[n].name?table->keys.key[n].name:WIDE( "<NONAME>" ) );
 		for( m = 0; table->keys.key[n].colnames[m] && m < MAX_KEY_COLUMNS; m++ )
 		{
-			lprintf( "Key part = %s"
+			lprintf( WIDE( "Key part = %s" )
 					 , ( (POINTER)table->keys.key[n].colnames[m] )
 					 );
 		}
@@ -1268,7 +1283,7 @@ retry:
 				// all read, but one row at a time is read from the database.
 				if( !retry )
 				{
-					strcpy( cmd, WIDE("select * from `%s`") );
+					StrCpyEx( cmd, WIDE("select * from `%s`"), 1024 );
 					retry++;
 					goto retry;
 				}
@@ -1294,13 +1309,13 @@ retry:
 							&&  strstr( table->fields.field[n].extra, "auto_increment" ) )
 						{
 							if( auto_increment_column )
-								lprintf( "SQLITE ERROR: Failure will happen - more than one auto_increment" );
+								lprintf( WIDE( "SQLITE ERROR: Failure will happen - more than one auto_increment" ) );
 							auto_increment_column = table->fields.field[n].name;
-							vtprintf( pvtCreate, WIDE("%s`%s` %s%s")
+							vtprintf( pvtCreate, WIDE( "%s`%s` %s%s" )
 									  , first?WIDE(""):WIDE(",")
 									  , table->fields.field[n].name
-									  , "INTEGER" //table->fields.field[n].type
-									  , " PRIMARY KEY"
+									  , WIDE( "INTEGER" ) //table->fields.field[n].type
+									  , WIDE( " PRIMARY KEY" )
 									  );
 						}
 						else
@@ -1308,12 +1323,12 @@ retry:
 							CTEXTSTR unsigned_word;
 							if(  table->fields.field[n].extra
 								&& (unsigned_word=StrStr( table->fields.field[n].extra
-								                        , "unsigned" )) )
+								                        , WIDE( "unsigned" ) )) )
 							{
 								TEXTSTR extra = StrDup( table->fields.field[n].extra );
 								int len = StrLen( unsigned_word + 8 ); 
 								// use same buffer allocated to write into...
-								snprintf( extra, strlen( table->fields.field[n].extra ), "%*.*s%*.*s"
+								snprintf( extra, strlen( table->fields.field[n].extra ), WIDE( "%*.*s%*.*s" )
 								       , (int)(unsigned_word-table->fields.field[n].extra)
 								       , (int)(unsigned_word-table->fields.field[n].extra)
 									   , table->fields.field[n].extra
@@ -1363,12 +1378,12 @@ retry:
 							{
 								if( table->keys.key[n].colnames[1] )
 								{
-									lprintf( "SQLITE ERROR: Complex PRIMARY KEY promoting to UNIQUE" );
+									lprintf( WIDE( "SQLITE ERROR: Complex PRIMARY KEY promoting to UNIQUE" ) );
 									vtprintf( pvtCreate, WIDE("%sUNIQUE `primary` (")
 											  , first?WIDE(""):WIDE(",") );
 								}
 								if( strcmp( auto_increment_column, table->keys.key[n].colnames[0] ) )
-									lprintf( "SQLITE ERROR: auto_increment column was not the PRMIARY KEY" );
+									lprintf( WIDE( "SQLITE ERROR: auto_increment column was not the PRMIARY KEY" ) );
 								else
 								{
 									// ignore key
@@ -1466,7 +1481,7 @@ retry:
 				}
 				txt_cmd = VarTextGet( pvtCreate );
 				if( f_odbc )
-					fprintf( f_odbc, "%s;\n", GetText( txt_cmd ) );
+					fprintf( f_odbc, WIDE( "%s;\n" ), GetText( txt_cmd ) );
 				else
 					SQLCommand( odbc, GetText( txt_cmd ) );
 				LineRelease( txt_cmd );

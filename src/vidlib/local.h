@@ -1,5 +1,21 @@
 #define l local_video_common
 
+#ifdef MINGW_SUX
+typedef struct tagUPDATELAYEREDWINDOWINFO {
+    DWORD               cbSize;
+    HDC                 hdcDst;
+    POINT CONST         *pptDst;
+    SIZE CONST          *psize;
+    HDC                 hdcSrc;
+    POINT CONST         *pptSrc;
+    COLORREF            crKey;
+    BLENDFUNCTION CONST *pblend;
+    DWORD               dwFlags;
+    RECT CONST          *prcDirty;
+} UPDATELAYEREDWINDOWINFO;
+
+#endif
+
 typedef struct vidlib_local_tag
 {
 	struct {
@@ -54,9 +70,11 @@ typedef struct vidlib_local_tag
 	PLIST ll_keyhooks;
    CRITICALSECTION csList;
 	//HHOOK hKeyHook;
+#ifndef _ARM_
 #ifdef __WINDOWS__
 	BOOL (WINAPI *UpdateLayeredWindow)(HWND,HDC,POINT*,SIZE*,HDC,POINT*,COLORREF,BLENDFUNCTION*,DWORD);
 	BOOL (WINAPI *UpdateLayeredWindowIndirect )(HWND hWnd, const UPDATELAYEREDWINDOWINFO *pULWInfo);
+#endif
 #endif
    _32 last_mouse_update; // last tick the mouse moved.
 } LOCAL;

@@ -635,7 +635,7 @@ static PTEXT GatherLineEx( PTEXT *pOutput, INDEX *pIndex, int bInsert, int bSave
        , maxlen = 0;
    PTEXT pReturn = NULL;
    PTEXT pDelete = NULL;
-   _8 character;
+   TEXTCHAR character;
    TEXTCHAR *output;
 
    if( !pOutput ) // must supply a holder for partial collection...
@@ -1032,14 +1032,20 @@ PTEXT GatherUserInput( PUSER_INPUT_BUFFER pci, PTEXT stroke )
 							, TRUE
 							, stroke );
 	if( pLine )
-      EnqueUserInputHistory( pci, pLine );
+	{
+		if( pci->CollectedEvent )
+		{
+			pci->CollectedEvent( pci->psvCollectedEvent, pLine );
+		}
+		EnqueUserInputHistory( pci, pLine );
+	}
    return pLine;
 }
 
 
 //----------------------------------------------------------------------------
 
-TYPELIB_PROC( void, EmptyUserInputHistory )( PUSER_INPUT_BUFFER pci )
+ void  EmptyUserInputHistory ( PUSER_INPUT_BUFFER pci )
 {
 	PTEXT pHistory;
 	while( ( pHistory = (PTEXT)DequeLink( &pci->InputHistory ) ) )
@@ -1053,10 +1059,11 @@ TYPELIB_PROC( void, EmptyUserInputHistory )( PUSER_INPUT_BUFFER pci )
 
 //----------------------------------------------------------------------------
 
-TYPELIB_PROC( PUSER_INPUT_BUFFER, CreateUserInputBuffer )( void )
+ PUSER_INPUT_BUFFER  CreateUserInputBuffer ( void )
 {
-	PUSER_INPUT_BUFFER pci = (PUSER_INPUT_BUFFER)Allocate( sizeof( USER_INPUT_BUFFER ) );
-   pci->CollectionBufferLock = FALSE;
+	PUSER_INPUT_BUFFER pci = New( USER_INPUT_BUFFER );
+	pci->CollectionBufferLock = FALSE;
+	pci->CollectedEvent = NULL;
 
    pci->CollectionBuffer = NULL;
 	pci->InputHistory = CreateLinkQueue();
@@ -1070,7 +1077,7 @@ TYPELIB_PROC( PUSER_INPUT_BUFFER, CreateUserInputBuffer )( void )
 
 //----------------------------------------------------------------------------
 
-TYPELIB_PROC( void, DestroyUserInputBuffer )( PUSER_INPUT_BUFFER *pci )
+ void  DestroyUserInputBuffer ( PUSER_INPUT_BUFFER *pci )
 {
 	if( pci )
 	{
@@ -1083,7 +1090,7 @@ TYPELIB_PROC( void, DestroyUserInputBuffer )( PUSER_INPUT_BUFFER *pci )
 //----------------------------------------------------------------------------
 
 
-TYPELIB_PROC( int, SetUserInputPosition )( PUSER_INPUT_BUFFER pci, int nPos, int whence )
+ int  SetUserInputPosition ( PUSER_INPUT_BUFFER pci, int nPos, int whence )
 {
 	if( whence == SEEK_SET )
 	{
@@ -1145,7 +1152,7 @@ TYPELIB_PROC( int, SetUserInputPosition )( PUSER_INPUT_BUFFER pci, int nPos, int
 
 //----------------------------------------------------------------------------
 
-TYPELIB_PROC( void, SetUserInputInsert )( PUSER_INPUT_BUFFER pci, int bInsert )
+ void  SetUserInputInsert ( PUSER_INPUT_BUFFER pci, int bInsert )
 {
 	if( bInsert < 0 )
 		pci->CollectionInsert = !pci->CollectionInsert;

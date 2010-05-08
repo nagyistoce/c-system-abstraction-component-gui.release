@@ -412,7 +412,7 @@ CTEXTSTR GetMethodName( POINTER Method, CTEXTSTR type, CTEXTSTR method )
 	TEXTCHAR buffer[256];
 	if( !Method )
 		return NULL;
-	sprintf( buffer, WIDE("psi/methods/%s/%s"), type, method );
+	snprintf( buffer, sizeof( buffer ), WIDE("psi/methods/%s/%s"), type, method );
 	for( name = GetFirstRegisteredName( buffer, &data );
 		 name;
 		  name = GetNextRegisteredName( &data ) )

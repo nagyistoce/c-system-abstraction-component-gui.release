@@ -374,7 +374,7 @@ void CPROC cBlotScaledMultiTImgAI( SCALED_BLOT_WORK_PARAMS
 // x, y location on dest
 // w, h are actual width and height to span...
 
-IMAGE_PROC( void, BlotScaledImageSizedEx )( ImageFile *pifDest, ImageFile *pifSrc
+ void  BlotScaledImageSizedEx ( ImageFile *pifDest, ImageFile *pifSrc
                                     , S_32 xd, S_32 yd
                                     , _32 _wd, _32 _hd
                                     , S_32 xs, S_32 ys

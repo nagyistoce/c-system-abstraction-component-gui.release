@@ -58,8 +58,8 @@ IDLE_PROC( void, AddIdleProc )( int (CPROC*Proc)( PTRSZVAL psv ), PTRSZVAL psvUs
 			newproc->flags.bRemove = 0;
 			newproc->function = Proc;
 			newproc->data = psvUser;
-         newproc->similar = NULL;
-         LinkLast( proc->similar, PIDLEPROC, newproc );
+			newproc->similar = NULL;
+			LinkLast( proc->similar, PIDLEPROC, newproc );
 			break;
 		}
 	}
@@ -68,12 +68,12 @@ IDLE_PROC( void, AddIdleProc )( int (CPROC*Proc)( PTRSZVAL psv ), PTRSZVAL psvUs
 	{
 		proc = (PIDLEPROC)Allocate( sizeof( IDLEPROC ) );
 		proc->thread = 0;
-      //proc->threads = CreateDataQueue( sizeof( THREAD_ID ) );
+		//proc->threads = CreateDataQueue( sizeof( THREAD_ID ) );
 		proc->flags.bDispatched = 0;
 		proc->flags.bRemove = 0;
 		proc->function = Proc;
 		proc->data = psvUser;
-      proc->similar = NULL;
+		proc->similar = NULL;
 		LinkThing( procs, proc );
 	}
 }
@@ -181,42 +181,3 @@ IDLE_PROC( int, IdleFor )( _32 dwMilliseconds )
 }; //	namespace idle {
 #endif
 
-//---------------------------------------------------
-// $Log: idle.c,v $
-// Revision 1.17  2005/01/27 07:08:19  panther
-// Linux cleaned.
-//
-// Revision 1.16  2004/10/02 06:16:16  d3x0r
-// Initialize new thread member of idle proc.
-//
-// Revision 1.15  2004/09/29 00:49:48  d3x0r
-// Added fancy wait for PSI frames which allows non-polling sleeping... Extended Idle() to result in meaningful information.
-//
-// Revision 1.14  2004/05/24 17:44:13  d3x0r
-// Okay really really fix types - other was adding loggin
-//
-// Revision 1.13  2004/05/24 17:42:49  d3x0r
-// Fixed idle return types
-//
-// Revision 1.12  2003/11/10 03:54:57  panther
-// Init proc to work right...
-//
-// Revision 1.11  2003/11/09 22:35:06  panther
-// Attempt to fix removal of idleproc allocated memory. Standardize linked list methods
-//
-// Revision 1.10  2003/10/26 01:58:37  panther
-// Hmm amazing that this didn't crash and burn!
-//
-// Revision 1.9  2003/10/21 00:21:47  panther
-// Export CloseSpaceEx (sharemem.h).  Unwind circular dependancy for idle.
-//
-// Revision 1.8  2003/09/18 07:53:20  panther
-// Added to idle - IdleFor - which sleeps for a time, calling idle procs
-//
-// Revision 1.7  2003/07/24 22:50:37  panther
-// Updates to make watcom happier
-//
-// Revision 1.6  2003/07/22 15:28:54  panther
-// Added cvs logging
-//
-//

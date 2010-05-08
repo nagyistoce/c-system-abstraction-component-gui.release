@@ -1,6 +1,6 @@
 
-#define DEFINE_DEFAULT_RENDER_INTERFACE
-#define USE_IMAGE_INTERFACE GetImageInterface()
+//#define DEFINE_DEFAULT_RENDER_INTERFACE
+//#define USE_IMAGE_INTERFACE GetImageInterface()
 #include <stdhdrs.h>
 #include <psi.h>
 #include <system.h>

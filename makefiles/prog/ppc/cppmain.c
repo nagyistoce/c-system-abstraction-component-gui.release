@@ -270,6 +270,7 @@ int ProcessInclude( int bNext )
 					{
 						fprintf( stddbg, WIDE("attempting \"%s\"\n") , Workname );
 					}
+               /*1234*/
 					if( OpenNewInputFile( Workname, GetCurrentFileName(), GetCurrentLine(), TRUE, bNext ) )
 					{
 						if( idx )
@@ -606,7 +607,10 @@ int PreProcessLine( void )
          //fprintf( stderr, WIDE("Include segments...") );
          //DumpSegs( pDirective );
 			ProcessInclude( FALSE );
-         return FALSE;
+			if( g.flags.keep_includes )
+				SetCurrentWord( pFirstWord );
+
+         return g.flags.keep_includes;
       }
 //== INCLUDE NEXT ==================================================
 		else if( TextLike( pDirective, WIDE("include_next") ) )
@@ -614,7 +618,9 @@ int PreProcessLine( void )
          //fprintf( stderr, WIDE("Include segments...") );
          //DumpSegs( pDirective );
 			ProcessInclude( TRUE );
-         return FALSE;
+         if( g.flags.keep_includes )
+				SetCurrentWord( pFirstWord );
+         return g.flags.keep_includes;
       }
 //== DEFINE =======================================================
       else if( TextLike( pDirective, WIDE("define") ) )
@@ -931,8 +937,14 @@ void RunProcessFile( void )
 {
    while( ReadLine( FALSE ) )
 	{
+      int depth = CurrentFileDepth();
 		if( PreProcessLine() )
 		{
+			if( g.flags.keep_includes )
+			{
+				if( depth > 1 )
+					continue;
+			}
          if( ProcessStatement() )
 			{
 				PTEXT pOut;
@@ -1057,6 +1069,8 @@ void usage( void )
 			 "                        (without line directive)\n" );
 	printf( WIDE("    -K                  emit unknown pragmas into output\n") );
    printf( WIDE("    -k                  do not emit unknown pragma (default)\n") );
+	printf( WIDE("    -c                  keep comments in output\n") );
+	printf( WIDE("    -p                  keep includes in output (don't output content of include)\n") );
 	printf( WIDE("    -f                  force / into \\\n") );
    printf( WIDE("    -F                  force \\ into /\n") );
    printf( WIDE("    -[Oo]<file>         specify the output filename\n") );
@@ -1315,6 +1329,14 @@ int main( char argc, char **argv, char **env )
 						if( argv[i][n] == '-' )
 						{
                      negarg = 1;
+						}
+						else if( argv[i][n] == 'c' )
+						{
+                     g.flags.keep_comments = 1;
+						}
+						else if( argv[i][n] == 'p' )
+						{
+                     g.flags.keep_includes = 1;
 						}
 						else if( argv[i][n] == 'I' )
 						{

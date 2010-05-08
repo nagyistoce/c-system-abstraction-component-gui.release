@@ -1,7 +1,9 @@
 #define IMAGE_LIBRARY_SOURCE
 #define IMAGE_MAIN
 #ifdef _MSC_VER
+#ifndef UNDER_CE
 #include <emmintrin.h>
+#endif
 // intrinsics
 #endif
 
@@ -148,7 +150,7 @@ static CDATA CPROC cColorAverage( CDATA c1, CDATA c2
 
 //----------------------------------------------------------------------
 
-IMAGE_PROC( void, FixImagePosition )( ImageFile *pImage )
+ void  FixImagePosition ( ImageFile *pImage )
 {
 	if( pImage )
 	{
@@ -166,7 +168,7 @@ IMAGE_PROC( void, FixImagePosition )( ImageFile *pImage )
 
 //----------------------------------------------------------------------
 
-IMAGE_PROC( void, SetImageBound )( Image pImage, P_IMAGE_RECTANGLE bound )
+ void  SetImageBound ( Image pImage, P_IMAGE_RECTANGLE bound )
 {
    if( !bound )
       return;
@@ -324,7 +326,7 @@ static void ComputeImageData( ImageFile *pImage )
 
 //----------------------------------------------------------------------
 
-IMAGE_PROC( void, MoveImage )( ImageFile *pImage, S_32 x, S_32 y )
+ void  MoveImage ( ImageFile *pImage, S_32 x, S_32 y )
 {
 	if( !pImage->pParent
 		&& !( pImage->flags & IF_FLAG_OWN_DATA ) ) // cannot move master iamge... only sub images..
@@ -337,7 +339,7 @@ IMAGE_PROC( void, MoveImage )( ImageFile *pImage, S_32 x, S_32 y )
 
 //----------------------------------------------------------------------
 
-IMAGE_PROC( void, GetImageSize )( ImageFile *image, _32 *width, _32 *height )
+ void  GetImageSize ( ImageFile *image, _32 *width, _32 *height )
 {
     if( image )
     {
@@ -349,7 +351,7 @@ IMAGE_PROC( void, GetImageSize )( ImageFile *image, _32 *width, _32 *height )
 }
 //----------------------------------------------------------------------
 
-IMAGE_PROC( PCDATA, GetImageSurface )       ( Image pImage )
+ PCDATA  GetImageSurface        ( Image pImage )
 {
    if( pImage )
       return (PCDATA)pImage->image;
@@ -358,7 +360,7 @@ IMAGE_PROC( PCDATA, GetImageSurface )       ( Image pImage )
 
 //----------------------------------------------------------------------
 
-IMAGE_PROC( void, ResizeImageEx )( ImageFile *pImage, S_32 width, S_32 height DBG_PASS )
+ void  ResizeImageEx ( ImageFile *pImage, S_32 width, S_32 height DBG_PASS )
 {
    if( !pImage )
       return;
@@ -413,7 +415,7 @@ IMAGE_PROC( void, ResizeImageEx )( ImageFile *pImage, S_32 width, S_32 height DB
 
 //----------------------------------------------------------------------
 
-IMAGE_PROC( void, OrphanSubImage )( Image pImage )
+ void  OrphanSubImage ( Image pImage )
 {
    // if it owns its own data, it's not a child (it might have a parent)
    if( !pImage || !pImage->pParent
@@ -433,7 +435,7 @@ IMAGE_PROC( void, OrphanSubImage )( Image pImage )
 
 //----------------------------------------------------------------------
 
-IMAGE_PROC( void, AdoptSubImage )( Image pFoster, Image pOrphan )
+ void  AdoptSubImage ( Image pFoster, Image pOrphan )
 {
    if( !pFoster || !pOrphan || pOrphan->pParent )
    {
@@ -455,7 +457,7 @@ IMAGE_PROC( void, AdoptSubImage )( Image pFoster, Image pOrphan )
 
 //----------------------------------------------------------------------
 
-IMAGE_PROC( ImageFile *,MakeSubImageEx )( ImageFile *pImage, S_32 x, S_32 y, _32 width, _32 height DBG_PASS)
+ ImageFile * MakeSubImageEx ( ImageFile *pImage, S_32 x, S_32 y, _32 width, _32 height DBG_PASS)
 {
    ImageFile *p;
    //if( !pImage )
@@ -488,7 +490,7 @@ IMAGE_PROC( ImageFile *,MakeSubImageEx )( ImageFile *pImage, S_32 x, S_32 y, _32
 
 //----------------------------------------------------------------------
 
-IMAGE_PROC( ImageFile *,BuildImageFileEx )( PCOLOR pc, _32 Width, _32 Height DBG_PASS )
+ ImageFile * BuildImageFileEx ( PCOLOR pc, _32 Width, _32 Height DBG_PASS )
 {
    ImageFile *p;
    p = (ImageFile*)AllocateEx( sizeof( ImageFile ) DBG_RELAY);
@@ -512,7 +514,7 @@ IMAGE_PROC( ImageFile *,BuildImageFileEx )( PCOLOR pc, _32 Width, _32 Height DBG
 
 //----------------------------------------------------------------------
 
-IMAGE_PROC( ImageFile *, RemakeImageEx )( ImageFile *pImage, PCOLOR pc
+ ImageFile *  RemakeImageEx ( ImageFile *pImage, PCOLOR pc
                                  , _32 width, _32 height DBG_PASS)
 {
    // for this routine I'm gonna have to assume that the image
@@ -570,7 +572,7 @@ IMAGE_PROC( ImageFile *, RemakeImageEx )( ImageFile *pImage, PCOLOR pc
 //----------------------------------------------------------------------
 
 
-IMAGE_PROC( ImageFile *,MakeImageFileEx )(_32 Width, _32 Height DBG_PASS)
+ ImageFile * MakeImageFileEx (_32 Width, _32 Height DBG_PASS)
 {
 	//lprintf( WIDE("Allocate %d"),sizeof( COLOR ) * Width * Height  );
 	Image tmp = BuildImageFileEx( (PCOLOR)AllocateEx( sizeof( COLOR ) * Width * Height DBG_RELAY )
@@ -585,7 +587,7 @@ IMAGE_PROC( ImageFile *,MakeImageFileEx )(_32 Width, _32 Height DBG_PASS)
 
 //----------------------------------------------------------------------
 
-IMAGE_PROC( void, UnmakeImageFileEx )( ImageFile *pif DBG_PASS)
+ void  UnmakeImageFileEx ( ImageFile *pif DBG_PASS)
 {
    if( pif )
    {
@@ -629,61 +631,60 @@ Image DecodeMemoryToImage( P_8 buf, _32 size )
 	Image file = NULL;
 	//lprintf( WIDE("Attempting to decode an image...") );
 #ifdef DO_PNG
-  if( !file )
-        file = ImagePngFile( buf, size );
+	if( !file )
+		file = ImagePngFile( buf, size );
 #endif //DO_PNG
 
 #ifdef DO_GIF
-  if( !file )
-        file = ImageGifFile( buf, size );
+	if( !file )
+		file = ImageGifFile( buf, size );
 #endif //DO_GIF
 
 #ifdef DO_BMP
-   if( !file )
-      file = ImageBMPFile( buf, size );
+	if( !file )
+		file = ImageBMPFile( buf, size );
 #endif
 
-   // PLEASE NOTE: JPEG IS DUMB! and aborted our application
-   //  PLEASE PLEASE take a look at this...
+	// PLEASE NOTE: JPEG IS DUMB! and aborted our application
+	//  PLEASE PLEASE take a look at this...
 #ifdef DO_JPG
-  if( !file )
-        file = ImageJpgFile( buf, size );
+	if( !file )
+		file = ImageJpgFile( buf, size );
 #endif
 
 #ifdef DO_TGA
-  if( !file )
-        file = ImageTgaFile( buf, size );
+	if( !file )
+		file = ImageTgaFile( buf, size );
 #endif //DO_TGA
 
-// consider a bitmap loader - though bmp has no header...
+	// consider a bitmap loader - though bmp has no header...
 
-  return file;
+	return file;
 }
 //----------------------------------------------------------------------
 
-IMAGE_PROC( ImageFile*, ImageLoadImageFileEx )(  CTEXTSTR filename DBG_PASS )
+ImageFile*  ImageLoadImageFileEx (  CTEXTSTR filename DBG_PASS )
 {
    _32 size;
    P_8 buf;
    ImageFile* file = NULL;
-   FILE* fp;
-   Fopen ( fp, filename, WIDE("rb"));
-#if 0
+	FILE* fp;
+
+   fp = sack_fopen( 0, filename, WIDE("rb"));
    {
       char path[280];
-      //GetCurrentPath( path );
-      Log4( WIDE("Loading image file: %s %s %p %d"), path, filename, fp, GetLastError() );
+      GetCurrentPath( path, sizeof( path ) );
+      lprintf( WIDE("Loading image file: [%s] %s %p %d"), path, filename, fp, GetLastError() );
    }
-#endif
    if (!fp)
       return NULL;
 
-   fseek (fp, 0, SEEK_END);
+   size = sack_fseek (fp, 0, SEEK_END);
    size = ftell (fp);
-   fseek (fp, 0, SEEK_SET);
+   sack_fseek (fp, 0, SEEK_SET);
    buf = (_8*) AllocateEx( size + 1 DBG_RELAY );
-   fread (buf, 1, size + 1, fp);
-   fclose (fp);
+   sack_fread (buf, 1, size + 1, fp);
+   sack_fclose (fp);
 
    // printf(" so far okay - %d (%d)\n", buf, size );
 
@@ -696,14 +697,14 @@ IMAGE_PROC( ImageFile*, ImageLoadImageFileEx )(  CTEXTSTR filename DBG_PASS )
 
 //---------------------------------------------------------------------------
 
-IMAGE_PROC( ImageFile*, LoadImageFileEx )( CTEXTSTR filename DBG_PASS )
+ ImageFile*  LoadImageFileEx ( CTEXTSTR filename DBG_PASS )
 {
     return ImageLoadImageFileEx( filename DBG_RELAY );
 }
 
 //---------------------------------------------------------------------------
 
-IMAGE_PROC( int, MergeRectangle )( IMAGE_RECTANGLE *r, IMAGE_RECTANGLE *r1, IMAGE_RECTANGLE *r2 )
+ int  MergeRectangle ( IMAGE_RECTANGLE *r, IMAGE_RECTANGLE *r1, IMAGE_RECTANGLE *r2 )
 {
    // results in the union of the area extents...
    // union will always result in a rectangle?...
@@ -738,7 +739,7 @@ IMAGE_PROC( int, MergeRectangle )( IMAGE_RECTANGLE *r, IMAGE_RECTANGLE *r1, IMAG
 
 //---------------------------------------------------------------------------
 
-IMAGE_PROC( int, IntersectRectangle )( IMAGE_RECTANGLE *r, IMAGE_RECTANGLE *r1, IMAGE_RECTANGLE *r2 )
+ int  IntersectRectangle ( IMAGE_RECTANGLE *r, IMAGE_RECTANGLE *r1, IMAGE_RECTANGLE *r2 )
 {
    int tmp1, tmp2;
    /*
@@ -878,13 +879,13 @@ IMAGE_NAMESPACE
 // it is used for clear image, clear image to
 // and for arbitrary rectangles - the direction
 // of images does not matter.
-IMAGE_PROC( void, BlatColor )( ImageFile *pifDest, S_32 x, S_32 y, _32 w, _32 h, CDATA color )
+ void  BlatColor ( Image pifDest, S_32 x, S_32 y, _32 w, _32 h, CDATA color )
 {
    PCDATA po;
    int  oo;
 	if( !pifDest || !pifDest->image )
 	{
-      lprintf( "No dest, or no dest image." );
+		lprintf( WIDE( "No dest, or no dest image." ) );
 		return;
 	}
 
@@ -906,7 +907,7 @@ IMAGE_PROC( void, BlatColor )( ImageFile *pifDest, S_32 x, S_32 y, _32 w, _32 h,
 		r2.height = pifDest->height;
 		if( !IntersectRectangle( &r, &r1, &r2 ) )
 		{
-			lprintf( "blat color is out of bounds (%"_32fs",%"_32fs")x(%"_32f",%"_32f") (%"_32fs",%"_32fs")x(%"_32f",%"_32f")"
+			lprintf( WIDE("blat color is out of bounds (%")_32fs WIDE(",%")_32fs WIDE(")x(%")_32f WIDE(",%")_32f WIDE(") (%")_32fs WIDE(",%")_32fs WIDE(")x(%")_32f WIDE(",%")_32f WIDE(")")
 				, x, y, w, h
 				, r2.x, r2.y, r2.width, r2.height );
 			return;
@@ -943,14 +944,14 @@ IMAGE_PROC( void, BlatColor )( ImageFile *pifDest, S_32 x, S_32 y, _32 w, _32 h,
    BlatPixels( po, oo, w, h, color );
 }
 
-IMAGE_PROC( void, BlatColorAlpha )( ImageFile *pifDest, S_32 x, S_32 y, _32 w, _32 h, CDATA color )
+ void  BlatColorAlpha ( ImageFile *pifDest, S_32 x, S_32 y, _32 w, _32 h, CDATA color )
 {
    PCDATA po;
    int  oo;
 
 	if( !pifDest || !pifDest->image )
 	{
-      lprintf( "No dest, or no dest image." );
+		lprintf( WIDE( "No dest, or no dest image." ) );
 
 		return;
 	}
@@ -970,7 +971,7 @@ IMAGE_PROC( void, BlatColorAlpha )( ImageFile *pifDest, S_32 x, S_32 y, _32 w, _
       r2.height = pifDest->height;
 		if( !IntersectRectangle( &r, &r1, &r2 ) )
 		{
-         lprintf( "Blat color out of bounds" );
+			lprintf( WIDE( "Blat color out of bounds" ) );
 			return;
 		}
 #ifdef DEBUG_BLATCOLOR
@@ -998,14 +999,14 @@ IMAGE_PROC( void, BlatColorAlpha )( ImageFile *pifDest, S_32 x, S_32 y, _32 w, _
 }
 //---------------------------------------------------------------------------
 #undef ClearImageTo
-IMAGE_PROC( void, ClearImageTo )( ImageFile *pImage, CDATA c )
+ void  ClearImageTo ( ImageFile *pImage, CDATA c )
 {
    BlatColor( pImage, 0, 0, pImage->real_width, pImage->real_height, c );
 }
 
 //---------------------------------------------------------------------------
 #undef ClearImage
-IMAGE_PROC( void, ClearImage )( ImageFile *pImage )
+ void  ClearImage ( ImageFile *pImage )
 {
    // should use 1 bit blue to make it definatly non transparent?
    // hmm.... nah - clear is CLEAR image...
@@ -1019,7 +1020,7 @@ IMAGE_PROC( void, ClearImage )( ImageFile *pImage )
 //#pragma warning( " // this should only be used by internal functions (load gif)" )
 //#warning // and on DYNAMIC bitmaps - do NOT use on DISPLAY bitmaps...
 
-IMAGE_PROC( void, FlipImageEx )( ImageFile *pif DBG_PASS )
+ void  FlipImageEx ( ImageFile *pif DBG_PASS )
 {
    PCOLOR temp, del;
    int i;
@@ -1043,14 +1044,14 @@ IMAGE_PROC( void, FlipImageEx )( ImageFile *pif DBG_PASS )
 
 //---------------------------------------------------------------------------
 
-IMAGE_PROC( void, UnloadFont )( Font font )
+ void  UnloadFont ( Font font )
 {
    // uhmm - release? I dunno... nothin really
    // the font passed to loadfont should be discarded by the
    // application.
 }
 
-IMAGE_PROC( Font, LoadFont )( Font font )
+ Font  LoadFont ( Font font )
 {
    // with direct usage we need no further information.
    return font;
@@ -1194,7 +1195,7 @@ IMAGE_NAMESPACE
 
 //---------------------------------------------------------------------------
 
-IMAGE_PROC( void, SetStringBehavior )( ImageFile *pImage, _32 behavior )
+ void  SetStringBehavior ( ImageFile *pImage, _32 behavior )
 {
    pImage->flags &= ~(IF_FLAG_C_STRING|IF_FLAG_MENU_STRING|IF_FLAG_CONTROL_STRING );
    if( behavior == STRING_PRINT_RAW )
@@ -1209,7 +1210,7 @@ IMAGE_PROC( void, SetStringBehavior )( ImageFile *pImage, _32 behavior )
 
 //---------------------------------------------------------------------------
 
-IMAGE_PROC( void, SetImageAuxRect )( Image pImage, P_IMAGE_RECTANGLE pRect )
+ void  SetImageAuxRect ( Image pImage, P_IMAGE_RECTANGLE pRect )
 {
    //lprintf( WIDE("Setting aux rect on %p = %d,%d - %d,%d"), pImage, pRect->x, pRect->y, pRect->width, pRect->height );
    if( pImage && pRect )
@@ -1218,7 +1219,7 @@ IMAGE_PROC( void, SetImageAuxRect )( Image pImage, P_IMAGE_RECTANGLE pRect )
 
 //---------------------------------------------------------------------------
 
-IMAGE_PROC( void, GetImageAuxRect )( Image pImage, P_IMAGE_RECTANGLE pRect )
+ void  GetImageAuxRect ( Image pImage, P_IMAGE_RECTANGLE pRect )
 {
    if( pImage && pRect )
       *pRect = pImage->auxrect;
@@ -1254,7 +1255,7 @@ IMAGE_NAMESPACE
 #define VFUNC(n) n
 #endif
 
-IMAGE_PROC( void, SetBlotMethod )( _32 method )
+ void  SetBlotMethod ( _32 method )
 {
 #ifdef HAS_ASSEMBLY
    if( method == BLOT_MMX )
@@ -1354,13 +1355,13 @@ void f(void )
    link_interface_please = 1;
 }
 
-IMAGE_PROC( void, SyncImage )( void )
+ void  SyncImage ( void )
 {
    // if used directlyt his is alwasy syncronzied...
 }
 
 
-IMAGE_PROC( PCDATA, ImageAddress )( Image i, S_32 x, S_32 y )
+ PCDATA  ImageAddress ( Image i, S_32 x, S_32 y )
 {
 	return ((CDATA*) \
                                ((i)->image + (( (x) - (i)->eff_x ) \
@@ -1371,55 +1372,55 @@ IMAGE_PROC( PCDATA, ImageAddress )( Image i, S_32 x, S_32 y )
 }
 
 #ifdef STUPID_NO_DATA_EXPORTS
-#define NoIMAGE_PROC(a,b) a CPROC b
-NoIMAGE_PROC( CDATA, ColorAverage )( CDATA c1, CDATA c2
+#define Noa b a CPROC b
+No CDATA  ColorAverage ( CDATA c1, CDATA c2
 											, int d, int max )
 {
    _ColorAverage(c1,c2,d,max);
 }
 
 
-NoIMAGE_PROC( void,plot)      ( Image pi, S_32 x, S_32 y, CDATA c )
+No void plot      ( Image pi, S_32 x, S_32 y, CDATA c )
 {
    _plot(pi,x,y,c);
 }
-NoIMAGE_PROC( void,plotalpha) ( Image pi, S_32 x, S_32 y, CDATA c )
+No void plotalpha ( Image pi, S_32 x, S_32 y, CDATA c )
 {
    _plotalpha(pi,x,y,c);
 }
-NoIMAGE_PROC( CDATA,getpixel) ( Image pi, S_32 x, S_32 y )
+No CDATA getpixel ( Image pi, S_32 x, S_32 y )
 {
    return _getpixel(pi,x,y);
 }
 //-------------------------------
 // Line functions  (lineasm.asm) // should include a line.c ... for now core was assembly...
 //-------------------------------
-NoIMAGE_PROC( void,do_line)     ( Image pBuffer, S_32 x, S_32 y, S_32 xto, S_32 yto, CDATA color )  // d is color data...
+No void do_line     ( Image pBuffer, S_32 x, S_32 y, S_32 xto, S_32 yto, CDATA color )  // d is color data...
 {
    _do_line( pBuffer, x, y, xto, yto, color );
 }
-NoIMAGE_PROC( void,do_lineAlpha)( Image pBuffer, S_32 x, S_32 y, S_32 xto, S_32 yto, CDATA color)  // d is color data...
+No void do_lineAlpha( Image pBuffer, S_32 x, S_32 y, S_32 xto, S_32 yto, CDATA color)  // d is color data...
 
 {
 	_do_lineAlpha( pBuffer, x, y, xto, yto, color );
 }
-NoIMAGE_PROC( void,do_hline)     ( Image pImage, S_32 y, S_32 xfrom, S_32 xto, CDATA color )
+No void do_hline     ( Image pImage, S_32 y, S_32 xfrom, S_32 xto, CDATA color )
 {
 	_do_hline( pImage, y, xfrom, xto, color );
 }
-NoIMAGE_PROC( void,do_vline)     ( Image pImage, S_32 x, S_32 yfrom, S_32 yto, CDATA color )
+No void do_vline     ( Image pImage, S_32 x, S_32 yfrom, S_32 yto, CDATA color )
 {
 	_do_vline( pImage, x, yfrom, yto, color );
 }
-NoIMAGE_PROC( void,do_hlineAlpha)( Image pImage, S_32 y, S_32 xfrom, S_32 xto, CDATA color )
+No void do_hlineAlpha( Image pImage, S_32 y, S_32 xfrom, S_32 xto, CDATA color )
 {
 	_do_hlineAlpha( pImage, y, xfrom, xto, color );
 }
-NoIMAGE_PROC( void,do_vlineAlpha)( Image pImage, S_32 x, S_32 yfrom, S_32 yto, CDATA color )
+No void do_vlineAlpha( Image pImage, S_32 x, S_32 yfrom, S_32 yto, CDATA color )
 {
 	_do_vlineAlpha( pImage, x,yfrom, yto, color );
 }
-NoIMAGE_PROC( void, do_lineExV)( Image pImage, S_32 x, S_32 y
+No void  do_lineExV( Image pImage, S_32 x, S_32 y
 									  , S_32 xto, S_32 yto, CDATA color
 									  , void (*func)( Image pif, S_32 x, S_32 y, int d ) )
 {

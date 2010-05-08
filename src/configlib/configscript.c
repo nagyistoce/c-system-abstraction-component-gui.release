@@ -35,7 +35,7 @@ using namespace sack::math::fraction;
 #define strnicmp strncasecmp
 #endif
 
-#define CompareText(l1,l2)    ( stricmp( GetText(l1), GetText(l2) ) )
+#define CompareText(l1,l2)    ( StrCaseCmp( GetText(l1), GetText(l2) ) )
 
 // all matches to content are done case insensitive.
 
@@ -208,6 +208,7 @@ typedef struct global_tag {
 
 	struct {
 		BIT_FIELD bDisableMemoryLogging : 1;
+		BIT_FIELD bLogUnhandled : 1;
 	} flags;
 } GLOBAL;
 
@@ -223,8 +224,10 @@ PRELOAD( InitGlobalConfig2 )
 {
 #ifdef __NO_OPTIONS__
 	g.flags.bDisableMemoryLogging = 1;
+	g.flags.bLogUnhandled = 0;
 #else
 	g.flags.bDisableMemoryLogging = SACK_GetProfileIntEx( GetProgramName(), "SACK/Config Script/Disable Memory Logging", 1, TRUE );
+	g.flags.bLogUnhandled = SACK_GetProfileIntEx( "SACK/Config Script", "Log Unhandled if no application handler", 0, TRUE );
 #endif
 }
 
@@ -244,65 +247,67 @@ void DoInit( void )
 
 //---------------------------------------------------------------------
 
-void LogElement( char *leader, PCONFIG_ELEMENT pce )
+void LogElementEx( TEXTCHAR *leader, PCONFIG_ELEMENT pce DBG_PASS)
+#define LogElement(leader,pc) LogElementEx(leader,pc DBG_SRC )
+
 {
     if( !pce )
     {
-        Log( WIDE("Nothing.") );
+        _lprintf(DBG_RELAY)( WIDE("Nothing.") );
         return;
     }
     switch( pce->type )
     {
     case CONFIG_UNKNOWN:
-        Log( WIDE("This thing was never configured?") );
+        _lprintf(DBG_RELAY)( WIDE("This thing was never configured?") );
         break;
     case CONFIG_TEXT:
-        Log2( WIDE("%s text constant: %s"), leader, GetText( pce->data[0].pText ) );
+        _lprintf(DBG_RELAY)( WIDE("%s text constant: %s"), leader, GetText( pce->data[0].pText ) );
         break;
     case CONFIG_BOOLEAN:
-        Log1( WIDE("%s a boolean"), leader );
+        _lprintf(DBG_RELAY)( WIDE("%s a boolean"), leader );
         break;
     case CONFIG_INTEGER:
-        Log1( WIDE("%s integer"), leader );
+        _lprintf(DBG_RELAY)( WIDE("%s integer"), leader );
         break;
     case CONFIG_COLOR:
-        Log1( WIDE("%s color"), leader );
+        _lprintf(DBG_RELAY)( WIDE("%s color"), leader );
         break;
     case CONFIG_BINARY:
-        Log1( WIDE("%s binary"), leader );
+        _lprintf(DBG_RELAY)( WIDE("%s binary"), leader );
         break;
     case CONFIG_FLOAT:
-        Log1( WIDE("%s Floating"), leader );
+        _lprintf(DBG_RELAY)( WIDE("%s Floating"), leader );
         break;
     case CONFIG_FRACTION:
-        Log1( WIDE("%s fraction"), leader );
+        _lprintf(DBG_RELAY)( WIDE("%s fraction"), leader );
         break;
     case CONFIG_SINGLE_WORD:
-        Log1( WIDE("%s a single word"), leader );
+		 _lprintf(DBG_RELAY)( WIDE("%s a single word:%p"), leader, pce->data[0].pWord );
         break;
     case CONFIG_MULTI_WORD:
-        Log1( WIDE("%s a multi word"), leader );
+        _lprintf(DBG_RELAY)( WIDE("%s a multi word"), leader );
         break;
    case CONFIG_PROCEDURE:
-    Log1( WIDE("%s a procedure to call."), leader );
+    _lprintf(DBG_RELAY)( WIDE("%s a procedure to call."), leader );
     break;
    case CONFIG_URL:
-    Log1( WIDE("%s a url?"), leader );
+    _lprintf(DBG_RELAY)( WIDE("%s a url?"), leader );
     break;
    case CONFIG_FILE:
-    Log1( WIDE("%s a filename"), leader );
+    _lprintf(DBG_RELAY)( WIDE("%s a filename"), leader );
     break;
    case CONFIG_PATH:
-    Log1( WIDE("%s a path name"), leader );
+    _lprintf(DBG_RELAY)( WIDE("%s a path name"), leader );
     break;
    case CONFIG_FILEPATH:
-    Log1( WIDE("%s a full path and file name"), leader );
+    _lprintf(DBG_RELAY)( WIDE("%s a full path and file name"), leader );
     break;
    case CONFIG_ADDRESS:
-    Log1( WIDE("%s an address"), leader );
+    _lprintf(DBG_RELAY)( WIDE("%s an address"), leader );
     break;
     default:
-        Log( WIDE("Do not know what this is.") );
+        _lprintf(DBG_RELAY)( WIDE("Do not know what this is.") );
         break;
     }
 }
@@ -315,11 +320,11 @@ void DumpConfigurationEvaluator( PCONFIG_HANDLER pch )
    PCONFIG_ELEMENT pce;
 	LIST_FORALL( pch->ConfigTestRoot.pConstElementList, idx, PCONFIG_ELEMENT, pce )
 	{
-      LogElement( "const", pce );
+      LogElement( WIDE("const"), pce );
 	}
 	LIST_FORALL( pch->ConfigTestRoot.pVarElementList, idx, PCONFIG_ELEMENT, pce )
 	{
-      LogElement( "var", pce );
+      LogElement( WIDE( "var" ), pce );
 	}
 }
 
@@ -360,12 +365,12 @@ static PTEXT CPROC FilterLines( POINTER *scratch, PTEXT buffer )
 		if( text )
 		{
 			LineRelease( buffer );
-         lprintf( "Returning buffer [%s]", GetText( text ) );
+         lprintf( WIDE( "Returning buffer [%s]" ), GetText( text ) );
          return text;
 		}
 		else
 		{
-         lprintf( "Returning buffer [%s]", GetText( buffer ) );
+         lprintf( WIDE( "Returning buffer [%s]" ), GetText( buffer ) );
 			return buffer; // pass it on to others - end of stream..
 		}
 	}
@@ -380,7 +385,7 @@ static PTEXT CPROC FilterLines( POINTER *scratch, PTEXT buffer )
 			Release( scratch[0] );
 			scratch[0] = NULL;
 #ifdef LOG_LINES_READ
-			lprintf( "Returning buffer [%s]", GetText( final ) );
+			lprintf( WIDE( "Returning buffer [%s]" ), GetText( final ) );
 #endif
          return final;
 		}
@@ -393,7 +398,7 @@ static PTEXT CPROC FilterLines( POINTER *scratch, PTEXT buffer )
 		int end = 0;
 		int length = GetTextSize( buffer );
 		CTEXTSTR chardata = GetText( buffer );
-      //lprintf( "Considering buffer %s", GetText( buffer ) + data->skip );
+      //lprintf( WIDE( "Considering buffer %s" ), GetText( buffer ) + data->skip );
 		if( !length )
 			LineRelease( SegGrab( buffer ) );
 		for( n = thisskip; n < length; n++ )
@@ -401,15 +406,24 @@ static PTEXT CPROC FilterLines( POINTER *scratch, PTEXT buffer )
 			if( chardata[n] == '\n' ||
 				chardata[n] == '\r' )
 			{
-				if( chardata[n] == '\n' && end )
+				if( chardata[n] == '\n' )
 				{
+               end = 1;
+					n++; // include this character.
 					//lprintf( WIDE("BLANK LINE - CONSUMED") );
+					break;
+				}
+				if( end ) // \r\r is two lines too
+				{
 					break;
 				}
 				end = 1;
 			}
 			else if( end )
+			{
+				// any other character... after a \r.. don't include the character.
 				break;
+			}
 		}
 		total_length += n - thisskip;
 		if( end )
@@ -430,7 +444,7 @@ static PTEXT CPROC FilterLines( POINTER *scratch, PTEXT buffer )
 					len = total_length - ofs;
 				MemCpy( GetText( result ) + ofs
 					, GetText( buffer ) + thisskip
-					, len );
+					, sizeof( TEXTCHAR)*len );
 				ofs += len;
 				n += len;
 				if( ofs < total_length )
@@ -451,7 +465,7 @@ static PTEXT CPROC FilterLines( POINTER *scratch, PTEXT buffer )
 			GetText(result)[total_length] = 0;
 			//lprintf( "Considering buffer %s", GetText( result ) );
 #ifdef LOG_LINES_READ
-			lprintf( "Returning buffer [%s]", GetText( result ) );
+			lprintf( WIDE( "Returning buffer [%s]" ), GetText( result ) );
 #endif
 			return result;
 		}
@@ -498,6 +512,7 @@ static PTEXT CPROC FilterTerminators( POINTER *scratch, PTEXT buffer )
 		{
 			TEXTSTR chardata = GetText( buffer );
 			int length = GetTextSize( buffer );
+         //LogBinary( chardata, length );
 			do
 			{
 				modified = 0;
@@ -571,7 +586,7 @@ static PTEXT CPROC FilterEscapesAndComments( POINTER *scratch, PTEXT pText )
 					switch( text[src] )
 					{
 					case 0:
-                  lprintf( "Continuation at end of line... save this and append next line please." );
+                  lprintf( WIDE( "Continuation at end of line... save this and append next line please." ) );
                   break;
 					default:
 						text[dest++] = text[src];
@@ -626,7 +641,7 @@ static PTEXT get_line(FILE *source /*FOLD00*/
 				{
 				// request any existing data without adding more...
 					newline = filter( GetLinkAddress( filter_data, idx ), newline );
-					//lprintf( "Process line: %s", GetText( newline ) );
+					//lprintf( WIDE( "Process line: %s" ), GetText( newline ) );
                //lprintf( WIDE("after filter %d line = %s"), idx, GetText( newline ) );
 					if( newline )
 						didone = TRUE;
@@ -655,13 +670,13 @@ static PTEXT get_line(FILE *source /*FOLD00*/
 				else
 				{
 					SetTextSize( newline, (_32)readlen );
-					//lprintf( "Process line: %s", GetText( newline ) );
+					//lprintf( WIDE( "Process line: %s" ), GetText( newline ) );
 				}
 
 				LIST_FORALL( filters[0], idx, PTEXT (CPROC *)(POINTER*,PTEXT), filter )
 				{
 					newline = filter( GetLinkAddress( filter_data, idx ), newline );
-					//lprintf( "Process line: %s", GetText( newline ) );
+					//lprintf( WIDE( "Process line: %s" ), GetText( newline ) );
 					if( !newline )
 						break; // get next bit of data ....
 				}
@@ -683,7 +698,7 @@ PTEXT GetConfigurationLine( PCONFIG_HANDLER pConfigHandler )
 									, pConfigHandler->Unhandled?TRUE:FALSE ) ) )
    {
 #if defined( LOG_LINES_READ )
-		lprintf( "Process line: %s", GetText( line ) );
+		lprintf( WIDE( "Process line: %s" ), GetText( line ) );
 #endif
       p = burst( line );
       LineRelease( line );
@@ -994,7 +1009,7 @@ int IsBooleanVar( PCONFIG_ELEMENT pce, PTEXT *start )
     //Log1( WIDE("Is %s boolean?"), GetText( *start ) );
 #define CmpMin(constlen)  ((len <= (constlen))?(len):0)
 #define NearText(text,const)   ( CmpMin( sizeof( const ) - 1 ) &&      \
-                 ( strnicmp( GetText( text ), const, len ) == 0 ) )
+                 ( StrCaseCmpEx( GetText( text ), const, len ) == 0 ) )
     if( NearText( *start, WIDE("yes") ) ||
         NearText( *start, WIDE("1") ) ||
        NearText( *start, WIDE("on") ) ||
@@ -1501,24 +1516,26 @@ int IsMultiWordVar( PCONFIG_ELEMENT pce, PTEXT *start )
 		 {
 			 LineRelease( pWords );
 			 pWords = NULL;
-			 lprintf( "Ended multi word badly." );
+			 lprintf( WIDE( "Ended multi word badly." ) );
           return FALSE;
 		 }
 #ifdef FULL_TRACE
 		 else
-			 lprintf( "is alright - gathered to end of line ok." );
+			 lprintf( WIDE( "is alright - gathered to end of line ok." ) );
 #endif
 	 }
-	 if( !pWords )
-       pWords = SegCreate(0);
-    pWords->format.position.spaces = 0;
+	 //if( !pWords )
+    //   pWords = SegCreate(0);
     if( pWords )
-    {
-		 PTEXT out = BuildLine( pWords );
-		 TEXTSTR buf = StrDup( GetText( out ) );
-		 LineRelease( out );
-		 LineRelease( pWords );
-		 pce->data[0].multiword.pWords = buf;
+	 {
+		 pWords->format.position.spaces = 0;
+		 {
+			 PTEXT out = BuildLine( pWords );
+			 TEXTSTR buf = StrDup( GetText( out ) );
+			 LineRelease( out );
+			 LineRelease( pWords );
+			 pce->data[0].multiword.pWords = buf;
+		 }
 		 return TRUE;
     }
     return FALSE;
@@ -1528,64 +1545,68 @@ int IsMultiWordVar( PCONFIG_ELEMENT pce, PTEXT *start )
 
 int IsPathVar( PCONFIG_ELEMENT pce, PTEXT *start )
 {
-    PTEXT pWords = NULL;
-    if( pce->type != CONFIG_PATH )
-        return FALSE;
-    if( pce->data[0].multiword.pWords )
-    {
-        Release( pce->data[0].multiword.pWords );
-		  pce->data[0].multiword.pWords = NULL;
-	 }
-    while( *start &&
-			 !IsAnyVar( pce->data[0].multiword.pEnd, start ) )
-    {
-        pWords = SegAppend( pWords, SegDuplicate( *start ) );
-        *start = NEXTLINE( *start );
-    }
-    pWords->format.position.spaces = 0;
-    if( pWords )
-    {
-        PTEXT out = BuildLine( pWords );
-        TEXTSTR buf = NewArray( TEXTCHAR, GetTextSize( out ) + 1 );
-        strcpy( buf, GetText( out ) );
-        LineRelease( out );
-        LineRelease( pWords );
-        pce->data[0].multiword.pWords = buf;
-        return TRUE;
-    }
-    return FALSE;
+	PTEXT pWords = NULL;
+	if( pce->type != CONFIG_PATH )
+		return FALSE;
+	if( pce->data[0].multiword.pWords )
+	{
+		Release( pce->data[0].multiword.pWords );
+		pce->data[0].multiword.pWords = NULL;
+	}
+	while( *start &&
+			!IsAnyVar( pce->data[0].multiword.pEnd, start ) )
+	{
+		pWords = SegAppend( pWords, SegDuplicate( *start ) );
+		*start = NEXTLINE( *start );
+	}
+	if( pWords )
+	{
+		pWords->format.position.spaces = 0;
+		{
+			PTEXT out = BuildLine( pWords );
+			TEXTSTR buf = NewArray( TEXTCHAR, GetTextSize( out ) + 1 );
+			StrCpy( buf, GetText( out ) );
+			LineRelease( out );
+			LineRelease( pWords );
+			pce->data[0].multiword.pWords = buf;
+		}
+		return TRUE;
+	}
+	return FALSE;
 }
 
 //---------------------------------------------------------------------
 
 int IsFileVar( PCONFIG_ELEMENT pce, PTEXT *start )
 {
-    PTEXT pWords = NULL;
-    if( pce->type != CONFIG_FILE )
-        return FALSE;
-    if( pce->data[0].multiword.pWords )
-    {
-        Release( pce->data[0].multiword.pWords );
-		  pce->data[0].multiword.pWords = NULL;
-	 }
-    while( *start &&
-			 !IsAnyVar( pce->data[0].multiword.pEnd, start ) )
-    {
-        pWords = SegAppend( pWords, SegDuplicate( *start ) );
-        *start = NEXTLINE( *start );
-    }
-    pWords->format.position.spaces = 0;
-    if( pWords )
-    {
-        PTEXT out = BuildLine( pWords );
-        TEXTSTR buf = NewArray( TEXTCHAR, GetTextSize( out ) + 1 );
-        strcpy( buf, GetText( out ) );
-        LineRelease( out );
-        LineRelease( pWords );
-        pce->data[0].multiword.pWords = buf;
-        return TRUE;
-    }
-    return FALSE;
+	PTEXT pWords = NULL;
+	if( pce->type != CONFIG_FILE )
+		return FALSE;
+	if( pce->data[0].multiword.pWords )
+	{
+		Release( pce->data[0].multiword.pWords );
+		pce->data[0].multiword.pWords = NULL;
+	}
+	while( *start &&
+			!IsAnyVar( pce->data[0].multiword.pEnd, start ) )
+	{
+		pWords = SegAppend( pWords, SegDuplicate( *start ) );
+		*start = NEXTLINE( *start );
+	}
+	if( pWords )
+	{
+		pWords->format.position.spaces = 0;
+		{
+			PTEXT out = BuildLine( pWords );
+			TEXTSTR buf = NewArray( TEXTCHAR, GetTextSize( out ) + 1 );
+			StrCpy( buf, GetText( out ) );
+			LineRelease( out );
+			LineRelease( pWords );
+			pce->data[0].multiword.pWords = buf;
+		}
+		return TRUE;
+	}
+	return FALSE;
 }
 
 //---------------------------------------------------------------------
@@ -1605,19 +1626,21 @@ int IsFilePathVar( PCONFIG_ELEMENT pce, PTEXT *start )
     {
         pWords = SegAppend( pWords, SegDuplicate( *start ) );
         *start = NEXTLINE( *start );
-    }
-    pWords->format.position.spaces = 0;
-    if( pWords )
-    {
-        PTEXT out = BuildLine( pWords );
-        TEXTSTR buf = NewArray( TEXTCHAR, GetTextSize( out ) + 1 );
-        strcpy( buf, GetText( out ) );
-        LineRelease( out );
-        LineRelease( pWords );
-        pce->data[0].multiword.pWords = buf;
-        return TRUE;
-    }
-    return FALSE;
+	 }
+	 if( pWords )
+	 {
+		 pWords->format.position.spaces = 0;
+		 {
+			 PTEXT out = BuildLine( pWords );
+			 TEXTSTR buf = NewArray( TEXTCHAR, GetTextSize( out ) + 1 );
+			 StrCpy( buf, GetText( out ) );
+			 LineRelease( out );
+			 LineRelease( pWords );
+			 pce->data[0].multiword.pWords = buf;
+		 }
+		 return TRUE;
+	 }
+	 return FALSE;
 }
 
 //---------------------------------------------------------------------
@@ -1639,10 +1662,13 @@ int IsAddressVar( PCONFIG_ELEMENT pce, PTEXT *start )
 	}
    if( pWords )
 	{
-		PTEXT pText = BuildLine( pWords );
-		LineRelease( pWords );
-		pce->data[0].psaSockaddr = CreateSockAddress( (CTEXTSTR)GetText( pText ), 0 );
-		LineRelease( pText );
+		pWords->format.position.spaces = 0;
+		{
+			PTEXT pText = BuildLine( pWords );
+			LineRelease( pWords );
+			pce->data[0].psaSockaddr = CreateSockAddress( (CTEXTSTR)GetText( pText ), 0 );
+			LineRelease( pText );
+		}
       return TRUE;
 	}
 	return FALSE;
@@ -1652,33 +1678,33 @@ int IsAddressVar( PCONFIG_ELEMENT pce, PTEXT *start )
 
 int IsURLVar( PCONFIG_ELEMENT pce, PTEXT *start )
 {
-    if( pce->type != CONFIG_URL )
-        return FALSE;
-    return FALSE;
+	if( pce->type != CONFIG_URL )
+		return FALSE;
+	return FALSE;
 }
 
 //---------------------------------------------------------------------
 
 int IsAnyVar( PCONFIG_ELEMENT pce, PTEXT *start )
 {
-    if( !pce || !start )
-    {
-        //Log( WIDE("No pce or no start") );
-        return FALSE;
-    }
-    return( ( IsConstText( pce, start ) ) ||
-			  ( IsBooleanVar( pce, start ) ) ||
-           ( IsBinaryVar( pce, start ) ) ||
-         ( IsIntegerVar( pce, start ) ) ||
-         ( IsFloatVar( pce, start ) ) ||
-          ( IsFractionVar( pce, start ) ) ||
-         ( IsSingleWordVar( pce, start ) ) ||
-       ( IsMultiWordVar( pce, start ) ) ||
-         ( IsPathVar( pce, start ) ) ||
-         ( IsFileVar( pce, start ) ) ||
-         ( IsFilePathVar( pce, start ) ) ||
-         ( IsURLVar( pce, start ) ) ||
-         ( IsColorVar( pce, start ) ) );
+	if( !pce || !start )
+	{
+		//Log( WIDE("No pce or no start") );
+		return FALSE;
+	}
+	return( ( IsConstText( pce, start ) ) ||
+			 ( IsBooleanVar( pce, start ) ) ||
+			 ( IsBinaryVar( pce, start ) ) ||
+			 ( IsIntegerVar( pce, start ) ) ||
+			 ( IsFloatVar( pce, start ) ) ||
+			 ( IsFractionVar( pce, start ) ) ||
+			 ( IsSingleWordVar( pce, start ) ) ||
+			 ( IsMultiWordVar( pce, start ) ) ||
+			 ( IsPathVar( pce, start ) ) ||
+			 ( IsFileVar( pce, start ) ) ||
+			 ( IsFilePathVar( pce, start ) ) ||
+			 ( IsURLVar( pce, start ) ) ||
+			 ( IsColorVar( pce, start ) ) );
 }
 
 //---------------------------------------------------------------------
@@ -1692,17 +1718,17 @@ void DoProcedure( PTRSZVAL *ppsvUser, PCONFIG_TEST Check )
 	PCONFIG_ELEMENT pce = NULL;
 	va_args parampack;
 #ifdef __WATCOMC__
-    va_args save_parampack;
+	va_args save_parampack;
 #endif
-    init_args( parampack );
-    LIST_FORALL( Check->pVarElementList, idx, PCONFIG_ELEMENT, pce )
-    {
-        if( pce->type == CONFIG_PROCEDURE )
-        {
-            if( pce->data[0].Process)
-            {
+	init_args( parampack );
+	LIST_FORALL( Check->pVarElementList, idx, PCONFIG_ELEMENT, pce )
+	{
+		if( pce->type == CONFIG_PROCEDURE )
+		{
+			if( pce->data[0].Process)
+			{
 #ifdef NEED_ASSEMBLY_CALLER
-                CallProcedure( ppsvUser, pce );
+				CallProcedure( ppsvUser, pce );
 #else
 				PCONFIG_ELEMENT pcePush = pce->prior;
 				// push arguments in reverse order...
@@ -1710,22 +1736,21 @@ void DoProcedure( PTRSZVAL *ppsvUser, PCONFIG_TEST Check )
 				while( pcePush )
 				{
 #ifdef FULL_TRACE
-                    Log( WIDE("To push...") );
-						  LogElement( WIDE("pushing"), pcePush );
+					LogElement( WIDE("pushing"), pcePush );
 #endif
 					switch( pcePush->type )
-                    {
-                    case CONFIG_TEXT:
-							  break;
+					{
+					case CONFIG_TEXT:
+						break;
 					case CONFIG_BINARY:
-                       PushArgument( parampack, POINTER, pcePush->data[0].binary.data );
-                       PushArgument( parampack, _32, pcePush->data[0].binary.length );
-                       break;
-                    case CONFIG_BOOLEAN:
-                        {
-                            LOGICAL val = pcePush->data[0].truefalse.bTrue;
+						PushArgument( parampack, POINTER, pcePush->data[0].binary.data );
+						PushArgument( parampack, _32, pcePush->data[0].binary.length );
+						break;
+					case CONFIG_BOOLEAN:
+						{
+							LOGICAL val = pcePush->data[0].truefalse.bTrue;
 							PushArgument( parampack, LOGICAL, val );
-                        }
+						}
 						break;
 					case CONFIG_INTEGER:
 						PushArgument( parampack, S_64, pcePush->data[0].integer_number );
@@ -1747,39 +1772,39 @@ void DoProcedure( PTRSZVAL *ppsvUser, PCONFIG_TEST Check )
 						PushArgument( parampack, CTEXTSTR, pcePush->data[0].multiword.pWords );
 						break;
 					default:
-                       break;
-                    }
-                    //Log1( WIDE("Total args are now: %d"), argsize );
-                    pcePush = pcePush->prior;
-					}
-// should really be #ifdef __IDIOTS_WROTE_THIS_COMPILER__
+						break;
+						  }
+					//Log1( WIDE("Total args are now: %d"), argsize );
+					pcePush = pcePush->prior;
+				}
+				// should really be #ifdef __IDIOTS_WROTE_THIS_COMPILER__
 #ifdef __WATCOMC__
-                save_parampack = parampack;
-					 (*ppsvUser) = pce->data[0].Process( *ppsvUser, pass_args(parampack) );
-                parampack = save_parampack;
+				save_parampack = parampack;
+				(*ppsvUser) = pce->data[0].Process( *ppsvUser, pass_args(parampack) );
+				parampack = save_parampack;
 #else
-					 (*ppsvUser) = pce->data[0].Process( *ppsvUser, pass_args(parampack) );
+				(*ppsvUser) = pce->data[0].Process( *ppsvUser, pass_args(parampack) );
 #endif
-					 PopArguments( parampack );
+				PopArguments( parampack );
 #endif
-                break; // done, end of list, please leave and do not iterate further!
-            }
-        }
-        else
+				break; // done, end of list, please leave and do not iterate further!
+			}
+		}
+		else
 		{
 			switch( pce->type )
 			{
 			case CONFIG_MULTI_WORD:
 			case CONFIG_SINGLE_WORD:
-              // null content ?
-				  break;
+				// null content ?
+				break;
 			default:
-				  // actually this probably means that there was no content to complete
-              // the match, and NULL is not a valid responce to data...
-				  Log( WIDE("Multiple options here for what to do at end of line?") );
+				// actually this probably means that there was no content to complete
+				// the match, and NULL is not a valid responce to data...
+				Log( WIDE("Multiple options here for what to do at end of line?") );
 			}
-        }
-    }
+		}
+	}
 }
 
 //---------------------------------------------------------------------
@@ -1788,36 +1813,38 @@ CONFIGSCR_PROC( int, ProcessConfigurationFile )( PCONFIG_HANDLER pch, CTEXTSTR n
 {
 	PTEXT line;
 	Fopen( pch->file, name, WIDE("rb") );
+#ifndef UNDER_CE
 	if( !pch->file )
 	{
-      CTEXTSTR workpath = OSALOT_GetEnvironmentVariable( "MY_WORK_PATH" );
+		CTEXTSTR workpath = OSALOT_GetEnvironmentVariable( WIDE( "MY_WORK_PATH" ) );
 		TEXTCHAR pathname[255];
-		sprintf( pathname, WIDE("%s/%s"), workpath, name );
+		snprintf( pathname, sizeof( pathname ), WIDE("%s/%s"), workpath, name );
 		Fopen( pch->file, pathname, WIDE("rb") );
 	}
 	if( !pch->file )
 	{
-      CTEXTSTR workpath = OSALOT_GetEnvironmentVariable( "MY_LOAD_PATH" );
+		CTEXTSTR workpath = OSALOT_GetEnvironmentVariable( WIDE( "MY_LOAD_PATH" ) );
 		TEXTCHAR pathname[255];
-		sprintf( pathname, WIDE("%s/%s"), workpath, name );
+		snprintf( pathname, sizeof( pathname ), WIDE("%s/%s"), workpath, name );
+		Fopen( pch->file, pathname, WIDE("rb") );
+	}
+#endif
+	if( !pch->file )
+	{
+		TEXTCHAR pathname[255];
+		snprintf( pathname, sizeof( pathname ), WIDE("/etc/%s"), name );
 		Fopen( pch->file, pathname, WIDE("rb") );
 	}
 	if( !pch->file )
 	{
 		TEXTCHAR pathname[255];
-		sprintf( pathname, WIDE("/etc/%s"), name );
+		snprintf( pathname, sizeof( pathname ), WIDE("\\ftn3000\\working\\%s"), name );
 		Fopen( pch->file, pathname, WIDE("rb") );
 	}
 	if( !pch->file )
 	{
 		TEXTCHAR pathname[255];
-		sprintf( pathname, WIDE("\\ftn3000\\working\\%s"), name );
-		Fopen( pch->file, pathname, WIDE("rb") );
-	}
-	if( !pch->file )
-	{
-		TEXTCHAR pathname[255];
-		sprintf( pathname, WIDE("C:\\ftn3000\\working\\%s"), name );
+		snprintf( pathname, sizeof( pathname ), WIDE("C:\\ftn3000\\working\\%s"), name );
 		Fopen( pch->file, pathname, WIDE("rb") );
 	}
 	pch->psvUser = psv;
@@ -1889,9 +1916,7 @@ CONFIGSCR_PROC( int, ProcessConfigurationFile )( PCONFIG_HANDLER pch, CTEXTSTR n
 									pch->Unhandled( pch->psvUser, GetText( pLine ) );
 								else
 								{
-#ifndef __NO_OPTIONS__
-									if( SACK_GetProfileIntEx( "SACK/Config Script", "Log Unhandled if no application handler", 0, TRUE ) )
-#endif
+									if( g.flags.bLogUnhandled )
 										xlprintf(LOG_NOISE)( WIDE("Unknown Configuration Line(No unhandled proc): %s"), GetText( pLine ) );
 								}
 
@@ -2094,16 +2119,16 @@ void EndConfiguration( PCONFIG_HANDLER pch )
 		}
 		else
 		{
-         lprintf( "Config was not saved, destroying." );
+			//lprintf( WIDE("Config was not saved, destroying.") );
 			DestroyConfigTest( pch, &pch->ConfigTestRoot, FALSE );
 		}
-      // didn't recover from states list.
-      pch->config_recovered = prior_state->recovered;
+		// didn't recover from states list.
+		pch->config_recovered = prior_state->recovered;
 		pch->ConfigTestRoot = prior_state->ConfigTestRoot;
 		pch->EndProcess = prior_state->EndProcess;
 		pch->Unhandled = prior_state->Unhandled;
 		pch->psvUser = prior_state->psvUser;
-      pch->save_config_as = prior_state->name;
+		pch->save_config_as = prior_state->name;
 	}
 }
 
@@ -2154,7 +2179,7 @@ void AddConfigurationEx( PCONFIG_HANDLER pch, CTEXTSTR format, USER_CONFIG_HANDL
 					 lprintf( WIDE("Configuration error %%v[no type]") );
 				 }
 				 LineRelease( pLine );
-				 lprintf( "Destroy config element %p", pceNew );
+				 lprintf( WIDE( "Destroy config element %p" ), pceNew );
 				 DestroyConfigElement( pch, pceNew );
 				 return;
 			 }
