@@ -18,7 +18,7 @@ add_library(${PROJECT_NAME} SHARED ${SOURCES} )
 
 
 
-string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
+string( REGEX REPLACE "(.*)\\.(.*)" "\\1_\\2" TARGET_LABEL ${PROJECT_NAME} )
 message("${TARGET_LABEL} is from ${PROJECT_NAME}" )
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL} ${LibraryExtraFlags}"
