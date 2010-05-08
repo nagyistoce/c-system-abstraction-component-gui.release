@@ -1,6 +1,6 @@
 
-#define DEFINE_DEFAULT_RENDER_INTERFACE
-#define USE_IMAGE_INTERFACE g.pii
+//#define DEFINE_DEFAULT_RENDER_INTERFACE
+//#define USE_IMAGE_INTERFACE g.pii
 //GetImageInterface()
 #include <stdhdrs.h>
 #include <image.h>
@@ -842,7 +842,7 @@ void MainInit( char *MyConfig )
 	if( !inited )
 	{
 		_32 width, height;
-      g.pii = GetImageInterface();
+      //g.pii = GetImageInterface();
 		//SetSystemLog( SYSLOG_FILE, stdout );
 		//SystemLogTime( SYSLOG_TIME_HIGH|SYSLOG_TIME_DELTA );
 		//SetBlotMethod( BLOT_C );

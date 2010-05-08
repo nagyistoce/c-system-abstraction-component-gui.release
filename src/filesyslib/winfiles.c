@@ -158,7 +158,7 @@ HANDLE sack_open( int group, CTEXTSTR filename, int opts, ... )
 							 , GENERIC_READ
 							 , FILE_SHARE_READ|FILE_SHARE_WRITE
 							 , NULL
-							 ,OPEN_EXISTING | ((opts&O_CREAT)?CREATE_ALWAYS:0)
+							 , ((opts&O_CREAT)?CREATE_ALWAYS:OPEN_EXISTING)
 							 , FILE_ATTRIBUTE_NORMAL
 							 , NULL );
 	break;
@@ -167,7 +167,7 @@ HANDLE sack_open( int group, CTEXTSTR filename, int opts, ... )
 							 , GENERIC_WRITE
 							 , FILE_SHARE_READ|FILE_SHARE_WRITE
 							 , NULL
-							 ,OPEN_EXISTING | ((opts&O_CREAT)?CREATE_ALWAYS:0)
+							 , ((opts&O_CREAT)?CREATE_ALWAYS:OPEN_EXISTING)
 							 , FILE_ATTRIBUTE_NORMAL
 							 , NULL );
 		break;
@@ -176,7 +176,7 @@ HANDLE sack_open( int group, CTEXTSTR filename, int opts, ... )
 							 ,(GENERIC_READ|GENERIC_WRITE)
 							 , FILE_SHARE_READ|FILE_SHARE_WRITE
 							 , NULL
-							 ,OPEN_EXISTING | ((opts&O_CREAT)?CREATE_ALWAYS:0)
+							 , ((opts&O_CREAT)?CREATE_ALWAYS:OPEN_EXISTING)
 							 , FILE_ATTRIBUTE_NORMAL
 							 , NULL );
 		break;

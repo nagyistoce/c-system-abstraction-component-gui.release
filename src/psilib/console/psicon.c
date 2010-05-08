@@ -9,12 +9,12 @@
 #include <logging.h>
 
 #ifndef __cplusplus_cli
-#define USE_IMAGE_INTERFACE ImageInterface
+//#define USE_IMAGE_INTERFACE ImageInterface
 #endif
 #include <image.h>
 PIMAGE_INTERFACE ImageInterface;
 #ifndef __cplusplus_cli
-#define USE_RENDER_INTERFACE RenderInterface
+//#define USE_RENDER_INTERFACE RenderInterface
 #endif
 #include <render.h>
 PRENDER_INTERFACE RenderInterface;

@@ -207,7 +207,8 @@ LOCATION struct network_global_data{
    WSAEVENT event;
 #endif
 	_32 dwReadTimeout;
-   _32 dwConnectTimeout;
+	_32 dwConnectTimeout;
+   PLIST addresses;
 }
 *global_network_data; // aka 'g'
 

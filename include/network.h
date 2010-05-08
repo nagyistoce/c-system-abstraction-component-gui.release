@@ -290,7 +290,12 @@ NETWORK_PROC( SOCKADDR *, CreateLocal )(_16 nMyPort);
 NETWORK_PROC( int, GetAddressParts )( SOCKADDR *pAddr, _32 *pdwIP, _16 *pwPort );
 NETWORK_PROC( void, ReleaseAddress )(SOCKADDR *lpsaAddr); // release a socket resource that has been created by an above routine
 
-NETWORK_PROC( LOGICAL, CompareAddress )(SOCKADDR *sa1, SOCKADDR *sa2 ); // result with TRUE if equal, else FALSE
+// result with TRUE if equal, else FALSE
+NETWORK_PROC( LOGICAL, CompareAddress )(SOCKADDR *sa1, SOCKADDR *sa2 );
+/*
+ * compare this address to see if it is any of my IPv4 interfaces
+ */
+NETWORK_PROC( LOGICAL, IsThisAddressMe )( SOCKADDR *addr, _16 myport );
 NETWORK_PROC( SOCKADDR *, DuplicateAddress )( SOCKADDR *pAddr ); // return a copy of this address...
 
 /* Transmission Control Protocol connection methods. This

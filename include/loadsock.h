@@ -10,6 +10,7 @@
 #define USE_WSA_EVENTS
 #endif
 #include <winsock2.h>
+#include <ws2tcpip.h>
 #include <sack_types.h>
 #ifdef __CYGWIN__
 // just need this simple symbol

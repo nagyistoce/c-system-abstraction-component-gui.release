@@ -1,4 +1,4 @@
-#define DEFINE_DEFAULT_RENDER_INTERFACE
+//#define DEFINE_DEFAULT_RENDER_INTERFACE
 #include <controls.h>
 #include <idle.h>
 #include <sqlgetoption.h>

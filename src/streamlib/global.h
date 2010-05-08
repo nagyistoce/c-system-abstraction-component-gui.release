@@ -10,7 +10,7 @@ typedef struct {
 	SOCKADDR *saBroadcast;
 	PLIST controls;
 	_32 capture_thread;
-   PIMAGE_INTERFACE pii;
+   //PIMAGE_INTERFACE pii;
 } GLOBAL;
 
 

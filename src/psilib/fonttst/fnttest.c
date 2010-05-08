@@ -1,5 +1,5 @@
-#define USE_IMAGE_INTERFACE GetImageInterface()
-#define USE_RENDER_INTERFACE GetRenderInterface()
+//#define USE_IMAGE_INTERFACE GetImageInterface()
+//#define USE_RENDER_INTERFACE GetRenderInterface()
 
 #include <stdhdrs.h>
 #include <logging.h>

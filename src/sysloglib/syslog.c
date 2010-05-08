@@ -372,6 +372,7 @@ static void LoadOptions( char *filename )
 
 
 	nLogLevel = SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Default Log Level (1001:all, 100:least)" ), nLogLevel, TRUE );
+
 	flags.bLogThreadID = SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Thread ID" ), 0, TRUE );
 	flags.bLogProgram = SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Program" ), 0, TRUE );
 	flags.bLogSourceFile = SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Source File" ), 1, TRUE );
@@ -975,7 +976,7 @@ void SystemLogFL( const TEXTCHAR *message FILELINE_PASS )
 				  , WIDE("%s%s%s%s%s%s%s")
 				  , logtime, logtime[0]?WIDE("|"):WIDE("")
 				  , flags.bLogThreadID?threadid:WIDE("")
-				  , flags.bLogProgram?(pProgramName?pProgramName:WIDE("")):WIDE("")
+				  , flags.bLogProgram?(GetProgramName()):WIDE("")
 				  , flags.bLogProgram?WIDE("@"):WIDE("")
 				  , flags.bLogSourceFile?sourcefile:WIDE("")
 				  , message );
@@ -984,7 +985,7 @@ void SystemLogFL( const TEXTCHAR *message FILELINE_PASS )
 				  , WIDE("%s%s%s%s%s%s")
 				  , logtime, logtime[0]?WIDE("|"):WIDE("")
 				  , flags.bLogThreadID?threadid:WIDE("")
-				  , flags.bLogProgram?(pProgramName?pProgramName:WIDE("")):WIDE("")
+				  , flags.bLogProgram?(GetProgramName()):WIDE("")
 				  , flags.bLogProgram?WIDE("@"):WIDE("")
 				  , message );
 	DoSystemLog( buffer );
@@ -1235,14 +1236,14 @@ static INDEX CPROC _real_vlprintf ( CTEXTSTR format, va_list args )
 #ifdef UNDER_CE
 				snprintf( buffer + ofs, 4095 - ofs, WIDE("%s%s%s%s(%") _32f WIDE("):")
 									, flags.bLogThreadID?threadid:WIDE("")
-									, flags.bLogProgram?pProgramName:WIDE("")
+									, flags.bLogProgram?GetProgramName():WIDE("")
 									, flags.bLogProgram?WIDE("@"):WIDE("")
 									, pFile, nLine );
 				ofs += StrLen( buffer + ofs );
 #else
 				snprintf( buffer + ofs, 4095 - ofs, WIDE("%s%s%s%s(%") _32f WIDE("):")
 									, flags.bLogThreadID?threadid:WIDE("")
-									, flags.bLogProgram?pProgramName:WIDE("")
+									, flags.bLogProgram?GetProgramName():WIDE("")
 									, flags.bLogProgram?WIDE("@"):WIDE("")
 									, pFile, nLine );
 				ofs += StrLen( buffer + ofs );
