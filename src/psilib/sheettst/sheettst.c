@@ -1,5 +1,5 @@
 #include <logging.h>
-#define DEFINE_DEFAULT_IMAGE_INTERFACE
+//#define DEFINE_DEFAULT_IMAGE_INTERFACE
 #include <controls.h>
 
 #define SHT_SHEETS  100

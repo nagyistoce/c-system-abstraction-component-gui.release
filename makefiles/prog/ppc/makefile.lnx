@@ -29,7 +29,7 @@ define getconfig
 	echo '/End of search list/ {list = 0}' >>zzyzzxx.awk
         echo '/define / { print $$0 }' >>zzyzzxx.awk
 	echo '{if ( list > 1 )  print "#pragma systemincludepath" $$0 }' >>zzyzzxx.awk
-        gcc -dM -E -v zzyzzxx.c 2>&1 | awk -f zzyzzxx.awk > config.ppc; 
+        $(CC) -dM -E -v zzyzzxx.c 2>&1 | awk -f zzyzzxx.awk > config.ppc; 
 	#rm zzyzzxx.*
 endef
 

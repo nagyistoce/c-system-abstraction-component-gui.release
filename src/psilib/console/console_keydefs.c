@@ -1368,12 +1368,8 @@ int DoStroke( PCONSOLE_INFO pdp, PTEXT stroke )
                         PTEXT pEcho;
                         pEcho = BuildLine( pLine );
                         pEcho->data.size--; // trim the last character (probably cr)
-                        pEcho->flags |= TF_NORETURN;
-#ifdef __DEKWARE_PLUGIN__
-								EnqueLink( &pdp->common.Output, pEcho );
-#else
-								LineRelease( pEcho );
-#endif
+								pEcho->flags |= TF_NORETURN;
+                        WinLogicWriteEx( pdp, pEcho, 1 );
                         lprintf( "Should this local echo be marked somehow?" );
                         //pdp->History.flags.bEnqueuedLocalEcho = 1;
                         //pdp->flags.bLastEnqueCommand = TRUE;

@@ -1884,6 +1884,8 @@ int __DoSQLCommandEx( PODBC odbc, PCOLLECT collection DBG_PASS )
 				}
 				break;
 			case SQLITE_BUSY:
+            // going to retry the statement as a whole anyhow.
+				sqlite3_finalize( collection->stmt );
 				lprintf( "Database busy, waiting..." );
             WakeableSleep( 25 );
 				Relinquish();

@@ -65,6 +65,7 @@ DEADSTART_PROC  void DEADSTART_CALLTYPE  SuspendDeadstart ( void );
 DEADSTART_PROC  void DEADSTART_CALLTYPE  InvokeDeadstart (void);
 DEADSTART_PROC  void DEADSTART_CALLTYPE  InvokeExits (void);
 DEADSTART_PROC  void DEADSTART_CALLTYPE  MarkRootDeadstartComplete ( void );
+DEADSTART_PROC  LOGICAL DEADSTART_CALLTYPE  IsRootDeadstartStarted ( void );
 
 #ifdef __LINUX__
 // call this after a fork().  Otherwise, it will falsely invoke shutdown when it exits.

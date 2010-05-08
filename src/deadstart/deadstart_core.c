@@ -76,6 +76,8 @@ struct deadstart_local_data_
 #define shutdown_procs l.shutdown_procs
 	int bInitialDone;
 #define bInitialDone l.bInitialDone
+	int bInitialStarted;
+#define bInitialStarted l.bInitialStarted
    int bSuspend;
 #define bSuspend l.bSuspend
 	int bDispatched;
@@ -184,6 +186,7 @@ void RegisterPriorityStartupProc( void (*proc)(void), CTEXTSTR func,int priority
 	
 	if( bInitialDone && !bSuspend )
 	{
+      lprintf( "Initial done, not suspended, dispatch immediate." );
       InvokeDeadstart();
 	}
    //lprintf( WIDE("Total procs %d"), nProcs );
@@ -287,6 +290,7 @@ void InvokeDeadstart( void )
 	//if( !bInitialDone /*|| bDispatched*/ )
 	//   return;
 	InitLocal();
+   bInitialStarted = 1;
 	bSuspend = 0; // if invoking, no longer suspend.
 #ifdef __WINDOWS__
 	if( !bInitialDone && !bDispatched )
@@ -586,12 +590,27 @@ EXPORT_METHOD	void BAG_Exit( int code )
 // legacy linking code - might still be usin this for linux...
 int is_deadstart_complete( void )
 {
-   //extern _32 deadstart_complete;
-	return 1;//deadstart_complete;
+	//extern _32 deadstart_complete;
+#ifndef UNDER_CE
+   if( deadstart_local_data )
+		return bInitialDone;//deadstart_complete;
+#endif
+	return 0;
 }
 
 SACK_NAMESPACE_END
 SACK_DEADSTART_NAMESPACE
+
+LOGICAL IsRootDeadstartStarted( void )
+{
+#ifndef UNDER_CE
+	if( deadstart_local_data )
+		return bInitialStarted;
+#endif
+   return 0;
+}
+
+
 
 #if 0
 int APIENTRY DllMain( HINSTANCE HInst, DWORD dwReason, UINT voidreason )

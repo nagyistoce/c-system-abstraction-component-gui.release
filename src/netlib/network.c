@@ -260,6 +260,15 @@ void DumpLists( void )
 	}
 }
 
+
+//----------------------------------------------------------------------------
+
+static SOCKADDR *AllocAddr( void )
+{
+	SOCKADDR *lpsaAddr=(SOCKADDR*)Allocate(sizeof(SOCKADDR_IN)< 256?256:sizeof( SOCKADDR_IN));
+   MemSet( lpsaAddr, 0, sizeof(SOCKADDR_IN) );
+   return lpsaAddr;
+}
 //----------------------------------------------------------------------------
 
 PCLIENT GrabClientEx( PCLIENT pClient DBG_PASS )
@@ -1452,6 +1461,23 @@ static PTRSZVAL CPROC NetworkThreadProc( PTHREAD thread )
 #  endif
 	while( !g.pThread ) // creator won't pass until bThreadInitComplete is set.
 		Relinquish();
+
+#ifdef __WINDOWS__
+	{
+		ADDRINFOA *result;
+		ADDRINFOA *test;
+		getaddrinfo( "d3c0re", NULL, NULL, &result );
+		for( test = result; test; test = test->ai_next )
+		{
+			if( test->ai_family == AF_INET )
+			{
+            SOCKADDR *tmp;
+				AddLink( &g.addresses, tmp = AllocAddr() );
+            MemCpy( tmp, test->ai_addr, test->ai_addrlen );
+			}
+		}
+	}
+#endif
 	bThreadInitComplete = TRUE;
 	while(g.pThread && !g.bQuit)
 	{
@@ -2165,13 +2191,6 @@ NETWORK_PROC( _16, GetNetworkWord )(PCLIENT lpClient,int nWord)
 //---------------------------------------------------------------------------
 
 
-static SOCKADDR *AllocAddr( void )
-{
-	SOCKADDR *lpsaAddr=(SOCKADDR*)Allocate(sizeof(SOCKADDR_IN)< 256?256:sizeof( SOCKADDR_IN));
-   MemSet( lpsaAddr, 0, sizeof(SOCKADDR_IN) );
-   return lpsaAddr;
-}
-
 
 NETWORK_PROC( SOCKADDR *, DuplicateAddress )( SOCKADDR *pAddr ) // return a copy of this address...
 {
@@ -2473,6 +2492,34 @@ LOGICAL CompareAddress( SOCKADDR *sa1, SOCKADDR *sa2 )
 		}
 	}
    return 0;
+}
+
+//----------------------------------------------------------------------------
+
+LOGICAL IsThisAddressMe( SOCKADDR *addr, _16 myport )
+{
+	SOCKADDR *test_addr;
+	INDEX idx;
+	LIST_FORALL( g.addresses, idx, SOCKADDR*, test_addr )
+	{
+		if( ((SOCKADDR_IN*)addr)->sin_family == ((SOCKADDR_IN*)test_addr)->sin_family )
+		{
+			switch( ((SOCKADDR_IN*)addr)->sin_family )
+			{
+			case AF_INET:
+				{
+					if( MemCmp( &((SOCKADDR_IN*)addr)->sin_addr, &((SOCKADDR_IN*)test_addr)->sin_addr, sizeof(((SOCKADDR_IN*)addr)->sin_addr)  ) == 0 )
+					{
+                  return TRUE;
+					}
+				}
+            break;
+			default:
+            lprintf( "Unknown comparison" );
+			}
+		}
+	}
+	return FALSE;
 }
 
 //----------------------------------------------------------------------------

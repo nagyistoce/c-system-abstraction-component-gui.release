@@ -1854,6 +1854,8 @@ typedef struct user_input_buffer_tag {
    INDEX CollectionIndex;  // used to store index.. for insert type operations...
    int   CollectionInsert; // flag for whether we are inserting or overwriting
 	PTEXT CollectionBuffer; // used to store partial from GatherLine
+	void (CPROC*CollectedEvent)( PTRSZVAL psv, PTEXT text ); // called when a buffer is complete.
+   PTRSZVAL psvCollectedEvent;  // passed to the event callback when a line is completed
 } USER_INPUT_BUFFER, *PUSER_INPUT_BUFFER;
 
 TYPELIB_PROC  PUSER_INPUT_BUFFER TYPELIB_CALLTYPE  CreateUserInputBuffer ( void );

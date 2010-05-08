@@ -1032,7 +1032,13 @@ PTEXT GatherUserInput( PUSER_INPUT_BUFFER pci, PTEXT stroke )
 							, TRUE
 							, stroke );
 	if( pLine )
-      EnqueUserInputHistory( pci, pLine );
+	{
+		if( pci->CollectedEvent )
+		{
+			pci->CollectedEvent( pci->psvCollectedEvent, pLine );
+		}
+		EnqueUserInputHistory( pci, pLine );
+	}
    return pLine;
 }
 
@@ -1055,8 +1061,9 @@ PTEXT GatherUserInput( PUSER_INPUT_BUFFER pci, PTEXT stroke )
 
  PUSER_INPUT_BUFFER  CreateUserInputBuffer ( void )
 {
-	PUSER_INPUT_BUFFER pci = (PUSER_INPUT_BUFFER)Allocate( sizeof( USER_INPUT_BUFFER ) );
-   pci->CollectionBufferLock = FALSE;
+	PUSER_INPUT_BUFFER pci = New( USER_INPUT_BUFFER );
+	pci->CollectionBufferLock = FALSE;
+	pci->CollectedEvent = NULL;
 
    pci->CollectionBuffer = NULL;
 	pci->InputHistory = CreateLinkQueue();

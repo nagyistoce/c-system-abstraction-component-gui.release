@@ -48,6 +48,8 @@ PSI_CONSOLE_PROC( void, PSIConsoleSaveFile )( PSI_CONTROL pc, CTEXTSTR filename 
 PSI_CONSOLE_PROC( int, vpcprintf )( PSI_CONTROL pc, CTEXTSTR format, va_list args );
 PSI_CONSOLE_PROC( int, pcprintf )( PSI_CONTROL pc, CTEXTSTR format, ... );
 PSI_CONSOLE_PROC( int, PSIConsoleOutput )( PSI_CONTROL pc, PTEXT lines );
+PSI_CONSOLE_PROC( void, PSIConsoleInputEvent )( PSI_CONTROL pc, void(CPROC*Event)(PTRSZVAL,PTEXT), PTRSZVAL psv );
+
 PSI_CONSOLE_NAMESPACE_END;
 
 USE_PSI_CONSOLE_NAMESPACE;

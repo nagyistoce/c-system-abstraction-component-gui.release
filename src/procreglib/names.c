@@ -1844,7 +1844,10 @@ POINTER GetInterface( CTEXTSTR pServiceName )
 {
 	TEXTCHAR interface_name[256];
 	POINTER (CPROC *load)( void );
-	InvokeDeadstart();
+	// this might be the first clean chance to run deadstarts
+   // for ill behaved platforms that have forgotten to do this.
+	if( !IsRootDeadstartStarted() )
+		InvokeDeadstart();
 	ReadConfiguration();
 	if( pServiceName )
 	{
