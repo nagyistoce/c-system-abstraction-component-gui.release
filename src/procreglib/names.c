@@ -1919,7 +1919,11 @@ void RegisterAndCreateGlobalWithInit( POINTER *ppGlobal, PTRSZVAL global_size, C
 #ifdef DEBUG_GLOBAL_REGISTRATION
 		lprintf( WIDE("Opening space...") );
 #endif
+#ifdef __WINDOWS__
 		snprintf( spacename, sizeof( spacename ), WIDE("%s:%08LX"), name, (GetMyThreadID()) >> 32 );
+#else
+		snprintf( spacename, sizeof( spacename ), WIDE("%s:%08lX"), name, getpid() );
+#endif
 		// hmm application only shared space?
 		// how do I get that to happen?
 		(*ppGlobal) = OpenSpaceExx( spacename, NULL, 0, &size, &created );
