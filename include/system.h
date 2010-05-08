@@ -40,13 +40,20 @@
 #endif
 #ifdef __cplusplus
 #define SACK_SYSTEM_NAMESPACE namespace sack {	namespace system {
+#define _SYSTEM_NAMESPACE namespace system {
 #define SACK_SYSTEM_NAMESPACE_END } }
 #else
 #define SACK_SYSTEM_NAMESPACE
+#define _SYSTEM_NAMESPACE 
 #define SACK_SYSTEM_NAMESPACE_END
 #endif
 
-SACK_SYSTEM_NAMESPACE
+#ifndef UNDER_CE
+#define HAVE_ENVIRONMENT
+#endif
+
+SACK_NAMESPACE
+	_SYSTEM_NAMESPACE
 
 typedef struct task_info_tag *PTASK_INFO;
 typedef void (CPROC*TaskEnd)(PTRSZVAL, PTASK_INFO task_ended);
@@ -68,10 +75,22 @@ SYSTEM_PROC( PTASK_INFO, LaunchProgramEx )( CTEXTSTR program, CTEXTSTR path, PCT
 SYSTEM_PROC( PTASK_INFO, LaunchProgram )( CTEXTSTR program, CTEXTSTR path, PCTEXTSTR  args );
 SYSTEM_PROC( PTRSZVAL, TerminateProgram )( PTASK_INFO task );
 SYSTEM_PROC( void, SetProgramUserData )( PTASK_INFO task, PTRSZVAL psv );
-SYSTEM_PROC( PTRSZVAL, StopProgram )( PTASK_INFO task ); // generate a Ctrl-C to the task.
+
+// generate a Ctrl-C to the task.
+// maybe also signal systray icon
+// maybe also signal process.lock region
+// maybe end process?
+// maybe then terminate process?
+SYSTEM_PROC( LOGICAL, StopProgram )( PTASK_INFO task ); 
+
+// ctextstr as its own type is a pointer so a
+//  PcTextStr is a pointer to strings -
+//   char ** - returns a quoted string if args have spaces (and escape quotes in args?)
 SYSTEM_PROC( TEXTSTR, GetArgsString )( PCTEXTSTR pArgs );
 SYSTEM_PROC( _32, GetTaskExitCode )( PTASK_INFO task );
 
+SYSTEM_PROC( CTEXTSTR, GetProgramName )( void );
+SYSTEM_PROC( CTEXTSTR, GetProgramPath )( void );
 
 // HandlePeerOutput is called whenever a peer task has generated output on stdout or stderr
 //   - someday evolution may require processing stdout and stderr with different event handlers
@@ -96,15 +115,16 @@ SYSTEM_PROC( generic_function, LoadPrivateFunctionEx )( CTEXTSTR libname, CTEXTS
 // this is a pointer pointer - being that generic_fucntion is
 // a pointer...
 SYSTEM_PROC( int, UnloadFunctionEx )( generic_function* DBG_PASS );
+#ifdef HAVE_ENVIRONMENT
 SYSTEM_PROC( CTEXTSTR, OSALOT_GetEnvironmentVariable )(CTEXTSTR name);
 SYSTEM_PROC( void, OSALOT_AppendEnvironmentVariable )(CTEXTSTR name, CTEXTSTR value);
 SYSTEM_PROC( void, OSALOT_PrependEnvironmentVariable )(CTEXTSTR name, CTEXTSTR value);
-
+#endif
 /* this needs to have 'GetCommandLine()' passed to it.
  * Otherwise, the command line needs to have the program name, and arguments passed in the string
  * the parameter to winmain has the program name skipped
  */
-SYSTEM_PROC( void, ParseIntoArgs )( char *lpCmdLine, int *pArgc, char ***pArgv );
+SYSTEM_PROC( void, ParseIntoArgs )( TEXTCHAR *lpCmdLine, int *pArgc, TEXTCHAR ***pArgv );
 
 #define UnloadFunction(p) UnloadFunctionEx(p DBG_SRC )
 

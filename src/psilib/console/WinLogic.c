@@ -1,10 +1,5 @@
 //#define NO_LOGGING
 //#define DEBUG_HISTORY_RENDER
-//#ifdef PSICON
-#ifndef __cplusplus_cli
-#define USE_IMAGE_INTERFACE ImageInterface
-#endif
-//#endif
 
 #include "consolestruc.h"
 //#include "interface.h"
@@ -163,6 +158,7 @@ void RenderCommandLine( PCONSOLE_INFO pdp, PENDING_RECT *region )
 		r.right = pdp->nXPad;
 		if( pdp->FillConsoleRect )
 		{
+         lprintf( "draw blank to left %d-%d", r.left, r.right );
          pdp->FillConsoleRect( pdp, &r, FILL_COMMAND_BACK );
 		}
       upd.left = 0;
@@ -170,7 +166,8 @@ void RenderCommandLine( PCONSOLE_INFO pdp, PENDING_RECT *region )
    else
       upd.left = pdp->nXPad + ( nCurrentCol * pdp->nFontWidth );
 
-   r.left = x = pdp->nXPad + ( nCurrentCol * pdp->nFontWidth );
+	r.left = x = pdp->nXPad + ( nCurrentCol * pdp->nFontWidth );
+   lprintf( "x/left is %d", x );
    // for now...
 
    upd.right = pdp->nWidth;
@@ -264,6 +261,7 @@ void RenderCommandLine( PCONSOLE_INFO pdp, PENDING_RECT *region )
 	// command line only update ? maybe add this to regions which should be updated?
 	// refresh here?
 	AddUpdateRegion( region, upd.left, upd.top, upd.right-upd.left,upd.bottom-upd.top );
+   /*
 	if( pdp->Update && region->flags.bHasContent )
 	{
 		RECT r;
@@ -273,7 +271,8 @@ void RenderCommandLine( PCONSOLE_INFO pdp, PENDING_RECT *region )
       r.bottom = region->y + region->height;
 		pdp->Update( pdp, &r );
       region->flags.bHasContent = 0;
-	}
+		}
+      */
 }
 
 
@@ -537,9 +536,10 @@ CORECON_EXPORT( volatile_variable_entry, vve_cursory ) = { DEFTEXT( "cursory" )
 
 //----------------------------------------------------------------------------
 
-int WinLogicWrite( PCONSOLE_INFO pmdp
-					  , PTEXT pLine
-					  )
+int WinLogicWriteEx( PCONSOLE_INFO pmdp
+						 , PTEXT pLine
+						 , int update
+						 )
 {
 	//PCONSOLE_INFO pmdp = (PCONSOLE_INFO)pdp;
    static int updated;
@@ -614,7 +614,7 @@ int WinLogicWrite( PCONSOLE_INFO pmdp
 			// process is low priority...
 			BuildDisplayInfoLines( pmdp->pCurrentDisplay );
 			DoRenderHistory( pmdp, FALSE, &upd );
-			if( pmdp->Update && upd.flags.bHasContent )
+			if( update && pmdp->Update && upd.flags.bHasContent )
 			{
 				RECT r;
 				r.left = upd.x;
@@ -1013,46 +1013,49 @@ void DoRenderHistory( PCONSOLE_INFO pdp, int bHistoryStart, PENDING_RECT *region
 						}
 					}
 				}
+				//lprintf( "Some stats %d %d %d", nChar, nShow, nShown );
 				if( nChar )
 					x = r.left = pdp->nXPad+ nChar * pdp->nFontWidth;
 				else
 				{
-					r.left = 0;
+					r.left = r.right;
 					x = pdp->nXPad;
 				}
-            r.right = pdp->nXPad + ( nChar + nShow ) * pdp->nFontWidth;
+				r.right = pdp->nXPad + ( nChar + nShow ) * pdp->nFontWidth;
 				if( r.bottom > nMinLine )
 				{
 #ifdef DEBUG_HISTORY_RENDER
 					lprintf( "And finally we can show some text... %s %d", text, y );
 #endif
+					//lprintf( "putting string %s at %d,%d (left-right) %d,%d", text, x, y, r.left, r.right );
 					if( pdp->DrawString )
 						pdp->DrawString( pdp, x, y, &r, text, nShown, nShow );
 					//DrawString( text );
+					//lprintf( "putting string %s at %d,%d (left-right) %d,%d", text, x, y, r.left, r.right );
 				}
 #ifdef DEBUG_HISTORY_RENDER
 				else
 					lprintf( "Hmm bottom < minline?" );
 #endif
-						  // fill to the end of the line...
-						  //nLen -= nShow;
+				// fill to the end of the line...
+				//nLen -= nShow;
 				nShown += nShow;
-            nChar += nShow;
+				nChar += nShow;
 			}
 #ifdef DEBUG_HISTORY_RENDER
 			lprintf( "nShown >= nLen..." );
 #endif
 
 			nShown -= nLen;
-         pText = NEXTLINE( pText );
-      }
-      {
+			pText = NEXTLINE( pText );
+		}
+		{
 			x = r.left = r.right;
 			r.right = pdp->nWidth;
-					  // if soething left to fill, blank fill it...
+			// if soething left to fill, blank fill it...
 			if( r.left < r.right )
 			{
-            //lprintf( "WRiting empty string (over top?)" );
+				//lprintf( "WRiting empty string (%d-%d)", r.left, r.right );
 				if( pdp->FillConsoleRect )
 					pdp->FillConsoleRect( pdp, &r, FILL_DISPLAY_BACK );
 				//FillConsoleRect();
@@ -1062,9 +1065,9 @@ void DoRenderHistory( PCONSOLE_INFO pdp, int bHistoryStart, PENDING_RECT *region
 			nFirst = -1;
 		nLine++;
 	}
-   lprintf( WIDE("r.bottom nMin %d %d"), r.bottom, nMinLine );
-   if( r.bottom > nMinLine )
-   {
+	lprintf( WIDE("r.bottom nMin %d %d"), r.bottom, nMinLine );
+	if( r.bottom > nMinLine )
+	{
 		r.bottom = r.top;
 		r.top = nMinLine;
 		x = r.left = 0;

@@ -22,7 +22,7 @@ typedef struct slider_tag
 //---------------------------------------------------------------------------
 
 static int OnDrawCommon( SLIDER_CONTROL_NAME )( PSI_CONTROL pc )
-//int CPROC _DrawSlider( PCOMMON pc )
+//int CPROC _DrawSlider( PSI_CONTROL pc )
 {
 	ValidatedControlData( PSLIDER, SLIDER_CONTROL, ps, pc );
 	if( ps )
@@ -125,8 +125,8 @@ static int OnDrawCommon( SLIDER_CONTROL_NAME )( PSI_CONTROL pc )
 
 //---------------------------------------------------------------------------
 
-static int OnMouseCommon( SLIDER_CONTROL_NAME )( PCOMMON pc, S_32 x, S_32 y, _32 b )
-//int CPROC _SliderMouse( PCOMMON pc, S_32 x, S_32 y, _32 b )
+static int OnMouseCommon( SLIDER_CONTROL_NAME )( PSI_CONTROL pc, S_32 x, S_32 y, _32 b )
+//int CPROC _SliderMouse( PSI_CONTROL pc, S_32 x, S_32 y, _32 b )
 {
 	PSLIDER ps = ControlData( PSLIDER, pc );
 	int pos, span;

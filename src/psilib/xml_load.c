@@ -1,7 +1,7 @@
 
 #include <stdhdrs.h>
 #include <sharemem.h>
-#include <sexpat/sexpat.h>
+#include <../src/sexpat/expat.h>
 #include <configscript.h>
 #include <filesys.h>
 #include "controlstruc.h"
@@ -38,11 +38,12 @@ void XMLCALL start_tags( void *UserData
 	TEXTSTR control_data = NULL;
 	TEXTSTR IDName = NULL;
 	TEXTSTR type = NULL;
-	PCOMMON pc;
+	PSI_CONTROL pc;
 	CTEXTSTR *p = atts;
 	//lprintf( WIDE("begin a tag %s with..."), name );
 	while( p && *p )
 	{
+		//lprintf( WIDE("begin a attrib %s=%s with..."), p[0], p[1] );
 		if( strcmp( p[0], WIDE("ID") ) == 0 )
 		{
 			ID = (int)IntCreateFromText( p[1] );
@@ -63,12 +64,16 @@ void XMLCALL start_tags( void *UserData
 #else
 #define SCANBUF p[1]
 #endif
-			sscanf( SCANBUF, cWIDE("%") c_32f cWIDE(",") cWIDE("%") c_32f, &width, &height );
+#ifdef UNICODE
+#define sscanf swscanf
+#endif
+
+			sscanf( SCANBUF, WIDE("%") _32f WIDE(",") WIDE("%") _32f, &width, &height );
 #ifdef __cplusplus_cli
 			Release( mybuf );
 #endif
 		}
-		else if( strcmp( p[0], WIDE("position") ) == 0 )
+		else if( StrCmp( p[0], WIDE("position") ) == 0 )
 		{
 #ifdef __cplusplus_cli
 			char *mybuf = CStrDup( p[1] );
@@ -76,7 +81,7 @@ void XMLCALL start_tags( void *UserData
 #else
 #define SCANBUF p[1]
 #endif
-			sscanf( SCANBUF, cWIDE("%") c_32f cWIDE(",") cWIDE("%") c_32f, &x, &y );
+			sscanf( SCANBUF, WIDE("%") _32f WIDE(",") WIDE("%") _32f, &x, &y );
 #ifdef __cplusplus_cli
 			Release( mybuf );
 #endif
@@ -111,7 +116,8 @@ void XMLCALL start_tags( void *UserData
 	}
 	if( IDName )
 	{
-		pc = MakeNamedCaptionedControlByName( (PCOMMON)UserData
+		//lprintf( WIDE( "Making a control... %s %s %s" ), type?type:WIDE("notype"), caption?caption:WIDE("nocatpion"), IDName );
+		pc = MakeNamedCaptionedControlByName( (PSI_CONTROL)UserData
 														, type
 														, x, y
 														, width, height
@@ -122,13 +128,15 @@ void XMLCALL start_tags( void *UserData
 	}
 	else
 	{
-		pc = MakeNamedCaptionedControl( (PCOMMON)UserData
+		//lprintf( WIDE( "Making a control... %s %s" ), type?type:WIDE("notype"), caption?caption:WIDE("nocatpion") );
+		pc = MakeNamedCaptionedControl( (PSI_CONTROL)UserData
 														, type
 														, x, y
 														, width, height
 														, ID
 												, caption );
 	}
+	//lprintf( WIDE( "control done..." ) );
 	if( pc )
 	{
 		if( edit_set )
@@ -158,7 +166,7 @@ void XMLCALL start_tags( void *UserData
 void XMLCALL end_tags( void *UserData
 							, const XML_Char *name )
 {
-	PCOMMON pc = (PCOMMON)UserData;
+	PSI_CONTROL pc = (PSI_CONTROL)UserData;
 	//lprintf( WIDE("Ended a tag %s.."), name );
 	if( pc )
 		XML_SetUserData( xp, pc->parent );
@@ -189,8 +197,9 @@ PSI_CONTROL ParseXMLFrameEx( POINTER buffer, _32 size DBG_PASS )
 	if( !g.MyImageInterface )
 		return NULL;
 #endif
+	//lprintf( WIDE("Beginning parse frame...") );
 #if DBG_AVAILABLE
-   current_loading.pFile = pFile;
+	current_loading.pFile = pFile;
 	current_loading.nLine = nLine;
 #endif
 	XML_memhandler.malloc_fcn = MyAllocate;
@@ -203,32 +212,51 @@ PSI_CONTROL ParseXMLFrameEx( POINTER buffer, _32 size DBG_PASS )
 	XML_ParseBuffer( xp, size, TRUE );
 	XML_ParserFree( xp );
 	xp = 0;
+	//lprintf( WIDE("Parse done...") );
 	return l.frame;
 }
 
 PSI_CONTROL LoadXMLFrameOverEx( PSI_CONTROL parent, CTEXTSTR file DBG_PASS )
-//PCOMMON  LoadXMLFrame( char *file )
+//PSI_CONTROL  LoadXMLFrame( char *file )
 {
 	POINTER buffer;
-   CTEXTSTR _file; // temp storage for prior value(create frame in place, allow moving later)
+	CTEXTSTR _file; // temp storage for prior value(create frame in place, allow moving later)
 	TEXTSTR tmp = NULL;
-	_32 size;
-   PSI_CONTROL frame;
+	PTRSZVAL size;
+   _32 zz;
+	PSI_CONTROL frame;
 #  ifdef USE_INTERFACES
 	if( !g.MyImageInterface )
 		return NULL;
 #endif
-   EnterCriticalSec( &l.cs );
-   // enter critical section!
-   l.frame = NULL;
+	EnterCriticalSec( &l.cs );
+	// enter critical section!
+	l.frame = NULL;
 #if DBG_AVAILABLE
-   current_loading.pFile = pFile;
+	current_loading.pFile = pFile;
 	current_loading.nLine = nLine;
 #endif
 	size = 0;
-	buffer = OpenSpace( NULL, file, &size );
+#ifdef UNDER_CE
+	{
+		FILE *file = sack_fopen( 0, file, "rt" );
+		if( file )
+		{
+			sack_fseek( file, 0, SEEK_END );
+			zz = ftell( file );
+			sack_fseek( file, 0, SEEK_SET );
 
-   if( !buffer || !size )
+			size = zz;
+			buffer = Allocate( zz );
+			fread( buffer, 1, zz, file );
+			sack_fclose( file );
+         lprintf( "loaded font blob %s %d %p", file, zz, buffer );
+		}
+	}
+#else
+	buffer = OpenSpace( NULL, file, &size );
+#endif
+	if( !buffer || !size )
 	{
 		// attempt secondary open within frames/*
 		CTEXTSTR filename;
@@ -242,7 +270,25 @@ PSI_CONTROL LoadXMLFrameOverEx( PSI_CONTROL parent, CTEXTSTR file DBG_PASS )
       _file = file; // save filename to restore for later
       file = tmp;
 		size = 0;
+#ifdef UNDER_CE
+		{
+			FILE *file = sack_open( 0, file, "rt" );
+			if( file )
+			{
+				sack_fseek( file, 0, SEEK_END );
+				zz = ftell( file );
+				sack_fseek( file, 0, SEEK_SET );
+
+				size = zz;
+				buffer = Allocate( zz );
+				fread( buffer, 1, zz, file );
+				sack_fclose( file );
+				lprintf( "loaded font blob %s %d %p", file, zz, buffer );
+			}
+		}
+#else
 		buffer = OpenSpace( NULL, file, &size );
+#endif
       if( !buffer || !size )
 			file = _file; // restore filenaem to mark on the dialog, else use new filename cuase we loaded success
 	}
@@ -287,7 +333,7 @@ PSI_CONTROL LoadXMLFrameOverEx( PSI_CONTROL parent, CTEXTSTR file DBG_PASS )
 }
 
 PSI_CONTROL LoadXMLFrameEx( CTEXTSTR file DBG_PASS )
-//PCOMMON  LoadXMLFrame( char *file )
+//PSI_CONTROL  LoadXMLFrame( char *file )
 {
    return LoadXMLFrameOverEx( NULL, file DBG_RELAY );
 }

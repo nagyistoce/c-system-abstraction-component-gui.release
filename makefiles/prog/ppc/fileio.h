@@ -26,6 +26,7 @@ int GetCurrentLine( void );
 char *GetCurrentFileName( void );
 char *GetCurrentShortFileName( void );
 void GetCurrentFileLine( char *name, int *line );
+int CurrentFileDepth( void ); // how many files deep we're processing
 
 PTEXT GetCurrentWord( void );
 PTEXT *GetCurrentTextLine( void );

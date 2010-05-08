@@ -1,37 +1,82 @@
 
 #ifndef SHARED_MEM_DEFINED
+/* Multiple inclusion protection symbol. */
 #define SHARED_MEM_DEFINED
 
 #include <sack_types.h>
 
-#ifdef BCC16
-#ifdef MEM_LIBRARY_SOURCE
-#define MEM_PROC(type,name) type STDPROC _export name
-#else
-#define MEM_PROC(type,name) type STDPROC name
-#endif
-#else
+/* A declaration of the call type for memory library routines. */
+#define MEM_API CPROC
 #    ifdef MEM_LIBRARY_SOURCE
-#      define MEM_PROC(type,name) EXPORT_METHOD type CPROC name
+#      define MEM_PROC EXPORT_METHOD
 #    else
-#      define MEM_PROC(type,name) IMPORT_METHOD type CPROC name
+/* Defines library linkage specification. */
+#      define MEM_PROC IMPORT_METHOD
 #    endif
-#endif
 
-
+#ifndef TIMER_NAMESPACE
 #ifdef __cplusplus
-namespace sack {
-namespace timers {
+#define _TIMER_NAMESPACE namespace timers {
+/* define a timer library namespace in C++. */
+#define TIMER_NAMESPACE SACK_NAMESPACE namespace timers {
+/* define a timer library namespace in C++ end. */
+#define TIMER_NAMESPACE_END } SACK_NAMESPACE_END
+#else
+#define TIMER_NAMESPACE 
+#define TIMER_NAMESPACE_END
 #endif
+#endif
+
+	TIMER_NAMESPACE
    // enables file/line monitoring of sections and a lot of debuglogging
 //#define DEBUG_CRITICAL_SECTIONS
    /* this symbol controls the logging in timers.c... (higher level interface to NoWait primatives)*/
 //#define LOG_DEBUG_CRITICAL_SECTIONS
 
-//#if !defined( MEMORY_STRUCT_DEFINED )
-typedef struct critical_section_tag {
+/* A custom implementation of windows CRITICAL_SECTION api.
+   Provides same capability for Linux type systems. Can be
+   checked as a study in how to implement safe locks.
+   
+   
+   
+   
+   See Also
+   InitCriticalSec
+   
+   EnterCriticalSec
+   
+   LeaveCriticalSec
+   
+   
+   Example
+   <c>For purposes of this example this is declared in global
+   memory, known to initialize to all 0.</c>
+   <code lang="c++">
+   CRITICALSECTION cs_lock_test;
+   
+   
+   </code>
+   
+   In some bit of code that can be executed by several
+   threads...
+   <code lang="c++">
+   {
+      EnterCriticalSec( &amp;cs_lock_test );
+      // the code in here will only be run by a single thread
+      LeaveCriticalSec( &amp;cs_lock_test );
+   }
+   </code>
+   
+   Remarks
+   The __Ex versions of functions passes source file and line
+   information in debug mode. This can be used if critical
+   section debugging is turned on, or if critical section
+   logging is turned on. (See ... ) This allows applications to
+   find deadlocks by tracking who is entering critical sections
+   and probably failing to leave them.                          */
+struct critical_section_tag {
 	_32 dwUpdating; // this is set when entering or leaving (updating)...
-	_32 dwLocks;
+	_32 dwLocks;  // count of locks entered.  (only low 24 bits may count for 16M entries, upper bits indicate internal statuses.
 	THREAD_ID dwThreadID; // windows upper 16 is process ID, lower is thread ID
 	THREAD_ID dwThreadWaiting; // ID of thread waiting for this..
 #ifdef DEBUG_CRITICAL_SECTIONS
@@ -39,15 +84,36 @@ typedef struct critical_section_tag {
 	CTEXTSTR pFile;
 	_32  nLine;
 #endif
-} CRITICALSECTION;
-//#endif
+};
 
+/* <combine sack::timers::critical_section_tag>
+   
+   \ \                                          */
+typedef struct critical_section_tag CRITICALSECTION;
+
+/* <combine sack::timers::critical_section_tag>
+   
+   defines a pointer to a CRITICALSECTION type  */
 typedef struct critical_section_tag *PCRITICALSECTION;
-MEM_PROC( S_32, EnterCriticalSecNoWaitEx )( PCRITICALSECTION pcs, THREAD_ID *prior DBG_PASS );
+/* attempts to enter the critical section, and does not block.
+   Returns
+   If it enters the return is 1, else the return is 0.
+   Parameters
+   pcs :    pointer to a critical section
+   prior :  if not NULL, prior will be set to the current thread
+            ID of the owning thread.                             */
+MEM_PROC  S_32 MEM_API  EnterCriticalSecNoWaitEx ( PCRITICALSECTION pcs, THREAD_ID *prior DBG_PASS );
+/* <combine sack::timers::EnterCriticalSecNoWaitEx@PCRITICALSECTION@THREAD_ID *prior>
+   
+   \ \                                                                                */
 #define EnterCriticalSecNoWait( pcs,prior ) EnterCriticalSecNoWaitEx( (pcs),(prior) DBG_SRC )
-MEM_PROC( void, InitializeCriticalSec )( PCRITICALSECTION pcs );
-MEM_PROC( _32, CriticalSecOwners )( PCRITICALSECTION pcs );
+/* clears all members of a CRITICALSECTION.  Same as memset( pcs, 0, sizeof( CRITICALSECTION ) ); */
+MEM_PROC  void MEM_API  InitializeCriticalSec ( PCRITICALSECTION pcs );
+/* Get a count of how many times a critical section is locked */
+MEM_PROC  _32 MEM_API  CriticalSecOwners ( PCRITICALSECTION pcs );
 
+/* Namespace of all memory related functions for allocating and
+   releasing memory.                                            */
 #ifdef __cplusplus
 }; // namespace timers
 }; // namespace sack
@@ -56,211 +122,870 @@ using namespace sack::timers;
 
 #ifdef __cplusplus
 namespace sack {
+/* Memory namespace contains functions for allocating and
+   releasing memory. Also contains methods for accessing shared
+   memory (if available on the target platform).
+   
+   
+   
+   Allocate
+   
+   Release
+   
+   Hold
+   
+   OpenSpace                                                    */
 namespace memory {
-//#define __mem_ns__ sack::memory::
 #endif
+
 typedef struct memory_block_tag* PMEM;
 
 // what is an abstract name for the memory mapping handle...
 // where is a filename for the filebacking of the shared memory
-// DigSpace( WIDE("Picture Memory"), WIDE("Picture.mem"), 100000 );
+// DigSpace( WIDE(TEXT( "Picture Memory" )), WIDE(TEXT( "Picture.mem" )), 100000 );
 
-// raw shared file view...
-MEM_PROC( POINTER, OpenSpace )( CTEXTSTR pWhat, CTEXTSTR pWhere, _32 *dwSize );
+/* <combinewith sack::memory::OpenSpaceExx@CTEXTSTR@CTEXTSTR@PTRSZVAL@PTRSZVAL *@P_32>
+   
+   \ \                                                                                 */
+MEM_PROC  POINTER MEM_API  OpenSpace ( CTEXTSTR pWhat, CTEXTSTR pWhere, PTRSZVAL *dwSize );
 
-// an option to specify a requested address would be MOST handy...
-//MEM_PROC( POINTER, OpenSpaceEx )( TEXTSTR pWhat, TEXTSTR pWhere, _32 address, _32 *dwSize );
-MEM_PROC( POINTER, OpenSpaceExx )( CTEXTSTR pWhat, CTEXTSTR pWhere, _32 address, P_32 dwSize, P_32 bCreated );
+/* <unfinished>
+   
+   Open a shared memory region. The region may be named with a
+   text string (this does not work under linux platforms, and
+   the name of the file to back the shared region is the sharing
+   point). The region may be backed with a file (and must be if
+   it is to be shared on linux.
+   
+   If the region exists by name, the region is opened, and a
+   pointer to that region is returned.
+   
+   If the file exists, the file is opened, and mapped into
+   memory, and a pointer to the file backed memory is returned.
+   
+   if the file does not exist, and the size parameter passed is
+   not 0, then the file is created, and expanded to the size
+   requested. The bCreate flag is set to true.
+   
+   If NULL is passed for pWhat and pWhere, then a block of
+   memory is allocated in system memory, backed by pagefile.
+   
+   if dwSize is 0, then the region is specified for open only,
+   and will not create.
+   Parameters
+   pWhat :     String to a named shared memory region. NULL is
+               unnamed.
+   pWhere :    Filename to back the shared memory with. The file
+               name itself may also be used to share the memory.
+   address :   A base address to map the memory at. If 0,
+               specifies do not care.
+   dwSize :    pointer to a PTRSZVAL that defines the size to
+               create. If 0, then the region is only opened. The
+               size of the region opened is set back into this
+               value after it is opened.
+   bCreated :  pointer to a boolean to indicate whether the space
+               was created or not.
+   
+   Returns
+   Pointer to region requested to be opened. NULL on failure.
+   Example
+   Many examples of this are appropriate.
+   
+   1) Open or create a file backed shared space.
+   
+   2) Open a file for direct memory access, the file is loaded
+   into memory by system paging routines and not any API.         */
+MEM_PROC  POINTER MEM_API  OpenSpaceExx ( CTEXTSTR pWhat, CTEXTSTR pWhere, PTRSZVAL address
+	, PTRSZVAL *dwSize, P_32 bCreated );
+/* <combine sack::memory::OpenSpaceExx@CTEXTSTR@CTEXTSTR@PTRSZVAL@PTRSZVAL *@P_32>
+   
+   \ \                                                                             */
 #define OpenSpaceEx( what,where,address,psize) OpenSpaceExx( what,where,address,psize,NULL )
 
-MEM_PROC( void, CloseSpace )( POINTER pMem );
-MEM_PROC( void, CloseSpaceEx )( POINTER pMem, int bFinal );
-MEM_PROC( _32, GetSpaceSize )( POINTER pMem );
+/* Closes a shared memory region. Calls CloseSpaceEx() with
+   bFinal set TRUE.
+   Parameters
+   pMem :  pointer to a memory region opened by OpenSpace.  */
+MEM_PROC  void MEM_API  CloseSpace ( POINTER pMem );
+/* Closes a memory region. Release can also be used to close
+   opened spaces.
+   Parameters
+   pMem :    pointer to a memory region opened with OpenSpace()
+   bFinal :  If final is set, the file used for backing the shared
+             region is deleted.                                    */
+MEM_PROC  void MEM_API  CloseSpaceEx ( POINTER pMem, int bFinal );
+/* This can give the size back of a memory space.
+   Returns
+   The size of the memory block.
+   Parameters
+   pMem :  pointer to a block of memory that was opened with
+           OpenSpace().                                      */
+MEM_PROC  PTRSZVAL MEM_API  GetSpaceSize ( POINTER pMem );
 
-// even if pMem is just a POINTER returned from OpenSpace
-// this will create a valid heap pointer.
-// will result TRUE if a valid heap is present
-// will result FALSE if heap is not able to init (has content)
-MEM_PROC( int, InitHeap)( PMEM pMem, _32 dwSize );
+/* even if pMem is just a POINTER returned from OpenSpace this
+   will create a valid heap pointer.
+   
+   will result TRUE if a valid heap is present will result FALSE
+   if heap is not able to init (has content)
+   Parameters
+   pMem :    pointer to a memory space to setup as a heap.
+   dwSize :  size of the memory space pointed at by pMem.        */
+MEM_PROC  int MEM_API  InitHeap( PMEM pMem, PTRSZVAL dwSize );
 
-// not sure about this one - perhaps with custom heaps
-// we DEFINATLY need to disallow auto-additions
-//MEM_PROC( void, AddMemoryHeap )( POINTER pMem, LOGICAL bInit );
 
-
-MEM_PROC( void, DebugDumpHeapMemEx )( PMEM pHeap, LOGICAL bVerbose );
+/* Dumps all blocks into the log.
+   Parameters
+   pHeap :     Heap to dump. If NULL or unspecified, dump the
+               default heap.
+   bVerbose :  Specify to dump each block's information,
+               otherwise only summary information is generated. */
+MEM_PROC  void MEM_API  DebugDumpHeapMemEx ( PMEM pHeap, LOGICAL bVerbose );
+/* <combine sack::memory::DebugDumpHeapMemEx@PMEM@LOGICAL>
+   
+   Logs all of the blocks tracked in a specific heap.
+   Parameters
+   Heap :  Heap to dump the memory blocks of.              */
 #define DebugDumpHeapMem(h)     DebugDumpMemEx( (h), TRUE )
 
-MEM_PROC( void, DebugDumpMemEx )( LOGICAL bVerbose );
+/* <combine sack::memory::DebugDumpHeapMemEx@PMEM@LOGICAL>
+   
+   \ \                                                     */
+MEM_PROC  void MEM_API  DebugDumpMemEx ( LOGICAL bVerbose );
+/* Dumps all tracked heaps.
+   Parameters
+   None.                    */
 #define DebugDumpMem()     DebugDumpMemEx( TRUE )
-MEM_PROC( void, DebugDumpHeapMemFile )( PMEM pHeap, CTEXTSTR pFilename );
-MEM_PROC( void, DebugDumpMemFile )( CTEXTSTR pFilename );
+/* Dumps a heap to a specific file.
+   Parameters
+   pHeap :      Heap. If NULL or unspecified, dumps default heap.
+   pFilename :  name of the file to write output to.              */
+MEM_PROC  void MEM_API  DebugDumpHeapMemFile ( PMEM pHeap, CTEXTSTR pFilename );
+/* <combine sack::memory::DebugDumpHeapMemFile@PMEM@CTEXTSTR>
+   
+   \ \                                                        */
+MEM_PROC  void MEM_API  DebugDumpMemFile ( CTEXTSTR pFilename );
 
 #ifdef GCC
-MEM_PROC( POINTER, HeapAllocateEx )( PMEM pHeap, _32 nSize DBG_PASS ) __attribute__((malloc));
-MEM_PROC( POINTER, AllocateEx )( _32 nSize DBG_PASS ) __attribute__((malloc));
+MEM_PROC  POINTER MEM_API  HeapAllocateEx ( PMEM pHeap, PTRSZVAL nSize DBG_PASS ) __attribute__((malloc));
+MEM_PROC  POINTER MEM_API  AllocateEx ( PTRSZVAL nSize DBG_PASS ) __attribute__((malloc));
 #else
-MEM_PROC( POINTER, HeapAllocateEx )( PMEM pHeap, _32 nSize DBG_PASS );
-MEM_PROC( POINTER, AllocateEx )( _32 nSize DBG_PASS );
+
+/* \ \ 
+   Parameters
+   pHeap :  pointer to a heap which was initialized with
+            InitHeap()
+   Size :   Size of block to allocate                    */
+MEM_PROC  POINTER MEM_API  HeapAllocateEx ( PMEM pHeap, PTRSZVAL nSize DBG_PASS );
+/* Allocates a block of memory of specific size. Debugging
+   information if passed is recorded on the block.
+   Parameters
+   size :  size of the memory block to create              */
+MEM_PROC  POINTER MEM_API  AllocateEx ( PTRSZVAL nSize DBG_PASS );
 #endif
 
+/* A simple macro to allocate a new single unit of a structure. Adds
+   a typecast automatically to be (type*) so C++ compilation is
+   clean. Does not burden the user with extra typecasts. This,
+   being in definition use means that all other things that are
+   typecast are potentially error prone. Memory is considered
+   uninitialized.
+   Parameters
+   type :  type to allocate
+   
+   Example
+   <code lang="c++">
+   int *p_int = New( int );
+   </code>                                                           */
 #define New(type) ((type*)Allocate(sizeof(type)))
+/* Reallocates an array of type.
+   Parameters
+   type :  type to use for sizeof(type) * sz for resulting size.
+   p :     pointer to realloc
+   sz :    count of elements in the array                        */
 #define Renew(type,p,sz) ((type*)Reallocate(p, sizeof(type)*sz))
-// an advantage of C, can define extra space at end of structure
-// which is allowed to carry extra data, which is unknown by other code
-// room for exploits rock.
+/* an advantage of C, can define extra space at end of structure
+   which is allowed to carry extra data, which is unknown by
+   other code room for exploits rock.
+   Parameters
+   type :   passed to sizeof()
+   extra :  Number of additional bytes to allocate beyond the
+            sizeof( type )
+   
+   Example
+   Create a text segment plus 18 characters of data. (This
+   should not be done, use SegCreate instead)
+   <code lang="c#">
+   PTEXT text = NewPlus( TEXT, 18 ); 
+   </code>                                                       */
 #define NewPlus(type,extra) ((type*)Allocate(sizeof(type)+(extra)))
+/* Allocate a new array of type.
+   Parameters
+   type :   type to determine size of array element to allocate.
+   count :  count of elements to allocate in the array.
+   
+   Returns
+   A pointer to type. (this is important, since in C++ it's cast
+   correctly to the destination type).                           */
 #define NewArray(type,count) ((type*)Allocate(sizeof(type)*(count)))
-// will invoke some sort of registered initializer
+/* Allocate sizeof(type). Will invoke some sort of registered
+   initializer
+   Parameters
+   type :  type to allocate for. Passes the name of the type so
+           the allocator can do a registered procedure lookup and
+           invok an initializer for the type.                     */
 #define NewObject(type) ((type*)FancyAllocate(sizeof(type),#type DBG_SRC))
-//#define New(type) ((type*)Allocate(sizeof(type)))
 #ifdef __cplusplus
+/* A 'safe' release macro. casts the block to the type to
+   release. Makes sure the pointer being released is the type
+   specified.
+   Parameters
+   type :   type of the variable
+   thing :  the thing to actually release.                    */
 #define Delete(type,thing) for(type tmp=thing;Release((POINTER)(tmp)),0;)
 #else
 #define Delete(type,thing) (Release((POINTER)(thing)))
 #endif
-#define HeapAllocate(heap, n) HeapAllocateEx( (heap), (_32)(n) DBG_SRC )
+/* <combine sack::memory::HeapAllocateEx@PMEM@PTRSZVAL nSize>
+   
+   \ \                                                        */
+#define HeapAllocate(heap, n) HeapAllocateEx( (heap), (PTRSZVAL)(n) DBG_SRC )
+/* <combine sack::memory::AllocateEx@PTRSZVAL nSize>
+   
+   \ \                                               */
 #define Allocate( n ) HeapAllocateEx( (PMEM)0, (n) DBG_SRC )
-//MEM_PROC( POINTER, AllocateEx )( _32 nSize DBG_PASS );
+//MEM_PROC  POINTER MEM_API  AllocateEx ( PTRSZVAL nSize DBG_PASS );
 //#define Allocate(n) AllocateEx(n DBG_SRC )
-MEM_PROC( POINTER, GetFirstUsedBlock )( PMEM pHeap );
+MEM_PROC  POINTER MEM_API  GetFirstUsedBlock ( PMEM pHeap );
 
-MEM_PROC( POINTER, ReleaseEx )( POINTER pData DBG_PASS ) ;
+/* Releases an allocated block. Memory becomes free to allocate
+   again. If debugging information is passed, the releasing
+   source and line is recorded in the block. (can be used to
+   find code deallocating memory it shouldn't).
+   
+   This also works with Hold(), and decrements the hold counter.
+   If there are no more holds on the block, then the block is
+   released.
+   Parameters
+   p :  pointer to allocated block to release.                   */
+MEM_PROC  POINTER MEM_API  ReleaseEx ( POINTER pData DBG_PASS ) ;
+/* <combine sack::memory::ReleaseEx@POINTER pData>
+   
+   \ \                                             */
 #define Release(p) ReleaseEx( (p) DBG_SRC )
 
-MEM_PROC( POINTER, HoldEx )( POINTER pData DBG_PASS  );
+/* Adds a usage count to a block of memory. For each count
+   added, an additional release must be used. This can be used
+   to keep a copy of the block, even if some other code
+   automatically releases it.
+   Parameters
+   pointer :  pointer to a block of memory that was Allocate()'d.
+   
+   Example
+   Allocate a block of memory, and release it properly. But we
+   passed it to some function. That function wanted to keep a
+   copy of the block, so it can apply a hold. It needs to later
+   do a Release again to actually free the memory.
+   <code lang="c++">
+   POINTER p = Allocate( 32 );
+   
+   call_some_function( p );
+   
+   Release( p );
+   
+   
+   void call_some_function( POINTER p )
+   {
+      static POINTER my_p_copy;
+      my_p_copy = p;
+      Hold( p );
+   }
+   </code>                                                        */
+MEM_PROC  POINTER MEM_API  HoldEx ( POINTER pData DBG_PASS  );
+/* <combine sack::memory::HoldEx@POINTER pData>
+   
+   \ \                                          */
 #define Hold(p) HoldEx(p DBG_SRC )
 
-MEM_PROC( POINTER, HeapReallocateEx )( PMEM pHeap, POINTER source, _32 size DBG_PASS );
+/* This can be used to add additional space after the end of a
+   memory block.
+   Parameters
+   pHeap :   If NULL or not specified, uses the common memory heap.
+   source :  pointer to the block to pre\-allocate. If NULL, a new
+             memory block will be allocated that is filled with 0.
+   size :    the new size of the block.
+   
+   Returns
+   A pointer to a new block of memory that is the new size.
+   Remarks
+   If the size specified for the new block is larger than the
+   previous size of the block, the curernt data is copied to the
+   beginning of the new block, and the memory after the existing
+   content is cleared to 0.
+   
+   If the size specified for the new block is smaller than the
+   previous size, the end of the original block is not copied to
+   the new block.
+   
+   If NULL is passed as the source block, then a new block
+   filled with 0 is created.                                        */
+MEM_PROC  POINTER MEM_API  HeapReallocateEx ( PMEM pHeap, POINTER source, PTRSZVAL size DBG_PASS );
+/* <combine sack::memory::HeapReallocateEx@PMEM@POINTER@PTRSZVAL size>
+   
+   \ \                                                                 */
 #define HeapReallocate(heap,p,sz) HeapReallocateEx( (heap),(p),(sz) DBG_SRC )
-MEM_PROC( POINTER, ReallocateEx )( POINTER source, _32 size DBG_PASS );
+/* <combine sack::memory::HeapReallocateEx@PMEM@POINTER@PTRSZVAL size>
+   
+   \ \                                                                 */
+MEM_PROC  POINTER MEM_API  ReallocateEx ( POINTER source, PTRSZVAL size DBG_PASS );
+/* <combine sack::memory::ReallocateEx@POINTER@PTRSZVAL size>
+   
+   \ \                                                        */
 #define Reallocate(p,sz) ReallocateEx( (p),(sz) DBG_SRC )
 
-MEM_PROC( POINTER, HeapPreallocateEx )( PMEM pHeap, POINTER source, _32 size DBG_PASS );
+/* This can be used to add additional space before the beginning
+   of a memory block.
+   Parameters
+   pHeap :   If NULL or not specified, uses the common memory heap.
+   source :  pointer to the block to pre\-allocate. If NULL, a new
+             memory block will be allocated that is filled with 0.
+   size :    the new size of the block.
+   Returns
+   A pointer to a new block of memory that is the new size.
+   Remarks
+   If the size specified for the new block is larger than the
+   previous size of the block, the content data is copied to the
+   end of the new block, and the memory leading up to the block
+   is cleared to 0.
+   
+   If the size specified for the new block is smaller than the
+   previous size, the end of the original block is not copied to
+   the new block.
+   
+   If NULL is passed as the source block, then a new block
+   filled with 0 is created.                                        */
+MEM_PROC  POINTER MEM_API  HeapPreallocateEx ( PMEM pHeap, POINTER source, PTRSZVAL size DBG_PASS );
+/* <combine sack::memory::HeapPreallocateEx@PMEM@POINTER@PTRSZVAL size>
+   
+   \ \                                                                  */
 #define HeapPreallocate(heap,p,sz) HeapPreallocateEx( (heap),(p),(sz) DBG_SRC )
-MEM_PROC( POINTER, PreallocateEx )( POINTER source, _32 size DBG_PASS );
+/* <combine sack::memory::HeapPreallocateEx@PMEM@POINTER@PTRSZVAL size>
+   
+   \ \                                                                  */
+MEM_PROC  POINTER MEM_API  PreallocateEx ( POINTER source, PTRSZVAL size DBG_PASS );
+/* <combine sack::memory::PreallocateEx@POINTER@PTRSZVAL size>
+   
+   \ \                                                         */
 #define Preallocate(p,sz) PreallocateEx( (p),(sz) DBG_SRC )
 
-MEM_PROC( POINTER, HeapMoveEx )( PMEM pNewHeap, POINTER source DBG_PASS );
+/* Moves a block of memory from one heap to another.
+   Parameters
+   pNewHeap :  heap target to move the block to.
+   source :    source block to move \- pointer to the data in the
+               block.
+   
+   Remarks
+   Since each block remembers its own size, it is possible to
+   move a block from one heap to another. A heap might be a
+   memory mapped file at a specific address for instance.         */
+MEM_PROC  POINTER MEM_API  HeapMoveEx ( PMEM pNewHeap, POINTER source DBG_PASS );
+/* <combine sack::memory::HeapMoveEx@PMEM@POINTER source>
+   
+   \ \                                                    */
 #define HeapMove(h,s) HeapMoveEx( (h), (s) DBG_SRC )
 
-MEM_PROC( _32, SizeOfMemBlock )( CPOINTER pData );
+/* \returns the size of a memory block which was Allocate()'d.
+   Parameters
+   pData :  pointer to a allocated memory block.
+   
+   Returns
+   The size of the block that was specified by the Allocate(). */
+MEM_PROC  PTRSZVAL MEM_API  SizeOfMemBlock ( CPOINTER pData );
 
-MEM_PROC( LOGICAL, Defragment )( POINTER *ppMemory );
+/* not so much of a fragment as a consolidation. Finds a free
+   spot earlier in the heap and attempts to move the block
+   there. This can help alleviate heap fragmentation.
+   Parameters
+   ppMemory :  pointer to a pointer to memory which might move */
+MEM_PROC  LOGICAL MEM_API  Defragment ( POINTER *ppMemory );
 
-MEM_PROC( void, GetHeapMemStatsEx )( PMEM pHeap, _32 *pFree, _32 *pUsed, _32 *pChunks, _32 *pFreeChunks DBG_PASS );
+/* \ \ 
+   Parameters
+   pHeap :        pointer to a heap
+   pFree :        pointer to a 32 bit value to receive the size
+                  of free space
+   pUsed :        pointer to a 32 bit value to receive the size
+                  of used space
+   pChunks :      pointer to a 32 bit value to receive the total
+                  count of chunks.
+   pFreeChunks :  pointer to a 32 bit value to receive the total
+                  count of free chunks.
+   
+   Remarks
+   It looks like DBG_PASS parameter isn't used... not sure why
+   it would here, there is no allocate or delete.
+   
+   The count of allocated chunks can be gotten by subtracting
+   FreeChunks from Chunks.
+   Example
+   <code lang="c++">
+   _32 free;
+   _32 used;
+   _32 chunks;
+   _32 free_chunks;
+   GetHeapMemStatsEx( NULL, &amp;free, &amp;used, &amp;chunks, &amp;free_chunks );
+   </code>                                                                         */
+MEM_PROC  void MEM_API  GetHeapMemStatsEx ( PMEM pHeap, _32 *pFree, _32 *pUsed, _32 *pChunks, _32 *pFreeChunks DBG_PASS );
+/* <combine sack::memory::GetHeapMemStatsEx@PMEM@_32 *@_32 *@_32 *@_32 *pFreeChunks>
+   
+   \ \                                                                               */
 #define GetHeapMemStats(h,f,u,c,fc) GetHeapMemStatsEx( h,f,u,c,fc DBG_SRC )
-//MEM_PROC( void, GetHeapMemStats )( PMEM pHeap, _32 *pFree, _32 *pUsed, _32 *pChunks, _32 *pFreeChunks );
-MEM_PROC( void, GetMemStats )( _32 *pFree, _32 *pUsed, _32 *pChunks, _32 *pFreeChunks );
+//MEM_PROC  void MEM_API  GetHeapMemStats ( PMEM pHeap, _32 *pFree, _32 *pUsed, _32 *pChunks, _32 *pFreeChunks );
+MEM_PROC  void MEM_API  GetMemStats ( _32 *pFree, _32 *pUsed, _32 *pChunks, _32 *pFreeChunks );
 
-MEM_PROC( int, SetAllocateLogging )( LOGICAL bTrueFalse );
-/* disables storing file/line, also disables auto GetMemStats checking*/
-MEM_PROC( int, SetAllocateDebug )( LOGICAL bDisable );
-/* disables auto GemMemStats on every allocate/release/Hold */
-MEM_PROC( int, SetManualAllocateCheck )( LOGICAL bDisable );
-// returns the prior state of logging...
-MEM_PROC( int, SetCriticalLogging )( LOGICAL bTrueFalse );
-MEM_PROC( void, SetMinAllocate )( int nSize );
-MEM_PROC( void, SetHeapUnit )( int dwSize );
-MEM_PROC( void, DisableHeapDebug)( PMEM pHeap );
+/* Sets whether to log allocations or not.
+   
+   \returns the prior state of logging...
+   Parameters
+   bTrueFalse :  if TRUE, allocation logging is turned on. Enables
+                 logging when each block is Allocated, Released,
+                 or Held.                                          */
+MEM_PROC  int MEM_API  SetAllocateLogging ( LOGICAL bTrueFalse );
+/* disables storing file/line, also disables auto GetMemStats
+   checking
+   Parameters
+   bDisable :  set to TRUE to disable allocate debug logging. */
+MEM_PROC  int MEM_API  SetAllocateDebug ( LOGICAL bDisable );
+/* disables auto GemMemStats on every allocate/release/Hold
+   
+   GetMemStats will evaluate each and every block allocated in
+   memory and inspect it for corruption.
+   Parameters
+   bDisable :  set to TRUE to disable auto mem check.          */
+MEM_PROC  int MEM_API  SetManualAllocateCheck ( LOGICAL bDisable );
+/* Sets whether to log critical sections or not.
+   
+   \returns the prior state of logging...
+   Parameters
+   bTrueFalse :  if TRUE, critical section logging is turned on. Logs
+                 when each thread enters or leaves a
+                 CRITICIALSECTION.                                    */
+MEM_PROC  int MEM_API  SetCriticalLogging ( LOGICAL bTrueFalse );
+/* Sets the minimum size to allocate. If a block size less than
+   this is allocated, then this much is actually allocated.
+   Parameters
+   nSize :  Specify the minimum allocation size                 */
+MEM_PROC  void MEM_API  SetMinAllocate ( int nSize );
+/* Sets how much a heap is expanded by when it is out of space. Default
+   is like 512k.
+   Parameters
+   dwSize :  the new size to expand heaps by.
+   
+   Remarks
+   Probably internally, this is rounded up to the next 4k
+   boundary.                                                            */
+MEM_PROC  void MEM_API  SetHeapUnit ( int dwSize );
 
 
 #ifdef __cplusplus
-MEM_PROC( PTRSZVAL, LockedExchange64 )( PVPTRSZVAL p, PTRSZVAL val );
+/* multi-processor safe exchange the value in a 64 bit variable
+   with another value.
+   Parameters
+   p :    a pointer to a 64 bit value to replace.
+   val :  the value to replace into p
+   Returns
+   the value previously in p.
+   Example
+   <code lang="c++">
+   _64 variable = 0;
+   _64 oldvalue = InterlockedExchange64( &amp;variable, 1 );
+   </code>                                                      */
+MEM_PROC  PTRSZVAL MEM_API  LockedExchange64 ( PVPTRSZVAL p, PTRSZVAL val );
 #endif
-MEM_PROC( _64, LockedExchange64 )( PV_64 p, _64 val );
-MEM_PROC( _32, LockedIncrement )( P_32 p );
-MEM_PROC( _32, LockedDecrement )( P_32 p );
+/* Multi-processor safe exchange operation. Returns the prior
+   value at the pointer.
+   Parameters
+   p :    pointer to a volatile 64 bit value.
+   val :  a new 64 bit value to put at (*p)
+   
+   Example
+   <code lang="c#">
+   _64 value = 13;
+   _64 oldvalue = LockedExchange64( &amp;value, 15 );
+   // old value will be 13
+   // value will be 15
+   </code>                                                    */
+MEM_PROC  _64 MEM_API  LockedExchange64 ( PV_64 p, _64 val );
+/* A multi-processor safe increment of a variable.
+   Parameters
+   p :  pointer to a 32 bit value to increment.    */
+MEM_PROC  _32 MEM_API  LockedIncrement ( P_32 p );
+/* Does a multi-processor safe decrement on a variable.
+   Parameters
+   p :  pointer to a 32 bit value to decrement.         */
+MEM_PROC  _32 MEM_API  LockedDecrement ( P_32 p );
 
 #ifdef __cplusplus
+// like also __if_assembly__
 extern "C" {
 #endif
 
-MEM_PROC( _32, LockedExchange )( PV_32 p, _32 val );
-MEM_PROC( void, MemSet )( POINTER p, _32 n, _32 sz );
+/* Multiprocessor safe swap of the contents of a variable with a
+   new value, and result with the old variable.
+   Parameters
+   p :    pointer to a 32 bit value to exchange
+   val :  value to set into the variable
+   Returns
+   The prior value in p.
+   Example
+   <code>
+   _32 variable = 0;
+   _32 oldvalue = InterlockedExchange( &amp;variable, 1 );
+   </code>                                                       */
+MEM_PROC  _32 MEM_API  LockedExchange ( PV_32 p, _32 val );
+/* Sets a 32 bit value into memory. If the length to set is not
+   a whole number of 32 bit words, the last bytes may contain
+   the low 16 bits of the value and the low 8 bits.
+   
+   
+   Parameters
+   p :   pointer to memory to set
+   n :   32 bit value to set memory with
+   sz :  length to set
+   
+   Remarks
+   Writes as many 32 it values as will fit in sz.
+   
+   If (sz &amp; 2), the low 16 bits of n are written at the end.
+   
+   then if ( sz &amp; 1 ) the low 8 bits of n are written at the
+   end.                                                          */
+MEM_PROC  void MEM_API  MemSet ( POINTER p, PTRSZVAL n, PTRSZVAL sz );
 #define _memset_ MemSet
-MEM_PROC( void, MemCpy )( POINTER pTo, CPOINTER pFrom, _32 sz );
+/* memory copy operation. not safe when buffers overlap. Performs
+   platform-native memory stream operation to copy from one
+   place in memory to another. (32 or 64 bit operations as
+   possible).
+   Parameters
+   pTo :    Memory to copy to
+   pFrom :  memory to copy from
+   sz :     size of block of memory to copy                       */
+MEM_PROC  void MEM_API  MemCpy ( POINTER pTo, CPOINTER pFrom, PTRSZVAL sz );
 #define _memcpy_ MemCpy
-MEM_PROC( int, MemCmp )( CPOINTER pOne, CPOINTER pTwo, _32 sz );
+/* Binary byte comparison of one block of memory to another. Results
+   \-1 if less, 1 if more and 0 if equal.
+   Parameters
+   pOne :  pointer to memory one
+   pTwo :  pointer to some other memory
+   sz :    count of bytes to compare
+   
+   Returns
+   0 if equal
+   
+   \-1 if the first different byte in pOne is less than pTwo.
+   
+   1 if the first different byte in pOne is more than pTwo.          */
+MEM_PROC  int MEM_API  MemCmp ( CPOINTER pOne, CPOINTER pTwo, PTRSZVAL sz );
 
-#ifdef __cplusplus
-}; // extern "C"
-#endif
-
-MEM_PROC( int, StrCmp )( CTEXTSTR pOne, CTEXTSTR pTwo );
-MEM_PROC( int, StrCaseCmp )( CTEXTSTR s1, CTEXTSTR s2 );
-MEM_PROC( int, StrCaseCmpEx )( CTEXTSTR s1, CTEXTSTR s2, INDEX maxlen );
-MEM_PROC( CTEXTSTR, StrChr )( CTEXTSTR s1, TEXTCHAR c );
-MEM_PROC( TEXTSTR, StrCpyEx )( TEXTSTR s1, CTEXTSTR s2, int n );
-MEM_PROC( TEXTSTR, StrCpy )( TEXTSTR s1, CTEXTSTR s2 );
-MEM_PROC( size_t, StrLen )( CTEXTSTR s );
-MEM_PROC( size_t, CStrLen )( char *s );
-
-
-MEM_PROC( CTEXTSTR, StrRChr )( CTEXTSTR s1, TEXTCHAR c );
-
-#ifdef __cplusplus
-MEM_PROC( TEXTSTR, StrChr )( TEXTSTR s1, TEXTCHAR c );
-MEM_PROC( TEXTSTR, StrRChr )( TEXTSTR s1, TEXTCHAR c );
-MEM_PROC( int, StrCmp )( const char * s1, CTEXTSTR s2 );
-//MEM_PROC( int, StrCmp )( char * s1, CTEXTSTR s2 );
-#endif
-
-MEM_PROC( int, StrCmpEx )( CTEXTSTR s1, CTEXTSTR s2, INDEX maxlen );
-MEM_PROC( CTEXTSTR, StrStr )( CTEXTSTR s1, CTEXTSTR s2 );
-#ifdef __cplusplus
-MEM_PROC( TEXTSTR, StrStr )( TEXTSTR s1, CTEXTSTR s2 );
-#endif
-MEM_PROC( CTEXTSTR, StrCaseStr )( CTEXTSTR s1, CTEXTSTR s2 );
-
+	/* nothing.
+   
+   does nothing, returns nothing. */
 #define memnop(mem,sz,comment)
-MEM_PROC( POINTER, MemDupEx )( CPOINTER thing DBG_PASS );
+
+#ifdef __cplusplus
+};
+#endif
+
+/* Compares two strings. Must match exactly.
+   Parameters
+   s1 :  string to compare
+   s2 :  string to compare
+   Returns
+   0 if equal.
+   
+   1 if (s1 \>s2)
+   
+   \-1 if (s1 \< s2)
+   
+   if s1 is NULL and s2 is not NULL, return is -1.
+   
+   if s2 is NULL and s1 is not NULL, return is 1.
+   
+   if s1 and s2 are NULL return is 0.              */
+MEM_PROC  int MEM_API  StrCmp ( CTEXTSTR pOne, CTEXTSTR pTwo );
+/* Compares two strings, case insensitively.
+   Parameters
+   s1 :  string to compare
+   s2 :  string to compare
+   
+   Returns
+   0 if equal.
+   
+   1 if (s1 \>s2)
+   
+   \-1 if (s1 \< s2)
+   
+   if s1 is NULL and s2 is not NULL, return is -1.
+   
+   if s2 is NULL and s1 is not NULL, return is 1.
+   
+   if s1 and s2 are NULL return is 0.              */
+MEM_PROC  int MEM_API  StrCaseCmp ( CTEXTSTR s1, CTEXTSTR s2 );
+/* String insensitive case comparison with maximum length
+   specified.
+   Parameters
+   s1 :      string to compare
+   s2 :      string to compare
+   maxlen :  maximum character required to match
+   Returns
+   0 if equal up to the number of characters.
+   
+   1 if (s1 \>s2)
+   
+   \-1 if (s1 \< s2)
+   
+   if s1 is NULL and s2 is not NULL, return is -1.
+   
+   if s2 is NULL and s1 is not NULL, return is 1.
+   
+   if s1 and s2 are NULL return is 0.                     */
+MEM_PROC  int MEM_API  StrCaseCmpEx ( CTEXTSTR s1, CTEXTSTR s2, INDEX maxlen );
+/* This searches a string for the first character that matches
+   some specified character.
+   
+   A custom strchr function, since microsoft is saying this is
+   an unsafe function. This Compiles to compare native strings,
+   if UNICODE uses unicode, otherwise uses 8 bit characters.
+   Parameters
+   s1 :  String to search
+   c :   Character to find
+   Returns
+   pointer in string to search that is the first character that
+   matches. NULL if no character matches.
+   Note
+   This flavor is the only one on C where operator overloading
+   cannot switch between CTEXTSTR and TEXTSTR parameters, to
+   \result with the correct type. If a CTEXTSTR is passed to
+   this it should result with a CTEXTSTR, but if that's the only
+   choice, then the result of this is never modifiable, even if
+   it is a pointer to a non-const TEXTSTR.                       */
+MEM_PROC  CTEXTSTR MEM_API  StrChr ( CTEXTSTR s1, TEXTCHAR c );
+/* copy S2 to S1, with a maximum of N characters.
+   
+   The last byte of S1 will always be a 'nul'. If S2 was longer
+   than S1, then it will be truncated to fit within S1. Perferred
+   method over this is SaveText or StrDup.
+   Parameters
+   s1 :      desitnation TEXTCHAR buffer
+   s2 :      source string
+   length :  the maximum number of characters that S1 can hold. (this
+             is not a size, but is a character count)                 */
+MEM_PROC  TEXTSTR MEM_API  StrCpyEx ( TEXTSTR s1, CTEXTSTR s2, int n );
+/* copy S2 to S1. This is 'unsafe', since neither paramter's
+   size is known. Prefer StrCpyEx which passes the maximum
+   length for S1.
+   Parameters
+   s1 :  desitnation TEXTCHAR buffer
+   s2 :  source string                                       */
+MEM_PROC  TEXTSTR MEM_API  StrCpy ( TEXTSTR s1, CTEXTSTR s2 );
+/* \Returns the count of characters in a string.
+   Parameters
+   s :  string to measure
+   
+   Returns
+   length of string.                             */
+MEM_PROC  size_t MEM_API  StrLen ( CTEXTSTR s );
+/* Get the length of a string in C chars.
+   Parameters
+   s :  char * to count.
+   
+   Returns
+   the length of s. If s is NULL, return 0. */
+MEM_PROC  size_t MEM_API  CStrLen ( char *s );
+
+
+/* Finds the last instance of a character in a string.
+   Parameters
+   s1 :  String to search in
+   c :   character to find
+   
+   Returns
+   NULL if character is not in the string.
+   
+   a pointer to the last character in s1 that matches c. */
+MEM_PROC  CTEXTSTR MEM_API  StrRChr ( CTEXTSTR s1, TEXTCHAR c );
+
+#ifdef __cplusplus
+/* This searches a string for the first character that matches
+   some specified character.
+   
+   A custom strchr function, since microsoft is saying this is
+   an unsafe function. This Compiles to compare native strings,
+   if UNICODE uses unicode, otherwise uses 8 bit characters.
+   Parameters
+   s1 :  String to search
+   c :   Character to find
+   Returns
+   pointer in string to search that is the first character that
+   matches. NULL if no character matches.
+   Note
+   This second flavor is only available on C++ where operator
+   overloading will switch between CTEXTSTR and TEXTSTR
+   \parameters, to result with the correct type. If a CTEXTSTR
+   is passed to this it should result with a CTEXTSTR, but if
+   that's the only choice, then the result of this is never
+   modifiable, even if it is a pointer to a non-const TEXTSTR.  */
+MEM_PROC  TEXTSTR MEM_API  StrChr ( TEXTSTR s1, TEXTCHAR c );
+/* This searches a string for the last character that matches
+   some specified character.
+   
+   A custom strrchr function, since microsoft is saying this is
+   an unsafe function. This Compiles to compare native strings,
+   if UNICODE uses unicode, otherwise uses 8 bit characters.
+   Parameters
+   s1 :  String to search
+   c :   Character to find
+   Returns
+   pointer in string to search that is the first character that
+   matches. NULL if no character matches.
+   Note
+   This second flavor is only available on C++ where operator
+   overloading will switch between CTEXTSTR and TEXTSTR
+   \parameters, to result with the correct type. If a CTEXTSTR
+   is passed to this it should result with a CTEXTSTR, but if
+   that's the only choice, then the result of this is never
+   modifiable, even if it is a pointer to a non-const TEXTSTR.  */
+MEM_PROC  TEXTSTR MEM_API  StrRChr ( TEXTSTR s1, TEXTCHAR c );
+/* <combine sack::memory::StrCmp@CTEXTSTR@CTEXTSTR>
+   
+   \ \                                              */
+MEM_PROC  int MEM_API  StrCmp ( const char * s1, CTEXTSTR s2 );
+#endif
+
+/* <combine sack::memory::StrCmp@char *@CTEXTSTR>
+   
+   \ \                                            */
+MEM_PROC  int MEM_API  StrCmpEx ( CTEXTSTR s1, CTEXTSTR s2, INDEX maxlen );
+/* Finds an instance of a string in another string.
+   
+   Custom implementation because strstr is declared unsafe, and
+   to handle switching between unicode and char.
+   
+   
+   Parameters
+   s1 :  the string to search in
+   s2 :  the string to locate
+   
+   Returns
+   NULL if s2 is not in s1.
+   
+   The beginning of the string in s1 that matches s2.
+   
+   
+   Example
+   <code lang="c++">
+   TEXTCHAR const *found = StrStr( WIDE( "look in this string" ), WIDE( "in" ) );
+                                               ^returns a pointer to here.
+   </code>                                                                        */
+MEM_PROC  CTEXTSTR MEM_API  StrStr ( CTEXTSTR s1, CTEXTSTR s2 );
+#ifdef __cplusplus
+/* Finds an instance of a string in another string.
+   
+   Custom implementation because strstr is declared unsafe, and
+   to handle switching between unicode and char.
+   
+   
+   Parameters
+   s1 :  the string to search in
+   s2 :  the string to locate
+   
+   Returns
+   NULL if s2 is not in s1.
+   
+   The beginning of the string in s1 that matches s2.
+   
+   
+   Example
+   <code>
+   TEXTCHAR *writable_string = StrDup( WIDE( "look in this string" ) );
+   TEXTCHAR *found = StrStr( writable_string, WIDE( "in" ) );
+   // returns a pointer to 'in' in the writable string, which can then be modified.
+   </code>                                                                          */
+MEM_PROC  TEXTSTR MEM_API  StrStr ( TEXTSTR s1, CTEXTSTR s2 );
+#endif
+/* Searches for one string in another. Compares case
+   insensitively.
+   Parameters
+   s1 :  string to search in
+   s2 :  string to locate
+   
+   See Also
+   <link sack::memory::StrStr@CTEXTSTR@CTEXTSTR, StrStr> */
+MEM_PROC  CTEXTSTR MEM_API  StrCaseStr ( CTEXTSTR s1, CTEXTSTR s2 );
+
+/* This duplicates a block of memory.
+   Parameters
+   p :  pointer to a block of memory that was allocated.
+   
+   Returns
+   a pointer to a new block of memory that has the same content
+   as the original.                                             */
+MEM_PROC  POINTER MEM_API  MemDupEx ( CPOINTER thing DBG_PASS );
+/* <combine sack::memory::MemDupEx@CPOINTER thing>
+   
+   \ \                                             */
 #define MemDup(thing) MemDupEx(thing DBG_SRC )
 
-MEM_PROC( TEXTSTR, StrDupEx )( CTEXTSTR original DBG_PASS );
-MEM_PROC( char * , CStrDupEx )( CTEXTSTR original DBG_PASS );
-MEM_PROC( TEXTSTR, DupCStrEx )( const char * original DBG_PASS );
+/* Duplicates a string, and returns a pointer to the copy.
+   Parameters
+   original :  string to duplicate                         */
+MEM_PROC  TEXTSTR MEM_API  StrDupEx ( CTEXTSTR original DBG_PASS );
+/* Translates from a TEXTCHAR string to a char string. Probably
+   only for UNICODE to non wide translation points.
+   Parameters
+   original :  string to duplicate                              */
+MEM_PROC  char *  MEM_API  CStrDupEx ( CTEXTSTR original DBG_PASS );
+/* Converts from 8 bit char to 16 bit wchar (or no-op if not
+   UNICODE compiled)
+   Parameters
+   original :  original string of C char. 
+   
+   Returns
+   a pointer to a wide character string.                     */
+MEM_PROC  TEXTSTR MEM_API  DupCStrEx ( const char * original DBG_PASS );
+/* <combine sack::memory::StrDupEx@CTEXTSTR original>
+   
+   \ \                                                */
 #define StrDup(o) StrDupEx( (o) DBG_SRC )
+/* <combine sack::memory::CStrDupEx@CTEXTSTR original>
+   
+   \ \                                                 */
 #define CStrDup(o) CStrDupEx( (o) DBG_SRC )
+/* <combine sack::memory::DupCStrEx@char * original>
+   
+   \ \                                               */
 #define DupCStr(o) DupCStrEx( (o) DBG_SRC )
 
-/*
-// patch for spider which attempted to use ShareMem but FAILED
-#ifndef _SHARED_MEMORY_LIBRARY
-#define Allocate(n) malloc(n)
-#undef Release
-#define Release(n)  free(n)
-#endif
-*/
 
 //------------------------------------------------------------------------
 
+#if 0
+// this code was going to provide network oriented shared memory.
 #ifndef TRANSPORT_STRUCTURE_DEFINED
 typedef PTRSZVAL PTRANSPORT_QUEUE;
 struct transport_queue_tag { _8 private_data_here; };
 
 #endif
 
-#if 0
-MEM_PROC( struct transport_queue_tag *, CreateQueue )( int size );
-MEM_PROC( int, EnqueMessage )( struct transport_queue_tag *queue, POINTER msg, int size );
-MEM_PROC( int, DequeMessage )( struct transport_queue_tag *queue, POINTER msg, int *size );
-MEM_PROC( int, PequeMessage )( struct transport_queue_tag *queue, POINTER *msg, int *size );
+MEM_PROC  struct transport_queue_tag * MEM_API  CreateQueue ( int size );
+MEM_PROC  int MEM_API  EnqueMessage ( struct transport_queue_tag *queue, POINTER msg, int size );
+MEM_PROC  int MEM_API  DequeMessage ( struct transport_queue_tag *queue, POINTER msg, int *size );
+MEM_PROC  int MEM_API  PequeMessage ( struct transport_queue_tag *queue, POINTER *msg, int *size );
 #endif
 
 
 //------------------------------------------------------------------------
 
 #ifdef __cplusplus
-
-#ifdef __cplusplus
-// this is what they made 'using namespace' for
-//#define AllocateEx __mem_ns__ AllocateEx
-//#define HeapAllocateEx __mem_ns__ HeapAllocateEx
-//#define ReleaseEx __mem_ns__ ReleaseEx
-//#define MemSet __mem_ns__ MemSet
-//#define MemCpy __mem_ns__ MemCpy
-#endif
 
 }; // namespace memory
 }; // namespace sack
@@ -280,9 +1005,9 @@ inline void operator delete (void * p DBG_PASS )
 //#define deleteEx(file,line) delete(file,line)
 #ifdef USE_SACK_ALLOCER
 inline void * operator new( size_t size DBG_PASS )
-{ return AllocateEx( (_32)size DBG_RELAY ); }
+{ return AllocateEx( (PTRSZVAL)size DBG_RELAY ); }
 static void * operator new[]( size_t size DBG_PASS )
-{ return AllocateEx( (_32)size DBG_RELAY ); }
+{ return AllocateEx( (PTRSZVAL)size DBG_RELAY ); }
 #define new new( DBG_VOIDSRC )
 #define newEx(file,line) new(file,line)
 #endif
@@ -309,81 +1034,3 @@ inline void operator delete (void * p)
 
 
 #endif
-// $Log: sharemem.h,v $
-// Revision 1.38  2005/05/12 21:00:22  jim
-// Expand critical section size ot excess of worst case...
-//
-// Revision 1.37  2004/12/19 15:44:57  panther
-// Extended set methods to interact with raw index numbers
-//
-// Revision 1.36  2004/12/05 15:32:06  panther
-// Some minor cleanups fixed a couple memory leaks
-//
-// Revision 1.35  2004/06/03 10:55:47  d3x0r
-// Add a CPROC strcmp
-//
-// Revision 1.34  2004/06/01 07:07:39  d3x0r
-// Fix custom drawn button no-border option
-//
-// Revision 1.33  2003/12/08 03:49:09  panther
-// Make some more types/defs for eltanin building
-//
-// Revision 1.32  2003/10/22 01:58:23  panther
-// Fixed critical sections yay! disabled critical section logging
-//
-// Revision 1.31  2003/10/21 00:21:36  panther
-// Export CloseSpaceEx (sharemem.h).  Unwind circular dependancy for idle.
-//
-// Revision 1.30  2003/10/20 03:01:21  panther
-// Fix getmythreadid - split depending if getpid returns ppid or pid.
-// Fix memory allocator to init region correctly...
-// fix initial status of found thred to reflect sleeping
-// in /proc/#/status
-//
-// Revision 1.29  2003/10/20 00:04:21  panther
-// Extend OpenSpace in SharedMem
-// revise msgqueue operations to more resemble sysVipc msgq
-//
-// Revision 1.28  2003/10/18 04:45:32  panther
-// Preallocate was misspelled...
-//
-// Revision 1.27  2003/10/17 00:56:04  panther
-// Rework critical sections.
-// Moved most of heart of these sections to timers.
-// When waiting, sleep forever is used, waking only when
-// released... This is preferred rather than continuous
-// polling of section with a Relinquish.
-// Things to test, event wakeup order uner linxu and windows.
-// Even see if the wake ever happens.
-// Wake should be able to occur across processes.
-// Also begin implmeenting MessageQueue in containers....
-// These work out of a common shared memory so multiple
-// processes have access to this region.
-//
-// Revision 1.26  2003/10/16 00:12:00  panther
-// Fix configscript arg building.  Added Preallocate which like Reallocate resizes memmory, but puts the old memory at the end of the allcoated space.
-//
-// Revision 1.25  2003/09/24 02:26:02  panther
-// Fix C++ methods, extend and correct.
-//
-// Revision 1.24  2003/07/24 16:56:41  panther
-// Updates to expliclity define C procedure model for callbacks and assembly modules - incomplete
-//
-// Revision 1.23  2003/05/18 19:30:56  panther
-// hmm use pretteir names for StrDup
-//
-// Revision 1.22  2003/05/13 09:12:37  panther
-// Update types to be more protected for memlib
-//
-// Revision 1.21  2003/04/27 01:25:45  panther
-// Don't disable allocate, release in header
-//
-// Revision 1.20  2003/04/24 00:03:49  panther
-// Added ColorAverage to image... Fixed a couple macros
-//
-// Revision 1.19  2003/04/21 19:59:43  panther
-// Option to return filename only
-//
-// Revision 1.18  2003/03/25 08:38:11  panther
-// Add logging
-//

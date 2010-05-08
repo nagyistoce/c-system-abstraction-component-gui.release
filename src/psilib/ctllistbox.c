@@ -1348,7 +1348,7 @@ PSI_PROC( void, GetListItemText )( PLISTITEM hli, TEXTSTR buffer, int bufsize )
 {
 	if( hli )
 	{
-		strncpy( buffer, ((PLISTITEM)hli)->text, bufsize-1 );
+		StrCpyEx( buffer, ((PLISTITEM)hli)->text, ((bufsize)/sizeof(TEXTCHAR))-1 );
 		buffer[bufsize-1] = 0;
 	}
 }

@@ -928,7 +928,7 @@ static void PlotArbitrary( Image dest
 static void (CPROC *SavePortion )( PSPRITE_METHOD psm, _32 x, _32 y, _32 w, _32 h );
 
 
-IMAGE_PROC( void, SetSavePortion )( void (CPROC*_SavePortion )( PSPRITE_METHOD psm, _32 x, _32 y, _32 w, _32 h ) )
+ void  SetSavePortion ( void (CPROC*_SavePortion )( PSPRITE_METHOD psm, _32 x, _32 y, _32 w, _32 h ) )
 {
    SavePortion = _SavePortion;
 }
@@ -1054,14 +1054,14 @@ static PSPRITE MakeSpriteEx( DBG_VOIDPASS )
    return ps;
 }
 
-IMAGE_PROC(  PSPRITE, MakeSpriteImageEx )( ImageFile *Image DBG_PASS)
+  PSPRITE  MakeSpriteImageEx ( ImageFile *Image DBG_PASS)
 {
    PSPRITE ps = MakeSpriteEx( DBG_VOIDRELAY );
    ps->image = Image;
    return ps;
 }
 
-IMAGE_PROC(  PSPRITE, MakeSpriteImageFileEx )( CTEXTSTR fname DBG_PASS )
+  PSPRITE  MakeSpriteImageFileEx ( CTEXTSTR fname DBG_PASS )
 {
    PSPRITE ps = MakeSpriteEx( DBG_VOIDRELAY );
    ps->image = LoadImageFileEx( fname DBG_RELAY );
@@ -1092,7 +1092,7 @@ void UnmakeSprite( PSPRITE sprite, int bForceImageAlso )
  *  to a full circle, 64 a right angle, etc. This function can draw onto
  *  both linear and mode-X bitmaps.
  */
-IMAGE_PROC(  void, rotate_scaled_sprite )(ImageFile *bmp, SPRITE *sprite, fixed angle, fixed scale_width, fixed scale_height)
+  void  rotate_scaled_sprite (ImageFile *bmp, SPRITE *sprite, fixed angle, fixed scale_width, fixed scale_height)
 {
    //lprintf( "rotate_scaled_sprite..." );
 #ifdef DEBUG_TIMING
@@ -1114,14 +1114,14 @@ IMAGE_PROC(  void, rotate_scaled_sprite )(ImageFile *bmp, SPRITE *sprite, fixed 
  *  to a full circle, 64 a right angle, etc. This function can draw onto
  *  both linear and mode-X bitmaps.
  */
-IMAGE_PROC(  void, rotate_sprite )(ImageFile *bmp, SPRITE *sprite, fixed angle)
+  void  rotate_sprite (ImageFile *bmp, SPRITE *sprite, fixed angle)
 {
 	rotate_scaled_sprite(bmp, sprite, angle, 0x10000, 0x10000 );
 }
 
 
 
-IMAGE_PROC(  void, BlotSprite )( ImageFile *pdest, SPRITE *ps ) // hotspot bitmaps...
+  void  BlotSprite ( ImageFile *pdest, SPRITE *ps ) // hotspot bitmaps...
 {
    PCOLOR po, pi;
 #ifdef __CYGWIN__

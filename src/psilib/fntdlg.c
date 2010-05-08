@@ -70,7 +70,7 @@ PRIORITY_PRELOAD( InitFontDialogGlobal, IMAGE_PRELOAD_PRIORITY + 1 )
 	SimpleRegisterAndCreateGlobal( global_font_data );
 	if( !fg.library )
 	{
-      lprintf( "image library didn't load?" );
+      lprintf( WIDE( "image library didn't load?" ) );
 	}
 }
 
@@ -232,7 +232,12 @@ static void CPROC SizeSelected( PTRSZVAL psv, PSI_CONTROL pc, PLISTITEM pli )
 #else
 #define SCANBUF size
 #endif
-	sscanf( SCANBUF, cWIDE("%") c_32f cWIDE("x%") c_32f cWIDE(""), &width, &height );
+#ifdef UNICODE
+	swscanf
+#else
+	sscanf
+#endif
+		( SCANBUF, WIDE("%") _32f WIDE("x%") _32f WIDE(""), &width, &height );
 #ifdef __cplusplus_cli
 	Release( mybuf );
 #endif
@@ -758,13 +763,13 @@ PSI_PROC( Font, PickScaledFontWithUpdate )( S_32 x, S_32 y
 						pResult->nHeight = fdData.nHeight;
 						offset = 0;
 
-						strcpy( pResult->names + offset, fdData.pFontEntry->name );
+						StrCpy( pResult->names + offset, fdData.pFontEntry->name );
 						offset += l1 + 1;
 
-						strcpy( pResult->names + offset, fdData.pFontStyle->name );
+						StrCpy( pResult->names + offset, fdData.pFontStyle->name );
 						offset += l2 + 1;
 
-						offset += sprintf( pResult->names + offset, WIDE("%s/%s")
+						offset += snprintf( pResult->names + offset, l3+l4+2, WIDE("%s/%s")
 											  , fdData.pSizeFile->path
 											  , fdData.pSizeFile->file
 											  );
@@ -781,11 +786,12 @@ PSI_PROC( Font, PickScaledFontWithUpdate )( S_32 x, S_32 y
 					}
 					else
 					{
+                  int chars;
 						_32 resultsize = sizeof(RENDER_FONTDATA)
-							+ strlen( fdData.filename ) + 1;
+							+ (chars=strlen( fdData.filename ) + 1)*sizeof(TEXTCHAR);
 						PRENDER_FONTDATA pResult = (PRENDER_FONTDATA)Allocate( resultsize );
 						pResult->magic = MAGIC_RENDER_FONT;
-						strcpy( pResult->filename, fdData.filename );
+						StrCpyEx( pResult->filename, fdData.filename, chars );
 						pResult->flags = fdData.flags.render_depth;
 						pResult->nWidth = fdData.nWidth;
 						pResult->nHeight = fdData.nHeight;

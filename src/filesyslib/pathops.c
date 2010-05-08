@@ -11,7 +11,7 @@
 
 FILESYS_NAMESPACE
 
-FILESYS_PROC( CTEXTSTR, pathrchr )( CTEXTSTR path )
+ CTEXTSTR  pathrchr ( CTEXTSTR path )
 {
 	CTEXTSTR end1, end2;
 	end1 = strrchr( path, '\\' );
@@ -22,7 +22,7 @@ FILESYS_PROC( CTEXTSTR, pathrchr )( CTEXTSTR path )
 }
 
 #ifdef __cplusplus
-FILESYS_PROC( TEXTSTR, pathrchr )( TEXTSTR path )
+ TEXTSTR  pathrchr ( TEXTSTR path )
 {
 	TEXTSTR end1, end2;
 	end1 = strrchr( path, '\\' );
@@ -35,7 +35,7 @@ FILESYS_PROC( TEXTSTR, pathrchr )( TEXTSTR path )
 
 //-----------------------------------------------------------------------
 
-FILESYS_PROC( CTEXTSTR, pathchr )( CTEXTSTR path )
+ CTEXTSTR  pathchr ( CTEXTSTR path )
 {
 	CTEXTSTR end1, end2;
 	end1 = strchr( path, (int)'\\' );
@@ -59,10 +59,12 @@ TEXTSTR GetCurrentPath( TEXTSTR path, int len )
 {
 	if( !path )
 		return 0;
+#ifndef UNDER_CE
 #ifdef _WIN32
 	GetCurrentDirectory( len, path );
 #else
 	getcwd( path, len );
+#endif
 #endif
 	return path;
 }
@@ -77,7 +79,16 @@ static void convert( P_64 outtime, time_t *time )
 
 //-----------------------------------------------------------------------
 
-FILESYS_PROC( _64, GetFileWriteTime)( CTEXTSTR name ) // last modification time.
+_64 GetTimeAsFileTime ( void )
+{
+	SYSTEMTIME st;
+   FILETIME result;
+	GetLocalTime( &st );
+	SystemTimeToFileTime( &st, &result );
+   return *(_64*)&result;
+}
+
+ _64  GetFileWriteTime( CTEXTSTR name ) // last modification time.
 {
 #ifdef _WIN32
 	HANDLE hFile = CreateFile( name
@@ -110,7 +121,7 @@ FILESYS_PROC( _64, GetFileWriteTime)( CTEXTSTR name ) // last modification time.
 
 //-----------------------------------------------------------------------
 
-FILESYS_PROC( LOGICAL, SetFileWriteTime)( CTEXTSTR name, _64 filetime ) // last modification time.
+ LOGICAL  SetFileWriteTime( CTEXTSTR name, _64 filetime ) // last modification time.
 {
 #ifdef _WIN32
 	HANDLE hFile = CreateFile( name
@@ -142,7 +153,7 @@ FILESYS_PROC( LOGICAL, SetFileWriteTime)( CTEXTSTR name, _64 filetime ) // last 
 
 //-----------------------------------------------------------------------
 
-FILESYS_PROC( int, IsPath )( CTEXTSTR path )
+ int  IsPath ( CTEXTSTR path )
 {
 	
 	if( !path )
@@ -168,7 +179,7 @@ FILESYS_PROC( int, IsPath )( CTEXTSTR path )
 
 //-----------------------------------------------------------------------
 
-FILESYS_PROC( int, MakePath )( CTEXTSTR path )
+ int  MakePath ( CTEXTSTR path )
 {
 	if( !path )
 		return 0;
@@ -181,15 +192,22 @@ FILESYS_PROC( int, MakePath )( CTEXTSTR path )
 
 //-----------------------------------------------------------------------
 
-FILESYS_PROC( int, SetCurrentPath )( CTEXTSTR path )
+ int  SetCurrentPath ( CTEXTSTR path )
 {
 	if( !path )
 		return 0;
+#ifndef UNDER_CE
+  lprintf( WIDE( "Set CurrentPath: %s" ), path );
+   SetDefaultFilePath( path );
 #ifdef _WIN32
 	return SetCurrentDirectory( path );
 #else
 	return !chdir( path );
 #endif	
+#else
+   SetDefaultFilePath( path );
+#endif
+	return 0;
 }
 
 FILESYS_NAMESPACE_END

@@ -1,4 +1,8 @@
 
+ifndef __LINUX__
+INCLUDEDIRS=$(SACK_BASE)/src/zlib-1.2.4 $(SACK_BASE)/src/libpng-1.4.1 
+endif
+
 PROGNAME=image_colorizer
 SRCS=image_colorizer imagepng
 MORELIBS=bag.image

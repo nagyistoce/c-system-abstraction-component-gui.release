@@ -1,7 +1,15 @@
 #ifndef InterShell_EXPORT
 #define InterShell_EXPORT
 #include <sack_types.h>
-#include <genxml/genx.h>
+#ifdef SACK_CORE_BUILD
+#include <../src/genx/genx.h>
+#else
+#include <../src/genx/genx.h>
+#endif
+#include <configscript.h>
+
+#include "widgets/include/buttons.h"
+
 #define _DEFINE_INTERFACE
 
 //!defined(__STATIC__) &&
@@ -21,15 +29,179 @@
 #endif
 #endif
 
-//#include "intershell_local.h"
-#include "intershell_button.h"
-#include "text_label.h"
-#include "fonts.h"
+
+#ifdef __cplusplus
+#define INTERSHELL_NAMESPACE SACK_NAMESPACE namespace intershell {
+#define INTERSHELL_NAMESPACE_END  } SACK_NAMESPACE_END
+
+
+namespace sack {
+	/* \ \ 
+	   Example
+	   A Simple Button
+	   
+	   This simple button, when clicked will show a message box
+	   indicating that the button was clicked. For button controls
+	   there is a default configuration dialog that is used for
+	   controls that do not themselves define a
+	   OnConfigureControl(OnEditControl) event handler. The default
+	   dialog, depending on its current design is able to set all
+	   relavent properties common to buttons, such as colors, font,
+	   button style, perhaps a page change indicator.
+	   
+	   
+	   
+	   <code lang="c++">
+	   
+	   
+	   OnCreateMenuButton( “basic/Hello World” )( PMENU_BUTTON button )
+	   {
+	       return 1; // result OK to create.
+	   }
+	   
+	   OnKeyPressEvent( “basic/Hello World” )( PTRSZVAL psvUnused )
+	   {
+	       SimpleMessageBox( NULL  // the parent frame, NULL is okay
+	                       , “Hello World!”   // the message within the message box
+	                       , “Button Clicked” );  // the title of the message box.
+	       // SimpleMessageBox displays a simple frame with a message
+	       // and a title, and an OK button. The function waits
+	       // until the OK button is clicked before returning.
+	   }
+	   
+	   
+	   </code>
+	   
+	   A Simple Listbox
+	   
+	   <code lang="c++">
+	   OnCreateListbox( “basic/List Test” )( PSI_CONTROL pc_list )
+	   {
+	         return pc_list; // result non-zero OK to create.
+	         // this result can also be used in subsequent events
+	   // by typecasting it back to the original PSI_CONTROL
+	   // type that it is.
+	   }
+	   
+	   
+	   
+	   </code>
+	   // several implementations of listboxes change their content
+	   
+	   based on the state of other controls around them, and/or
+	   
+	   database content. The OnShowControl is a convenient place
+	   
+	   to re-populate the listbox with new data.
+	   
+	   There is no requirement to do this in this way.
+	   
+	   Some listboxes may populate their content during OnCreate.
+	   
+	   <code lang="c++">
+	   
+	   OnShowControl( “basic/List Test” )( PTRSZVAL psvList )
+	   
+	   {
+	   
+	         PSI_CONTROL pc_list = (PSI_CONTROL)psvList;
+	   
+	         ResetList( pc_list );
+	   
+	         AddListItem( pc_list, “One List Item” );
+	   
+	         AddListItem( pc_list, “Another List Item” );
+	   
+	   }
+	   
+	   
+	   
+	   
+	   
+	   
+	   
+	   
+	   
+	   A Simple Control
+	   
+	   
+	   
+	   There is no such thing as a ‘simple’ control.
+	   
+	   
+	   
+	   OnCreateControl( “basic/Other Control” )( PSI_CONTROL frame, S_32 x, S_32 y, _32 w, _32 h )
+	   
+	   {
+	   
+	         // this code results with a create PSI control.
+	   
+	         // the PSI control must have been previously registered
+	   
+	   // or defined in some way.
+	   
+	         // the result of creating an invalid control,
+	   
+	   // or of creating a control that fails creation
+	   
+	   // for one reason or another is NULL, which will in turn
+	   
+	   // fails creation of the MILK control.
+	   
+	         return (PTRSZVAL)MakeNamedControl( frame
+	   
+	   , “Some PSI Control type-name”
+	   
+	   , x, y  // control position passed to event
+	   
+	   , w, h  // control size passed to event
+	   
+	   , \-1 ); // control ID; typically unused.
+	   
+	   }
+	   
+	   
+	   
+	   // For MILK to be able to hide the control when pages change,
+	   
+	   // show the control when pages change, move the control to
+	   
+	   // a new position, or to resize the control, this method MUST
+	   
+	   // be defined for MILK widgets created through OnCreateControl.
+	   
+	   
+	   
+	   OnQueryGetControl( PTRSZVAL psv )
+	   
+	   {
+	   
+	         // since we know that we returned a PSI_CONTROL from the
+	   
+	         // creation event, this can simply be typecast and returned.
+	   
+	         return (PSI_CONTROL)psv;
+	   
+	   }
+	   </code>                                                                                     */
+	namespace intershell {
+#else
+#define INTERSHELL_NAMESPACE
+#define INTERSHELL_NAMESPACE_END
+#endif
+
+
+
+#ifndef MENU_BUTTON_DEFINED
+#define MENU_BUTTON_DEFINED
+		typedef struct menu_button *PMENU_BUTTON;
+#endif
+typedef struct page_data   *PPAGE_DATA;
 
 
 // pabel label is actually just a text label thing... 
-typedef struct page_label *PPAGE_LABEL;
-typedef struct font_preset_tag *PFONT_PRESET;
+typedef struct page_label      *PPAGE_LABEL;
+typedef struct font_preset     *PFONT_PRESET;
 
 
 //-------------------------------------------------------
@@ -129,7 +301,7 @@ INTERSHELL_PROC_PTR( void, InterShell_SetButtonFont )( PMENU_BUTTON button, Font
 // this result can be used for controls that are not really buttons to get the common
 // properties of the font being used for this control...
 INTERSHELL_PROC_PTR( Font*, InterShell_GetCurrentButtonFont )( void );
-INTERSHELL_PROC_PTR( void, InterShell_SetButtonStyle )( PMENU_BUTTON button, char *style );
+INTERSHELL_PROC_PTR( void, InterShell_SetButtonStyle )( PMENU_BUTTON button, TEXTCHAR *style );
 INTERSHELL_PROC_PTR( void, InterShell_SaveCommonButtonParameters )( FILE *file );
 INTERSHELL_PROC_PTR( CTEXTSTR, InterShell_GetSystemName )( void );
 //INTERSHELL_PROC_PTR( void, UpdateButtonEx )( PMENU_BUTTON button, int bEndingEdit );
@@ -171,7 +343,8 @@ INTERSHELL_PROC_PTR( void, ClearPageList )( void );
 // disable updates on the page, disable updating of buttons...
 INTERSHELL_PROC_PTR( void, InterShell_DisablePageUpdate )( LOGICAL bDisable );
 INTERSHELL_PROC_PTR( void, RestoreCurrentPage )( PSI_CONTROL pc_canvas );
-INTERSHELL_PROC_PTR( void, HidePageEx )( PSI_CONTROL pc_canvas );
+INTERSHELL_PROC_PTR( void, HidePageExx )( PSI_CONTROL pc_canvas DBG_PASS);
+#define HidePageEx2(page) HidePageExx( page DBG_SRC )
 
 
 
@@ -203,7 +376,7 @@ INTERSHELL_PROC_PTR( void, GetPageSize )( P_32 width, P_32 height );
 //-----------------------------------------------------
 // layout members which have a position x, y, font, text and color of their own
 // may be created on buttons.  They are displayed below the lense/ridge[up/down] and above the background.
-INTERSHELL_PROC_PTR( void, SetButtonTextField )( PMENU_BUTTON pKey, PTEXT_PLACEMENT pField, char *text );
+INTERSHELL_PROC_PTR( void, SetButtonTextField )( PMENU_BUTTON pKey, PTEXT_PLACEMENT pField, TEXTCHAR *text );
 INTERSHELL_PROC_PTR( PTEXT_PLACEMENT, AddButtonLayout )( PMENU_BUTTON pKey, int x, int y, Font *font, CDATA color, _32 flags );
 
 
@@ -249,7 +422,7 @@ INTERSHELL_PROC_PTR( PCONFIG_HANDLER, InterShell_GetCurrentConfigHandler )( void
 //   other info to save... the method for setting additional configuration methods
 //   is invoked by thisname.
 //   Then end_type_name is the last string which will close the subconfiguration.
-INTERSHELL_PROC_PTR( LOGICAL, BeginSubConfiguration )( char *control_type_name, const char *end_type_name );
+INTERSHELL_PROC_PTR( LOGICAL, BeginSubConfiguration )( TEXTCHAR *control_type_name, const TEXTCHAR *end_type_name );
 INTERSHELL_PROC_PTR( CTEXTSTR, EscapeMenuString )( CTEXTSTR string );
 INTERSHELL_PROC_PTR( PMENU_BUTTON, InterShell_GetCurrentLoadingControl )( void );
 
@@ -264,10 +437,12 @@ INTERSHELL_PROC_PTR( PMENU_BUTTON, InterShell_GetPhysicalButton )( PMENU_BUTTON 
 
 INTERSHELL_PROC_PTR( void, InterShell_SetButtonHighlight )( PMENU_BUTTON button, LOGICAL bEnable );
 
+INTERSHELL_PROC_PTR( PTRSZVAL,  InterShell_CreateControl )( CTEXTSTR type, int x, int y, int w, int h );
 
 };  //struct intershell_interface {
 
 #endif
+
 
 #ifdef INTERSHELL_SOURCE
 // magically knows which button we're editing at the moment.
@@ -322,7 +497,7 @@ INTERSHELL_PROC( void, InterShell_SetButtonFont )( PMENU_BUTTON button, Font *fo
 // THis function returns the font of the current button being edited...
 // this result can be used for controls that are not really buttons to get the common
 // properties of the font being used for this control...
-INTERSHELL_PROC( void, InterShell_SetButtonStyle )( PMENU_BUTTON button, char *style );
+INTERSHELL_PROC( void, InterShell_SetButtonStyle )( PMENU_BUTTON button, TEXTCHAR *style );
 INTERSHELL_PROC( void, InterShell_SaveCommonButtonParameters )( FILE *file );
 INTERSHELL_PROC( CTEXTSTR, InterShell_GetSystemName )( void );
 //INTERSHELL_PROC( void, UpdateButtonEx )( PMENU_BUTTON button, int bEndingEdit );
@@ -364,7 +539,7 @@ INTERSHELL_PROC( void, ClearPageList )( void );
 // disable updates on the page, disable updating of buttons...
 INTERSHELL_PROC( void, InterShell_DisablePageUpdate )( LOGICAL bDisable );
 INTERSHELL_PROC( void, RestoreCurrentPage )( PSI_CONTROL pc_canvas );
-INTERSHELL_PROC( void, HidePageEx )( PSI_CONTROL pc_canvas );
+INTERSHELL_PROC( void, HidePageExx )( PSI_CONTROL pc_canvas DBG_PASS);
 
 
 
@@ -396,7 +571,7 @@ INTERSHELL_PROC( void, GetPageSize )( P_32 width, P_32 height );
 //-----------------------------------------------------
 // layout members which have a position x, y, font, text and color of their own
 // may be created on buttons.  They are displayed below the lense/ridge[up/down] and above the background.
-INTERSHELL_PROC( void, SetButtonTextField )( PMENU_BUTTON pKey, PTEXT_PLACEMENT pField, char *text );
+INTERSHELL_PROC( void, SetButtonTextField )( PMENU_BUTTON pKey, PTEXT_PLACEMENT pField, TEXTCHAR *text );
 INTERSHELL_PROC( PTEXT_PLACEMENT, AddButtonLayout )( PMENU_BUTTON pKey, int x, int y, Font *font, CDATA color, _32 flags );
 
 
@@ -440,9 +615,10 @@ INTERSHELL_PROC( PMENU_BUTTON, InterShell_GetCurrentLoadingControl )( void );
 //   other info to save... the method for setting additional configuration methods
 //   is invoked by thisname.
 //   Then end_type_name is the last string which will close the subconfiguration.
-INTERSHELL_PROC( LOGICAL, BeginSubConfiguration )( char *control_type_name, const char *end_type_name );
+INTERSHELL_PROC( LOGICAL, BeginSubConfiguration )( TEXTCHAR *control_type_name, const TEXTCHAR *end_type_name );
 INTERSHELL_PROC( CTEXTSTR, EscapeMenuString )( CTEXTSTR string );
 
+INTERSHELL_PROC( PTRSZVAL,  InterShell_CreateControl )( CTEXTSTR type, int x, int y, int w, int h );
 
 
 
@@ -471,6 +647,7 @@ PRIORITY_PRELOAD( InitInterShellInterface, DEFAULT_PRELOAD_PRIORITY - 3)
 #endif
 
 #ifndef INTERSHELL_SOURCE
+#define InterShell_CreateControl                                ( !InterShell )?0:InterShell->InterShell_CreateControl
 #define  GetCommonButtonControls                               if( InterShell )InterShell->GetCommonButtonControls 
 #define  SetCommonButtonControls							   if( InterShell )InterShell->SetCommonButtonControls 
 #define  RestartMenu										   if( InterShell )InterShell->RestartMenu 
@@ -504,7 +681,7 @@ PRIORITY_PRELOAD( InitInterShellInterface, DEFAULT_PRELOAD_PRIORITY - 3)
 #define  ClearPageList										   if( InterShell )InterShell->ClearPageList 
 #define  InterShell_DisablePageUpdate								   if( InterShell )InterShell->InterShell_DisablePageUpdate 
 #define  RestoreCurrentPage									   if( InterShell )InterShell->RestoreCurrentPage 
-#define  HidePageEx											   if( InterShell )InterShell->HidePageEx 
+#define  HidePageExx											   if( InterShell )InterShell->HidePageExx
 #define  InterShell_DisableButtonPageChange						   if( InterShell )InterShell->InterShell_DisableButtonPageChange 
 #define  CreateLabelVariable								  ( !InterShell )?NULL:InterShell->CreateLabelVariable
 #define  CreateLabelVariableEx								   ( !InterShell )?NULL:InterShell->CreateLabelVariableEx
@@ -542,7 +719,13 @@ PRIORITY_PRELOAD( InitInterShellInterface, DEFAULT_PRELOAD_PRIORITY - 3)
 
 
 
+# ifndef HidePageEx
+#define HidePageEx(page) HidePageExx( page DBG_SRC )
+# endif
 
-
+# ifdef __cplusplus
+} }
+using namespace sack::intershell;
+# endif
 
 #endif

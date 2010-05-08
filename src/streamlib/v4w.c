@@ -1,5 +1,5 @@
 #define NEED_V4W
-#define USE_IMAGE_INTERFACE g.pii
+//#define USE_IMAGE_INTERFACE g.pii
 #include <stdhdrs.h>
 #include <image.h>
 #include <vfw.h>

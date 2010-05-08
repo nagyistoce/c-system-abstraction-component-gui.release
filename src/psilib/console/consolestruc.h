@@ -149,7 +149,11 @@ typedef struct myconsolestruc {
 		unsigned int bCharMode : 1;
 		unsigned int bNoLocalEcho : 1;
 		unsigned int bHistoryShow : 1;
+		unsigned int bNewLine : 1; // set if the next line is NEW else it's to be appended.
 	} flags;
+
+	_32 pending_spaces;
+   _32 pending_tabs;
 
 	RECT rArea; // pixel size of the display (if font height/width>1)
 	_32 nFontHeight;

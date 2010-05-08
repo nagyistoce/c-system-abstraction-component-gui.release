@@ -1,6 +1,6 @@
 #define USES_MILK_INTERFACE
 #define DEFINES_MILK_INTERFACE
-#define DEFINE_DEFAULT_IMAGE_INTERFACE
+//#define DEFINE_DEFAULT_IMAGE_INTERFACE
 #include <psi.h>
 #include <milk_export.h>
 #include <milk_registry.h>

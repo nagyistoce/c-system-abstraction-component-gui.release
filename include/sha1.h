@@ -47,11 +47,13 @@
 #else
 #ifndef __WATCOMC__
 	typedef unsigned long uint32_t;
+	typedef short int_least16_t;
+	typedef unsigned char uint8_t;
 #else
 #include <sys/types.h>
 #endif
-typedef unsigned char uint8_t;
-typedef int int_least16_t;
+//typedef unsigned char uint8_t;
+//typedef int int_least16_t;
 #endif
 /*
  * If you do not have the ISO standard stdint.h header file, then you

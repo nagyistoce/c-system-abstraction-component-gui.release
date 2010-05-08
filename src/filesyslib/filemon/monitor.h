@@ -29,7 +29,11 @@ typedef struct filemonitor_tag {
 #ifdef __cplusplus_cli
 	gcroot<System::DateTime^> lastmodifiedtime;
 #else
+#  ifdef WIN32
+   FILETIME lastmodifiedtime;
+#  else
 	time_t lastmodifiedtime;
+#  endif
 #endif
     _64    lastknownsize;
     CRITICALSECTION cs;

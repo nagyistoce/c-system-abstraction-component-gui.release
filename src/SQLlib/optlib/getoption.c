@@ -1,6 +1,8 @@
 #ifndef GETOPTION_SOURCE
 #define GETOPTION_SOURCE
 #endif
+// we want access to GLOBAL from sqltub
+#define SQLLIB_SOURCE
 #include <stdhdrs.h>
 #include <sack_types.h>
 #include <deadstart.h>
@@ -8,7 +10,7 @@
 #include <filesys.h>
 #include <system.h>
 #include <network.h>
-#include <controls.H> // INI prompt
+#include <controls.h> // INI prompt
 #ifdef __WATCOMC__
 #include <io.h> // unlink
 #endif
@@ -154,10 +156,11 @@ SQLGETOPTION_PROC( void, CreateOptionDatabaseEx )( PODBC odbc )
 				CheckODBCTable( odbc, table, CTO_MERGE );
 				DestroySQLTable( table );
 			}
+         //SQLCommit( odbc );
+         //SQLCommand( odbc, "COMMIT" );
 			tree->flags.bCreated = 1;
 		}
 	}
-	SetSQLLoggingDisable( odbc, FALSE );
 }
 
 void SetOptionDatabaseOption( PODBC odbc, int bNewVersion )
@@ -165,7 +168,7 @@ void SetOptionDatabaseOption( PODBC odbc, int bNewVersion )
    POPTION_TREE node = GetOptionTreeEx( odbc );
 	if( node )
 	{
-      node->flags.bCreated = FALSE;
+		node->flags.bCreated = FALSE;
 		node->flags.bNewVersion = bNewVersion;
       CreateOptionDatabaseEx( odbc );
 	}
@@ -185,7 +188,7 @@ SQLGETOPTION_PROC( void, CreateOptionDatabase )( void )
          loadpath = ".";
 #endif
 		if( strlen( global_sqlstub_data->Option.info.pDSN ) == 0 )
-         strcpy( global_sqlstub_data->Option.info.pDSN, "option.db" );
+			global_sqlstub_data->Option.info.pDSN = "option.db";
 		//lprintf( "connect to %s[%s]", global_sqlstub_data->Option.info.pDSN, loadpath );
 
 		//if( !pathchr( global_sqlstub_data->Option.info.pDSN )
@@ -208,6 +211,9 @@ SQLGETOPTION_PROC( void, CreateOptionDatabase )( void )
 			{
             //lprintf( "connect to %s", out );
 				og.Option = ConnectToDatabase( out );
+				og.Option->flags.bAutoTransact = 1;
+				og.Option->last_command_tick = 0; // just to make sure
+
 			}
 		}
       //else
@@ -253,9 +259,7 @@ void InitMachine( void )
          WSAStartup( MAKEWORD(1,1), &ws );
 #endif
          gethostname( og.SystemName, sizeof( og.SystemName ) );
-			SetSQLLoggingDisable( og.Option, TRUE );
 			og.SystemID = SQLReadNameTable( og.Option, og.SystemName, WIDE("systems"), WIDE("system_id")  );
-			SetSQLLoggingDisable( og.Option, FALSE );
       }
    }
 }
@@ -302,7 +306,6 @@ static INDEX GetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, cons
 		InitMachine();
 		// resets the search/browse cursor... not empty...
 		FamilyTreeReset( GetOptionTree( odbc ) );
-		SetSQLLoggingDisable( odbc, TRUE );
 		while( system || program || file || pBranch || pValue || start )
 		{
 #ifdef DETAILED_LOGGING
@@ -355,7 +358,7 @@ static INDEX GetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, cons
 			}
 			else
 			{
-				strncpy( namebuf, (*start), sizeof( namebuf )-1 );
+				StrCpyEx( namebuf, (*start), sizeof( namebuf )-1 );
 				(*start) = NULL;
 				start = NULL;
 			}
@@ -421,7 +424,6 @@ static INDEX GetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, cons
 					lprintf( WIDE("Option tree corrupt.  No option node_id=%ld"), ID );
 #endif
 					PopODBCEx( odbc );
-					SetSQLLoggingDisable( odbc, FALSE );
 					return INVALID_INDEX;
 				}
 				else
@@ -441,7 +443,6 @@ static INDEX GetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, cons
 				PopODBCEx( odbc );
 			}
 		}
-		SetSQLLoggingDisable( odbc, FALSE );
 	}
 	return parent;
 }
@@ -474,7 +475,6 @@ INDEX GetOptionValueIndexEx( PODBC odbc, INDEX ID )
 		INDEX IDValue = INVALID_INDEX;
 		if( ID && ID!= INVALID_INDEX )
 		{
-			SetSQLLoggingDisable( odbc, TRUE );
 			snprintf( query, sizeof( query ), WIDE("select value_id from option_map where node_id=%ld"), ID );
 			//lprintf( WIDE("push get value index.") );
 			PushSQLQueryEx( odbc );
@@ -482,14 +482,12 @@ INDEX GetOptionValueIndexEx( PODBC odbc, INDEX ID )
 				|| !result )
 			{
 				lprintf( WIDE("Option tree corrupt.  No option node_id=%ld") );
-				SetSQLLoggingDisable( odbc, FALSE );
 				return INVALID_INDEX;
 			}
 			//lprintf( WIDE("okay and then we pop!?") );
 			IDValue = INVALID_INDEX;
 			sscanf( result, WIDE("%lu"), &IDValue );
 			PopODBCEx( odbc);
-			SetSQLLoggingDisable( odbc, FALSE );
 			//lprintf( WIDE("and then by the time done...") );
 		}
 		return IDValue;
@@ -507,7 +505,6 @@ INDEX NewDuplicateValue( PODBC odbc, INDEX iOriginalOption, INDEX iNewOption )
 	char query[256];
 	CTEXTSTR *results;
    TEXTSTR tmp;
-	SetSQLLoggingDisable( odbc, TRUE );
 	PushSQLQueryEx( odbc );
    // my nested parent may have a select state in a condition that I think it's mine.
 	SQLRecordQueryf( odbc, NULL, &results, NULL, "select `string` from "OPTION_VALUES" where option_id=%ld", iOriginalOption );
@@ -515,7 +512,7 @@ INDEX NewDuplicateValue( PODBC odbc, INDEX iOriginalOption, INDEX iNewOption )
 	if( results && results[0] )
 	{
 		snprintf( query, sizeof( query )
-			  , WIDE("replace into "OPTION_VALUES" (option_id,`string`) values (%ld,'%s')")
+			  , "replace into "OPTION_VALUES" (option_id,`string`) values (%ld,'%s')"
 				  , iNewOption, tmp = EscapeSQLBinary( odbc, results[0], strlen( results[0] ) ) );
 		Release( tmp );
       SQLEndQuery( odbc );
@@ -527,14 +524,13 @@ INDEX NewDuplicateValue( PODBC odbc, INDEX iOriginalOption, INDEX iNewOption )
 	if( results && results[0] )
 	{
 		snprintf( query, sizeof( query )
-				  , WIDE("replace into "OPTION_BLOBS" (option_id,`binary`) values (%ld,'%s')")
+				  , "replace into "OPTION_BLOBS" (option_id,`binary`) values (%ld,'%s')"
 				  , iNewOption, tmp = EscapeSQLBinary( odbc, results[0], strlen( results[0] ) ) );
 		Release( tmp );
       SQLEndQuery( odbc );
 		SQLCommand( odbc, query );
 	}
 	PopODBCEx( odbc );
-	SetSQLLoggingDisable( odbc, FALSE );
 	return iNewOption;
 }
 
@@ -550,13 +546,11 @@ INDEX DuplicateValue( INDEX iOriginalValue, INDEX iNewValue )
 	{
 		char query[256];
 		INDEX iNewValue;
-		SetSQLLoggingDisable( og.Option, TRUE );
 		snprintf( query, sizeof( query )
-				  , WIDE("insert into option_values select 0,`string`,`binary` from option_values where value_id=%ld")
+				  , "insert into option_values select 0,`string`,`binary` from option_values where value_id=%ld"
 				  , iOriginalValue );
 		SQLCommand( og.Option, query );
 		iNewValue = FetchLastInsertID(og.Option,NULL,NULL);
-		SetSQLLoggingDisable( og.Option, FALSE );
 		return iNewValue;
 	}
 }
@@ -576,11 +570,10 @@ _32 GetOptionStringValueEx( PODBC odbc, INDEX optval, char *buffer, _32 len DBG_
    CTEXTSTR result = NULL;
    int last_was_session, last_was_system;
 	INDEX _optval;
-   _32 result_len = 0;
+   PTRSZVAL result_len = 0;
    len--;
 
-	SetSQLLoggingDisable( og.Option, TRUE );
-   snprintf( query, sizeof( query ), WIDE("select override_value_id from option_exception ")
+   snprintf( query, sizeof( query ), "select override_value_id from option_exception "
             "where ( apply_from<=now() or apply_from=0 )"
             "and ( apply_until>now() or apply_until=0 )"
             "and ( system_id=%d or system_id=0 )"
@@ -593,7 +586,7 @@ _32 GetOptionStringValueEx( PODBC odbc, INDEX optval, char *buffer, _32 len DBG_
 	for( SQLQuery( og.Option, query, &result ); result; FetchSQLResult( og.Option, &result ) )
 	{
 		_optval = optval;
-		sscanf( result, "%" _32f, &optval );
+		sscanf( result, WIDE("%") _32f, &optval );
 		if( (!optval) || ( optval == INVALID_INDEX ) )
 			optval = _optval;
 	}
@@ -619,7 +612,6 @@ _32 GetOptionStringValueEx( PODBC odbc, INDEX optval, char *buffer, _32 len DBG_
 	}
 	PopODBCEx( og.Option );
    PopODBCEx( og.Option );
-	SetSQLLoggingDisable( og.Option, FALSE );
 	return result_len;
 	}
 }
@@ -647,9 +639,13 @@ int GetOptionBlobValueOdbc( PODBC odbc, INDEX optval, char **buffer, _32 *len )
 		//lprintf( WIDE(" query succeeded....") );
 		if( buffer && result && result[0] && result[1] )
 		{
-         success = TRUE;
+         	success = TRUE;
+#ifdef _WIN64
 			(*buffer) = NewArray( TEXTCHAR, (*len)=atol( result[1] ));
-			MemCpy( (*buffer), result[0], (*len) );
+#else
+			(*buffer) = NewArray( TEXTCHAR, (*len)=atoi( result[1] ));
+#endif
+			MemCpy( (*buffer), result[0], (PTRSZVAL)(*len) );
 		}
 		PopODBCEx( odbc );
 		return success;
@@ -694,7 +690,6 @@ INDEX CreateValue( PODBC odbc, INDEX iOption, CTEXTSTR pValue )
 		CTEXTSTR result=NULL;
 		TEXTSTR newval = EscapeSQLBinary( odbc, pValue, StrLen( pValue ) );
 		int IDValue;
-		SetSQLLoggingDisable( odbc, TRUE );
 		if( pValue == NULL )
 			snprintf( insert, sizeof( insert ), WIDE("insert into option_blobs (`blob` ) values ('')")
 					  );
@@ -714,7 +709,6 @@ INDEX CreateValue( PODBC odbc, INDEX iOption, CTEXTSTR pValue )
 			IDValue = INVALID_INDEX;
 		}
 		Release( newval );
-		SetSQLLoggingDisable( odbc, FALSE );
 		return IDValue;
 	}
 }
@@ -733,7 +727,6 @@ INDEX SetOptionValueEx( PODBC odbc, INDEX optval, INDEX iValue )
 	{
 	char update[128];
 	CTEXTSTR result = NULL;
-	SetSQLLoggingDisable( odbc, TRUE );
 	// should escape quotes passed in....
 	snprintf( update, sizeof( update ), WIDE("update option_map set value_id=%ld where node_id=%ld"), iValue, optval );
 	if( !SQLCommand( odbc, update ) )
@@ -744,7 +737,6 @@ INDEX SetOptionValueEx( PODBC odbc, INDEX optval, INDEX iValue )
 	}
 	// should do some sort of pop temp... it's a commit of sorts.
 	PopODBCEx( odbc );
-	SetSQLLoggingDisable( odbc, FALSE );
 	return iValue;
 	}
 }
@@ -774,7 +766,6 @@ INDEX SetOptionStringValue( INDEX optval, CTEXTSTR pValue )
 				  , IDValue );
    strncpy( value, pValue, sizeof( value )-1 );
    newval = EscapeSQLBinary( og.Option, pValue, strlen( pValue ) );
-	SetSQLLoggingDisable( og.Option, TRUE );
    if( IDValue && SQLQuery( og.Option, update, &result ) && result )
    {
 		snprintf( update, sizeof( update ), WIDE("update %s set string='%s' where %s=%ld")
@@ -799,7 +790,6 @@ INDEX SetOptionStringValue( INDEX optval, CTEXTSTR pValue )
 		  IDValue = SetOptionValueEx( og.Option, optval, IDValue );
       }
    }
-	SetSQLLoggingDisable( og.Option, FALSE );
    Release( newval );
    return IDValue;
 }
@@ -869,7 +859,7 @@ int SQLPromptINIValue(
 	if( _SQLPromptINIValue )
 		return _SQLPromptINIValue(lpszSection, lpszEntry, lpszDefault, lpszReturnBuffer, cbReturnBuffer, filename );
 #else
-	return _SQLPromptINIValue(lpszSection, lpszEntry, lpszDefault, lpszReturnBuffer, cbReturnBuffer, filename );
+	return SQLPromptINIValue(lpszSection, lpszEntry, lpszDefault, lpszReturnBuffer, cbReturnBuffer, filename );
 #endif
 #endif
 #if prompt_stdout
@@ -890,8 +880,8 @@ int SQLPromptINIValue(
 SQLGETOPTION_PROC( int, SACK_GetPrivateProfileStringExx )( CTEXTSTR pSection
 																		  , CTEXTSTR pOptname
 																		  , CTEXTSTR pDefaultbuf
-																		  , char *pBuffer
-																		  , _32 nBuffer
+																		  , TEXTCHAR *pBuffer
+																		  , PTRSZVAL nBuffer
 																		  , CTEXTSTR pININame
 																		  , LOGICAL bQuiet
 																			DBG_PASS
@@ -906,7 +896,16 @@ SQLGETOPTION_PROC( int, SACK_GetPrivateProfileStringExx )( CTEXTSTR pSection
 		{
 			// issue dialog
 			if( !bQuiet )
-				SQLPromptINIValue( pSection, pOptname, pDefaultbuf, pBuffer, nBuffer, pININame );
+			{
+				if( og.flags.bPromptDefault )
+				{
+					SQLPromptINIValue( pSection, pOptname, pDefaultbuf, pBuffer, nBuffer, pININame );
+				}
+				else
+				{
+					strncpy( pBuffer, pDefaultbuf, nBuffer );			
+				}
+			}
 			else
 				strncpy( pBuffer, pDefaultbuf, nBuffer );
 			// create the option branch since it doesn't exist...
@@ -957,7 +956,7 @@ SQLGETOPTION_PROC( S_32, SACK_GetPrivateProfileIntEx )( CTEXTSTR pSection, CTEXT
 {
    char buffer[32];
    char defaultbuf[32];
-   sprintf( defaultbuf, WIDE("%ld"), nDefault );
+   snprintf( defaultbuf, sizeof( defaultbuf ), WIDE("%ld"), nDefault );
    if( SACK_GetPrivateProfileStringEx( pSection, pOptname, defaultbuf, buffer, sizeof( buffer ), pININame, bQuiet ) )
 	{
 		if( buffer[0] == 'Y' || buffer[0] == 'y' )
@@ -974,15 +973,15 @@ SQLGETOPTION_PROC( S_32, SACK_GetPrivateProfileInt )( CTEXTSTR pSection, CTEXTST
 
 //------------------------------------------------------------------------
 
-#define DEFAULT_PUBLIC_KEY NULL
+#define DEFAULT_PUBLIC_KEY "DEFAULT"
 //#define DEFAULT_PUBLIC_KEY "system"
 
-SQLGETOPTION_PROC( int, SACK_GetProfileStringEx )( CTEXTSTR pSection, CTEXTSTR pOptname, CTEXTSTR pDefaultbuf, char *pBuffer, _32 nBuffer, LOGICAL bQuiet )
+SQLGETOPTION_PROC( int, SACK_GetProfileStringEx )( CTEXTSTR pSection, CTEXTSTR pOptname, CTEXTSTR pDefaultbuf, TEXTCHAR *pBuffer, _32 nBuffer, LOGICAL bQuiet )
 {
    return SACK_GetPrivateProfileStringEx( pSection, pOptname, pDefaultbuf, pBuffer, nBuffer, DEFAULT_PUBLIC_KEY, bQuiet );
 }
 
-SQLGETOPTION_PROC( int, SACK_GetProfileString )( CTEXTSTR pSection, CTEXTSTR pOptname, CTEXTSTR pDefaultbuf, char *pBuffer, _32 nBuffer )
+SQLGETOPTION_PROC( int, SACK_GetProfileString )( CTEXTSTR pSection, CTEXTSTR pOptname, CTEXTSTR pDefaultbuf, TEXTCHAR *pBuffer, _32 nBuffer )
 {
    return SACK_GetPrivateProfileString( pSection, pOptname, pDefaultbuf, pBuffer, nBuffer, DEFAULT_PUBLIC_KEY );
 }
@@ -990,7 +989,7 @@ SQLGETOPTION_PROC( int, SACK_GetProfileString )( CTEXTSTR pSection, CTEXTSTR pOp
 //------------------------------------------------------------------------
 
 
-SQLGETOPTION_PROC( int, SACK_GetProfileBlobOdbc )( PODBC odbc, CTEXTSTR pSection, CTEXTSTR pOptname, char **pBuffer, _32 *pnBuffer )
+SQLGETOPTION_PROC( int, SACK_GetProfileBlobOdbc )( PODBC odbc, CTEXTSTR pSection, CTEXTSTR pOptname, TEXTCHAR **pBuffer, _32 *pnBuffer )
 {
    INDEX optval = GetOptionIndexExx( odbc, OPTION_ROOT_VALUE, NULL, pSection, pOptname, FALSE DBG_SRC );
    if( optval == INVALID_INDEX )
@@ -1005,7 +1004,7 @@ SQLGETOPTION_PROC( int, SACK_GetProfileBlobOdbc )( PODBC odbc, CTEXTSTR pSection
 //   int status = SACK_GetProfileString( );
 }
 
-SQLGETOPTION_PROC( int, SACK_GetProfileBlob )( CTEXTSTR pSection, CTEXTSTR pOptname, char **pBuffer, _32 *pnBuffer )
+SQLGETOPTION_PROC( int, SACK_GetProfileBlob )( CTEXTSTR pSection, CTEXTSTR pOptname, TEXTCHAR **pBuffer, _32 *pnBuffer )
 {
    return SACK_GetProfileBlobOdbc( og.Option, pSection, pOptname, pBuffer, pnBuffer );
 }
@@ -1046,7 +1045,7 @@ SQLGETOPTION_PROC( int, SACK_WritePrivateProfileString )( CTEXTSTR pSection, CTE
 SQLGETOPTION_PROC( S_32, SACK_WritePrivateProfileInt )( CTEXTSTR pSection, CTEXTSTR pName, S_32 value, CTEXTSTR pINIFile )
 {
    char valbuf[32];
-   sprintf( valbuf, WIDE("%ld"), value );
+   snprintf( valbuf, sizeof( valbuf ), WIDE("%ld"), value );
    return SACK_WritePrivateProfileString( pSection, pName, valbuf, pINIFile );
 }
 
@@ -1185,12 +1184,11 @@ SQLGETOPTION_PROC( INDEX, GetSystemID )( void )
 SQLGETOPTION_PROC( void, BeginBatchUpdate )( void )
 {
 	//   SQLCommand(
-   SQLCommand( og.Option, "BEGIN TRANSACTION" );
+   //SQLCommand( og.Option, "BEGIN TRANSACTION" );
 }
 
 SQLGETOPTION_PROC( void, EndBatchUpdate )( void )
 {
-   SQLCommand( og.Option, "COMMIT" );
+   //SQLCommand( og.Option, "COMMIT" );
 }
-_OPTION_NAMESPACE_END SACK_NAMESPACE_END
-
+SACK_OPTION_NAMESPACE_END

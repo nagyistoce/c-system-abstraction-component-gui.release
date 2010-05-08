@@ -105,7 +105,7 @@ void GenerateSprites( PRENDERER renderer, int x, int y )
 			if( !sprite[n].sprite )
 			{
 				if( !l.image )
-					l.image = LoadImageFile( "images/firestar2.png" );
+					l.image = LoadImageFile( WIDE( "images/firestar2.png" ) );
 
 				if( !l.psm )
 					l.psm = EnableSpriteMethod( renderer, SpriteDrawProc, 0 );
@@ -187,7 +187,7 @@ int InitSpriteEngine( void )
 
 }
 
-OnFinishInit( "Sprite" )( void )
+OnFinishInit( WIDE("Sprite") )( void )
 {
 #ifdef DISABLE_SPRITES
 	return;

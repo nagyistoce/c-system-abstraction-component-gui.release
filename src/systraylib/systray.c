@@ -111,7 +111,7 @@ int APIENTRY IconMessageHandler( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 		{
 		case MNU_EXIT:
 			if( l.flags.bLog )
-				lprintf( "Posting quit Message" );
+				lprintf( WIDE( "Posting quit Message" ) );
 			UnregisterIcon();
 			PostQuitMessage( 0 );
 			exit(0);
@@ -163,21 +163,21 @@ PTRSZVAL CPROC RegisterAndCreate( PTHREAD thread )
 	static WNDCLASS wc;  // zero init.
 	static ATOM ac;
 #ifndef __NO_OPTIONS__
-	l.flags.bLog = SACK_GetPrivateProfileIntEx( "SACK/System Tray", "Logging Enable", 0, GetProgramName(), TRUE );
+	l.flags.bLog = SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/System Tray/Logging Enable" ), 0, TRUE );
 #endif
 	if( !ac )
 	{
-      WM_TASKBARCREATED = RegisterWindowMessage("TaskbarCreated");
+      WM_TASKBARCREATED = RegisterWindowMessage(WIDE( "TaskbarCreated" ));
 		memset( &wc, 0, sizeof( WNDCLASS ) );
    	wc.lpfnWndProc   = (WNDPROC)IconMessageHandler;
 		wc.hInstance     = GetModuleHandle( NULL ) ;
-		wc.lpszClassName = "AlertAgentIcon";
+		wc.lpszClassName = WIDE( "AlertAgentIcon" );
 		if( !( ac = RegisterClass(&wc) ) )
 		{
 			TEXTCHAR byBuf[256];
 			if( GetLastError() != ERROR_CLASS_ALREADY_EXISTS )
 			{
-				sprintf( byBuf, WIDE("RegisterClassError: %08x %d"), GetModuleHandle( NULL ), GetLastError() );
+				snprintf( byBuf, sizeof( byBuf ), WIDE("RegisterClassError: %08x %d"), GetModuleHandle( NULL ), GetLastError() );
 				MessageBox( NULL, byBuf, WIDE("BAD"), MB_OK );
 				return FALSE;   // stop thread
 			}
@@ -186,7 +186,7 @@ PTRSZVAL CPROC RegisterAndCreate( PTHREAD thread )
 		AddIdleProc( systrayidle, 0 );
 	}
 	{
-		char wndname[256];
+		TEXTCHAR wndname[256];
 		//if( (PTRSZVAL)icon < 0x10000)
 		//	snprintf( wndname, sizeof( wndname ), WIDE("AlertAgentIcon:%d"), icon );
 		//else
@@ -203,7 +203,7 @@ PTRSZVAL CPROC RegisterAndCreate( PTHREAD thread )
 			}
 			}
       */
-		ghWndIcon = CreateWindow( (LPCSTR)ac,
+		ghWndIcon = CreateWindow(  (CTEXTSTR)ac,
 										 wndname,
 										 0,0,0,0,0,NULL,NULL,NULL,NULL);
 	}
@@ -271,7 +271,7 @@ void BasicExitMenu( void )
 {
 	TEXTCHAR filepath[256];
 	GetModuleFileName( NULL, filepath, sizeof( filepath ) );
-	hInstMe = LoadLibrary( _WIDE(TARGETNAME) );
+	hInstMe = LoadLibrary( TARGETNAME );
 #ifdef WIN32
  	hMainMenu = CreatePopupMenu();
 	AppendMenu( hMainMenu, MF_STRING, TXT_STATIC, filepath );
@@ -334,15 +334,28 @@ int RegisterIconEx( CTEXTSTR icon DBG_PASS )
 	nid.uFlags = NIF_ICON|NIF_MESSAGE;
 	nid.uCallbackMessage = WM_USERICONMSG;
 
+
 	if( (int)icon & 0xFFFF0000 )
 	{
 		nid.hIcon = (HICON)LoadImage( NULL, icon, IMAGE_ICON
 									, 0, 0
-									, LR_LOADFROMFILE| LR_DEFAULTSIZE );
+									, 
+#ifndef _ARM_
+									LR_LOADFROMFILE| 
+									LR_DEFAULTSIZE
+#else
+									0
+#endif
+									);
 		if( !nid.hIcon )
 				nid.hIcon = (HICON)LoadImage( GetModuleHandle(NULL), icon, IMAGE_ICON
 											, 0, 0
-											,  LR_DEFAULTSIZE );
+#ifndef _ARM_
+											,  LR_DEFAULTSIZE
+#else
+											, 0
+#endif
+											);
 	}
 	else
 	{
@@ -350,11 +363,21 @@ int RegisterIconEx( CTEXTSTR icon DBG_PASS )
 		{
 			nid.hIcon = (HICON)LoadImage( GetModuleHandle(NULL), icon, IMAGE_ICON
 										, 0, 0
-										,  LR_DEFAULTSIZE );
+#ifndef _ARM_
+											,  LR_DEFAULTSIZE 
+#else
+											, 0
+#endif
+										);
 			if( !nid.hIcon )
 				nid.hIcon = (HICON)LoadImage( NULL, icon, IMAGE_ICON
 											, 0, 0
-											,  LR_DEFAULTSIZE );
+#ifndef _ARM_
+											,  LR_DEFAULTSIZE 
+#else
+											, 0
+#endif
+											);
 		}
 		else
 		{
@@ -363,11 +386,21 @@ int RegisterIconEx( CTEXTSTR icon DBG_PASS )
 				nid.hIcon = (HICON)LoadImage( hInstMe
 											, (TEXTCHAR*)ICO_DEFAULT, IMAGE_ICON
 											, 0, 0
-											,  LR_DEFAULTSIZE );
+#ifndef _ARM_
+											,  LR_DEFAULTSIZE 
+#else
+											, 0
+#endif
+											);
 				if( !nid.hIcon )
 					nid.hIcon = (HICON)LoadImage( NULL, (TEXTCHAR*)ICO_DEFAULT, IMAGE_ICON
 												, 0, 0
-												,  LR_DEFAULTSIZE );
+#ifndef _ARM_
+												,  LR_DEFAULTSIZE 
+#else
+												, 0
+#endif
+												);
 			}
 		}
 	}
@@ -405,22 +438,37 @@ void ChangeIconEx( CTEXTSTR icon DBG_PASS )
 	{
 		nid.hIcon = (HICON)LoadImage( GetModuleHandle(NULL), icon, IMAGE_ICON
 								, 0, 0
-								,  LR_DEFAULTSIZE );
+#ifndef _ARM_
+											,  LR_DEFAULTSIZE 
+#else
+											, 0
+#endif
+								);
 		if( !nid.hIcon )
 		nid.hIcon = (HICON)LoadImage( NULL, icon, IMAGE_ICON
 								, 0, 0
-								, LR_LOADFROMFILE| LR_DEFAULTSIZE );
+#ifndef _ARM_
+								, LR_LOADFROMFILE| LR_DEFAULTSIZE 
+#else
+											, 0
+#endif
+								);
 	}
 	else
 	{
 		nid.hIcon = (HICON)LoadImage( GetModuleHandle(NULL), icon, IMAGE_ICON
 								, 0, 0
-								,  LR_DEFAULTSIZE );
+#ifndef _ARM_
+								,  LR_DEFAULTSIZE 
+#else
+											, 0
+#endif
+								);
 	}
 	if( !nid.hIcon )
 	{
 		TEXTCHAR msg[128];
-		sprintf( msg, DBG_FILELINEFMT WIDE("Failed to load icon") DBG_RELAY );
+		snprintf( msg, sizeof( msg ), DBG_FILELINEFMT WIDE("Failed to load icon") DBG_RELAY );
 		MessageBox( NULL, msg, WIDE("Systray Library"), MB_OK );
 	}
 	Shell_NotifyIcon( NIM_MODIFY, &nid );
@@ -443,10 +491,10 @@ void UnregisterIcon( void )
 
 void TerminateIcon( void )
 {
-   int attempt = 0;
+	int attempt = 0;
 	HWND hWndOld;
-	char iconwindow[256];
-	snprintf( iconwindow, sizeof( iconwindow ), "AlertAgentIcon:%s", GetProgramName() );
+	TEXTCHAR iconwindow[256];
+	snprintf( iconwindow, sizeof( iconwindow ), WIDE( "AlertAgentIcon:%s" ), GetProgramName() );
 	while( ( hWndOld = FindWindow( WIDE("AlertAgentIcon"), iconwindow ) ) && ( attempt < 5 ) )
 	{
 		if( l.flags.bLog )
@@ -461,12 +509,12 @@ void TerminateIcon( void )
 		DWORD dwThread = GetWindowThreadProcessId( hWndOld, &dwProcess );
 		HANDLE hProc;
 		if( l.flags.bLog )
-			lprintf( "posting didn't cause process to exit... attempting to terminate." );
+			lprintf( WIDE( "posting didn't cause process to exit... attempting to terminate." ) );
 		hProc = OpenProcess( SYNCHRONIZE | PROCESS_TERMINATE, FALSE, dwProcess );
 		if( hProc == NULL )
 		{
 			if( l.flags.bLog )
-				lprintf( "Failed to open process handle..." );
+				lprintf( WIDE( "Failed to open process handle..." ) );
 			return;
 		}
 		TerminateProcess( hProc, 0xFEED );

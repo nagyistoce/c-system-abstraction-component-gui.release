@@ -10,7 +10,9 @@
 
 #include "fonts.h"
 
-#define TEXT_LABEL_NAME "Text Label"
+INTERSHELL_NAMESPACE
+
+#define TEXT_LABEL_NAME WIDE("Text Label")
 
 
 
@@ -32,7 +34,7 @@ struct page_label {
 	//POINTER fontdata;
   	//_32 fontdatalen;
 	PPAGE_DATA page;
-	char *label_text; // allowed to override the real title...
+	TEXTCHAR *label_text; // allowed to override the real title...
 	int offset;
 	int min_offset;
 	int max_offset;
@@ -46,8 +48,8 @@ enum { BTN_VARNAME = 1322
 
 PRELOAD( AliasPageTitle )
 {
-	EasyRegisterResource( "intershell/text", BTN_VARNAME, EDIT_FIELD_NAME );
-	EasyRegisterResource( "intershell/text", BTN_VARVAL, EDIT_FIELD_NAME );
+	EasyRegisterResource( WIDE( "intershell/text" ), BTN_VARNAME, EDIT_FIELD_NAME );
+	EasyRegisterResource( WIDE( "intershell/text" ), BTN_VARVAL, EDIT_FIELD_NAME );
 	// hack for ancient stuff...
    // browse names maybe shouldnt' return aliases (at an option?)
 	//RegisterClassAlias( TASK_PREFIX"/control/"TEXT_LABEL_NAME
@@ -58,7 +60,7 @@ PRELOAD( AliasPageTitle )
 typedef struct variable_tag VARIABLE;
 struct variable_tag
 {
-	char *name;
+	TEXTCHAR *name;
 #define BITFIELD _32
 	struct {
 		BITFIELD bString : 1;
@@ -77,7 +79,7 @@ struct variable_tag
       label_gettextproc_control proc_control_ex;
 	} data;
    PTRSZVAL psvUserData; // passed to data.proc_ex
-	char tmpval[32];
+	TEXTCHAR tmpval[32];
    PLIST references; // PPAGE_LABELs which reference this variable...
 };
 
@@ -103,7 +105,7 @@ VARIABLE variables[] = { { "Current User", .flags={1,0},.data={.string_value=&pa
 static PLIST extern_variables;
 
 
-
+#undef CreateLabelVariableEx
 PVARIABLE CreateLabelVariableEx( CTEXTSTR name, enum label_variable_types type, CPOINTER data, PTRSZVAL psv )
 {
 	if( name && name[0] )
@@ -145,7 +147,7 @@ PVARIABLE CreateLabelVariable( CTEXTSTR name, enum label_variable_types type, CP
 {
 	if( type == LABEL_TYPE_PROC_EX )
 	{
-		xlprintf( LOG_ALWAYS )( "Cannot Register an EX Proc tyep label with CreateLabelVariable!" );
+		xlprintf( LOG_ALWAYS )( WIDE( "Cannot Register an EX Proc tyep label with CreateLabelVariable!" ) );
 		DebugBreak();
 	}
    return CreateLabelVariableEx( name, type, data, 0 );
@@ -159,7 +161,7 @@ CTEXTSTR InterShell_GetLabelText( PPAGE_LABEL label, CTEXTSTR variable )
 // somehow, variables need to get udpate events...
 // which can then update the text labels referencing said variable.
 
-//OnUpdateVariable( WIDE("Current User Total") )( char *variable )
+//OnUpdateVariable( WIDE("Current User Total") )( TEXTCHAR *variable )
 //{
 //}
 
@@ -183,7 +185,7 @@ void CPROC ScrollingLabelUpdate( PTRSZVAL psv )
 
 PRELOAD( PreconfigureVariables )
 {
-	CreateLabelVariable( "Current Page", LABEL_TYPE_PROC, (POINTER)GetPageTitle );
+	CreateLabelVariable( WIDE( "Current Page" ), LABEL_TYPE_PROC, (POINTER)GetPageTitle );
 	AddTimer( 50, ScrollingLabelUpdate, 0 );
 }
 
@@ -191,7 +193,7 @@ PRELOAD( PreconfigureVariables )
 CTEXTSTR GetPageTitle( void )
 {
 	PPAGE_DATA page = ShellGetCurrentPage();
-   return page->title?page->title:"DEFAULT PAGE";
+   return page->title?page->title:WIDE( "DEFAULT PAGE" );
 }
 
 PVARIABLE FindVariableByName( CTEXTSTR variable )
@@ -217,7 +219,7 @@ PVARIABLE FindVariableByName( CTEXTSTR variable )
 
 CTEXTSTR InterShell_GetControlLabelText( PMENU_BUTTON button, PPAGE_LABEL label, CTEXTSTR variable )
 {
-	static char output[256];
+	static TEXTCHAR output[256];
 	int nOutput = 0;
 	while( variable && variable[0] )
 	{
@@ -234,7 +236,7 @@ CTEXTSTR InterShell_GetControlLabelText( PMENU_BUTTON button, PPAGE_LABEL label,
 				else if( var->flags.bConstString )
 				{
 					nOutput += snprintf( output + nOutput, sizeof( output ) - nOutput - 1
-											 , WIDE("%s"), (var->data.string_const_value?var->data.string_const_value:"") );
+											 , WIDE("%s"), (var->data.string_const_value?var->data.string_const_value:WIDE("")) );
 				}
 				else if( var->flags.bInt )
 				{
@@ -243,22 +245,22 @@ CTEXTSTR InterShell_GetControlLabelText( PMENU_BUTTON button, PPAGE_LABEL label,
 				}
 				else if( var->flags.bProc )
 				{
-               //lprintf( "Calling external function to get value..." );
-               nOutput += snprintf( output + nOutput, sizeof( output ) - nOutput - 1
+					//lprintf( "Calling external function to get value..." );
+					nOutput += snprintf( output + nOutput, sizeof( output ) - nOutput - 1
 											 , WIDE("%s"), var->data.proc() );
 					//lprintf( "New output is [%s]", output );
 				}
 				else if( var->flags.bProcControlEx )
 				{
-               //lprintf( "Calling external function to get value..." );
-               nOutput += snprintf( output + nOutput, sizeof( output ) - nOutput - 1
+					//lprintf( "Calling external function to get value..." );
+					nOutput += snprintf( output + nOutput, sizeof( output ) - nOutput - 1
 											 , WIDE("%s"), var->data.proc_control_ex(var->psvUserData,button) );
 					//lprintf( "New output is [%s]", output );
 				}
 				else if( var->flags.bProcEx )
 				{
-               //lprintf( "Calling external extended function to get value..." );
-               nOutput += snprintf( output + nOutput, sizeof( output ) - nOutput - 1
+					//lprintf( "Calling external extended function to get value..." );
+					nOutput += snprintf( output + nOutput, sizeof( output ) - nOutput - 1
 											 , WIDE("%s"), var->data.proc_ex( var->psvUserData ) );
 					//lprintf( "New output is [%s]", output );
 				}
@@ -316,7 +318,7 @@ CTEXTSTR InterShell_TranslateLabelText( PPAGE_LABEL label, TEXTSTR output, int b
 					else if( var->flags.bConstString )
 					{
 						nOutput += snprintf( output + nOutput, buffer_len - nOutput - 1
-										 , WIDE("%s"), (var->data.string_const_value?var->data.string_const_value:"") );
+										 , WIDE("%s"), (var->data.string_const_value?var->data.string_const_value:WIDE("")) );
 					}
 					else if( var->flags.bInt )
 					{
@@ -352,14 +354,16 @@ CTEXTSTR InterShell_TranslateLabelText( PPAGE_LABEL label, TEXTSTR output, int b
 					TEXTSTR tmp = NewArray( TEXTCHAR, env - variable );
 					StrCpyEx( tmp, variable+1, (env-variable-1) );
 					tmp[(env-variable)-1] = 0;
+#ifdef HAVE_ENVIRONMENT
 					env_var = OSALOT_GetEnvironmentVariable( tmp );
 					if( env_var )
 					{
 						nOutput += snprintf( output + nOutput, buffer_len - nOutput - 1
-												 , "%s", env_var );
+												 , WIDE( "%s" ), env_var );
 						variable += (env-variable);
 					}
 					else
+#endif
 						nOutput += snprintf( output + nOutput, buffer_len - nOutput - 1
 												 , WIDE("[bad variable]") );
 				}
@@ -479,11 +483,11 @@ OnSaveControl( TEXT_LABEL_NAME )( FILE *file,PTRSZVAL psv )
 			 , GreenVal( title->color )
 			 , BlueVal( title->color )
 			 );
-	fprintf( file, "align center?%s\n", title->flags.bCenter?"on":"off" );
-	fprintf( file, "align right?%s\n", title->flags.bRight?"on":"off" );
-	fprintf( file, "align scroll?%s\n", title->flags.bScroll?"on":"off" );
-	fprintf( file, "align vertical?%s\n", title->flags.bVertical?"on":"off" );
-	fprintf( file, "align inverted?%s\n", title->flags.bInverted?"on":"off" );
+	fprintf( file, WIDE( "align center?%s\n" ), title->flags.bCenter?WIDE( "on" ):WIDE( "off" ) );
+	fprintf( file, WIDE( "align right?%s\n" ), title->flags.bRight?WIDE( "on" ):WIDE( "off" ) );
+	fprintf( file, WIDE( "align scroll?%s\n" ), title->flags.bScroll?WIDE( "on" ):WIDE( "off" ) );
+	fprintf( file, WIDE( "align vertical?%s\n" ), title->flags.bVertical?WIDE( "on" ):WIDE( "off" ) );
+	fprintf( file, WIDE( "align inverted?%s\n" ), title->flags.bInverted?WIDE( "on" ):WIDE( "off" ) );
 	if( title->preset_name )
 	{
 		fprintf( file, WIDE("font name=%s\n"),title->preset_name );
@@ -495,7 +499,7 @@ OnSaveControl( TEXT_LABEL_NAME )( FILE *file,PTRSZVAL psv )
 static PTRSZVAL CPROC SetTitleLabel( PTRSZVAL psv, arg_list args )
 {
 	PPAGE_LABEL title = (PPAGE_LABEL)psv;
-	PARAM( args, char *, label );
+	PARAM( args, TEXTCHAR *, label );
    title->label_text = StrDup( label );
    return psv;
 }
@@ -551,7 +555,7 @@ static PTRSZVAL CPROC SetTitleScrollRightLeft( PTRSZVAL psv, arg_list args )
 static PTRSZVAL CPROC SetTitleFontByName( PTRSZVAL psv, arg_list args )
 {
 	PPAGE_LABEL title = (PPAGE_LABEL)psv;
-	PARAM( args, char *, name );
+	PARAM( args, TEXTCHAR *, name );
 	title->font = UseAFont( name );
    title->preset_name = StrDup( name );
 	return psv;
@@ -638,7 +642,7 @@ void CPROC VariableChanged( PTRSZVAL psv, PSI_CONTROL pc, PLISTITEM pli )
 	PSI_CONTROL pc_text = (PSI_CONTROL)psv;
 	if( pc_text )
 	{
-		char buffer[256];
+		TEXTCHAR buffer[256];
 		GetItemText( pli, sizeof(buffer)-1, buffer+1 );
 		buffer[0] = '%';
 		TypeIntoEditControl( pc_text, buffer );
@@ -727,7 +731,7 @@ OnEditControl( TEXT_LABEL_NAME )( PTRSZVAL psv, PSI_CONTROL parent_frame )
             page_label->flags.bScroll = GetCheckState( GetControl( frame, CHECKBOX_LABEL_SCROLL ) );
 
 				{
-					char buffer[128];
+					TEXTCHAR buffer[128];
 					int i,o;
 					for( i = o = 0; buffer[i]; i++,o++ )
 					{
@@ -785,11 +789,11 @@ void SetVariable( CTEXTSTR name, CTEXTSTR value )
 		LabelVariableChanged( pVar );
 	}
 	else
-		lprintf( "Attempt to set a variable that is not direct text, cannot override routines...name:%s newval:%s"
+		lprintf( WIDE( "Attempt to set a variable that is not direct text, cannot override routines...name:%s newval:%s" )
 				 , name, value );
 }
 
-OnKeyPressEvent( "text/Set Variable" )( PTRSZVAL psv )
+OnKeyPressEvent( WIDE( "text/Set Variable" ) )( PTRSZVAL psv )
 {
 	PSETVAR pSetVar = (PSETVAR)psv;
    SetVariable( pSetVar->varname, pSetVar->newval );
@@ -797,21 +801,21 @@ OnKeyPressEvent( "text/Set Variable" )( PTRSZVAL psv )
    //return 1;
 }
 
-OnCreateMenuButton( "text/Set Variable" )( PMENU_BUTTON button )
+OnCreateMenuButton( WIDE( "text/Set Variable" ) )( PMENU_BUTTON button )
 {
 	PSETVAR pSetVar = New( SETVAR );
    pSetVar->varname = NULL;
    pSetVar->newval = NULL;
-	InterShell_SetButtonStyle( button, "bicolor square" );
+	InterShell_SetButtonStyle( button, WIDE( "bicolor square" ) );
 
    return (PTRSZVAL)pSetVar;
 }
 
-OnConfigureControl( "text/Set Variable" )( PTRSZVAL psv, PSI_CONTROL parent )
+OnConfigureControl( WIDE( "text/Set Variable" ) )( PTRSZVAL psv, PSI_CONTROL parent )
 {
 	PSETVAR pSetVar = (PSETVAR)psv;
 	PSI_CONTROL frame;
-	frame = LoadXMLFrameOver( parent, "configure_text_setvar_button.isframe" );
+	frame = LoadXMLFrameOver( parent, WIDE( "configure_text_setvar_button.isframe" ) );
 	if( frame )
 	{
 		int okay = 0;
@@ -848,14 +852,14 @@ OnConfigureControl( "text/Set Variable" )( PTRSZVAL psv, PSI_CONTROL parent )
    return psv;
 }
 
-OnSaveControl( "text/Set Variable" )( FILE *file, PTRSZVAL psv )
+OnSaveControl( WIDE( "text/Set Variable" ) )( FILE *file, PTRSZVAL psv )
 {
 	PSETVAR pSetVar = (PSETVAR)psv;
-   fprintf( file, "set variable text name=%s\n", EscapeMenuString( pSetVar->varname ) );
-   fprintf( file, "set variable text value=%s\n", EscapeMenuString( pSetVar->newval ) );
+   fprintf( file, WIDE( "set variable text name=%s\n" ), EscapeMenuString( pSetVar->varname ) );
+   fprintf( file, WIDE( "set variable text value=%s\n" ), EscapeMenuString( pSetVar->newval ) );
 }
 
-static void OnCloneControl( "text/Set Variable" )( PTRSZVAL psvNew, PTRSZVAL psvOld )
+static void OnCloneControl( WIDE( "text/Set Variable" ) )( PTRSZVAL psvNew, PTRSZVAL psvOld )
 {
 	PSETVAR pSetVarNew = (PSETVAR)psvNew;
 	PSETVAR pSetVarOld = (PSETVAR)psvOld;
@@ -884,10 +888,11 @@ static PTRSZVAL CPROC SetVariableVariableValue( PTRSZVAL psv, arg_list args )
    return psv;
 }
 
-OnLoadControl( "text/Set Variable" )( PCONFIG_HANDLER pch, PTRSZVAL psv )
+OnLoadControl( WIDE( "text/Set Variable" ) )( PCONFIG_HANDLER pch, PTRSZVAL psv )
 {
-   AddConfigurationMethod( pch,  "set variable text name=%m", SetVariableVariableName );
-   AddConfigurationMethod( pch,  "set variable text value=%m", SetVariableVariableValue );
+   AddConfigurationMethod( pch,  WIDE( "set variable text name=%m" ), SetVariableVariableName );
+   AddConfigurationMethod( pch,  WIDE( "set variable text value=%m" ), SetVariableVariableValue );
 }
 
+INTERSHELL_NAMESPACE_END
 

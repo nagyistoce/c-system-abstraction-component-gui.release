@@ -35,6 +35,10 @@ CORECON_PROC(void, CalculateHistory )( PCONSOLE_INFO pdp );
 CORECON_PROC( int, WinLogicWrite )( PCONSOLE_INFO pdp
 											 , PTEXT pLine
 											 );
+CORECON_PROC( int, WinLogicWriteEx )( PCONSOLE_INFO pdp
+												, PTEXT pLine
+												, int update
+												);
 CORECON_PROC( void, WinLogicCalculateHistory )( PCONSOLE_INFO pdp );
 
 #ifdef __DEKWARE_PLUGIN__

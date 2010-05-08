@@ -4,6 +4,7 @@
 #include <windows.h>
 #endif
 
+#define MEM_LIBRARY_SOURCE
 #ifdef __LINUX__
 #define Relinquish() sched_yield()
 #define GetCurrentProcessId getpid
@@ -11,7 +12,7 @@
 #define GetLastError() errno
 #else
 #define Relinquish() Sleep(0)
-#endif[A
+#endif
 
 #include "./types.h"
 #include <stddef.h>

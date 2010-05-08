@@ -399,7 +399,7 @@ static void NativeRemoveBinaryNode( PTREEROOT root, PTREENODE node )
 
 //---------------------------------------------------------------------------
 
-TYPELIB_PROC( void, RemoveBinaryNode )( PTREEROOT root, POINTER data, PTRSZVAL key )
+ void  RemoveBinaryNode ( PTREEROOT root, POINTER data, PTRSZVAL key )
 {
 	PTREENODE node;
 	if( !root )
@@ -492,7 +492,7 @@ void DumpNode( PTREENODE node, int level, int (*DumpMethod)( POINTER user, PTRSZ
       print = TRUE;
 	//else
 	if( print )
-		lprintf( WIDE("[%3d] %p Node has %3")_32f WIDE(" children (%p %3")_32f WIDE(",%p %3")_32f WIDE("). %10" PTRSZVALfs )
+		lprintf( WIDE("[%3d] %p Node has %3")_32f WIDE(" children (%p %3")_32f WIDE(",%p %3")_32f WIDE("). %10") PTRSZVALfs
 				 , level, node, node->children
 				 , node->lesser
 				 , (node->lesser)?(node->lesser->children+1):0
@@ -604,7 +604,7 @@ POINTER LocateInBinaryTree( PTREEROOT root, PTRSZVAL key
          PTREENODE one_down;
 			// this matched, in an inexact length.
 			// to be really careful we should match one up and one down.
-			lprintf( " - Found a near match..." );
+			//lprintf( " - Found a near match..." );
          one_up = node;
 			//root->current = node;
          GetGreaterNodeEx( root, &one_up );
@@ -614,7 +614,7 @@ POINTER LocateInBinaryTree( PTREEROOT root, PTRSZVAL key
 				int one_up_dir = fuzzy( key, one_up->key );
 				if( one_up_dir == 100 )
 				{
-					lprintf( " on up matches...(sorta)[FAIL]" );
+					//lprintf( " on up matches...(sorta)[FAIL]" );
 					// also fuzzy short-match the next one...
 					// no way to know if what this command might be
 					// (throw an error here with possible results?
@@ -622,7 +622,7 @@ POINTER LocateInBinaryTree( PTREEROOT root, PTRSZVAL key
 				}
 				if( one_up_dir == 0 )
 				{
-					lprintf( "one up was an exact match..." );
+					//lprintf( "one up was an exact match..." );
 					root->lastfound = one_up;
                return one_up->userdata;
 				}
@@ -636,7 +636,7 @@ POINTER LocateInBinaryTree( PTREEROOT root, PTRSZVAL key
 				int one_down_dir = fuzzy( key, one_down->key );
 				if( one_down_dir == 100 )
 				{
-					lprintf( " on down matches...(sorta)[FAIL]" );
+					//lprintf( " on down matches...(sorta)[FAIL]" );
 					// also fuzzy short-match the next one...
 					// no way to know if what this command might be
 					// (throw an error here with possible results?
@@ -644,12 +644,12 @@ POINTER LocateInBinaryTree( PTREEROOT root, PTRSZVAL key
 				}
 				if( one_down_dir == 0 )
 				{
-					lprintf( "one down was an exact match..." );
+					//lprintf( "one down was an exact match..." );
 					root->lastfound = one_down;
                return one_down->userdata;
 				}
 			}
-         lprintf( "best match return... %s %s", node->key, key );
+			//lprintf( "best match return... %s %s", node->key, key );
          return( node->userdata );
 		}
 		if( dir > 0 )

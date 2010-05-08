@@ -1,3 +1,6 @@
+#ifdef _WIN64
+#define __64__
+#endif
 
 // debugging only gets you the ordering logging and something else...
 // useful logging is now controlled with l.flags.bLog
@@ -33,16 +36,16 @@
 #else
 #endif
 
-SACK_DEADSTART_NAMESPACE
 
-#ifdef __LINUX__
-//struct rt_init begin_deadstart __attribute__((section("deadstart_list"))) = { -1, 0, NULL };
+#ifdef UNDER_CE
+#define LockedExchange InterlockedExchange
 #endif
 
-//!defined( __STATIC__ ) &&
-EXPORT_METHOD
- void RunDeadstart( void );
+SACK_DEADSTART_NAMESPACE
 
+#undef PRELOAD
+
+EXPORT_METHOD void RunDeadstart( void );
 
 typedef struct startup_proc_tag {
 	DeclareLink( struct startup_proc_tag );
@@ -73,6 +76,8 @@ struct deadstart_local_data_
 #define shutdown_procs l.shutdown_procs
 	int bInitialDone;
 #define bInitialDone l.bInitialDone
+	int bInitialStarted;
+#define bInitialStarted l.bInitialStarted
    int bSuspend;
 #define bSuspend l.bSuspend
 	int bDispatched;
@@ -93,14 +98,30 @@ struct deadstart_local_data_
 	} flags;
 };
 
+#ifdef UNDER_CE 
+static struct deadstart_local_data_ deadstart_local_data;
+#define l (deadstart_local_data)
+#else
 //#ifdef __STATIC__
 static struct deadstart_local_data_ *deadstart_local_data;
 #define l (*deadstart_local_data)
+#endif
+
+void RunExits( void )
+{
+   InvokeExits();
+}
+
 static void InitLocal( void )
 {
+#ifndef UNDER_CE 
 	if( !deadstart_local_data )
+#endif
 	{
+#ifndef UNDER_CE 
 		SimpleRegisterAndCreateGlobal( deadstart_local_data );
+#endif
+		atexit( RunExits );
 	}
 }
 //#else
@@ -113,7 +134,13 @@ static void InitLocal( void )
 // we don't actually do anything with this?
 void RegisterPriorityStartupProc( void (*proc)(void), CTEXTSTR func,int priority, void *use_label, CTEXTSTR file,int line )
 {
-	if( LOG_ALL || deadstart_local_data && l.flags.bLog )
+	if( LOG_ALL ||
+#ifndef UNDER_CE
+		 (deadstart_local_data 
+#else 
+		(1
+#endif
+		&& l.flags.bLog ))
 		lprintf( WIDE("%s@%s(%d) %d register"), func,file,line, priority);
 	InitLocal();
 	procs[nProcs].proc = proc;
@@ -153,20 +180,19 @@ void RegisterPriorityStartupProc( void (*proc)(void), CTEXTSTR func,int priority
 	nProcs++;
 	if( nProcs == 1024 )
 	{
-      lprintf( "Excessive number of startup procs!" );
+		lprintf( WIDE( "Excessive number of startup procs!" ) );
 		DebugBreak();
 	}
-
+	
 	if( bInitialDone && !bSuspend )
 	{
+      lprintf( "Initial done, not suspended, dispatch immediate." );
       InvokeDeadstart();
 	}
-	//if( deadstart_complete )
-   //   RunDeadstart();
    //lprintf( WIDE("Total procs %d"), nProcs );
 }
 
-#undef PRELOAD
+
 #ifdef __WATCOMC__ 
 // this is really nice - to have a prioritized initializer list...
 #  ifdef __cplusplus
@@ -197,24 +223,26 @@ void RegisterPriorityStartupProc( void (*proc)(void), CTEXTSTR func,int priority
 	void name(void)
 #    endif
 #  endif
-#elif defined( __LINUX__ )
+#elif defined( __GNUC__ )
 #    define PRELOAD(name) void name( void ) __attribute__((constructor)); \
 void name( void )
 #endif
 
 #ifdef __LINUX__
- void ClearDeadstarts( void )
+// this handles the peculiarities of fork() and exit()
+void ClearDeadstarts( void )
 {
-// this is reserved for the sole use of
-// fork() success and then exec() failing...
-// when oh wait - __attribute__((destructor))
-   // if( registered_pid != getppid() )
+	// this is reserved for the sole use of
+	// fork() success and then exec() failing...
+	// when oh wait - __attribute__((destructor))
+	// if( registered_pid != getppid() )
 	shutdown_proc_schedule = NULL;
 	// be rude - yes we lose resources. but everything goes away cause
-   // this is just a clone..
+	// this is just a clone..
 }
 #endif
 
+#ifndef UNDER_CE
 #  if defined( __WINDOWS__ )
 #    ifndef __cplusplus_cli
 static BOOL WINAPI CtrlC( DWORD dwCtrlType )
@@ -223,13 +251,10 @@ static BOOL WINAPI CtrlC( DWORD dwCtrlType )
 	{
 	case CTRL_BREAK_EVENT:
 	case CTRL_C_EVENT:
-		lprintf( "!!--!! Exit." );
 		InvokeExits();
-		lprintf( "!!--!! Exit2." );
 		// allow C api to exit, whatever C api we're using
       // (allows triggering atexit functions)
 		exit(3);
-		lprintf( "!!--!! Exited." );
 		return TRUE;
 	case CTRL_CLOSE_EVENT:
 		break;
@@ -250,7 +275,7 @@ static void CtrlC( int signal )
    exit(3);
 }
 #  endif
-
+#endif
 
 //#ifdef __WINDOWS__
 
@@ -264,10 +289,13 @@ void InvokeDeadstart( void )
 	PSTARTUP_PROC proc;
 	//if( !bInitialDone /*|| bDispatched*/ )
 	//   return;
-   bSuspend = 0; // if invoking, no longer suspend.
+	InitLocal();
+   bInitialStarted = 1;
+	bSuspend = 0; // if invoking, no longer suspend.
 #ifdef __WINDOWS__
 	if( !bInitialDone && !bDispatched )
 	{
+#  ifndef UNDER_CE
 		if( GetConsoleWindow() )
 		{
 #    ifndef __cplusplus_cli
@@ -280,15 +308,23 @@ void InvokeDeadstart( void )
 			//MessageBox( NULL, "!!--!! NO CtrlC", "blah", MB_OK );
 			; // do nothing if we're no actually a console window. this should fix ctrl-c not working in CMD prompts launched by MILK/InterShell
 		}
+#  endif
 	}
 #endif
+
 #ifdef __64__
 	while( proc = (PSTARTUP_PROC)LockedExchange64( (PVPTRSZVAL)&proc_schedule, NULL ) )
 #else
-		while( proc = (PSTARTUP_PROC)LockedExchange( (PVPTRSZVAL)&proc_schedule, NULL ) )
+		while( proc = (PSTARTUP_PROC)LockedExchange( (PVPTRSZVAL)&proc_schedule, 0 ) )
 #endif
 	{
-		if( LOG_ALL || deadstart_local_data && l.flags.bLog )
+		if( LOG_ALL ||
+#ifndef UNDER_CE
+		 (deadstart_local_data 
+#else 
+		(1
+#endif
+		&& l.flags.bLog ))
 			lprintf( WIDE("Dispatch %s@%s(%d)"), proc->func,proc->file,proc->line);
 		//bDispatched = 1;
 		{
@@ -296,8 +332,10 @@ void InvokeDeadstart( void )
 			//proc_schedule = NULL;
 			if( proc->proc
 #ifndef __LINUX__
-#if 1 ||  __WATCOMC__ >= 1280
+#if  __WATCOMC__ >= 1280
 				&& !IsBadCodePtr( (int(STDCALL*)(void))proc->proc )
+#elif defined( __64__ )
+				&& !IsBadCodePtr( (FARPROC)proc->proc )
 #else
 //				&& !IsBadCodePtr( (int STDCALL(*)(void))proc->proc )
 #endif
@@ -313,11 +351,9 @@ void InvokeDeadstart( void )
 			}
 			proc_schedule = proc;
 		}
-		//bDispatched = 0;
 		proc->bUsed = 0;
 		UnlinkThing( proc );
 	}
-	//bInitialDone = 1;
 }
 
 void MarkRootDeadstartComplete( void )
@@ -328,167 +364,85 @@ void MarkRootDeadstartComplete( void )
 #endif
 }
 
-#if defined( GCC )
+
+
+#if defined( __GNUC__ )
 
 #ifndef __cplusplus
 static void RegisterStartups( void ) __attribute__((constructor));
-#endif
-//PRIORITY_PRELOAD( RunStartups, 25 )
-// This becomes the only true contstructor...
-// this is loaded in the main program, and not in a library
-// this ensures that the libraries registration (if any)
-// is definatly done to the main application
-//(the one place for doing the work)
-#ifndef LIBRARY_DEADSTART
-void ctor_RunStartups( void ) __attribute__((constructor));
-#endif
 
-#ifndef __cplusplus
-static int Registered;
-#endif
 // this one is used when the library loads.  (there is only one of these.)
 // and constructors are run every time a library is loaded....
-					 // I wonder whose fault that is....
-#ifndef __cplusplus
+// I wonder whose fault that is....
 void RegisterStartups( void )
 {
-#ifndef paste
-#define paste(a,b) a##b
-#endif
-#define paste2(a,b) paste(a,b)
-#define DeclareList(n) paste2(n,TARGET_LABEL)
+#  ifndef paste
+#    define paste(a,b) a##b
+#  endif
+#  define paste2(a,b) paste(a,b)
+#  define DeclareList(n) paste2(n,TARGET_LABEL)
    extern struct rt_init DeclareList( begin_deadstart_ );
    extern struct rt_init DeclareList( end_deadstart_ );
 	struct rt_init *begin = &DeclareList( begin_deadstart_ );
 	struct rt_init *end = &DeclareList( end_deadstart_ );
 	struct rt_init *current;
-#ifdef __NO_BAG__
+#  ifdef __NO_BAG__
    printf( "Not doing deadstarts\n" );
 	return;
-#endif
-   Registered=1;
+#  endif
    //cygwin_dll_init();
 	if( begin[0].scheduled )
       return;
 	if( (begin+1) < end )
 	{
-#ifdef __CYGWIN__
+#  ifdef __CYGWIN__
 		void (*MyRegisterPriorityStartupProc)( void (*proc)(void), CTEXTSTR func,int priority, CTEXTSTR file,int line );
 		char myname[256];
       HMODULE mod;
       GetModuleFileName(NULL,myname,sizeof(myname));
 		mod = LoadLibrary( myname );GetModuleFileName(NULL,myname,sizeof(myname));
 		MyRegisterPriorityStartupProc = (void(*)( void(*)(void),CTEXTSTR,int,CTEXTSTR,int))GetProcAddress( mod, "RegisterPriorityStartupProc" );
-#ifdef DEBUG_CYGWIN_START
+#    ifdef DEBUG_CYGWIN_START
 		fprintf( stderr, "mod is %p proc  is %p %s\n", mod, MyRegisterPriorityStartupProc, TARGETNAME );
-#endif
+#    endif
 		if( MyRegisterPriorityStartupProc )
 		{
-#endif
+#  endif
 		for( current = begin + 1; current < end; current++ )
 		{
 			if( !current[0].scheduled )
 			{
+#ifndef UNDER_CE
 				if( LOG_ALL || deadstart_local_data && l.flags.bLog )
+#endif
 					lprintf( WIDE("Register %d %s@%s(%d)"), current->priority, current->funcname, current->file, current->line );
-#ifdef __CYGWIN__
-#ifdef DEBUG_CYGWIN_START
+#  ifdef __CYGWIN__
+#    ifdef DEBUG_CYGWIN_START
 				fprintf( stderr, WIDE("Register %d %s@%s(%d)\n"), current->priority, current->funcname, current->file, current->line );
-#endif
+#    endif
 				MyRegisterPriorityStartupProc( current->routine, current->funcname, current->priority, current->file, current->line );
-#else
+#  else
 				RegisterPriorityStartupProc( current->routine, current->funcname, current->priority, NULL, current->file, current->line );
-#endif
+#  endif
             current[0].scheduled = 1;
 			}
 			else
 			{
-#ifndef  DISABLE_DEBUG_REGISTER_AND_DISPATCH
+#  ifndef  DISABLE_DEBUG_REGISTER_AND_DISPATCH
 				lprintf( WIDE("Not Register(already did this once) %d %s@%s(%d)"), current->priority, current->funcname, current->file, current->line );
-#endif
+#  endif
 			}
-#ifdef __CYGWIN__
+#  ifdef __CYGWIN__
 		}
-#endif
+#  endif
 		}
 	}
    // should be setup in such a way that this ignores all external invokations until the core app runs.
-	InvokeDeadstart();
+	//InvokeDeadstart();
 }
-#endif
-#ifdef LIBRARY_DEADSTART
-// no runstartups routine as a library.
-#else
-void RunStartups( void )
-{
-#ifdef DEBUG_CYGWIN_START
-	fprintf( stderr, "running registered startups...\n" );
-#endif
-#ifndef paste
-#define paste(a,b) a##b
-#endif
-#define paste2(a,b) paste(a,b)
-#define DeclareList(n) paste2(n,TARGET_LABEL)
-/* register starups should have already been done? */
-   if( bInitialDone )
-	{
-		PSTARTUP_PROC proc;
-		while( ( proc = proc_schedule ) )
-		{
-         if( LOG_ALL || deadstart_local_data && l.flags.bLog )
-				lprintf( WIDE("Dispatch %s@%s(%d)"), proc->func,proc->file,proc->line);
-			bDispatched = 1;
-			proc_schedule = NULL;
-			if( proc->proc
-#ifndef __LINUX__
-			  && !IsBadCodePtr( (int(STDCALL*)(void))proc->proc )
-#endif
-			  )
-				proc->proc();
-			proc->bUsed = 0;
-			bDispatched = 0;
-			if( proc_schedule )
-			{
-				if( LOG_ALL || deadstart_local_data && l.flags.bLog )
-					lprintf( WIDE("Scheduled startups while dispatched.") );
-				LinkLast( proc, PSTARTUP_PROC, proc_schedule );
-			}
-			proc_schedule = proc;
-			UnlinkThing( proc );
-		}
-	}
+#endif  //__cplusplus
 
-}
-
-// this is linux, with an attribute constructor applied ahead.
-void ctor_RunStartups( void )
-{
-	if( !bInitialDone )
-	{
-#ifdef __WINDOWS__
-		SetConsoleCtrlHandler( CtrlC, TRUE );
-#else
-		signal( SIGINT, CtrlC );
-#endif
-	}
-#ifndef __cplusplus
-   if( !Registered )
-		RegisterStartups();
-#endif
-	bInitialDone = 1;
-	RunStartups();
-#ifndef __NO_OPTIONS__
-	l.flags.bLog = SACK_GetProfileIntEx( GetProgramName(), "SACK/Deadstart/Logging Enabled?", 0, TRUE );
-#endif
-}
-
-#endif
-#elif defined( __WINDOWS__ )
-// don't need anything special here for startups
-#else // #elif __LINUX__
-// anything other than __LINUX__ or __WINDOWS__ needs code here.
-#error no method defined to run preload....
-#endif // #if __WINDOWS__ #elif __LINUX__
+#endif // #if __GNUC__
 
 // parameter 4 is just used so the external code is not killed
 // we don't actually do anything with this?
@@ -579,7 +533,7 @@ void InvokeExits( void )
 			// don't release this stuff... memory might be one of the autoexiters.
 			if( proc->proc
 #ifndef __LINUX__
-				&& !IsBadCodePtr( (int(STDCALL*)(void))proc->proc )
+				&& !IsBadCodePtr( (FARPROC)proc->proc )
 #endif
 			  )
 			{
@@ -620,4 +574,49 @@ void SuspendDeadstart( void )
 }
 
 SACK_DEADSTART_NAMESPACE_END
-//#endif
+SACK_NAMESPACE
+
+// linked into BAG to provide a common definition for function Exit()
+// this then invokes an exit in the mainline program (if available)
+EXPORT_METHOD	void BAG_Exit( int code )
+{
+#ifndef __cplusplus_cli
+	InvokeExits();
+#endif
+#undef exit
+   exit( code );
+}
+
+// legacy linking code - might still be usin this for linux...
+int is_deadstart_complete( void )
+{
+	//extern _32 deadstart_complete;
+#ifndef UNDER_CE
+   if( deadstart_local_data )
+		return bInitialDone;//deadstart_complete;
+#endif
+	return 0;
+}
+
+SACK_NAMESPACE_END
+SACK_DEADSTART_NAMESPACE
+
+LOGICAL IsRootDeadstartStarted( void )
+{
+#ifndef UNDER_CE
+	if( deadstart_local_data )
+		return bInitialStarted;
+#endif
+   return 0;
+}
+
+
+
+#if 0
+int APIENTRY DllMain( HINSTANCE HInst, DWORD dwReason, UINT voidreason )
+{
+   return 1;
+}
+#endif
+
+SACK_DEADSTART_NAMESPACE_END

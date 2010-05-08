@@ -15,6 +15,10 @@
 //#include <windunce.h>
 #endif
 
+#if defined( __WINDOWS__ ) && !defined( S_IFDIR )
+#include <sys/stat.h>
+#endif
+
 #include <time.h>
 
 #include <signal.h>
@@ -116,10 +120,19 @@ int IsDirectory( CTEXTSTR name )
 		return 1;
 	return 0;
 #else
+#ifdef WIN32
+	{
+		_32 dwAttr = GetFileAttributes( name );
+		if( dwAttr & FILE_ATTRIBUTE_DIRECTORY )
+			return 1;
+      return 0;
+	}
+#else
 	struct stat statbuf;
 	if( stat( name, &statbuf ) >= 0 && statbuf.st_mode & S_IFDIR )
 		return 1;
 	return 0;
+#endif
 #endif
 }
 
@@ -162,9 +175,10 @@ FILEMONITOR_PROC( PFILEMON, AddMonitoredFile )( PCHANGEHANDLER Change, CTEXTSTR 
 		base = monitor->directory;
 		newfile = (PFILEMON)Allocate( sizeof( FILEMON ) );
 		//Log2( WIDE("Making a new file (not watched): %s/%s"), base, name );
-		pos = snprintf( newfile->name, sizeof(newfile->name), WIDE("%s/"), base );
+		snprintf( newfile->name, sizeof(newfile->name), WIDE("%s/"), base );
+      pos = strlen( newfile->name );
 		newfile->filename = newfile->name + pos;
-		strcpy( newfile->filename, name );
+		StrCpyEx( newfile->filename, name, (sizeof( newfile->name )/sizeof(TEXTCHAR)) - pos );
 #ifdef __cplusplus_cli
 		newfile->lastmodifiedtime = gcnew System::DateTime();
 #endif
@@ -174,7 +188,11 @@ FILEMONITOR_PROC( PFILEMON, AddMonitoredFile )( PCHANGEHANDLER Change, CTEXTSTR 
       newfile->flags.bPending         = 0;
 		newfile->flags.bCreated         = Change->flags.bInitial?0:1;
 		if( l.flags.bLog ) lprintf( WIDE("New file %s is marked as created? %s"), name, newfile->flags.bCreated?"yes":"no" );
+#ifdef WIN32
+		(*(_64*)&newfile->lastmodifiedtime) = 0;
+#else
 		newfile->lastmodifiedtime = 0;
+#endif
 		newfile->lastknownsize    = 0;
       if( l.flags.bLog ) lprintf( WIDE("Setting monitor do scan time - new file monitor") );
 		monitor->DoScanTime =
@@ -202,35 +220,6 @@ FILEMONITOR_PROC( PFILEMON, AddMonitoredFile )( PCHANGEHANDLER Change, CTEXTSTR 
 
 //-------------------------------------------------------------------------
 
-_32 GetSizeofFile( char *name, P_32 unused )
-{
-	_32 size;
-#ifdef __LINUX__
-	int hFile = open( name,           // open MYFILE.TXT
-							  O_RDONLY );              // open for reading
-	if( hFile >= 0 )
-	{
-		size = lseek( hFile, 0, SEEK_END );
-		close( hFile );
-		return size;
-	}
-	else
-		return 0;
-#else
-   HANDLE hFile = CreateFile( name, 0, 0, NULL, OPEN_EXISTING, 0, NULL );
-	if( hFile != INVALID_HANDLE_VALUE )
-	{
-		GetFileSize( hFile, &size );
-		CloseHandle( hFile );
-		return size;
-	}
-	else
-		return 0;
-#endif
-}
-
-//-------------------------------------------------------------------------
-
 PTRSZVAL CPROC ScanFile( PTRSZVAL psv, INDEX idx, POINTER *item )
 {
 	PCHANGEHANDLER Change = (PCHANGEHANDLER)psv;
@@ -239,7 +228,10 @@ PTRSZVAL CPROC ScanFile( PTRSZVAL psv, INDEX idx, POINTER *item )
 	_64 dwSize, dwBigSize;
 #else
 	_32 dwSize, dwBigSize;
+#ifdef WIN32
+#else
 	struct stat statbuf;
+#endif
 #endif
 	// if this file is already pending a change
 	// do not re-enque... if it's changing THIS often
@@ -264,6 +256,8 @@ PTRSZVAL CPROC ScanFile( PTRSZVAL psv, INDEX idx, POINTER *item )
 		System::String ^filemonname = gcnew System::String( filemon->name );
 		System::IO::FileInfo ^info= gcnew System::IO::FileInfo( filemonname );
 		//dwSize == System::IO::FileInfo::Length::get();
+#else
+		FILETIME lastmodified;
 #endif
 		filemon->flags.bScanned = TRUE;
 		if( filemon->flags.bDirectory )
@@ -273,12 +267,9 @@ PTRSZVAL CPROC ScanFile( PTRSZVAL psv, INDEX idx, POINTER *item )
 #ifdef __cplusplus_cli
 			dwSize = info->Length;
 #else
-			dwSize = GetSizeofFile( filemon->name, &dwBigSize );
+			dwSize = GetFileTimeAndSize( filemon->name, NULL, NULL, &lastmodified, NULL );
 #endif
 		}
-#ifndef __cplusplus_cli
-		stat( filemon->name, &statbuf );
-#endif
 		//lprintf( WIDE("File change stats: %s(%s) %lu %lu, %lu %lu, %s")
 		//		 , filemon->name
 		//		 , filemon->filename
@@ -290,7 +281,7 @@ PTRSZVAL CPROC ScanFile( PTRSZVAL psv, INDEX idx, POINTER *item )
 #ifdef __cplusplus_cli
 			|| filemon->lastmodifiedtime->CompareTo( (lastmodified = info->LastWriteTime ) )
 #else
-			|| statbuf.st_mtime != filemon->lastmodifiedtime
+			|| (*(_64*)&lastmodified) != (*(_64*)&filemon->lastmodifiedtime)
 #endif
 			|| filemon->flags.bToDelete
 		  )
@@ -299,7 +290,11 @@ PTRSZVAL CPROC ScanFile( PTRSZVAL psv, INDEX idx, POINTER *item )
 #ifdef __cplusplus_cli
 			filemon->lastmodifiedtime = lastmodified;
 #else
+#ifdef WIN32
+			(*(_64*)&filemon->lastmodifiedtime) = (*(_64*)&lastmodified);
+#else
 			filemon->lastmodifiedtime = statbuf.st_mtime;
+#endif
 #endif
 			if( !filemon->flags.bToDelete && !filemon->flags.bCreated )
 			{
@@ -378,7 +373,11 @@ FILEMONITOR_PROC( void, MonitorForgetAll )( PMONITOR monitor )
 				filemon->flags.bScanned = FALSE;
 				filemon->flags.bToDelete = 1;
 				filemon->lastknownsize = 0;
+#ifdef WIN32
+				(*(_64*)&filemon->lastmodifiedtime) = 0;
+#else
 				filemon->lastmodifiedtime = 0;
+#endif
 			}
 		}
 	}
@@ -456,7 +455,7 @@ FILEMONITOR_PROC( int, DispatchChanges )( PMONITOR monitor )
 #ifdef __cplusplus_cli
 														, Change->currentchange->lastmodifiedtime->Ticks
 #else
-														, Change->currentchange->lastmodifiedtime
+														, (*(_64*)&Change->currentchange->lastmodifiedtime)
 #endif
 														, Change->currentchange->flags.bCreated
 														, Change->currentchange->flags.bDirectory
