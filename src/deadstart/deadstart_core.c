@@ -172,10 +172,18 @@ void RegisterPriorityStartupProc( void (*proc)(void), CTEXTSTR func,int priority
 			}
 		}
 		if( !check )
+		{
 			LinkLast( proc_schedule, PSTARTUP_PROC, procs + nProcs );
+#ifndef  DISABLE_DEBUG_REGISTER_AND_DISPATCH
+			lprintf( WIDE("%s(%d) is to run after all")
+					 , procs[nProcs].func
+					 , nProcs
+					 );
+#endif
 		//lprintf( WIDE("first routine is %s(%d)")
 		//		 , shutdown_proc_schedule->func
 		//		 , shutdown_proc_schedule->line );
+		}
 	}
 	nProcs++;
 	if( nProcs == 1024 )
