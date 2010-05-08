@@ -114,7 +114,8 @@ typedef struct {
 /* compare _MSC_VER to some constant when you fail to compile here... and this will define missing structure */
 #if UNDER_CE || ( (__WATCOMC__ <= 1250 ) || defined __LINUX__ ) && !defined( _MSC_VER ) && !defined( __CYGWIN__ ) && !defined( _WINGDI_H) 
 //#if (WINVER >= 0x0500)
-typedef long    FXPT2DOT30;
+//typedef long    FXPT2DOT30;
+#if 0
 typedef struct tagCIEXYZ {
     FXPT2DOT30  ciexyzX;
     FXPT2DOT30  ciexyzY;
@@ -125,7 +126,7 @@ typedef struct tagCIEXYZTRIPLE {
     CIEXYZ  ciexyzGreen;
     CIEXYZ  ciexyzBlue;
 } CIEXYZTRIPLE;
-
+#endif
 typedef struct {
         _32        bV5Size;
         S_32       bV5Width;

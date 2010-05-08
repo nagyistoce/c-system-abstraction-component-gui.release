@@ -49,7 +49,7 @@ return 0;
 #include <fcntl.h>
 #endif
 #include <idle.h>
-#ifdef __UNIX__
+#ifdef __LINUX__
 #include <unistd.h>
 #ifdef __LINUX__
 
@@ -165,11 +165,7 @@ void AcceptClient(PCLIENT pListen)
 #else
       // yes this is an ugly transition from the above dangling
       // else...
-      {
-          int t = TRUE;
-          ioctl( pNewClient->Socket, FIONBIO, &t );
-      }
-      //fcntl( pNewClient->Socket, F_SETFL, O_NONBLOCK );
+      fcntl( pNewClient->Socket, F_SETFL, O_NONBLOCK );
 #endif
       { 
           //Log( WIDE("Accepted and notifying...") );
@@ -274,7 +270,7 @@ NETWORK_PROC( PCLIENT, CPPOpenTCPListenerAddrEx )(SOCKADDR *pAddr
 		int t = TRUE;
 		setsockopt( pListen->Socket, SOL_SOCKET, SO_REUSEADDR, &t, 4 );
 		t = TRUE;
-		ioctl( pListen->Socket, FIONBIO, &t );
+		fcntl( pListen->Socket, F_SETFL, O_NONBLOCK );
 	}
 #endif
 #ifndef _WIN32
@@ -415,10 +411,6 @@ static PCLIENT InternalTCPClientAddrExx(SOCKADDR *lpAddr,
 			}
 #  endif
 #else
-            {
-                int t = TRUE;
-                ioctl( pResult->Socket, FIONBIO, &t );
-            }
             fcntl( pResult->Socket, F_SETFL, O_NONBLOCK );
 #endif
             pResult->saClient = DuplicateAddress( lpAddr );
@@ -443,7 +435,7 @@ static PCLIENT InternalTCPClientAddrExx(SOCKADDR *lpAddr,
                 _32 dwError;
                 dwError = WSAGetLastError();
                 if( dwError != WSAEWOULDBLOCK 
-#ifdef __UNIX__
+#ifdef __LINUX__
                    && dwError != EINPROGRESS
 #else
                   && dwError != WSAEINPROGRESS
@@ -705,7 +697,7 @@ int FinishPendingRead(PCLIENT lpClient DBG_PASS )  // only time this should be c
 				//Log( WIDE("Pending Receive would block...") );
 				lpClient->dwFlags &= ~CF_READREADY;
 				return lpClient->RecvPending.dwAvail;
-#ifdef __UNIX__
+#ifdef __LINUX__
 			case ECONNRESET:
 #else
 			case WSAECONNRESET:

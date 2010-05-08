@@ -284,6 +284,7 @@ void CPROC EndTaskWindow( PTASK_INFO task )
 
 LOGICAL CPROC StopProgram( PTASK_INFO task )
 {
+#ifdef __WINDOWS__
 #ifndef UNDER_CE
 	if( !GenerateConsoleCtrlEvent( CTRL_C_EVENT, task->pi.dwProcessId ) )
 	{
@@ -294,6 +295,9 @@ LOGICAL CPROC StopProgram( PTASK_INFO task )
          	return FALSE;
 		}
 	}
+#endif
+#else
+        // kill( ) ?
 #endif
     return TRUE;
 }

@@ -30,9 +30,9 @@ SACK_NAMESPACE
 
 
 #ifdef SQLGETOPTION_SOURCE
-#define SQLGETOPTION_PROC(type,name) LITERAL_LIB_EXPORT_METHOD type CPROC name
+#define SQLGETOPTION_PROC(type,name) EXPORT_METHOD type CPROC name
 #else
-#define SQLGETOPTION_PROC(type,name) LITERAL_LIB_IMPORT_METHOD type CPROC name
+#define SQLGETOPTION_PROC(type,name) IMPORT_METHOD type CPROC name
 #endif
 
 #ifndef __NO_INTERFACES__

@@ -122,11 +122,15 @@ using namespace System;
    individual library module once upon a time.    and not NO_SQL and not NO_OPTIONS   */
 #define SQLGETOPTION_SOURCE
 #    endif
-#endif
+#  endif
 
 /* Defined when SACK_BAG_EXPORTS is defined. This was an
    individual library module once upon a time.           */
 #define FORCE_NO_INTERFACE
+
+/* Defined when SACK_BAG_EXPORTS is defined. This was an
+   individual library module once upon a time.           */
+#define PSI_SOURCE
 
 #ifdef _MSC_VER
 
@@ -155,9 +159,6 @@ using namespace System;
    individual library module once upon a time.           */
 #define SYSTRAY_LIBRARAY
 
-/* Defined when SACK_BAG_EXPORTS is defined. This was an
-   individual library module once upon a time.           */
-#define PSI_SOURCE
 /* Defined when SACK_BAG_EXPORTS is defined. This was an
    individual library module once upon a time.           */
 #define SOURCE_PSI2
@@ -281,10 +282,10 @@ using namespace System;
 #  define EXPORT_METHOD [DllImport(LibName)] public
 # else
 #  ifdef __cplusplus_cli
-#   ifdef __STATIC__
+#   if defined( __STATIC__ ) || defined( __LINUX__ )
 #     define EXPORT_METHOD
 #     define IMPORT_METHOD extern
-#else
+#   else
 #     define EXPORT_METHOD __declspec(dllexport)
 #     define IMPORT_METHOD __declspec(dllimport)
 #   endif
@@ -292,6 +293,10 @@ using namespace System;
 #   define LITERAL_LIB_IMPORT_METHOD extern
 //__declspec(dllimport)
 #  else
+#    ifdef __LINUX__
+#      define EXPORT_METHOD
+#      define IMPORT_METHOD extern
+#    else
 /* Method to declare functions exported from a DLL. (nothign on
    LINUX or building statically, but __declspec(dllimport) on
    windows )                                                    */
@@ -300,6 +305,7 @@ using namespace System;
    library. Under windows, this is probably
    __declspec(dllimport). Under linux this is probably 'extern'. */
 #   define IMPORT_METHOD __declspec(dllimport)
+#endif
 #  define LITERAL_LIB_EXPORT_METHOD __declspec(dllexport)
 #  define LITERAL_LIB_IMPORT_METHOD __declspec(dllimport)
 #  endif

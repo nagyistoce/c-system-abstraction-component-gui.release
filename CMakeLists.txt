@@ -42,6 +42,7 @@ set( SACK_BASE ${PROJECT_SOURCE_DIR} )
 
 set( CMAKE_MODULE_PATH ${SACK_SOURCE_DIR}/makefiles/cmake )
 include( DefaultInstall )
+include( FindSqlite )
 
 OPTION( C++ "Build with C++" OFF )
 if( WIN32 )
@@ -59,13 +60,11 @@ SET(BUILD_ALTANIK_ROOT "../altanik" CACHE STRING "If Specified, hook into eltani
 
 if ( UNIX )
         set( USE_INTERNAL_STANDARDLIBS 0 )
-        find_package( PNG REQUIRED )
-        find_package( JPEG REQUIRED )
-        find_package( Freetype REQUIRED )
-        find_package( GGI REQUIRED )
+        find_package( PNG )
+        find_package( JPEG )
+        find_package( Freetype )
+	find_package( Sqlite )
         find_package( Threads REQUIRED )
-        find_package( Curses REQUIRED )
-        find_package( Sndfile REQUIRED )
 	find_package( SDL REQUIRED )
         set( SDL_LIBRARIES SDL SDL SDLmain SDL_gfx SDL_image SDL_ttf )
 else ( UNIX )
@@ -122,6 +121,10 @@ endif()
 add_definitions( -DSACK_CORE_BUILD )
 
 
+if( __LINUX__ )
+   add_definitions( -D__LINUX__ )
+#   set( ExtraFlags "${ExtraFlags} -D__LINUX__" )
+endif( __LINUX__ )
 
 
 if( USE_ODBC OR USE_SQLITE )
@@ -154,9 +157,9 @@ add_definitions( -D__NO_OPTIONS__ )
  endif( USE_OPTIONS )
 
  if( USE_SQLITE )
-  SET(SQLITE_SOURCES   src/sqlite/sqlite3.c src/sqlite/sqlite_interface.c  )
-  add_definitions( -DUSE_SQLITE )
-  
+  SET(SQLITE_SOURCES   src/sqlite/sqlite_interface.c )
+if( !SQLITE3_FOUND )
+  SET( SQLITE_SOURCES ${SQLITE_SOURCES} src/sqlite/sqlite3.c  )
   if( NOT USE_SQLITE_EXTERNAL )
    # setup to include sqlite in the core libraries...
    set( BAG_SQLITE_SOURCES ${SQLITE_SOURCES} )
@@ -164,7 +167,12 @@ add_definitions( -D__NO_OPTIONS__ )
   else()
    set( ExtraFlags "${ExtraFlags} -DUSE_SQLITE_INTERFACE" )
   endif()
-  
+else( !SQLITE3_FOUND )
+   set( ExtraFlags "${ExtraFlags} -DSYSTEM_SQLITE" )
+endif( !SQLITE3_FOUND )
+
+  add_definitions( -DUSE_SQLITE )
+    
  endif(USE_SQLITE)
 
 else( USE_ODBC OR USE_SQLITE )
@@ -237,6 +245,7 @@ set( GENX_SOURCES
   src/genx/genx.c
 )
 
+if( __WINDOWS__ )
 set( VIDLIB_SOURCES
   src/vidlib/key.c
   src/vidlib/keydefs.c
@@ -247,6 +256,10 @@ if( NOT __ARM__ )
 set( VIDLIB_SOURCES ${VIDLIB_SOURCES} src/vidlib/opengl.c )
 set( ExtraRenderFlags "${ExtraRenderFlags} -D_OPENGL_ENABLED" )
 endif( NOT __ARM__ )
+
+else( __WINDOWS__ )
+
+endif( __WINDOWS__ )
 
 set( IMAGE_SOURCES
   src/imglib/alphastab.c
@@ -294,8 +307,15 @@ set( PSI_SOURCES
   src/psilib/xml_load.c
   src/psilib/xml_save.c
   src/psilib/option_frame.c
-  src/systraylib/systray.c
 )
+
+if( __WINDOWS__ )
+  SET( PSI_SOURCES ${PSI_SOURCES}  src/systraylib/systray.c )
+else( __WINDOWS__ )
+  SET( PSI_SOURCES ${PSI_SOURCES}  src/systraylib/systray_client.c )
+  
+endif( __WINDOWS__ )
+
 
 if( NOT BUILD_MONOLITHIC )
 set( PSI_SOURCES ${PSI_SOURCES} 
@@ -312,14 +332,22 @@ set( SACK_MSG_SERVICES
 
 if( NOT __ARM__ )
 set(BASE_SOURCES ${BASE_SOURCES} ${SACK_MSG_SERVICES}
-  src/filesyslib/filemon/allfiles.c
-  src/filesyslib/filemon/windowsfiles.c
-  #src/filesyslib/filemon/linuxfiles.c
   src/netlib/ping.c
   src/netlib/whois.c
   src/systemlib/spawntask.c
-
+  src/filesyslib/filemon/allfiles.c
 )
+if( __LINUX__ )
+set(BASE_SOURCES ${BASE_SOURCES}
+  src/filesyslib/filemon/linuxfiles.c
+)
+else( __LINUX__ )
+set(BASE_SOURCES ${BASE_SOURCES}
+  src/filesyslib/filemon/windowsfiles.c
+  src/filesyslib/winfiles.c
+)
+endif( __LINUX__ )
+
 else()
 set( Extraflags "${ExtraFlags} -D__NO_MSGSVR__" )
 set( CMAKE_C_STANDARD_LIBRARIES_INIT "" )
@@ -344,7 +372,6 @@ set(BASE_SOURCES  ${BASE_SOURCES}
   src/configlib/configscript.c
   src/procreglib/names.c
   src/netlib/network.c
-  src/netlib/net_winsock2.c
   src/netlib/tcpnetwork.c
   src/netlib/udpnetwork.c
   src/systemlib/args.c
@@ -352,7 +379,6 @@ set(BASE_SOURCES  ${BASE_SOURCES}
   src/vectlib/vectlib.c
   src/sha1lib/sha1.c
   src/filesyslib/pathops.c
-  src/filesyslib/winfiles.c
   src/filesyslib/filescan.c
   src/systemlib/system.c
   ${OPTION_SOURCE}
@@ -360,6 +386,12 @@ set(BASE_SOURCES  ${BASE_SOURCES}
   ${EXPAT_SOURCES}
 )
 
+
+if( __WINDOWS__ )
+set(BASE_SOURCES ${BASE_SOURCES}
+  src/netlib/net_winsock2.c
+)
+endif( __WINDOWS__ )
 
 
 include_directories( 
@@ -431,25 +463,6 @@ SET_TARGET_PROPERTIES(sack_bag PROPERTIES
 		  SOLUTION_FOLDER "MyFolder" 
 )
 
-add_library( sack_bags 
-    ${FIRST_GCC_LIBRARY_SOURCE} 
-    ${BASE_SOURCES} 
-    ${ODBC_SOURCES}
-    ${BAG_SQLITE_SOURCES}
-    ${IMAGE_SOURCES} 
-    ${VIDLIB_SOURCES} 
-    ${PSI_SOURCES} 
-    ${JPEG_SOURCE}
-    ${ZLIB_SOURCE}
-    ${PNG_SOURCE}
-    ${FREETYPE_SOURCE}
-  ${LAST_GCC_LIBRARY_SOURCE} )
-SET_TARGET_PROPERTIES(sack_bags PROPERTIES
-                  DEFINE_SYMBOL SACK_BAG_EXPORTS
-                  COMPILE_FLAGS  "-DTARGET_LABEL=sack_bag ${ExtraFlags} ${ExtraRenderFlags} -D__STATIC__"
-		  SOLUTION_FOLDER "MyFolder" 
-)
-
 if( __WINDOWS_ARM_CE__ )
 SET_TARGET_PROPERTIES( sack_bag PROPERTIES LINK_LIBRARIES "" )
 endif()
@@ -462,13 +475,16 @@ endif()
 
 set( SACK_LIBRARY sack_bag )
 
-set( SACK_LIBRARY_ARCH sack_bags )
+if( __WINDOWS__ )
+  if( __ARM__ )
+    target_link_libraries( sack_bag ws2 mmtimer iphlpapi coredll corelibc.lib)
+  else()
+    target_link_libraries( sack_bag wsock32 ws2_32 opengl32 winmm iphlpapi)
+  endif()
+else( __WINDOWS__ )
+  target_link_libraries( sack_bag odbc ${SQLITE3_LIBRARIES} ${PNG_LIBRARIES} ${JPEG_LIBRARIES} )
+endif( __WINDOWS__ )
 
-if( __ARM__ )
-target_link_libraries( sack_bag ws2 mmtimer iphlpapi coredll corelibc.lib)
-else()
-target_link_libraries( sack_bag wsock32 ws2_32 opengl32 winmm iphlpapi)
-endif()
 install_default_dest( sack_bag )
 
 if( NOT NEED_PNG ) 
@@ -609,6 +625,8 @@ add_definitions( -D__OBSCURE_STREAM_INTERNALS )
    )
    
   endif()
+
+add_subdirectory( src/displaylib )
 
 add_subdirectory( src/msgsvr/server )
 

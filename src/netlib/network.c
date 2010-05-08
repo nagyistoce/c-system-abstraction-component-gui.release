@@ -2354,20 +2354,20 @@ SOCKADDR *CreateRemote(CTEXTSTR lpName,_16 nHisPort)
 					else
 					{
 						lprintf( "Strange, gethostbyname failed, but AF_INET worked..." );
-						SET_SOCKADDR_LENGTH( pc->saLastClient, 16 );
+						SET_SOCKADDR_LENGTH( lpsaAddr, 16 );
 						lpsaAddr->sin_family = AF_INET;
 					}
 				}
 				else
 				{
-					SET_SOCKADDR_LENGTH( pc->saLastClient, 28 );
+					SET_SOCKADDR_LENGTH( lpsaAddr, 28 );
 					lpsaAddr->sin_family = AF_INET6;         // InetAddress Type.
 				}
 			}
 			else
 			{
 				Release( tmp );
-				SET_SOCKADDR_LENGTH( pc->saLastClient, 16 );
+				SET_SOCKADDR_LENGTH( lpsaAddr, 16 );
 				lpsaAddr->sin_family = AF_INET;         // InetAddress Type.
 			}
 			memcpy( &lpsaAddr->sin_addr.s_addr,           // save IP address from host entry.

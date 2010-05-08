@@ -39,5 +39,6 @@ struct task_info_tag {
    //HANDLE hReadErr, hWriteErr;
 	int hReadIn, hWriteIn;
    pid_t pid;
+   _32 exitcode;
 #endif
 };

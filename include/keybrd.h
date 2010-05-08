@@ -263,7 +263,7 @@ using namespace sack::image::render::keyboard;
 //} // extern "C"
 #endif
 
-#ifdef __UNIX__
+#ifdef __LINUX__
 
 //#define USE_SDL_KEYSYM
 // ug - KEYSYMS are too wide...

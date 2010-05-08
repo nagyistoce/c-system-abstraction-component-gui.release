@@ -4,7 +4,8 @@
 #include <string.h>
 #include <filesys.h>
 #include <logging.h>
-#ifdef __UNIX__
+#ifdef __LINUX__
+#include <time.h>
 #include <sys/stat.h>
 #endif
 //-----------------------------------------------------------------------
@@ -81,11 +82,20 @@ static void convert( P_64 outtime, time_t *time )
 
 _64 GetTimeAsFileTime ( void )
 {
+#if defined( __LINUX__ )
+	struct timeval tmp;
+	struct timezone tz;
+	FILETIME result;
+	gettimeofday( &tmp, &tz );
+	result = ( tmp.tv_usec * 10LL ) + ( tmp.tv_sec * 1000LL * 1000LL * 10LL );
+	return result;
+#else
 	SYSTEMTIME st;
-   FILETIME result;
+	FILETIME result;
 	GetLocalTime( &st );
 	SystemTimeToFileTime( &st, &result );
-   return *(_64*)&result;
+	return *(_64*)&result;
+#endif
 }
 
  _64  GetFileWriteTime( CTEXTSTR name ) // last modification time.
