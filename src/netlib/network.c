@@ -79,7 +79,7 @@ static LOGICAL bThreadInitComplete = FALSE
     , bThreadInitOkay = TRUE
 	;
 
-PRIORITY_PRELOAD( InitGlobal, GLOBAL_INIT_PRELOAD_PRIORITY )
+PRIORITY_PRELOAD( InitNetworkGlobal, GLOBAL_INIT_PRELOAD_PRIORITY )
 {
 	SimpleRegisterAndCreateGlobal( global_network_data );
 	if( !g.system_name )
@@ -1959,6 +1959,8 @@ void ReallocClients( _16 wClients, int nUserData )
 {
 	P_8 pUserData;
 	PCLIENT_SLAB pClientSlab;
+	if( !global_network_data )
+		InvokeDeadstart();
 	if( !MAX_NETCLIENTS )
 	{
 		//Log( WIDE("Starting Network Init!") );

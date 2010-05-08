@@ -175,6 +175,7 @@ static LOGICAL DoPingExx( CTEXTSTR pstrHost
 			vtprintf( pvtResult, WIDE("Uhmm bad things happened for sockraw!\n") );
 		else
 			lprintf( WIDE("Uhmm bad things happened for sockraw!\n") );
+#ifdef __WINDOWS__
 		rawSocket = OpenSocket( TRUE, FALSE, TRUE );
 		if( rawSocket == SOCKET_ERROR )
 		{
@@ -192,6 +193,7 @@ static LOGICAL DoPingExx( CTEXTSTR pstrHost
        }
 		 return FALSE;
 		}
+#endif
    }
 
    // Setup destination socket address
