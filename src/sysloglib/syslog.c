@@ -112,7 +112,7 @@ PRIORITY_ATEXIT( CleanSyslog, ATEXIT_PRIORITY_SYSLOG )
 	enum syslog_types _logtype = logtype;
 	if( ( _logtype == SYSLOG_AUTO_FILE && file ) || ( _logtype != SYSLOG_AUTO_FILE && _logtype == SYSLOG_NONE ) )
 		lprintf( WIDE( "Final log - syslog closed." ) );
-   return;
+	return;
 	pProgramName = NULL; // this was dynamic allocated memory, and it is now gone.
 	if( ( _logtype == SYSLOG_AUTO_FILE && file ) || ( _logtype != SYSLOG_AUTO_FILE && _logtype == SYSLOG_NONE ) )
 		lprintf( WIDE( "Final log - syslog closed." ) );
@@ -121,7 +121,7 @@ PRIORITY_ATEXIT( CleanSyslog, ATEXIT_PRIORITY_SYSLOG )
 	{
 	case SYSLOG_FILE:
 	case SYSLOG_FILENAME:
-      fclose( file );
+		fclose( file );
 		break;
 	case SYSLOG_UDP:
 	case SYSLOG_UDPBROADCAST:
@@ -435,13 +435,11 @@ void InitSyslog( void )
 	flags.bInitialized = 1;
 }
 
-#if !defined( UNDER_CE ) || 1
-
 PRIORITY_PRELOAD( InitSyslogPreload, SYSLOG_PRELOAD_PRIORITY )
 {
    InitSyslog();
 }
-#endif //UNDER_CE
+
 //----------------------------------------------------------------------------
 CTEXTSTR GetTimeEx( int bUseDay )
 {
@@ -887,7 +885,7 @@ void DoSystemLog( const TEXTCHAR *buffer )
 			return;
 		}
 		if( ( logtype == SYSLOG_UDPBROADCAST ) || ( logtype == SYSLOG_UDP ) )
-         return;
+			return;
 	}
 	if( logtype == SYSLOG_UDP
 		|| logtype == SYSLOG_UDPBROADCAST )
@@ -955,6 +953,10 @@ void SystemLogFL( const TEXTCHAR *message FILELINE_PASS )
 	static TEXTCHAR sourcefile[256];
 	CTEXTSTR logtime;
 	static _32 lock;
+	if( !init_complete )
+	{
+		InvokeDeadstart();
+	}
 	if( cannot_log )
       return;
 #ifdef __WINDOWS__
