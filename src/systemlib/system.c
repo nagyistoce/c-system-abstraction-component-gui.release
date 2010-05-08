@@ -201,7 +201,10 @@ static void SetupSystemServices( void )
 			pb = strrchr(buf,'/');
 			if( pb )
 				pb[0]=0;
+			else
+				pb = buf - 1;
 			//lprintf( WIDE("My execution: %s"), buf);
+			l.filename = StrDup( pb + 1 );
 			l.load_path = StrDup( buf );
 			setenv( WIDE("MY_LOAD_PATH"), buf, TRUE );
 			//strcpy( pMyPath, buf );

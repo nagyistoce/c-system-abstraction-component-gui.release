@@ -42,7 +42,7 @@ static int DumpError( void )
 #endif
 
 //--------------------------------------------------------------------------
-#ifdef __UNIX__
+#ifdef __LINUX__
 int CanRead( int handle )
 {
 	fd_set n;
