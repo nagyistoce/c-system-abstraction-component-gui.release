@@ -25,8 +25,9 @@
 //#define LOG_CLIENT_LISTS
 
 //TODO: modify the client struct to contain the MAC addr
-
+#ifndef __LINUX__
 #define USE_WSA_EVENTS
+#endif
 
 #ifndef CLIENT_DEFINED
 #define CLIENT_DEFINED

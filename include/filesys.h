@@ -17,19 +17,23 @@
 
 #if !defined( UNDER_CE ) ||defined( ELTANIN)
 #include <fcntl.h>
+#if !defined( __LINUX__ )
 #include <io.h>
+#else
+#define LPFILETIME P_64
+#define FILETIME _64
+#endif
 #endif
 
 /* uhmm in legacy usage this was not CPROC, but was unspecified */
 #define FILESYS_API
-
+// DOM-IGNORE-BEGIN
 #ifdef FILESYSTEM_LIBRARY_SOURCE
-#define FILESYS_PROC EXPORT_METHOD
+#  define FILESYS_PROC EXPORT_METHOD
 #else
-/* define the method that file system and file monitor use for
-   library linkage.                                            */
-#define FILESYS_PROC IMPORT_METHOD
+#  define FILESYS_PROC IMPORT_METHOD
 #endif
+// DOM-IGNORE-END
 
 #ifdef __cplusplus
 /* defined the file system partial namespace (under
@@ -368,6 +372,7 @@ FILESYS_PROC  _32 FILESYS_API  GetFileTimeAndSize ( CTEXTSTR name
 //# endif
 #endif
 
+#ifndef __LINUX__
 FILESYS_PROC  HANDLE FILESYS_API  sack_open ( int group, CTEXTSTR filename, int opts, ... );
 FILESYS_PROC  HANDLE FILESYS_API  sack_openfile ( int group, CTEXTSTR filename, OFSTRUCT *of, int flags );
 FILESYS_PROC  HANDLE FILESYS_API  sack_creat ( int group, CTEXTSTR file, int opts, ... );
@@ -375,9 +380,10 @@ FILESYS_PROC  int FILESYS_API  sack_close ( HANDLE file_handle );
 FILESYS_PROC  int FILESYS_API  sack_lseek ( HANDLE file_handle, int pos, int whence );
 FILESYS_PROC  int FILESYS_API  sack_read ( HANDLE file_handle, CPOINTER buffer, int size );
 FILESYS_PROC  int FILESYS_API  sack_write ( HANDLE file_handle, CPOINTER buffer, int size );
+#endif
 
 FILESYS_PROC  int FILESYS_API  sack_iopen ( int group, CTEXTSTR filename, int opts, ... );
-FILESYS_PROC  int FILESYS_API  sack_iopenfile ( int group, CTEXTSTR filename, OFSTRUCT *of, int flags );
+FILESYS_PROC  int FILESYS_API  sack_iopenfile ( int group, CTEXTSTR filename, int opts, int flags );
 FILESYS_PROC  int FILESYS_API  sack_icreat ( int group, CTEXTSTR file, int opts, ... );
 FILESYS_PROC  int FILESYS_API  sack_iclose ( int file_handle );
 FILESYS_PROC  int FILESYS_API  sack_ilseek ( int file_handle, int pos, int whence );

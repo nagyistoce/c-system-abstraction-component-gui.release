@@ -3,6 +3,8 @@
 #ifdef __LINUX__
 // fcntl, open
 //#include <unistd.h>
+#define HAVE_ARCH_STRUCT_FLOCK
+#include <linux/fcntl.h>
 //#include <fcntl.h>
 #endif
 #include <time.h>
@@ -12,7 +14,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 #else
-#include <linux/fcntl.h>
 #endif
 #include <signal.h>
 #include <dirent.h>

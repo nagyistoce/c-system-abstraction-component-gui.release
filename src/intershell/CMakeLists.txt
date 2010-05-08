@@ -16,7 +16,7 @@ fonts.c
 loadsave.c     
 macros.c       
 main.c         
-InterShell_plugins.c 
+intershell_plugins.c 
 page_dialog.c  
 pages.c        
 resname.c      

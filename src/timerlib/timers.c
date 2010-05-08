@@ -203,6 +203,26 @@ static struct {
 
 //--------------------------------------------------------------------------
 #ifdef __LINUX__
+#ifdef __LINUX__
+TIMER_PROC( _32, GetTickCount )( void )
+{
+	struct timeval time;
+	gettimeofday( &time, 0 );
+	return (time.tv_sec * 1000) + (time.tv_usec / 1000);
+}
+
+TIMER_PROC( _32, timeGetTime )( void )
+{
+	struct timeval time;
+	gettimeofday( &time, 0 );
+	return (time.tv_sec * 1000) + (time.tv_usec / 1000);
+}
+
+TIMER_PROC( void, Sleep )( _32 ms )
+{
+	(usleep((ms)*1000));
+}
+#endif
 PTRSZVAL closesem( POINTER p, PTRSZVAL psv )
 {
    PTHREAD thread = (PTHREAD)p;
@@ -1759,26 +1779,6 @@ TIMER_PROC( void, DeleteCriticalSec )( PCRITICALSECTION pcs )
 	return;
 }
 
-#ifdef __LINUX__
-TIMER_PROC( _32, GetTickCount )( void )
-{
-	struct timeval time;
-	gettimeofday( &time, 0 );
-	return (time.tv_sec * 1000) + (time.tv_usec / 1000);
-}
-
-TIMER_PROC( _32, timeGetTime )( void )
-{
-	struct timeval time;
-	gettimeofday( &time, 0 );
-	return (time.tv_sec * 1000) + (time.tv_usec / 1000);
-}
-
-TIMER_PROC( void, Sleep )( _32 ms )
-{
-	(usleep((ms)*1000));
-}
-#endif
 #ifdef __cplusplus 
 };//	namespace timers {
 };//namespace sack {

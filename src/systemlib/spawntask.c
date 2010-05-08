@@ -212,7 +212,9 @@ static PTRSZVAL CPROC HandleTaskOutput(PTHREAD thread )
 			if( phi->handle == task->hStdIn.handle )
 				task->hStdIn.handle = INVALID_HANDLE_VALUE;
 			phi->handle = INVALID_HANDLE_VALUE;
+#ifdef _WIN32
 			GetExitCodeProcess( task->pi.hProcess, &task->exitcode );
+#endif
 
 			if( task->EndNotice )
 				task->EndNotice( task->psvEnd, task );
