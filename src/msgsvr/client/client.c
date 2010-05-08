@@ -330,7 +330,11 @@ int SendInMultiMessageEx( _32 routeID, _32 MsgID, _32 parts, BUFFER_LENGTH_PAIR 
 		if( len + ofs > 8192 )
 		{
 		// wow - this is a BIG message - lets see - what can we do?
+#ifdef __WINDOWS__
 			SetLastError( E2BIG );
+#else
+			errno = E2BIG;
+#endif
 			lprintf( WIDE("Length of message is too big to transport...%") _32f WIDE(" (len %") _32f WIDE(" ofs %") _32f WIDE(")"), len + ofs, len, ofs );
 			LeaveCriticalSec( &g.csMsgTransact );
 			return FALSE;
@@ -419,7 +423,11 @@ static int PrivateSendDirectedServerMultiMessageEx( _32 DestID
 		if( len + ofs > 8192 )
 		{
 		// wow - this is a BIG message - lets see - what can we do?
+#ifdef __WINDOWS__
 			SetLastError( E2BIG );
+#else
+			errno = E2BIG;
+#endif
 			lprintf( WIDE("Length of message is too big to transport...%") _32f WIDE(" (len %") _32f WIDE(" ofs %") _32f WIDE(")"), len + ofs, len, ofs );
 			return FALSE;
 		}
@@ -508,9 +516,13 @@ static PEVENTHANDLER PrivateSendServerMultiMessageEx( _32 *MessageID, _32 *bias,
 			}
 			if( !handler )
 			{
-            DebugBreak();
+				DebugBreak();
 				Log( WIDE("Client attempting to send an invalid message ID") );
+#ifdef __WINDOWS__
 				SetLastError( EINVAL );
+#else
+				errno = EINVAL;
+#endif
 				return NULL;
 			}
 			else
