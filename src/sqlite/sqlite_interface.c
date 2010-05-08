@@ -6,7 +6,7 @@
 #include "../SQLlib/sqlstruc.h"
 #include "sqlite3.h"
 
-struct sqlite_interface sqlite_interface = {
+struct sqlite_interface my_sqlite_interface = {
 	sqlite3_result_text
 														 , sqlite3_user_data
 														 , sqlite3_last_insert_rowid
@@ -31,7 +31,7 @@ struct sqlite_interface sqlite_interface = {
 static POINTER CPROC GetSQLiteInterface( void )
 {
    //RealSQLiteInterface._global_font_data = GetGlobalFonts();
-   return &sqlite_interface;
+   return &my_sqlite_interface;
 }
 
 static void CPROC DropSQLiteInterface( POINTER p )
