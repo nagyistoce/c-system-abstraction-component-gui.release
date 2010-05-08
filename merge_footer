@@ -1,3 +1,6 @@
 Begin BAG branch (work to consolidate while merging)
 
 sack.work propogated here, and then merged from .sack"
+
+Hehe at mercurial revision 40, managed to get 'default' as a past head merged into a foriegn branch which I could not then get updated....
+so this is to merge 43 back into default head also, erasing arm_ce branch (sorta)
