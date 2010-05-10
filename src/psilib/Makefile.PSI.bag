@@ -1,0 +1,81 @@
+#define BUILD_TESTS to build test projects...
+# 
+
+CXFLAGS1:=-DSOURCE_PSI2 -DSYSTRAY_LIBRARAY -DBAG -DPSI_SOURCE $(if $(__NO_OPTIONS__),-D__NO_OPTIONS__,) -DFORCE_NO_INTERFACE
+
+
+LIBNAME1=bag.psi
+# define COMN_SOURCES since the server version
+# and the local version are NEARLY tthe same - except the server
+# does not take advantaage of psi_interface... (might/could, but doesn't)
+
+COMN_SOURCES=borders mouse popups controls palette ctlbutton \
+      ctltext ctledit ctlslider  ctllistbox \
+      fileopen ctlscroll ctlmisc ctlprop \
+                ctlcombo ctlsheet loadsave xml_load xml_save \
+                calctl/clock calctl/analog $(if $(__NO_OPTION__),,option_frame)
+#I dunno about this guy... maybe someday
+COMN_SOURCES+=psi_interface
+
+COMN_SOURCES+=$(if $(STATIC),$(if $(__NO_GUI__),fntcache,),fntcache) fntdlg
+
+ifeq '0' '1'
+# add psicon control sources - fancy term with word wrap and scrollback uses PTEXTs with format (color)
+CONSOLE_SOURCES=history console_keydefs paste psicon psicon_interface regaccess WinLogic 
+COMN_SOURCES+=$(foreach SRC,$(CONSOLE_SOURCES),console/$(SRC))
+CXFLAGS1+=-DCORECON_SOURCE
+endif
+
+ifdef __WINDOWS__
+COMN_SOURCES+=../systraylib/systray
+ifeq '$(filter static_release static_debug,$(DEST))' ''
+RSRCS1=../systraylib/systray
+endif
+else
+COMN_SOURCES+=../systraylib/systray_client
+endif
+                
+SRCS1 = $(COMN_SOURCES)
+
+ifdef WATCOM
+#CXFLAGS1+=-DUSE_INTERFACES
+MORE_LITERAL_LIBS1+=
+else
+ifeq '$(shell uname -o)' 'GNU/Linux'
+CXFLAGS1+=$(if $(__LINUX__),-DUSE_INTERFACES,)
+MORE_LITERAL_LIBS1+=
+else
+MORE_LITERAL_LIBS1+=bag.image bag.video
+endif
+endif
+
+# calctl project is now included in standard PSI
+PROJECT_DIRS=console
+
+PROJECT_DIRS+=$(if $(BUILD_TESTS),paltst listtst sheettst menutst fonttst editctltest edittst,)
+PROJECTS=$(PROJECT_DIRS)
+#$(foreach dir,$(PROJECT_DIRS),$(dir)/Makefile.$(dir).bag)
+ifndef __WINDOWS__
+ifneq '$(COMPILER)' 'arm'
+CXFLAGS1 += $(CXFLAGS1) $(shell freetype-config --cflags)
+LINK_LIBDIRS1=$(shell freetype-config --libs|sed 's/-l[^ ]*//g;s/-Wl[^ ]*//g;s/-L//' )
+SYSLIBS1+=$(shell freetype-config --libs|sed 's/-L[^ ]*//g;s/-l//g;s/-Wl[^ ]*//g' )
+endif
+else
+INCLUDEDIRS+=$(SACK_BASE)/src/freetype-2.3.12/include
+endif
+
+####################################
+# I really might like to make these things individual modules
+# realtime linking being slower and slower...
+
+#LIBNAME3=ctlbutton
+#SRCS3=ctlbutton borders
+#MORELIBS3=psi containers 
+
+#LIBNAME4=ctltext
+#SRCS4=ctltext
+#MORELIBS4=psi
+
+include $(SACK_BASE)/makefiles/makefile.many
+

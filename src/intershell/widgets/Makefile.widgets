@@ -1,0 +1,14 @@
+
+LIBNAME=sack.widgets
+
+SRCS=banner/banner \
+   keypad/buttons \
+   keypad/keypad \
+   keypad/accum
+
+CXFLAGS=-DBANNER_SOURCE \
+    -DKEYPAD_SOURCE  
+
+include $(SACK_BASE)/makefiles/makefile.single
+
+
