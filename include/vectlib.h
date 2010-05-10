@@ -26,7 +26,7 @@
 #      ifndef __cplusplus_cli
 #        define MATHLIB_DEXPORT extern IMPORT_METHOD
 #      else
-#        define MATHLIB_DEXPORT IMPORT_METHOD
+#        define MATHLIB_DEXPORT extern IMPORT_METHOD
 #      endif
 #    else
 #      define MATHLIB_DEXPORT IMPORT_METHOD

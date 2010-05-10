@@ -42,7 +42,7 @@ set( SACK_BASE ${PROJECT_SOURCE_DIR} )
 
 set( CMAKE_MODULE_PATH ${SACK_SOURCE_DIR}/makefiles/cmake )
 include( DefaultInstall )
-include( FindSqlite )
+#include( FindSqlite )
 
 OPTION( C++ "Build with C++" OFF )
 if( WIN32 )
@@ -161,7 +161,7 @@ add_definitions( -D__NO_OPTIONS__ )
 
  if( USE_SQLITE )
   SET(SQLITE_SOURCES   src/sqlite/sqlite_interface.c )
-if( !SQLITE3_FOUND )
+#if( !SQLITE3_FOUND )
   SET( SQLITE_SOURCES ${SQLITE_SOURCES} src/sqlite/sqlite3.c  )
   if( NOT USE_SQLITE_EXTERNAL )
    # setup to include sqlite in the core libraries...
@@ -170,9 +170,9 @@ if( !SQLITE3_FOUND )
   else()
    set( ExtraFlags "${ExtraFlags} -DUSE_SQLITE_INTERFACE" )
   endif()
-else( !SQLITE3_FOUND )
-   set( ExtraFlags "${ExtraFlags} -DSYSTEM_SQLITE" )
-endif( !SQLITE3_FOUND )
+#else( !SQLITE3_FOUND )
+#   set( ExtraFlags "${ExtraFlags} -DSYSTEM_SQLITE" )
+#endif( !SQLITE3_FOUND )
 
   add_definitions( -DUSE_SQLITE )
     
@@ -452,15 +452,14 @@ endif( NOT WATCOM )
 if( BUILD_MONOLITHIC )
 
 if( NOT __NO_GUI__ )
-set( BASE_SOURCES ${BASE_SOUCES} 
+set( BASE_SOURCES ${BASE_SOURCES} 
     ${IMAGE_SOURCES} 
     ${VIDLIB_SOURCES} 
     ${PSI_SOURCES} 
 )
 endif( NOT __NO_GUI__ )
 
-
-add_library( sack_bag SHARED 
+set( SACK_SOURCES 
   ${FIRST_GCC_LIBRARY_SOURCE} 
     ${BASE_SOURCES} 
     ${ODBC_SOURCES}
@@ -469,11 +468,47 @@ add_library( sack_bag SHARED
     ${ZLIB_SOURCE}
     ${PNG_SOURCE}
     ${FREETYPE_SOURCE}
-  ${LAST_GCC_LIBRARY_SOURCE} )
+  ${LAST_GCC_LIBRARY_SOURCE} 
+)
+
+add_library( sack_bag SHARED 
+  ${SACK_SOURCES} 
+  )
+
+set( cplusplus_sources )
+
+FOREACH(SOURCE ${SACK_SOURCES})
+   if( ${SOURCE} MATCHES "(.*)\\.c" )
+      if( ${PROJECT_SOURCE_DIR}/${SOURCE} IS_NEWER_THAN ${PROJECT_SOURCE_DIR}/${CMAKE_MATCH_1}.cpp )
+          EXECUTE_PROCESS(COMMAND cmake -E copy ${PROJECT_SOURCE_DIR}/${SOURCE} ${PROJECT_SOURCE_DIR}/${CMAKE_MATCH_1}.cpp )
+          #message( "LIB2_SOURCE : ${CMAKE_MATCH_1}  ${SOURCE}" )
+      endif()
+      set( cplusplus_sources ${cplusplus_sources} ${CMAKE_MATCH_1}.cpp )
+   else()
+      message( "NOT THIGN ${SOURCE}" )
+   endif()
+ENDFOREACH(SOURCE)
+
+message( SOURCES:${SACK_SOURCES} )
+message( C++SOURCE:${cplusplus_sources} )
+
+#set_source_files_properties( ${SOURCES} PROPERTIES LANGUAGE "CXX" )
+
+
 SET_TARGET_PROPERTIES(sack_bag PROPERTIES
                   DEFINE_SYMBOL SACK_BAG_EXPORTS
                   COMPILE_FLAGS  "-DTARGET_LABEL=sack_bag ${ExtraFlags} ${ExtraRenderFlags}"
 		  SOLUTION_FOLDER "MyFolder" 
+)
+
+
+add_library( sack_bag++ SHARED 
+  ${cplusplus_sources} 
+)
+SET_TARGET_PROPERTIES(sack_bag++ PROPERTIES
+                  DEFINE_SYMBOL SACK_BAG_EXPORTS
+                  COMPILE_FLAGS  "-DTARGET_LABEL=sack_bag_plusplus ${ExtraFlags} ${ExtraRenderFlags}"
+		  SOLUTION_FOLDER "sack_bag++" 
 )
 
 if( __WINDOWS_ARM_CE__ )
@@ -492,24 +527,30 @@ set( SACK_LIBRARIES sack_bag )
 if( __WINDOWS__ )
   if( __ARM__ )
     target_link_libraries( sack_bag ws2 mmtimer iphlpapi coredll corelibc.lib)
+    target_link_libraries( sack_bag++ ws2 mmtimer iphlpapi coredll corelibc.lib)
   else()
     target_link_libraries( sack_bag wsock32 ws2_32 opengl32 winmm iphlpapi)
+    target_link_libraries( sack_bag++ wsock32 ws2_32 opengl32 winmm iphlpapi)
   endif()
 else( __WINDOWS__ )
   target_link_libraries( sack_bag odbc ${SQLITE3_LIBRARIES} ${PNG_LIBRARIES} ${JPEG_LIBRARIES} )
+  target_link_libraries( sack_bag++ odbc ${SQLITE3_LIBRARIES} ${PNG_LIBRARIES} ${JPEG_LIBRARIES} )
 endif( __WINDOWS__ )
 
 install_default_dest( sack_bag )
+install_default_dest( sack_bag++ )
 
 if( NOT NEED_PNG ) 
   target_link_libraries( sack_bag png )
+  target_link_libraries( sack_bag++ png )
 endif() 
 if( NOT NEED_JPEG ) 
   target_link_libraries( sack_bag jpeg   )
+  target_link_libraries( sack_bag++ jpeg   )
 endif() 
 if( NOT NEED_FREETYPE )
   target_link_libraries( sack_bag  freetype  )
-  target_link_libraries( sack_bag  freetype  )
+  target_link_libraries( sack_bag++  freetype  )
 endif()
 
 
@@ -630,7 +671,7 @@ add_definitions( -D__OBSCURE_STREAM_INTERNALS )
       ${SQLITE_SOURCES}
       ${LAST_GCC_LIBRARY_SOURCE} )
    # required link back to bag for register interface
-   target_link_libraries( bag.sqlite3.external bag )
+   target_link_libraries( bag.sqlite3.external ${SACK_LIBRARY} )
    install_default_dest( bag.sqlite3.external )
    SET_TARGET_PROPERTIES( bag.sqlite3.external PROPERTIES 
                   COMPILE_FLAGS  "-DTARGET_LABEL=bag_sqlite3 -DSQLITE_SOURCE"
@@ -640,7 +681,7 @@ add_definitions( -D__OBSCURE_STREAM_INTERNALS )
    
   endif()
 
-add_subdirectory( src/displaylib )
+#add_subdirectory( src/displaylib )
 
 if( NOT __NO_GUI__ )
 add_subdirectory( src/msgsvr/server )
@@ -682,6 +723,7 @@ add_subdirectory( ${BUILD_ALTANIK_ROOT} altanik )
 endif( BUILD_ALTANIK )
 
 add_subdirectory( src/netlib/user )
+add_subdirectory( src/netlib/echo )
 
 set( CMAKE_C_STANDARD_LIBRARIES_INIT "" )
 
