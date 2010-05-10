@@ -133,7 +133,7 @@ INSTALL(
   FILES
     ${SYS_IPC_HEADERS}
   DESTINATION
-    include/${CMAKE_PROJECT_NAME}/sys
+    include/${CMAKE_PROJECT_NAME}/sys.sack
 )
 
 endif()
