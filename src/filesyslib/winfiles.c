@@ -1,7 +1,7 @@
 
 #include <stdhdrs.h>
 #include <filesys.h>
-
+#include <system.h>
 //#define DEBUG_FILEOPEN
 
 #ifndef UNDER_CE
