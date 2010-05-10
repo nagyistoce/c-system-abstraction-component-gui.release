@@ -2069,7 +2069,7 @@ NETWORK_PROC( LOGICAL, NetworkWait )(HWND hWndNotify,_16 wClients,int wUserData)
 	{
 		ADDRINFO *result;
 		ADDRINFO *test;
-		getaddrinfo( g.system_name, NULL, NULL, &result );
+		getaddrinfo( g.system_name, NULL, NULL, (struct addrinfo**)&result );
 		for( test = result; test; test = test->ai_next )
 		{
 			//if( test->ai_family == AF_INET )
@@ -2328,7 +2328,7 @@ SOCKADDR *CreateRemote(CTEXTSTR lpName,_16 nHisPort)
 			{
 				ADDRINFO *result;
 				ADDRINFO *test;
-				getaddrinfo( lpName, NULL, NULL, &result );
+				getaddrinfo( lpName, NULL, NULL, (struct addrinfo**)&result );
 				for( test = result; test; test = test->ai_next )
 				{
 					//SOCKADDR *tmp;
