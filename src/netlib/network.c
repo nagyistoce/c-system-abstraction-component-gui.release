@@ -2410,16 +2410,34 @@ SOCKADDR *CreateRemote(CTEXTSTR lpName,_16 nHisPort)
 namespace udp {
 #endif
 NETWORK_PROC( void, DumpAddrEx)( CTEXTSTR name, SOCKADDR *sa DBG_PASS )
-{
-     Log9( WIDE("%s: %03d,%03d,%03d,%03d,%03d,%03d,%03d,%03d "), name,
-    				*(((unsigned char *)sa)+0),
-    				*(((unsigned char *)sa)+1),
-    				*(((unsigned char *)sa)+2),
-    				*(((unsigned char *)sa)+3),
-    				*(((unsigned char *)sa)+4),
-    				*(((unsigned char *)sa)+5),
-    				*(((unsigned char *)sa)+6),
-    				*(((unsigned char *)sa)+7) );
+	{
+		LogBinary( sa, SOCKADDR_LENGTH( sa ) );
+		if( sa->sa_family == AF_INET )
+			lprintf( WIDE("%s: %03d %03d.%03d.%03d.%03d "), name,
+					  //*(((unsigned char *)sa)+0),
+					  //*(((unsigned char *)sa)+1),
+					  ntohs(*(((unsigned short *)((unsigned char*)sa+2))))
+					  ,*(((unsigned char *)sa)+4),
+					  *(((unsigned char *)sa)+5),
+					  *(((unsigned char *)sa)+6),
+					  *(((unsigned char *)sa)+7) );
+		else if( sa->sa_family == AF_INET6 )
+		{
+			lprintf( "Socket address binary: %s", name );
+			lprintf( WIDE("%s: %03d %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x ")
+					 , name
+					 , ntohs(*(((unsigned short *)((unsigned char*)sa+2))))
+					 , *(((unsigned short *)((unsigned char*)sa+4)))
+					 , *(((unsigned short *)((unsigned char*)sa+6)))
+					 , *(((unsigned short *)((unsigned char*)sa+8)))
+					 , *(((unsigned short *)((unsigned char*)sa+10)))
+					 , *(((unsigned short *)((unsigned char*)sa+12)))
+					 , *(((unsigned short *)((unsigned char*)sa+14)))
+					 , *(((unsigned short *)((unsigned char*)sa+16)))
+					 , *(((unsigned short *)((unsigned char*)sa+18)))
+					 );
+		}
+
 }
 #ifdef __cplusplus
 }

@@ -347,27 +347,17 @@ NETWORK_PROC( LOGICAL, SendUDPEx )( PCLIENT pc, CPOINTER pBuf, int nSize, SOCKAD
 		sa = pc->saClient;
 	if( !pc )
       return FALSE;
-   /*
-   Log8( WIDE("SendUDP: Sendto %03d,%03d,%03d,%03d,%03d,%03d,%03d,%03d"),
-       				*(((unsigned char *)sa)+0),
-       				*(((unsigned char *)sa)+1),
-       				*(((unsigned char *)sa)+2),
-       				*(((unsigned char *)sa)+3),
-       				*(((unsigned char *)sa)+4),
-       				*(((unsigned char *)sa)+5),
-       				*(((unsigned char *)sa)+6),
-						*(((unsigned char *)sa)+7) );
-   */
-   nSent = sendto( pc->Socket,
-                   (const char*)pBuf,
-                   nSize,
-                   0
-                   ,(sa)?sa:pc->saClient
-                   , SOCKADDR_LENGTH((sa)?sa:pc->saClient )
-                   );
+	nSent = sendto( pc->Socket
+					  , (const char*)pBuf
+					  , nSize
+					  , 0
+					  , (sa)
+					  , SOCKADDR_LENGTH((sa))
+					  );
    if( nSent < 0 )
-   {
-      Log1( WIDE("SendUDP: Error (%d)"), WSAGetLastError() );
+	{
+		Log1( WIDE("SendUDP: Error (%d)"), WSAGetLastError() );
+		DumpAddr( "SendTo Socket", (sa) );
       return FALSE;
    }
    else

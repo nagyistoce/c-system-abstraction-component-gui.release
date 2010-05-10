@@ -37,8 +37,8 @@ SACK_NETWORK_NAMESPACE
 #define MAGIC_SOCKADDR_LENGTH sizeof(SOCKADDR_IN)< 256?256:sizeof( SOCKADDR_IN)
 
 // this might have to be like sock_addr_len_t
-#define SOCKADDR_LENGTH(sa) ( (int)*(PTRSZVAL*)( ( (PTRSZVAL)sa ) - sizeof(PTRSZVAL) ) )
-#define SET_SOCKADDR_LENGTH(sa,size) ( ( *(PTRSZVAL*)( ( (PTRSZVAL)sa ) - sizeof(PTRSZVAL) ) ) = size )
+#define SOCKADDR_LENGTH(sa) ( (int)*(PTRSZVAL*)( ( (PTRSZVAL)(sa) ) - sizeof(PTRSZVAL) ) )
+#define SET_SOCKADDR_LENGTH(sa,size) ( ( *(PTRSZVAL*)( ( (PTRSZVAL)(sa) ) - sizeof(PTRSZVAL) ) ) = size )
 
 // used by the network thread dispatched network layer messages...
 #define SOCKMSG_UDP (WM_USER+1)  // messages for UDP use this window Message
