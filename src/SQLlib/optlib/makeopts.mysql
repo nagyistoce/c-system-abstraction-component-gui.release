@@ -1,0 +1,146 @@
+
+#ifdef OPTION_MAIN_SOURCE
+#define OPT_EXTERN(a,b,...) a b= __VA_ARGS__
+#else
+#define OPT_EXTERN(a,b,...) extern a b
+#endif
+
+//# Table: 'option_exception_time'
+//# 
+#define OPTION_EXCEPTION "option2_exception"
+
+OPT_EXTERN( CTEXTSTR, option2_exception, "CREATE TABLE `option2_exception` ("
+"  `option_exception_id` int(11) NOT NULL auto_increment,\n"
+"  `apply_from` datetime default '0000-00-00 00:00:00',\n"
+"  `apply_until` datetime default '0000-00-00 00:00:00',\n"
+"  `system_id` int(11) NOT NULL default '0',\n"
+"  `override_value_id` int(11) NOT NULL default '0',\n"
+"  `option_id` int(11) NOT NULL default '0',\n"
+"  PRIMARY KEY  (`option_exception_id`)\n"
+" );\n" );
+
+//# Table: 'option_map'
+//# 
+#define OPTION_MAP "option2_map"
+
+OPT_EXTERN( CTEXTSTR, option2_map, "CREATE TABLE `option2_map` ("
+"  `option_id` int(11) NOT NULL auto_increment,\n"
+"  `parent_option_id` int(11) NOT NULL default '0',\n"
+"  `name_id` int(11) NOT NULL default '0',\n"
+"  `description` tinytext,\n"
+"  PRIMARY KEY  (`option_id`),"
+"  INDEX `parent_key`(`parent_option_id`)"
+" ) TYPE=MyISAM COMMENT='Table ID defines ID for use in OptionValues';\n" );
+
+#define OPTION_NAME "option2_name"
+//# Table: 'option_name'
+//# 
+#define OPTION_NAME "option2_name"
+OPT_EXTERN( CTEXTSTR, option2_name, "CREATE TABLE `option2_name` ("
+"  `name_id` int(11) NOT NULL auto_increment,\n"
+"  `name` varchar(255) NOT NULL default '',\n"
+"  PRIMARY KEY  (`name_id`),\n"
+"  UNIQUE KEY `name` (`name`)"
+" ) TYPE=MyISAM;\n" );
+
+//# Table: 'option_values'
+//# 
+#define OPTION_VALUES "option2_values"
+OPT_EXTERN( CTEXTSTR, option2_values, "CREATE TABLE `option2_values` ("
+"  `option_id` int(11) default '0',\n"
+"  `string` varchar(100) default NULL,\n"
+"  UNIQUE KEY `value_id` (`option_id`)"
+" ) TYPE=MyISAM;\n" );
+
+//# Table: 'option_blobs'
+//# 
+#define OPTION_BLOBS "option2_blobs"
+OPT_EXTERN( CTEXTSTR, option2_blobs, "CREATE TABLE `option2_blobs` ("
+"  `option_id` int(11) default '0',\n"
+"  `binary` blob,\n"
+"  UNIQUE KEY `value_id` (`option_id`)"
+" ) TYPE=MyISAM;\n" );
+
+//# Table: 'systems'
+//# 
+OPT_EXTERN( CTEXTSTR, systems2, "CREATE TABLE `systems` ("
+"  `system_id` tinyint(4) NOT NULL auto_increment,\n"
+"  `name` varchar(64) NOT NULL default '',\n"
+"  `address` varchar(64) NOT NULL default '',\n"
+"  PRIMARY KEY  (`system_id`),\n"
+"  KEY `namekey` (`name`)"
+" ) TYPE=MyISAM;\n" );
+
+//#SELECT 
+//#//#a.name_id, b.name_id, c.name_id,d.name_id, e.name_id, f.node_id, g.node_id, h.node_id
+//#ona.name,onb.name,onc.name,ond.name,one.name,onf.name,ong.name,onh.name
+//#FROM `option_map` as a
+//#left join option_map as b on b.parent_node_id=a.node_id
+//#left join option_map as c on c.parent_node_id=b.node_id
+//#left join option_map as d on d.parent_node_id=c.node_id
+//#left join option_map as e on e.parent_node_id=d.node_id
+//#left join option_map as f on f.parent_node_id=e.node_id
+//#left join option_map as g on g.parent_node_id=f.node_id
+//#left join option_map as h on h.parent_node_id=g.node_id
+//#
+//#join option_name as ona on ona.name_id=a.name_id
+//#join option_name as onb on onb.name_id=b.name_id
+//#join option_name as onc on onc.name_id=c.name_id
+//#join option_name as ond on ond.name_id=d.name_id
+//#join option_name as one on one.name_id=e.name_id
+//#left join option_name as onf on onf.name_id=f.name_id
+//#left join option_name as ong on ong.name_id=g.name_id
+//#left join option_name as onh on onh.name_id=h.name_id
+
+
+//# Table: 'option_exception_time'
+//# 
+OPT_EXTERN( CTEXTSTR, option_exception, "CREATE TABLE `option_exception` ("
+"  `option_exception_id` int(11) NOT NULL auto_increment,\n"
+"  `apply_from` datetime default '0000-00-00 00:00:00',\n"
+"  `apply_until` datetime default '0000-00-00 00:00:00',\n"
+"  `system_id` int(11) NOT NULL default '0',\n"
+"  `override_value_id` int(11) NOT NULL default '0',\n"
+"  `value_id` int(11) NOT NULL default '0',\n"
+"  PRIMARY KEY  (`option_exception_id`)\n"
+" );\n" );
+
+//# Table: 'option_map'
+//# 
+OPT_EXTERN( CTEXTSTR, option_map, "CREATE TABLE `option_map` ("
+"  `node_id` int(11) NOT NULL auto_increment,\n"
+"  `parent_node_id` int(11) NOT NULL default '0',\n"
+"  `name_id` int(11) NOT NULL default '0',\n"
+"  `value_id` int(11) default '0',\n"
+"  `description` tinytext,\n"
+"  PRIMARY KEY  (`node_id`)"
+" ) TYPE=MyISAM COMMENT='Table ID defines ID for use in OptionValues';\n" );
+
+//# Table: 'option_name'
+//# 
+OPT_EXTERN( CTEXTSTR, option_name, "CREATE TABLE `option_name` ("
+"  `name_id` int(11) NOT NULL auto_increment,\n"
+"  `name` varchar(255) NOT NULL default '',\n"
+"  PRIMARY KEY  (`name_id`),\n"
+"  UNIQUE KEY `name` (`name`)"
+" ) TYPE=MyISAM;\n" );
+
+//# Table: 'option_values'
+//# 
+OPT_EXTERN( CTEXTSTR, option_values, "CREATE TABLE `option_values` ("
+"  `value_id` int(11) NOT NULL auto_increment,\n"
+"  `string` varchar(100) default NULL,\n"
+"  `binary` blob,\n"
+"  PRIMARY KEY  (`value_id`)"
+" ) TYPE=MyISAM;\n" );
+
+//# Table: 'systems'
+//# 
+OPT_EXTERN( CTEXTSTR, systems, "CREATE TABLE `systems` ("
+"  `system_id` tinyint(4) NOT NULL auto_increment,\n"
+"  `name` varchar(64) NOT NULL default '',\n"
+"  `address` varchar(64) NOT NULL default '',\n"
+"  PRIMARY KEY  (`system_id`),\n"
+"  KEY `namekey` (`name`)"
+" ) TYPE=MyISAM;\n" );
+
