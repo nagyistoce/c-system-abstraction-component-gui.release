@@ -64,6 +64,7 @@ _TIMER_NAMESPACE
 #endif
 
 #ifdef __LINUX__
+TIMER_PROC( _32, timeGetTime )( void );
 TIMER_PROC( _32, GetTickCount )( void );
 TIMER_PROC( void, Sleep )( _32 ms );
 #endif
