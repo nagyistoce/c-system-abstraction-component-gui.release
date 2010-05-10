@@ -12,7 +12,7 @@ SET( SACK_GENX_HEADERS
 )
 
 SET( SYS_IPC_HEADERS 
-sys/ipc.h sys/msg.h
+sys.sack/ipc.h sys.sack/msg.h
 )
 
 SET( SACK_HEADERS
