@@ -48,6 +48,7 @@
 #include <deadstart.h>
 #include <sharemem.h>
 #include <procreg.h>
+#include <system.h>
 #include "sharestruc.h"
 #include <sqlgetoption.h>
 #include <ctype.h>
@@ -61,7 +62,7 @@ namespace sack {
 #undef _DEBUG
 
 #if defined( __LINUX__ ) && !defined( __CYGWIN__ )
-#define WINAPI
+//#define WINAPI
 typedef _32 HINSTANCE;
 #endif
 

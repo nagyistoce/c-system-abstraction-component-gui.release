@@ -1,19 +1,22 @@
 //#include <windows.h>
 #include <stdhdrs.h>
+
 #ifdef __LINUX__
 // fcntl, open
 //#include <unistd.h>
-#define HAVE_ARCH_STRUCT_FLOCK
-#include <linux/fcntl.h>
-//#include <fcntl.h>
+//#define _ASM_GENERIC_FCNTL_H
+//#define HAVE_ARCH_STRUCT_FLOCK
+//#undef __USE_GNU
+//#include <linux/fcntl.h>
+#include <fcntl.h>
+#include <sys/inotify.h>
 #endif
+
 #include <time.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #ifdef __cplusplus
-#include <unistd.h>
-#include <fcntl.h>
-#else
+//#include <unistd.h>
 #endif
 #include <signal.h>
 #include <dirent.h>
@@ -102,14 +105,14 @@ FILEMONITOR_PROC( void, EndMonitor )( PMONITOR monitor )
 	if( monitor->flags.bDispatched )
 	{
 		monitor->flags.bEnd = 1;
-      return;
+		return;
 	}
 	if( monitor->flags.bClosing )
 	{
 		//Log( WIDE("Monitor already closing...") );
-      return;
+		return;
 	}
-   EnterCriticalSec( &monitor->cs );
+	EnterCriticalSec( &monitor->cs );
 	if( monitor )
 	{
 		if( monitor->timer )
@@ -118,12 +121,13 @@ FILEMONITOR_PROC( void, EndMonitor )( PMONITOR monitor )
 	// wouldn't just closing it be enough!?!?!
 	// if I include <fcntl.h> then <linux/fcntl.h> is broken
 	// or vice-versa.  Please suffer with no definition on these lines.
-
+#if 0
 		fcntl( monitor->fdMon, F_SETSIG, 0 );
 		fcntl( monitor->fdMon, F_NOTIFY, 0 );
+#endif
 		Log1( WIDE("Closing monitor handle: %d"), monitor->fdMon );
 		close( monitor->fdMon );
-      UnlinkThing( monitor );
+		UnlinkThing( monitor );
 		Release( monitor );
 		if( !Monitors )
 		{
@@ -162,12 +166,35 @@ static void handler( int sig, siginfo_t *si, void *data )
     }
 }
 
+void CPROC NewScanTimer( PTRSZVAL unused )
+{
+	
+        PMONITOR cur = Monitors;
+        for( cur = Monitors; cur; cur = cur->next )
+        {
+		static _8 buf[4096];
+		struct inotify_event *event;
+		int len;	
+
+		while( ( len = read( cur->fdMon, &buf, sizeof( buf ) ) ) > 0 )
+		{
+			event = (struct inotify_event*)buf;
+
+                        //event->wd;
+			//event->name;
+			 if( !cur->DoScanTime )
+				 cur->DoScanTime = GetTickCount() - 1;
+		}
+        }
+}
+
 //-------------------------------------------------------------------------
 
 FILEMONITOR_PROC( PMONITOR, MonitorFiles )( CTEXTSTR dirname, int scan_delay )
 {
 	if( !Monitors )
 	{
+#if 0
 		struct sigaction act;
 		act.sa_sigaction = handler;
 		sigemptyset( &act.sa_mask );
@@ -177,6 +204,7 @@ FILEMONITOR_PROC( PMONITOR, MonitorFiles )( CTEXTSTR dirname, int scan_delay )
 			Log( WIDE("Failed to set signal handler") );
 			return NULL;
 		}
+#endif
 	}
 
 	{
@@ -184,12 +212,21 @@ FILEMONITOR_PROC( PMONITOR, MonitorFiles )( CTEXTSTR dirname, int scan_delay )
 		Log2( WIDE("Attempting to monitor:(%d) %s"), getpid(), dirname );
 	// if I include <fcntl.h> then <linux/fcntl.h> is broken
 	// or vice-versa.  Please suffer with no definition on these lines.
+#if 0
 		fdMon = open( dirname, O_RDONLY );
+#else
+		fdMon = inotify_init();
+		fcntl(fdMon, F_SETFL, O_NONBLOCK); 
+#endif
 		if( fdMon >= 0 )
 		{
 			PMONITOR monitor;
+#if 0
 			fcntl( fdMon, F_SETSIG, SIGRTMIN );
 			fcntl( fdMon, F_NOTIFY, DN_CREATE|DN_DELETE|DN_RENAME|DN_MODIFY|DN_MULTISHOT );
+#else
+			inotify_add_watch( fdMon, dirname, IN_ALL_EVENTS );
+#endif
 			monitor = CreateMonitor( fdMon, (char*)dirname );
 			Monitoring = 1;
 			//monitor->Client = Client;
@@ -206,43 +243,3 @@ FILEMONITOR_PROC( PMONITOR, MonitorFiles )( CTEXTSTR dirname, int scan_delay )
 
 FILEMON_NAMESPACE_END
 
-//-------------------------------------------------------------------
-// Branched from bingocore.  Also console barbingo/relay (a little more robust)
-// $Log: linuxfiles.c,v $
-// Revision 1.12  2005/01/27 07:25:47  panther
-// Linux - well as clean as it can be with libC sucking.
-//
-// Revision 1.11  2004/01/20 04:28:56  d3x0r
-// Fix stupid copy from windows mistake.
-//
-// Revision 1.10  2004/01/16 16:57:48  d3x0r
-// Added logging, and an extern anable per monitor for file logging
-//
-// Revision 1.9  2003/12/03 16:27:09  panther
-// Fixup for linux build
-//
-// Revision 1.8  2003/11/09 22:30:09  panther
-// Stablity fixes... don't End while scanning for instance
-//
-// Revision 1.7  2003/11/04 11:41:27  panther
-// On directory event set scan now, each file will be updated itself.
-//
-// Revision 1.6  2003/11/04 09:20:49  panther
-// Modify call method to watch directory and supply seperate masks per change routine
-//
-// Revision 1.5  2003/11/04 02:08:17  panther
-// Reduced messages, investigated close.  If EndMonitor is called, the thread will be awoken and killed
-//
-// Revision 1.4  2003/11/04 01:46:43  panther
-// Remove some unused members, remove tree function
-//
-// Revision 1.3  2003/11/04 01:32:21  panther
-// Fixed some compat issued with linux scanner
-//
-// Revision 1.2  2003/11/04 01:28:51  panther
-// Fixed most holes with the windows change monitoring system
-//
-// Revision 1.1  2003/11/03 23:01:43  panther
-// Initial commit of librarized filemonitor
-//
-//
