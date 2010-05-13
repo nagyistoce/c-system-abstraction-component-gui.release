@@ -2162,14 +2162,22 @@ NETWORK_PROC( PTRSZVAL, GetNetworkLong )(PCLIENT lpClient,int nLong)
    {
       switch( nLong )
       {
-      case GNL_IP:  // IP of destination
-         return *(_32*)(lpClient->saClient->sa_data+2);
+		case GNL_IP:  // IP of destination
+         if( lpClient->saClient )
+				return *(_32*)(lpClient->saClient->sa_data+2);
+         break;
       case GNL_PORT:  // port of server...  STUPID PATCH?!  maybe...
-         return ntohs( *(_16*)(lpClient->saClient->sa_data) );
+			if( lpClient->saClient )
+				return ntohs( *(_16*)(lpClient->saClient->sa_data) );
+         break;
       case GNL_MYPORT:  // port of server...  STUPID PATCH?!  maybe...
-         return ntohs( *(_16*)(lpClient->saSource->sa_data) );
+			if( lpClient->saSource )
+				return ntohs( *(_16*)(lpClient->saSource->sa_data) );
+         break;
 		case GNL_MYIP: // IP of myself (after connect?)
-			return *(_32*)(lpClient->saSource->sa_data+2);
+			if( lpClient->saSource )
+				return *(_32*)(lpClient->saSource->sa_data+2);
+         break;
 
 			//TODO if less than zero return a (high/low)portion of the  hardware address (MAC).
       }
