@@ -1501,6 +1501,15 @@ void SetKeyHighlight( PKEY_BUTTON key, LOGICAL bHighlight )
    SmudgeCommon( key->button );
 }
 
+LOGICAL GetKeyHighlight( PKEY_BUTTON key )
+{
+	if( key )
+	{
+		return key->flags.bHighlight;
+	}
+   return 0;
+}
+
 
 PRENDERER GetButtonAnimationLayer( PSI_CONTROL pc_key_button )
 {
