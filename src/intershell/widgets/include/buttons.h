@@ -182,6 +182,7 @@ KEYPAD_PROC( void, SetKeyShading )( PKEY_BUTTON key, CDATA grey_channel ); // se
 
 KEYPAD_PROC( void, SetKeyImageMargin )( PKEY_BUTTON key, _32 hMargin, _32 vMargin );
 KEYPAD_PROC( void, SetKeyHighlight )( PKEY_BUTTON key, LOGICAL bEnable );
+KEYPAD_PROC( LOGICAL, GetKeyHighlight )( PKEY_BUTTON key );
 KEYPAD_PROC( PRENDERER, GetButtonAnimationLayer )( PSI_CONTROL pc_key_button );
 
 #endif

@@ -436,8 +436,12 @@ INTERSHELL_PROC_PTR( void, InterShell_SetButtonFontName )( PMENU_BUTTON button, 
 INTERSHELL_PROC_PTR( PMENU_BUTTON, InterShell_GetPhysicalButton )( PMENU_BUTTON button );
 
 INTERSHELL_PROC_PTR( void, InterShell_SetButtonHighlight )( PMENU_BUTTON button, LOGICAL bEnable );
+INTERSHELL_PROC_PTR( LOGICAL, InterShell_GetButtonHighlight )( PMENU_BUTTON button );
+
+INTERSHELL_PROC_PTR( CTEXTSTR, InterShell_TranslateLabelTextEx )( PMENU_BUTTON button, PPAGE_LABEL label, TEXTSTR output, int buffer_len, CTEXTSTR variable );
 
 INTERSHELL_PROC_PTR( PTRSZVAL,  InterShell_CreateControl )( CTEXTSTR type, int x, int y, int w, int h );
+
 
 };  //struct intershell_interface {
 
@@ -472,6 +476,7 @@ INTERSHELL_PROC( void, InterShell_SetButtonText )( PMENU_BUTTON button, CTEXTSTR
 INTERSHELL_PROC( void, InterShell_GetButtonText )( PMENU_BUTTON button, TEXTSTR text, int text_buf_len );
 INTERSHELL_PROC( void, InterShell_SetButtonImage )( PMENU_BUTTON button, CTEXTSTR name );
 INTERSHELL_PROC( void, InterShell_SetButtonHighlight )( PMENU_BUTTON button, LOGICAL bEnable );
+INTERSHELL_PROC( LOGICAL, InterShell_GetButtonHighlight )( PMENU_BUTTON button );
 #ifndef __NO_ANIMATION__
 //INTERSHELL_PROC( void, InterShell_SetButtonAnimation )( PMENU_BUTTON button, CTEXTSTR name );
 #endif
@@ -584,6 +589,7 @@ INTERSHELL_PROC( PSI_CONTROL, InterShell_GetButtonControl )( PMENU_BUTTON button
 INTERSHELL_PROC( CTEXTSTR, InterShell_GetLabelText )( PPAGE_LABEL label, CTEXTSTR variable );
 // use of this is preferred, otherwise thread conflicts will destroy the buffer.
 INTERSHELL_PROC( CTEXTSTR, InterShell_TranslateLabelText )( PPAGE_LABEL label, TEXTSTR output, int buffer_len, CTEXTSTR variable );
+INTERSHELL_PROC( CTEXTSTR, InterShell_TranslateLabelTextEx )( PMENU_BUTTON button, PPAGE_LABEL label, TEXTSTR output, int buffer_len, CTEXTSTR variable );
 
 /* actual worker function for InterShell_GetLabelText - but suport dispatch to bProcControlEx*/
 INTERSHELL_PROC( CTEXTSTR, InterShell_GetControlLabelText )( PMENU_BUTTON button, PPAGE_LABEL label, CTEXTSTR variable );
