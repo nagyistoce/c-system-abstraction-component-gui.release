@@ -49,7 +49,7 @@ static int CPROC RenderScrollBar( PCONTROL pc )
 		int top, bottom;
 		// render top button...
 		
-		ClearImageTo( surface, basecolors[SCROLLBAR_BACK] );
+		ClearImageTo( surface, basecolor(pc)[SCROLLBAR_BACK] );
 		if( psb->range == 0 )
          return 1;
 
@@ -72,7 +72,7 @@ static int CPROC RenderScrollBar( PCONTROL pc )
 			}
 			BlatColor( surface, top, 0
 								, bottom-top
-								, psb->height, basecolors[NORMAL] );
+								, psb->height, basecolor(pc)[NORMAL] );
 	   }
 	   else
 	   {
@@ -88,7 +88,7 @@ static int CPROC RenderScrollBar( PCONTROL pc )
 			}
 			BlatColor( surface, 0, top
 								, psb->width
-								, bottom-top, basecolors[NORMAL] );
+								, bottom-top, basecolor(pc)[NORMAL] );
 		}
 		//Log2( WIDE("top: %d bottom: %d"), top, bottom );
 		psb->top = top;
@@ -98,17 +98,17 @@ static int CPROC RenderScrollBar( PCONTROL pc )
 
 		if( psb->scrollflags.bHorizontal )
 		{
-			do_vline( surface, top, 1, psb->height-2, basecolors[HIGHLIGHT] );
-			do_hline( surface, 1, top, bottom, basecolors[HIGHLIGHT] );
-			do_hline( surface, psb->height-2, top, bottom, basecolors[SHADOW] );
-			do_vline( surface, bottom, 1, psb->height-2, basecolors[SHADOW] );
+			do_vline( surface, top, 1, psb->height-2, basecolor(pc)[HIGHLIGHT] );
+			do_hline( surface, 1, top, bottom, basecolor(pc)[HIGHLIGHT] );
+			do_hline( surface, psb->height-2, top, bottom, basecolor(pc)[SHADOW] );
+			do_vline( surface, bottom, 1, psb->height-2, basecolor(pc)[SHADOW] );
 		}
 		else
 		{
-			do_hline( surface, top, 1, psb->width-2, basecolors[HIGHLIGHT] );
-			do_vline( surface, 1, top, bottom, basecolors[HIGHLIGHT] );
-			do_vline( surface, psb->width-2, top, bottom, basecolors[SHADOW] );
-			do_hline( surface, bottom, 1, psb->width-2, basecolors[SHADOW] );
+			do_hline( surface, top, 1, psb->width-2, basecolor(pc)[HIGHLIGHT] );
+			do_vline( surface, 1, top, bottom, basecolor(pc)[HIGHLIGHT] );
+			do_vline( surface, psb->width-2, top, bottom, basecolor(pc)[SHADOW] );
+			do_hline( surface, bottom, 1, psb->width-2, basecolor(pc)[SHADOW] );
 		}
 
 	}
@@ -263,25 +263,25 @@ static void CPROC DrawBottomButton( PTRSZVAL psv, PSI_CONTROL pc )
 		int mx = pc->surface_rect.width/2;
 		int cx = pc->surface_rect.width/4
 	, cy = pc->surface_rect.height/3;
-      ClearImageTo( surface, basecolors[NORMAL] );
+      ClearImageTo( surface, basecolor(pc)[NORMAL] );
 		if( IsButtonPressed( pc ) )
 		{
 			cx++;
          cy++;
 		}
 #define fline(s,x1,y1,x2,y2,c,a) do_lineAlpha(s,x1,y1,x2,y2,SetAlpha(c,a))
-		fline( surface, mx, 2*cy+1, cx, cy+1, basecolors[SHADOW], 255 );
-		fline( surface, mx, 2*cy+0, cx, cy+0, basecolors[SHADE], 128 );
-		fline( surface, mx, 2*cy+2, cx, cy+2, basecolors[SHADE], 128 );
-		fline( surface, mx, 2*cy+2, mx+(mx-cx)  , cy+2, basecolors[HIGHLIGHT], 255 );
-		fline( surface, mx, 2*cy+0, mx+(mx-cx)  , cy+0, basecolors[SHADOW], 128 );
-		fline( surface, mx, 2*cy+1, mx+(mx-cx)  , cy+1, basecolors[SHADE], 128 );
-//			do_line( surface, cx - 3 - w, cy - 2, cx, cy + 1, basecolors[SHADE] );
-//			do_line( surface, cx - 4 - w, cy - 2, cx, cy + 2, basecolors[SHADOW] );
-//			do_line( surface, cx - 4 - w, cy - 1, cx, cy + 3, basecolors[SHADE] );
-//		do_line( surface, cx, cy+3, cx+4, cy-1, basecolors[HIGHLIGHT] );
-//		do_line( surface, cx, cy+2, cx+4, cy-2, basecolors[SHADE] );
-//		do_line( surface, cx, cy+1, cx+3, cy-2, basecolors[SHADOW] );
+		fline( surface, mx, 2*cy+1, cx, cy+1, basecolor(pc)[SHADOW], 255 );
+		fline( surface, mx, 2*cy+0, cx, cy+0, basecolor(pc)[SHADE], 128 );
+		fline( surface, mx, 2*cy+2, cx, cy+2, basecolor(pc)[SHADE], 128 );
+		fline( surface, mx, 2*cy+2, mx+(mx-cx)  , cy+2, basecolor(pc)[HIGHLIGHT], 255 );
+		fline( surface, mx, 2*cy+0, mx+(mx-cx)  , cy+0, basecolor(pc)[SHADOW], 128 );
+		fline( surface, mx, 2*cy+1, mx+(mx-cx)  , cy+1, basecolor(pc)[SHADE], 128 );
+//			do_line( surface, cx - 3 - w, cy - 2, cx, cy + 1, basecolor(pc)[SHADE] );
+//			do_line( surface, cx - 4 - w, cy - 2, cx, cy + 2, basecolor(pc)[SHADOW] );
+//			do_line( surface, cx - 4 - w, cy - 1, cx, cy + 3, basecolor(pc)[SHADE] );
+//		do_line( surface, cx, cy+3, cx+4, cy-1, basecolor(pc)[HIGHLIGHT] );
+//		do_line( surface, cx, cy+2, cx+4, cy-2, basecolor(pc)[SHADE] );
+//		do_line( surface, cx, cy+1, cx+3, cy-2, basecolor(pc)[SHADOW] );
 	}
 }
 
@@ -294,15 +294,15 @@ static void CPROC DrawRightButton( PTRSZVAL psv, PCONTROL pc )
 	{
 		int cx = pc->surface_rect.width/2
 	, cy = pc->surface_rect.height/2;
-      ClearImageTo( surface, basecolors[NORMAL] );
+      ClearImageTo( surface, basecolor(pc)[NORMAL] );
 		if( IsButtonPressed( pc ) )
 			cx++;
-		do_line( surface, cy - 2, cx - 3, cy + 1, cx  , basecolors[SHADE] );
-		do_line( surface, cy - 2, cx - 4, cy + 2, cx  , basecolors[SHADOW] );
-		do_line( surface, cy - 1, cx - 4, cy + 3, cx  , basecolors[SHADE] );
-		do_line( surface, cy + 3, cx    , cy - 1, cx+4, basecolors[HIGHLIGHT] );
-		do_line( surface, cy + 2, cx    , cy - 2, cx+4, basecolors[SHADE] );
-		do_line( surface, cy + 1, cx    , cy - 2, cx+3, basecolors[SHADOW] );
+		do_line( surface, cy - 2, cx - 3, cy + 1, cx  , basecolor(pc)[SHADE] );
+		do_line( surface, cy - 2, cx - 4, cy + 2, cx  , basecolor(pc)[SHADOW] );
+		do_line( surface, cy - 1, cx - 4, cy + 3, cx  , basecolor(pc)[SHADE] );
+		do_line( surface, cy + 3, cx    , cy - 1, cx+4, basecolor(pc)[HIGHLIGHT] );
+		do_line( surface, cy + 2, cx    , cy - 2, cx+4, basecolor(pc)[SHADE] );
+		do_line( surface, cy + 1, cx    , cy - 2, cx+3, basecolor(pc)[SHADOW] );
 	}
 }
 
@@ -324,17 +324,17 @@ static void CPROC DrawTopButton( PTRSZVAL psv, PCONTROL pc )
 		int mx = pc->surface_rect.width/2;
 		int cx = pc->surface_rect.width/4
 		  , cy = pc->surface_rect.height/3;
-      ClearImageTo( surface, basecolors[NORMAL] );
+      ClearImageTo( surface, basecolor(pc)[NORMAL] );
 		if( IsButtonPressed( pc ) )
 			cx++;
-		c = basecolors[SHADE];
+		c = basecolor(pc)[SHADE];
 		//c = SetAlpha( c, 128 );
-		fline( surface, mx, cy+1, mx+(mx-cx), 2*cy+1, basecolors[SHADOW], 255 );
-		fline( surface, mx, cy, mx+(mx-cx), 2*cy, basecolors[SHADE], 128 );
-		fline( surface, mx, cy+2, mx+(mx-cx), 2*cy+2, basecolors[SHADE], 128 );
-		fline( surface, mx, cy+2, cx, 2*cy+2, basecolors[HIGHLIGHT], 255 );
-		fline( surface, mx, cy+0, cx, 2*cy+0, basecolors[SHADOW], 128 );
-		fline( surface, mx, cy+1, cx, 2*cy+1, basecolors[SHADE], 128 );
+		fline( surface, mx, cy+1, mx+(mx-cx), 2*cy+1, basecolor(pc)[SHADOW], 255 );
+		fline( surface, mx, cy, mx+(mx-cx), 2*cy, basecolor(pc)[SHADE], 128 );
+		fline( surface, mx, cy+2, mx+(mx-cx), 2*cy+2, basecolor(pc)[SHADE], 128 );
+		fline( surface, mx, cy+2, cx, 2*cy+2, basecolor(pc)[HIGHLIGHT], 255 );
+		fline( surface, mx, cy+0, cx, 2*cy+0, basecolor(pc)[SHADOW], 128 );
+		fline( surface, mx, cy+1, cx, 2*cy+1, basecolor(pc)[SHADE], 128 );
 	}
 }
 
@@ -348,16 +348,16 @@ static void CPROC DrawLeftButton( PTRSZVAL psv, PCONTROL pc )
 		int cx = pc->surface_rect.width/2
 	, cy = pc->surface_rect.height/2;
       // hmm hope clearimage uses a blatalpha..
-      ClearImageTo( surface, basecolors[NORMAL] );
+      ClearImageTo( surface, basecolor(pc)[NORMAL] );
 		if( IsButtonPressed( pc ) )
 			cx++;
-		do_line( surface, cy - 3, cx  , cy+1, cx+4, basecolors[SHADE] );
-		do_line( surface, cy - 2, cx  , cy+2, cx+4, basecolors[SHADOW] );
-		do_line( surface, cy - 1, cx  , cy+2, cx+3, basecolors[SHADE] );
-		do_line( surface, cy + 2, cx-3, cy-1, cx  , basecolors[HIGHLIGHT] );
-		do_line( surface, cy + 2, cx-4, cy-2, cx  , basecolors[SHADE] );
-		do_line( surface, cy + 1, cx-4, cy-3, cx  , basecolors[SHADOW] );
-		//plot( surface, cx + 4, cy + 2, basecolors[HIGHLIGHT] );
+		do_line( surface, cy - 3, cx  , cy+1, cx+4, basecolor(pc)[SHADE] );
+		do_line( surface, cy - 2, cx  , cy+2, cx+4, basecolor(pc)[SHADOW] );
+		do_line( surface, cy - 1, cx  , cy+2, cx+3, basecolor(pc)[SHADE] );
+		do_line( surface, cy + 2, cx-3, cy-1, cx  , basecolor(pc)[HIGHLIGHT] );
+		do_line( surface, cy + 2, cx-4, cy-2, cx  , basecolor(pc)[SHADE] );
+		do_line( surface, cy + 1, cx-4, cy-3, cx  , basecolor(pc)[SHADOW] );
+		//plot( surface, cx + 4, cy + 2, basecolor(pc)[HIGHLIGHT] );
 	}
 }
 

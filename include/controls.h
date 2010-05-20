@@ -536,9 +536,11 @@ PSI_PROC( PRENDER_INTERFACE, SetControlInterface)( PRENDER_INTERFACE DisplayInte
 PSI_PROC( PIMAGE_INTERFACE, SetControlImageInterface )( PIMAGE_INTERFACE DisplayInterface );
 
 PSI_PROC( void, AlignBaseToWindows)( void );
-// see indexes above.
+
 PSI_PROC( void, SetBaseColor )( INDEX idx, CDATA c );
 PSI_PROC( CDATA, GetBaseColor )( INDEX idx );
+PSI_PROC( void, SetControlColor )( PSI_CONTROL pc, INDEX idx, CDATA c );
+PSI_PROC( CDATA, GetControlColor )( PSI_CONTROL pc, INDEX idx );
 
 //-------- Frame and generic control functions --------------
 #ifdef CONTROL_SOURCE

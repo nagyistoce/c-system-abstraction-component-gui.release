@@ -460,7 +460,8 @@ typedef struct common_control_frame
 	IMAGE_RECTANGLE update_rect;  
    /* A copy of the name that the frame was loaded from or saved
       to. For subsequent save when the control is edited.        */
-   CTEXTSTR save_name;
+		CTEXTSTR save_name;
+      CDATA *basecolors;
    int nExtra; // size above common required...
 } FR_CT_COMMON, *PCONTROL;
 //DOM-IGNORE-END
@@ -478,9 +479,9 @@ void CPROC DrawThinFrameImage( Image pc );
 /* Draw a 2 pixel frame around a control.
    Parameters
    pc :  COntrol to draw a thinner frame on;. */
-void CPROC DrawThinnerFrameImage( Image pc );
-void CPROC DrawThinFrameInvertedImage( Image pc );
-void CPROC DrawThinnerFrameInvertedImage( Image pc );
+void CPROC DrawThinnerFrameImage( PSI_CONTROL pc, Image image );
+void CPROC DrawThinFrameInvertedImage( PSI_CONTROL pc, Image image );
+void CPROC DrawThinnerFrameInvertedImage( PSI_CONTROL pc, Image image );
 
 void GetCurrentDisplaySurface( PPHYSICAL_DEVICE device );
 _MOUSE_NAMESPACE

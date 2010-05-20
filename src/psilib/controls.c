@@ -537,21 +537,21 @@ PSI_PROC( void, AlignBaseToWindows )( void )
 #ifdef _WIN32
     int tmp;
 #define Swap(i) (tmp = i,((( tmp&0xFF) << 16 ) | ( tmp & 0xFF00 ) | ( ( tmp & 0xFF0000 ) >> 16 ) | 0xFF000000 ))
-	 basecolors[HIGHLIGHT        ] =  Swap(GetSysColor( COLOR_3DHIGHLIGHT));
+	 defaultcolor[HIGHLIGHT        ] =  Swap(GetSysColor( COLOR_3DHIGHLIGHT));
     if( !g.BorderImage )
-		 basecolors[NORMAL           ] =  Swap(GetSysColor(COLOR_3DFACE ));
-    basecolors[SHADE            ] =  Swap(GetSysColor(COLOR_3DSHADOW ));
-    basecolors[SHADOW           ] =  Swap(GetSysColor(COLOR_3DDKSHADOW ));
-    basecolors[TEXTCOLOR        ] =  Swap(GetSysColor(COLOR_BTNTEXT ));
-    basecolors[CAPTION          ] =  Swap(GetSysColor(COLOR_ACTIVECAPTION ));
-    basecolors[CAPTIONTEXTCOLOR] =  Swap(GetSysColor( COLOR_CAPTIONTEXT));
-    basecolors[INACTIVECAPTION ] =  Swap(GetSysColor(COLOR_INACTIVECAPTION ));    
-    basecolors[INACTIVECAPTIONTEXTCOLOR]=Swap(GetSysColor(COLOR_INACTIVECAPTIONTEXT ));
-    basecolors[SELECT_BACK      ] =  Swap(GetSysColor(COLOR_HIGHLIGHT ));
-    basecolors[SELECT_TEXT      ] =  Swap(GetSysColor(COLOR_HIGHLIGHTTEXT ));
-    basecolors[EDIT_BACKGROUND ] =  Swap(GetSysColor(COLOR_WINDOW ));
-    basecolors[EDIT_TEXT       ] =  Swap(GetSysColor(COLOR_WINDOWTEXT ));
-        basecolors[SCROLLBAR_BACK  ] =  Swap(GetSysColor(COLOR_SCROLLBAR ));
+		 defaultcolor[NORMAL           ] =  Swap(GetSysColor(COLOR_3DFACE ));
+    defaultcolor[SHADE            ] =  Swap(GetSysColor(COLOR_3DSHADOW ));
+    defaultcolor[SHADOW           ] =  Swap(GetSysColor(COLOR_3DDKSHADOW ));
+    defaultcolor[TEXTCOLOR        ] =  Swap(GetSysColor(COLOR_BTNTEXT ));
+    defaultcolor[CAPTION          ] =  Swap(GetSysColor(COLOR_ACTIVECAPTION ));
+    defaultcolor[CAPTIONTEXTCOLOR] =  Swap(GetSysColor( COLOR_CAPTIONTEXT));
+    defaultcolor[INACTIVECAPTION ] =  Swap(GetSysColor(COLOR_INACTIVECAPTION ));    
+    defaultcolor[INACTIVECAPTIONTEXTCOLOR]=Swap(GetSysColor(COLOR_INACTIVECAPTIONTEXT ));
+    defaultcolor[SELECT_BACK      ] =  Swap(GetSysColor(COLOR_HIGHLIGHT ));
+    defaultcolor[SELECT_TEXT      ] =  Swap(GetSysColor(COLOR_HIGHLIGHTTEXT ));
+    defaultcolor[EDIT_BACKGROUND ] =  Swap(GetSysColor(COLOR_WINDOW ));
+    defaultcolor[EDIT_TEXT       ] =  Swap(GetSysColor(COLOR_WINDOWTEXT ));
+        defaultcolor[SCROLLBAR_BACK  ] =  Swap(GetSysColor(COLOR_SCROLLBAR ));
 #endif
     // No base to set to - KDE/Gnome/E/?
 }
@@ -560,13 +560,34 @@ PSI_PROC( void, AlignBaseToWindows )( void )
 
 PSI_PROC( void, SetBaseColor )( INDEX idx, CDATA c )
 {
-    //Log3( WIDE("Color %d was %08X and is now %08X"), idx, basecolors[idx], c );
-    basecolors[idx] = c;
+    //Log3( WIDE("Color %d was %08X and is now %08X"), idx, defaultcolor[idx], c );
+    defaultcolor[idx] = c;
 }
 
 PSI_PROC( CDATA, GetBaseColor )( INDEX idx )
 {
-    return basecolors[idx] ;
+    return defaultcolor[idx] ;
+}
+
+//---------------------------------------------------------------------------
+
+PSI_PROC( void, SetControlColor )( PSI_CONTROL pc, INDEX idx, CDATA c )
+{
+	//Log3( WIDE("Color %d was %08X and is now %08X"), idx, basecolor(pc)[idx], c );
+	if( pc )
+	{
+		if( basecolor(pc) == g.defaultcolors )
+		{
+			pc->basecolors = NewArray( CDATA, sizeof( DefaultColors ) / sizeof( CDATA ) );
+         MemCpy( pc->basecolors, g.defaultcolors, sizeof( DefaultColors ) );
+		}
+		basecolor(pc)[idx] = c;
+	}
+}
+
+PSI_PROC( CDATA, GetControlColor )( PSI_CONTROL pc, INDEX idx )
+{
+    return basecolor(pc)[idx];
 }
 
 //---------------------------------------------------------------------------
@@ -1083,7 +1104,7 @@ int CPROC DefaultFrameDraw( PSI_CONTROL pc )
 #ifdef DEBUG_UPDAATE_DRAW
 	lprintf( WIDE( "-=-=-=-=- Output Frame background..." ) );
 #endif
-	BlatColorAlpha( pc->Surface, 0, 0, pc->surface_rect.width, pc->surface_rect.height, basecolors[NORMAL] );
+	BlatColorAlpha( pc->Surface, 0, 0, pc->surface_rect.width, pc->surface_rect.height, basecolor(pc)[NORMAL] );
 	//lprintf( WIDE("Drawing frame caption...") );
 	DrawFrameCaption( pc );
 	// frame border will be drawn after this.
@@ -2394,6 +2415,7 @@ PROCEDURE RealCreateCommonExx( PSI_CONTROL *pResult
 
 	pc = (PSI_CONTROL)AllocateEx( sizeof( FR_CT_COMMON ) DBG_RELAY );
 	MemSet( pc, 0, sizeof( FR_CT_COMMON ) );
+   pc->basecolors = basecolor( pContainer );
 	{
 		_32 size = GetRegisteredIntValue( root, WIDE("extra") );
 		if( size )

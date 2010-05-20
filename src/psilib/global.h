@@ -33,6 +33,29 @@
 
 PSI_NAMESPACE
 
+#if !defined( CONTROL_BASE )
+	extern
+#endif
+	CDATA DefaultColors[]
+#if defined( CONTROL_BASE )
+	= { Color( 192, 192, 192 ) // highlight
+            , AColor( 53, 96, 89, 255 ) // normal
+            , Color( 35, 63, 57 ) // shade
+            , Color( 0, 0, 1 ) // shadow
+            , Color( 0, 240, 240 ) // text
+            , Color( 88,124,200 ) // caption background
+            , Color( 240, 240, 240 ) // cannot be black(0). caption text 
+            , Color( 89, 120, 120 ) // inactive caption background
+            , Color( 0, 0, 1 )     // inactive caption text (not black)
+            , Color( 0, 0, 128 )  // text select background
+            , Color( 220, 220, 220 ) // text select foreground
+            , AColor( 192, 192, 192, 255 ) // edit background
+            , Color( 0, 0, 1 )  // edit text
+									  , Color( 120, 120, 180 ) // scroll bar...
+	}
+#endif
+	;
+
 //DOM-IGNORE-BEGIN
 typedef struct global_tag
 {
@@ -49,7 +72,7 @@ typedef struct global_tag
 		_32 touch_display : 1;
 		_32 fancy_border : 1;
 	} flags;
-	CDATA basecolors[15];
+	CDATA *defaultcolors;
 	S_32 BorderWidth;
 	S_32 BorderHeight;
 	Image BorderImage;
@@ -69,7 +92,8 @@ enum {
 	  , SEGMENT_BOTTOM_RIGHT
      // border segment index's
 };
-#define basecolors g.basecolors
+#define defaultcolor g.defaultcolors
+#define basecolor(pc) ((pc)?((pc)->basecolors):(g.defaultcolors))
 
 #if !defined( CONTROL_BASE ) && (defined( SOURCE_PSI2 ) || defined( __cplusplus_cli ))
 extern
@@ -107,22 +131,8 @@ PSI_GLOBAL g
 #endif
 #endif
   { 0 }
-				// none of these should be 0 (black) may be 1 (nearest black)
-, { Color( 192, 192, 192 ) // highlight
-            , AColor( 53, 96, 89, 255 ) // normal
-            , Color( 35, 63, 57 ) // shade
-            , Color( 0, 0, 1 ) // shadow
-            , Color( 0, 240, 240 ) // text
-            , Color( 88,124,200 ) // caption background
-            , Color( 240, 240, 240 ) // cannot be black(0). caption text 
-            , Color( 89, 120, 120 ) // inactive caption background
-            , Color( 0, 0, 1 )     // inactive caption text (not black)
-            , Color( 0, 0, 128 )  // text select background
-            , Color( 220, 220, 220 ) // text select foreground
-            , AColor( 192, 192, 192, 255 ) // edit background
-            , Color( 0, 0, 1 )  // edit text
-            , Color( 120, 120, 180 ) // scroll bar...
-            } };
+  // none of these should be 0 (black) may be 1 (nearest black)
+  , DefaultColors };
 
 #endif
 //DOM-IGNORE-END

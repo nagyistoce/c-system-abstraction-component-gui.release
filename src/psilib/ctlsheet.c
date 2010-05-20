@@ -152,7 +152,7 @@ static int CPROC DrawSheetControl( PSI_CONTROL pc )
 	// need to compute how big the tab is for the caption on the dialog... and
 	// whether we need additionally some buttons present...
    //lprintf( WIDE("So yeah we clear the sufrace...") );
-	//ClearImageTo( surface, basecolors[NORMAL] );
+	//ClearImageTo( surface, basecolor(pc)[NORMAL] );
    //lprintf( WIDE("Get a font") );
 	font = GetFrameFont( pc );
 	{
@@ -186,12 +186,12 @@ static int CPROC DrawSheetControl( PSI_CONTROL pc )
 				else
 				{
 					tab_width = sheet->tab_width + psc->tab_pad;
-               BlatColor( surface, x, 0, tab_width, psc->height, basecolors[NORMAL] );
-					do_vline( surface, x, 0, psc->height, basecolors[SHADE] );
-					do_vline( surface, x+1, 0, psc->height, basecolors[HIGHLIGHT] );
-					do_vline( surface, x + tab_width-1, 0, psc->height, basecolors[SHADE] );
-					do_vline( surface, x + tab_width, 0, psc->height, basecolors[SHADOW] );
-					do_hline( surface, 0, x+1, x + tab_width, basecolors[HIGHLIGHT] );
+               BlatColor( surface, x, 0, tab_width, psc->height, basecolor(pc)[NORMAL] );
+					do_vline( surface, x, 0, psc->height, basecolor(pc)[SHADE] );
+					do_vline( surface, x+1, 0, psc->height, basecolor(pc)[HIGHLIGHT] );
+					do_vline( surface, x + tab_width-1, 0, psc->height, basecolor(pc)[SHADE] );
+					do_vline( surface, x + tab_width, 0, psc->height, basecolor(pc)[SHADOW] );
+					do_hline( surface, 0, x+1, x + tab_width, basecolor(pc)[HIGHLIGHT] );
 				}
 				if( sheet->content->caption.text )
 				{
@@ -201,7 +201,7 @@ static int CPROC DrawSheetControl( PSI_CONTROL pc )
                else if( psc->flags.bCustomColors )
 						color = psc->cActiveText;
 					else
-                  color = basecolors[TEXTCOLOR];
+                  color = basecolor(pc)[TEXTCOLOR];
                //lprintf( WIDE("Putting string out at %d,%d %s"), x + 4, 3, GetText( sheet->content->caption.text ) );
 					PutStringFont( surface, x + ( tab_width - sheet->tab_width) / 2, (psc->height - TAB_HEIGHT)/2, color, 0
 									 , GetText( sheet->content->caption.text), font );
@@ -225,12 +225,12 @@ static int CPROC DrawSheetControl( PSI_CONTROL pc )
 				{
                tab_width = sheet->tab_width + psc->tab_pad;
 				//lprintf( WIDE("Surface height and my hight %d %d"), surface->height, psc->height );
-               BlatColor( surface, x, 0, tab_width, psc->height, basecolors[NORMAL] );
-					do_vline( surface, x, 0, psc->height, basecolors[SHADE] );
-					do_vline( surface, x+1, 0, psc->height, basecolors[SHADOW] );
-					do_vline( surface, x + tab_width-1, 0, psc->height, basecolors[SHADE] );
-					do_vline( surface, x + tab_width, 0, psc->height, basecolors[HIGHLIGHT] );
-					do_hline( surface, 0, x+1, x + tab_width, basecolors[SHADE] );
+               BlatColor( surface, x, 0, tab_width, psc->height, basecolor(pc)[NORMAL] );
+					do_vline( surface, x, 0, psc->height, basecolor(pc)[SHADE] );
+					do_vline( surface, x+1, 0, psc->height, basecolor(pc)[SHADOW] );
+					do_vline( surface, x + tab_width-1, 0, psc->height, basecolor(pc)[SHADE] );
+					do_vline( surface, x + tab_width, 0, psc->height, basecolor(pc)[HIGHLIGHT] );
+					do_hline( surface, 0, x+1, x + tab_width, basecolor(pc)[SHADE] );
 				}
 				if( sheet->content->caption.text )
 				{
@@ -240,7 +240,7 @@ static int CPROC DrawSheetControl( PSI_CONTROL pc )
                else if( psc->flags.bCustomColors )
 						color = psc->cInactiveText;
 					else
-                  color = basecolors[SHADE];
+                  color = basecolor(pc)[SHADE];
                //lprintf( WIDE("Putting string out at %d,%d %s"), x + 4, 3, GetText( sheet->content->caption.text ) );
 					PutStringFont( surface, x + (tab_width-sheet->tab_width)/2, (psc->height - TAB_HEIGHT)/2, color, 0
 									 , GetText( sheet->content->caption.text), font );

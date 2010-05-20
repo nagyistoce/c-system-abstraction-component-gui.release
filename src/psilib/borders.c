@@ -15,7 +15,7 @@
 PSI_NAMESPACE
 //---------------------------------------------------------------------------
 
-void DrawNormalFrameInset( Image window, int bInvert, int align )
+void DrawNormalFrameInset( PSI_CONTROL pc, Image window, int bInvert, int align )
 {
 }
 
@@ -225,24 +225,24 @@ void CPROC DrawThickFrame( PCOMMON pc )
    if( pc->flags.bInitial || pc->flags.bHidden ) return;
 	for( ofs = 0, n = 0; n < 2; n++,ofs++ )
 	{
-		do_hline( window, ofs, ofs, width-(1+ofs), basecolors[NORMAL] );
-		do_vline( window, ofs, ofs, height-(1+ofs), basecolors[NORMAL] );
-		do_vline( window, width - (1+ofs), ofs, height-(1+ofs), basecolors[SHADOW] );
-		do_hline( window, height- (1+ofs), ofs, width-(1+ofs), basecolors[SHADOW]);
+		do_hline( window, ofs, ofs, width-(1+ofs), basecolor(pc)[NORMAL] );
+		do_vline( window, ofs, ofs, height-(1+ofs), basecolor(pc)[NORMAL] );
+		do_vline( window, width - (1+ofs), ofs, height-(1+ofs), basecolor(pc)[SHADOW] );
+		do_hline( window, height- (1+ofs), ofs, width-(1+ofs), basecolor(pc)[SHADOW]);
 	}
 	for( n = 0; n < 2; n++,ofs++ )
 	{
-		do_hline( window, ofs, ofs, width-(1+ofs), basecolors[HIGHLIGHT] );
-		do_vline( window, ofs, ofs, height-(1+ofs), basecolors[HIGHLIGHT] );
-		do_vline( window, width - (1+ofs), ofs, height-(1+ofs), basecolors[SHADE] );
-		do_hline( window, height- (1+ofs), ofs, width-(1+ofs), basecolors[SHADE]);
+		do_hline( window, ofs, ofs, width-(1+ofs), basecolor(pc)[HIGHLIGHT] );
+		do_vline( window, ofs, ofs, height-(1+ofs), basecolor(pc)[HIGHLIGHT] );
+		do_vline( window, width - (1+ofs), ofs, height-(1+ofs), basecolor(pc)[SHADE] );
+		do_hline( window, height- (1+ofs), ofs, width-(1+ofs), basecolor(pc)[SHADE]);
 	}
 	for( n = 0; n < 4; n++,ofs++ )
 	{
-		do_hline( window, ofs, ofs, width-(1+ofs), basecolors[NORMAL] );
-		do_vline( window, ofs, ofs, height-(1+ofs), basecolors[NORMAL] );
-		do_vline( window, width - (1+ofs), ofs, height-(1+ofs), basecolors[NORMAL] );
-		do_hline( window, height- (1+ofs), ofs, width-(1+ofs), basecolors[NORMAL]);
+		do_hline( window, ofs, ofs, width-(1+ofs), basecolor(pc)[NORMAL] );
+		do_vline( window, ofs, ofs, height-(1+ofs), basecolor(pc)[NORMAL] );
+		do_vline( window, width - (1+ofs), ofs, height-(1+ofs), basecolor(pc)[NORMAL] );
+		do_hline( window, height- (1+ofs), ofs, width-(1+ofs), basecolor(pc)[NORMAL]);
 	}
 }
 void CPROC DrawThickFrameInverted( PCOMMON pc )
@@ -254,24 +254,24 @@ void CPROC DrawThickFrameInverted( PCOMMON pc )
    if( pc->flags.bInitial || pc->flags.bHidden ) return;
 	for( ofs = 0, n = 0; n < 2; n++,ofs++ )
 	{
-		do_hline( window, ofs, ofs, width-(1+ofs), basecolors[SHADOW] );
-		do_vline( window, ofs, ofs, height-(1+ofs), basecolors[SHADOW] );
-		do_vline( window, width - (1+ofs), ofs, height-(1+ofs), basecolors[NORMAL] );
-		do_hline( window, height- (1+ofs), ofs, width-(1+ofs), basecolors[NORMAL]);
+		do_hline( window, ofs, ofs, width-(1+ofs), basecolor(pc)[SHADOW] );
+		do_vline( window, ofs, ofs, height-(1+ofs), basecolor(pc)[SHADOW] );
+		do_vline( window, width - (1+ofs), ofs, height-(1+ofs), basecolor(pc)[NORMAL] );
+		do_hline( window, height- (1+ofs), ofs, width-(1+ofs), basecolor(pc)[NORMAL]);
 	}
 	for( n = 0; n < 2; n++,ofs++ )
 	{
-		do_hline( window, ofs, ofs, width-(1+ofs), basecolors[SHADE] );
-		do_vline( window, ofs, ofs, height-(1+ofs), basecolors[SHADE] );
-		do_vline( window, width - (1+ofs), ofs, height-(1+ofs), basecolors[HIGHLIGHT] );
-		do_hline( window, height- (1+ofs), ofs, width-(1+ofs), basecolors[HIGHLIGHT]);
+		do_hline( window, ofs, ofs, width-(1+ofs), basecolor(pc)[SHADE] );
+		do_vline( window, ofs, ofs, height-(1+ofs), basecolor(pc)[SHADE] );
+		do_vline( window, width - (1+ofs), ofs, height-(1+ofs), basecolor(pc)[HIGHLIGHT] );
+		do_hline( window, height- (1+ofs), ofs, width-(1+ofs), basecolor(pc)[HIGHLIGHT]);
 	}
 	for( n = 0; n < 4; n++,ofs++ )
 	{
-		do_hline( window, ofs, ofs, width-(1+ofs), basecolors[NORMAL] );
-		do_vline( window, ofs, ofs, height-(1+ofs), basecolors[NORMAL] );
-		do_vline( window, width - (1+ofs), ofs, height-(1+ofs), basecolors[NORMAL] );
-		do_hline( window, height- (1+ofs), ofs, width-(1+ofs), basecolors[NORMAL]);
+		do_hline( window, ofs, ofs, width-(1+ofs), basecolor(pc)[NORMAL] );
+		do_vline( window, ofs, ofs, height-(1+ofs), basecolor(pc)[NORMAL] );
+		do_vline( window, width - (1+ofs), ofs, height-(1+ofs), basecolor(pc)[NORMAL] );
+		do_hline( window, height- (1+ofs), ofs, width-(1+ofs), basecolor(pc)[NORMAL]);
 	}
 }
 
@@ -281,25 +281,25 @@ void CPROC DrawNormalFrame( PCOMMON pc )
    _32 width = window->width;
     _32 height = window->height;
    if( pc->flags.bInitial || pc->flags.bHidden ) return;
-	 do_hline( window, 0, 0, width-1, basecolors[NORMAL] );
-	 do_hline( window, 1, 1, width-2, basecolors[HIGHLIGHT] );
-	 do_hline( window, 2, 2, width-3, basecolors[NORMAL] );
-	 do_hline( window, 3, 3, width-4, basecolors[NORMAL] );
+	 do_hline( window, 0, 0, width-1, basecolor(pc)[NORMAL] );
+	 do_hline( window, 1, 1, width-2, basecolor(pc)[HIGHLIGHT] );
+	 do_hline( window, 2, 2, width-3, basecolor(pc)[NORMAL] );
+	 do_hline( window, 3, 3, width-4, basecolor(pc)[NORMAL] );
 
-	 do_vline( window, 0, 0, height-1, basecolors[NORMAL] );
-	 do_vline( window, 1, 1, height-2, basecolors[HIGHLIGHT] );
-	 do_vline( window, 2, 2, height-3, basecolors[NORMAL] );
-	 do_vline( window, 3, 3, height-4, basecolors[NORMAL] );
+	 do_vline( window, 0, 0, height-1, basecolor(pc)[NORMAL] );
+	 do_vline( window, 1, 1, height-2, basecolor(pc)[HIGHLIGHT] );
+	 do_vline( window, 2, 2, height-3, basecolor(pc)[NORMAL] );
+	 do_vline( window, 3, 3, height-4, basecolor(pc)[NORMAL] );
 
-	 do_vline( window, width -4, 3, height-4, basecolors[NORMAL] );
-	 do_vline( window, width -3, 2, height-3, basecolors[NORMAL] );
-	 do_vline( window, width -2, 1, height-2, basecolors[SHADE] );
-	 do_vline( window, width -1, 0, height-1, basecolors[SHADOW] );
+	 do_vline( window, width -4, 3, height-4, basecolor(pc)[NORMAL] );
+	 do_vline( window, width -3, 2, height-3, basecolor(pc)[NORMAL] );
+	 do_vline( window, width -2, 1, height-2, basecolor(pc)[SHADE] );
+	 do_vline( window, width -1, 0, height-1, basecolor(pc)[SHADOW] );
 
-	 do_hline( window, height-4, 3, width-4, basecolors[NORMAL]);
-	 do_hline( window, height-3, 2, width-3, basecolors[NORMAL] );
-	 do_hline( window, height-2, 1, width-2, basecolors[SHADE] );
-	 do_hline( window, height-1, 0, width-1, basecolors[SHADOW] );
+	 do_hline( window, height-4, 3, width-4, basecolor(pc)[NORMAL]);
+	 do_hline( window, height-3, 2, width-3, basecolor(pc)[NORMAL] );
+	 do_hline( window, height-2, 1, width-2, basecolor(pc)[SHADE] );
+	 do_hline( window, height-1, 0, width-1, basecolor(pc)[SHADOW] );
 }
 
 void CPROC DrawNormalFrameInverted( PCOMMON pc )
@@ -308,45 +308,45 @@ void CPROC DrawNormalFrameInverted( PCOMMON pc )
    _32 width = window->width;
     _32 height = window->height;
    if( pc->flags.bInitial || pc->flags.bHidden ) return;
-	do_hline( window, 0, 0, width-1, basecolors[SHADOW] );
-	do_hline( window, 1, 1, width-2, basecolors[SHADE] );
-	do_hline( window, 2, 2, width-3, basecolors[NORMAL] );
-	do_hline( window, 3, 3, width-4, basecolors[NORMAL] );
+	do_hline( window, 0, 0, width-1, basecolor(pc)[SHADOW] );
+	do_hline( window, 1, 1, width-2, basecolor(pc)[SHADE] );
+	do_hline( window, 2, 2, width-3, basecolor(pc)[NORMAL] );
+	do_hline( window, 3, 3, width-4, basecolor(pc)[NORMAL] );
 
-	do_vline( window, 0, 0, height-1, basecolors[SHADOW] );
-	do_vline( window, 1, 1, height-2, basecolors[SHADE] );
-	do_vline( window, 2, 2, height-3, basecolors[NORMAL] );
-	do_vline( window, 3, 3, height-4, basecolors[NORMAL] );
+	do_vline( window, 0, 0, height-1, basecolor(pc)[SHADOW] );
+	do_vline( window, 1, 1, height-2, basecolor(pc)[SHADE] );
+	do_vline( window, 2, 2, height-3, basecolor(pc)[NORMAL] );
+	do_vline( window, 3, 3, height-4, basecolor(pc)[NORMAL] );
 
-	do_vline( window, width -4, 3, height-4, basecolors[NORMAL] );
-	do_vline( window, width -3, 2, height-3, basecolors[NORMAL] );
-	do_vline( window, width -2, 1, height-2, basecolors[HIGHLIGHT] );
-	do_vline( window, width -1, 0, height-1, basecolors[NORMAL] );
+	do_vline( window, width -4, 3, height-4, basecolor(pc)[NORMAL] );
+	do_vline( window, width -3, 2, height-3, basecolor(pc)[NORMAL] );
+	do_vline( window, width -2, 1, height-2, basecolor(pc)[HIGHLIGHT] );
+	do_vline( window, width -1, 0, height-1, basecolor(pc)[NORMAL] );
 
-	do_hline( window, height-4, 3, width-4, basecolors[NORMAL]);
-	do_hline( window, height-3, 2, width-3, basecolors[NORMAL] );
-	do_hline( window, height-2, 1, width-2, basecolors[HIGHLIGHT] );
-	do_hline( window, height-1, 0, width-1, basecolors[NORMAL] );
+	do_hline( window, height-4, 3, width-4, basecolor(pc)[NORMAL]);
+	do_hline( window, height-3, 2, width-3, basecolor(pc)[NORMAL] );
+	do_hline( window, height-2, 1, width-2, basecolor(pc)[HIGHLIGHT] );
+	do_hline( window, height-1, 0, width-1, basecolor(pc)[NORMAL] );
 }
 
 //---------------------------------------------------------------------------
 
-void CPROC DrawThinnerFrameImage( Image window )
+void CPROC DrawThinnerFrameImage( PSI_CONTROL pc, Image window )
 {
    //Image window = pc->Window;
 	_32 width = window->width;
 	_32 height = window->height;
-	do_hline( window, 0, 0, width-1, basecolors[HIGHLIGHT] );
-	do_hline( window, 1, 1, width-2, basecolors[NORMAL] );
+	do_hline( window, 0, 0, width-1, basecolor(pc)[HIGHLIGHT] );
+	do_hline( window, 1, 1, width-2, basecolor(pc)[NORMAL] );
 
-	do_vline( window, 0, 0, height-1, basecolors[HIGHLIGHT] );
-	do_vline( window, 1, 1, height-2, basecolors[NORMAL] );
+	do_vline( window, 0, 0, height-1, basecolor(pc)[HIGHLIGHT] );
+	do_vline( window, 1, 1, height-2, basecolor(pc)[NORMAL] );
 
-	do_vline( window, width -2, 1, height-2, basecolors[SHADE] );
-	do_vline( window, width -1, 0, height-1, basecolors[SHADOW] );
+	do_vline( window, width -2, 1, height-2, basecolor(pc)[SHADE] );
+	do_vline( window, width -1, 0, height-1, basecolor(pc)[SHADOW] );
 
-	do_hline( window, height-2, 1, width-2, basecolors[SHADE] );
-	do_hline( window, height-1, 0, width-1, basecolors[SHADOW] );
+	do_hline( window, height-2, 1, width-2, basecolor(pc)[SHADE] );
+	do_hline( window, height-1, 0, width-1, basecolor(pc)[SHADOW] );
 }
 
 //---------------------------------------------------------------------------
@@ -357,17 +357,17 @@ void CPROC DrawThinnerFrame( PCOMMON pc )
 	_32 width = window->width;
 	_32 height = window->height;
    if( pc->flags.bInitial || pc->flags.bHidden ) return;
-	do_hline( window, 0, 0, width-1, basecolors[HIGHLIGHT] );
-	do_hline( window, 1, 1, width-2, basecolors[NORMAL] );
+	do_hline( window, 0, 0, width-1, basecolor(pc)[HIGHLIGHT] );
+	do_hline( window, 1, 1, width-2, basecolor(pc)[NORMAL] );
 
-	do_vline( window, 0, 0, height-1, basecolors[HIGHLIGHT] );
-	do_vline( window, 1, 1, height-2, basecolors[NORMAL] );
+	do_vline( window, 0, 0, height-1, basecolor(pc)[HIGHLIGHT] );
+	do_vline( window, 1, 1, height-2, basecolor(pc)[NORMAL] );
 
-	do_vline( window, width -2, 1, height-2, basecolors[SHADE] );
-	do_vline( window, width -1, 0, height-1, basecolors[SHADOW] );
+	do_vline( window, width -2, 1, height-2, basecolor(pc)[SHADE] );
+	do_vline( window, width -1, 0, height-1, basecolor(pc)[SHADOW] );
 
-	do_hline( window, height-2, 1, width-2, basecolors[SHADE] );
-	do_hline( window, height-1, 0, width-1, basecolors[SHADOW] );
+	do_hline( window, height-2, 1, width-2, basecolor(pc)[SHADE] );
+	do_hline( window, height-1, 0, width-1, basecolor(pc)[SHADOW] );
 }
 
 void CPROC DrawThinnerFrameInverted( PCOMMON pc )
@@ -376,71 +376,71 @@ void CPROC DrawThinnerFrameInverted( PCOMMON pc )
 	_32 width = window->width;
 	_32 height = window->height;
 	if( pc->flags.bInitial || pc->flags.bHidden ) return;
-	do_hline( window, 0, 0, width-1, basecolors[SHADOW] );
-	do_hline( window, 1, 1, width-2, basecolors[SHADE] );
+	do_hline( window, 0, 0, width-1, basecolor(pc)[SHADOW] );
+	do_hline( window, 1, 1, width-2, basecolor(pc)[SHADE] );
 
-	do_vline( window, 0, 0, height-1, basecolors[SHADOW] );
-	do_vline( window, 1, 1, height-2, basecolors[SHADE] );
+	do_vline( window, 0, 0, height-1, basecolor(pc)[SHADOW] );
+	do_vline( window, 1, 1, height-2, basecolor(pc)[SHADE] );
 
-	do_vline( window, width -2, 1, height-2, basecolors[NORMAL] );
-	do_vline( window, width -1, 0, height-1, basecolors[HIGHLIGHT] );
+	do_vline( window, width -2, 1, height-2, basecolor(pc)[NORMAL] );
+	do_vline( window, width -1, 0, height-1, basecolor(pc)[HIGHLIGHT] );
 
-	do_hline( window, height-2, 1, width-2, basecolors[NORMAL] );
-	do_hline( window, height-1, 0, width-1, basecolors[HIGHLIGHT] );
+	do_hline( window, height-2, 1, width-2, basecolor(pc)[NORMAL] );
+	do_hline( window, height-1, 0, width-1, basecolor(pc)[HIGHLIGHT] );
 }
 
-void CPROC DrawThinnerFrameInvertedImage( Image window )
+void CPROC DrawThinnerFrameInvertedImage( PSI_CONTROL pc, Image window )
 {
 	//Image window = pc->Window;
 	_32 width = window->width;
 	_32 height = window->height;
-	do_hline( window, 0, 0, width-1, basecolors[SHADOW] );
-	do_hline( window, 1, 1, width-2, basecolors[SHADE] );
+	do_hline( window, 0, 0, width-1, basecolor(pc)[SHADOW] );
+	do_hline( window, 1, 1, width-2, basecolor(pc)[SHADE] );
 
-	do_vline( window, 0, 0, height-1, basecolors[SHADOW] );
-	do_vline( window, 1, 1, height-2, basecolors[SHADE] );
+	do_vline( window, 0, 0, height-1, basecolor(pc)[SHADOW] );
+	do_vline( window, 1, 1, height-2, basecolor(pc)[SHADE] );
 
-	do_vline( window, width -2, 1, height-2, basecolors[NORMAL] );
-	do_vline( window, width -1, 0, height-1, basecolors[HIGHLIGHT] );
+	do_vline( window, width -2, 1, height-2, basecolor(pc)[NORMAL] );
+	do_vline( window, width -1, 0, height-1, basecolor(pc)[HIGHLIGHT] );
 
-	do_hline( window, height-2, 1, width-2, basecolors[NORMAL] );
-	do_hline( window, height-1, 0, width-1, basecolors[HIGHLIGHT] );
+	do_hline( window, height-2, 1, width-2, basecolor(pc)[NORMAL] );
+	do_hline( window, height-1, 0, width-1, basecolor(pc)[HIGHLIGHT] );
 }
 
 //---------------------------------------------------------------------------
 
-void DrawThinnerFrameInset( Image window, int bInvert, int amount )
+void DrawThinnerFrameInset( PSI_CONTROL pc, Image window, int bInvert, int amount )
 {
    _32 width = window->width;
     _32 height = window->height;
    if( !bInvert )
    {
 
-      do_hline( window, amount+0, amount+0, width-(amount+1), basecolors[HIGHLIGHT] );
-      do_hline( window, amount+1, amount+1, width-(amount+2), basecolors[NORMAL] );
+      do_hline( window, amount+0, amount+0, width-(amount+1), basecolor(pc)[HIGHLIGHT] );
+      do_hline( window, amount+1, amount+1, width-(amount+2), basecolor(pc)[NORMAL] );
 
-      do_vline( window, amount+0, amount+0, height-(amount+1), basecolors[HIGHLIGHT] );
-      do_vline( window, amount+1, amount+1, height-2, basecolors[NORMAL] );
+      do_vline( window, amount+0, amount+0, height-(amount+1), basecolor(pc)[HIGHLIGHT] );
+      do_vline( window, amount+1, amount+1, height-2, basecolor(pc)[NORMAL] );
 
-      do_vline( window, width -(amount+2), amount+1, height-(amount+2), basecolors[SHADE] );
-      do_vline( window, width -(amount+1), amount+0, height-(amount+1), basecolors[SHADOW] );
+      do_vline( window, width -(amount+2), amount+1, height-(amount+2), basecolor(pc)[SHADE] );
+      do_vline( window, width -(amount+1), amount+0, height-(amount+1), basecolor(pc)[SHADOW] );
 
-    do_hline( window, height-(amount+2), amount+1, width-(amount+2), basecolors[SHADE] );
-       do_hline( window, height-(amount+1), amount+0, width-(amount+1), basecolors[SHADOW] );
+    do_hline( window, height-(amount+2), amount+1, width-(amount+2), basecolor(pc)[SHADE] );
+       do_hline( window, height-(amount+1), amount+0, width-(amount+1), basecolor(pc)[SHADOW] );
    }
    else
    {
-      do_hline( window, amount+0, amount+0, width-(amount+1), basecolors[SHADOW] );
-      do_hline( window, amount+1, amount+1, width-(amount+2), basecolors[SHADE] );
+      do_hline( window, amount+0, amount+0, width-(amount+1), basecolor(pc)[SHADOW] );
+      do_hline( window, amount+1, amount+1, width-(amount+2), basecolor(pc)[SHADE] );
 
-      do_vline( window, amount+0, amount+0, height-(amount+1), basecolors[SHADOW] );
-      do_vline( window, amount+1, amount+1, height-(amount+2), basecolors[SHADE] );
+      do_vline( window, amount+0, amount+0, height-(amount+1), basecolor(pc)[SHADOW] );
+      do_vline( window, amount+1, amount+1, height-(amount+2), basecolor(pc)[SHADE] );
 
-      do_vline( window, width -(amount+2), amount+1, height-(amount+2), basecolors[NORMAL] );
-      do_vline( window, width -(amount+1), amount+0, height-(amount+1), basecolors[HIGHLIGHT] );
+      do_vline( window, width -(amount+2), amount+1, height-(amount+2), basecolor(pc)[NORMAL] );
+      do_vline( window, width -(amount+1), amount+0, height-(amount+1), basecolor(pc)[HIGHLIGHT] );
 
-    do_hline( window, height-(amount+2), amount+1, width-(amount+2), basecolors[NORMAL] );
-       do_hline( window, height-(amount+1), amount+0, width-(amount+1), basecolors[HIGHLIGHT] );
+    do_hline( window, height-(amount+2), amount+1, width-(amount+2), basecolor(pc)[NORMAL] );
+       do_hline( window, height-(amount+1), amount+0, width-(amount+1), basecolor(pc)[HIGHLIGHT] );
    }
 }
 
@@ -452,10 +452,10 @@ void CPROC DrawThinFrame( PCOMMON pc )
 	_32 width = window->width;
 	_32 height = window->height;
    if( pc->flags.bInitial || pc->flags.bHidden ) return;
-	do_hline( window, 0, 0, width-1, basecolors[HIGHLIGHT] );
-	do_vline( window, 0, 0, height-1, basecolors[HIGHLIGHT] );
-	do_vline( window, width -1, 0, height-1, basecolors[SHADOW] );
-	do_hline( window, height-1, 0, width-1, basecolors[SHADOW] );
+	do_hline( window, 0, 0, width-1, basecolor(pc)[HIGHLIGHT] );
+	do_vline( window, 0, 0, height-1, basecolor(pc)[HIGHLIGHT] );
+	do_vline( window, width -1, 0, height-1, basecolor(pc)[SHADOW] );
+	do_hline( window, height-1, 0, width-1, basecolor(pc)[SHADOW] );
 }
 //---------------------------------------------------------------------------
 
@@ -465,44 +465,44 @@ void CPROC DrawThinFrameInverted( PCOMMON pc )
 	_32 width = window->width;
 	_32 height = window->height;
    if( pc->flags.bInitial || pc->flags.bHidden ) return;
-	do_hline( window, 0, 0, width-1, basecolors[SHADOW] );
-	do_vline( window, 0, 0, height-1, basecolors[SHADOW] );
-	do_vline( window, width -1, 0, height-1, basecolors[HIGHLIGHT] );
-	do_hline( window, height-1, 0, width-1, basecolors[HIGHLIGHT] );
+	do_hline( window, 0, 0, width-1, basecolor(pc)[SHADOW] );
+	do_vline( window, 0, 0, height-1, basecolor(pc)[SHADOW] );
+	do_vline( window, width -1, 0, height-1, basecolor(pc)[HIGHLIGHT] );
+	do_hline( window, height-1, 0, width-1, basecolor(pc)[HIGHLIGHT] );
 }
 
 //---------------------------------------------------------------------------
 
-void CPROC DrawThinFrameInvertedImage( Image window )
+void CPROC DrawThinFrameInvertedImage( PSI_CONTROL pc, Image window )
 {
 	//Image window = pc->Window;
 	_32 width = window->width;
 	_32 height = window->height;
-	do_hline( window, 0, 0, width-1, basecolors[SHADOW] );
-	do_vline( window, 0, 0, height-1, basecolors[SHADOW] );
-	do_vline( window, width -1, 0, height-1, basecolors[HIGHLIGHT] );
-	do_hline( window, height-1, 0, width-1, basecolors[HIGHLIGHT] );
+	do_hline( window, 0, 0, width-1, basecolor(pc)[SHADOW] );
+	do_vline( window, 0, 0, height-1, basecolor(pc)[SHADOW] );
+	do_vline( window, width -1, 0, height-1, basecolor(pc)[HIGHLIGHT] );
+	do_hline( window, height-1, 0, width-1, basecolor(pc)[HIGHLIGHT] );
 }
 
 //---------------------------------------------------------------------------
 
-void DrawThinFrameInset( Image window, int bInvert, int amount )
+void DrawThinFrameInset( PSI_CONTROL pc, Image window, int bInvert, int amount )
 {
    _32 width = window->width;
    _32 height = window->height;
    if( !bInvert )
    {
-      do_hline( window, amount, amount, width-(amount+1), basecolors[HIGHLIGHT] );
-      do_vline( window, amount, amount, height-(amount+1), basecolors[HIGHLIGHT] );
-      do_vline( window, width -(amount+1), amount, height-(amount+1), basecolors[SHADOW] );
-       do_hline( window, height-(amount+1), amount, width-(amount+1), basecolors[SHADOW] );
+      do_hline( window, amount, amount, width-(amount+1), basecolor(pc)[HIGHLIGHT] );
+      do_vline( window, amount, amount, height-(amount+1), basecolor(pc)[HIGHLIGHT] );
+      do_vline( window, width -(amount+1), amount, height-(amount+1), basecolor(pc)[SHADOW] );
+       do_hline( window, height-(amount+1), amount, width-(amount+1), basecolor(pc)[SHADOW] );
    }
    else
    {
-      do_hline( window, amount, amount, width-(amount+1), basecolors[SHADOW] );
-      do_vline( window, amount, amount, height-(amount+1), basecolors[SHADOW] );
-      do_vline( window, width -(amount+1), amount, height-(amount+1), basecolors[HIGHLIGHT] );
-       do_hline( window, height-(amount+1), amount, width-(amount+1), basecolors[HIGHLIGHT] );
+      do_hline( window, amount, amount, width-(amount+1), basecolor(pc)[SHADOW] );
+      do_vline( window, amount, amount, height-(amount+1), basecolor(pc)[SHADOW] );
+      do_vline( window, width -(amount+1), amount, height-(amount+1), basecolor(pc)[HIGHLIGHT] );
+       do_hline( window, height-(amount+1), amount, width-(amount+1), basecolor(pc)[HIGHLIGHT] );
    }
 }
 
@@ -536,38 +536,38 @@ void DrawFrameCaption( PCOMMON pc )
 					 , xofs+1, xofs+1
 					 , width - 2*(xofs+1)
 					 , h
-					 , basecolors[CAPTION] );
+					 , basecolor(pc)[CAPTION] );
 		 PutStringFont( pc->Window
 						  , TEXT_INSET + xofs+2, (TEXT_INSET-2)+xofs+2 // Bad choice - but... works for now...
-						  , basecolors[SHADOW], 0
+						  , basecolor(pc)[SHADOW], 0
 						  , GetText( pc->caption.text )
 						  , GetCommonFont(pc)
 						  );
 		 PutStringFont( pc->Window
 						  , TEXT_INSET + xofs+3, (TEXT_INSET-2)+xofs+3 // Bad choice - but... works for now...
-						  , basecolors[HIGHLIGHT], 0
+						  , basecolor(pc)[HIGHLIGHT], 0
 						  , GetText( pc->caption.text )
 						  , GetCommonFont(pc)
 						  );
 //      PutString( pc->Window
 //                       // bias the text towards the top?
 //                  , TEXT_INSET + xofs+1, (TEXT_INSET-2)+xofs+1 // Bad choice - but... works for now...
-//                  , basecolors[CAPTIONTEXTCOLOR], 0
+//                  , basecolor(pc)[CAPTIONTEXTCOLOR], 0
 //                  , GetText( pc->caption.text ) );
         h += xofs;
         w = width - (xofs+1);
         do_hline( pc->Window
                     , xofs, xofs, w
-                    , basecolors[SHADE] );
+                    , basecolor(pc)[SHADE] );
         do_vline( pc->Window
                     , xofs, xofs, h
-                    , basecolors[SHADE] );
+                    , basecolor(pc)[SHADE] );
         do_hline( pc->Window
                     , h, xofs, w
-                    , basecolors[HIGHLIGHT] );
+                    , basecolor(pc)[HIGHLIGHT] );
         do_vline( pc->Window
                     , w, xofs, h
-                    , basecolors[HIGHLIGHT] );
+                    , basecolor(pc)[HIGHLIGHT] );
     }
     else
     {
@@ -576,37 +576,37 @@ void DrawFrameCaption( PCOMMON pc )
                     , xofs+1, xofs+1
                     , width - 2*(xofs+1)
                     , h
-                    , basecolors[INACTIVECAPTION] );
+                    , basecolor(pc)[INACTIVECAPTION] );
         PutStringFont( pc->Window
                     , TEXT_INSET + xofs+1, (TEXT_INSET-2)+xofs+1 // Bad choice - but... works for now...
-                    , basecolors[SHADOW], 0
+                    , basecolor(pc)[SHADOW], 0
 							, GetText( pc->caption.text )
 							, GetCommonFont(pc)
 							);
         PutStringFont( pc->Window
                     , TEXT_INSET + xofs+2, (TEXT_INSET-2)+xofs+2 // Bad choice - but... works for now...
-                    , basecolors[HIGHLIGHT], 0
+                    , basecolor(pc)[HIGHLIGHT], 0
 							, GetText( pc->caption.text )
 							, GetCommonFont(pc)
 							);
 //      PutString( pc->Window
 //                  , TEXT_INSET + xofs+1, (TEXT_INSET-2)+xofs+1 // Bad choice - but... works for now...
-//                  , basecolors[INACTIVECAPTIONTEXTCOLOR], 0
+//                  , basecolor(pc)[INACTIVECAPTIONTEXTCOLOR], 0
 //                  , GetText( pc->caption.text ) );
         h += xofs;
         w = width - (xofs+1);
         do_hline( pc->Window
                     , xofs, xofs, w
-                    , basecolors[HIGHLIGHT] );
+                    , basecolor(pc)[HIGHLIGHT] );
         do_vline( pc->Window
                     , xofs, xofs, h
-                    , basecolors[HIGHLIGHT] );
+                    , basecolor(pc)[HIGHLIGHT] );
         do_hline( pc->Window
                     , h, xofs, w
-                    , basecolors[SHADE] );
+                    , basecolor(pc)[SHADE] );
         do_vline( pc->Window
                     , w, xofs, h
-                    , basecolors[SHADE] );
+                    , basecolor(pc)[SHADE] );
 	 }
 	}
    //lprintf( WIDE("Is anything going to output this to the window?") );
@@ -618,7 +618,7 @@ void CPROC DrawThickDent( PCOMMON pc )
 {
    if( pc->flags.bInitial || pc->flags.bHidden ) return;
 	DrawNormalFrameInverted( pc );
-	DrawNormalFrameInset( pc->Window, FALSE, 4 );
+	DrawNormalFrameInset( pc, pc->Window, FALSE, 4 );
 }
 
 //---------------------------------------------------------------------------
@@ -627,7 +627,7 @@ void CPROC DrawThickDentInverted( PCOMMON pc )
 {
    if( pc->flags.bInitial || pc->flags.bHidden ) return;
 	DrawNormalFrame( pc );
-	DrawNormalFrameInset( pc->Window, TRUE, 4 );
+	DrawNormalFrameInset( pc, pc->Window, TRUE, 4 );
 }
 
 //---------------------------------------------------------------------------
@@ -636,7 +636,7 @@ void CPROC DrawDent( PCOMMON pc )
 {
    if( pc->flags.bInitial || pc->flags.bHidden ) return;
 	DrawThinnerFrameInverted( pc );
-	DrawThinFrameInset( pc->Window, FALSE, 2 );
+	DrawThinFrameInset( pc, pc->Window, FALSE, 2 );
 }
 
 //---------------------------------------------------------------------------
@@ -645,7 +645,7 @@ void CPROC DrawDentInverted( PCOMMON pc )
 {
    if( pc->flags.bInitial || pc->flags.bHidden ) return;
 	DrawThinnerFrame( pc );
-	DrawThinFrameInset( pc->Window, TRUE, 2 );
+	DrawThinFrameInset( pc, pc->Window, TRUE, 2 );
 }
 
 //---------------------------------------------------------------------------
@@ -653,7 +653,7 @@ void CPROC DrawThinDent( PCOMMON pc )
 {
    if( pc->flags.bInitial || pc->flags.bHidden ) return;
 	DrawThinFrameInverted( pc );
-	DrawThinFrameInset( pc->Window, FALSE, 1 );
+	DrawThinFrameInset( pc, pc->Window, FALSE, 1 );
 }
 
 //---------------------------------------------------------------------------
@@ -662,7 +662,7 @@ void CPROC DrawThinDentInverted( PCOMMON pc )
 {
    if( pc->flags.bInitial || pc->flags.bHidden ) return;
 	DrawThinFrame( pc );
-	DrawThinFrameInset( pc->Window, TRUE, 1 );
+	DrawThinFrameInset( pc, pc->Window, TRUE, 1 );
 }
 
 //---------------------------------------------------------------------------
