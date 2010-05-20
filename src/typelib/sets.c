@@ -324,8 +324,8 @@ void DeleteFromSetExx( GENERICSET *pSet, void *unit, int unitsize, int max DBG_P
 						 , &pSet->bUsed
                    , ofs
 						 , n, n % unitsize, unitsize );
-            return;
-				//DebugBreak();
+				DebugBreak();
+				return;
 			}
 			n /= unitsize;
 			ClearUsed( pSet, n );

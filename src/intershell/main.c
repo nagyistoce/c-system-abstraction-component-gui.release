@@ -4637,6 +4637,15 @@ void InterShell_SetButtonHighlight( PMENU_BUTTON button, LOGICAL bEnable )
 		SetKeyHighlight( button->control.key, bEnable );
 }
 
+LOGICAL InterShell_GetButtonHighlight( PMENU_BUTTON button )
+{
+   button = InterShell_GetPhysicalButton( button );
+   if( !button->flags.bCustom )
+		return GetKeyHighlight( button->control.key );
+   return 0;
+}
+
+
 static void CPROC MyHandleSQLFeedback( CTEXTSTR message )
 {
 	lprintf( WIDE("SQLMessage %s"), message );
@@ -5116,7 +5125,9 @@ GetCommonButtonControls
 																 , InterShell_GetCurrentButton
 																 , InterShell_SetButtonFontName
 																 , InterShell_GetPhysicalButton
-																				 , InterShell_SetButtonHighlight
+																 , InterShell_SetButtonHighlight
+																 , InterShell_GetButtonHighlight
+                                                 , InterShell_TranslateLabelTextEx
                                                              , InterShell_CreateControl
 };
 
