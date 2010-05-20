@@ -298,7 +298,7 @@ CTEXTSTR InterShell_GetControlLabelText( PMENU_BUTTON button, PPAGE_LABEL label,
    return output;
 }
 
-CTEXTSTR InterShell_TranslateLabelText( PPAGE_LABEL label, TEXTSTR output, int buffer_len, CTEXTSTR variable )
+CTEXTSTR InterShell_TranslateLabelTextEx( PMENU_BUTTON button, PPAGE_LABEL label, TEXTSTR output, int buffer_len, CTEXTSTR variable )
 {
 	int nOutput = 0;
 	while( variable && variable[0] )
@@ -385,6 +385,12 @@ CTEXTSTR InterShell_TranslateLabelText( PPAGE_LABEL label, TEXTSTR output, int b
    output[nOutput] = 0;
    return output;
 }
+
+CTEXTSTR InterShell_TranslateLabelText( PPAGE_LABEL label, TEXTSTR output, int buffer_len, CTEXTSTR variable )
+{
+   return InterShell_TranslateLabelTextEx( NULL, label, output, buffer_len, variable );
+}
+
 
 void LabelVariableChanged( PVARIABLE variable) // update any labels which are using this variable.
 {
