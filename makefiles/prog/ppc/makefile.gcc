@@ -1,0 +1,46 @@
+
+CFLAGS= -c -g -D_DEBUG -D__GCC__ -D__LINUX__
+
+all: ppc
+
+OBJS = define.o links.o text.o input.o mem.o cppmain.o \
+	fileio.o expr.o enum.o struct.o array.o
+
+ppc: $(OBJS)
+	gcc -oppc $(OBJS)
+
+links.o: links.c
+	gcc $(CFLAGS) links.c
+
+fileio.o: fileio.c
+	gcc $(CFLAGS) fileio.c
+
+expr.o: expr.c
+	gcc $(CFLAGS) expr.c
+
+text.o: text.c
+	gcc $(CFLAGS) text.c
+
+input.o: input.c
+	gcc $(CFLAGS) input.c
+
+mem.o: mem.c
+	gcc $(CFLAGS) mem.c
+
+cppmain.o: cppmain.c
+	gcc $(CFLAGS) cppmain.c
+
+
+define.o: define.c
+	gcc $(CFLAGS) define.c
+
+enum.o: enum.c
+	gcc $(CFLAGS) enum.c
+
+array.o: array.c
+	gcc $(CFLAGS) array.c
+
+struct.o: struct.c
+	gcc $(CFLAGS) struct.c
+
+

@@ -1,0 +1,47 @@
+
+MODE=RELEASE
+
+CDEBUG_FLAGS= -g -D_DEBUG 
+CRELEASE_FLAGS= #-O
+LDDEBUG_FLAGS=-g
+LDRELEASE_FLAGS=-s
+CFLAGS=$(C$(MODE)_FLAGS) -D__WINTIME__ -D__LCC__
+
+
+all: ppc.exe config.ppc
+
+OBJS = define.obj links.obj text.obj input.obj mem.obj cppmain.obj fileio.obj expr.obj
+
+.PHONY:config.ppc
+
+config.ppc:
+	echo #pragma systemincludepath c:/tools/lcc/include > config.ppc
+	echo #define WINDOWS >>config.ppc
+	echo #define _WINDOWS >>config.ppc
+	echo #define _WIN32 >>config.ppc
+	echo #define WIN32 >>config.ppc
+
+
+ppc.exe: $(OBJS)
+	lcclnk $(LD$(MODE)_FLAGS) /map ppc.map /out:ppc.exe $(OBJS)
+
+%.obj:%.c
+	lcc $(CFLAGS) /Fo$@ $<
+
+links.obj: links.c $(COMMONMAKE)
+
+fileio.obj: fileio.c $(COMMONMAKE)
+
+expr.obj: expr.c $(COMMONMAKE)
+
+text.obj: text.c $(COMMONMAKE)
+
+input.obj: input.c $(COMMONMAKE)
+
+mem.obj: mem.c $(COMMONMAKE)
+
+cppmain.obj: cppmain.c $(COMMONMAKE)
+
+define.obj: define.c $(COMMONMAKE)
+
+makefile.lcc: ;

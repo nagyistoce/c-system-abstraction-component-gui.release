@@ -1,0 +1,46 @@
+ifndef SACK_BASE
+SACK_BASE=$(CURDIR)/../..
+endif
+
+MORE_PROJECTS=testsql/Makefile
+
+ifdef bananaramama
+# direct library, application controlled redundant connections
+LIBNAME3=bag.pssql
+SRCS3=sqlstub sqlutil sqlwrap
+CXFLAGS3=-DSQLPROXY_LIBRARY_SOURCE
+MORELIBS3=bag
+ifdef __WINDOWS__
+SYSLIBS3=odbc32
+else
+SYSLIBS3=odbc
+endif
+
+ifdef __WINDOWS__
+# message based proxy to a sql server, registers one per system.
+PROGNAME2=bag.pssql_proxy
+SRCS2=sqlstub sqlutil sqlwrap
+RSRCS2=sqlstub
+SUBSYSTEM2=windows
+CXFLAGS2=-DSQLPROXY_LIBRARY_SOURCE -DSQL_PROXY_SERVER
+MORELIBS2=bag bag.psi
+ifdef __WINDOWS__
+SYSLIBS2=odbc32
+else
+SYSLIBS2=odbc
+endif
+
+# message based client to sql proxy service, lightweight message wrapper
+LIBNAME4=bag.pssql_client
+SRCS4=sqlclient
+CXFLAGS4=-DSQLSTUB_SOURCE -DSQLPROXY_SOURCE
+MORELIBS4=bag
+MORELIBS4+=bag.psi
+endif
+
+endif
+
+include $(SACK_BASE)/makefiles/makefile.many
+
+$(FINALDEST)/bin/$(RINTDEST)/$(LIBNAMEPREFIX)systray$(STATIC)$(SHLIBEXT) :
+	make -C ../systraylib $(MAKECMDGOALS)
