@@ -281,13 +281,13 @@ static int RenderRelationLines( PSI_CONTROL pc, PLISTITEM pli, int drawthis )
 			pliNextUpLevel = pliNextUpLevel->next;
 		if( pliNextUpLevel && ( pliNextUpLevel->nLevel == pli->nLevel ) )
 		{
-			do_hline( pc->Surface, y, x, x + (BRANCH_WIDTH/2)-1, basecolors[SHADE] );
-			do_vline( pc->Surface, x, ymin, ymax, basecolors[SHADE] );
+			do_hline( pc->Surface, y, x, x + (BRANCH_WIDTH/2)-1, basecolor(pc)[SHADE] );
+			do_vline( pc->Surface, x, ymin, ymax, basecolor(pc)[SHADE] );
 		}
 		else
 		{
-			do_hline( pc->Surface, y, x, x + (BRANCH_WIDTH/2)-1, basecolors[SHADE] );
-			do_vline( pc->Surface, x, ymin, y, basecolors[SHADE] );
+			do_hline( pc->Surface, y, x, x + (BRANCH_WIDTH/2)-1, basecolor(pc)[SHADE] );
+			do_vline( pc->Surface, x, ymin, y, basecolor(pc)[SHADE] );
 		}
 	}
 	pliNextUpLevel = pli->next;
@@ -300,7 +300,7 @@ static int RenderRelationLines( PSI_CONTROL pc, PLISTITEM pli, int drawthis )
 			do_vline( pc->Surface
 					  , pliNextUpLevel->nLevel * BRANCH_WIDTH + (BRANCH_WIDTH/2)
 					  , ymin, ymax
-					  , basecolors[SHADE] );
+					  , basecolor(pc)[SHADE] );
 		}
       pli = pliNextUpLevel;
 	}
@@ -332,29 +332,29 @@ static int RenderItemKnob( PSI_CONTROL pc, PLISTITEM pli )
 	y = pli->top + ( pli->height / 2 );
 
    // this draws the box with a + in it...
-	do_hline( pc->Surface, y - 5, x-5, x+5, basecolors[SHADE] );
-	do_hline( pc->Surface, y + 5, x-5, x+5, basecolors[SHADE] );
-	do_vline( pc->Surface, x - 5, y-5, y+5, basecolors[SHADE] );
-	do_vline( pc->Surface, x + 5, y-5, y+5, basecolors[SHADE] );
+	do_hline( pc->Surface, y - 5, x-5, x+5, basecolor(pc)[SHADE] );
+	do_hline( pc->Surface, y + 5, x-5, x+5, basecolor(pc)[SHADE] );
+	do_vline( pc->Surface, x - 5, y-5, y+5, basecolor(pc)[SHADE] );
+	do_vline( pc->Surface, x + 5, y-5, y+5, basecolor(pc)[SHADE] );
 	if( !pli->flags.bOpen )
 	{
-		do_hline( pc->Surface, y, x-3, x+3, basecolors[SHADOW] );
-		do_vline( pc->Surface, x, y-3, y+3, basecolors[SHADOW] );
+		do_hline( pc->Surface, y, x-3, x+3, basecolor(pc)[SHADOW] );
+		do_vline( pc->Surface, x, y-3, y+3, basecolor(pc)[SHADOW] );
 	}
 	else
 	{
-		do_hline( pc->Surface, y, x-3, x+3, basecolors[SHADOW] );
+		do_hline( pc->Surface, y, x-3, x+3, basecolor(pc)[SHADOW] );
 	}
 
    // draw line leading in (top) and out (right)
-   do_vline( pc->Surface, x, y - 5, pli->top, basecolors[SHADE] );
-	do_hline( pc->Surface, y, x + 5, x + (BRANCH_WIDTH/2)-1, basecolors[SHADE] );
+   do_vline( pc->Surface, x, y - 5, pli->top, basecolor(pc)[SHADE] );
+	do_hline( pc->Surface, y, x + 5, x + (BRANCH_WIDTH/2)-1, basecolor(pc)[SHADE] );
 
    // optionally draw line leading down (bottom)
 	if( pliNextUpLevel && ( pliNextUpLevel->nLevel == pli->nLevel ) )
 	{
       // next item is on this level, extend branch line down.
-      do_vline( pc->Surface, y, y + 5, pli->top + pli->height - 1, basecolors[SHADE] );
+      do_vline( pc->Surface, y, y + 5, pli->top + pli->height - 1, basecolor(pc)[SHADE] );
 	}
    return x + BRANCH_WIDTH/2;
 }
@@ -417,8 +417,8 @@ static int CPROC RenderListBox( PSI_CONTROL pc )
 	}
 	else
 		bFirstDraw = FALSE;
-   BlatColorAlpha( pc->Surface, 0, 0, pc->surface_rect.width, pc->surface_rect.height, basecolors[EDIT_BACKGROUND] );
-	//ClearImageTo( pSurface, basecolors[EDIT_BACKGROUND] );
+   BlatColorAlpha( pc->Surface, 0, 0, pc->surface_rect.width, pc->surface_rect.height, basecolor(pc)[EDIT_BACKGROUND] );
+	//ClearImageTo( pSurface, basecolor(pc)[EDIT_BACKGROUND] );
    font = GetFrameFont( pc );
 	GetStringSizeFont( WIDE("X"), &w, &h, font );
 	maxchars = ( pc->surface_rect.width - 8 ) / w;
@@ -447,7 +447,7 @@ static int CPROC RenderListBox( PSI_CONTROL pc )
 		}
 		if( pli->flags.bSelected )
 		{
-			BlatColor( pSurface, x-2, y, w-4, h, basecolors[SELECT_BACK] );
+			BlatColor( pSurface, x-2, y, w-4, h, basecolor(pc)[SELECT_BACK] );
 		}
 		while( start )
 		{
@@ -473,11 +473,11 @@ static int CPROC RenderListBox( PSI_CONTROL pc )
 			}
 			if( pli->flags.bSelected )
 			{
-				PutStringFontEx( pSurface, x + column, y, basecolors[SELECT_TEXT], 0, start, end-start, font );
+				PutStringFontEx( pSurface, x + column, y, basecolor(pc)[SELECT_TEXT], 0, start, end-start, font );
 			}
 			else
 			{
-				PutStringFontEx( pSurface, x + column, y, basecolors[EDIT_TEXT], 0, start, end-start, font );
+				PutStringFontEx( pSurface, x + column, y, basecolor(pc)[EDIT_TEXT], 0, start, end-start, font );
 			}
 			tab++;
 			if( tab >= plb->nTabstops )
@@ -489,7 +489,7 @@ static int CPROC RenderListBox( PSI_CONTROL pc )
 		}
 		if( pc->flags.bFocused &&
 		    plb->current == pli )
-			do_line( pSurface, x + 1, y + h-2, w - 6, y + h - 2, basecolors[SHADE] );
+			do_line( pSurface, x + 1, y + h-2, w - 6, y + h - 2, basecolor(pc)[SHADE] );
 		y += h;
       //xlprintf(LOG_ALWAYS)( "y is %ld and height is %ld", y , pc->surface_rect.height );
 		if( y < pc->surface_rect.height ) // probably is only partially shown...

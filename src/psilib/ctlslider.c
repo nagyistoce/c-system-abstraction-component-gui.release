@@ -27,8 +27,8 @@ static int OnDrawCommon( SLIDER_CONTROL_NAME )( PSI_CONTROL pc )
 	ValidatedControlData( PSLIDER, SLIDER_CONTROL, ps, pc );
 	if( ps )
 	{
-      //BlatColorAlpha( pc->Surface, 0, 0, pc->surface_rect.width, pc->surface_rect.height, basecolors[NORMAL] );
-		//ClearImageTo( pc->Surface, basecolors[NORMAL] );
+      //BlatColorAlpha( pc->Surface, 0, 0, pc->surface_rect.width, pc->surface_rect.height, basecolor(pc)[NORMAL] );
+		//ClearImageTo( pc->Surface, basecolor(pc)[NORMAL] );
 		if( ps->flags.bHorizontal )
 		{
 			int midy;
@@ -40,9 +40,9 @@ static int OnDrawCommon( SLIDER_CONTROL_NAME )( PSI_CONTROL pc )
 			midy = pc->surface_rect.height / 2;
 			fromx = 2+(caretw/2);
 			tox = pc->surface_rect.width - (2+(caretw/2));
-			do_line( pc->Surface, fromx+1, midy-1, tox-1, midy-1, basecolors[SHADOW] );
-			do_line( pc->Surface, fromx, midy, tox, midy, basecolors[SHADE] );
-			do_line( pc->Surface, fromx+1, midy+1, tox-1, midy+1, basecolors[HIGHLIGHT] );
+			do_line( pc->Surface, fromx+1, midy-1, tox-1, midy-1, basecolor(pc)[SHADOW] );
+			do_line( pc->Surface, fromx, midy, tox, midy, basecolor(pc)[SHADE] );
+			do_line( pc->Surface, fromx+1, midy+1, tox-1, midy+1, basecolor(pc)[HIGHLIGHT] );
 			{
 				int x;
 				caretx = fromx + ( ps->current - ps->min ) * ( tox - fromx ) / ( ps->max - ps->min );
@@ -54,25 +54,25 @@ static int OnDrawCommon( SLIDER_CONTROL_NAME )( PSI_CONTROL pc )
 					else
 						y = x;
 					if( x == -caretw/2 )
-						c = basecolors[HIGHLIGHT];
+						c = basecolor(pc)[HIGHLIGHT];
 					else if( x == caretw/2 )
-					c = basecolors[SHADOW];
+					c = basecolor(pc)[SHADOW];
 					else if( x == caretw/2 - 1 )
-						c = basecolors[SHADE];
+						c = basecolor(pc)[SHADE];
 					else
-						c = basecolors[NORMAL];
+						c = basecolor(pc)[NORMAL];
 					do_line( pc->Surface, x + caretx, 1 + y, caretx + x, ( careth - 1 ) - y, c );
 				}
 				do_line( pc->Surface, caretx, 1,
-						  caretx + caretw/2 - 1,  caretw/2, basecolors[SHADE] );
+						  caretx + caretw/2 - 1,  caretw/2, basecolor(pc)[SHADE] );
 				do_line( pc->Surface, caretx - caretw/2, 1 + caretw/2
-						 , caretx           , 1, basecolors[HIGHLIGHT] );
+						 , caretx           , 1, basecolor(pc)[HIGHLIGHT] );
 				do_line( pc->Surface, caretx - caretw/2, careth - 1 - caretw/2
-								     , caretx, careth - 1, basecolors[SHADE] );
+								     , caretx, careth - 1, basecolor(pc)[SHADE] );
 				do_line( pc->Surface, caretx, careth - 1
-						 , caretx + caretw/2, careth - 1 - caretw/2, basecolors[SHADOW] );
+						 , caretx + caretw/2, careth - 1 - caretw/2, basecolor(pc)[SHADOW] );
 				do_line( pc->Surface, caretx, careth - 2
-						 , caretx + caretw/2 - 1, careth - 1 - caretw/2, basecolors[SHADE] );
+						 , caretx + caretw/2 - 1, careth - 1 - caretw/2, basecolor(pc)[SHADE] );
 			}
 		}
 		else
@@ -84,9 +84,9 @@ static int OnDrawCommon( SLIDER_CONTROL_NAME )( PSI_CONTROL pc )
 			midx = pc->surface_rect.width /2;
 			fromy = 2 + (caretw/2);
 			toy = pc->surface_rect.height - (2 + (caretw/2));
-			do_line( pc->Surface, midx-1, fromy+1, midx-1, toy-1, basecolors[SHADOW] );
-			do_line( pc->Surface, midx, fromy, midx, toy, basecolors[SHADE] );
-			do_line( pc->Surface, midx+1, fromy+1, midx+1, toy-1, basecolors[HIGHLIGHT] );
+			do_line( pc->Surface, midx-1, fromy+1, midx-1, toy-1, basecolor(pc)[SHADOW] );
+			do_line( pc->Surface, midx, fromy, midx, toy, basecolor(pc)[SHADE] );
+			do_line( pc->Surface, midx+1, fromy+1, midx+1, toy-1, basecolor(pc)[HIGHLIGHT] );
 			{
 				int x;
 				carety = fromy + ( ps->current - ps->min ) * ( toy - fromy ) / ( ps->max - ps->min );
@@ -98,25 +98,25 @@ static int OnDrawCommon( SLIDER_CONTROL_NAME )( PSI_CONTROL pc )
 					else
 						y = x;
 					if( x == -caretw/2 )
-						c = basecolors[HIGHLIGHT];
+						c = basecolor(pc)[HIGHLIGHT];
 					else if( x == caretw/2 )
-						c = basecolors[SHADOW];
+						c = basecolor(pc)[SHADOW];
 					else if( x == caretw/2 - 1 )
-						c = basecolors[SHADE];
+						c = basecolor(pc)[SHADE];
 					else
-						c = basecolors[NORMAL];
+						c = basecolor(pc)[NORMAL];
 					do_inv_line( pc->Surface, x + carety, 1 + y, carety + x, ( careth - 1 ) - y, c );
 				}
 				do_inv_line( pc->Surface, carety, 1,
-								carety + caretw/2 - 1,  caretw/2, basecolors[SHADE] );
+								carety + caretw/2 - 1,  caretw/2, basecolor(pc)[SHADE] );
 				do_inv_line( pc->Surface, carety - caretw/2, 1 + caretw/2
-							  , carety           , 1, basecolors[HIGHLIGHT] );
+							  , carety           , 1, basecolor(pc)[HIGHLIGHT] );
 				do_inv_line( pc->Surface, carety - caretw/2, careth - 1 - caretw/2
-							  , carety, careth - 1, basecolors[SHADE] );
+							  , carety, careth - 1, basecolor(pc)[SHADE] );
 				do_inv_line( pc->Surface, carety, careth - 1
-							  , carety + caretw/2, careth - 1 - caretw/2, basecolors[SHADOW] );
+							  , carety + caretw/2, careth - 1 - caretw/2, basecolor(pc)[SHADOW] );
 				do_inv_line( pc->Surface, carety, careth - 2
-							  , carety + caretw/2 - 1, careth - 1 - caretw/2, basecolors[SHADE] );
+							  , carety + caretw/2 - 1, careth - 1 - caretw/2, basecolor(pc)[SHADE] );
 			}
 		}
 	}
