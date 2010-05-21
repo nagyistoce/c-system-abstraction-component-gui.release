@@ -174,7 +174,7 @@ static int CPROC ButtonDraw( PSI_CONTROL pc )
 				GetImageSize( pb->pImage, &width, &height );
 				do_line( pc->Surface, 2, height - 2
 						 , width - 2, height - 2
-						 , basecolors[SHADE] );
+						 , basecolor(pc)[SHADE] );
 			}
 		}
 		if( pc->caption.text )
@@ -188,17 +188,17 @@ static int CPROC ButtonDraw( PSI_CONTROL pc )
 			if( !pc->flags.bDisable )
 			{
 				_32 y, maxw;
-				DrawButtonCaption( pc, pb, x, 0, basecolors[TEXTCOLOR], &y, &maxw, font );
+				DrawButtonCaption( pc, pb, x, 0, basecolor(pc)[TEXTCOLOR], &y, &maxw, font );
 				if( pc->flags.bFocused )
 				{
-					do_hline( pc->Surface, y-1, x-maxw/2-1, x+maxw/2+1, basecolors[SHADE] );
-					do_hline( pc->Surface, y, x-maxw/2, x+maxw/2, basecolors[HIGHLIGHT] );
+					do_hline( pc->Surface, y-1, x-maxw/2-1, x+maxw/2+1, basecolor(pc)[SHADE] );
+					do_hline( pc->Surface, y, x-maxw/2, x+maxw/2, basecolor(pc)[HIGHLIGHT] );
 				}
 			}
 			else
 			{
-				DrawButtonCaption( pc, pb, x, 0, basecolors[SHADOW], NULL, NULL, font );
-				DrawButtonCaption( pc, pb, x+1, 1, basecolors[HIGHLIGHT], NULL, NULL, font );
+				DrawButtonCaption( pc, pb, x, 0, basecolor(pc)[SHADOW], NULL, NULL, font );
+				DrawButtonCaption( pc, pb, x+1, 1, basecolor(pc)[HIGHLIGHT], NULL, NULL, font );
 			}
 		}
 	}
@@ -496,7 +496,7 @@ CONTROL_PROC_DEF_EX( NORMAL_BUTTON, BUTTON, Button, (void) )
 		// this bit of code needs to go away...
       SetCommonTransparent( pc, TRUE );
 		pb->buttonflags.pressed = FALSE;
-		pb->color = basecolors[NORMAL];
+		pb->color = basecolor(pc)[NORMAL];
 		pb->_b = 0;
 		return TRUE;
 	}
@@ -537,7 +537,7 @@ int CPROC ConfigureCustomDrawnButton( PSI_CONTROL pc )
 	{
       SetCommonTransparent( pc, TRUE );
 		pc->CaptionChanged = ButtonCaptionChange;
-		pb->color = basecolors[NORMAL];
+		pb->color = basecolor(pc)[NORMAL];
 		pb->buttonflags.pressed = FALSE;
 		pb->_b = 0;
 		return 1;
@@ -562,7 +562,7 @@ int CPROC ConfigureImageButton( PSI_CONTROL pc )
 		//pb->ClickMethod = PushMethod;
 		//pb->ClickData = Data;
 		//pb->pImage = pImage;
-		pb->color = basecolors[NORMAL];
+		pb->color = basecolor(pc)[NORMAL];
 		pb->buttonflags.pressed = FALSE;
 		pc->CaptionChanged = ButtonCaptionChange;
       return TRUE;
@@ -648,22 +648,22 @@ static int CPROC DrawCheckButton( PSI_CONTROL pc )
 	// c> the whole control si a button that locks down...
 	if( pchk )
 	{
-      BlatColorAlpha( pc->Surface, 0, 0, pc->surface_rect.width, pc->surface_rect.height, basecolors[NORMAL] );
-		//ClearImageTo( pc->Surface, basecolors[NORMAL] );
+      BlatColorAlpha( pc->Surface, 0, 0, pc->surface_rect.width, pc->surface_rect.height, basecolor(pc)[NORMAL] );
+		//ClearImageTo( pc->Surface, basecolor(pc)[NORMAL] );
 	}
    if( pchk->pCheckWindow )
-		DrawThinFrameInvertedImage( pchk->pCheckWindow );
+		DrawThinFrameInvertedImage( pc, pchk->pCheckWindow );
 
 	// this disables also...
-	//ClearImageTo( pchk->pCheckSurface, basecolors[NORMAL]  );
+	//ClearImageTo( pchk->pCheckSurface, basecolor(pc)[NORMAL]  );
 
 	if( pchk->pCheckSurface )
 		if( !pchk->flags.pressed )
 		{
 			if( pchk->flags.bChecked )
-				DrawThinnerFrameInvertedImage( pchk->pCheckSurface );
+				DrawThinnerFrameInvertedImage( pc, pchk->pCheckSurface );
 			else
-				DrawThinnerFrameImage( pchk->pCheckSurface );
+				DrawThinnerFrameImage( pc, pchk->pCheckSurface );
 		}
 
 	if( pc->caption.text )
@@ -672,19 +672,19 @@ static int CPROC DrawCheckButton( PSI_CONTROL pc )
 		x = 16;
 		if( !pc->flags.bDisable )
 		{
-			PutMenuString( pc->Surface, x, 0, basecolors[TEXTCOLOR], 0, GetText( pc->caption.text) );
+			PutMenuString( pc->Surface, x, 0, basecolor(pc)[TEXTCOLOR], 0, GetText( pc->caption.text) );
 			if( pc->flags.bFocused )
 			{
 				_32 end, h;
 				end = x + GetStringSize( GetText( pc->caption.text), NULL, &h );
 				//h += ;
-				do_line( pc->Surface, x, h, end, h, basecolors[SHADE] );
+				do_line( pc->Surface, x, h, end, h, basecolor(pc)[SHADE] );
 			}
 		}
 		else
 		{
-			PutMenuString( pc->Surface, x+1, 1, basecolors[HIGHLIGHT], 0, GetText( pc->caption.text) );
-			PutMenuString( pc->Surface, x, 0, basecolors[SHADOW], 0, GetText( pc->caption.text) );
+			PutMenuString( pc->Surface, x+1, 1, basecolor(pc)[HIGHLIGHT], 0, GetText( pc->caption.text) );
+			PutMenuString( pc->Surface, x, 0, basecolor(pc)[SHADOW], 0, GetText( pc->caption.text) );
 		}
 	}
    return 1;

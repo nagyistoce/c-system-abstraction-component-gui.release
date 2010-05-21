@@ -65,8 +65,8 @@ CUSTOM_CONTROL_DRAW( DrawEditControl, ( PSI_CONTROL pc ) )
 	Font font;
 	int ofs, x, CursX;
 	_32 height;
-	BlatColorAlpha( pc->Surface, 0, 0, pc->surface_rect.width, pc->surface_rect.height, basecolors[EDIT_BACKGROUND] );
-	//ClearImageTo( pc->Surface, basecolors[EDIT_BACKGROUND] );
+	BlatColorAlpha( pc->Surface, 0, 0, pc->surface_rect.width, pc->surface_rect.height, basecolor(pc)[EDIT_BACKGROUND] );
+	//ClearImageTo( pc->Surface, basecolor(pc)[EDIT_BACKGROUND] );
 	font = GetFrameFont( pc );
 	// should probably figure some way to center the text vertical also...
 	pe->MaxShowLen = GetMaxStringLengthFont( pc->surface_rect.width, font );
@@ -121,7 +121,7 @@ CUSTOM_CONTROL_DRAW( DrawEditControl, ( PSI_CONTROL pc ) )
 						nLen = pe->MaxShowLen - ofs;
 					//lprintf( WIDE("Showing %d of string in normal color before select..."), nLen );
 					PutStringFontEx( pc->Surface, x, pe->top_side_pad
-											 , basecolors[EDIT_TEXT], basecolors[EDIT_BACKGROUND]
+											 , basecolor(pc)[EDIT_TEXT], basecolor(pc)[EDIT_BACKGROUND]
 											 , GetString( pe, GetText( pc->caption.text) + Start, nLen ), nLen, font );
 					x += GetStringSizeFontEx( GetString( pe, GetText( pc->caption.text) + Start, nLen ), nLen, NULL, NULL, font );
 				}
@@ -130,7 +130,7 @@ CUSTOM_CONTROL_DRAW( DrawEditControl, ( PSI_CONTROL pc ) )
 					nLen = pe->MaxShowLen - ofs;
 					//lprintf( WIDE("Showing %d of string in normal color after select..."), nLen );
 					PutStringFontEx( pc->Surface, x, pe->top_side_pad
-											 , basecolors[EDIT_TEXT], basecolors[EDIT_BACKGROUND]
+											 , basecolor(pc)[EDIT_TEXT], basecolor(pc)[EDIT_BACKGROUND]
 											 , GetString( pe, GetText( pc->caption.text) + Start, nLen ), nLen, font );
 					x += GetStringSizeFontEx( GetString( pe, GetText( pc->caption.text) + Start, nLen ), nLen, NULL, NULL, font );
 				}
@@ -144,7 +144,7 @@ CUSTOM_CONTROL_DRAW( DrawEditControl, ( PSI_CONTROL pc ) )
 						nLen = pe->MaxShowLen - ofs;
 					//lprintf( WIDE("Showing %d of string in selected color..."), nLen );
 					PutStringFontEx( pc->Surface, x, pe->top_side_pad
-											 , basecolors[SELECT_TEXT], basecolors[SELECT_BACK]
+											 , basecolor(pc)[SELECT_TEXT], basecolor(pc)[SELECT_BACK]
 											 , GetString( pe, GetText( pc->caption.text) + Start, nLen ), nLen, font );
 					x += GetStringSizeFontEx( GetString( pe, GetText( pc->caption.text) + Start, nLen ), nLen, NULL, NULL, font );
 				}
@@ -155,7 +155,7 @@ CUSTOM_CONTROL_DRAW( DrawEditControl, ( PSI_CONTROL pc ) )
 		else
 		{
 			PutStringFontEx( pc->Surface, x, pe->top_side_pad
-									 , basecolors[EDIT_TEXT], basecolors[EDIT_BACKGROUND]
+									 , basecolor(pc)[EDIT_TEXT], basecolor(pc)[EDIT_BACKGROUND]
 									 , GetString( pe, GetText( pc->caption.text) + pe->Start, pe->MaxShowLen ), pe->MaxShowLen
 									 , font
 									 );
