@@ -292,6 +292,9 @@ NETWORK_PROC( void, ReleaseAddress )(SOCKADDR *lpsaAddr); // release a socket re
 
 // result with TRUE if equal, else FALSE
 NETWORK_PROC( LOGICAL, CompareAddress )(SOCKADDR *sa1, SOCKADDR *sa2 );
+#define SA_COMPARE_FULL 1
+#define SA_COMPARE_IP   0
+NETWORK_PROC( LOGICAL, CompareAddressEx )(SOCKADDR *sa1, SOCKADDR *sa2, int method );
 /*
  * compare this address to see if it is any of my IPv4 interfaces
  */

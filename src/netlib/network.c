@@ -2537,29 +2537,60 @@ SOCKADDR *CreateLocal(_16 nMyPort)
 
 //----------------------------------------------------------------------------
 
-LOGICAL CompareAddress( SOCKADDR *sa1, SOCKADDR *sa2 )
+LOGICAL CompareAddressEx( SOCKADDR *sa1, SOCKADDR *sa2, int method )
 {
-	if( sa1 && sa2 )
+	if( method == SA_COMPARE_FULL )
 	{
-		if( ((SOCKADDR_IN*)sa1)->sin_family == ((SOCKADDR_IN*)sa2)->sin_family )
+		if( sa1 && sa2 )
 		{
-			switch( ((SOCKADDR_IN*)sa1)->sin_family )
+			if( ((SOCKADDR_IN*)sa1)->sin_family == ((SOCKADDR_IN*)sa2)->sin_family )
 			{
-			case AF_INET:
+				switch( ((SOCKADDR_IN*)sa1)->sin_family )
 				{
-					SOCKADDR_IN *sin1 = (SOCKADDR_IN*)sa1;
-					SOCKADDR_IN *sin2 = (SOCKADDR_IN*)sa2;
-					if( MemCmp( sin1, sin2, sizeof( SOCKADDR_IN ) ) == 0 )
-						return 1;
+				case AF_INET:
+					{
+						SOCKADDR_IN *sin1 = (SOCKADDR_IN*)sa1;
+						SOCKADDR_IN *sin2 = (SOCKADDR_IN*)sa2;
+						if( MemCmp( sin1, sin2, sizeof( SOCKADDR_IN ) ) == 0 )
+							return 1;
+					}
+					break;
+				default:
+					xlprintf( LOG_ALWAYS )( WIDE("unhandled address type passed to compare, resulting FAILURE") );
+					return 0;
 				}
-				break;
-			default:
-				xlprintf( LOG_ALWAYS )( WIDE("unhandled address type passed to compare, resulting FAILURE") );
-				return 0;
 			}
 		}
 	}
-   return 0;
+	else
+	{
+		if( sa1 && sa2 )
+		{
+			if( ((SOCKADDR_IN*)sa1)->sin_family == ((SOCKADDR_IN*)sa2)->sin_family )
+			{
+				switch( ((SOCKADDR_IN*)sa1)->sin_family )
+				{
+				case AF_INET:
+					{
+						if( MemCmp( &((SOCKADDR_IN*)sa1)->sin_addr, &((SOCKADDR_IN*)sa2)->sin_addr, sizeof( ((SOCKADDR_IN*)sa2)->sin_addr ) ) == 0 )
+							return 1;
+					}
+					break;
+				default:
+					xlprintf( LOG_ALWAYS )( WIDE("unhandled address type passed to compare, resulting FAILURE") );
+					return 0;
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+//----------------------------------------------------------------------------
+
+LOGICAL CompareAddress( SOCKADDR *sa1, SOCKADDR *sa2 )
+{
+   return CompareAddressEx( sa1, sa2, SA_COMPARE_FULL );
 }
 
 //----------------------------------------------------------------------------
