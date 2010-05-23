@@ -191,7 +191,8 @@ HANDLE sack_open( int group, CTEXTSTR filename, int opts, ... )
 #endif
 		return INVALID_HANDLE_VALUE;
 	}
-	AddLink( &file->handles, handle );
+   if( handle != INVALID_HANDLE_VALUE )
+		AddLink( &file->handles, handle );
 	return handle;
 }
 
@@ -237,6 +238,8 @@ int sack_close( HANDLE file_handle )
 {
 
 	struct file *file = FindFileByHandle( (HANDLE)file_handle );
+	if( file )
+	{
 	DeleteLink( &file->handles, (POINTER)file_handle );
 #ifdef DEBUG_FILEOPEN
 	lprintf( WIDE("Close %s"), file->fullname );
@@ -246,8 +249,11 @@ int sack_close( HANDLE file_handle )
 	Release( file->fullname );
 	Release( file );
 	DeleteLink( &l.files, file );
-   */
-	return CloseHandle((HANDLE)file_handle);
+	*/
+	}
+	if( file_handle != INVALID_HANDLE_VALUE )
+		return CloseHandle((HANDLE)file_handle);
+   return 0;
 }
 
 int sack_iopen( int group, CTEXTSTR filename, int opts, ... )
