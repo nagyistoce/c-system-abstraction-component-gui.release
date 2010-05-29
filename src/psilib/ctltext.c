@@ -122,8 +122,8 @@ CAPTIONED_CONTROL_PROC_DEF( STATIC_TEXT, TEXTCONTROL, TextControl, (int attr) )
 	if( ptc )
 	{
       SetNoFocus( pc );
-		ptc->foreground = basecolors[TEXTCOLOR];
-		ptc->background = basecolors[NORMAL];
+		ptc->foreground = basecolor(pc)[TEXTCOLOR];
+		ptc->background = basecolor(pc)[NORMAL];
       SetCommonTransparent( pc, TRUE );
 		return TRUE;
 	}
@@ -140,14 +140,14 @@ PSI_PROC( void, SetTextControlColors )( PCONTROL pc, CDATA fore, CDATA back )
 	if( fore )
 		ptc->foreground = fore;
 	else
-		ptc->foreground = basecolors[TEXTCOLOR];
+		ptc->foreground = basecolor(pc)[TEXTCOLOR];
 
 	// if we don't allow the application to set the background to OFF
    // then it can't just be floating transparency text....
 	//if( back )
 		ptc->background = back;
 	//else
-	//	ptc->background = basecolors[NORMAL];
+	//	ptc->background = basecolor(pc)[NORMAL];
 	SmudgeCommon( pc );
 }
 
