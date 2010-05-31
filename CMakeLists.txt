@@ -708,6 +708,9 @@ if( NOT SACK_ONLY )
   if( BUILD_INTERSHELL )
    add_subdirectory( src/intershell )
   endif( BUILD_INTERSHELL )
+  
+  add_subdirectory( src/psilib/paltst )
+
  endif( NOT __NO_GUI__ )
 
 # parts of SDK ...
