@@ -35,6 +35,8 @@ add_definitions( -D_WIN32_WINNT=${WIN32_VERSION} )
 
 endif( ${CMAKE_GENERATOR} MATCHES "Watcom WMake" )
 
+#ENABLE_LANGUAGE(RC)
+
 
 project( SACK )
 
@@ -439,6 +441,7 @@ set_source_files_properties( ${OPTION_SOURCES} PROPERTIES LANGUAGE "CXX" )
 endif()
 
 if( NOT WATCOM )
+message( "not watcom... adding all-rsources.rc" )
   LIST(APPEND BASE_SOURCES
      all_resources.rc )
 else()
@@ -492,7 +495,7 @@ FOREACH(SOURCE ${SACK_SOURCES})
       endif()
       set( cplusplus_sources ${cplusplus_sources} ${BASENAME}.cpp )
    else()
-      message( "NOT THING ${SOURCE}" )
+      #message( "NOT THING ${SOURCE}" )
    endif()
 ENDFOREACH(SOURCE)
 
@@ -505,8 +508,8 @@ set( SACK_SOURCES ${SACK_SOURCES}
   ${LAST_GCC_LIBRARY_SOURCE} 
 )
 
-message( SOURCES:${SACK_SOURCES} )
-message( C++SOURCE:${cplusplus_sources} )
+#message( SOURCES:${SACK_SOURCES} )
+#message( C++SOURCE:${cplusplus_sources} )
 
 #set_source_files_properties( ${SOURCES} PROPERTIES LANGUAGE "CXX" )
 
