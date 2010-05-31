@@ -72,6 +72,7 @@ endif()
 add_subdirectory( windows_shell )
 add_subdirectory( tasks )
 add_subdirectory( clock )
+add_subdirectory( graph )
 
 
 # this has to be set before the cmakelists.txt ends... but not before other cmakelists are loaded
