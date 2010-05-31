@@ -744,6 +744,7 @@ endif( BUILD_ALTANIK )
 
 add_subdirectory( src/netlib/user )
 add_subdirectory( src/netlib/echo )
+add_subdirectory( src/utils/launcher )
 add_subdirectory( src/utils/deploy )
 
 set( CMAKE_C_STANDARD_LIBRARIES_INIT "" )
