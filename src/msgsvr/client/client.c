@@ -40,7 +40,7 @@
 
 MSGCLIENT_NAMESPACE
 
-#define MSG_DEFAULT_RESULT_BUFFER_MAX (sizeof( _32 ) * 2048)
+#define MSG_DEFAULT_RESULT_BUFFER_MAX (sizeof( _32 ) * 16384)
 
 #ifdef  _DEBUG
 #define DEFAULT_TIMEOUT 300000 // standard transaction timout
@@ -776,11 +776,11 @@ static int GetAMessageEx( MSGQ_TYPE msgq, CTEXTSTR q, int flags DBG_PASS )
 	if( IsThisThread( g.pThread ) )
 	{
 		int logged = 0;
-		_32 get_tired_of_waiting_at = GetTickCount() + 200;
+		_32 get_tired_of_waiting_at = timeGetTime() + 200;
 		while( g.responce_received )
 		{
 			Relinquish(); // someone hasn't gotten their responce in yet...
-			if( get_tired_of_waiting_at < GetTickCount() )
+			if( get_tired_of_waiting_at < timeGetTime() )
 			{
 				lprintf( "Dropping a responce on the ground. %s:%08" _32fx, q, g.MessageIn.msgid );
 				g.responce_received = 0;
@@ -843,7 +843,7 @@ static int GetAMessageEx( MSGQ_TYPE msgq, CTEXTSTR q, int flags DBG_PASS )
 			else
 			{
 #ifdef DEBUG_DATA_XFER
-				lprintf( WIDE("Received Mesage.... "));
+				lprintf( WIDE("Received Message.... "));
 				LogBinary( (P_8)&g.MessageIn, g.MessageLen + sizeof( MSGIDTYPE ) );
 #endif
 				//Log2( WIDE("Read message to %d (%08x)"), g.pid_me, g.MessageIn.data[0] );
@@ -854,7 +854,7 @@ static int GetAMessageEx( MSGQ_TYPE msgq, CTEXTSTR q, int flags DBG_PASS )
 					for( handler = g.pHandlers; handler; handler = handler->next )
 						if( handler->ServiceID == g.MessageIn.data[1] )
 						{
-							handler->wait_for_responce = g.MessageIn.data[2] + GetTickCount();
+							handler->wait_for_responce = g.MessageIn.data[2] + timeGetTime();
 							break;
 						}
 					if( !handler )
@@ -895,7 +895,7 @@ static int GetAMessageEx( MSGQ_TYPE msgq, CTEXTSTR q, int flags DBG_PASS )
 							// then, this is a request of ProbeClientAlive.
 							g.MessageIn.data[0] = RU_ALIVE;
 						}
-						client->last_time_received = GetTickCount();
+						client->last_time_received = timeGetTime();
 					}
 					// go back to top and get another message...
 					// application can care about this...
@@ -905,18 +905,18 @@ static int GetAMessageEx( MSGQ_TYPE msgq, CTEXTSTR q, int flags DBG_PASS )
 			}
 		}
 		while( !g.flags.disconnected && g.MessageIn.data[0] == RU_ALIVE );
-																		//lprintf( WIDE("Responce received...%08lX"), g.MessageIn.data[0] );
+		lprintf( WIDE("Responce received...%08lX"), g.MessageIn.data[0] );
 		if( !g.flags.disconnected )
 		{
 			int cnt = 0;
 			INDEX idx;
 			PTHREAD thread;
 			g.responce_received = 1; // set to enable application to get it's message...
-									  //lprintf( WIDE("waking sleepers.") );
+			lprintf( WIDE("waking sleepers.") );
 			LIST_FORALL( g.pSleepers, idx, PTHREAD, thread )
 			{
 				cnt++;
-			//lprintf( WIDE("Wake thread waiting for responces...%016Lx"), thread->ThreadID );
+				lprintf( WIDE("Wake thread waiting for responces...%016Lx"), 0 );
 				WakeThread( thread );
 			}
 			if( !cnt )
@@ -1325,7 +1325,7 @@ static PSERVICE_CLIENT AddClient( _32 pid )
 		PSERVICE_CLIENT client = (PSERVICE_CLIENT)Allocate( sizeof( SERVICE_CLIENT ) );
 		MemSet( client, 0, sizeof( SERVICE_CLIENT ) );
 		client->pid = pid;
-		client->last_time_received = GetTickCount();
+		client->last_time_received = timeGetTime();
 		client->flags.valid = 1;
 		LinkThing( g.clients, client );
 		g.clients = client;
@@ -1816,35 +1816,35 @@ void ResumeThreads( void )
 	if( g.pThread )
 	{
 		lprintf( WIDE("Resume Service") );
-		tick = GetTickCount();
+		tick = timeGetTime();
 		g.pending = 1;
 		pthread_kill( ( GetThreadID( g.pThread ) & 0xFFFFFFFF ), SIGUSR2 );
-		while( ((tick+10)>GetTickCount()) && g.pending ) Relinquish();
+		while( ((tick+10)>timeGetTime()) && g.pending ) Relinquish();
 	}
 	if( g.pMessageThread )
 	{
 		lprintf( WIDE("Resume Responce") );
-		tick = GetTickCount();
+		tick = timeGetTime();
 		g.pending = 1;
 		pthread_kill( ( GetThreadID( g.pMessageThread ) & 0xFFFFFFFF ), SIGUSR2 );
-		while( ((tick+10)>GetTickCount()) && g.pending ) Relinquish();
+		while( ((tick+10)>timeGetTime()) && g.pending ) Relinquish();
 	}
 
 	if( g.pEventThread )
 	{
 		lprintf( WIDE("Resume event") );
-		tick = GetTickCount();
+		tick = timeGetTime();
 		g.pending = 1;
 		pthread_kill( ( GetThreadID( g.pEventThread ) & 0xFFFFFFFF ), SIGUSR2 );
-		while( ((tick+10)>GetTickCount()) && g.pending ) Relinquish();
+		while( ((tick+10)>timeGetTime()) && g.pending ) Relinquish();
 	}
 	if( g.pLocalEventThread )
 	{
 		lprintf( WIDE("Resume local event") );
-		tick = GetTickCount();
+		tick = timeGetTime();
 		g.pending = 1;
 		pthread_kill( ( GetThreadID( g.pLocalEventThread ) & 0xFFFFFFFF ), SIGUSR2 );
-		while( ((tick+10)>GetTickCount()) && g.pending ) Relinquish();
+		while( ((tick+10)>timeGetTime()) && g.pending ) Relinquish();
 	}
 #else
 	if( g.pThread )
@@ -1905,14 +1905,14 @@ void CloseMessageQueues( void )
 		g.msgq_local = 0;
 		do
 		{
-			time = GetTickCount();
-			while( ((time+100)>GetTickCount()) && g.pThread ) Relinquish();
-			time = GetTickCount();
-			while( ((time+100)>GetTickCount()) && g.pMessageThread ) Relinquish();
-			time = GetTickCount();
-			while( ((time+100)>GetTickCount()) && g.pEventThread ) Relinquish();
-			time = GetTickCount();
-			while( ((time+100)>GetTickCount()) && g.pLocalEventThread ) Relinquish();
+			time = timeGetTime();
+			while( ((time+100)>timeGetTime()) && g.pThread ) Relinquish();
+			time = timeGetTime();
+			while( ((time+100)>timeGetTime()) && g.pMessageThread ) Relinquish();
+			time = timeGetTime();
+			while( ((time+100)>timeGetTime()) && g.pEventThread ) Relinquish();
+			time = timeGetTime();
+			while( ((time+100)>timeGetTime()) && g.pLocalEventThread ) Relinquish();
 			if( g.pThread || g.pMessageThread || g.pEventThread || g.pLocalEventThread )
 			{
 				attempts++;
@@ -2371,7 +2371,7 @@ static int WaitReceiveServerMsg ( PEVENTHANDLER handler
 		handler->len = LengthIn;
 		// therefore, please do relinquish one cycle...
 		Relinquish();
-		//Log( WIDE("To wait for a responce") );
+		Log( WIDE("To wait for a responce") );
 						 //if( !handler->flags.responce_received )
 		handler->flags.bCheckedResponce = 0;
 		do
@@ -2386,17 +2386,17 @@ static int WaitReceiveServerMsg ( PEVENTHANDLER handler
 #ifdef _DEBUG
 					 (lprintf( WIDE("Compare %") _32f WIDE(" vs %") _32f WIDE(" (=%") _32fs WIDE(") (positive keep waiting)")
 								, handler->wait_for_responce
-								, GetTickCount()
-								, handler->wait_for_responce - GetTickCount()  ) ),
+								, timeGetTime()
+								, handler->wait_for_responce - timeGetTime()  ) ),
 #endif
 #endif
-					( handler->wait_for_responce > GetTickCount() )) ) // wait for a responce
+					( handler->wait_for_responce > timeGetTime() )) ) // wait for a responce
 			{
 				received = 1;
 			// check for responces...
 			// will return immediate if is not this thread which
 			// is supposed to be there...
-				//lprintf( WIDE("getting or waiting for... a message...") );
+				lprintf( WIDE("getting or waiting for... a message...") );
 				if( IsThread )
 				{
 					lprintf( WIDE("Get message (might be my thread") );
@@ -2420,9 +2420,11 @@ static int WaitReceiveServerMsg ( PEVENTHANDLER handler
 						goto dont_sleep;
 					}
 					handler->flags.bCheckedResponce = 0;
-					//lprintf( WIDE("Going to sleep for %ld %016Lx"), handler->wait_for_responce - GetTickCount(), pThread->ThreadID );
-					WakeableSleep( handler->wait_for_responce - GetTickCount() );
-					//lprintf( WIDE("AWAKE!") );
+					lprintf( WIDE("Going to sleep for %ld %016Lx")
+							 , handler->wait_for_responce - timeGetTime()
+							 , 0 );
+					WakeableSleep( handler->wait_for_responce - timeGetTime() );
+					lprintf( WIDE("AWAKE! %d"), g.responce_received );
 					DeleteLink( &g.pSleepers, pThread );
 				}
 				else
@@ -2433,7 +2435,7 @@ static int WaitReceiveServerMsg ( PEVENTHANDLER handler
 			if( !handler->flags.bCheckedResponce )
 				received = 1;
 
-			//lprintf( WIDE("When we finished this loop still was waiting %ld"), handler->wait_for_responce - GetTickCount() );
+			lprintf( WIDE("When we finished this loop still was waiting %ld"), handler->wait_for_responce - timeGetTime() );
 			//else
 			{
 				//lprintf( WIDE("Excellent... the responce is back before I could sleep!") );
@@ -2466,6 +2468,7 @@ static int WaitReceiveServerMsg ( PEVENTHANDLER handler
 						 , handler->LastMsgID & 0x0FFFFFFF
 						 , handler->bias);
 			}
+         lprintf( "Clear received response" );
 			g.responce_received = 0; // allow more responces to be received.
 		}
 	}
@@ -2528,7 +2531,7 @@ CLIENTMSG_PROC( int, TransactRoutedServerMultiMessageEx )( _32 RouteID
 		}
 		if( ( handler->MessageID = MsgIn ) )
 			(*MsgIn) = handler->LastMsgID;
-		handler->wait_for_responce = GetTickCount() + (timeout?timeout:DEFAULT_TIMEOUT);
+		handler->wait_for_responce = timeGetTime() + (timeout?timeout:DEFAULT_TIMEOUT);
 	}
 	//lprintf( WIDE("transact message...") );
 	va_start( args, timeout );
@@ -2613,7 +2616,7 @@ CLIENTMSG_PROC( int, TransactServerMultiMessage )( _32 MsgOut, _32 buffers
 	next_transact.pFile = "no File";
 	Release( pairs );
 	handler->bias = bias;
-	handler->wait_for_responce = GetTickCount() + (DEFAULT_TIMEOUT);
+	handler->wait_for_responce = timeGetTime() + (DEFAULT_TIMEOUT);
 	//lprintf( WIDE("waiting... %p"), handler );
 	if( MsgIn || (BufferIn && LengthIn) )
 		stat = WaitReceiveServerMsg( handler
@@ -2675,7 +2678,7 @@ CLIENTMSG_PROC( int, TransactServerMultiMessageEx )( _32 MsgOut, _32 buffers
 	}
 	Release( pairs );
 	handler->bias = bias;
-	handler->wait_for_responce = GetTickCount() + (timeout?timeout:DEFAULT_TIMEOUT);
+	handler->wait_for_responce = timeGetTime() + (timeout?timeout:DEFAULT_TIMEOUT);
 	if( MsgIn || (BufferIn && LengthIn) )
 		stat = WaitReceiveServerMsg( handler
 											, MsgOut
@@ -2850,14 +2853,14 @@ static void CPROC MonitorClientActive( PTRSZVAL psv )
 		{
 			next = client->next;
 #ifdef DEBUG_RU_ALIVE_CHECK
-			lprintf( WIDE("Client %d(%p) last received %d ms ago"), client->pid, client, GetTickCount() - client->last_time_received );
+			lprintf( WIDE("Client %d(%p) last received %d ms ago"), client->pid, client, timeGetTime() - client->last_time_received );
 #endif
-			if( ( client->last_time_received + CLIENT_TIMEOUT ) < GetTickCount() )
+			if( ( client->last_time_received + CLIENT_TIMEOUT ) < timeGetTime() )
 			{
 				Log( WIDE("Client has been silent +") STRSYM(CLIENT_TIMEOUT) WIDE("ms - he's dead. (maybe he unloaded and we forgot to forget him?!)") );
 				EndClient( client );
 			}
-			else if( ( client->last_time_received + (CLIENT_TIMEOUT/2) ) <  GetTickCount() )
+			else if( ( client->last_time_received + (CLIENT_TIMEOUT/2) ) <  timeGetTime() )
 			{
 				if( !client->flags.status_queried )
 				{
@@ -2899,7 +2902,7 @@ static void CPROC MonitorClientActive( PTRSZVAL psv )
 			pNextHandler = pHandler->next;
 			{
 				_32 tick;
-				if( ( pHandler->last_check_tick + (CLIENT_TIMEOUT) ) < ( tick = GetTickCount() ) )
+				if( ( pHandler->last_check_tick + (CLIENT_TIMEOUT) ) < ( tick = timeGetTime() ) )
 				{
 					pHandler->last_check_tick = tick;
 					if( !ProbeClientAlive( pHandler->ServiceID ) )

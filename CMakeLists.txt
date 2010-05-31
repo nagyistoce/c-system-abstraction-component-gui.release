@@ -463,7 +463,6 @@ set( SACK_SOURCES
   ${FIRST_GCC_LIBRARY_SOURCE} 
     ${BASE_SOURCES} 
     ${ODBC_SOURCES}
-    ${BAG_SQLITE_SOURCES}
     ${JPEG_SOURCE}
     ${ZLIB_SOURCE}
     ${PNG_SOURCE}
@@ -493,9 +492,18 @@ FOREACH(SOURCE ${SACK_SOURCES})
       endif()
       set( cplusplus_sources ${cplusplus_sources} ${BASENAME}.cpp )
    else()
-      message( "NOT THIGN ${SOURCE}" )
+      message( "NOT THING ${SOURCE}" )
    endif()
 ENDFOREACH(SOURCE)
+
+set( SACK_SOURCES ${SACK_SOURCES}
+    ${BAG_SQLITE_SOURCES}
+)
+
+
+set( SACK_SOURCES ${SACK_SOURCES}
+  ${LAST_GCC_LIBRARY_SOURCE} 
+)
 
 message( SOURCES:${SACK_SOURCES} )
 message( C++SOURCE:${cplusplus_sources} )
@@ -705,6 +713,7 @@ if( NOT SACK_ONLY )
 # parts of SDK ...
 add_subdirectory( include )
 add_subdirectory( src/utils/runner )
+add_subdirectory( src/deadstart )
 
 add_subdirectory( data )
 # includes some testdata in tstdisplay...
@@ -732,6 +741,7 @@ endif( BUILD_ALTANIK )
 
 add_subdirectory( src/netlib/user )
 add_subdirectory( src/netlib/echo )
+add_subdirectory( src/utils/deploy )
 
 set( CMAKE_C_STANDARD_LIBRARIES_INIT "" )
 

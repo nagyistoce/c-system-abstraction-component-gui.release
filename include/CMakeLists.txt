@@ -53,6 +53,7 @@ sql_support.h
 sqlgetoption.h
 sqloptint.h
 stdhdrs.h
+final_types.h
 strlib.hpp
 symbits.h
 system.h
