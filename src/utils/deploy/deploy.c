@@ -86,7 +86,27 @@ int main( int argc, char **argv )
 		for( c = 0; path[c]; c++ )
          if( path[c] == '\\' ) path[c] = '/';
 #ifdef WIN32
-      SetRegistryItem( HKEY_LOCAL_MACHINE, "SOFTWARE", "\\SACK", "Install_Dir", REG_SZ, path, strlen(path));
+		SetRegistryItem( HKEY_LOCAL_MACHINE, "SOFTWARE", "\\SACK", "Install_Dir", REG_SZ, path, strlen(path));
+      if(0)
+		{
+         FILE *out2;
+			snprintf( tmp, sizeof( tmp ), "%s/CMakePackage", path );
+			out2 = fopen( "%s/MakeShortcut.vbs", "wt" );
+			if( out2 )
+			{
+				fprintf( out2, "set WshShell = WScript.CreateObject(\"WScript.Shell\" )\n" );
+				fprintf( out2, "strDesktop = WshShell.SpecialFolders(\"AllUsersDesktop\" )\n" );
+				fprintf( out2, "set oShellLink = WshShell.CreateShortcut(strDesktop & \"\\shortcut name.lnk\" )\n" );
+				fprintf( out2, "oShellLink.TargetPath = \"c:\\application folder\\application.exe\"\n" );
+				fprintf( out2, "oShellLink.WindowStyle = 1\n" );
+				fprintf( out2, "oShellLink.IconLocation = \"c:\\application folder\\application.ico\"\n" );
+				fprintf( out2, "oShellLink.Description = \"Shortcut Script\"\n" );
+				fprintf( out2, "oShellLink.WorkingDirectory = \"c:\\application folder\"\n" );
+				fprintf( out2, "oShellLink.Save\n" );
+				fclose( out2 );
+				system( tmp );
+			}
+		}
 #endif
       fprintf( out, "set( SACK_BASE %s )\n", path );
       fprintf( out, "set( SACK_INCLUDE_DIR ${SACK_BASE}/include/sack )\n" );
