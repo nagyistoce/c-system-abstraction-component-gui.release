@@ -2679,7 +2679,7 @@ void CPROC DrawEditGlare( PTRSZVAL psv, Image surface )
 
 //---------------------------------------------------------------------------
 
-int CPROC DrawFrameBackground( PCOMMON pf )
+static int OnDrawCommon( WIDE( "Menu Canvas" ) )( PSI_CONTROL pf )
 {
 	lprintf( WIDE( "----------g.flags.bPageUpdateDisabled %d" ), g.flags.bPageUpdateDisabled );
 	if( !g.flags.bPageUpdateDisabled )
@@ -2775,6 +2775,33 @@ int CPROC DrawFrameBackground( PCOMMON pf )
 		else
 			DebugBreak();
 
+		{
+			PMENU_BUTTON button;
+			INDEX idx;
+			int nButton = 1;
+			int controls = 0;
+			LIST_FORALL( current_page->controls, idx, PMENU_BUTTON, button )
+			{
+            controls++;
+			}
+			if( controls == 0 )
+			{
+				int y = 15;
+            int skip = 14;
+				PutString( surface
+							, (S_32)15, (S_32)y, BASE_COLOR_WHITE, SetAlpha( BASE_COLOR_BLACK, 90 )
+							, "There are no controls defined..." );
+            y += skip;
+				PutString( surface
+							, (S_32)15, (S_32)y, BASE_COLOR_WHITE, SetAlpha( BASE_COLOR_BLACK, 90 )
+							, "Press Alt-C to edit" );
+            y += skip;
+				PutString( surface
+							, (S_32)15, (S_32)y, BASE_COLOR_WHITE, SetAlpha( BASE_COLOR_BLACK, 90 )
+							, "Right click on empty space to edit other properties and add plugins..." );
+			}
+		}
+
 #ifndef USE_EDIT_GLARE
 		if( canvas->flags.bEditMode )
 		{
@@ -2805,11 +2832,13 @@ int CPROC DrawFrameBackground( PCOMMON pf )
 				PMENU_BUTTON button;
 				INDEX idx;
 				int nButton = 1;
+            int controls = 0;
 				LIST_FORALL( current_page->controls, idx, PMENU_BUTTON, button )
 				{
 					long long x, y;
 					long long w, h;
 					TEXTCHAR buttonname[128];
+               controls++;
 					//lprintf( WIDE("Drawing at %d,%d..."), button->x, button->y );
 					x = (PARTX( button->x ) + 5); y = (PARTY( button->y ) + 5);
 					w=(PARTW( button->x, button->w )+1 - 10);
@@ -2851,6 +2880,11 @@ int CPROC DrawFrameBackground( PCOMMON pf )
 					PutString( surface
 						, (S_32)x + 15, (S_32)y + 15, BASE_COLOR_WHITE, 0
 						, buttonname );
+				}
+				if( !controls )
+				{
+					PutString( surface
+						, (S_32)15, (S_32)15, BASE_COLOR_WHITE, 0,  );
 				}
 			}
 
@@ -4167,7 +4201,7 @@ CONTROL_REGISTRATION menu_surface = { WIDE( "Menu Canvas" )
 , { { 512, 460 }, sizeof( CanvasData ), BORDER_WANTMOUSE|BORDER_NONE|BORDER_NOMOVE|BORDER_FIXED }
 , InitMasterFrame
 , NULL
-, DrawFrameBackground
+, NULL //DrawFrameBackground
 , ShellMouse
 , ShellKey
 , NULL, NULL,NULL,NULL,NULL,NULL
