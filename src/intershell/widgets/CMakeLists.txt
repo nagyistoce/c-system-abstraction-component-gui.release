@@ -30,7 +30,11 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 
 
 target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} ${SACK_PSI_LIBRARY})
-install_default_dest( ${PROJECT_NAME} )
+
+install( TARGETS ${PROJECT_NAME} 
+   RUNTIME DESTINATION bin/InterShell
+   LIBRARY DESTINATION lib/InterShell
+)
 
 
 

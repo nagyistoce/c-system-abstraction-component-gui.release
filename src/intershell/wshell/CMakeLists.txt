@@ -23,5 +23,5 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   COMPILE_FLAGS  "-DTARGET_LABEL=${PROJECT_NAME}"
 )
 target_link_libraries( ${PROJECT_NAME}  ${SACK_LIBRARY} )
-install_default_dest( ${PROJECT_NAME} )
+install_literal_product( ${PROJECT_NAME} InterShell ) 
 

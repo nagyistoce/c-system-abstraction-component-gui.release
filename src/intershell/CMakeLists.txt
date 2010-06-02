@@ -43,14 +43,11 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 
 target_link_libraries( ${PROJECT_NAME} sack_widgets ${SACK_LIBRARY} )
 install_literal_product( ${PROJECT_NAME} InterShell ) 
-#install_default_dest_binary( ${PROJECT_NAME} )
+
 
 include_directories( 
   ${CMAKE_CURRENT_SOURCE_DIR}
 )
-
-install_default_dest_binary( ${PROJECT_NAME} )
-
 
 
 SET( INTERSHELL_SDK
