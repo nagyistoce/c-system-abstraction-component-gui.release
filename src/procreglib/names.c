@@ -1788,7 +1788,8 @@ static void ReadConfiguration( void )
 #else
 #define STATIC
 #endif
-						snprintf( loadname, sizeof(TEXTCHAR)*len, WIDE("%s/%s"), filepath, l.config_filename?l.config_filename:WIDE("interface.conf") STATIC );
+						snprintf( loadname, sizeof(TEXTCHAR)*len, WIDE("%s/%s"), filepath, l.config_filename?l.config_filename
+									:WIDE("interface.conf") STATIC );
 					}
 					else
 					{
@@ -1819,8 +1820,12 @@ static void ReadConfiguration( void )
 				success = ProcessConfigurationFile( pch, loadname, 0 );
 				if( !success )
 				{
-					lprintf( WIDE("Failed to open interface configuration file:%s - assuming it will never exist, and aborting trying this again")
-							 , l.config_filename?l.config_filename:WIDE("interface.conf") STATIC);
+					success = ProcessConfigurationFile( pch, "interface.conf", 0 );
+					if( !success )
+					{
+						lprintf( WIDE("Failed to open interface configuration file:%s - assuming it will never exist, and aborting trying this again")
+								 , l.config_filename?l.config_filename:WIDE("interface.conf") STATIC);
+					}
 				}
             Release( loadname );
 			}
