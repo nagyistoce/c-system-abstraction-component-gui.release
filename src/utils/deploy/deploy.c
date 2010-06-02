@@ -2,6 +2,57 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef WIN32
+#include <windows.h>
+int SetRegistryItem( HKEY hRoot, char *pPrefix,
+                     char *pProduct, char *pKey, 
+                     DWORD dwType,
+                     char *pValue, int nSize )
+{
+   char szString[512];
+   char *pszString = szString;
+   DWORD dwStatus;
+   HKEY hTemp;
+
+   if( pProduct )
+      wsprintf( pszString, "%s%s", pPrefix, pProduct );
+   else
+      wsprintf( pszString, "%s", pPrefix );
+
+   dwStatus = RegOpenKeyEx( hRoot,
+                            pszString, 0, 
+                            KEY_WRITE, &hTemp );
+   if( dwStatus == ERROR_FILE_NOT_FOUND )
+   {
+      DWORD dwDisposition;
+      dwStatus = RegCreateKeyEx( hRoot, 
+                                 pszString, 0
+                             , ""
+                             , REG_OPTION_NON_VOLATILE
+                             , KEY_WRITE
+                             , NULL
+                             , &hTemp
+                             , &dwDisposition);
+      if( dwDisposition == REG_OPENED_EXISTING_KEY )
+         fprintf( stderr, "Failed to open, then could open???" );
+      if( dwStatus )   // ERROR_SUCCESS == 0 
+         return FALSE; 
+   }
+   if( (dwStatus == ERROR_SUCCESS) && hTemp )
+   {
+      dwStatus = RegSetValueEx(hTemp, pKey, 0
+                                , dwType
+                                , pValue, nSize );
+      RegCloseKey( hTemp );
+      if( dwStatus == ERROR_SUCCESS )
+      {
+         return TRUE;
+      }
+   }
+   return FALSE;
+}
+#endif
+
 int main( int argc, char **argv )
 {
 	char *path = strdup( argv[0] );
@@ -34,6 +85,9 @@ int main( int argc, char **argv )
 		int c;
 		for( c = 0; path[c]; c++ )
          if( path[c] == '\\' ) path[c] = '/';
+#ifdef WIN32
+      SetRegistryItem( HKEY_LOCAL_MACHINE, "SOFTWARE", "\\SACK", "Install_Dir", REG_SZ, path, strlen(path));
+#endif
       fprintf( out, "set( SACK_BASE %s )\n", path );
       fprintf( out, "set( SACK_INCLUDE_DIR ${SACK_BASE}/include/sack )\n" );
       fprintf( out, "set( SACK_LIBRARIES sack_bag sack_bag++ )\n" );
