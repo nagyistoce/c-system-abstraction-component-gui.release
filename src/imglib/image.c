@@ -674,7 +674,7 @@ ImageFile*  ImageLoadImageFileEx (  CTEXTSTR filename DBG_PASS )
    {
       char path[280];
       GetCurrentPath( path, sizeof( path ) );
-      lprintf( WIDE("Loading image file: [%s] %s %p %d"), path, filename, fp, GetLastError() );
+      //lprintf( WIDE("Loading image file: [%s] %s %p %d"), path, filename, fp, GetLastError() );
    }
    if (!fp)
       return NULL;

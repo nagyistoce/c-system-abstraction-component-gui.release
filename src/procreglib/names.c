@@ -706,10 +706,10 @@ PROCREG_PROC( LOGICAL, RegisterFunctionExx )( PCLASSROOT root
 				if( !oldname->data.proc.proc )
 				{
 					// old branch location might have existed, but no value assigned...
-					lprintf( WIDE( "overloading prior %p with %p and %p with %p" )
-							 , oldname->data.proc.proc, proc
-							 , oldname->data.proc.name, newname->data.proc.name
-							 );
+					//lprintf( WIDE( "overloading prior %p with %p and %p with %p" )
+					//		 , oldname->data.proc.proc, proc
+					//		 , oldname->data.proc.name, newname->data.proc.name
+					//		 );
                oldname->flags.bProc = 1;
 					oldname->data.proc.proc = proc;
 					oldname->data.proc.name = newname->data.proc.name;
