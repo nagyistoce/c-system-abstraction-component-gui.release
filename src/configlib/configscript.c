@@ -1977,7 +1977,7 @@ CONFIGSCR_PROC( int, ProcessConfigurationFile )( PCONFIG_HANDLER pch, CTEXTSTR n
     }
     else
     {
-		 Log1( WIDE("Failed to open config file: %s"), name );
+		 //Log1( WIDE("Failed to open config file: %s"), name );
        return FALSE;
     }
 }
