@@ -269,12 +269,12 @@ typedef struct myfinddata {
 	if( !*pInfo )
 	{
 		TEXTCHAR findmask[256];
-   		snprintf( findmask, sizeof(findmask), WIDE("%s/*"), basename );
+		snprintf( findmask, sizeof(findmask), WIDE("%s/*"), basename );
 		*pInfo = Allocate( sizeof( MFD ) );
 		findhandle(pInfo) = findfirst( findmask, finddata(pInfo) );
 		if( findhandle(pInfo) == HANDLECAST -1 )
 		{
-      		findclose( findhandle(pInfo) );
+			findclose( findhandle(pInfo) );
 			Release( *pInfo );
 			(*pInfo) = NULL;
 			return 0;
@@ -282,17 +282,17 @@ typedef struct myfinddata {
 	}
 	else
 	{
-   getnext:
+	getnext:
 		if( findnext( findhandle(pInfo), finddata( pInfo ) ) )
 		{
-      		findclose( findhandle(pInfo) );
+			findclose( findhandle(pInfo) );
 			Release( *pInfo );
 			(*pInfo) = NULL;
 			return 0;
 		}
 	}
 #ifdef UNDER_CE
-   if( !strcmp( WIDE("."), finddata(pInfo)->cFileName ) ||
+	if( !strcmp( WIDE("."), finddata(pInfo)->cFileName ) ||
        !strcmp( WIDE(".."), finddata(pInfo)->cFileName ) )
 #else
    if( !strcmp( WIDE("."), finddata(pInfo)->name ) ||
