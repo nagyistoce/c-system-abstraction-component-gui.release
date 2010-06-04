@@ -1,6 +1,5 @@
 
 SET( INTERSHELL_IMAGES
-AnimationWizard1.mng
 Pressed-Lens.png
 colorLayer.png
 default-Lens.png
