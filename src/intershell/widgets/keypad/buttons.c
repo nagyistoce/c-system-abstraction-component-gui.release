@@ -460,7 +460,7 @@ void LoadButtonTheme( void )
 														,szBuffer, sizeof(szBuffer), gIniFileName, TRUE);
 		if (strncmp(szBuffer, WIDE("NULL"), 4)  )
 		{
-			l.default_theme.buttons.iMask = LoadImageFile( szBuffer );
+			l.default_theme.buttons.iMask = LoadImageFileFromGroup( GetFileGroup( "Resources" ), szBuffer );
 			xlprintf(LOG_NOISE+1)( WIDE(" LoadImageFile returned a pointer to %p ") , l.default_theme.buttons.iMask );
 		}
 		else
@@ -473,7 +473,7 @@ void LoadButtonTheme( void )
 														,szBuffer, sizeof(szBuffer), gIniFileName, TRUE);
 		if (strncmp(szBuffer, WIDE("NULL"), 4)  )
 		{
-			l.default_theme.buttons.iGlare = LoadImageFile( szBuffer );
+			l.default_theme.buttons.iGlare = LoadImageFileFromGroup( GetFileGroup( "Resources" ), szBuffer );
 			xlprintf(LOG_NOISE+1)( WIDE(" LoadImageFile returned a pointer to %p ") , l.default_theme.buttons.iGlare );
 		}
 		else
@@ -486,7 +486,7 @@ void LoadButtonTheme( void )
 														,szBuffer, sizeof(szBuffer), gIniFileName, TRUE);
 		if (strncmp(szBuffer, WIDE("NULL"), 4)  )
 		{
-			l.default_theme.buttons.iPressed = LoadImageFile( szBuffer );
+			l.default_theme.buttons.iPressed = LoadImageFileFromGroup( GetFileGroup( "Resources" ), szBuffer );
 			xlprintf(LOG_NOISE+1)( WIDE(" LoadImageFile returned a pointer to %p ") , l.default_theme.buttons.iPressed);
 		}
 		else
@@ -499,7 +499,7 @@ void LoadButtonTheme( void )
 														,szBuffer, sizeof(szBuffer), gIniFileName, TRUE);
 		if (strncmp(szBuffer, WIDE("NULL"), 4)  )
 		{
-			l.default_theme.buttons.iNormal = LoadImageFile( szBuffer );
+			l.default_theme.buttons.iNormal = LoadImageFileFromGroup( GetFileGroup( "Resources" ), szBuffer );
 			xlprintf(LOG_NOISE+1)( WIDE(" LoadImageFile returned a pointer to %p ") , l.default_theme.buttons.iNormal );
 		}
 		else
@@ -1059,7 +1059,7 @@ int SetKeyImageByName( PKEY_BUTTON key, CTEXTSTR name )
 		key->background.alpha = 0;
 		if( name )
 		{
-			if( ( key->background.image = LoadImageFile( name ) ) )
+			if( ( key->background.image = LoadImageFileFromGroup( GetFileGroup( "Resources" ), name ) ) )
 			{
             key->flags.background_by_name = 1;
 				key->flags.background_image = 1;
