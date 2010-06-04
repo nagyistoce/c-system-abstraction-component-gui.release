@@ -262,13 +262,14 @@ struct rt_init // structure placed in XI/YI segment
 #define ATEXIT_PRIORITY PRIORITY_ATEXIT
 #define PRIORITY_PRELOAD(name,pr) static void name(void); \
 	RTINIT_STATIC struct rt_init name##_ctor_label \
-	  __attribute__((section("deadstart_list"))) \
+	  __attribute__((section("deadstart_list"))) __attribute__((used)) \
 	={0,0,pr INIT_PADDING    \
 	 ,__LINE__,name         \
 	 ,WIDE__FILE__        \
 	,#name        \
 	JUNKINIT(name)}; \
-	static void name(void)
+	static void name(void) __attribute__((used));  \
+	void name(void)
 
 typedef void(*atexit_priority_proc)(void (*)(void),CTEXTSTR,int,CTEXTSTR,int);
 #define PRIORITY_ATEXIT(name,priority) static void name(void); static void atexit##name(void) __attribute__((constructor));  \
