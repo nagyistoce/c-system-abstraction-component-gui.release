@@ -59,12 +59,12 @@
 #include <jerror.h>
 #else
 #ifdef __cplusplus
-extern "C" {
+//extern "C" {
 #endif
 #include <jpeglib.h>
 #include <jerror.h>
 #ifdef __cplusplus
-}
+//}
 #endif
 #endif
 
