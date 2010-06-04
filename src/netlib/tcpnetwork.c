@@ -114,7 +114,7 @@ void AcceptClient(PCLIENT pListen)
    // contains a value which may be less than a valid address
    // length... usually didn't JAB: 980203
 	nTemp = MAGIC_SOCKADDR_LENGTH;
-
+   pNewClient->saClient = AllocAddr();
    pNewClient->Socket = accept( pListen->Socket
 										, pNewClient->saClient
 										,&nTemp
