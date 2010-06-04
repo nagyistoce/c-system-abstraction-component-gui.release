@@ -238,8 +238,11 @@ int main( int argc, char **argv )
 			SetOptionDatabase( o = ConnectToDatabase( argv[2] ) );
 			SetOptionDatabaseOption( o, FALSE ); // defaults to new version... so revert to old version..
 		}
-      else
+		else
+		{
 			SetOptionDatabase( o = ConnectToDatabase( argv[1] ) );
+			SetOptionDatabaseOption( o, TRUE ); // defaults to old version... so revert to old version..
+		}
 	}
    EditOptions();
    return 0;
