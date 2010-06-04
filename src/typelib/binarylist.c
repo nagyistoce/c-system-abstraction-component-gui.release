@@ -545,10 +545,11 @@ int CPROC TextMatchLocate( PTRSZVAL key1, PTRSZVAL key2 )
 {
 	int k1len = StrLen( (CTEXTSTR)key1 );
 	int k2len = StrLen( (CTEXTSTR)key2 );
+	//lprintf( "COmpare %s(%d) vs %s(%d)", key1, k1len, key2, k2len );
 	if( k2len < k1len )
 	{
 		// cannot match this.... but should
-      // try to choose a direction
+		// try to choose a direction
 		int dir = StrCaseCmpEx( (CTEXTSTR)key1, (CTEXTSTR)key2, k2len );
 		if( dir > 0 )
 			return 1;
@@ -557,12 +558,12 @@ int CPROC TextMatchLocate( PTRSZVAL key1, PTRSZVAL key2 )
 	else if( k2len > k1len )
 	{
 		int dir = StrCaseCmpEx( (CTEXTSTR)key1, (CTEXTSTR)key2, k1len );
-      // is exact match, but only part of key2
+		// is exact match, but only part of key2
 		if( dir == 0 )
 			return 100;
 
 		// I doubt these will really matter...
-      // could compute distance...
+		// could compute distance...
 		if( dir > 0 )
 			return 1;
 		else
@@ -594,63 +595,37 @@ POINTER LocateInBinaryTree( PTREEROOT root, PTRSZVAL key
 	PTREENODE node;
 	node = root->tree;
 	if( !fuzzy )
-      fuzzy = TextMatchLocate;
+		fuzzy = TextMatchLocate;
+
 	while( node )
 	{
 		int dir = fuzzy( key, node->key );
 		if( dir == 100 )
 		{
-         PTREENODE one_up;
-         PTREENODE one_down;
+			PTREENODE one_up;
 			// this matched, in an inexact length.
 			// to be really careful we should match one up and one down.
+			// well, we'll match better only if we had exact length
+         // so - go up one node, until we find exact length
 			//lprintf( " - Found a near match..." );
-         one_up = node;
-			//root->current = node;
-         GetGreaterNodeEx( root, &one_up );
-			//one_up = root->current;
-         if( one_up )
+			one_up = node;
+			do
 			{
-				int one_up_dir = fuzzy( key, one_up->key );
-				if( one_up_dir == 100 )
+				GetLesserNodeEx( root, &one_up );
+				dir = fuzzy( key, one_up->key );
+				if( dir == 100 )
+					continue;
+				if( dir == 0 )
 				{
-					//lprintf( " on up matches...(sorta)[FAIL]" );
-					// also fuzzy short-match the next one...
-					// no way to know if what this command might be
-					// (throw an error here with possible results?
-               return NULL;
-				}
-				if( one_up_dir == 0 )
-				{
-					//lprintf( "one up was an exact match..." );
 					root->lastfound = one_up;
-               return one_up->userdata;
+					return (one_up->userdata);
 				}
+				else
+					break;
 			}
-
-         one_down = node;
-			GetLesserNodeEx( root, &one_down );
-			//one_down = root->current;
-         if( one_down )
-			{
-				int one_down_dir = fuzzy( key, one_down->key );
-				if( one_down_dir == 100 )
-				{
-					//lprintf( " on down matches...(sorta)[FAIL]" );
-					// also fuzzy short-match the next one...
-					// no way to know if what this command might be
-					// (throw an error here with possible results?
-               return NULL;
-				}
-				if( one_down_dir == 0 )
-				{
-					//lprintf( "one down was an exact match..." );
-					root->lastfound = one_down;
-               return one_down->userdata;
-				}
-			}
-			//lprintf( "best match return... %s %s", node->key, key );
-         return( node->userdata );
+			while( 1 );
+			root->lastfound = node;
+			return( node->userdata );
 		}
 		if( dir > 0 )
 		{
