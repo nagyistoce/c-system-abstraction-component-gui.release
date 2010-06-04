@@ -3,12 +3,13 @@
 #include <sack_types.h>
 #ifdef SACK_CORE_BUILD
 #include <../src/genx/genx.h>
+#include "widgets/include/buttons.h"
 #else
-#include <../src/genx/genx.h>
+#include <genx/genx.h>
+#include "widgets/buttons.h"
 #endif
 #include <configscript.h>
 
-#include "widgets/include/buttons.h"
 
 #define _DEFINE_INTERFACE
 
