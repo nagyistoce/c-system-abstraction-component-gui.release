@@ -272,7 +272,7 @@ PSI_CONTROL LoadXMLFrameOverEx( PSI_CONTROL parent, CTEXTSTR file DBG_PASS )
 		size = 0;
 #ifdef UNDER_CE
 		{
-			FILE *file = sack_open( 0, file, "rt" );
+			FILE *file = sack_open( GetFileGroup( "Frames" ), file, "rt" );
 			if( file )
 			{
 				sack_fseek( file, 0, SEEK_END );

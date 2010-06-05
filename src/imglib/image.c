@@ -663,19 +663,14 @@ Image DecodeMemoryToImage( P_8 buf, _32 size )
 }
 //----------------------------------------------------------------------
 
-ImageFile*  ImageLoadImageFileEx (  CTEXTSTR filename DBG_PASS )
+ImageFile*  LoadImageFileFromGroupEx ( int group, CTEXTSTR filename DBG_PASS )
 {
    _32 size;
    P_8 buf;
    ImageFile* file = NULL;
 	FILE* fp;
 
-   fp = sack_fopen( 0, filename, WIDE("rb"));
-   {
-      char path[280];
-      GetCurrentPath( path, sizeof( path ) );
-      //lprintf( WIDE("Loading image file: [%s] %s %p %d"), path, filename, fp, GetLastError() );
-   }
+   fp = sack_fopen( group, filename, WIDE("rb"));
    if (!fp)
       return NULL;
 
@@ -699,7 +694,7 @@ ImageFile*  ImageLoadImageFileEx (  CTEXTSTR filename DBG_PASS )
 
  ImageFile*  LoadImageFileEx ( CTEXTSTR filename DBG_PASS )
 {
-    return ImageLoadImageFileEx( filename DBG_RELAY );
+    return LoadImageFileFromGroupEx( 0, filename DBG_RELAY );
 }
 
 //---------------------------------------------------------------------------

@@ -846,7 +846,7 @@ void LoadButtonConfig( PSI_CONTROL pc_canvas, TEXTSTR filename )
 #ifndef __ARM__
 			if( SACK_GetProfileBlobOdbc( NULL, WIDE("intershell/configuration"), filename, &buffer, &buflen ) )
 			{
-				FILE *out = sack_fopen( GetFileGroup( "Resources" ), filename, WIDE("wb") );
+				FILE *out = sack_fopen( GetFileGroup( "Resources", NULL ), filename, WIDE("wb") );
 				if( out )
 				{
 					sack_fwrite( buffer, buflen, 1, out );
@@ -877,7 +877,7 @@ void LoadButtonConfig( PSI_CONTROL pc_canvas, TEXTSTR filename )
 #endif
 			if( mem && size )
 			{
-				file = sack_fopen( GetFileGroup( "Resources" ), filename, WIDE("rb") );
+				file = sack_fopen( GetFileGroup( "Resources", NULL ), filename, WIDE("rb") );
 				sack_fseek( file, 0, SEEK_END );
 				real_file_size = ftell( file );
 				sack_fclose( file );
@@ -942,7 +942,7 @@ void LoadButtonConfig( PSI_CONTROL pc_canvas, TEXTSTR filename )
 			PTRSZVAL real_file_size = 0;
 			if( mem && size )
 			{
-				file = sack_fopen( GetFileGroup( "Resources" ), filename, WIDE( "rb" ) );
+				file = sack_fopen( GetFileGroup( "Resources", NULL ), filename, WIDE( "rb" ) );
 				sack_fseek( file, 0, SEEK_END );
 				real_file_size = ftell( file );
 				sack_fclose( file );
@@ -956,7 +956,7 @@ void LoadButtonConfig( PSI_CONTROL pc_canvas, TEXTSTR filename )
 						StrRChr( filename, '.' );
 					ext[0] = 0;
 				}
-				file = sack_fopen( GetFileGroup( "Resources" ), filename, WIDE("wb") );
+				file = sack_fopen( GetFileGroup( "Resources", NULL ), filename, WIDE("wb") );
 				sack_fwrite( mem, 1, real_file_size, file );
 				sack_fclose( file );
 			}
@@ -1405,7 +1405,7 @@ void SaveSQLButtonConfig( void )
 void RenameConfig( TEXTCHAR *config_filename, TEXTCHAR *source, int source_name_len, int n )
 {
 	FILE *file;
-	file = sack_fopen( GetFileGroup( "Resources" ), source, WIDE("rt") );
+	file = sack_fopen( GetFileGroup( "Resources", NULL ), source, WIDE("rt") );
 	if( file )
 	{
 		TEXTCHAR backup[256];
@@ -1507,7 +1507,7 @@ void SaveButtonConfig( PSI_CONTROL pc_canvas, TEXTCHAR *filename )
 
 	RenameConfig( filename, filename, strlen( filename ), 1 );
 
-	file = sack_fopen( GetFileGroup( "Resources" ), filename, WIDE("wt") );
+	file = sack_fopen( GetFileGroup( "Resources", NULL ), filename, WIDE("wt") );
 	if( file )
 	{
       //fprintf( file, WIDE("[config]\n") ); // make this look like an INI so some standard tools work.

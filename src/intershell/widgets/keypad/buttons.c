@@ -447,6 +447,8 @@ void LoadButtonTheme( void )
 		int retval;
 		char szTheme[64];
 		char szBuffer[256];
+		TEXTCHAR tmpGroup[256];
+		TEXTCHAR tmpGroupFull[256];
 		static const CTEXTSTR gIniFileName = "theme.ini";
 		retval =  SACK_GetPrivateProfileStringEx("THEME","CURRENT"
 	 											,"DEFAULT"
@@ -457,10 +459,13 @@ void LoadButtonTheme( void )
 		memcpy( szTheme, szBuffer, (sizeof (szTheme) ) );
 
 		retval =  SACK_GetPrivateProfileStringEx(szTheme,"MASK","NULL"
-														,szBuffer, sizeof(szBuffer), gIniFileName, TRUE);
+															 ,szBuffer, sizeof(szBuffer), gIniFileName, TRUE);
+		GetFileGroupText( GetFileGroup( "Resources", NULL ), tmpGroup, 256 );
+      snprintf( tmpGroupFull, sizeof( tmpGroupFull ), "%s/%s", tmpGroup, "images" );
+
 		if (strncmp(szBuffer, WIDE("NULL"), 4)  )
 		{
-			l.default_theme.buttons.iMask = LoadImageFileFromGroup( GetFileGroup( "Resources" ), szBuffer );
+			l.default_theme.buttons.iMask = LoadImageFileFromGroup( GetFileGroup( "Button Resources", tmpGroupFull ), szBuffer );
 			xlprintf(LOG_NOISE+1)( WIDE(" LoadImageFile returned a pointer to %p ") , l.default_theme.buttons.iMask );
 		}
 		else
@@ -473,7 +478,7 @@ void LoadButtonTheme( void )
 														,szBuffer, sizeof(szBuffer), gIniFileName, TRUE);
 		if (strncmp(szBuffer, WIDE("NULL"), 4)  )
 		{
-			l.default_theme.buttons.iGlare = LoadImageFileFromGroup( GetFileGroup( "Resources" ), szBuffer );
+			l.default_theme.buttons.iGlare = LoadImageFileFromGroup( GetFileGroup( "Button Resources", tmpGroupFull ), szBuffer );
 			xlprintf(LOG_NOISE+1)( WIDE(" LoadImageFile returned a pointer to %p ") , l.default_theme.buttons.iGlare );
 		}
 		else
@@ -486,7 +491,7 @@ void LoadButtonTheme( void )
 														,szBuffer, sizeof(szBuffer), gIniFileName, TRUE);
 		if (strncmp(szBuffer, WIDE("NULL"), 4)  )
 		{
-			l.default_theme.buttons.iPressed = LoadImageFileFromGroup( GetFileGroup( "Resources" ), szBuffer );
+			l.default_theme.buttons.iPressed = LoadImageFileFromGroup( GetFileGroup( "Button Resources", tmpGroupFull ), szBuffer );
 			xlprintf(LOG_NOISE+1)( WIDE(" LoadImageFile returned a pointer to %p ") , l.default_theme.buttons.iPressed);
 		}
 		else
@@ -499,7 +504,7 @@ void LoadButtonTheme( void )
 														,szBuffer, sizeof(szBuffer), gIniFileName, TRUE);
 		if (strncmp(szBuffer, WIDE("NULL"), 4)  )
 		{
-			l.default_theme.buttons.iNormal = LoadImageFileFromGroup( GetFileGroup( "Resources" ), szBuffer );
+			l.default_theme.buttons.iNormal = LoadImageFileFromGroup( GetFileGroup( "Button Resources", tmpGroupFull ), szBuffer );
 			xlprintf(LOG_NOISE+1)( WIDE(" LoadImageFile returned a pointer to %p ") , l.default_theme.buttons.iNormal );
 		}
 		else
@@ -1059,7 +1064,8 @@ int SetKeyImageByName( PKEY_BUTTON key, CTEXTSTR name )
 		key->background.alpha = 0;
 		if( name )
 		{
-			if( ( key->background.image = LoadImageFileFromGroup( GetFileGroup( "Resources" ), name ) ) )
+			//TEXTSTR tmpGroup[256];
+			if( ( key->background.image = LoadImageFileFromGroup( GetFileGroup( "Button Resources", NULL ), name ) ) )
 			{
             key->flags.background_by_name = 1;
 				key->flags.background_image = 1;

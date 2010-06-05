@@ -42,7 +42,7 @@ SACK_NAMESPACE
 	/* Defines methods and macros for use as a client of a service. */
 	_CLIENT_NAMESPACE
 
-#define MSG_DEFAULT_RESULT_BUFFER_MAX (sizeof( _32 ) * 2048)
+#define MSG_DEFAULT_RESULT_BUFFER_MAX (sizeof( _32 ) * 16384)
 
 	// not realy sure where this doc goes
    //
