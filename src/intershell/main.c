@@ -141,7 +141,7 @@ Image InterShell_CommonImageLoad( CTEXTSTR name )
 	{
 		image = New( struct image_tag );
 		image->name = StrDup( name );
-		image->image = LoadImageFileFromGroup( GetFileGroup( "Resources" ), image->name );
+		image->image = LoadImageFileFromGroup( GetFileGroup( "Image Resources", NULL ), image->name );
 		image->references = 1;
 	}
 	else
@@ -878,7 +878,7 @@ void FixupButtonEx( PMENU_BUTTON button DBG_PASS )
 	PSI_CONTROL pc_button = QueryGetControl( button );
 	PCanvasData canvas = GetCanvas( GetCommonParent( QueryGetControl( button ) ) );
    //lprintf( WIDE( "Button fixup..." ) );
-#define LoadImg(n) ((n)?LoadImageFileFromGropu(GetFileGroup( "Resources" ), (TEXTSTR)n):NULL)
+#define LoadImg(n) ((n)?LoadImageFileFromGroup(GetFileGroup( "Image Resources", NULL ), (TEXTSTR)n):NULL)
 	if( canvas )
 		if( canvas->flags.bEditMode ) // don't do fixup/reveal if editing...
 		{
@@ -2740,7 +2740,7 @@ static int OnDrawCommon( WIDE( "Menu Canvas" ) )( PSI_CONTROL pf )
 		if( current_page )
 		{
 			if( !current_page->background_image && current_page->background )
-				current_page->background_image = LoadImageFileFromGroup( GetFileGroup( "Resources" ), (TEXTCHAR*)current_page->background );
+				current_page->background_image = LoadImageFileFromGroup( GetFileGroup( "Image Resources", NULL ), (TEXTCHAR*)current_page->background );
 			if( current_page->background_color )
 				ClearImageTo( surface, current_page->background_color );
 			if( current_page->background_image )

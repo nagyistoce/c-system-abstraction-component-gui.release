@@ -47,11 +47,21 @@ static struct Group *GetGroupFilePath( CTEXTSTR group )
    return filegroup;
 }
 
- int  GetFileGroup ( CTEXTSTR groupname, CTEXTSTR default_path )
+int  GetFileGroup ( CTEXTSTR groupname, CTEXTSTR default_path )
 {
 	struct Group *filegroup = GetGroupFilePath( groupname );
 	if( !filegroup )
 	{
+		if( default_path == NULL )
+		{
+			{
+				TEXTCHAR tmp[256];
+				snprintf( tmp, sizeof( tmp ), "file group/%s", groupname );
+				SACK_GetProfileString( GetProgramName(), tmp, "", tmp, sizeof( tmp ) );
+				if( tmp[0] )
+               default_path = tmp;
+			}
+		}
 		filegroup = New( struct Group );
 		filegroup->name = StrDup( groupname );
 		filegroup->base_path = StrDup( default_path );
@@ -60,15 +70,30 @@ static struct Group *GetGroupFilePath( CTEXTSTR group )
    return FindLink( &l.groups, filegroup );
 }
 
+TEXTSTR GetFileGroupText ( int group, TEXTSTR path, int path_chars )
+{
+	struct Group* filegroup = (struct Group *)GetLink( &l.groups, group );
+	if( !filegroup )
+	{
+		path[0] = 0;
+		return 0;
+	}
+	StrCpyEx( path, filegroup->base_path, path_chars );
+	return path;
+}
 
- int  SetGroupFilePath ( CTEXTSTR group, CTEXTSTR path )
+
+int  SetGroupFilePath ( CTEXTSTR group, CTEXTSTR path )
 {
 	struct Group *filegroup = GetGroupFilePath( group );
 	if( !filegroup )
 	{
+      TEXTCHAR tmp[256];
 		filegroup = New( struct Group );
 		filegroup->name = StrDup( group );
 		filegroup->base_path = StrDup( path );
+      snprintf( tmp, sizeof( tmp ), "file group/%s", path );
+      SACK_WriteProfileString( GetProgramName(), tmp, path );
       AddLink( &l.groups, filegroup );
 	}
 	else

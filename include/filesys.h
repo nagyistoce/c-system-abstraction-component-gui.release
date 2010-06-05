@@ -310,6 +310,8 @@ FILESYS_PROC  TEXTSTR FILESYS_API  sack_prepend_path ( int group, CTEXTSTR filen
    </code>                                                      */
 FILESYS_PROC  int FILESYS_API  GetFileGroup ( CTEXTSTR groupname, CTEXTSTR default_path );
 
+FILESYS_PROC TEXTSTR FILESYS_API GetFileGroupText ( int group, TEXTSTR path, int path_chars );
+
 /* \Returns the size of the file.
    
    

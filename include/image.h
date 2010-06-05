@@ -585,7 +585,10 @@ ALPHA_TRANSPARENT_MAX = 0x2FF
       DBG_PASS :  _nt_
       Example
       See <link sack::image::Image, Image>                            */
-   IMAGE_PROC  Image IMAGE_API LoadImageFileEx  ( CTEXTSTR name DBG_PASS );
+	IMAGE_PROC  Image IMAGE_API LoadImageFileEx  ( CTEXTSTR name DBG_PASS );
+
+	IMAGE_PROC Image  IMAGE_API LoadImageFileFromGroupEx ( int group, CTEXTSTR filename DBG_PASS );
+
    /* Decodes a block of memory into an image. This is used
       internally so, LoadImageFile() opens the file and reads it
       into a buffer, which it then passes to DecodeMemoryToImage().
@@ -612,7 +615,8 @@ ALPHA_TRANSPARENT_MAX = 0x2FF
          // buffer decoded okay.
       }
       </code>                                                       */
-		IMAGE_PROC  Image IMAGE_API  DecodeMemoryToImage ( P_8 buf, _32 size );
+	IMAGE_PROC  Image IMAGE_API  DecodeMemoryToImage ( P_8 buf, _32 size );
+
       /* direct hack for processing clipboard data... probably does some massaging of the databefore calling DecodeMemoryToImage */
    IMAGE_PROC  Image IMAGE_API  ImageRawBMPFile (_8* ptr, _32 filesize); 
 
@@ -2003,6 +2007,10 @@ IMAGE_PROC  void IMAGE_API  FlipImageEx ( Image pif DBG_PASS );
    
    \ \                                                  */
 #define LoadImageFile(file) LoadImageFileEx( file DBG_SRC )
+/* <combine sack::image::LoadImageFileEx@CTEXTSTR name>
+   
+   \ \                                                  */
+#define LoadImageFileFromGroup(group,file) LoadImageFileFromGroupEx( group, file DBG_SRC )
 /* <combine sack::image::BlatColor@Image@S_32@S_32@_32@_32@CDATA>
    
    \ \                                                            */
