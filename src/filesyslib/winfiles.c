@@ -1,6 +1,7 @@
 
 #include <stdhdrs.h>
 #include <filesys.h>
+#include <sqlgetoption.h>
 #include <system.h>
 //#define DEBUG_FILEOPEN
 
@@ -64,7 +65,10 @@ int  GetFileGroup ( CTEXTSTR groupname, CTEXTSTR default_path )
 		}
 		filegroup = New( struct Group );
 		filegroup->name = StrDup( groupname );
-		filegroup->base_path = StrDup( default_path );
+      if( default_path )
+			filegroup->base_path = StrDup( default_path );
+		else
+         filegroup->base_path = StrDup( "." );
 		AddLink( &l.groups, filegroup );
 	}
    return FindLink( &l.groups, filegroup );
