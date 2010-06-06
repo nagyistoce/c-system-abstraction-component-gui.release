@@ -54,7 +54,12 @@ macro( install_literal_product proj project_target )
  # FOREACH( req ${filelist} )
  #   install( FILES ${req} DESTINATION bin/${project_target}  )
  # ENDFOREACH()
+if( WIN32 )
   install( TARGETS ${proj} RUNTIME DESTINATION bin/${project_target} 
   	)
+else( WIN32 )
+  install( TARGETS ${proj} LIBRARY DESTINATION bin/${project_target} 
+  	)
+endif()
 endmacro( install_literal_product )
 
