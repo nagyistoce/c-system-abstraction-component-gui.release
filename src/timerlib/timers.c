@@ -187,7 +187,7 @@ static struct {
 #include <pthread.h>
 #include <errno.h>
 #include <sys/types.h>
-#include <sys/ipc.h>
+//#include <sys/ipc.h>
 
 	 // hmm wonder why this has to be defined....
 	 // semtimedop is a wonderful wonderful thing...
