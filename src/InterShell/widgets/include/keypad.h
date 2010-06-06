@@ -2,19 +2,19 @@
 #define __KEYPAD_WIDGET_DEFINED__
 #include <controls.h>
 
-#if !defined(__STATIC__) && !defined(__UNIX__)
-#ifdef KEYPAD_SOURCE
-#define KEYPAD_PROC(type,name) __declspec(dllexport) type CPROC name
-#else
-#define KEYPAD_PROC(type,name) __declspec(dllimport) type CPROC name
-#endif
-#else
-#ifdef KEYPAD_SOURCE
-#define KEYPAD_PROC(type,name) type name
-#else
-#define KEYPAD_PROC(type,name) extern type name
-#endif
-#endif
+#if !defined(__STATIC__) && !defined(__UNIX__)
+#ifdef KEYPAD_SOURCE
+#define KEYPAD_PROC(type,name) EXPORT_METHOD type CPROC name
+#else
+#define KEYPAD_PROC(type,name) IMPORT_METHOD type CPROC name
+#endif
+#else
+#ifdef KEYPAD_SOURCE
+#define KEYPAD_PROC(type,name) type name
+#else
+#define KEYPAD_PROC(type,name) extern type name
+#endif
+#endif
 
 //-- keypad.c --------------------
 
