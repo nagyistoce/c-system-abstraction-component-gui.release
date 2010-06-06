@@ -11,10 +11,6 @@ ${LAST_GCC_PROGRAM_SOURCE}
 )
 
 
-if( C++ )
-set_source_files_properties( ${BASE_SOURCES} PROPERTIES LANGUAGE "CXX" )
-endif()
-
 add_executable(${PROJECT_NAME} WIN32 ${BASE_SOURCES} )
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 COMPILE_FLAGS  "-DTARGET_LABEL=${PROJECT_NAME}" )
@@ -24,20 +20,17 @@ install_default_dest_binary( ${PROJECT_NAME} )
 
 project( launchpad.isp ) 
 
-set(BASE_SOURCES
+set(BASE_SOURCES2
 ${FIRST_GCC_PROGRAM_SOURCE} 
     launchpad ishell_plugin
 ${LAST_GCC_PROGRAM_SOURCE}
 )
 
-if( C++ )
-set_source_files_properties( ${BASE_SOURCES} PROPERTIES LANGUAGE "CXX" )
-endif()
 include_directories( ${SACK_BASE}/src/InterShell )
-add_library(${PROJECT_NAME} SHARED ${BASE_SOURCES} )
+add_library(${PROJECT_NAME} SHARED ${BASE_SOURCES2} )
 string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
-                  COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL} ${LibraryExtraFlags} -DISHELL_PLUGIN"
+                  COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL} ${LibraryExtraFlags}"
                   PREFIX ""
                   SUFFIX ""
 )
@@ -48,20 +41,16 @@ install_literal_product( ${PROJECT_NAME} InterShell )
 if( altanik_is_built )
 project( launchpad.isom ) 
 
-set(BASE_SOURCES
+set(BASE_SOURCES3
 ${FIRST_GCC_PROGRAM_SOURCE} 
     launchpad milk_plugin
 ${LAST_GCC_PROGRAM_SOURCE}
 )
 
-if( C++ )
-set_source_files_properties( ${BASE_SOURCES} PROPERTIES LANGUAGE "CXX" )
-endif()
-
-add_library(${PROJECT_NAME} SHARED ${BASE_SOURCES} )
+add_library(${PROJECT_NAME} SHARED ${BASE_SOURCES3} )
 string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
-                  COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL} ${LibraryExtraFlags}"
+                  COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL} ${LibraryExtraFlags} -DISHELL_PLUGIN"
                   PREFIX ""
                   SUFFIX ""
 )
