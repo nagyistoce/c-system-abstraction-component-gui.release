@@ -424,33 +424,33 @@ LIST(APPEND BASE_SOURCES
 )
 endif(__WINDOWS__)
 
-if( C++ )
-set_source_files_properties( ${FIRST_GCC_LIBRARY_SOURCE} ${LAST_GCC_LIBRARY_SOURCE} PROPERTIES LANGUAGE "CXX" )
-set_source_files_properties( ${FIRST_GCC_PROGRAM_SOURCE} ${LAST_GCC_PROGRAM_SOURCE} PROPERTIES LANGUAGE "CXX" )
-set_source_files_properties( ${BASE_SOURCES} PROPERTIES LANGUAGE "CXX" )
-set_source_files_properties( ${IMAGE_SOURCES} PROPERTIES LANGUAGE "CXX" )
-set_source_files_properties( ${VIDLIB_SOURCES} PROPERTIES LANGUAGE "CXX" )
-set_source_files_properties( ${PSI_SOURCES} PROPERTIES LANGUAGE "CXX" )
-#set_source_files_properties( ${JPEG_SOURCES} PROPERTIES LANGUAGE "CXX" )
-set_source_files_properties( ${ODBC_SOURCES} PROPERTIES LANGUAGE "CXX" )
-set_source_files_properties( ${OPTION_SOURCES} PROPERTIES LANGUAGE "CXX" )
+if( WIN32 )
+message( "Windows... adding all-rsources.rc" )
+LIST(APPEND BASE_SOURCES     all_resources.rc )
 
-#set_source_files_properties( ${PNG_SOURCES} PROPERTIES LANGUAGE "CXX" )
-#set_source_files_properties( ${ZLIB_SOURCES} PROPERTIES LANGUAGE "CXX" )
-#set_source_files_properties( ${FREETYPE_SOURCES} PROPERTIES LANGUAGE "CXX" )
-endif()
+if( MINGW )
 
-if( NOT WATCOM )
-message( "not watcom... adding all-rsources.rc" )
-  LIST(APPEND BASE_SOURCES
-     all_resources.rc )
-else()
+SET(CMAKE_RC_COMPILER_INIT "windres")
+SET(CMAKE_RC_COMPILER "windres")
+SET(CMAKE_RC_COMPILE_OBJECT "windres <FLAGS> <DEFINES> -O coff -o <OBJECT> <SOURCE>")
+ENABLE_LANGUAGE(RC)
+
+
+
+#set( CMAKE_RC_COMPILER windres )
+#add_custom_command( OUTPUT ${PROJECT_BINARY_DIR}/all_resources.res
+#                     DEPENDS ${SACK_BASE}/all_resources.rc
+#                     COMMAND ${CMAKE_RC_COMPILER} -I${SACK_BASE}  -o${PROJECT_BINARY_DIR}/all_resources.res -i${SACK_BASE}/all_resources.rc -O coff
+# )
+# ADD_CUSTOM_TARGET( generate_foo DEPENDS ${PROJECT_BINARY_DIR}/all_resources.res)
+elseif( WATCOM )
 add_custom_command( OUTPUT ${PROJECT_BINARY_DIR}/all_resources.res
                      DEPENDS ${SACK_BASE}/all_resources.rc
                      COMMAND ${CMAKE_RC_COMPILER} -i${SACK_BASE} -fo${PROJECT_BINARY_DIR}/all_resources.res ${SACK_BASE}/all_resources.rc
  )
  ADD_CUSTOM_TARGET( generate_foo DEPENDS ${PROJECT_BINARY_DIR}/all_resources.res)
-endif( NOT WATCOM ) 
+endif()
+endif( WIN32 ) 
 
 if( BUILD_MONOLITHIC )
 
@@ -513,10 +513,10 @@ set( SACK_SOURCES ${SACK_SOURCES}
 
 #set_source_files_properties( ${SOURCES} PROPERTIES LANGUAGE "CXX" )
 
-
+set( quote \" )
 SET_TARGET_PROPERTIES(sack_bag PROPERTIES
                   DEFINE_SYMBOL SACK_BAG_EXPORTS
-                  COMPILE_FLAGS  "-DTARGET_LABEL=sack_bag ${ExtraFlags} ${ExtraRenderFlags}"
+                  COMPILE_FLAGS  "-DTARGET_LABEL=sack_bag ${ExtraFlags} -DTARGETNAME=\"\\\"${CMAKE_SHARED_LIBRARY_PREFIX}sack_bag${CMAKE_SHARED_LIBRARY_SUFFIX}\\\"\" ${ExtraRenderFlags}"
 		  SOLUTION_FOLDER "MyFolder" 
 )
 
@@ -526,7 +526,7 @@ add_library( sack_bag++ SHARED
 )
 SET_TARGET_PROPERTIES(sack_bag++ PROPERTIES
                   DEFINE_SYMBOL SACK_BAG_EXPORTS
-                  COMPILE_FLAGS  "-DTARGET_LABEL=sack_bag_plusplus ${ExtraFlags} ${ExtraRenderFlags}"
+                  COMPILE_FLAGS  "-DTARGET_LABEL=sack_bag_plusplus -DTARGETNAME=\"\\\"${CMAKE_SHARED_LIBRARY_PREFIX}sack_bag${CMAKE_SHARED_LIBRARY_SUFFIX}\\\"\" ${ExtraFlags} ${ExtraRenderFlags}"
 		  SOLUTION_FOLDER "sack_bag++" 
 )
 
@@ -537,7 +537,10 @@ endif()
 if( WATCOM )
 ADD_DEPENDENCIES( sack_bag generate_foo )
 SET_TARGET_PROPERTIES(sack_bag PROPERTIES LINK_FLAGS "option resource=all_resources.res")
-
+elseif( MINGW )
+ADD_DEPENDENCIES( sack_bag generate_foo )
+#ADD_DEPENDENCIES( sack_bag all_resources.res )
+#SET_TARGET_PROPERTIES(sack_bag PROPERTIES LINK_FLAGS "all_resources.res")
 endif()
 
 set( SACK_LIBRARY sack_bag )
