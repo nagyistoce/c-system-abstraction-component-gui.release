@@ -725,19 +725,19 @@ INDEX SetOptionValueEx( PODBC odbc, INDEX optval, INDEX iValue )
 	}
 	else
 	{
-	char update[128];
-	CTEXTSTR result = NULL;
-	// should escape quotes passed in....
-	snprintf( update, sizeof( update ), WIDE("update option_map set value_id=%ld where node_id=%ld"), iValue, optval );
-	if( !SQLCommand( odbc, update ) )
-	{
-		GetSQLResult( &result );
-		lprintf( WIDE("Update value failed: %s"), result );
-		iValue = INVALID_INDEX;
-	}
-	// should do some sort of pop temp... it's a commit of sorts.
-	PopODBCEx( odbc );
-	return iValue;
+		char update[128];
+		CTEXTSTR result = NULL;
+		// should escape quotes passed in....
+		snprintf( update, sizeof( update ), WIDE("update option_map set value_id=%ld where node_id=%ld"), iValue, optval );
+		if( !SQLCommand( odbc, update ) )
+		{
+			GetSQLResult( &result );
+			lprintf( WIDE("Update value failed: %s"), result );
+			iValue = INVALID_INDEX;
+		}
+		// should do some sort of pop temp... it's a commit of sorts.
+		PopODBCEx( odbc );
+		return iValue;
 	}
 }
 
@@ -756,42 +756,47 @@ INDEX SetOptionStringValue( INDEX optval, CTEXTSTR pValue )
 	CTEXTSTR result = NULL;
    TEXTSTR newval;
 	INDEX IDValue;
-	POPTION_TREE tree = GetOptionTreeEx( og.Option );
-	IDValue = GetOptionValueIndexEx( og.Option, optval );
-	// should escape quotes passed in....
-   if( IDValue && IDValue != INVALID_INDEX )
-		snprintf( update, sizeof( update ), WIDE("select string from %s where %s=%lu")
-				  , tree->flags.bNewVersion?OPTION_VALUES:"option_values"
-				  , tree->flags.bNewVersion?"option_id":"value_id"
-				  , IDValue );
-   strncpy( value, pValue, sizeof( value )-1 );
-   newval = EscapeSQLBinary( og.Option, pValue, strlen( pValue ) );
-   if( IDValue && SQLQuery( og.Option, update, &result ) && result )
-   {
-		snprintf( update, sizeof( update ), WIDE("update %s set string='%s' where %s=%ld")
-				  , tree->flags.bNewVersion?OPTION_VALUES:"option_values"
-				  , newval
-				  , tree->flags.bNewVersion?"option_id":"value_id"
-				  , IDValue );
-      SQLEndQuery( og.Option );
-      if( !SQLCommand( og.Option, update ) )
-      {
-         FetchSQLError( og.Option, &result );
-         lprintf( WIDE("Update value failed: %s"), result );
-         IDValue = INVALID_INDEX;
-      }
-   }
-   else
-   {
-      IDValue = CreateValue( og.Option, optval, value );
-      if( IDValue != INVALID_INDEX )
-      {
-		  // setoption might fail, resulting in an invalid index ID
-		  IDValue = SetOptionValueEx( og.Option, optval, IDValue );
-      }
-   }
-   Release( newval );
-   return IDValue;
+	EnterCriticalSec( &og.cs_option );
+	{
+		POPTION_TREE tree = GetOptionTreeEx( og.Option );
+		IDValue = GetOptionValueIndexEx( og.Option, optval );
+		// should escape quotes passed in....
+		if( IDValue && IDValue != INVALID_INDEX )
+			snprintf( update, sizeof( update ), WIDE("select string from %s where %s=%lu")
+					  , tree->flags.bNewVersion?OPTION_VALUES:"option_values"
+					  , tree->flags.bNewVersion?"option_id":"value_id"
+					  , IDValue );
+		strncpy( value, pValue, sizeof( value )-1 );
+		newval = EscapeSQLBinary( og.Option, pValue, strlen( pValue ) );
+		if( IDValue && SQLQuery( og.Option, update, &result ) && result )
+		{
+			snprintf( update, sizeof( update ), WIDE("update %s set string='%s' where %s=%ld")
+					  , tree->flags.bNewVersion?OPTION_VALUES:"option_values"
+					  , newval
+					  , tree->flags.bNewVersion?"option_id":"value_id"
+					  , IDValue );
+			SQLEndQuery( og.Option );
+			if( !SQLCommand( og.Option, update ) )
+			{
+				FetchSQLError( og.Option, &result );
+				lprintf( WIDE("Update value failed: %s"), result );
+				IDValue = INVALID_INDEX;
+			}
+		}
+		else
+		{
+			IDValue = CreateValue( og.Option, optval, value );
+			if( IDValue != INVALID_INDEX )
+			{
+				// setoption might fail, resulting in an invalid index ID
+				IDValue = SetOptionValueEx( og.Option, optval, IDValue );
+			}
+		}
+	}
+	LeaveCriticalSec( &og.cs_option );
+
+	Release( newval );
+	return IDValue;
 }
 
 //------------------------------------------------------------------------
