@@ -100,10 +100,9 @@ int  SetGroupFilePath ( CTEXTSTR group, CTEXTSTR path )
 		filegroup = New( struct Group );
 		filegroup->name = StrDup( group );
 		filegroup->base_path = StrDup( path );
-		snprintf( tmp, sizeof( tmp ), "file group/%s %s", group, path );
+		snprintf( tmp, sizeof( tmp ), "file group/%s", group );
 		if( l.have_default )
 		{
-			lprintf( "option to save is %s %s", tmp, path );
 			SACK_WriteProfileString( GetProgramName(), tmp, path );
 		}
 		AddLink( &l.groups, filegroup );
@@ -149,7 +148,7 @@ static TEXTSTR PrependBasePath( int groupid, struct Group *group, CTEXTSTR filen
 			group = (struct Group *)GetLink( &l.groups, groupid );
 		}
 	}
-	if( !group || filename[0] == '/' || filename[0] == '\\' || filename[1] == ':' )
+	if( !group || ( filename && ( filename[0] == '/' || filename[0] == '\\' || filename[1] == ':' ) ) )
       return StrDup( filename );
 	{
 		int len;

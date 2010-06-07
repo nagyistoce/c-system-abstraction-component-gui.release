@@ -239,17 +239,17 @@ PSI_CONTROL LoadXMLFrameOverEx( PSI_CONTROL parent, CTEXTSTR file DBG_PASS )
 	size = 0;
 #ifdef UNDER_CE
 	{
-		FILE *file = sack_fopen( 0, file, "rt" );
-		if( file )
+		FILE *file_read = sack_fopen( 0, file, "rt" );
+		if( file_read )
 		{
-			sack_fseek( file, 0, SEEK_END );
-			zz = ftell( file );
-			sack_fseek( file, 0, SEEK_SET );
+			sack_fseek( file_read, 0, SEEK_END );
+			zz = ftell( file_read );
+			sack_fseek( file_read, 0, SEEK_SET );
 
 			size = zz;
 			buffer = Allocate( zz );
 			fread( buffer, 1, zz, file );
-			sack_fclose( file );
+			sack_fclose( file_read );
          lprintf( "loaded font blob %s %d %p", file, zz, buffer );
 		}
 	}
@@ -263,7 +263,7 @@ PSI_CONTROL LoadXMLFrameOverEx( PSI_CONTROL parent, CTEXTSTR file DBG_PASS )
 		size = 0;
 #ifdef UNDER_CE
 		{
-			FILE *file_read = sack_open( GetFileGroup( "PSI Frames", "./frames" ), file, "rt" );
+			FILE *file_read = sack_fopen( GetFileGroup( "PSI Frames", "./frames" ), file, "rt" );
 			if( file_read )
 			{
 				sack_fseek( file_read, 0, SEEK_END );
@@ -284,8 +284,8 @@ PSI_CONTROL LoadXMLFrameOverEx( PSI_CONTROL parent, CTEXTSTR file DBG_PASS )
 			Release( tmp );
 		}
 #endif
-      if( !buffer || !size )
-			file = _file; // restore filenaem to mark on the dialog, else use new filename cuase we loaded success
+      //if( !buffer || !size )
+		//	file = _file; // restore filenaem to mark on the dialog, else use new filename cuase we loaded success
 	}
 	if( buffer && size )
 	{
@@ -299,7 +299,8 @@ PSI_CONTROL LoadXMLFrameOverEx( PSI_CONTROL parent, CTEXTSTR file DBG_PASS )
 		{
 			PSI_CONTROL frame;
          TEXTSTR tmp;
-			frame = CreateFrame( tmp = sack_prepend_path( GetFileGroup( "PSI Frames", "./frames" ), file )
+			frame = CreateFrame( tmp = sack_prepend_path( GetFileGroup( "PSI Frames", "./frames" )
+																	  , file )
 									 , 0, 0
 									 , 420, 250, 0, NULL );
 			frame->save_name = tmp;
