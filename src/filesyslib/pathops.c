@@ -202,22 +202,21 @@ _64 GetTimeAsFileTime ( void )
 
 //-----------------------------------------------------------------------
 
- int  SetCurrentPath ( CTEXTSTR path )
+int  SetCurrentPath ( CTEXTSTR path )
 {
 	if( !path )
 		return 0;
+	lprintf( WIDE( "Set CurrentPath: %s" ), path );
+	SetDefaultFilePath( path );
+
 #ifndef UNDER_CE
-  lprintf( WIDE( "Set CurrentPath: %s" ), path );
-   SetDefaultFilePath( path );
 #ifdef _WIN32
 	return SetCurrentDirectory( path );
 #else
 	return !chdir( path );
-#endif	
-#else
-   SetDefaultFilePath( path );
 #endif
-	return 0;
+#endif
+	return 1;
 }
 
 FILESYS_NAMESPACE_END

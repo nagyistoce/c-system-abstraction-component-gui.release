@@ -903,11 +903,19 @@ SQLGETOPTION_PROC( int, SACK_GetPrivateProfileStringExx )( CTEXTSTR pSection
 				}
 				else
 				{
-					strncpy( pBuffer, pDefaultbuf, nBuffer );			
+               if( pDefaultbuf )
+						strncpy( pBuffer, pDefaultbuf, nBuffer );
+					else
+                  pBuffer[0] = 0;
 				}
 			}
 			else
-				strncpy( pBuffer, pDefaultbuf, nBuffer );
+			{
+				if( pDefaultbuf )
+					strncpy( pBuffer, pDefaultbuf, nBuffer );
+				else
+					pBuffer[0] = 0;
+			}
 			// create the option branch since it doesn't exist...
 			optval = GetOptionIndexEx( OPTION_ROOT_VALUE, pININame, pSection, pOptname, TRUE DBG_RELAY );
 			{
