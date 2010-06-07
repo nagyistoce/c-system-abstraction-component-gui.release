@@ -356,6 +356,15 @@ int RegisterIconEx( CTEXTSTR icon DBG_PASS )
 											, 0
 #endif
 											);
+		if( !nid.hIcon )
+				nid.hIcon = (HICON)LoadImage( hInstMe, icon, IMAGE_ICON
+											, 0, 0
+#ifndef _ARM_
+											,  LR_DEFAULTSIZE
+#else
+											, 0
+#endif
+											);
 	}
 	else
 	{
@@ -369,6 +378,15 @@ int RegisterIconEx( CTEXTSTR icon DBG_PASS )
 											, 0
 #endif
 										);
+			if( !nid.hIcon )
+				nid.hIcon = (HICON)LoadImage( hInstMe, icon, IMAGE_ICON
+											, 0, 0
+#ifndef _ARM_
+											,  LR_DEFAULTSIZE 
+#else
+											, 0
+#endif
+											);
 			if( !nid.hIcon )
 				nid.hIcon = (HICON)LoadImage( NULL, icon, IMAGE_ICON
 											, 0, 0
@@ -393,7 +411,7 @@ int RegisterIconEx( CTEXTSTR icon DBG_PASS )
 #endif
 											);
 				if( !nid.hIcon )
-					nid.hIcon = (HICON)LoadImage( NULL, (TEXTCHAR*)ICO_DEFAULT, IMAGE_ICON
+					nid.hIcon = (HICON)LoadImage( hInstMe, (TEXTCHAR*)"ICO_DEFAULT", IMAGE_ICON
 												, 0, 0
 #ifndef _ARM_
 												,  LR_DEFAULTSIZE 
