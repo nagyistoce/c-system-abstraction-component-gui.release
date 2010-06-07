@@ -173,7 +173,14 @@ static TEXTSTR PrependBasePath( int groupid, struct Group *group, CTEXTSTR filen
 			snprintf( fullname, len * sizeof( TEXTCHAR ), WIDE("%s/%s"), group->base_path, filename );
 		}
 	}
-   lprintf( "resulting name is %s", fullname );
+	{
+		static int aa;
+		if( aa > 2 )
+		{
+         aa++;
+			lprintf( "%s", fullname );
+		}
+	}
 	return fullname;
 }
 
