@@ -6,9 +6,18 @@ project( launchpad )
 
 set(BASE_SOURCES
 ${FIRST_GCC_PROGRAM_SOURCE} 
-    launchpad
+    launchpad launchpad.rc
 ${LAST_GCC_PROGRAM_SOURCE}
 )
+
+if( MINGW )
+
+SET(CMAKE_RC_COMPILER_INIT "windres")
+SET(CMAKE_RC_COMPILER "windres")
+SET(CMAKE_RC_COMPILE_OBJECT "windres <FLAGS> <DEFINES> -O coff -o <OBJECT> <SOURCE>")
+ENABLE_LANGUAGE(RC)
+
+endif()
 
 
 add_executable(${PROJECT_NAME} WIN32 ${BASE_SOURCES} )
