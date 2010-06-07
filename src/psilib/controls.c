@@ -451,21 +451,18 @@ void GetMyInterface( void )
 #endif
 }
 #endif
-// run this one later than our ealieest
-PRIORITY_PRELOAD( deadstart, DEFAULT_PRELOAD_PRIORITY - 2 )
+
+void TryLoadingFrameImage( void )
 {
-#ifdef USE_INTERFACES
-	GetMyInterface();
-	if( g.MyImageInterface )
-#endif
+   if( !g.BorderImage )
 	{
 		TEXTCHAR buffer[256];
 #ifndef __NO_OPTIONS__
-		SACK_GetProfileStringEx( GetProgramName(), "SACK/PSI/Frame border image", WIDE("images/frame_border.png"), buffer, sizeof( buffer ), TRUE );
+		SACK_GetProfileStringEx( GetProgramName(), "SACK/PSI/Frame border image", WIDE("frame_border.png"), buffer, sizeof( buffer ), TRUE );
 #else
-		StrCpy( buffer, WIDE("images/frame_border.png") );
+		StrCpy( buffer, WIDE("frame_border.png") );
 #endif
-		g.BorderImage = LoadImageFile( buffer );
+		g.BorderImage = LoadImageFileFromGroup( GetFileGroup( "Images", "./Images" ), buffer );
 		if( g.BorderImage )
 		{
 			int MiddleSegmentWidth, MiddleSegmentHeight;
@@ -503,6 +500,18 @@ PRIORITY_PRELOAD( deadstart, DEFAULT_PRELOAD_PRIORITY - 2 )
 																				 , g.BorderWidth + MiddleSegmentWidth, g.BorderHeight + MiddleSegmentHeight
 																				 , g.BorderWidth, g.BorderHeight );
 		}
+	}
+}
+
+// run this one later than our ealieest
+PRIORITY_PRELOAD( deadstart, DEFAULT_PRELOAD_PRIORITY - 2 )
+{
+#ifdef USE_INTERFACES
+	GetMyInterface();
+	if( g.MyImageInterface )
+#endif
+	{
+		TryLoadingFrameImage();
 	}
 }
 
@@ -2739,6 +2748,8 @@ PPHYSICAL_DEVICE OpenPhysicalDevice( PSI_CONTROL pc, PSI_CONTROL over, PRENDERER
 		// characteristics...
 		// readjusts surface (again) after adoption.
 		//lprintf( WIDE("------------------- COMMON BORDER RE-SET on draw -----------------") );
+		TryLoadingFrameImage();
+
 		if( g.BorderImage )
 			SetCommonTransparent( pc, TRUE );
 		SetCommonBorder( pc, pc->BorderType );
