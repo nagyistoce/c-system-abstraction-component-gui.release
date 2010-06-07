@@ -259,39 +259,30 @@ PSI_CONTROL LoadXMLFrameOverEx( PSI_CONTROL parent, CTEXTSTR file DBG_PASS )
 	if( !buffer || !size )
 	{
 		// attempt secondary open within frames/*
-		CTEXTSTR filename;
 		int len;
-		TEXTCHAR pathbuf[256];
-      GetFileGroupText( GetFileGroup( "Frame", "./frames" ), pathbuf, 256 );
-		tmp = (TEXTSTR)Allocate( len = strlen( file ) + strlen( WIDE("frames/") ) + StrLen( pathbuf )+ 1 );
-		filename = pathrchr( file );
-      lprintf( "attmpgint to use path buffer [%s][%s]", pathbuf, file );
-		if( filename )
-			snprintf( tmp, len, WIDE("%s/%*.*s/frames%s"), pathbuf, (int)(filename-file),(int)(filename-file),file,filename);
-      else
-			snprintf( tmp, len, WIDE("%s/frames/%s"), pathbuf, file );
-      lprintf( "attmpgint to use path buffer [%s]", tmp );
-      _file = file; // save filename to restore for later
-      file = tmp;
 		size = 0;
 #ifdef UNDER_CE
 		{
-			FILE *file = sack_open( GetFileGroup( "Frames" ), file, "rt" );
-			if( file )
+			FILE *file_read = sack_open( GetFileGroup( "PSI Frames", "./frames" ), file, "rt" );
+			if( file_read )
 			{
-				sack_fseek( file, 0, SEEK_END );
-				zz = ftell( file );
-				sack_fseek( file, 0, SEEK_SET );
+				sack_fseek( file_read, 0, SEEK_END );
+				zz = ftell( file_read );
+				sack_fseek( file_read, 0, SEEK_SET );
 
 				size = zz;
 				buffer = Allocate( zz );
-				fread( buffer, 1, zz, file );
-				sack_fclose( file );
-				lprintf( "loaded font blob %s %d %p", file, zz, buffer );
+				sack_fread( buffer, 1, zz, file_read );
+				sack_fclose( file_read );
+				//lprintf( "loaded font blob %s %d %p", file, zz, buffer );
 			}
 		}
 #else
-		buffer = OpenSpace( NULL, file, &size );
+		{
+			TEXTSTR tmp;
+			buffer = OpenSpace( NULL, tmp = sack_prepend_path( GetFileGroup( "PSI Frames", "./frames" ), file ), &size );
+			Release( tmp );
+		}
 #endif
       if( !buffer || !size )
 			file = _file; // restore filenaem to mark on the dialog, else use new filename cuase we loaded success
@@ -307,8 +298,11 @@ PSI_CONTROL LoadXMLFrameOverEx( PSI_CONTROL parent, CTEXTSTR file DBG_PASS )
 		//create_editable_dialog:
 		{
 			PSI_CONTROL frame;
-			frame = CreateFrame( file, 0, 0, 420, 250, 0, NULL );
-			frame->save_name = StrDup( file );
+         TEXTSTR tmp;
+			frame = CreateFrame( tmp = sack_prepend_path( GetFileGroup( "PSI Frames", "./frames" ), file )
+									 , 0, 0
+									 , 420, 250, 0, NULL );
+			frame->save_name = tmp;
 			if( tmp )
 			{
 				Release( tmp );
@@ -320,7 +314,7 @@ PSI_CONTROL LoadXMLFrameOverEx( PSI_CONTROL parent, CTEXTSTR file DBG_PASS )
 			if( frame )
 			{
 				// save it, and result with it...
-				SaveXMLFrame( frame, file );
+				SaveXMLFrame( frame, tmp );
 				LeaveCriticalSec( &l.cs );
 				return frame;
 			}
