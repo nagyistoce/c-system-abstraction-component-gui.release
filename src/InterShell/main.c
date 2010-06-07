@@ -4688,6 +4688,7 @@ static void CPROC MyHandleSQLFeedback( CTEXTSTR message )
 
 PRIORITY_PRELOAD( LoadingMessage, DEFAULT_PRELOAD_PRIORITY+3 )
 {
+
 	BannerNoWait( WIDE("Loading...") );
 	//void SQLSetFeedbackHandler( void (CPROC*HandleSQLFeedback*)(TEXTCHAR *message) );
 #ifndef __NO_SQL__
@@ -4719,6 +4720,7 @@ PRIORITY_PRELOAD( ProgramLock, DEFAULT_PRELOAD_PRIORITY+2 )
 								  , sizeof( resource_path ), TRUE );
 
 	SetGroupFilePath( "Resources", resource_path );
+   SetCurrentPath( resource_path );
 /*
 #  ifdef _WIN32
 #    ifdef UNDER_CE
