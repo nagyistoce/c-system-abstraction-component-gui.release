@@ -29,7 +29,8 @@ struct Group {
 static struct winfile_local_tag {
 	PLIST files;
 	PLIST groups;
-   PLIST handles;
+	PLIST handles;
+   LOGICAL have_default;
 } winfile_local;
 
 #define l winfile_local
@@ -58,7 +59,8 @@ int  GetFileGroup ( CTEXTSTR groupname, CTEXTSTR default_path )
 			{
 				TEXTCHAR tmp[256];
 				snprintf( tmp, sizeof( tmp ), "file group/%s", groupname );
-				SACK_GetProfileString( GetProgramName(), tmp, "", tmp, sizeof( tmp ) );
+				lprintf( "option to save is %s", tmp );
+				SACK_GetProfileString( GetProgramName(), tmp, default_path, tmp, sizeof( tmp ) );
 				if( tmp[0] )
                default_path = tmp;
 			}
@@ -96,9 +98,14 @@ int  SetGroupFilePath ( CTEXTSTR group, CTEXTSTR path )
 		filegroup = New( struct Group );
 		filegroup->name = StrDup( group );
 		filegroup->base_path = StrDup( path );
-      snprintf( tmp, sizeof( tmp ), "file group/%s", path );
-      SACK_WriteProfileString( GetProgramName(), tmp, path );
-      AddLink( &l.groups, filegroup );
+		snprintf( tmp, sizeof( tmp ), "file group/%s", group );
+		if( l.have_default )
+		{
+				lprintf( "option to save is %s %s", tmp, path );
+				SACK_WriteProfileString( GetProgramName(), tmp, path );
+		}
+		AddLink( &l.groups, filegroup );
+      l.have_default = TRUE;
 	}
 	else
 	{

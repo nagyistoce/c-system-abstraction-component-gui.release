@@ -261,12 +261,16 @@ PSI_CONTROL LoadXMLFrameOverEx( PSI_CONTROL parent, CTEXTSTR file DBG_PASS )
 		// attempt secondary open within frames/*
 		CTEXTSTR filename;
 		int len;
-		tmp = (TEXTSTR)Allocate( len = strlen( file ) + strlen( WIDE("frames/") ) + 1 );
+		TEXTCHAR pathbuf[256];
+      GetFileGroupText( GetFileGroup( "Frame", "./frames" ), pathbuf, 256 );
+		tmp = (TEXTSTR)Allocate( len = strlen( file ) + strlen( WIDE("frames/") ) + StrLen( pathbuf )+ 1 );
 		filename = pathrchr( file );
+      lprintf( "attmpgint to use path buffer [%s][%s]", pathbuf, file );
 		if( filename )
-			snprintf( tmp, len, WIDE("%*.*s/frames%s"), (int)(filename-file),(int)(filename-file),file,filename);
+			snprintf( tmp, len, WIDE("%s/%*.*s/frames%s"), pathbuf, (int)(filename-file),(int)(filename-file),file,filename);
       else
-			snprintf( tmp, len, WIDE("frames/%s"), file );
+			snprintf( tmp, len, WIDE("%s/frames/%s"), pathbuf, file );
+      lprintf( "attmpgint to use path buffer [%s]", tmp );
       _file = file; // save filename to restore for later
       file = tmp;
 		size = 0;
