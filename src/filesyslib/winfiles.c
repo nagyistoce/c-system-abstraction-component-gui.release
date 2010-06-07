@@ -54,15 +54,17 @@ int  GetFileGroup ( CTEXTSTR groupname, CTEXTSTR default_path )
 	struct Group *filegroup = GetGroupFilePath( groupname );
 	if( !filegroup )
 	{
-		if( default_path == NULL )
 		{
+			TEXTCHAR tmp_ent[256];
+			TEXTCHAR tmp[256];
+			snprintf( tmp_ent, sizeof( tmp_ent ), "file group/%s", groupname );
+			//lprintf( "option to save is %s", tmp );
+			SACK_GetProfileString( GetProgramName(), tmp_ent, default_path?default_path:".", tmp, sizeof( tmp ) );
+			if( tmp[0] )
+				default_path = tmp;
+			else if( default_path )
 			{
-				TEXTCHAR tmp[256];
-				snprintf( tmp, sizeof( tmp ), "file group/%s", groupname );
-				lprintf( "option to save is %s", tmp );
-				SACK_GetProfileString( GetProgramName(), tmp, default_path, tmp, sizeof( tmp ) );
-				if( tmp[0] )
-               default_path = tmp;
+				SACK_WriteProfileString( GetProgramName(), tmp_ent, default_path );
 			}
 		}
 		filegroup = New( struct Group );
@@ -98,11 +100,11 @@ int  SetGroupFilePath ( CTEXTSTR group, CTEXTSTR path )
 		filegroup = New( struct Group );
 		filegroup->name = StrDup( group );
 		filegroup->base_path = StrDup( path );
-		snprintf( tmp, sizeof( tmp ), "file group/%s", group );
+		snprintf( tmp, sizeof( tmp ), "file group/%s %s", group, path );
 		if( l.have_default )
 		{
-				lprintf( "option to save is %s %s", tmp, path );
-				SACK_WriteProfileString( GetProgramName(), tmp, path );
+			lprintf( "option to save is %s %s", tmp, path );
+			SACK_WriteProfileString( GetProgramName(), tmp, path );
 		}
 		AddLink( &l.groups, filegroup );
       l.have_default = TRUE;
@@ -144,16 +146,34 @@ static TEXTSTR PrependBasePath( int groupid, struct Group *group, CTEXTSTR filen
 
 		if( !groupid )
 		{
-         	group = (struct Group *)GetLink( &l.groups, groupid );
+			group = (struct Group *)GetLink( &l.groups, groupid );
 		}
 	}
 	if( !group || filename[0] == '/' || filename[0] == '\\' || filename[1] == ':' )
       return StrDup( filename );
 	{
 		int len;
-		fullname = NewArray( TEXTCHAR, len = StrLen( filename ) + StrLen(group->base_path) + 2 );
-		snprintf( fullname, len * sizeof( TEXTCHAR ), WIDE("%s/%s"), group->base_path, filename );
+		if( groupid && group->base_path[0] == '.' && ( group->base_path[1] == '/' || group->base_path[1] == '\\' ) )
+		{
+			struct Group *root = (struct Group *)GetLink( &l.groups, 0 );
+			if( root )
+			{
+				fullname = NewArray( TEXTCHAR, len = StrLen( root->base_path ) + StrLen( filename + 2) + StrLen(group->base_path) + 3 );
+				snprintf( fullname, len * sizeof( TEXTCHAR ), WIDE("%s/%s/%s"), root->base_path, group->base_path +2, filename );
+			}
+			else
+			{
+				fullname = NewArray( TEXTCHAR, len = StrLen( filename ) + StrLen(group->base_path) + 2 );
+				snprintf( fullname, len * sizeof( TEXTCHAR ), WIDE("%s/%s"), group->base_path, filename );
+			}
+		}
+		else
+		{
+			fullname = NewArray( TEXTCHAR, len = StrLen( filename ) + StrLen(group->base_path) + 2 );
+			snprintf( fullname, len * sizeof( TEXTCHAR ), WIDE("%s/%s"), group->base_path, filename );
+		}
 	}
+   lprintf( "resulting name is %s", fullname );
 	return fullname;
 }
 
