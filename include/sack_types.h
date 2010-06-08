@@ -48,6 +48,9 @@ using namespace System;
 
 // Defined for building visual studio monolithic build.  These symbols are not relavent with cmakelists.
 #ifdef SACK_BAG_EXPORTS
+
+#define SACK_BAG_CORE_EXPORTS
+
 // exports don't really matter with CLI compilation.
 #  ifndef BAG
 
@@ -61,6 +64,7 @@ using namespace System;
 #define LIBRARY_DEADSTART
 #endif
 
+#define USE_SACK_FILE_IO
 /* Defined when SACK_BAG_EXPORTS is defined. This was an
    individual library module once upon a time.           */
 #define MEM_LIBRARY_SOURCE
@@ -300,14 +304,14 @@ using namespace System;
 /* Method to declare functions exported from a DLL. (nothign on
    LINUX or building statically, but __declspec(dllimport) on
    windows )                                                    */
-#   define EXPORT_METHOD __declspec(dllexport)
+#      define EXPORT_METHOD __declspec(dllexport)
 /* method to define a function which will be Imported from a
    library. Under windows, this is probably
    __declspec(dllimport). Under linux this is probably 'extern'. */
-#   define IMPORT_METHOD __declspec(dllimport)
-#endif
-#  define LITERAL_LIB_EXPORT_METHOD __declspec(dllexport)
-#  define LITERAL_LIB_IMPORT_METHOD __declspec(dllimport)
+#      define IMPORT_METHOD __declspec(dllimport)
+#    endif
+#      define LITERAL_LIB_EXPORT_METHOD __declspec(dllexport)
+#      define LITERAL_LIB_IMPORT_METHOD __declspec(dllimport)
 #  endif
 # endif
 #else
@@ -1574,7 +1578,7 @@ is_deadstart_complete( void );
 #endif
 
 /* Define a routine to call for exit().  This triggers specific code to handle shutdown event registration */
-#ifdef SACK_BAG_EXPORTS
+#ifdef SACK_BAG_CORE_EXPORTS
 EXPORT_METHOD
 #else
 IMPORT_METHOD
