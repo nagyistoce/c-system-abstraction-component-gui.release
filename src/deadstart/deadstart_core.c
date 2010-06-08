@@ -398,7 +398,6 @@ void RegisterStartups( void )
 	struct rt_init *begin = &DeclareList( begin_deadstart_ );
 	struct rt_init *end = &DeclareList( end_deadstart_ );
 	struct rt_init *current;
- lprintf( "JUNK" );
 #  ifdef __NO_BAG__
    printf( "Not doing deadstarts\n" );
 	return;
