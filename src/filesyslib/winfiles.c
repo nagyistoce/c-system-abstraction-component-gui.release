@@ -59,12 +59,18 @@ int  GetFileGroup ( CTEXTSTR groupname, CTEXTSTR default_path )
 			TEXTCHAR tmp[256];
 			snprintf( tmp_ent, sizeof( tmp_ent ), "file group/%s", groupname );
 			//lprintf( "option to save is %s", tmp );
-			SACK_GetProfileString( GetProgramName(), tmp_ent, default_path?default_path:".", tmp, sizeof( tmp ) );
+#ifdef __NO_OPTIONS__
+         tmp[0] = 0;
+#else
+			SACK_GetProfileString( GetProgramName(), tmp_ent, default_path?default_path:"", tmp, sizeof( tmp ) );
+#endif
 			if( tmp[0] )
 				default_path = tmp;
 			else if( default_path )
 			{
+#ifndef __NO_OPTIONS__
 				SACK_WriteProfileString( GetProgramName(), tmp_ent, default_path );
+#endif
 			}
 		}
 		filegroup = New( struct Group );
@@ -101,10 +107,12 @@ int  SetGroupFilePath ( CTEXTSTR group, CTEXTSTR path )
 		filegroup->name = StrDup( group );
 		filegroup->base_path = StrDup( path );
 		snprintf( tmp, sizeof( tmp ), "file group/%s", group );
+#ifndef __NO_OPTIONS__
 		if( l.have_default )
 		{
 			SACK_WriteProfileString( GetProgramName(), tmp, path );
 		}
+#endif
 		AddLink( &l.groups, filegroup );
       l.have_default = TRUE;
 	}
