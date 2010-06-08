@@ -41,8 +41,8 @@ ${FIRST_GCC_PROGRAM_SOURCE}
     ../../../filesyslib/filescan.c
     ../../../filesyslib/pathops.c
     ../../../filesyslib/winfiles.c
-    ../../../deadstart/deadstart_core.c 
 ${LAST_GCC_PROGRAM_SOURCE}
+    ../../../deadstart/deadstart_core.c 
 )
 
 add_executable(${PROJECT_NAME} ${BASE_SOURCES} )
