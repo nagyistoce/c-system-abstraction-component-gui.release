@@ -127,6 +127,7 @@ LOGICAL APIENTRY DllMain( HINSTANCE hModule,
 //----------------------------------------------------------------------------
 NETWORK_PROC( int, GetMacAddress)(PCLIENT pc )//int get_mac_addr (char *device, unsigned char *buffer)
 {
+#ifdef INCLUDE_MAC_SUPPORT
 #ifdef __LINUX__
 #ifdef __THIS_CODE_GETS_MY_MAC_ADDRESS___
 	int fd;
@@ -209,6 +210,8 @@ NETWORK_PROC( int, GetMacAddress)(PCLIENT pc )//int get_mac_addr (char *device, 
 	hr = SendARP (GetNetworkLong(pc,GNL_IP), 0, (PULONG)pc->hwClient, &ulLen);
     lprintf (WIDE("Return %08x, length %8d\n"), hr, ulLen);
 
+	return 0;
+#endif
 	return 0;
 #endif
 }
