@@ -194,13 +194,14 @@ void RegisterPriorityStartupProc( void (*proc)(void), CTEXTSTR func,int priority
 	
 	if( bInitialDone && !bSuspend )
 	{
-      lprintf( "Initial done, not suspended, dispatch immediate." );
+#define ONE_MACRO(a,b) a,b
+      _xlprintf(LOG_NOISE,file,line)( "Initial done, not suspended, dispatch immediate." );
       InvokeDeadstart();
 	}
    //lprintf( WIDE("Total procs %d"), nProcs );
 }
 
-
+#if UNUSED
 #ifdef __WATCOMC__ 
 // this is really nice - to have a prioritized initializer list...
 #  ifdef __cplusplus
@@ -234,6 +235,9 @@ void RegisterPriorityStartupProc( void (*proc)(void), CTEXTSTR func,int priority
 #elif defined( __GNUC__ )
 #    define PRELOAD(name) void name( void ) __attribute__((constructor)); \
 void name( void )
+#endif
+
+
 #endif
 
 #ifdef __LINUX__
@@ -394,6 +398,7 @@ void RegisterStartups( void )
 	struct rt_init *begin = &DeclareList( begin_deadstart_ );
 	struct rt_init *end = &DeclareList( end_deadstart_ );
 	struct rt_init *current;
+ lprintf( "JUNK" );
 #  ifdef __NO_BAG__
    printf( "Not doing deadstarts\n" );
 	return;
