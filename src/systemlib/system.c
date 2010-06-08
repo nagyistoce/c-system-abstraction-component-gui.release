@@ -898,8 +898,12 @@ CTEXTSTR GetProgramName( void )
 {
 	if( !l.filename )
 	{
-      DebugBreak();
-		return NULL;
+      SetupSystemServices();
+		if( !l.filename )
+		{
+			DebugBreak();
+			return NULL;
+		}
 	}
    return l.filename;
 }
@@ -908,8 +912,12 @@ CTEXTSTR GetProgramPath( void )
 {
 	if( !l.load_path )
 	{
-      DebugBreak();
-		return NULL;
+		SetupSystemServices();
+		if( !l.load_path )
+		{
+			DebugBreak();
+			return NULL;
+		}
 	}
    return l.load_path;
 }
