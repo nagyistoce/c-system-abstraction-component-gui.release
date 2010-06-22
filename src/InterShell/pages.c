@@ -800,8 +800,8 @@ void EditCurrentPageProperties(PSI_CONTROL parent, PCanvasData canvas)
 		canvas->current_page->grid.nPartsX = atoi( buffer );
 		GetControlText( GetControl( frame, EDIT_PAGE_GRID_PARTS_Y ), buffer, sizeof( buffer ) );
 		canvas->current_page->grid.nPartsY = atoi( buffer );
- 		if( (_rows != canvas->current_page->grid.nPartsX) ||
-			(_cols != canvas->current_page->grid.nPartsY) )
+ 		if( (_rows != canvas->current_page->grid.nPartsY) ||
+			(_cols != canvas->current_page->grid.nPartsX) )
 		{
 			AdjustControlPositions( canvas, canvas->current_page );
 			/* assume things have updated, color, etc... during configuration this redraw shouldn't be an issue*/
