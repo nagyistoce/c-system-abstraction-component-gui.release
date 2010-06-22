@@ -4,7 +4,6 @@
 //#line 2 "../imglib/psi_fntcache.c"
 #endif
 
-
 #ifdef SACK_MONOLITHIC_BUILD
 #define __CAN_USE_CACHE_DIALOG__
 #endif
