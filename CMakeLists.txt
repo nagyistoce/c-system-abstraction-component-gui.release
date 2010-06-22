@@ -454,6 +454,7 @@ endif( WIN32 )
 
 if( BUILD_MONOLITHIC )
 
+add_definitions( -DSACK_MONOLITHIC_BUILD )
 if( NOT __NO_GUI__ )
 set( BASE_SOURCES ${BASE_SOURCES} 
     ${IMAGE_SOURCES} 
