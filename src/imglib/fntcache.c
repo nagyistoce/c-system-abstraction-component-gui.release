@@ -5,6 +5,10 @@
 #endif
 
 
+#ifdef SACK_MONOLITHIC_BUILD
+#define __CAN_USE_CACHE_DIALOG__
+#endif
+
 #include <stdhdrs.h>
 #include <timers.h>
 #include <sharemem.h>
@@ -836,7 +840,7 @@ void DumpFontCache( void )
 		fprintf( out, WIDE("\n") );
       linelen = 0;
 	}
-	fclose( out );
+	sack_fclose( out );
 }
 
 #ifdef _DEBUG
@@ -994,7 +998,7 @@ void DumpLoadedFontCache( void )
 		fprintf( out, WIDE("\n") );
 		linelen = 0;
 	}
-	fclose( out );
+	sack_fclose( out );
 }
 #endif
 
@@ -1051,12 +1055,15 @@ void CPROC UpdateStatus( PTRSZVAL psvFrame )
 			 , (TimeElapsed/1000) % 60
 			 );
 	lprintf( msg );
-#if 0
+#ifdef __CAN_USE_CACHE_DIALOG__
    // in the positiion of image library, there is no controls to do...
 	SetCommonText( GetControl( (PCOMMON)psvFrame, TXT_TIME_STATUS ), msg );
+#endif
 	sprintf( msg, WIDE("Checked Fonts: %d")
 			 , fonts_checked
 			 );
+	lprintf( msg );
+#ifdef __CAN_USE_CACHE_DIALOG__
 	SetCommonText( GetControl( (PCOMMON)psvFrame, TXT_COUNT_STATUS ), msg );
 #endif
 }
@@ -1081,9 +1088,10 @@ void CPROC ScanDrive( PTRSZVAL user, TEXTCHAR *letter, int flags )
 void BuildFontCache( void )
 {
 	void *data = NULL;
-#if 0
 	PCOMMON status;
 	_32 timer;
+#ifdef __CAN_USE_CACHE_DIALOG__
+//#if 0
 	status = CreateFrame( WIDE("Font Cache Status")
 							  , 0, 0
 							  , 250, 60
@@ -1091,14 +1099,18 @@ void BuildFontCache( void )
 	MakeTextControl( status, 5, 5, 240, 19, TXT_STATUS, WIDE("Building font cache..."), 0 );
 	MakeTextControl( status, 5, 25, 240, 19, TXT_TIME_STATUS, WIDE(""), 0 );
 	MakeTextControl( status, 5, 45, 240, 19, TXT_COUNT_STATUS, WIDE(""), 0 );
-
 #endif
+//#endif
    lprintf( WIDE("Building cache...") );
 	StartTime = 0;
-#if 0 // erm? (images... no gui... ? )
+//#if 0 // erm? (images... no gui... ? )
+#ifdef __CAN_USE_CACHE_DIALOG__
 	DisplayFrame( status );
-	timer = AddTimer( 100, UpdateStatus, (PTRSZVAL)status );
+   MakeTopmost( GetFrameRenderer( status ) );
 #endif
+	timer = AddTimer( 100, UpdateStatus, (PTRSZVAL)status );
+//#endif
+
 	// .psf.gz doesn't load directly....
 	while( ScanFiles( WIDE("."), WIDE("*.ttf\t*.fon\t*.TTF\t*.pcf.gz\t*.pf?\t*.fnt\t*.psf.gz"), &data
 						 , ListFontFile, SFF_SUBCURSE, 0 ) );
@@ -1110,8 +1122,6 @@ void BuildFontCache( void )
       int len;
 		TEXTSTR tmp = NewArray( TEXTCHAR, len = strlen( name ) + 10 );
       snprintf( tmp, len * sizeof( TEXTCHAR ), "%s\\fonts", name );
-      lprintf( "... %s", tmp );
-		Release( (POINTER)name );
 		while( ScanFiles( tmp, WIDE("*.ttf\t*.fon\t*.TTF\t*.pcf.gz\t*.pf?\t*.fnt\t*.psf.gz"), &data
 							 , ListFontFile, SFF_SUBCURSE, 0 ) );
       Release( tmp );
@@ -1135,8 +1145,8 @@ void BuildFontCache( void )
 	UnloadFontBuilder();
 	//DebugDumpMemFile( WIDE("cache.built") );
    // it might be dispatched...
-#if 0
 	RemoveTimer( timer );
+#ifdef __CAN_USE_CACHE_DIALOG__
 	DestroyFrame( &status );
 #endif
 }
@@ -1502,7 +1512,7 @@ void LoadAllFonts( void )
 #endif
 
 		}
-		fclose( in );
+		sack_fclose( in );
 #ifdef _DEBUG
 		//DumpLoadedFontCache();
 #endif
