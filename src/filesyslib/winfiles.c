@@ -310,20 +310,20 @@ int sack_close( HANDLE file_handle )
 	struct file *file = FindFileByHandle( (HANDLE)file_handle );
 	if( file )
 	{
-	DeleteLink( &file->handles, (POINTER)file_handle );
+		DeleteLink( &file->handles, (POINTER)file_handle );
 #ifdef DEBUG_FILEOPEN
-	lprintf( WIDE("Close %s"), file->fullname );
+		lprintf( WIDE("Close %s"), file->fullname );
 #endif
-   /*
-	Release( file->name );
-	Release( file->fullname );
-	Release( file );
-	DeleteLink( &l.files, file );
-	*/
+		/*
+		 Release( file->name );
+		 Release( file->fullname );
+		 Release( file );
+		 DeleteLink( &l.files, file );
+		 */
 	}
 	if( file_handle != INVALID_HANDLE_VALUE )
 		return CloseHandle((HANDLE)file_handle);
-   return 0;
+	return 0;
 }
 
 int sack_iopen( int group, CTEXTSTR filename, int opts, ... )
@@ -384,12 +384,12 @@ int sack_unlink( CTEXTSTR filename )
 #ifdef __LINUX__
    return unlink( filename );
 #else
-   int okay;
-   struct Group *filegroup = (struct Group *)GetLink( &l.groups, 0 );
-   TEXTSTR tmp = PrependBasePath( 0, filegroup, filename );
+	int okay;
+	struct Group *filegroup = (struct Group *)GetLink( &l.groups, 0 );
+	TEXTSTR tmp = PrependBasePath( 0, filegroup, filename );
 	okay = DeleteFile(tmp);
 	Release( tmp );
-   return !okay; // unlink returns TRUE is 0, else error...
+	return !okay; // unlink returns TRUE is 0, else error...
 #endif
 }
 
@@ -429,7 +429,7 @@ struct file *FindFileByFILE( FILE *file_file )
 		struct Group *filegroup = (struct Group *)GetLink( &l.groups, group );
 		file = New( struct file );
 		file->handles = NULL;
-      	file->files = NULL;
+		file->files = NULL;
 		file->name = StrDup( filename );
 		file->fullname = PrependBasePath( group, filegroup, filename );
 		AddLink( &l.files,file );
@@ -452,9 +452,12 @@ struct file *FindFileByFILE( FILE *file_file )
 		return NULL;
 	}
 #ifdef DEBUG_FILEOPEN
-	lprintf( WIDE( "Fopen %s" ), file->fullname );
+	lprintf( WIDE( "sack_open %s (%s)" ), file->fullname, opts );
 #endif
 	AddLink( &file->files, handle );
+#ifdef DEBUG_FILEOPEN
+   lprintf( "Added FILE* %p and list is %p", handle, file->files );
+#endif
 	return handle;
 }
  int  sack_fseek ( FILE *file_file, int pos, int whence )
@@ -470,6 +473,9 @@ struct file *FindFileByFILE( FILE *file_file )
 	lprintf( WIDE("Closing %s"), file->fullname );
 #endif
 	DeleteLink( &file->files, file_file );
+#ifdef DEBUG_FILEOPEN
+   lprintf( "deleted FILE* %p and list is %p", file_file, file->files );
+#endif
    /*
 	Release( file->name );
    Release( file->fullname );
