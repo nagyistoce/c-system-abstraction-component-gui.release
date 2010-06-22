@@ -31,6 +31,7 @@ struct procreg_local_tag {
 
 	TEXTCHAR *config_filename;
 	FILE *file;
+   CRITICALSECTION csName;
    //gcroot<System::IO::FileStream^> fs;
 };
 
@@ -52,7 +53,7 @@ PTREEDEF GetClassTreeEx( PTREEDEF root
 //---------------------------------------------------------------------------
 
 
-int CPROC SavedNameCmpEx(CTEXTSTR dst, CTEXTSTR src, size_t srclen)
+static int CPROC SavedNameCmpEx(CTEXTSTR dst, CTEXTSTR src, size_t srclen)
 {
 	// NUL does not nessecarily terminate strings
 	// instead slave off the length...
@@ -99,7 +100,7 @@ int CPROC SavedNameCmpEx(CTEXTSTR dst, CTEXTSTR src, size_t srclen)
 }
 //---------------------------------------------------------------------------
 
-int CPROC SavedNameCmp(CTEXTSTR dst, CTEXTSTR src)
+static int CPROC SavedNameCmp(CTEXTSTR dst, CTEXTSTR src)
 {
    //lprintf( WIDE("Compare names... (tree) %s,%s"), dst, src );
    return SavedNameCmpEx( dst, src, src[-1]-2 );
@@ -203,32 +204,40 @@ static CTEXTSTR DoSaveName( CTEXTSTR stripped, size_t len )
 		//lprintf( WIDE("zero length string passed") );
 		return NULL;
 	}
+	EnterCriticalSec( &l.csName );
 	if( l.flags.bIndexNameTable )
 	{
 		POINTER p;
 		p = FindInBinaryTree( l.NameIndex, (PTRSZVAL)stripped );
 		if( p )
-			return ((CTEXTSTR)p);
-	}
-	for( space = l.NameSpace; space; space = space->next )
-	{
-		p = space->buffer;
-		while( p[0] && len )
 		{
-			//lprintf( WIDE("Compare %s(%d) vs %s(%d)"), p+1, p[0], stripped,len );
-			if( SavedNameCmpEx( p+1, stripped, len ) == 0 )
+			LeaveCriticalSec( &l.csName );
+			return ((CTEXTSTR)p);
+		}
+	}
+	else
+	{
+		for( space = l.NameSpace; space; space = space->next )
+		{
+			p = space->buffer;
+			while( p[0] && len )
 			{
-				return (CTEXTSTR)p+1;
-			}
-			p +=
+				//lprintf( WIDE("Compare %s(%d) vs %s(%d)"), p+1, p[0], stripped,len );
+				if( SavedNameCmpEx( p+1, stripped, len ) == 0 )
+				{
+					LeaveCriticalSec( &l.csName );
+					return (CTEXTSTR)p+1;
+				}
+				p +=
 #if defined( __ARM__ ) || defined( UNDER_CE )
-            (
+					(
 #endif
-				 p[0]
+					 p[0]
 #if defined( __ARM__ ) || defined( UNDER_CE )
-				+3 ) & 0xFC;
+					 +3 ) & 0xFC;
 #endif
 				;
+			}
 		}
 	}
 	for( space = l.NameSpace; space; space = space->next )
@@ -264,9 +273,13 @@ static CTEXTSTR DoSaveName( CTEXTSTR stripped, size_t len )
 		space->nextname += (_32)alloclen;
 		space->buffer[space->nextname] = 0;
 
-		AddBinaryNode( l.NameIndex, p, (PTRSZVAL)p );
-		BalanceBinaryTree( l.NameIndex );
+		if( l.flags.bIndexNameTable )
+		{
+			AddBinaryNode( l.NameIndex, p, (PTRSZVAL)p );
+			BalanceBinaryTree( l.NameIndex );
+		}
 	}
+	LeaveCriticalSec( &l.csName );
    return (CTEXTSTR)p;
 }
 
@@ -281,7 +294,8 @@ static CTEXTSTR SaveName( CTEXTSTR name )
 		for( n = 0; n < len; n++ )
 			if( name[n] == '\\' || name[n] == '/' )
 			{
-				len = n; break;
+				len = n;
+				break;
 			}
 		return DoSaveName( name, len );
 	}
@@ -389,19 +403,15 @@ static void CPROC InitGlobalSpace( POINTER p, PTRSZVAL size )
 
 }
 
-#ifdef __WATCOM_CPLUSPLUS__
-#pragma initialize 36
-#endif
-PRIORITY_PRELOAD( InitProcreg, NAMESPACE_PRELOAD_PRIORITY )
-//static void Init( void )
+static void Init( void )
 {
-#ifdef __cplusplus
-   // if you got here- you win!
-	//DebugBreak();
-#endif
-	SimpleRegisterAndCreateGlobalWithInit( procreg_local_data, InitGlobalSpace );
-	//l.translations = GetFileGroup( WIDE("Translations"), WIDE("translations") );
+   if( !procreg_local_data )
+		SimpleRegisterAndCreateGlobalWithInit( procreg_local_data, InitGlobalSpace );
+}
 
+PRIORITY_PRELOAD( InitProcreg, NAMESPACE_PRELOAD_PRIORITY )
+{
+	Init();
 }
 
 //---------------------------------------------------------------------------
