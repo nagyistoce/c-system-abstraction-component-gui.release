@@ -969,12 +969,13 @@ try_another_default:
 #else
 			CTEXTSTR file = renderer->file;
 #endif
-			lprintf( WIDE("Using file access font...") );
+			//lprintf( WIDE("Using file access font... for %s"), file );
 			error = FT_New_Face( fg.library
 									 , file
 									 , 0
 									 , &renderer->face );
-         lprintf( "Result %d", error );
+         if( error )
+				lprintf( "Failed to open font %s Result %d", renderer->file, error );
 #ifdef __cplusplus_cli
 			Release( file );
 #endif
