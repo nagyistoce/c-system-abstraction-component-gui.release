@@ -511,7 +511,7 @@ PRIORITY_PRELOAD( deadstart, DEFAULT_PRELOAD_PRIORITY - 2 )
 	if( g.MyImageInterface )
 #endif
 	{
-		TryLoadingFrameImage();
+		//TryLoadingFrameImage();
 	}
 }
 
@@ -2748,6 +2748,7 @@ PPHYSICAL_DEVICE OpenPhysicalDevice( PSI_CONTROL pc, PSI_CONTROL over, PRENDERER
 		// characteristics...
 		// readjusts surface (again) after adoption.
 		//lprintf( WIDE("------------------- COMMON BORDER RE-SET on draw -----------------") );
+
 		TryLoadingFrameImage();
 
 		if( g.BorderImage )
@@ -2760,7 +2761,7 @@ PPHYSICAL_DEVICE OpenPhysicalDevice( PSI_CONTROL pc, PSI_CONTROL over, PRENDERER
 		SetKeyboardHandler( device->pActImg, FrameKeyProc, (PTRSZVAL)device );
 		//lprintf( WIDE("------------ to set frame focus...") );
 		SetLoseFocusHandler( device->pActImg, FrameFocusProc, (PTRSZVAL)device );
-		lprintf( WIDE("------------- Set all the handling methods?") );
+		//lprintf( WIDE("------------- Set all the handling methods?") );
 		// these methods should aready be set by the creation above...
 		// have to attach the mouse events to this frame...
 	}
