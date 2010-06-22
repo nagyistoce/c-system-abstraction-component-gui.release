@@ -852,7 +852,7 @@ static void FileSystemLog( CTEXTSTR message )
 static void BackupFile( const TEXTCHAR *source, int source_name_len, int n )
 {
 	FILE *testfile;
-	testfile = sack_fopen( 0, source, WIDE("rt") );
+	testfile = sack_fopen( GetFileGroup( "system.logs", GetProgramPath() ), source, WIDE("rt") );
 	if( testfile )
 	{
 		TEXTCHAR backup[256];
@@ -905,11 +905,11 @@ void DoSystemLog( const TEXTCHAR *buffer )
 					BackupFile( gFilename, (int)strlen( gFilename ), 1 );
 				}
 				else if( flags.bLogOpenAppend )
-					Fopen( file, gFilename, WIDE("at+") );
+					file = sack_fopen( GetFileGroup( "system.logs", GetProgramPath() ), gFilename, WIDE("at+") );
 				if( file )
 					fseek( file, 0, SEEK_END );
 				else
-					Fopen( file, gFilename, WIDE("wt") );
+					file = sack_fopen( GetFileGroup( "system.logs", GetProgramPath() ), gFilename, WIDE("wt") );
 				logtype = SYSLOG_AUTO_FILE;
 
 				if( !file )
@@ -1084,7 +1084,7 @@ void SystemLogEx ( const TEXTCHAR *message DBG_PASS )
 	LogBinaryFL( buffer,size, NULL, 0 );
 }
 
- void  SetSystemLog ( enum syslog_types type, const void *data )
+void  SetSystemLog ( enum syslog_types type, const void *data )
 {
 	if( file )
 	{
@@ -1102,7 +1102,7 @@ void SystemLogEx ( const TEXTCHAR *message DBG_PASS )
 	else if( type == SYSLOG_FILENAME )
 	{
 		FILE *log;
-		Fopen( log, (CTEXTSTR)data, WIDE("wt") );
+		log = sack_fopen( GetFileGroup( "system.logs", GetProgramPath() ), (CTEXTSTR)data, WIDE("wt") );
 		file = log;
 		logtype = SYSLOG_FILE;
 	}
@@ -1163,7 +1163,10 @@ static INDEX CPROC _real_vlprintf ( CTEXTSTR format, va_list args )
 	if( !init_complete )
 	{
 		logtype = SYSLOG_FILE;
-		file = stdout ;
+#ifdef __WINDOWS__
+		// if there is a console, use stdout?"
+#endif
+		file = fopen( "default.log", "wt" );
 		SystemLogTime( SYSLOG_TIME_CPU|SYSLOG_TIME_DELTA );
 
       init_complete = 1;
