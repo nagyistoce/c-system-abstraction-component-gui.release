@@ -20,4 +20,8 @@ PROGNAME7=test_many_layered_windows
 SRCS7=test_many_layered_windows
 MORELIBS7=bag.video
 
+PROGNAME8=test_binary_tree
+SRCS8=test_binary_tree
+
+
 include $(SACK_BASE)/makefiles/makefile.many
