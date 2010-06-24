@@ -7,6 +7,7 @@ APP_DEFAULT_DATA1=$(foreach frame,$(shell ls frames),frames/$(frame))  \
 
 LITERAL_LIBNAME5=clock.isp
 SRCS5=clock_addon
+CXFLAGS5=-DSACK_CORE_BUILD
 
 
 include $(SACK_BASE)/makefiles/makefile.many

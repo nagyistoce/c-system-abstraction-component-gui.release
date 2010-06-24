@@ -7,6 +7,7 @@ APP_DEFAULT_DATA6=frames/ConfigureKeypad.isFrame frames/hotkey_change_property.i
 
 LITERAL_LIBNAME6=keypad.isp
 SRCS6=keypad
+CXFLAGS6=-DSACK_CORE_BUILD
 MORELIBS6=sack.widgets
 
 include $(SACK_BASE)/makefiles/makefile.many

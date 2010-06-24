@@ -78,8 +78,15 @@ int main( void )
          int peice = PARTOFX( n );
 			int part = PARTX( peice );
 			int real = COMPUTEPARTOFX( part, tmp.nPartsX );
-			lprintf( "Part is %d : %d for %d", peice, part, n );
+
+         int peice2 = ( ( n ) * (canvas->current_page->grid.nPartsX/2) ) / canvas->width;
+			int part2 = _COMPUTEX(canvas,peice2,(canvas)->current_page->grid.nPartsX/2);
+			int real2 = COMPUTEPARTOFX( part, tmp.nPartsX/2 );
+			lprintf( "------ \nPart is %d : %d for %d", peice, part, n );
 			lprintf( "and %d for %d", real, part );
+
+			lprintf( "======\n Part is %d : %d for %d", peice2, part2, n );
+			lprintf( "and %d for %d", real2, part2 );
 
 		}
 	}
