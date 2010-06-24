@@ -23,5 +23,8 @@ MORELIBS7=bag.video
 PROGNAME8=test_binary_tree
 SRCS8=test_binary_tree
 
+PROGNAME9=test_coords
+SRCS9=test_coords
+
 
 include $(SACK_BASE)/makefiles/makefile.many

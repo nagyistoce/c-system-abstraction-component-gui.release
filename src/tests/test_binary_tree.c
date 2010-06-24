@@ -13,7 +13,7 @@ int main( void )
 			BalanceBinaryTree( tree );
 		if( ( n % 10000 ) == 0 )
 		{
-         DumpBinaryTree( tree );
+         //DumpBinaryTree( tree );
          fprintf( stderr, "tick.\n" );
 		}
 	}
