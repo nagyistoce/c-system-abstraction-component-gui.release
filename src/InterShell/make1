@@ -40,7 +40,7 @@ SUBSYSTEM2=windows
 SRCS2=main loadsave pages fonts text_label sprites macros fileopen security banner_button intershell_plugins $(if $(NO_ANIMATION),,animation animation_plugin)
 SRCS2+=resname
 #RSRCS_IDS2=resource.h
-CXFLAGS2=-DINTERSHELL_SOURCE $(if $(NO_ANIMATION),-D__NO_ANIMATION__,) $(if $(__LINUX__),-DUSE_INTERFACES,)
+CXFLAGS2=-DINTERSHELL_SOURCE $(if $(NO_ANIMATION),-D__NO_ANIMATION__,) $(if $(__LINUX__),-DUSE_INTERFACES,) -DSACK_CORE_BUILD
 
 MORELIBS2+=sack.widgets 
 ifdef __WINDOWS__

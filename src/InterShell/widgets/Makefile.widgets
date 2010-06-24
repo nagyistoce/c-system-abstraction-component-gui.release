@@ -6,8 +6,7 @@ SRCS=banner/banner \
    keypad/keypad \
    keypad/accum
 
-CXFLAGS=-DBANNER_SOURCE \
-    -DKEYPAD_SOURCE  
+CXFLAGS=-DBANNER_SOURCE -DKEYPAD_SOURCE  -DSACK_CORE_BUILD
 
 include $(SACK_BASE)/makefiles/makefile.single
 

@@ -234,20 +234,33 @@ typedef struct global_tag
 #define _X(canvas,n) (((n) * (canvas)->width)/(PART_RESOLUTION))
 #define _Y(canvas,n) (((n) * (canvas)->height)/(PART_RESOLUTION))
 
-#define _WIDTH(canvas,w) ( ( (PART_RESOLUTION) - ( (canvas)->button_space * ((canvas)->button_cols + 1) ) ) / (canvas)->button_cols );
+//#define _WIDTH(canvas,w) ( ( (PART_RESOLUTION) - ( (canvas)->button_space * ((canvas)->button_cols + 1) ) ) / (canvas)->button_cols );
 
-#define _COMPUTEPARTOFX( canvas,x, parts )  ((x)*parts / ((canvas)->width-1) )
-#define _COMPUTEPARTOFY( canvas,y, parts )  ((y)*parts / ((canvas)->height-1) )
+   // helps to compute the part of a coordinate
+#define _COMPUTEPARTOFX( canvas,x, parts )  ((x)*parts / ((canvas)->width) )
+   // helps to compute the part of a coordinate
+#define _COMPUTEPARTOFY( canvas,y, parts )  ((y)*parts / ((canvas)->height) )
 
-#define _COMPUTEX( canvas,npart, parts )  ( ( ( ( (PART_RESOLUTION) * (npart) ) / (parts) ) * ((canvas)->width-1) ) / (PART_RESOLUTION) )
-#define _COMPUTEY( canvas,npart, parts )  ( ( ( ( (PART_RESOLUTION) * (npart) ) / (parts) ) * ((canvas)->height-1) ) / (PART_RESOLUTION) )
-#define _MODX( canvas,npart, parts )  ( ( ( ( (PART_RESOLUTION) * npart ) / parts ) * ((canvas)->width-1) ) % (PART_RESOLUTION) )
-#define _MODY( canvas,npart, parts )  ( ( ( ( (PART_RESOLUTION) * npart ) / parts ) * ((canvas)->height-1) ) % (PART_RESOLUTION) )
+   // helps to compute X coordinate of a part
+#define _COMPUTEX( canvas,npart, parts )  ( ( ( ( (PART_RESOLUTION) * (npart) ) ) * ((canvas)->width) ) / ((parts)*PART_RESOLUTION) )
+   // helps to compute Y coordinate of a part
+#define _COMPUTEY( canvas,npart, parts )  ( ( ( ( (PART_RESOLUTION) * (npart) ) ) * ((canvas)->height) ) / ((parts)*PART_RESOLUTION) )
+
+//#define _MODX( canvas,npart, parts )  ( ( ( ( (PART_RESOLUTION) * npart ) ) * ((canvas)->width) ) % ((parts)*PART_RESOLUTION) )
+//#define _MODY( canvas,npart, parts )  ( ( ( ( (PART_RESOLUTION) * npart ) ) * ((canvas)->height) ) % ((parts)*PART_RESOLUTION) )
+
+// get the X coordinate of a part
 #define _PARTX(canvas,part) (S_32)_COMPUTEX(canvas,part,(canvas)->current_page->grid.nPartsX)
+// get the Y coordinate of a part
 #define _PARTY(canvas,part) (S_32)_COMPUTEY(canvas,part,(canvas)->current_page->grid.nPartsY)
+// get the width coordinate of a part width
 #define _PARTW(canvas,x,w) (_32)(_PARTX(canvas,x+w)-_PARTX(canvas,x))
+// get the height coordinate of a part height
 #define _PARTH(canvas,y,h) (_32)(_PARTY(canvas,y+h)-_PARTY(canvas,y))
+
+// result with current parts
 #define _PARTSX(canvas) (canvas)->current_page->grid.nPartsX
+// result with current parts
 #define _PARTSY(canvas) (canvas)->current_page->grid.nPartsY
 
 #define X(n) _X(canvas)
