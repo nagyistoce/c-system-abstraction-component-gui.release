@@ -71,10 +71,17 @@ try_mask:
 			namech = name[n] - ('a' - 'A');
 		else
 			namech = name[n];
+
 		if( !keepcase && mask[m]>= 'a' && mask[m] <= 'z' )
 			maskch = mask[m] - ('a' - 'A');
 		else
 			maskch = mask[m];
+
+		if( mask[m] == '/' )
+			maskch = '\\';
+		if( name[n] == '/' )
+         namech = '\\';
+
       if( matchone )
 		{
 			matchone--;
@@ -236,13 +243,16 @@ typedef struct myfinddata {
    struct finddata_t fd;
 #  endif
 # endif
-   TEXTCHAR buffer[MAX_PATH_NAME];
+	TEXTCHAR buffer[MAX_PATH_NAME];
+	TEXTCHAR basename[MAX_PATH_NAME];
+   TEXTCHAR findmask[MAX_PATH_NAME];
 } MFD, *PMFD;
 
 #define findhandle(pInfo) ( ((PMFD)(*pInfo))->handle)
 #define finddata(pInfo) ( &((PMFD)(*pInfo))->fd)
 #define findbuffer(pInfo) ( ((PMFD)(*pInfo))->buffer)
-
+#define findbasename(pInfo) ( ((PMFD)(*pInfo))->basename)
+#define findmask(pInfo)     ( ((PMFD)(*pInfo))->findmask)
 
  int  ScanFiles ( CTEXTSTR base
            , CTEXTSTR mask
@@ -251,26 +261,33 @@ typedef struct myfinddata {
            , int flags 
            , PTRSZVAL psvUser )
 {
+   PMFD pData = (PMFD)(*pInfo);
 	int sendflags;
-	TEXTCHAR basename[256];
-	if( base )
-		StrCpy( basename, base );
-	else
-	{
-		CTEXTSTR p = pathrchr( mask );
-		if( p )
-		{
-			StrCpyEx( basename, mask, p - mask + 1 );
-			mask = p + 1;
-		}
-		else
-			StrCpyEx( basename, WIDE("."), sizeof( basename ) / sizeof( TEXTCHAR ) );
-	}
+	//TEXTCHAR basename[256];
 	if( !*pInfo )
 	{
 		TEXTCHAR findmask[256];
-		snprintf( findmask, sizeof(findmask), WIDE("%s/*"), basename );
 		*pInfo = Allocate( sizeof( MFD ) );
+		pData = (PMFD)(*pInfo);
+
+		if( base )
+			StrCpy( findbasename(pInfo), base );
+		else
+		{
+			CTEXTSTR p = pathrchr( mask );
+			if( p )
+			{
+				StrCpyEx( findbasename(pInfo), mask, p - mask + 1 );
+            StrCpyEx( findmask(pInfo), p + 1, MAX_PATH_NAME );
+				//mask = p + 1;
+			}
+			else
+			{
+				StrCpyEx( findbasename(pInfo), WIDE("."), 2 );
+            StrCpyEx( findmask(pInfo), mask, MAX_PATH_NAME );
+			}
+		}
+		snprintf( findmask, sizeof(findmask), WIDE("%s/*"), findbasename(pInfo) );
 		findhandle(pInfo) = findfirst( findmask, finddata(pInfo) );
 		if( findhandle(pInfo) == HANDLECAST -1 )
 		{
@@ -298,27 +315,33 @@ typedef struct myfinddata {
    if( !strcmp( WIDE("."), finddata(pInfo)->name ) ||
        !strcmp( WIDE(".."), finddata(pInfo)->name ) )
 #endif
-   	goto getnext;
+		goto getnext;
+
 	if( flags & SFF_NAMEONLY )
+	{
 #ifdef UNDER_CE
 		strncpy( findbuffer( pInfo ), finddata(pInfo)->cFileName, MAX_PATH_NAME );
 #else
 		strncpy( findbuffer( pInfo ), finddata(pInfo)->name, MAX_PATH_NAME );
 #endif
-   else 
+	}
+	else
+	{
 #ifdef UNDER_CE
-		snprintf( findbuffer( pInfo ), MAX_PATH_NAME, WIDE("%s/%s"), basename, finddata(pInfo)->cFileName );
+		snprintf( findbuffer( pInfo ), MAX_PATH_NAME, WIDE("%s/%s"), findbasename(pInfo), finddata(pInfo)->cFileName );
 #else
-	snprintf( findbuffer( pInfo ), MAX_PATH_NAME, WIDE("%s/%s"), basename, finddata(pInfo)->name );
+		snprintf( findbuffer( pInfo ), MAX_PATH_NAME, WIDE("%s/%s"), findbasename(pInfo), finddata(pInfo)->name );
 #endif
+	}
 	findbuffer( pInfo )[MAX_PATH_NAME-1] = 0; // force nul termination...
-   if( ( flags & (SFF_DIRECTORIES|SFF_SUBCURSE) )
+	if( ( flags & (SFF_DIRECTORIES|SFF_SUBCURSE) )
 #ifdef UNDER_CE
-       && finddata(pInfo)->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY )
+		&& finddata(pInfo)->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY
 #else
-       && finddata(pInfo)->attrib & _A_SUBDIR )
+		&& finddata(pInfo)->attrib & _A_SUBDIR
 #endif
-   {
+	  )
+	{
 		if( flags & SFF_DIRECTORIES )
 		{
 			if( Process != NULL )
@@ -326,36 +349,38 @@ typedef struct myfinddata {
          return 1;
 		}
 		if( flags & SFF_NAMEONLY ) // if nameonly - have to rebuild the correct name.
+		{
 #ifdef UNDER_CE
-			snprintf( findbuffer( pInfo ), MAX_PATH_NAME, WIDE("%s/%s"), basename, finddata(pInfo)->cFileName );
+			snprintf( findbuffer( pInfo ), MAX_PATH_NAME, WIDE("%s/%s"), findbasename(pInfo), finddata(pInfo)->cFileName );
 #else
-			snprintf( findbuffer( pInfo ), MAX_PATH_NAME, WIDE("%s/%s"), basename, finddata(pInfo)->name );
+			snprintf( findbuffer( pInfo ), MAX_PATH_NAME, WIDE("%s/%s"), findbasename(pInfo), finddata(pInfo)->name );
 #endif
-		if( flags & SFF_SUBCURSE  )
-   	{
+		}
+		if( flags & SFF_SUBCURSE )
+		{
 			void *data = NULL;
-	   	while( ScanFiles( findbuffer(pInfo), mask, &data, Process, flags, psvUser ) );
-	   }
+			while( ScanFiles( findbuffer(pInfo), findmask( pInfo ), &data, Process, flags, psvUser ) );
+		}
    	goto getnext;
 	}
-	if( ( sendflags = SFF_DIRECTORY, ( ( flags & SFF_DIRECTORIES ) 
+	if( ( sendflags = SFF_DIRECTORY, ( ( flags & SFF_DIRECTORIES )
 #ifdef UNDER_CE
-			&& ( finddata(pInfo)->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) ) )
+												 && ( finddata(pInfo)->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY )
 #else
-			&& ( finddata(pInfo)->attrib & _A_SUBDIR ) ) )
+												 && ( finddata(pInfo)->attrib & _A_SUBDIR )
 #endif
-|| ( sendflags = 0, CompareMask( mask
+												) ) || ( sendflags = 0, CompareMask( findmask( pInfo )
 #ifdef UNDER_CE
-										 , finddata(pInfo)->cFileName
+																							  , finddata(pInfo)->cFileName
 #else
-										 , finddata(pInfo)->name
+																							  , finddata(pInfo)->name
 #endif
-												  // yes this is silly - but it's correct...
-												 , (flags & SFF_IGNORECASE)?0:0 ) ) )
-   { 
+																								// yes this is silly - but it's correct...
+																							  , (flags & SFF_IGNORECASE)?0:0 ) ) )
+	{
 		if( Process != NULL )
 			Process( psvUser, findbuffer( pInfo ), sendflags );
-	   return 1;
+		return 1;
 	}
 	return 1;
 }
@@ -391,53 +416,60 @@ typedef struct myfinddata {
 //---------------------------------------------------------------------------
 typedef struct myfinddata {
 	int handle;
+   DIR *dir;
    //struct finddata_t fd;
-   char buffer[MAX_PATH_NAME];
+	char buffer[MAX_PATH_NAME];
+   char basename[MAX_PATH_NAME];
 } MFD, *PMFD;
 
+#define finddir(pInfo) ( ((PMFD)(*pInfo))->dir)
+#define findbasename(pInfo) ( ((PMFD)(*pInfo))->basename)
+
 //---------------------------------------------------------------------------
- int  ScanFiles ( CTEXTSTR base
-           , CTEXTSTR mask
-           , void **pInfo
-           , void CPROC Process( PTRSZVAL psvUser, CTEXTSTR name, int flags )
-           , int flags
-           , PTRSZVAL psvUser )
+int  ScanFiles ( CTEXTSTR base
+					, CTEXTSTR mask
+					, void **pInfo
+					, void CPROC Process( PTRSZVAL psvUser, CTEXTSTR name, int flags )
+					, int flags
+					, PTRSZVAL psvUser )
 {
-	DIR *dir;
+	//DIR *dir;
    char name[256];
 	struct dirent *de;
-	char basename[256];
+	//char basename[256];
 	// need to dup base - it might be in read-only space.
 	if( !*pInfo )
 	{
+      (*pInfo) = New( MFD );
 		if( base )
-			strcpy( basename, base );
+			strcpy( findbasename(pInfo), base );
 		else
 		{
 			CTEXTSTR p = pathrchr( mask );
 			if( p )
 			{
-				strncpy( basename, mask, p - mask );
-				basename[p-mask] = 0;
+				strncpy( findbasename(pInfo), mask, p - mask );
+				findbasename(pInfo)[p-mask] = 0;
 				mask = p + 1;
 			}
 			else
-				strcpy( basename, WIDE(".") );
+			{
+				strcpy( findbasename(pInfo), WIDE(".") );
+			}
 		}
-		//lprintf( WIDE("Check base: %s"), basename  );
-		dir = opendir( basename );
-		*pInfo = (void*)dir;
+		finddir( pInfo ) = opendir( findbasename(pInfo) );
+		//*pInfo = (void*)dir;
 	}
 	else
 	{
-      dir = (DIR*)*pInfo;
+      //dir = (DIR*)*pInfo;
 	}
 	{
 		char *p;
-	// result from pathrchr is within basename
+	// result from pathrchr is within findbasename(pInfo)
 	// it's result si technically a CTEXTSTR since
 	// that is what is passed to pathrchr
-		if( ( p = (char*)pathrchr( basename ) ) )
+		if( ( p = (char*)pathrchr( findbasename(pInfo) ) ) )
 		{
 			if( !p[1] )
 			{
@@ -445,8 +477,8 @@ typedef struct myfinddata {
 			}
 		}
 	}
-   if( dir )
-		while( ( de = readdir( dir ) ) )
+   if( finddir( pInfo ) )
+		while( ( de = readdir( finddir( pInfo ) ) ) )
 		{
 			struct stat filestat;
 			//lprintf( WIDE("Check: %s"), de->d_name );
@@ -454,7 +486,7 @@ typedef struct myfinddata {
 			if( !strcmp( WIDE("."), de->d_name ) ||
 				!strcmp( WIDE(".."), de->d_name ) )
 				continue;
-			sprintf( name, WIDE("%s/%s"), basename, de->d_name );
+			sprintf( name, WIDE("%s/%s"), findbasename(pInfo), de->d_name );
 #ifdef BCC32
 			if( stat( name, &filestat ) == -1 )
 				continue;
@@ -497,7 +529,9 @@ typedef struct myfinddata {
 				return 1;
 			}
 		}
-	closedir( dir );
+
+	closedir( finddir( pInfo ) );
+   Release( *pInfo );
 	*pInfo = NULL;
 	return 0;
 }
