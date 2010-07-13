@@ -271,7 +271,10 @@ typedef struct myfinddata {
 		pData = (PMFD)(*pInfo);
 
 		if( base )
+		{
 			StrCpy( findbasename(pInfo), base );
+			StrCpyEx( findmask(pInfo), mask, MAX_PATH_NAME );
+		}
 		else
 		{
 			CTEXTSTR p = pathrchr( mask );
