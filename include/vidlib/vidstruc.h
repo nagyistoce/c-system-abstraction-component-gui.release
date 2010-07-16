@@ -8,14 +8,12 @@
 # else
 #  define RENDER_NAMESPACE
 #  define RENDER_NAMESPACE_END
-
-//extern "C" {
 # endif
 #endif
 
 
-//#include <vfw.h>
 #include <imglib/imagestruct.h>
+
 #ifdef __WINDOWS__
 # ifndef _ARM_
 #  include <gl\gl.h>         // Header File For The OpenGL32 Library
@@ -26,7 +24,10 @@
 #endif
 
 #ifndef PRENDERER
+RENDER_NAMESPACE
 # define PRENDERER struct HVIDEO_tag *
+struct HVIDEO_tag;
+RENDER_NAMESPACE_END
 #endif
 
 #include <sack_types.h>
