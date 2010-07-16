@@ -37,7 +37,6 @@ endif( ${CMAKE_GENERATOR} MATCHES "Watcom WMake" )
 
 #ENABLE_LANGUAGE(RC)
 
-
 project( SACK )
 
 set( SACK_BASE ${PROJECT_SOURCE_DIR} )
@@ -46,7 +45,6 @@ set( CMAKE_MODULE_PATH ${SACK_SOURCE_DIR}/makefiles/cmake )
 include( DefaultInstall )
 #include( FindSqlite )
 
-OPTION( C++ "Build with C++" OFF )
 if( WIN32 )
    set( __WINDOWS__ ON )
 else()
@@ -56,9 +54,6 @@ else()
 endif()
 
 SET(VLC_PATH "c:/tools/vlc-1.0.5" CACHE STRING "Base Path of VLC Installation 1.0.0 and less than 1.1.0" )
-
-SET(BUILD_ELTANIN_ROOT "../eltanin2/BingoUnified" CACHE STRING "If Specified, hook into eltanin build CmakeLists" )
-SET(BUILD_ALTANIK_ROOT "../altanik" CACHE STRING "If Specified, hook into eltanin build CmakeLists" )
 
 if ( UNIX )
         set( USE_INTERNAL_STANDARDLIBS 0 )
@@ -103,8 +98,6 @@ OPTION( NEED_JPEG "Build internal jpeg lib (with suitable exports to link agains
 OPTION( NEED_PNG "Build internal png lib (with suitable exports to link against)" ${USE_INTERNAL_STANDARDLIBS} )
 OPTION( NEED_FREETYPE "Build internal freetype lib (with suitable exports to link against)" ${USE_INTERNAL_STANDARDLIBS} )
 OPTION( NEED_ZLIB "Build internal zlib lib (with suitable exports to link against)" ${USE_INTERNAL_STANDARDLIBS} )
-OPTION( BUILD_ELTANIN "Hook into building eltanin tree" OFF )
-OPTION( BUILD_ALTANIK "Hook into building altanik tree" OFF )
 OPTION( __WINDOWS_ARM_CE__ "Build for windows CE 5.0 ARM" 0 )
 OPTION( USE_ASSEMBLY "Use Assembly files as available.  NASM required for this." OFF )
 OPTION( BUILD_MONOLITHIC "Build one giant library" 1 )
@@ -741,13 +734,6 @@ if( USE_OPTIONS )
 endif( USE_OPTIONS )
  endif( NOT __NO_GUI__ )
 
-
-if( BUILD_ELTANIN )
-add_subdirectory( ${BUILD_ELTANIN_ROOT} eltanin )
-endif( BUILD_ELTANIN )
-if( BUILD_ALTANIK )
-add_subdirectory( ${BUILD_ALTANIK_ROOT} altanik )
-endif( BUILD_ALTANIK )
 
 add_subdirectory( src/netlib/user )
 add_subdirectory( src/netlib/echo )
