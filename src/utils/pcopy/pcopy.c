@@ -232,7 +232,7 @@ int ScanFile( PFILESOURCE pfs )
 	{
 		INDEX idx;
       CTEXTSTR exclude;
-		LIST_FORALL( g.excludes, idx, CTEXTSTR, exclude )
+		//LIST_FORALL( g.excludes, idx, CTEXTSTR, exclude )
 		{
          /*
 			if( stristr( pfs->name, exclude ) )
@@ -478,7 +478,7 @@ int main( int argc, CTEXTSTR *argv )
 							if( ( c + 1 ) < (argc-1) )
 							{
 								AddLink( &g.excludes, strdup( argv[c+1] ) );
-								c++; // skip one character...
+								c++; // skip one word...
 								done = 1; // skip remining characters, go to next parameter (c++)
 							}
 							else
@@ -492,7 +492,8 @@ int main( int argc, CTEXTSTR *argv )
 					ch++;
 				}
 			}
-			AddFileCopy( argv[c ]);
+         else
+				AddFileCopy( argv[c ]);
 		}
 	}
 	CopyFileCopyTree( argv[argc-1] );
