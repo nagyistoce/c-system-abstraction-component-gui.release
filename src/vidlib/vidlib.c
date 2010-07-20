@@ -4441,14 +4441,14 @@ RENDER_PROC (void, MakeAbsoluteTopmost) (PVIDEO hVideo)
 {
 	if( hVideo )
 	{
-	hVideo->flags.bTopmost = 1;
-	hVideo->flags.bAbsoluteTopmost = 1;
-	if( hVideo->flags.bShown )
-	{
-      lprintf( WIDE( "Forcing topmost" ) );
-		SetWindowPos (hVideo->hWndOutput, HWND_TOPMOST, 0, 0, 0, 0,
-						  SWP_NOMOVE | SWP_NOSIZE);
-	}
+		hVideo->flags.bTopmost = 1;
+		hVideo->flags.bAbsoluteTopmost = 1;
+		if( hVideo->flags.bShown )
+		{
+			lprintf( WIDE( "Forcing topmost" ) );
+			SetWindowPos (hVideo->hWndOutput, HWND_TOPMOST, 0, 0, 0, 0,
+							  SWP_NOMOVE | SWP_NOSIZE);
+		}
 	}
 }
 
