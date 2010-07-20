@@ -14,14 +14,10 @@ set(SOURCES
 
 add_definitions( -DLOAD_LIBNAME="InterShell.core" -DMODE=0 )
 
-if( C++ )
-set_source_files_properties( ${SOURCES} PROPERTIES LANGUAGE "CXX" )
-endif()
-
 add_executable(${PROJECT_NAME} WIN32 ${SOURCES})
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   COMPILE_FLAGS  "-DTARGET_LABEL=${PROJECT_NAME}"
 )
 target_link_libraries( ${PROJECT_NAME}  ${SACK_LIBRARY} )
-install_literal_product( ${PROJECT_NAME} InterShell ) 
+install( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin/InterShell ) 
 
