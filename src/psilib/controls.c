@@ -9,6 +9,7 @@
 #include <interface.h>
 #include <keybrd.h>
 #include <procreg.h>
+#include <system.h>
 #define CONTROL_BASE
 
 // this is a FUN flag! this turns on
