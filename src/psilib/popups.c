@@ -187,9 +187,9 @@ void RenderItem( PMENU pm, PMENUITEM pmi )
     {
         int height = pmi->height;
         int baseline = pmi->baseline + (height/2);
-        do_hline( surface, baseline-1, 6, pm->width - 12, basecolors[SHADOW] );
-        do_hline( surface, baseline  , 5, pm->width - 10, basecolors[SHADE] );
-        do_hline( surface, baseline+1, 6, pm->width - 12, basecolors[HIGHLIGHT] );
+        do_hline( surface, baseline-1, 6, pm->width - 12, basecolor(pm->image)[SHADOW] );
+        do_hline( surface, baseline  , 5, pm->width - 10, basecolor(pm->image)[SHADE] );
+        do_hline( surface, baseline+1, 6, pm->width - 12, basecolor(pm->image)[HIGHLIGHT] );
         //pmi->baseline += height;
         //pmi->height = height;
     }
@@ -214,10 +214,10 @@ void RenderItem( PMENU pm, PMENUITEM pmi )
         BlatColor( surface
                   , 0, pmi->baseline
                   , pm->width, pmi->height + 2
-                  , basecolors[NORMAL] );
+                  , basecolor(pm->image)[NORMAL] );
         PutMenuStringFont( surface
                           , MENU_HORZPAD + CHECK_WIDTH, pmi->baseline + 1
-                          , basecolors[TEXTCOLOR], 0
+                          , basecolor(pm->image)[TEXTCOLOR], 0
                           , pmi->data.text.text, pm->font );
         pmi->height = GetFontHeight( pm->font );
         if( pmi->flags.bSubMenu )
@@ -226,15 +226,15 @@ void RenderItem( PMENU pm, PMENUITEM pmi )
                         do_line( surface
                                 , width - 8, pmi->baseline + 1 + 2
                                 , width, pmi->baseline + 1 + (pmi->height/2)
-                                , basecolors[SHADOW] );
+                                , basecolor(pm->image)[SHADOW] );
                         do_line( surface
                                 , width, pmi->baseline + 1 + (pmi->height/2)
                                 , width - 8, pmi->baseline + 1 + (pmi->height - 2)
-                                , basecolors[HIGHLIGHT] );
+                                , basecolor(pm->image)[HIGHLIGHT] );
 			do_line( surface
                                 , width - 8, pmi->baseline + 1 + 2
                                 , width - 8, pmi->baseline + 1 + ( pmi->height - 2 )
-                                , basecolors[SHADE] );
+                                , basecolor(pm->image)[SHADE] );
 		  }
 #ifdef DEBUG_DRAW_MENU
 		  lprintf( WIDE("Item is %s"),pmi->flags.bChecked?"checked":"unchecked" );
@@ -255,17 +255,17 @@ void RenderItem( PMENU pm, PMENUITEM pmi )
             do_line( surface
                     , 3, pmi->baseline + 1
                     , 13, pmi->baseline + 11
-                    , basecolors[NORMAL] );
+                    , basecolor(pm->image)[NORMAL] );
             do_line( surface
                     , 3, pmi->baseline + 11
                     , 13, pmi->baseline + 1
-						 , basecolors[NORMAL]);
+						 , basecolor(pm->image)[NORMAL]);
 		  }
 	 }
 	 //if( pmi->flags.bSelected )
 	 //{
-	 //   do_hline( pm->surface, pmi->baseline, 0, pm->width, basecolors[SHADOW] );
-	 //   do_hline( pm->surface, pmi->baseline+pmi->height+2, 0, pm->width, basecolors[HIGHLIGHT] );
+	 //   do_hline( pm->surface, pmi->baseline, 0, pm->width, basecolor(pm->image)[SHADOW] );
+	 //   do_hline( pm->surface, pmi->baseline+pmi->height+2, 0, pm->width, basecolor(pm->image)[HIGHLIGHT] );
 	 //}
 }
 
@@ -273,8 +273,8 @@ void RenderItem( PMENU pm, PMENUITEM pmi )
 
 void RenderUnselect( PMENU pm, PMENUITEM pmi )
 {
-	do_hline( pm->surface, pmi->baseline, 0, pm->width, basecolors[NORMAL] );
-	do_hline( pm->surface, pmi->baseline+pmi->height+2, 0, pm->width, basecolors[NORMAL] );
+	do_hline( pm->surface, pmi->baseline, 0, pm->width, basecolor(pm->image)[NORMAL] );
+	do_hline( pm->surface, pmi->baseline+pmi->height+2, 0, pm->width, basecolor(pm->image)[NORMAL] );
 #ifdef DEBUG_DRAW_MENU
 	lprintf( WIDE("Render unselect") );
 #endif
@@ -285,10 +285,10 @@ void RenderUnselect( PMENU pm, PMENUITEM pmi )
 
 void RenderSelect( PMENU pm, PMENUITEM pmi )
 {
-	do_hline( pm->surface, pmi->baseline, 0, pm->width-1, basecolors[SHADOW] );
-	do_hline( pm->surface, pmi->baseline+pmi->height+2, 0, pm->width-1, basecolors[HIGHLIGHT] );
-   do_vline( pm->surface, 0, pmi->baseline, pmi->baseline + pmi->height + 2, basecolors[SHADE] );
-   do_vline( pm->surface, pm->width-1, pmi->baseline, pmi->baseline + pmi->height + 2, basecolors[HIGHLIGHT] );
+	do_hline( pm->surface, pmi->baseline, 0, pm->width-1, basecolor(pm->image)[SHADOW] );
+	do_hline( pm->surface, pmi->baseline+pmi->height+2, 0, pm->width-1, basecolor(pm->image)[HIGHLIGHT] );
+   do_vline( pm->surface, 0, pmi->baseline, pmi->baseline + pmi->height + 2, basecolor(pm->image)[SHADE] );
+   do_vline( pm->surface, pm->width-1, pmi->baseline, pmi->baseline + pmi->height + 2, basecolor(pm->image)[HIGHLIGHT] );
 #ifdef DEBUG_DRAW_MENU
 	lprintf( WIDE("Render select") );
 #endif
@@ -307,7 +307,7 @@ static int CPROC RenderItems( PSI_CONTROL pc )
 	if( pm )
 	{
 		//lprintf( WIDE("rendering a menu popup control thing...") );
-      ClearImageTo( pc->Surface, basecolors[NORMAL] );
+      ClearImageTo( pc->Surface, basecolor(pm->image)[NORMAL] );
 		pm->surface = pc->Surface;
 		if( !pm->surface )
 			return 0;
