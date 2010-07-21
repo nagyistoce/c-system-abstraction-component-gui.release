@@ -3261,7 +3261,7 @@ SQLSTUB_PROC( int, vSQLInsert )( PODBC odbc, CTEXTSTR table, va_list args )
 		char *varname;
 		char *varval;
       int making_columns;
-		char *open_quote_string, *close_quote_string;
+		const char *open_quote_string, *close_quote_string;
 		first = 1;
 		// once I thought values for access were [ ] enclosed...
 		// so now this is a silly variable...

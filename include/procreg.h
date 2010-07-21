@@ -418,7 +418,7 @@ PROCREG_PROC( void, DropInterface )( TEXTCHAR *pServiceName, POINTER interface_x
 PROCREG_PROC( POINTER, GetInterface )( CTEXTSTR pServiceName );
 
 #define GetRegisteredInterface(name) GetInterface(name)
-PROCREG_PROC( LOGICAL, RegisterInterface )( TEXTCHAR *name, POINTER(CPROC*load)(void), void(CPROC*unload)(POINTER));
+PROCREG_PROC( LOGICAL, RegisterInterface )( CTEXTSTR name, POINTER(CPROC*load)(void), void(CPROC*unload)(POINTER));
 
 // unregister a function, should be smart and do full return type
 // and parameters..... but for now this only references name, this indicates

@@ -2028,7 +2028,7 @@ int InitMessageService( void )
 
 //--------------------------------------------------------------------
 
-static MSGQ_TYPE OpenQueueEx( TEXTCHAR *name, int key, int flags DBG_PASS )
+static MSGQ_TYPE OpenQueueEx( CTEXTSTR name, int key, int flags DBG_PASS )
 #ifdef _WIN32
 #define OpenQueue(n,k,f) OpenQueueEx(n,0,f DBG_SRC)
 #else
@@ -2567,7 +2567,7 @@ CLIENTMSG_PROC( int, TransactRoutedServerMultiMessageEx )( _32 RouteID
 	}
 }
 
-struct {
+struct debug_transact {
 	CTEXTSTR pFile;
 	int nLine;
 }next_transact;
@@ -3127,7 +3127,7 @@ CLIENTMSG_PROC( _32, LoadServiceExx)( CTEXTSTR service, EventHandlerFunctionExx 
 //--------------------------------------------------------------------
 
 #undef RegisterServiceEx
-CLIENTMSG_PROC( LOGICAL, RegisterServiceEx )( TEXTCHAR *name
+CLIENTMSG_PROC( LOGICAL, RegisterServiceEx )( CTEXTSTR name
 														  , server_function_table functions
 														  , int entries
 														  , server_message_handler handler
@@ -3136,7 +3136,7 @@ CLIENTMSG_PROC( LOGICAL, RegisterServiceEx )( TEXTCHAR *name
    return RegisterServiceExx( name, functions, entries, handler, NULL, 0 );
 }
 
-CLIENTMSG_PROC( LOGICAL, RegisterServiceExx )( TEXTCHAR *name
+CLIENTMSG_PROC( LOGICAL, RegisterServiceExx )( CTEXTSTR name
 															, server_function_table functions
 															, int entries
 															, server_message_handler handler

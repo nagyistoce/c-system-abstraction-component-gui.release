@@ -29,7 +29,7 @@ SACK_NETWORK_NAMESPACE
 
 // Internal Functions
 void Ping(TEXTSTR pstrHost, int maxTTL);
-void ReportError(PVARTEXT pInto, TEXTSTR pstrFrom);
+void ReportError(PVARTEXT pInto, CTEXTSTR pstrFrom);
 int  WaitForEchoReply(SOCKET s, _32 dwTime);
 u_short in_cksum(u_short *addr, int len);
 
@@ -347,7 +347,7 @@ LoopBreakpoint:
 
    for( i = 0; i < nEntry; i++ )
    {
-      char *pIPBuf;
+      CTEXTSTR pIPBuf;
       if( Entry[i].dwIP )  
       {
          saSrc.sin_addr.s_addr = Entry[i].dwIP;
@@ -356,7 +356,7 @@ LoopBreakpoint:
       }
       else        
       {
-         pIPBuf = "No Response.";
+         pIPBuf = WIDE("No Response.");
          Entry[i].pName = 0;
       }
       if( maxTTL )
@@ -543,7 +543,7 @@ int RecvEchoReply(PVARTEXT pvtResult, SOCKET s, SOCKADDR_IN *lpsaFrom, u_char *p
 }
 
 // What happened?
-void ReportError(PVARTEXT pInto, TEXTSTR pWhere)
+void ReportError(PVARTEXT pInto, CTEXTSTR pWhere)
 {
     vtprintf( pInto, WIDE("\n%s error: %d\n"),
                             pWhere, WSAGetLastError());

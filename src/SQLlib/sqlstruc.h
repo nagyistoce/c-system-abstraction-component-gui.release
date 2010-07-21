@@ -93,7 +93,7 @@ typedef struct database_info_tag
 	struct {
 		BIT_FIELD  bAutoUser  : 1;
 	} flags;
-	TEXTSTR pDSN;
+	CTEXTSTR pDSN;
 	TEXTCHAR pID[64];
 	TEXTCHAR pPASSWORD[64];
 } DB_INFO, *PDB_INFO;

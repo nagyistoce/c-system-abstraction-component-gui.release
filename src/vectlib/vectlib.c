@@ -1113,18 +1113,18 @@ void GetGLMatrix( PTRANSFORM pt, PMATRIX out )
 #endif
 
 
-void PrintVectorEx( TEXTCHAR *lpName, PCVECTOR v DBG_PASS )
+void PrintVectorEx( CTEXTSTR lpName, PCVECTOR v DBG_PASS )
 {
    _xlprintf( 1 DBG_RELAY )( WIDE("Vector  %s = <%lg, %lg, %lg> %lg"),
             lpName, v[0], v[1], v[2], Length( v ) );
 }
 #undef PrintVector
-void PrintVector( TEXTCHAR *lpName, PCVECTOR v )
+void PrintVector( CTEXTSTR lpName, PCVECTOR v )
 {
    PrintVectorEx( lpName, v DBG_SRC );
 }
 
- void PrintVectorStdEx( TEXTCHAR *lpName, VECTOR v DBG_PASS )
+ void PrintVectorStdEx( CTEXTSTR lpName, VECTOR v DBG_PASS )
 {
    TEXTCHAR byBuffer[256];
    SPRINTF( byBuffer, WIDE("Vector  %s = <%lg, %lg, %lg> %lg\n"),
@@ -1133,19 +1133,19 @@ void PrintVector( TEXTCHAR *lpName, PCVECTOR v )
 }
 
 #undef PrintVectorStd
- void PrintVectorStd( TEXTCHAR *lpName, VECTOR v )
+ void PrintVectorStd( CTEXTSTR lpName, VECTOR v )
 {
    PrintVectorStdEx( lpName, v DBG_SRC );
 }
 
 #undef PrintMatrix
-void PrintMatrix( TEXTCHAR *lpName, MATRIX m )
+void PrintMatrix( CTEXTSTR lpName, MATRIX m )
 #define PrintMatrix(m) PrintMatrix( #m, m )
 {
    PrintMatrixEx( lpName, m DBG_SRC );
 }
 
-void PrintMatrixEx( TEXTCHAR *lpName, MATRIX m DBG_PASS )
+void PrintMatrixEx( CTEXTSTR lpName, MATRIX m DBG_PASS )
 {
    _xlprintf( 1 DBG_RELAY )( WIDE("Vector  %s = <%lg, %lg, %lg, %lg> %lg"),
             lpName, m[0][0], m[0][1], m[0][2], m[0][3], Length( m[0] ) );

@@ -313,13 +313,13 @@ GENX_PROC(int, genxScrubText )(genxWriter w, constUtf8 in, utf8 out);
 /*
  * return error messages
  */
-GENX_PROC(char *, genxGetErrorMessage )(genxWriter w, genxStatus status);
-GENX_PROC(char *, genxLastErrorMessage )(genxWriter w);
+GENX_PROC(const char *, genxGetErrorMessage )(genxWriter w, genxStatus status);
+GENX_PROC(const char *, genxLastErrorMessage )(genxWriter w);
 
 /*
  * return version
  */
-GENX_PROC(char *, genxGetVersion )();
+GENX_PROC(const char *, genxGetVersion )();
 
 GENX_NAMESPACE_END
 #ifdef __cplusplus
