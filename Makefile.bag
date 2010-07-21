@@ -1,0 +1,423 @@
+# __NO_SQL__ can be defined to eliminate SQL depandnacies (unixodbc, sqlite)
+# __NO_OPTIONS__ can be defined to remove option gui dependancy
+
+#__NO_MSGSVR__=1 can be defined to remove message service - internally I no longer auto use it.  With options Enabled, then construct will ask for optiont o auto load which may trigger service initialization
+#export __NO_MSGSVR__
+
+#$(warning Auto enabling __NO_MSGSVR__)
+
+# comment this out to build sqlite into sack.
+#__EXTERNAL_SQLITE__=1 
+#$(warning this needs some work... like actually loading/filling the interface)
+
+# NO NO NO - okay this
+# this breaks deadstart compilations
+# INDIRECT_BUILD can affect any project not
+# found in deadstart...
+INDIRECT_BUILD=YES
+# I don't know that there's a valid BAG no
+# BAG no would be the individual components 
+# built atomically.... there have come to be
+# some abuses with time
+BAG=yes
+#export BAG
+
+
+# enable using sqlite file based SQL database
+# if both this and ODBC are used, the DSN specified
+# will first attempt to open as a ODBC commection.
+# if teh connection is still down, then sqlite is 
+# used..  (if there is NO odbc connectiON? what if 
+# it'sa temporary odbc failure?)
+ifndef __NO_SQL__
+ifndef __EXTERNAL_SQLITE__
+USE_SQLITE=1
+endif
+endif
+
+#DEST_PREFIX=bag
+#export DEST_PREFIX
+MAKEBAG=1
+
+
+ifeq '$(filter distclean,$(MAKECMDGOALS))' ''
+# if not distclean, then do mark these to build, 
+# otherwise the default delete rule gets confused a bit.
+ifndef DATAPATH
+ DATAPATH=/bin
+endif
+MORE_TARGETS=$(FINALDEST)$(DATAPATH)/$(DEST_SUFFIX)/interface.conf $(FINALDEST)$(DATAPATH)/$(DEST_SUFFIX)/interface.conf.static
+endif
+
+ifndef __WINDOWS__
+
+ifeq '$(shell uname)' 'MINGW32_NT-6.0'
+__WINDOWS__=1
+export __WINDOWS__
+endif
+ifeq '$(shell uname)' ''
+__WINDOWS__=1
+export __WINDOWS__
+endif
+endif
+
+WIN_MORE_PROJECTS=$(if $(__WINDOWS__),$(if $(OPENGL),src/vidlib/opengl/Makefile,src/vidlib/Makefile),)
+
+ifndef BUILD_BAG_ONLY
+
+
+ifndef __NO_GUI__
+MORE_PROJECTS+=src/imglib/Makefile \
+        $(WIN_MORE_PROJECTS)   \
+	$(if $(__WINDOWS__),,src/displaylib/Makefile.display.bag) \
+        src/psilib/Makefile.PSI.bag \
+        $(if $(__WINDOWS__),,src/displaylib/Makefile.display2.bag) \
+	$(if $(__WINDOWS__),,src/intershell/Makefile) \
+        $(if $(__WINDOWS__),src/streamlib/Makefile,) \
+        $(if $(__NO_SQL__),,src/SQLlib/optlib/Makefile)
+else
+#__NO_MSGSVR__=1
+#export __NO_MSGSVR__
+#$(warning Auto enabling __NO_MSGSVR__)
+endif
+
+ifndef __NO_MSGSVR__
+MORE_PROJECTS+=src/msgsvr/server/Makefile \
+	        src/msgsvr/servicelist/Makefile  \
+	        $(if $(__NO_GUI__),,src/msgsvr/summoner/Makefile) \
+	        src/msgsvr/leech_messages/Makefile 
+endif
+
+MORE_PROJECTS+=src/sysloglib/logger/Makefile  \
+        src/netlib/Makefile  \
+	src/utils/Makefile \
+	$(if $(__NO_SQL__),,src/SQLlib/testsql/Makefile) \
+        $(if $(__EXTERNAL_SQLITE__),src/sqlite/Makefile,)
+#src/libmng/Makefile # this is included in bag now.
+
+PROJECTS=data
+ifeq '$(filter distclean,$(MAKECMDGOALS))' 'distclean'
+PROJECTS+=makefiles
+endif
+
+endif
+
+LIBNAME=bag
+
+# one early check.
+HAVE_NASM=$(if $(shell nasm.exe -h),1,)
+
+MONSRC=$(if $(__WINDOWS__),src/filesyslib/filemon/windowsfiles,src/filesyslib/filemon/linuxfiles)
+
+SRCS= src/deadstart/deadstart_core    \
+ src/sysloglib/syslog            \
+ src/memlib/sharemem             \
+ $(if $(__CYGWIN__)$(__LINUX64__)$(__ARM__),,$(if $(HAVE_NASM),src/memlib/memoryasm,))            \
+ src/typelib/typecode            \
+ src/typelib/binarylist          \
+ src/typelib/familytree          \
+ src/typelib/input               \
+ src/typelib/msgqueue            \
+ src/typelib/sets                \
+ src/typelib/spacetree           \
+ src/typelib/text                \
+ src/timerlib/timers             \
+ $(if $(__NO_MSGSVR__),,src/msgsvr/client/client  \
+                          src/msgsvr/summoner/construct  ) \
+ src/fractionlib/fractions       \
+ src/configlib/configscript      \
+ src/procreglib/names            \
+ src/netlib/ping                 \
+ src/netlib/tcpnetwork           \
+ src/netlib/udpnetwork           \
+ src/netlib/whois                \
+ src/netlib/network              \
+ $(if $(__WINDOWS__),src/netlib/net_winsock2,)         \
+ src/netservicelib/udprequest    \
+ src/netservicelib/udpresp       \
+ src/filesyslib/filescan         \
+ src/filesyslib/pathops          \
+ src/filesyslib/winfiles         \
+ $(MONSRC)                       \
+ src/filesyslib/filemon/allfiles \
+ src/systemlib/system            \
+ src/systemlib/args              \
+ src/systemlib/spawntask         \
+ src/vectlib/vectlib             \
+ src/sha1lib/sha1                \
+ src/idlelib/idle                \
+ $(if $(__NO_SQL__),,src/SQLlib/sqlstub              \
+ src/SQLlib/sqlutil              \
+ src/SQLlib/sqlwrap              \
+ src/SQLlib/sqlparse3            \
+ $(if $(__NO_OPTIONS__),,src/SQLlib/optlib/getoption src/SQLlib/optlib/getoption_new      \
+ src/SQLlib/optlib/optionutil src/SQLlib/optlib/optionutil_new)    \
+ $(if $(USE_SQLITE),src/sqlite/sqlite_interface src/sqlite/sqlite3,) )
+
+MORE_TARGETS+=$(if $(__NO_SQL__),,$(if $(USE_SQLITE),$(SACK_BASE)/include/sqlite3.h))
+
+
+
+SYSLIBS=$(if $(__WINDOWS__),odbc32 wsock32 iphlpapi winmm, m odbc)
+CXFLAGS:=$(CXFLAGS) $(if $(__WINDOWS__),-DWIN32,) $(if $(__NO_SQL__),,-DUSE_ODBC) $(if $(__EXTERNAL_SQLITE__),-DUSE_SQLITE -DUSE_SQLITE_INTERFACE) $(if $(USE_SQLITE),-DSQLITE_SOURCE,)
+
+    
+CXFLAGS:=$(CXFLAGS) -DSACK_BAG_EXPORTS \
+    $(if $(NEED_FREETYPE),-DFT2_BUILD_LIBRARY,) \
+    $(if $(__NO_MSGSVR__),-D__NO_MSGSVR__,) \
+    $(if $(__NO_SQL__),\
+    	-D__NO_SQL__ -D__NO_OPTIONS__\
+    	,$(if $(__NO_OPTIONS__),-D__NO_OPTIONS__,)) \
+    $(if $(__NO_SQL__),,$(if $(USE_SQLITE),-DUSE_SQLITE)) \
+    
+
+
+# first batch of icons - resource files are going to SUCK.
+#RSRCS=src/systraylib/systray
+RSRCS=$(if $(STATIC),,all_resources)
+
+
+
+ifndef __NO_GUI__
+ifeq '$(__WINDOWS__)' '1'
+NEED_FREETYPE=1
+NEED_MNG=0
+#$(if $(CPLUSPLUS_BUILD),,1)
+
+  ifeq '$(if $(filter static_debug static_release,$(DEST)),0,1)' '1'
+#  $(warning including png...)
+NEED_PNG=1
+  else
+#  $(warning huh - static make this differently please? )
+NEED_PNG=0
+MORE_PROJECTS:=src/libpng-1.4.1/Makefile $(MORE_PROJECTS)
+  endif
+NEED_ZLIB=1
+NEED_JPEG=1
+else
+ifeq '$(COMPILER)' 'arm'
+# in a actual build system, this would not need
+# jpeg, zlib or png.  But I don't have those libs here
+# so it's probably best to just throw them in.
+NEED_FREETYPE=1
+ifeq '$(shell uname -o)' 'Cygwin'
+NEED_MNG=0
+NEED_PNG=0
+NEED_ZLIB=0
+NEED_JPEG=0
+else
+NEED_MNG=0
+NEED_PNG=0
+NEED_ZLIB=0
+NEED_JPEG=0
+endif
+else 
+ifdef __LINUX64__
+ifndef __NO_GUI__
+#NEED_MNG=1
+#NEED_PNG=1
+#NEED_ZLIB=1
+#NEED_JPEG=1
+endif
+else
+$(warning Think I'm disabling all internal graphics libraries)
+NEED_MNG=0
+NEED_PNG=0
+NEED_ZLIB=0
+NEED_JPEG=0
+endif
+endif
+
+endif
+
+#__NO_GUI__
+endif
+
+ifeq '$(NEED_ZLIB)' '1'
+ifndef __NO_GUI__
+########### ZLIB SRCS ##############
+ZBASEDIR=src/zlib-1.2.4
+INCLUDEDIRS+=$(SACK_BASE)/$(ZBASEDIR)
+include $(ZBASEDIR)/Makefile.bag.part
+endif
+endif
+########### JPEG SRCS ##############
+
+ifeq '$(NEED_JPEG)' '1'
+ifndef __NO_GUI__
+JBASEDIR=src/jpeg-8a
+SYSDEPMEM=jmemnobs
+
+# library object files common to compression and decompression
+COMSRCS= jcomapi jutils jerror jmemmgr $(SYSDEPMEM)
+
+# compression library object files
+CLIBSRCS= jcarith jcapimin jcapistd jctrans jcparam jdatadst \
+        jcinit jcmaster jcmarker jcmainct jcprepct \
+        jccoefct jccolor jcsample jchuff  \
+        jcdctmgr jfdctfst jfdctflt jfdctint
+
+# decompression library object files
+DLIBSRCS= jaricom jdarith jdapimin jdapistd jdtrans jdatasrc \
+        jdmaster jdinput jdmarker jdhuff  \
+        jdmainct jdcoefct jdpostct jddctmgr jidctfst \
+        jidctflt jidctint jdsample jdcolor \
+        jquant1 jquant2 jdmerge
+# These objectfiles are included in libjpeg.lib
+SRCS+=$(foreach src,$(CLIBSRCS) $(COMSRCS) $(DLIBSRCS),$(JBASEDIR)/$(src))
+CXFLAGS+= -DJPEG_SOURCE
+INCLUDEDIRS+=$(SACK_BASE)/src/jpeg-8a
+endif
+endif
+########### PNG SRCS ##############
+
+ifeq '$(NEED_PNG)' '1'
+ifndef __NO_GUI__
+PBASEDIR=src/libpng-1.4.1
+include $(PBASEDIR)/Makefile.bag.part
+endif
+endif
+
+########### MNG SRCS ##############
+
+ifeq '$(NEED_MNG)' '1'
+ifndef __NO_GUI__
+MNGBASEDIR=src/libmng
+include $(MNGBASEDIR)/Makefile.bag.part
+endif
+endif
+
+
+#####################################
+ifdef NEED_FREETYPE
+ifndef __NO_GUI__
+
+FBASEDIR=src/freetype-2.3.12/src
+
+CXFLAGS+=-DFREETYPE_SOURCE
+
+FT_SRCS=autofit/autofit \
+     base/ftbase \
+     bdf/bdf \
+     cache/ftcache \
+     cff/cff \
+     cid/type1cid \
+     lzw/ftlzw \
+     gzip/ftgzip \
+     otvalid/otvalid \
+     pcf/pcf \
+     pfr/pfr \
+     psnames/psmodule \
+     psaux/psaux \
+     pshinter/pshinter \
+     raster/raster \
+     sfnt/sfnt \
+     smooth/smooth \
+     truetype/truetype \
+     type1/type1 \
+     type42/type42 \
+     winfonts/winfnt \
+     base/ftbitmap \
+     base/ftgasp \
+     base/ftglyph \
+     base/ftgxval \
+     base/ftinit \
+     base/ftmm \
+     base/ftotval \
+     base/ftpfr \
+     base/ftstroke \
+     base/ftsynth \
+     base/ftsystem \
+     base/fttype1 \
+     base/ftwinfnt \
+     base/ftxf86 
+
+FT_INCLUDEPATH=$(FBASEDIR)/../include
+CXFLAGS+=-DFT2_BUILD_LIBRARY -DFREETYPE_SOURCE
+INCLUDEDIRS+=$(FT_INCLUDEPATH)
+
+SRCS+=$(foreach src,$(FT_SRCS),$(FBASEDIR)/$(src))
+endif
+endif
+#####################################
+
+############### GENX Library #############
+
+#GENX_DESTINC1=$(SACK_BASE)/include/genxml
+#MORE_TARGETS+=$(GENX_DESTINC1)/genx.h
+SRCS+=src/genx/genx src/genx/charProps
+CXFLAGS+=-DGENX_SOURCE
+
+############### S-Expat Library #############
+
+#SEXPAT_DESTINC=$(SACK_BASE)/include/sexpat
+#MORE_TARGETS+=$(SEXPAT_DESTINC)/sexpat.h $(SEXPAT_DESTINC)/sexpat_external.h
+SRCS+=src/sexpat/xmlparse src/sexpat/xmlrole src/sexpat/xmltok
+CXFLAGS+=-DSEXPAT_SOURCE
+CXFLAGS+=-DXML_MIN_SIZE
+
+######  SNMP #########################
+#ifeq '$(__CYGWIN__)' ''
+#__INCLUDE_SNMP__=1
+#endif
+# nooone uses snmp anymore? not true... but nothing I have uses it.
+ifdef __INCLUDE_SNMP__
+ifdef __WINDOWS__
+SRCS+=src/snmplib/asn1          src/snmplib/coexistance   src/snmplib/mib           src/snmplib/mibii          src/snmplib/mini-client      \
+     src/snmplib/new-parse     src/snmplib/parse         src/snmplib/snmp_api      src/snmplib/snmp_api_error src/snmplib/snmp_api_util \
+     src/snmplib/snmp_client   src/snmplib/snmp_dump     src/snmplib/snmp_error    src/snmplib/snmp_extra     src/snmplib/snmp_msg      \
+     src/snmplib/snmp_pdu      src/snmplib/snmp_vars         src/snmplib/version
+# test program to init mib...src/snmplib/test-mib  
+CXFLAGS+=-DWIN32
+endif
+endif
+
+#####################################
+include $(SACK_BASE)/makefiles/makefile.single
+
+ifdef __WINDOWS__
+$(DEST)/ftgzip1.obj: CXFLAGS1+=-I$(SACK_BASE)/include/png
+endif
+
+#####################################
+# GENX Custom rules - why? cause we thought we would be clever
+# someday just move the genx header into the appropriate folder and commit it.
+$(GENX_DESTINC1)/genx.h: $(SACK_BASE)/src/genx/genx.h | $(GENX_DESTINC1)
+	-cp $(SACK_BASE)/src/genx/genx.h $@
+
+ifeq '$(NEED_ZLIB)' '1'
+include $(ZBASEDIR)/Makefile.bag.part.end
+endif
+
+ifeq '$(NEED_PNG)' '1'
+include $(PBASEDIR)/Makefile.bag.part.end
+endif
+
+ifeq '$(NEED_MNG)' '1'
+include $(MNGBASEDIR)/Makefile.bag.part.end
+endif
+
+#$(GENX_DESTINC1): 
+#	-mkdir $(call SYSCMDPATH,$@)
+ifndef __NO_SQL__
+ifeq '$(USE_SQLITE)' '1'
+$(SACK_BASE)/include/sqlite3.h: $(SACK_BASE)/src/sqlite/sqlite3.h
+	cp $< $@
+
+$(SACK_BASE)/src/sqlite/sqlite3.h:
+	make -C $(SACK_BASE)/src/sqlite
+
+$(call CLEANTARGET,$(SACK_BASE)/include/sqlite3.h):
+	-rm -f $(subst /,$(SYSPATHCHAR),$(SACK_BASE)/include/sqlite3.h)
+endif
+endif
+
+#####################################
+
+$(call CLEANTARGET,$(FINALDEST)$(DATAPATH)/$(DEST_SUFFIX)/interface.conf):
+	-rm -f $(subst /,$(SYSPATHCHAR),$(FINALDEST)/bin/$(DEST_SUFFIX)/interface.conf)
+
+$(FINALDEST)$(DATAPATH)/$(DEST_SUFFIX)/interface.conf : src/procreglib/interface.conf
+	cp $< $@ 
+$(FINALDEST)$(DATAPATH)/$(DEST_SUFFIX)/interface.conf.static : src/procreglib/interface.conf.static
+	cp $< $@ 

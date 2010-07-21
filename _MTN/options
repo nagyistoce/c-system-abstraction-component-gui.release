@@ -1,0 +1,4 @@
+database "c:/general/monotone/sack.db"
+  branch "org.d3x0r.trunks.sack.doc_project"
+     key "jim@forest.fortunet.com"
+  keydir "c:/users/d3x0r/AppData/Roaming/monotone/keys"
