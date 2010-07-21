@@ -1382,8 +1382,13 @@ PTRSZVAL GetFileSize( int fd )
 			hMem = CreateFileMapping( INVALID_HANDLE_VALUE, NULL
 											, PAGE_READWRITE
 											 |SEC_COMMIT
+#if __64__
 											, (*dwSize)>>32 // dwSize is sometimes 64 bit... this should be harmless
 											, (*dwSize) & (0xFFFFFFFF)
+#else
+											, 0
+											, (*dwSize)
+#endif
 											, pWhat ); // which should be NULL... but is consistant
 			if( !hMem )
 			{
