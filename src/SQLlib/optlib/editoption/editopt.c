@@ -193,8 +193,8 @@ int EditOptions( void )
 		frame = CreateFrame( WIDE("Edit Options"), -1, -1, NEW_SIZE, 320, BORDER_RESIZABLE|BORDER_NORMAL, NULL );
 		list = MakeListBox( frame, 5, 5, LIST_SIZE, 310, LST_OPTIONMAP, 0 );
 		SetListboxIsTree( list, TRUE );
-		SetSelChangeHandler( list, OptionSelectionChanged, NULL );
-      	SetListItemOpenHandler( list, HandleItemOpened, NULL );
+		SetSelChangeHandler( list, OptionSelectionChanged, 0 );
+		SetListItemOpenHandler( list, HandleItemOpened, 0 );
 		MakeEditControl( frame, RIGHT_START, 35, 175, 25, EDT_OPTIONVALUE, WIDE("blah"), 0 );
 
 

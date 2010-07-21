@@ -1162,7 +1162,7 @@ PTRSZVAL CPROC WaitForCallerThread( PTHREAD thread )
 	while( 1 )
 	{
       FILE *file;
-		if( ( file = fopen( WIDE("f:\config.sys"), WIDE("rb") ) ) )
+		if( ( file = fopen( WIDE("f:\\config.sys"), WIDE("rb") ) ) )
 		{
 			fclose( file );
          lprintf( WIDE("Launching caller auto tasks.") );

@@ -670,7 +670,7 @@ PRIORITY_PRELOAD( InitInterShellInterface, DEFAULT_PRELOAD_PRIORITY - 3)
 #define  InterShell_CommonImageUnloadByName						   if( InterShell )InterShell->InterShell_CommonImageUnloadByName 
 #define  InterShell_CommonImageUnloadByImage						   if( InterShell )InterShell->InterShell_CommonImageUnloadByImage 
 #define  InterShell_SetButtonImageAlpha							   if( InterShell )InterShell->InterShell_SetButtonImageAlpha 
-#define  InterShell_IsButtonVirtual								   ( !InterShell )?NULL:InterShell->InterShell_IsButtonVirtual
+#define  InterShell_IsButtonVirtual								   ( !InterShell )?FALSE:InterShell->InterShell_IsButtonVirtual
 #define  InterShell_SetButtonFont									   if( InterShell )InterShell->InterShell_SetButtonFont 
 #define  InterShell_GetCurrentButtonFont							   ( !InterShell )?NULL:InterShell->InterShell_GetCurrentButtonFont
 #define  InterShell_SetButtonStyle								   if( InterShell )InterShell->InterShell_SetButtonStyle 

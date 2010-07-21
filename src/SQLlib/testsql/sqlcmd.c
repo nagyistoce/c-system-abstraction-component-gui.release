@@ -13,7 +13,7 @@ void Usage( int bFull )
 	fprintf( stderr, WIDE("!<command> - issues command to \n") );
 	fprintf( stderr, WIDE("=<table>@<DSN><,DSN>,...> setup output to these DSN's for next command or query result\n") );
 	fprintf( stderr, WIDE("?!<query> results go to the current output (with replace instead of insert), or the screen if non specified before\n") );
-	fprintf( stderr, WIDE("\q on a new line - quit\n") );
+	fprintf( stderr, WIDE("\\q on a new line - quit\n") );
 }
 
 void CPROC ShowSQLStates( CTEXTSTR message )
