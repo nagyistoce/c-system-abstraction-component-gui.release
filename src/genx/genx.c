@@ -131,7 +131,7 @@ struct genxWriter_rec
   plist                    prefixes;
   plist           	   stack;   
   struct genxAttribute_rec arec;
-  char *                   etext[100];
+  const char *                   etext[100];
   void *       		(* alloc)(void * userData, int bytes);
   void         		(* dealloc)(void * userData, void * data);
 };
@@ -772,11 +772,11 @@ static genxStatus checkNCName(genxWriter w, constUtf8 name)
   return GENX_SUCCESS;
 }
 
-char * genxGetErrorMessage(genxWriter w, genxStatus status)
+const char * genxGetErrorMessage(genxWriter w, genxStatus status)
 {
   return w->etext[status];
 }
-char * genxLastErrorMessage(genxWriter w)
+const char * genxLastErrorMessage(genxWriter w)
 {
   return w->etext[w->status];
 }
@@ -1946,7 +1946,7 @@ genxStatus genxAddAttributeLiteral(genxWriter w, constUtf8 xmlns,
 /*
  * return version
  */
-char * genxGetVersion()
+const char * genxGetVersion()
 {
   return GENX_VERSION;
 }

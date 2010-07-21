@@ -247,7 +247,7 @@ void DoInit( void )
 
 //---------------------------------------------------------------------
 
-void LogElementEx( TEXTCHAR *leader, PCONFIG_ELEMENT pce DBG_PASS)
+void LogElementEx( CTEXTSTR leader, PCONFIG_ELEMENT pce DBG_PASS)
 #define LogElement(leader,pc) LogElementEx(leader,pc DBG_SRC )
 
 {

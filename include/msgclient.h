@@ -59,7 +59,7 @@ SACK_NAMESPACE
 
 
 // the result is a RouteID.  (ie. or MsgBase)...
-	CLIENTMSG_PROC( _32, RegisterServiceExx )( char *name
+	CLIENTMSG_PROC( _32, RegisterServiceExx )( CTEXTSTR name
 														  , server_function_table functions
 														  , int entries
 														  , server_message_handler event_handler

@@ -1575,7 +1575,7 @@ typedef void	 (CPROC *UNLOADPROC)( POINTER );
 
 //-----------------------------------------------------------------------
 
-LOGICAL RegisterInterface( TEXTCHAR *servicename, POINTER(CPROC*load)(void), void(CPROC*unload)(POINTER))
+LOGICAL RegisterInterface( CTEXTSTR servicename, POINTER(CPROC*load)(void), void(CPROC*unload)(POINTER))
 {
 	//PARAM( args, TEXTCHAR*, servicename );
 	//PARAM( args, TEXTCHAR*, library );

@@ -208,18 +208,18 @@ MATHLIB_EXPORT P_POINT Invert( P_POINT a );
    // expands to
    PrintVectorEx( "_X", _X DBG_SRC );
    </code>                                                    */
-MATHLIB_EXPORT void PrintVectorEx( TEXTCHAR *lpName, PCVECTOR v DBG_PASS );
-/* <combine sack::math::vector::PrintVectorEx@TEXTCHAR *@PCVECTOR v>
+MATHLIB_EXPORT void PrintVectorEx( CTEXTSTR lpName, PCVECTOR v DBG_PASS );
+/* <combine sack::math::vector::PrintVectorEx@CTEXTSTR@PCVECTOR v>
    
    \ \                                                               */
 #define PrintVector(v) PrintVectorEx( WIDE(#v), v DBG_SRC )
-MATHLIB_EXPORT void PrintVectorStdEx( TEXTCHAR *lpName, VECTOR v DBG_PASS );
-/* <combine sack::math::vector::PrintVectorStdEx@TEXTCHAR *@VECTOR v>
+MATHLIB_EXPORT void PrintVectorStdEx( CTEXTSTR lpName, VECTOR v DBG_PASS );
+/* <combine sack::math::vector::PrintVectorStdEx@CTEXTSTR@VECTOR v>
    
    \ \                                                                */
 #define PrintVectorStd(v) PrintVectorStd( WIDE(#v), v DBG_SRC )
-MATHLIB_EXPORT void PrintMatrixEx( TEXTCHAR *lpName, MATRIX m DBG_PASS );
-/* <combine sack::math::vector::PrintMatrixEx@TEXTCHAR *@MATRIX m>
+MATHLIB_EXPORT void PrintMatrixEx( CTEXTSTR lpName, MATRIX m DBG_PASS );
+/* <combine sack::math::vector::PrintMatrixEx@CTEXTSTR@MATRIX m>
    
    \ \                                                             */
 #define PrintMatrix(m) PrintMatrixEx( WIDE(#m), m DBG_SRC )

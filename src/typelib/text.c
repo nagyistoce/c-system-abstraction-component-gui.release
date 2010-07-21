@@ -2185,21 +2185,21 @@ int vtprintfEx( PVARTEXT pvt , CTEXTSTR format, ... )
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 
-static char *Ops[] = {
-	"FORMAT_OP_CLEAR_END_OF_LINE",
-	"FORMAT_OP_CLEAR_START_OF_LINE",
-	"FORMAT_OP_CLEAR_LINE ",
-	"FORMAT_OP_CLEAR_END_OF_PAGE",
-	"FORMAT_OP_CLEAR_START_OF_PAGE",
-	"FORMAT_OP_CLEAR_PAGE",
-	"FORMAT_OP_CONCEAL" 
-	  , "FORMAT_OP_DELETE_CHARS" // background is how many to delete.
-	  , "FORMAT_OP_SET_SCROLL_REGION" // format.x, y are start/end of region -1,-1 clears.
-	  , "FORMAT_OP_GET_CURSOR" // this works as a transaction...
-	  , "FORMAT_OP_SET_CURSOR" // responce to getcursor...
+static CTEXTSTR Ops[] = {
+	WIDE("FORMAT_OP_CLEAR_END_OF_LINE"),
+	WIDE("FORMAT_OP_CLEAR_START_OF_LINE"),
+	WIDE("FORMAT_OP_CLEAR_LINE "),
+	WIDE("FORMAT_OP_CLEAR_END_OF_PAGE"),
+	WIDE("FORMAT_OP_CLEAR_START_OF_PAGE"),
+	WIDE("FORMAT_OP_CLEAR_PAGE"),
+	WIDE("FORMAT_OP_CONCEAL") 
+	  , WIDE("FORMAT_OP_DELETE_CHARS") // background is how many to delete.
+	  , WIDE("FORMAT_OP_SET_SCROLL_REGION") // format.x, y are start/end of region -1,-1 clears.
+	  , WIDE("FORMAT_OP_GET_CURSOR") // this works as a transaction...
+	  , WIDE("FORMAT_OP_SET_CURSOR") // responce to getcursor...
 
-	  , "FORMAT_OP_PAGE_BREAK" // clear page, home page... result in page break...
-	  , "FORMAT_OP_PARAGRAPH_BREAK" // break between paragraphs - kinda same as lines...
+	  , WIDE("FORMAT_OP_PAGE_BREAK") // clear page, home page... result in page break...
+	  , WIDE("FORMAT_OP_PARAGRAPH_BREAK") // break between paragraphs - kinda same as lines...
 };
 
 //---------------------------------------------------------------------------
