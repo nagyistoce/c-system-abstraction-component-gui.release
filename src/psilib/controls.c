@@ -78,8 +78,8 @@ typedef struct resource_names
 {
 	_32 resource_name_id;
 	_32 resource_name_range;
-	TEXTCHAR *resource_name;
-	TEXTCHAR *type_name;
+	CTEXTSTR resource_name;
+	CTEXTSTR type_name;
 } RESOURCE_NAMES;
 static RESOURCE_NAMES resource_names[] = {
 #define BUILD_NAMES
