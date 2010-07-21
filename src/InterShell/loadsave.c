@@ -370,7 +370,7 @@ PTRSZVAL CPROC CreateNewControl( PTRSZVAL psv, arg_list args )
 			}
 		}
 	}
-	return  NULL;
+	return 0;
 }
 
 void SetCurrentLoadingButton( PMENU_BUTTON button )
