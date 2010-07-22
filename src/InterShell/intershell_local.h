@@ -124,6 +124,8 @@ struct CanvasData {
    PRENDERER edit_glare; // this has it's own direct draw methods.  Without complication of being a control.
    PSI_CONTROL edit_glare_frame; // cause we need to reference the glare as a frame...
    PLIST selected_list;
+
+	PLINKSTACK prior_pages; // this used to be global, but really this is a per-canvas property - since each has pages.
 };
 
 
@@ -189,9 +191,12 @@ typedef struct global_tag
 		BIT_FIELD bTopmost : 1;
 		BIT_FIELD bSpanDisplay : 1;
 		BIT_FIELD bTransparent : 1;
+		BIT_FIELD bExternalApplicationhost : 1; // set by C# intro hook... so we don't make a auto g.single_frame
 		// once this comes up, the memlock region is disabled
       // if this option is set in the config..
 		//BIT_FIELD bAllowMultiLaunch : 1;
+		BIT_FIELD bPageReturn : 1; // doing a return page (don't save current page to stack)
+
 	} flags;
 	// tokens which are used for testing
    // user security rights.

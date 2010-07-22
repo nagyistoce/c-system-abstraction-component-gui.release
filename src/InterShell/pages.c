@@ -35,10 +35,6 @@ INTERSHELL_NAMESPACE
 
 extern CONTROL_REGISTRATION menu_surface;
 
-static struct {
-	PLINKSTACK prior_pages;
-} l;
-
 void CreateNamedPage( PSI_CONTROL pc_canvas, CTEXTSTR page_name )
 {
 	PCanvasData canvas = GetCanvas( pc_canvas );
@@ -120,6 +116,16 @@ PPAGE_DATA ShellGetNamedPage( PSI_CONTROL pc_canvas, CTEXTSTR name )
 		{
          return canvas->current_page;
 		}
+		else if( strcmp( name, WIDE( "return" ) ) == 0 )
+		{
+			PPAGE_DATA page = (PPAGE_DATA)PopLink( &canvas->prior_pages );
+			g.flags.bPageReturn = 1;
+			if( page )
+			{
+				return page;
+			}
+			return canvas->current_page;
+		}
 		else LIST_FORALL( canvas->pages, idx, PPAGE_DATA, page )
 		{
 			if( page->title )
@@ -158,7 +164,15 @@ PPAGE_DATA ShellGetCurrentPage( void )
 
 void ClearPageList( void )
 {
-   while( PopLink( &l.prior_pages ) );
+	PSI_CONTROL pc_canvas = NULL;
+	if( !pc_canvas )
+		pc_canvas = g.single_frame;
+	if( pc_canvas )
+	{
+		PCanvasData canvas = GetCanvas( pc_canvas );
+		while( PopLink( &canvas->prior_pages ) );
+	}
+   //while( PopLink( &l.prior_pages ) );
 }
 
 //-------------------------------------------------------------------------
@@ -491,6 +505,11 @@ void ChangePagesEx( PSI_CONTROL pc_canvas, PPAGE_DATA page DBG_PASS )
 	if( !g.flags.bPageUpdateDisabled )
 		EnableCommonUpdates( pc_canvas, FALSE );
 
+	if( !g.flags.bPageReturn && ( canvas->current_page != page ) )
+	{
+		PushLink( &canvas->prior_pages, canvas->current_page );
+	}
+
 	{
 		int was_active;
       //_lprintf(DBG_RELAY)( "%p ", canvas->current_page );
@@ -518,13 +537,16 @@ void ChangePagesEx( PSI_CONTROL pc_canvas, PPAGE_DATA page DBG_PASS )
 
 void ShellReturnCurrentPage( void )
 {
-
-	PPAGE_DATA page = (PPAGE_DATA)PopLink( &l.prior_pages );
-	if( page )
+	PSI_CONTROL pc_canvas = g.single_frame;
+	if( pc_canvas )
 	{
-		ChangePages( page->frame, page );
+		PCanvasData canvas = GetCanvas( pc_canvas );
+		PPAGE_DATA page = (PPAGE_DATA)PopLink( &canvas->prior_pages );
+		if( page )
+		{
+			ChangePages( page->frame, page );
+		}
 	}
-   //ChangePages( &canvas->default_page );
 }
 
 void SetCurrentPageID( PSI_CONTROL pc_canvas, _32 ID )
@@ -622,9 +644,12 @@ void UnDestroyPageID( PSI_CONTROL pc_canvas, _32 ID ) // MNU_DESTROY_PAGE ID (mi
 
 int ShellCallSetCurrentPageEx( PSI_CONTROL pc_canvas, CTEXTSTR name )
 {
-	ValidatedControlData( PCanvasData, menu_surface.TypeID, canvas, pc_canvas );
-	PushLink( &l.prior_pages, canvas->current_page );
-	return ShellSetCurrentPage( name );
+	if( pc_canvas )
+	{
+		ValidatedControlData( PCanvasData, menu_surface.TypeID, canvas, pc_canvas );
+		return ShellSetCurrentPage( name );
+	}
+   return 0;
 }
 
 // stuff...
@@ -647,7 +672,8 @@ int ShellSetCurrentPageEx( PSI_CONTROL pc_canvas, CTEXTSTR name )
 	if( page )
 	{
 		ChangePages( pc_canvas, page );
-      return TRUE;
+		g.flags.bPageReturn = 0;
+		return TRUE;
 	}
 	return FALSE;
 }
