@@ -1780,8 +1780,12 @@ void GetCommonButtonControls( PSI_CONTROL frame )
 				buffer[0] = 0;
 			else if( strcmp( buffer, WIDE("-- Startup Page") ) == 0 )
 				StrCpy( buffer, WIDE("first" ) );
-			if( strcmp( buffer, WIDE("-- Next") ) == 0 )
+			else if( strcmp( buffer, WIDE("-- Next") ) == 0 )
 				StrCpy( buffer, WIDE("next" ) );
+			else if( strcmp( buffer, WIDE("-- Return") ) == 0 )
+				strcpy( buffer, WIDE("return" ) );
+			else if( strcmp( buffer, WIDE("-- Refresh Page(here)") ) == 0 )
+				strcpy( buffer, WIDE("here" ) );
 
 			if( configure_key_dispatch.button->pPageName )
 				Release( configure_key_dispatch.button->pPageName );
@@ -2171,6 +2175,17 @@ void SetCommonButtonControls( PSI_CONTROL frame )
 				if( configure_key_dispatch.button->pPageName &&
 					stricmp( configure_key_dispatch.button->pPageName, WIDE("next") ) == 0 )
 					SetSelectedItem( list, pli );
+
+				pli = AddListItem( list, WIDE("-- Return") );
+				if( configure_key_dispatch.button->pPageName &&
+					stricmp( configure_key_dispatch.button->pPageName, WIDE("return") ) == 0 )
+					SetSelectedItem( list, pli );
+
+				pli = AddListItem( list, WIDE("-- Refresh Page(here)") );
+				if( configure_key_dispatch.button->pPageName &&
+					stricmp( configure_key_dispatch.button->pPageName, WIDE("here") ) == 0 )
+					SetSelectedItem( list, pli );
+
 				LIST_FORALL( canvas->pages, idx, PPAGE_DATA, page )
 				{
 					pli = AddListItem( list, page->title );
@@ -3784,44 +3799,47 @@ void SetupSystemsListAndGlobalSingleFrame(void )
 
 	// always have at least 1 frame.  and it is a menu canvas
 	InterShell_DisablePageUpdate( TRUE );
-
+	if( !g.flags.bExternalApplicationhost )
+	{
 #ifndef __NO_OPTIONS__
 #  ifndef __LINUX__
-	{
-		int display = SACK_GetProfileIntEx( GetProgramName(), WIDE( "Intershell Layout/Use Screen Number" ), 0, TRUE );
-		if( display > 0 )
 		{
-			_32 w, h;
-			S_32 x, y;
-         GetDisplaySizeEx( display, &x, &y, &w, &h );
-			g.single_frame = MakeControl( NULL, menu_surface.TypeID
-												 , x, y
-												 , w, h, 0 );
+			int display = SACK_GetProfileIntEx( GetProgramName(), WIDE( "Intershell Layout/Use Screen Number" ), 0, TRUE );
+			if( display > 0 )
+			{
+				_32 w, h;
+				S_32 x, y;
+				GetDisplaySizeEx( display, &x, &y, &w, &h );
+				g.single_frame = MakeControl( NULL, menu_surface.TypeID
+													 , x, y
+													 , w, h, 0 );
+			}
 		}
-	}
 #  endif
-	if( !g.single_frame )
-		if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "Intershell Layout/Use Custom Positioning" ), 0, TRUE ) )
-		{
-			int x = SACK_GetProfileInt( GetProgramName(), WIDE( "Intershell Layout/X Position" ), 0 );
-			int y = SACK_GetProfileInt( GetProgramName(), WIDE( "Intershell Layout/Y Position" ), 0 );
-			int _w = SACK_GetProfileInt( GetProgramName(), WIDE( "Intershell Layout/Width" ), g.width );
-			int _h = SACK_GetProfileInt( GetProgramName(), WIDE( "Intershell Layout/Height" ), g.height );
-			g.width = _w;
-			g.height = _h;
-			g.single_frame = MakeControl( NULL, menu_surface.TypeID, x, y, _w, _h, 0 );
+		if( !g.single_frame )
+			if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "Intershell Layout/Use Custom Positioning" ), 0, TRUE ) )
+			{
+				int x = SACK_GetProfileInt( GetProgramName(), WIDE( "Intershell Layout/X Position" ), 0 );
+				int y = SACK_GetProfileInt( GetProgramName(), WIDE( "Intershell Layout/Y Position" ), 0 );
+				int _w = SACK_GetProfileInt( GetProgramName(), WIDE( "Intershell Layout/Width" ), g.width );
+				int _h = SACK_GetProfileInt( GetProgramName(), WIDE( "Intershell Layout/Height" ), g.height );
+				g.width = _w;
+				g.height = _h;
+				g.single_frame = MakeControl( NULL, menu_surface.TypeID, x, y, _w, _h, 0 );
 
-		}
-		else
-			if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "Intershell Layout/Use Second Display(horizontal)" ), 0, TRUE ) )
-				g.single_frame = MakeControl( NULL, menu_surface.TypeID, g.width, 0, g.width, g.height, 0 );
+			}
 			else
-				if( g.flags.bSpanDisplay )
-					g.single_frame = MakeControl( NULL, menu_surface.TypeID, 0, 0, g.width*2, g.height, 0 );
+				if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "Intershell Layout/Use Second Display(horizontal)" ), 0, TRUE ) )
+					g.single_frame = MakeControl( NULL, menu_surface.TypeID, g.width, 0, g.width, g.height, 0 );
 				else
+					if( g.flags.bSpanDisplay )
+						g.single_frame = MakeControl( NULL, menu_surface.TypeID, 0, 0, g.width*2, g.height, 0 );
+					else
 #endif
-					g.single_frame = MakeControl( NULL, menu_surface.TypeID, 0, 0, g.width, g.height, 0 );
-					lprintf( WIDE( "Got single frame. %d,%d" ), g.width, g.height );
+						g.single_frame = MakeControl( NULL, menu_surface.TypeID, 0, 0, g.width, g.height, 0 );
+		lprintf( WIDE( "Got single frame. %d,%d" ), g.width, g.height );
+	}
+
 	if( !g.flags.multi_edit )
 	{
 	}
@@ -4103,6 +4121,7 @@ int CPROC InitMasterFrame( PCOMMON pc )
 			canvas->current_page->frame = canvas->pc_canvas;
 			// really this should have been done the other way...
 			canvas->default_page =  canvas->current_page;
+			canvas->prior_pages = CreateLinkStackLimited( 20 );
 
 			canvas->flags.bSuperMode = 1;
 			AddLink( &g.frames, pc );
@@ -5010,6 +5029,7 @@ namespace InterShell
 		InterShell_Canvas( System::IntPtr handle )
 		{
 			//g.flags.bLogNames = 1;
+			g.flags.bExternalApplicationhost = 1;
 			InvokeDeadstart();
 			Init( FALSE );
 			//g.UseWindowHandle = handle;
