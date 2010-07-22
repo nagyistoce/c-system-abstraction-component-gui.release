@@ -1,16 +1,44 @@
 
 PROJECT( scan_ports )
-add_executable( ${PROJECT_NAME} scan )
+add_executable( ${PROJECT_NAME} ${FIRST_GCC_PROGRAM_SOURCE} 
+scan 
+${LAST_GCC_PROGRAM_SOURCE}
+)
+string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
+SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
+                  COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL} ${LibraryExtraFlags}"
+)
 target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} )
 
 PROJECT( scan_addresses )
-add_executable( ${PROJECT_NAME} pinger )
+add_executable( ${PROJECT_NAME} ${FIRST_GCC_PROGRAM_SOURCE} 
+pinger 
+${LAST_GCC_PROGRAM_SOURCE}
+)
+string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
+SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
+                  COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL} ${LibraryExtraFlags}"
+)
 target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} )
 
 PROJECT( nameof )
-add_executable( ${PROJECT_NAME} nameof )
+add_executable( ${PROJECT_NAME} ${FIRST_GCC_PROGRAM_SOURCE} 
+nameof 
+${LAST_GCC_PROGRAM_SOURCE}
+)
+string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
+SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
+                  COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL} ${LibraryExtraFlags}"
+)
 target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} )
 
 PROJECT( ipof )
-add_executable( ${PROJECT_NAME} ipof )
+add_executable( ${PROJECT_NAME} ${FIRST_GCC_PROGRAM_SOURCE} 
+ipof 
+${LAST_GCC_PROGRAM_SOURCE}
+)
+string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
+SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
+                  COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL} ${LibraryExtraFlags}"
+)
 target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} )
