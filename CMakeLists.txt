@@ -157,7 +157,10 @@ add_definitions( -D__NO_OPTIONS__ )
  if( USE_SQLITE )
   SET(SQLITE_SOURCES   src/sqlite/sqlite_interface.c )
 #if( !SQLITE3_FOUND )
-  SET( SQLITE_SOURCES ${SQLITE_SOURCES} src/sqlite/sqlite3.c  )
+  SET( SQLITE_VERSION 3.7.0 ) #3.6.23
+  SET( SQLITE_SOURCES ${SQLITE_SOURCES} src/sqlite/${SQLITE_VERSION}/sqlite3.c  )
+  include_directories( ${SACK_BASE}/src/sqlite/${SQLITE_VERSION} )
+  
   if( NOT USE_SQLITE_EXTERNAL )
    # setup to include sqlite in the core libraries...
    set( BAG_SQLITE_SOURCES ${SQLITE_SOURCES} )

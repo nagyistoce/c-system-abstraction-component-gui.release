@@ -3,11 +3,7 @@
 #ifndef SQL_STRUCT_DEFINED
 #define SQL_STRUCT_DEFINED
 # if defined( USE_SQLITE ) || defined( USE_SQLITE_INTERFACE )
-#   if defined( SYSTEM_SQLITE )
-#     include "sqlite3.h"
-#   else
-#     include "../sqlite/sqlite3.h"
-#   endif
+#     include <sqlite3.h>
 #  ifndef USE_ODBC
 // if not using odbc, need these 
 // otherwise they will be defined in sql.h
