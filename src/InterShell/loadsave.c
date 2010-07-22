@@ -642,6 +642,17 @@ PTRSZVAL CPROC SetMenuRowCols( PTRSZVAL psv, arg_list args )
 	_32 button_rows, button_cols, button_space;
 	// 25 PART_RESOLUTION's?
 	PCanvasData canvas = GetCanvas( (PSI_CONTROL)PeekLink( &l.current_canvas ) );
+	{
+		static int bFirstLoadDone = 0;
+		if( !bFirstLoadDone )
+		{
+			// tell the plugins that a page change happened.
+			bFirstLoadDone = 1;
+			// mark that the current page is the current page - for plugins...
+         // otherwise they don't know what page we are on until the second page.
+			InvokePageChange();
+		}
+	}
 	button_space = 0;
 	button_rows = rows;
 	button_cols = cols;
