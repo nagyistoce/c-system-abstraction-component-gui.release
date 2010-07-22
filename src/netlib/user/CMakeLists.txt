@@ -1,3 +1,11 @@
 PROJECT( test_user_connect )
-add_executable( ${PROJECT_NAME} user )
+
+string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
+add_executable( ${PROJECT_NAME} ${FIRST_GCC_PROGRAM_SOURCE} 
+user 
+${LAST_GCC_PROGRAM_SOURCE}
+)
+SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
+                  COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL} ${LibraryExtraFlags}"
+)
 target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} )
