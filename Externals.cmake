@@ -40,7 +40,7 @@ if( NEED_PNG )
  endif( NEED_ZLIB )
 
 
- SET( PBASEDIR src/libpng-1.4.1 )
+ SET( PBASEDIR src/libpng-1.4.3 )
  include( ${PBASEDIR}/CMakeLists.part )
 endif( NEED_PNG )
 

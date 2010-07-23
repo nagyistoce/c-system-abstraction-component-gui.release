@@ -4966,8 +4966,6 @@ PUBLIC( int, Main)( int argc, TEXTCHAR **argv, int bConsole )
 					varval[0] = 0;
 					varval++;
 					SetVariable( varname, varval );
-
-
 				}
 				else
 				{
@@ -5210,6 +5208,7 @@ PRELOAD( RegisterInterShellInterface )
 	{
 		RegisterClassAlias( WIDE( "system/interfaces/InterShell" ), WIDE( "system/interfaces/MILK" ));
 		RegisterClassAlias( WIDE( "InterShell" ), WIDE( "MILK" ) );
+		//RegisterClassAlias( WIDE( "psi/Resources/InterShell" ), WIDE( "psi/Resources/MILK" ) );
 		RegisterClassAlias( WIDE( "sack/widgets" ), WIDE( "altanik/widgets" ) );
 	}
 }
