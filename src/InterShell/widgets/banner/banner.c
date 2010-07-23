@@ -197,7 +197,7 @@ static void CPROC CancelChoiceClicked( PTRSZVAL psv, PCONTROL pc )
 
 //--------------------------------------------------------------------------
 
-#define BANNER_NAME WIDE("Large font simple banner")
+#define BANNER_NAME WIDE("Large font simple banner 2")
 static int OnKeyCommon( BANNER_NAME )( PSI_CONTROL pc, _32 key )
 {
 	PBANNER *ppBanner = (PBANNER*)GetCommonUserData( pc );

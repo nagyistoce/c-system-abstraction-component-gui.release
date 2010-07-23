@@ -19,7 +19,7 @@ typedef struct key_button_tag *PKEY_BUTTON;
 
 #include "../include/buttons.h"
 
-#define BUTTON_NAME WIDE("fancy button")
+#define BUTTON_NAME WIDE("fancy button 2")
 
 typedef struct text_placement_tag
 {
