@@ -162,7 +162,7 @@ PUBLIC( PSI_CONTROL, GetKeypadOfType )( CTEXTSTR type )
    return NULL;
 }
 
-OnEditControl( WIDE( "Keypad" ) )( PTRSZVAL psv, PSI_CONTROL pc_parent )
+OnEditControl( WIDE( "Keypad 2" ) )( PTRSZVAL psv, PSI_CONTROL pc_parent )
 {
 	PPAGE_KEYPAD keypad = (PPAGE_KEYPAD)psv;
 	PSI_CONTROL frame = LoadXMLFrameOver( pc_parent, "ConfigureKeypad.isFrame" );
@@ -219,7 +219,7 @@ OnEditControl( WIDE( "Keypad" ) )( PTRSZVAL psv, PSI_CONTROL pc_parent )
    return psv;
 }
 
-OnCreateControl( WIDE("Keypad") )( PSI_CONTROL frame, S_32 x, S_32 y, _32 w, _32 h )
+OnCreateControl( WIDE("Keypad 2") )( PSI_CONTROL frame, S_32 x, S_32 y, _32 w, _32 h )
 {
 	PPAGE_KEYPAD page_keypad = NULL;
 	PKEYPAD keypad;
@@ -251,20 +251,20 @@ OnCreateControl( WIDE("Keypad") )( PSI_CONTROL frame, S_32 x, S_32 y, _32 w, _32
    return (PTRSZVAL)page_keypad;
 }
 
-OnChangePage( WIDE("keypad") )( void )
+OnChangePage( WIDE("keypad 2") )( void )
 {
    ClearKeyedEntry( l.keypad );
    return TRUE;
 }
 
-OnGetControl( WIDE("Keypad") )(PTRSZVAL psv )
+OnGetControl( WIDE("Keypad 2") )(PTRSZVAL psv )
 {
 	PPAGE_KEYPAD keypad = (PPAGE_KEYPAD)psv;
    return keypad->keypad;
 }
 
 
-OnSaveControl( WIDE("Keypad") )( FILE *file, PTRSZVAL psv )
+OnSaveControl( WIDE("Keypad 2") )( FILE *file, PTRSZVAL psv )
 {
    PPAGE_KEYPAD keypad = (PPAGE_KEYPAD)psv;
    fprintf( file, "Keypad type='%s'\n", keypad->keypad_type );
@@ -279,7 +279,7 @@ static PTRSZVAL CPROC SetKeypadType( PTRSZVAL psv, arg_list args )
    return psv;
 }
 
-OnLoadControl( WIDE("Keypad") )( PCONFIG_HANDLER pch, PTRSZVAL psv )
+OnLoadControl( WIDE("Keypad 2") )( PCONFIG_HANDLER pch, PTRSZVAL psv )
 {
    AddConfigurationMethod( pch, "Keypad type='%m'", SetKeypadType );
 }
@@ -287,7 +287,7 @@ OnLoadControl( WIDE("Keypad") )( PCONFIG_HANDLER pch, PTRSZVAL psv )
 // part of restore, might as well be done in fixup?
 // fixup is more for content change... editend is for
 // edit screen changes - which resize is a property of...
-OnQueryShowControl( WIDE("Keypad") )( PTRSZVAL psv )
+OnQueryShowControl( WIDE("Keypad 2") )( PTRSZVAL psv )
 {
 	{
       PPAGE_KEYPAD page_keypad;
@@ -320,7 +320,7 @@ typedef struct hotkey
    CTEXTSTR preset_name;
 } HOTKEY, *PHOTKEY;
 
-OnKeyPressEvent( WIDE("Keypad Hotkey") )( PTRSZVAL psv )
+OnKeyPressEvent( WIDE("Keypad Hotkey 2") )( PTRSZVAL psv )
 {
 	// becuae of the way this has to be created, this event has a funny
    // rule about its parameters...
@@ -332,7 +332,7 @@ OnKeyPressEvent( WIDE("Keypad Hotkey") )( PTRSZVAL psv )
 		KeyIntoKeypad( l.keypad, hotkey->value );
 }
 
-OnCreateMenuButton( WIDE("Keypad Hotkey") )( PMENU_BUTTON button )
+OnCreateMenuButton( WIDE("Keypad Hotkey 2") )( PMENU_BUTTON button )
 {
 	PHOTKEY hotkey = New( HOTKEY );
 	MemSet( hotkey, 0, sizeof( *hotkey ) );
@@ -357,7 +357,7 @@ static void CPROC PickHotkeyFont( PTRSZVAL psv, PSI_CONTROL pc )
 }
 
 
-OnEditControl( WIDE("Keypad Hotkey") )(PTRSZVAL psv, PSI_CONTROL parent_frame )
+OnEditControl( WIDE("Keypad Hotkey 2") )(PTRSZVAL psv, PSI_CONTROL parent_frame )
 {
 	PHOTKEY hotkey = (PHOTKEY)psv;
    int okay = 0, done = 0;
@@ -402,7 +402,7 @@ OnEditControl( WIDE("Keypad Hotkey") )(PTRSZVAL psv, PSI_CONTROL parent_frame )
    return psv;
 }
 
-OnSaveControl( WIDE("Keypad Hotkey") )( FILE *file, PTRSZVAL psv )
+OnSaveControl( WIDE("Keypad Hotkey 2") )( FILE *file, PTRSZVAL psv )
 {
 	PHOTKEY hotkey = (PHOTKEY)psv;
 	if( hotkey )
@@ -442,7 +442,7 @@ static PTRSZVAL CPROC SetHotkeyNegative( PTRSZVAL psv, arg_list args )
    return psv;
 }
 
-OnLoadControl( WIDE("Keypad Hotkey") )( PCONFIG_HANDLER pch, PTRSZVAL psv )
+OnLoadControl( WIDE("Keypad Hotkey 2") )( PCONFIG_HANDLER pch, PTRSZVAL psv )
 {
    AddConfigurationMethod( pch, WIDE("hotkey font=%m"), SetHotkeyFontByName );
    AddConfigurationMethod( pch, WIDE("hotkey value=%i"), SetHotkeyValue );
@@ -450,7 +450,7 @@ OnLoadControl( WIDE("Keypad Hotkey") )( PCONFIG_HANDLER pch, PTRSZVAL psv )
 }
 
 
-OnFixupControl( WIDE("Keypad Hotkey") )( PTRSZVAL psv )
+OnFixupControl( WIDE("Keypad Hotkey 2") )( PTRSZVAL psv )
 {
 	PHOTKEY hotkey = (PHOTKEY)psv;
 	char buffer[256];

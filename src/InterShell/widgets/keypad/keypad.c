@@ -196,13 +196,13 @@ int CPROC InitKeypadDisplay( PCOMMON pc );
 static int CPROC DrawKeypadDisplay( PCONTROL pc );
 
 
-CONTROL_REGISTRATION keypad_control = { "Keypad Control"
+CONTROL_REGISTRATION keypad_control = { "Keypad Control 2"
 												  , { { 240, 320 }, sizeof( KEYPAD ), BORDER_NONE }
 												  , InitKeypad
 												  , NULL
                                       , KeypadDraw
 };
-CONTROL_REGISTRATION keypad_display = { "Keypad Display"
+CONTROL_REGISTRATION keypad_display = { "Keypad Display 2"
 												  , { { 180, 20 }, sizeof( DISPLAY ), BORDER_INVERT|BORDER_THIN }
 												  , InitKeypadDisplay
 												  , NULL
@@ -1012,7 +1012,7 @@ PSI_CONTROL MakeKeypad( PCOMMON parent
 }
 
 
-static void OnHideCommon( WIDE("Keypad Control") )( PSI_CONTROL pc )
+static void OnHideCommon( WIDE("Keypad Control 2") )( PSI_CONTROL pc )
 {
 	ValidatedControlData( PKEYPAD, keypad_control.TypeID, keypad, pc );
 	if( keypad )
@@ -1023,7 +1023,7 @@ static void OnHideCommon( WIDE("Keypad Control") )( PSI_CONTROL pc )
 	}
 }
 
-static void OnRevealCommon( WIDE("Keypad Control") )( PSI_CONTROL pc )
+static void OnRevealCommon( WIDE("Keypad Control 2") )( PSI_CONTROL pc )
 {
 	ValidatedControlData( PKEYPAD, keypad_control.TypeID, keypad, pc );
 	if( keypad )
