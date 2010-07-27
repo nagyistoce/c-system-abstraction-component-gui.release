@@ -444,6 +444,23 @@ FT_BEGIN_HEADER
 
 #endif /* !FT_BASE_DEF */
 
+#if !defined(__STATIC__) && !defined(__UNIX__)
+# ifdef FREETYPE_SOURCE
+#  define FT_EXPORT(x) EXPORT_METHOD x
+#  define FT_EXPORT_DEF(x) EXPORT_METHOD x
+# else
+#  define FT_EXPORT(x) __declspec(dllimport) x
+#  define FT_EXPORT_DEF(x) __declspec(dllimport) x
+# endif
+#else
+# ifdef FREETYPE_SOURCE
+#  define  FT_EXPORT(x)       extern x 
+#  define  FT_EXPORT_DEF(x)   x 
+#else
+#  define  FT_EXPORT(x)       extern x 
+#  define  FT_EXPORT_DEF(x)   x 
+# endif
+#endif
 
 #ifndef FT_EXPORT
 
