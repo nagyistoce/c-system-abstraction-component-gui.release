@@ -1,0 +1,34 @@
+syntax: glob
+*~
+syntax: regexp
+_svn$
+err$
+/xx$
+\.i$
+\.vcproj.*\.user
+\.vcproj.*\.old
+MSDebug
+/Debug C\+\+/
+MSRelease
+debug-.*$
+release-.*$
+/[Dd]ebug$
+/[Rr]elease$
+static_debug-.*$
+static_release-.*$
+\.user$
+\.suo$
+\.ncb$
+[Ss]ql.[Cc]onfig$
+[Ss]ql.[Ll]og$
+memory.dump$
+/p$
+.aps$
+glob:include/sexpat/sexpat_external.h
+glob:include/png/pngconf.h
+glob:include/sqlite3.h
+glob:include/zlib/zconf.h
+glob:include/genxml/genx.h
+glob:include/png/png.h
+glob:include/zlib/zlib.h
+glob:include/sexpat/sexpat.h
