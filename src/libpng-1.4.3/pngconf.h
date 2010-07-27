@@ -22,6 +22,13 @@
 #ifndef PNGCONF_H
 #define PNGCONF_H
 
+/* Added for SACK Compilation */
+#include <stdhdrs.h>
+#ifdef SACK_BAG_EXPORTS
+#define PNG_INTERNAL
+#endif
+
+
 #ifndef PNG_NO_LIMITS_H
 #  include <limits.h>
 #endif
@@ -1262,12 +1269,21 @@ typedef char            FAR * FAR * FAR * png_charppp;
 #  define PNG_IMPEXP
 #endif
 
+#  define PNG_DLL
+#  ifdef PNG_INTERNAL
+#    define PNG_IMPEXP EXPORT_METHOD
+#  define PNG_EXPORT(type,symbol) PNG_IMPEXP type PNGAPI symbol
+#  else
+#    define PNG_IMPEXP IMPORT_METHOD
+#  define PNG_EXPORT(type,symbol) PNG_IMPEXP type PNGAPI symbol
+#  endif
+
 #if defined(PNG_DLL) || defined(_DLL) || defined(__DLL__ ) || \
     (( defined(_Windows) || defined(_WINDOWS) || \
        defined(WIN32) || defined(_WIN32) || defined(__WIN32__) ))
 
 #  ifndef PNGAPI
-#     if defined(__GNUC__) || (defined (_MSC_VER) && (_MSC_VER >= 800))
+#     if defined(__GNUC__) || (defined (_MSC_VER) && (_MSC_VER >= 800)) || defined( __WATCOMC__ )
 #        define PNGAPI __cdecl
 #     else
 #        define PNGAPI _cdecl
@@ -1443,6 +1459,15 @@ typedef char            FAR * FAR * FAR * png_charppp;
 #    define png_memcpy  CopyMemory
 #    define png_memset  memset
 #    define png_sprintf wsprintfA
+#      ifdef _MSC_VER
+#        define png_snprintf _snprintf   /* Added to v 1.2.19 */
+#        define png_snprintf2 _snprintf
+#        define png_snprintf6 _snprintf
+#      else
+#        define png_snprintf snprintf   /* Added to v 1.2.19 */
+#        define png_snprintf2 snprintf
+#        define png_snprintf6 snprintf
+#      endif
 #  else
 #    define CVT_PTR(ptr)         (ptr)
 #    define CVT_PTR_NOCHECK(ptr) (ptr)
