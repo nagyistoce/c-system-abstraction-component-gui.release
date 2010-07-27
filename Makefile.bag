@@ -292,7 +292,7 @@ endif
 ifdef NEED_FREETYPE
 ifndef __NO_GUI__
 
-FBASEDIR=src/freetype-2.3.12/src
+FBASEDIR=src/freetype-2.4.1/src
 
 CXFLAGS+=-DFREETYPE_SOURCE
 
