@@ -6,7 +6,7 @@
 #   if defined( SYSTEM_SQLITE )
 #     include "sqlite3.h"
 #   else
-#     include "../sqlite/sqlite3.h"
+#     include "../sqlite/3.7.0/sqlite3.h"
 #   endif
 #  ifndef USE_ODBC
 // if not using odbc, need these 
@@ -125,12 +125,16 @@ struct odbc_handle_tag{
 		BIT_FIELD bFailEnvOnDbcFail : 1;
       // generate begintransaction and commit automatically.
 		BIT_FIELD bAutoTransact : 1;
+		BIT_FIELD bThreadProtect : 1;
 	} flags;
 	_32 last_command_tick;
    _32 commit_timer;
 	PCOLLECT collection;
 	int native; // saved for resulting with native error code...
-   PTRSZVAL psvUser; // allow user to associate some data with this.
+	PTRSZVAL psvUser; // allow user to associate some data with this.
+	CRITICALSECTION cs;
+   PTHREAD pThreadProtect;
+	int nProtected; // critical section is currently owned
 };
 
 #ifdef SQLLIB_SOURCE
