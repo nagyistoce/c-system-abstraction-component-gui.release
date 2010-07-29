@@ -46,7 +46,7 @@ endif( NEED_PNG )
 
 
 if( NEED_FREETYPE )
-SET( FBASEDIR src/freetype-2.3.12/src )
+SET( FBASEDIR src/freetype-2.4.1/src )
 
 add_definitions( -DFREETYPE_SOURCE -DFT2_BUILD_LIBRARY )
 
