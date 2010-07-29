@@ -1271,6 +1271,9 @@ typedef void (CPROC *result_responder)( int responce
 
 SQLSTUB_PROC( void, RegisterResponceHandler )( result_responder );
 
+SQLSTUB_PROC( void, SetSQLThreadProtect )( PODBC odbc, LOGICAL bEnable );
+
+
 SQL_NAMESPACE_END
 #ifdef __cplusplus
 	using namespace sack::sql;
