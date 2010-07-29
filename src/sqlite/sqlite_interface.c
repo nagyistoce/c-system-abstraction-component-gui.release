@@ -4,7 +4,7 @@
 #define USE_SQLITE_INTERFACE
 #define BUILDS_INTERFACE
 #include "../SQLlib/sqlstruc.h"
-#include "sqlite3.h"
+#include "3.7.0/sqlite3.h"
 
 struct sqlite_interface my_sqlite_interface = {
 	sqlite3_result_text
