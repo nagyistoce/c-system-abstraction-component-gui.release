@@ -565,6 +565,14 @@ void SetSQLLoggingDisable( PODBC odbc, LOGICAL bDisable )
 	}
 }
 
+void SetSQLThreadProtect( PODBC odbc, LOGICAL bEnable )
+{
+	if( odbc )
+	{
+      odbc->flags.bThreadProtect = bEnable;
+	}
+}
+
 LOGICAL EnsureLogOpen( PODBC odbc )
 {
 	if( odbc && odbc->flags.bNoLogging )
@@ -1450,7 +1458,7 @@ void DestroyCollectorEx( PCOLLECT pCollect DBG_PASS )
 #endif
 // cannot destroy this local thing.
 	if( !pCollect )
-      return;
+		return;
 #if defined( USE_SQLITE ) || defined( USE_SQLITE_INTERFACE )
 	if( pCollect->odbc->flags.bSQLite_native && pCollect->stmt )
 	{
@@ -1465,6 +1473,7 @@ void DestroyCollectorEx( PCOLLECT pCollect DBG_PASS )
 		pCollect->hstmt = 0;
 	}
 #endif
+
 	if( !pCollect->flags.bDynamic ) // must keep at least one.
 	{
 		return;
@@ -1495,6 +1504,11 @@ void DestroyCollectorEx( PCOLLECT pCollect DBG_PASS )
 		}
 	}
 #endif
+	if( odbc->flags.bThreadProtect )
+	{
+		odbc->nProtect--;
+		LeaveCriticalSec( &odbc->cs );
+	}
 }
 
 //----------------------------------------------------------------------
@@ -1808,13 +1822,32 @@ int __DoSQLCommandEx( PODBC odbc, PCOLLECT collection DBG_PASS )
 	}
 	VarTextEmpty( collection->pvt_result );
 	VarTextEmpty( collection->pvt_errorinfo );
+	{
+      int leave_section = 0;
 #if defined( USE_SQLITE ) || defined( USE_SQLITE_INTERFACE )
 	if( odbc->flags.bSQLite_native )
 	{
 		if( collection->stmt )
 		{
+			if( odbc->flags.bThreadProtect )
+			{
+				if( odbc->nProtect )
+					if( IsThisThread( odbc->pThreadProtect ) )
+					{
+						odbc->pThreadProtect = MakeThread();
+						odbc->nProtect--;
+						LeaveCriticalSec( &odbc->cs );
+					}
+					else
+					{
+						// this belongs to someone else, and we should not release it.
+						// and we can't use this collection either...
+                  DebugBreak();
+					}
+			}
 			sqlite3_finalize( collection->stmt );
 			collection->stmt = NULL;
+         leave_section = 1;
 		}
 	}
 #endif
@@ -1823,8 +1856,25 @@ int __DoSQLCommandEx( PODBC odbc, PCOLLECT collection DBG_PASS )
 	{
 		if( collection->hstmt )
 		{
+			if( odbc->flags.bThreadProtect )
+			{
+				if( odbc->nProtect )
+					if( IsThisThread( odbc->pThreadProtect ) )
+					{
+						odbc->pThreadProtect = MakeThread();
+						odbc->nProtect--;
+						LeaveCriticalSec( &odbc->cs );
+					}
+					else
+					{
+						// this belongs to someone else, and we should not release it.
+						// and we can't use this collection either...
+                  DebugBreak();
+					}
+			}
 			SQLFreeHandle( SQL_HANDLE_STMT, collection->hstmt );
 			collection->hstmt = 0;
+         leave_section = 1;
 		}
 		rc = SQLAllocHandle( SQL_HANDLE_STMT
 								 , odbc->hdbc
@@ -1837,6 +1887,9 @@ int __DoSQLCommandEx( PODBC odbc, PCOLLECT collection DBG_PASS )
 		}
 	}
 #endif
+
+	}
+
         if( !(g.flags.bNoLog) )
         {
             if( odbc->flags.bNoLogging )
@@ -1848,6 +1901,14 @@ int __DoSQLCommandEx( PODBC odbc, PCOLLECT collection DBG_PASS )
 #ifdef LOG_EVERYTHING
 	lprintf( "sql command on %p [%s]", collection->hstmt, GetText( cmd ) );
 #endif
+
+	if( odbc->flags.bThreadProtect )
+	{
+		EnterCriticalSec( &odbc->cs );
+      odbc->pThreadProtect = MakeThread();
+      odbc->nProtect++;
+	}
+
 #if defined( USE_SQLITE ) || defined( USE_SQLITE_INTERFACE )
    if( odbc->flags.bSQLite_native )
 	{
@@ -1959,6 +2020,8 @@ int __DoSQLCommandEx( PODBC odbc, PCOLLECT collection DBG_PASS )
 			}
 	}
 #endif
+	if( odbc->flags.bThreadProtect )
+		LeaveCriticalSec( &odbc->cs );
 	//  actually we keep collections around while there's a client...
 	//lprintf( WIDE("Command destroy collection...") );
 	//DestroyCollector( collection );
@@ -2325,6 +2388,11 @@ int __GetSQLResult( PODBC odbc, PCOLLECT collection, int bMore )
 			collection->flags.bTemporary = 1;
 			collection->flags.bEndOfFile = 1;
 			GenerateResponce( collection, result_cmd );
+
+         // end thread protection here - was started in the __DoSQLQuery
+			if( odbc->flags.bThreadProtect )
+				LeaveCriticalSec( &odbc->cs );
+
 			//DestroyCollection( collection );
 			return 0;
 		}
@@ -2703,6 +2771,12 @@ int __DoSQLQueryEx( PODBC odbc, PCOLLECT collection, CTEXTSTR query DBG_PASS )
 	{
       return FALSE;
 	}
+	if( odbc->flags.bThreadProtect )
+	{
+		EnterCriticalSec( &odbc->cs );
+		odbc->pThreadProtect = MakeThread();
+		odbc->nProtect++;
+	}
 	//lprintf( WIDE("Query: %s"), GetText( cmd ) );
 	ReleaseCollectionResults( collection, TRUE );
 #if defined( USE_SQLITE ) || defined( USE_SQLITE_INTERFACE )
@@ -2712,6 +2786,11 @@ int __DoSQLQueryEx( PODBC odbc, PCOLLECT collection, CTEXTSTR query DBG_PASS )
 		{
 			sqlite3_finalize( collection->stmt );
 			collection->stmt = NULL;
+			if( odbc->flags.bThreadProtect )
+			{
+				odbc->nProtect--;
+				LeaveCriticalSec( &odbc->cs );
+			}
 		}
 	}
 #endif
