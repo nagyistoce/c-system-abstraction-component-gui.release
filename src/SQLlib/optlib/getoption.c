@@ -209,11 +209,11 @@ SQLGETOPTION_PROC( void, CreateOptionDatabase )( void )
 #endif
 			if( !og.Option )
 			{
-            //lprintf( "connect to %s", out );
+				//lprintf( "connect to %s", out );
 				og.Option = ConnectToDatabase( out );
+				SetSQLThreadProtect( og.Option, TRUE );
 				og.Option->flags.bAutoTransact = 1;
 				og.Option->last_command_tick = 0; // just to make sure
-
 			}
 		}
       //else

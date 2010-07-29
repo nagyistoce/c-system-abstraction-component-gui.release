@@ -252,7 +252,7 @@ int rc = sqlite3_create_function(
 	{
 #if SQLITE_VERSION_NUMBER >= 3006011
 		static sqlite3_mem_methods mem_routines;
-		if( mem_routines.pAppData = NULL )
+		if( mem_routines.pAppData == NULL )
 		{
 			sqlite3_config( SQLITE_CONFIG_GETMALLOC, &mem_routines );
 			mem_routines.xMalloc = SimpleAllocate;
@@ -562,6 +562,14 @@ void SetSQLLoggingDisable( PODBC odbc, LOGICAL bDisable )
 	if( odbc )
 	{
 		odbc->flags.bNoLogging = bDisable;
+	}
+}
+
+void SetSQLThreadProtect( PODBC odbc, LOGICAL bEnable )
+{
+	if( odbc )
+	{
+      odbc->flags.bThreadProtect = bEnable;
 	}
 }
 
@@ -946,6 +954,7 @@ void CPROC CommitTimer( PTRSZVAL psv )
 			RemoveTimer( odbc->commit_timer );
 			odbc->flags.bAutoTransact = 0;
 			SQLCommand( odbc, "COMMIT" );
+         lprintf( "Commit complete." );
 			odbc->flags.bAutoTransact = 1;
 			odbc->last_command_tick = 0;
 		}
@@ -955,9 +964,12 @@ void CPROC CommitTimer( PTRSZVAL psv )
 
 void SQLCommit( PODBC odbc )
 {
+	int n = odbc->flags.bAutoTransact;
 	odbc->last_command_tick = 0;
-   RemoveTimer( odbc->commit_timer );
+	odbc->flags.bAutoTransact = 0;
+	RemoveTimer( odbc->commit_timer );
 	SQLCommand( odbc, "COMMIT" );
+	odbc->flags.bAutoTransact = n;
 }
 
 //----------------------------------------------------------------------
@@ -984,7 +996,7 @@ void BeginTransact( PODBC odbc )
 			}
 			else
 			{
-            SQLCommand( odbc, "START TRANSACTION" );
+				SQLCommand( odbc, "START TRANSACTION" );
 			}
 			odbc->flags.bAutoTransact = 1;
 			odbc->last_command_tick = GetTickCount();
@@ -1440,9 +1452,9 @@ void ReleaseCollectionResults( PCOLLECT pCollect, int bEntire )
 void DestroyCollectorEx( PCOLLECT pCollect DBG_PASS )
 #define DestroyCollector(c) DestroyCollectorEx(c DBG_SRC )
 {
+	PODBC odbc = pCollect?pCollect->odbc:NULL;
 #ifdef LOG_COLLECTOR_STATES
    // added to supprot 'collectors'
-	PODBC odbc = pCollect?pCollect->odbc:NULL;
 	_lprintf(DBG_RELAY)( "Destroying a state, restoring prior if any... %s"
 							 ,odbc?odbc->collection?odbc->collection->flags.bPushed?"pushed":"":"":"No ODBC"
 			 );
@@ -1450,7 +1462,7 @@ void DestroyCollectorEx( PCOLLECT pCollect DBG_PASS )
 #endif
 // cannot destroy this local thing.
 	if( !pCollect )
-      return;
+		return;
 #if defined( USE_SQLITE ) || defined( USE_SQLITE_INTERFACE )
 	if( pCollect->odbc->flags.bSQLite_native && pCollect->stmt )
 	{
@@ -1465,6 +1477,7 @@ void DestroyCollectorEx( PCOLLECT pCollect DBG_PASS )
 		pCollect->hstmt = 0;
 	}
 #endif
+
 	if( !pCollect->flags.bDynamic ) // must keep at least one.
 	{
 		return;
@@ -1495,6 +1508,11 @@ void DestroyCollectorEx( PCOLLECT pCollect DBG_PASS )
 		}
 	}
 #endif
+	if( odbc && odbc->flags.bThreadProtect )
+	{
+		odbc->nProtect--;
+		LeaveCriticalSec( &odbc->cs );
+	}
 }
 
 //----------------------------------------------------------------------
@@ -1794,10 +1812,22 @@ int __DoSQLCommandEx( PODBC odbc, PCOLLECT collection DBG_PASS )
 		//collection->hLastWnd = hWnd;
 		return FALSE;
 	}
+
+	if( odbc->flags.bThreadProtect )
+	{
+		EnterCriticalSec( &odbc->cs );
+      odbc->nProtect++;
+	}
+
 	if( !OpenSQLConnection( odbc ) )
 	{
 		lprintf( WIDE("Fail connect odbc... should already be open?!") );
 		GenerateResponce( collection, WM_SQL_RESULT_ERROR );
+		if( odbc->flags.bThreadProtect )
+		{
+			odbc->nProtect--;
+			LeaveCriticalSec( &odbc->cs );
+		}
 		return FALSE;
 	}
 	cmd = VarTextPeek( collection->pvt_out );
@@ -1808,46 +1838,53 @@ int __DoSQLCommandEx( PODBC odbc, PCOLLECT collection DBG_PASS )
 	}
 	VarTextEmpty( collection->pvt_result );
 	VarTextEmpty( collection->pvt_errorinfo );
-#if defined( USE_SQLITE ) || defined( USE_SQLITE_INTERFACE )
-	if( odbc->flags.bSQLite_native )
+
 	{
-		if( collection->stmt )
+		int leave_section = 0;
+#if defined( USE_SQLITE ) || defined( USE_SQLITE_INTERFACE )
+		if( odbc->flags.bSQLite_native )
 		{
-			sqlite3_finalize( collection->stmt );
-			collection->stmt = NULL;
+			if( collection->stmt )
+			{
+				sqlite3_finalize( collection->stmt );
+				collection->stmt = NULL;
+				leave_section = 1;
+			}
 		}
-	}
 #endif
 #ifdef USE_ODBC
-	if( odbc->flags.bODBC )
-	{
-		if( collection->hstmt )
+		if( odbc->flags.bODBC )
 		{
-			SQLFreeHandle( SQL_HANDLE_STMT, collection->hstmt );
-			collection->hstmt = 0;
+			if( collection->hstmt )
+			{
+				SQLFreeHandle( SQL_HANDLE_STMT, collection->hstmt );
+				collection->hstmt = 0;
+				leave_section = 1;
+			}
 		}
-		rc = SQLAllocHandle( SQL_HANDLE_STMT
-								 , odbc->hdbc
-								 , &collection->hstmt );
-		if( rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO )
+#endif
+
+		if( leave_section && odbc->flags.bThreadProtect )
 		{
-			lprintf( WIDE("Failed to open ODBC statement handle....") );
-			GenerateResponce( collection, WM_SQL_RESULT_ERROR );
-			return FALSE;
+         // had to close a prior connection...
+			odbc->nProtect--;
+			LeaveCriticalSec( &odbc->cs );
 		}
 	}
-#endif
-        if( !(g.flags.bNoLog) )
-        {
-            if( odbc->flags.bNoLogging )
-                //odbc->hidden_messages++
-                ;
-            else
-                _lprintf(DBG_RElAY)( "Do Command: %s", GetText( cmd ) );
-        }
+
+	if( !(g.flags.bNoLog) )
+	{
+		if( odbc->flags.bNoLogging )
+			//odbc->hidden_messages++
+			;
+		else
+			_lprintf(DBG_RElAY)( "Do Command: %s", GetText( cmd ) );
+	}
+
 #ifdef LOG_EVERYTHING
 	lprintf( "sql command on %p [%s]", collection->hstmt, GetText( cmd ) );
 #endif
+
 #if defined( USE_SQLITE ) || defined( USE_SQLITE_INTERFACE )
    if( odbc->flags.bSQLite_native )
 	{
@@ -1923,6 +1960,23 @@ int __DoSQLCommandEx( PODBC odbc, PCOLLECT collection DBG_PASS )
 #ifdef USE_ODBC
 	if( odbc->flags.bODBC )
 	{
+		if( !collection->hstmt )
+		{
+			rc = SQLAllocHandle( SQL_HANDLE_STMT
+									 , odbc->hdbc
+									 , &collection->hstmt );
+			if( rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO )
+			{
+				lprintf( WIDE("Failed to open ODBC statement handle....") );
+				GenerateResponce( collection, WM_SQL_RESULT_ERROR );
+				if( odbc->flags.bThreadProtect )
+				{
+					odbc->nProtect--;
+					LeaveCriticalSec( &odbc->cs );
+				}
+				return FALSE;
+			}
+		}
 		rc = SQLExecDirect( collection->hstmt,
 #ifdef _UNICODE 
 #error sorry, need to convert from unicode native to unsigned char * type thing...
@@ -1959,6 +2013,12 @@ int __DoSQLCommandEx( PODBC odbc, PCOLLECT collection DBG_PASS )
 			}
 	}
 #endif
+
+	if( odbc->flags.bThreadProtect )
+	{
+		odbc->nProtect--;
+		LeaveCriticalSec( &odbc->cs );
+	}
 	//  actually we keep collections around while there's a client...
 	//lprintf( WIDE("Command destroy collection...") );
 	//DestroyCollector( collection );
@@ -2011,11 +2071,13 @@ void __GetSQLTypes( PODBC odbc, PCOLLECT collection )
 	if( odbc->flags.bSQLite_native )
 	{
 		lprintf( "Someone's getting types - haven't figured this one out yet..." );
+      /*
 		if( collection->stmt )
 		{
 			sqlite3_finalize( collection->stmt );
 			collection->stmt = NULL;
 		}
+      */
 		GenerateResponce( collection, WM_SQL_RESULT_NO_DATA );
       return;
 	}
@@ -2325,6 +2387,11 @@ int __GetSQLResult( PODBC odbc, PCOLLECT collection, int bMore )
 			collection->flags.bTemporary = 1;
 			collection->flags.bEndOfFile = 1;
 			GenerateResponce( collection, result_cmd );
+
+         // end thread protection here - was started in the __DoSQLQuery
+			if( odbc->flags.bThreadProtect )
+				LeaveCriticalSec( &odbc->cs );
+
 			//DestroyCollection( collection );
 			return 0;
 		}
@@ -2703,6 +2770,13 @@ int __DoSQLQueryEx( PODBC odbc, PCOLLECT collection, CTEXTSTR query DBG_PASS )
 	{
       return FALSE;
 	}
+
+	if( odbc->flags.bThreadProtect )
+	{
+		EnterCriticalSec( &odbc->cs );
+		odbc->nProtect++;
+	}
+
 	//lprintf( WIDE("Query: %s"), GetText( cmd ) );
 	ReleaseCollectionResults( collection, TRUE );
 #if defined( USE_SQLITE ) || defined( USE_SQLITE_INTERFACE )
@@ -2712,6 +2786,11 @@ int __DoSQLQueryEx( PODBC odbc, PCOLLECT collection, CTEXTSTR query DBG_PASS )
 		{
 			sqlite3_finalize( collection->stmt );
 			collection->stmt = NULL;
+			if( odbc->flags.bThreadProtect )
+			{
+				odbc->nProtect--;
+				LeaveCriticalSec( &odbc->cs );
+			}
 		}
 	}
 #endif
@@ -2720,43 +2799,29 @@ int __DoSQLQueryEx( PODBC odbc, PCOLLECT collection, CTEXTSTR query DBG_PASS )
 #endif
 #ifdef USE_ODBC
 	{
-				if( collection->hstmt )
-				{
-#ifdef LOG_EVERYTHING
-					lprintf( "Releasing old handle... %p", collection->hstmt );
-#endif
-					SQLFreeHandle( SQL_HANDLE_STMT, collection->hstmt );
-					collection->hstmt = 0;
-				}
-//		if( collection->hstmt )
-//		{
-  //       lprintf( "Releasing old handle... %p", collection->hstmt );
-	 //  	SQLFreeHandle( SQL_HANDLE_STMT, collection->hstmt );
-	 //  	collection->hstmt = 0;
-	 //  }
-#ifdef LOG_EVERYTHING
-				lprintf( "getting a new handle....against %p on %p", odbc->hdbc, odbc );
-#endif
-		rc = SQLAllocHandle( SQL_HANDLE_STMT
-								 , odbc->hdbc
-								 , &collection->hstmt );
-		if( rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO )
+		if( collection->hstmt )
 		{
-			xlprintf(LOG_ALWAYS)( WIDE("Failed to open ODBC statement handle....") );
-			//DestroyCollector( collection );
-			return FALSE;
-		}
 #ifdef LOG_EVERYTHING
-		lprintf( "new handle... %p", collection->hstmt );
+			lprintf( "Releasing old handle... %p", collection->hstmt );
 #endif
+			SQLFreeHandle( SQL_HANDLE_STMT, collection->hstmt );
+			collection->hstmt = 0;
+			if( odbc->flags.bThreadProtect )
+			{
+				odbc->nProtect--;
+				LeaveCriticalSec( &odbc->cs );
+			}
+		}
 	}
 #endif
+
 	// try and get query from collector if NULL
 	if( query ) 
 	{
 		VarTextEmpty( collection->pvt_out );
 		vtprintf( collection->pvt_out, "%s", query );
 	}
+
 	{
 		tmp = VarTextPeek( collection->pvt_out );
 		query = GetText( tmp );
@@ -2816,6 +2881,25 @@ int __DoSQLQueryEx( PODBC odbc, PCOLLECT collection, CTEXTSTR query DBG_PASS )
 #endif
 #ifdef USE_ODBC
 	{
+#ifdef LOG_EVERYTHING
+		lprintf( "getting a new handle....against %p on %p", odbc->hdbc, odbc );
+#endif
+		rc = SQLAllocHandle( SQL_HANDLE_STMT
+								 , odbc->hdbc
+								 , &collection->hstmt );
+		if( rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO )
+		{
+			xlprintf(LOG_ALWAYS)( WIDE("Failed to open ODBC statement handle....") );
+			if( odbc->flags.bThreadProtect )
+			{
+				odbc->nProtect--;
+				LeaveCriticalSec( &odbc->cs );
+			}
+			return FALSE;
+		}
+#ifdef LOG_EVERYTHING
+		lprintf( "new handle... %p", collection->hstmt );
+#endif
 		if( /*odbc->flags.bSQLite && */strcmp( query, WIDE("show tables") ) == 0 )
 		{
 			rc = SQLTables( collection->hstmt, NULL, 0, NULL, 0, NULL, 0, NULL, 0 );
