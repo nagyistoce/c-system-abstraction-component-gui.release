@@ -129,8 +129,7 @@ struct odbc_handle_tag{
 	int native; // saved for resulting with native error code...
 	PTRSZVAL psvUser; // allow user to associate some data with this.
 	CRITICALSECTION cs;
-   PTHREAD pThreadProtect;
-	int nProtected; // critical section is currently owned
+	int nProtect; // critical section is currently owned
 };
 
 #ifdef SQLLIB_SOURCE
