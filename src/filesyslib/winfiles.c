@@ -127,17 +127,30 @@ int  SetGroupFilePath ( CTEXTSTR group, CTEXTSTR path )
 
 void SetDefaultFilePath( CTEXTSTR path )
 {
+   TEXTSTR tmp_path = NULL;
 	struct Group *filegroup;
 	filegroup = (struct Group *)GetLink( &l.groups, 0 );
+#ifndef UNDER_CE
+	if( path[0] == '.' && ( path[1] == '/' ) || ( path[1] == '\\' ) )
+	{
+		TEXTCHAR here[256];
+		int len;
+		GetCurrentPath( here, sizeof( here ) );
+		tmp_path = NewArray( TEXTCHAR, len = ( StrLen( here ) + StrLen( path ) ) );
+      snprintf( tmp_path, len, "%s/%s", here, path + 2 );
+	}
+#endif
 	if( l.groups && filegroup )
 	{
 		Release( (POINTER)filegroup->base_path );
-		filegroup->base_path = StrDup( path );
+		filegroup->base_path = StrDup( tmp_path?tmp_path:path );
 	}
 	else
 	{
-		SetGroupFilePath( WIDE( "Default" ), path );
+		SetGroupFilePath( WIDE( "Default" ), tmp_path?tmp_path:path );
 	}
+	if( tmp_path )
+      Release( tmp_path );
 }
 
 static TEXTSTR PrependBasePath( int groupid, struct Group *group, CTEXTSTR filename )
