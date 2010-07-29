@@ -1960,7 +1960,7 @@ int __DoSQLCommandEx( PODBC odbc, PCOLLECT collection DBG_PASS )
 #ifdef USE_ODBC
 	if( odbc->flags.bODBC )
 	{
-		if( !odbc->hstmt )
+		if( !collection->hstmt )
 		{
 			rc = SQLAllocHandle( SQL_HANDLE_STMT
 									 , odbc->hdbc
