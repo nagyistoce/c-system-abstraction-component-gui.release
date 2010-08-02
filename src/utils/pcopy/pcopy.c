@@ -1,3 +1,4 @@
+//#define DEBUG_DISCOVERY
 //#define BYTE unsigned char
 //#define WORD unsigned short
 //#define LONG signed long
@@ -307,7 +308,6 @@ int ScanFile( PFILESOURCE pfs )
                   char *data;
 						MY_IMAGE_IMPORT_DESCRIPTOR *iid;
                   int m;
-//cpg27dec 2006 						MY_IMAGE_IMPORT_LOOKUP_TABLE iilt;
 //cpg27dec 2006 c:\work\sack\src\utils\pcopy\pcopy.c(295): Warning! W202: Symbol 'iilt' has been defined, but not referenced
 //cpg27dec 2006 c:\work\sack\src\utils\pcopy\pcopy.c(226): Warning! W202: Symbol 'n' has been defined, but not referenced
 //cpg27dec 2006 						int n;
@@ -326,38 +326,43 @@ int ScanFile( PFILESOURCE pfs )
 										 iid->FirstThunk || iid->ForwarderChain )
 							 ; m++ )
 						{
-                     AddDependCopy( pfs, data+( iid->Name - section.VirtualAddress ) );
-							//printf( WIDE("%s %08x %08x %08x\n")
-							//		, data +( iid->Name - section.VirtualAddress )
-							//		 , ( iid->Name - section.VirtualAddress )
-							//		, iid->Characteristics
-							//		, iid->FirstThunk );
+							AddDependCopy( pfs, data+( iid->Name - section.VirtualAddress ) );
+#ifdef DEBUG_DISCOVERY
+							printf( WIDE("%s %08x %08x %08x\n")
+									, data +( iid->Name - section.VirtualAddress )
+									 , ( iid->Name - section.VirtualAddress )
+									, iid->Characteristics
+									, iid->FirstThunk );
+#endif
 						}
 
 #if 0
-						do
 						{
-                     printf( WIDE("Reading %d\n"), sizeof( iilt ) );
-							fread( &iilt, sizeof( iilt ), 1, file );
-							if( !iilt.NameIsString )
+							MY_IMAGE_IMPORT_LOOKUP_TABLE iilt;
+							do
 							{
-                        printf( WIDE("Name at %08x\n"), iilt.Name - section.VirtualAddress + section.PointerToRawData );
-							}
-							else
-                        printf( WIDE("Oridinal %d\n"), iilt.Id );
-						} while( iilt.Name );
+								printf( WIDE("Reading %d\n"), sizeof( iilt ) );
+								fread( &iilt, sizeof( iilt ), 1, file );
+								if( !iilt.NameIsString )
+								{
+									printf( WIDE("Name at %08x\n"), iilt.Name - section.VirtualAddress + section.PointerToRawData );
+								}
+								else
+									printf( WIDE("Oridinal %d\n"), iilt.Id );
+							} while( iilt.Name );
 
-						do
-						{
-                     printf( WIDE("Reading %d\n"), sizeof( iilt ) );
-							fread( &iilt, sizeof( iilt ), 1, file );
-							if( !iilt.NameIsString )
+							do
 							{
-                        printf( WIDE("Name at %08x\n"), iilt.Name - section.VirtualAddress + section.PointerToRawData );
-							}
-							else
-                        printf( WIDE("Oridinal %d\n"), iilt.Id );
-						} while( iilt.Name );
+								printf( WIDE("Reading %d\n"), sizeof( iilt ) );
+								fread( &iilt, sizeof( iilt ), 1, file );
+								if( !iilt.NameIsString )
+								{
+									printf( WIDE("Name at %08x\n"), iilt.Name - section.VirtualAddress + section.PointerToRawData );
+								}
+								else
+									printf( WIDE("Oridinal %d\n"), iilt.Id );
+							} while( iilt.Name );
+						}
 #endif
 						//free( data );
 
