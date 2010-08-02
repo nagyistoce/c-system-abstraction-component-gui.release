@@ -245,7 +245,7 @@ endif
 
 ifeq '$(NEED_JPEG)' '1'
 ifndef __NO_GUI__
-JBASEDIR=src/jpeg-8a
+JBASEDIR=src/jpeg-8b
 SYSDEPMEM=jmemnobs
 
 # library object files common to compression and decompression
@@ -266,7 +266,7 @@ DLIBSRCS= jaricom jdarith jdapimin jdapistd jdtrans jdatasrc \
 # These objectfiles are included in libjpeg.lib
 SRCS+=$(foreach src,$(CLIBSRCS) $(COMSRCS) $(DLIBSRCS),$(JBASEDIR)/$(src))
 CXFLAGS+= -DJPEG_SOURCE
-INCLUDEDIRS+=$(SACK_BASE)/src/jpeg-8a
+INCLUDEDIRS+=$(SACK_BASE)/src/jpeg-8b
 endif
 endif
 ########### PNG SRCS ##############

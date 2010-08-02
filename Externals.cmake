@@ -2,7 +2,7 @@
 if( NOT __NO_GUI__ )
 
 if( NEED_JPEG )
-SET( JBASEDIR src/jpeg-8a )
+SET( JBASEDIR src/jpeg-8b )
 SET( SYSDEPMEM jmemnobs )
 
 # library object files common to compression and decompression
@@ -35,7 +35,7 @@ endif()
 if( NEED_PNG )
 
  if( NEED_ZLIB )
-  SET( ZBASEDIR src/zlib-1.2.4 )
+  SET( ZBASEDIR src/zlib-1.2.5 )
   include( ${ZBASEDIR}/CMakeLists.part )
  endif( NEED_ZLIB )
 
