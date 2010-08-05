@@ -178,6 +178,9 @@ typedef struct threads_tag *PTHREAD;
 /* Function signature for a thread entry point passed to
    ThreadTo.                                             */
 typedef PTRSZVAL (CPROC*ThreadStartProc)( PTHREAD );
+/* Function signature for a thread entry point passed to
+   ThreadToSimple.                                             */
+typedef PTRSZVAL (*ThreadSimpleStartProc)( POINTER );
 
 
 /* Create a separate thread that starts in the routine
@@ -197,6 +200,25 @@ TIMER_PROC( PTHREAD, ThreadToEx )( ThreadStartProc proc, PTRSZVAL param DBG_PASS
    
    \ \                                                           */
 #define ThreadTo(proc,param) ThreadToEx( proc,param DBG_SRC )
+
+/* Create a separate thread that starts in the routine
+   specified. The PTRSZVAL value (something that might be a
+   pointer), is passed in the PTHREAD structure. (See
+   GetThreadParam)
+   Parameters
+   proc :       starting routine for the thread
+   user_data :  some value that can be stored in the number of
+                bits that a pointer is. This is passed to the
+                proc when the thread starts.
+   
+   Example
+   See WakeableSleepEx.                                        */
+TIMER_PROC( PTHREAD, ThreadToSimpleEx )( ThreadSimpleStartProc proc, POINTER param DBG_PASS );
+
+/* <combine sack::timers::ThreadToEx@THREAD_PROC@PTRSZVAL param>
+   
+   \ \                                                           */
+#define ThreadToSimple(proc,param) ThreadToSimpleEx( proc,param DBG_SRC )
 /* \Returns a PTHREAD that represents the current thread. This
    can be used to create a PTHREAD identifier for the main
    thread.
