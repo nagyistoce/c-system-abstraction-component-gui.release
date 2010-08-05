@@ -105,6 +105,7 @@ struct threads_tag
 	// to the thread created.
 	PTRSZVAL param;
 	PTRSZVAL (CPROC*proc)( struct threads_tag * );
+	PTRSZVAL (CPROC*simple_proc)( POINTER );
 	THREAD_ID thread_ident;
 #ifdef _WIN32
 	HANDLE hEvent;
@@ -908,6 +909,40 @@ static PTRSZVAL CPROC ThreadWrapper( PTHREAD pThread )
 }
 
 //--------------------------------------------------------------------------
+#ifdef __WATCOMC__
+static void *SimpleThreadWrapper( PTHREAD pThread )
+#else
+static PTRSZVAL CPROC SimpleThreadWrapper( PTHREAD pThread )
+#endif
+{
+	PTRSZVAL result = 0;
+#ifdef _WIN32
+	while( !pThread->hThread )
+	{
+		Log( WIDE("wait for main thread to process...") );
+		Relinquish();
+	}
+#endif
+	while( !pThread->flags.bReady )
+      Relinquish();
+	pThread->thread_ident = GetMyThreadID();
+	InitWakeup( pThread );
+#ifdef LOG_THREAD
+	Log1( WIDE("Set thread ident: %016Lx"), pThread->thread_ident );
+#endif
+	if( pThread->proc )
+		 result = pThread->simple_proc( (POINTER)GetThreadParam( pThread ) );
+	//lprintf( WIDE("%s(%d):Thread is exiting... "), pThread->pFile, pThread->nLine );
+	UnmakeThread();
+	//lprintf( WIDE("%s(%d):Thread is exiting... "), pThread->pFile, pThread->nLine );
+#ifdef __WATCOMC__
+	return (void*)result;
+#else
+	return result;
+#endif
+}
+
+//--------------------------------------------------------------------------
 
 TIMER_PROC( PTHREAD, MakeThread )( void )
 {
@@ -997,6 +1032,75 @@ TIMER_PROC( PTHREAD, ThreadToEx )( PTRSZVAL (CPROC*proc)(PTHREAD), PTRSZVAL para
     success = (int)(pThread->hThread!=NULL);
 #else
 	 success = !pthread_create( &pThread->thread, NULL, (void*(*)(void*))ThreadWrapper, pThread );
+#endif
+    if( success )
+	 {
+		 // link into list... it's a valid thread
+       // the system claims that it can start one.
+		 //if( ( ( pThread->next = g.threads ) ) )
+		 //   g.threads->me = &pThread->next;
+		 //pThread->me = &g.threads;
+		 //g.threads = pThread;
+      pThread->flags.bReady = 1;
+		 while( !pThread->thread_ident )
+			Relinquish();
+#ifdef LOG_THREAD
+	   Log3( WIDE("Created thread address: %p %016Lx at %p")
+	             , pThread->proc, pThread->thread_ident, pThread );
+#endif
+	}
+	else
+	{
+      // unlink from g.threads list.
+		DeleteFromSet( THREAD, &g.threadset, pThread ) /*Release( pThread )*/;
+		pThread = NULL;
+	}
+	 return pThread;
+}
+
+//--------------------------------------------------------------------------
+
+TIMER_PROC( PTHREAD, ThreadToSimpleEx )( PTRSZVAL (CPROC*proc)(POINTER), POINTER param DBG_PASS )
+{
+	int success;
+	PTHREAD pThread;
+	while( LockedExchange( &g.lock_thread_create, 1 ) )
+		Relinquish();
+	pThread = GetFromSet( THREAD, &g.threadset );
+	/*AllocateEx( sizeof( THREAD ) DBG_RELAY );*/
+#ifdef LOG_THREAD
+	Log( WIDE("Creating a new thread... ") );
+	lprintf( WIDE("New thread %p"), pThread );
+#endif
+	MemSet( pThread, 0, sizeof( THREAD ) );
+	pThread->flags.bLocal = TRUE;
+	pThread->simple_proc = proc;
+	pThread->param = (PTRSZVAL)param;
+	pThread->thread_ident = 0;
+#if DBG_AVAILABLE
+	pThread->pFile = pFile;
+	pThread->nLine = nLine;
+#endif
+   g.lock_thread_create = 0;
+#ifdef LOG_THREAD
+	Log( WIDE("Begin Create Thread") );
+#endif
+#ifdef _WIN32
+#if defined( __WATCOMC__ ) || defined( __WATCOM_CPLUSPLUS__ )
+	pThread->hThread = (HANDLE)_beginthread( (void(*)(void*))SimpleThreadWrapper, 8192, pThread );
+#else
+	{
+      DWORD dwJunk;
+		pThread->hThread = CreateThread( NULL, 1024
+												 , (LPTHREAD_START_ROUTINE)(SimpleThreadWrapper)
+												 , pThread
+												 , 0
+												 , &dwJunk );
+	}
+#endif
+    success = (int)(pThread->hThread!=NULL);
+#else
+	 success = !pthread_create( &pThread->thread, NULL, (void*(*)(void*))SimpleThreadWrapper, pThread );
 #endif
     if( success )
 	 {
