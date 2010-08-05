@@ -26,5 +26,8 @@ SRCS8=test_binary_tree
 PROGNAME9=test_coords
 SRCS9=test_coords
 
+PROGNAMEA=test_uuid
+SRCSA=test_uuid
+SYSLIBSA=rpcrt4
 
 include $(SACK_BASE)/makefiles/makefile.many
