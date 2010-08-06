@@ -480,7 +480,15 @@ RENDER_PROC (void, UpdateDisplayPortionEx)( PVIDEO hVideo
 #ifdef LOG_OPEN_TIMING
 						lprintf( WIDE( "Showing window..." ) );
 #endif
+
+						// SW_shownormal does extra stuff, that I think causes top level windows to fall behind other
+                  // topmost windows.
+#ifdef UNDER_CE
 						ShowWindow (hVideo->hWndOutput, SW_SHOWNORMAL );
+#else
+						ShowWindow (hVideo->hWndOutput, SW_SHOW );
+#endif
+
 #ifdef LOG_OPEN_TIMING
 						lprintf( WIDE( "window shown..." ) );
 #endif
