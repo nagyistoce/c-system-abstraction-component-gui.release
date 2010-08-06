@@ -1999,15 +1999,18 @@ void ReallocClients( _16 wClients, int nUserData )
    // keep the max of specified data..
 	if( nUserData < g.nUserData )
 		nUserData = g.nUserData;
+	if( wClients < MAX_NETCLIENTS )
+		wClients = MAX_NETCLIENTS;
+
 	if( nUserData > g.nUserData || wClients > MAX_NETCLIENTS )
 	{
 		INDEX idx;
 		PCLIENT_SLAB slab;
 		_32 n;
 		int tot = 0;
-		g.nUserData = nUserData;
-		pUserData = (P_8)Allocate( g.nUserData * sizeof( PTRSZVAL ) * wClients );
-		MemSet( pUserData, 0, g.nUserData * sizeof( PTRSZVAL ) * wClients );
+		//g.nUserData = nUserData;
+		pUserData = (P_8)Allocate( nUserData * sizeof( PTRSZVAL ) * wClients );
+		MemSet( pUserData, 0, nUserData * sizeof( PTRSZVAL ) * wClients );
 		LIST_FORALL( g.ClientSlabs, idx, PCLIENT_SLAB, slab )
 		{
 			for( n = 0; n < slab->count; n++ )
