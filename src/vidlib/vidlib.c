@@ -4879,7 +4879,8 @@ RENDER_PROC( void, ForceDisplayFocus )( PRENDERER pRender )
    //lprintf( WIDE( "... 3 step?" ) );
 	//SetActiveWindow( pRender->hWndOutput );
 	//SetForegroundWindow( pRender->hWndOutput );
-	SafeSetFocus( pRender->hWndOutput );
+   if( pRender )
+		SafeSetFocus( pRender->hWndOutput );
 }
 
 //----------------------------------------------------------------------------
