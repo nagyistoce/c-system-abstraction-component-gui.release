@@ -78,6 +78,8 @@ void InsertStartupPage( PSI_CONTROL pc_canvas, CTEXTSTR page_name );
 void RenamePage( PSI_CONTROL pc_canvas );
 void CreateNamedPage( PSI_CONTROL pc_canvas, CTEXTSTR page_name );
 
+int InvokePageChange( void );
+
 INTERSHELL_NAMESPACE_END
 
 #endif

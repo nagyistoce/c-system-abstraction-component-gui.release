@@ -851,7 +851,7 @@ void LoadButtonConfig( PSI_CONTROL pc_canvas, TEXTSTR filename )
 		//lprintf( WIDE("long wait...") );
 		if( g.flags.bSQLConfig )
 		{
-			BannerNoWait( WIDE("Read SQL Config...") );
+			Banner2NoWait( WIDE("Read SQL Config...") );
 #ifndef __NO_OPTIONS__
 #ifndef __NO_SQL__
 #ifndef __ARM__
@@ -975,7 +975,7 @@ void LoadButtonConfig( PSI_CONTROL pc_canvas, TEXTSTR filename )
 #endif
 	}
 	// should be the last link...
-	BannerNoWait( WIDE("Config Done...") );
+	Banner2NoWait( WIDE("Config Done...") );
    // and just in case we had no defaults....
 	SetDefaultRowsCols();
 	// need to pop this last - set default rows/cols needs canvas
