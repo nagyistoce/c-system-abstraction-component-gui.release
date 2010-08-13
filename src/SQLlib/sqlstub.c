@@ -167,6 +167,14 @@ void GetNowFunc(sqlite3_context*onwhat,int n,sqlite3_value**something)
 	CTEXTSTR str = GetPackedTime();
 	sqlite3_result_text( onwhat, str, (int)(sizeof( str[0] ) * strlen( str )), 0 );
 }
+void GetCurDateFunc(sqlite3_context*onwhat,int n,sqlite3_value**something)
+{
+	CTEXTSTR str = GetPackedTime();
+	TEXTSTR tmp = StrDup( str );
+   tmp[8] = 0;
+	sqlite3_result_text( onwhat, tmp, (int)(sizeof( tmp[0] ) * strlen( tmp )), 0 );
+   Release( tmp );
+}
 void SQLiteGetLastInsertID(sqlite3_context*onwhat,int n,sqlite3_value**something)
 {
 	static TEXTCHAR str[20];
@@ -216,30 +224,44 @@ void SimpleShutdown( POINTER p )
 
 void ExtendConnection( PODBC odbc )
 {
-int rc = sqlite3_create_function(
-  odbc->db //sqlite3 *,
-  , "now"  //const char *zFunctionName,
-  , 0 //int nArg,
-  , SQLITE_UTF8 //int eTextRep,
-  , (void*)odbc //void*,
-  , GetNowFunc //void (*xFunc)(sqlite3_context*,int,sqlite3_value**),
-  , NULL //void (*xStep)(sqlite3_context*,int,sqlite3_value**),
-  , NULL //void (*xFinal)(sqlite3_context*)
-										  );
+	int rc = sqlite3_create_function(
+												odbc->db //sqlite3 *,
+											  , "now"  //const char *zFunctionName,
+											  , 0 //int nArg,
+											  , SQLITE_UTF8 //int eTextRep,
+											  , (void*)odbc //void*,
+											  , GetNowFunc //void (*xFunc)(sqlite3_context*,int,sqlite3_value**),
+											  , NULL //void (*xStep)(sqlite3_context*,int,sqlite3_value**),
+											  , NULL //void (*xFinal)(sqlite3_context*)
+											  );
 	if( rc )
 	{
 		// error..
 	}
 	rc = sqlite3_create_function(
-  odbc->db //sqlite3 *,
-  , "LAST_INSERT_ID"  //const char *zFunctionName,
-  , 0 //int nArg,
-  , SQLITE_UTF8 //int eTextRep,
-  , (void*)odbc //void*,
-  , SQLiteGetLastInsertID //void (*xFunc)(sqlite3_context*,int,sqlite3_value**),
-  , NULL //void (*xStep)(sqlite3_context*,int,sqlite3_value**),
-  , NULL //void (*xFinal)(sqlite3_context*)
-										  );
+										  odbc->db //sqlite3 *,
+										 , "curdate"  //const char *zFunctionName,
+										 , 0 //int nArg,
+										 , SQLITE_UTF8 //int eTextRep,
+										 , (void*)odbc //void*,
+										 , GetCurDateFunc //void (*xFunc)(sqlite3_context*,int,sqlite3_value**),
+										 , NULL //void (*xStep)(sqlite3_context*,int,sqlite3_value**),
+										 , NULL //void (*xFinal)(sqlite3_context*)
+										 );
+	if( rc )
+	{
+		// error..
+	}
+	rc = sqlite3_create_function(
+										  odbc->db //sqlite3 *,
+										 , "LAST_INSERT_ID"  //const char *zFunctionName,
+										 , 0 //int nArg,
+										 , SQLITE_UTF8 //int eTextRep,
+										 , (void*)odbc //void*,
+										 , SQLiteGetLastInsertID //void (*xFunc)(sqlite3_context*,int,sqlite3_value**),
+										 , NULL //void (*xStep)(sqlite3_context*,int,sqlite3_value**),
+										 , NULL //void (*xFinal)(sqlite3_context*)
+										 );
 	if( rc )
 	{
 		// error..
@@ -3437,7 +3459,7 @@ SQLSTUB_PROC( int, SQLInsert )( PODBC odbc, CTEXTSTR table, ... )
 
 //-----------------------------------------------------------------------
 
-#define natoi(n, p,len) for( n = 0, cnt = 0; cnt < len; cnt++ ) (n) = ((n)*10) + (p)[cnt] - '0'; p += len;
+#define natoi(n, p,len) if( (p)[0] == '-' ) p++; for( n = 0, cnt = 0; cnt < len; cnt++ ) (n) = ((n)*10) + (p)[cnt] - '0'; p += len;
 
 void ConvertSQLDateEx( CTEXTSTR date
                      , int *year, int *month, int *day
