@@ -364,7 +364,7 @@ void RestorePageEx( PSI_CONTROL pc_canvas, PCanvasData canvas, PPAGE_DATA page, 
 				page = ShellGetNamedPage( pc_canvas, WIDE( "next" ) );
 				if( !page || page == canvas->default_page )
 				{
-					BannerMessage( WIDE( "Failure to find an accessable page, exiting." ) );
+					Banner2Message( WIDE( "Failure to find an accessable page, exiting." ) );
 					exit(0);
 				}
 			}

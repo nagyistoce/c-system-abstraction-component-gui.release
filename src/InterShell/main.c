@@ -102,7 +102,7 @@ static PLIST images;
 void InterShell_Hide( void )
 {
 	// find the current page, and hide it...
-	//RemoveBannerEx( NULL DBG_SRC );
+	//RemoveBanner2Ex( NULL DBG_SRC );
 	InterShell_DisablePageUpdate( TRUE );
 	HideCommon( g.single_frame );
 }
@@ -675,7 +675,7 @@ void CPROC ButtonCreateGlareSet( PTRSZVAL psv, PSI_CONTROL button )
 	{
 		if( CheckGlareSet( buffer ) )
 		{
-			BannerMessage( WIDE( "Glare set already exists!" ) );
+			Banner2Message( WIDE( "Glare set already exists!" ) );
 		}
 		else
 		{
@@ -2970,7 +2970,7 @@ static int ProcessContextMenu( PCanvasData canvas, PSI_CONTROL pc, S_32 px, S_32
 					case MNU_EDIT_BEHAVIORS:
 						if( EditControlBehaviors )
 						{
-							BannerMessage( WIDE( "EditControlBehaviors has been disabled" ) );
+							Banner2Message( WIDE( "EditControlBehaviors has been disabled" ) );
 							/*
 							 if( canvas->pCurrentControl->flags.bCustom )
 							 EditControlBehaviors( canvas->pCurrentControl->control );
@@ -3537,7 +3537,7 @@ void CPROC QuitMenu( PSI_CONTROL pc, _32 keycodeUnused )
 	//ValidatedControlData( PCanvasData, menu_surface.TypeID, canvas, pc );
 	lprintf( WIDE("!!!!!!!!!!! QUIT MENU !!!!!!!!!!!!!!!") );
 	g.flags.bExit = 1;
-	BannerTopNoWait( WIDE( "Shutting down..." ) );
+	Banner2TopNoWait( WIDE( "Shutting down..." ) );
 	InvokeInterShellShutdown();
 	{
 		//PMENU_BUTTON button;
@@ -4155,7 +4155,7 @@ int CPROC PageFocusChanged( PSI_CONTROL pc, LOGICAL bFocused )
 
 void CPROC GoodQuitMenu( PTRSZVAL psvUnused, _32 keycodeUnused )
 {
-	BannerNoWait( WIDE("Exiting...") );
+	Banner2NoWait( WIDE("Exiting...") );
 	if( g.flags.bTerminateStayResident )
 	{
 		BAG_Exit(0xd1e);
@@ -4306,7 +4306,7 @@ int Init( LOGICAL bLoadConfig )
 		PGLARE_SET glare_set;
 		if( bLoadConfig )
 		{
-			BannerNoWait( WIDE("Read config...") );
+			Banner2NoWait( WIDE("Read config...") );
 			LoadButtonConfig( g.single_frame, g.config_filename );
 		}
 		//g.button_space = 25;
@@ -4346,7 +4346,7 @@ int Init( LOGICAL bLoadConfig )
 
 		if( bLoadConfig )
 		{
-			BannerNoWait( WIDE("Finish Config...") );
+			Banner2NoWait( WIDE("Finish Config...") );
 			InvokeFinishInit();
 		}
 		if( g.flags.bLogNames )
@@ -4416,7 +4416,7 @@ ATEXIT_PRIORITY( ExitMisc, ATEXIT_PRIORITY_DEFAULT + 1 )
 OnKeyPressEvent( WIDE( "Quit POS" ) )( PTRSZVAL psv )
 //void CPROC QuitPOS( PTRSZVAL psv, PKEY_BUTTON key )
 {
-	BannerNoWait( WIDE("Exiting...") );
+	Banner2NoWait( WIDE("Exiting...") );
 #ifdef __cplusplus_cli
 	//Application::Exit();
 #endif
@@ -4576,7 +4576,7 @@ int restart( void )
 	xlprintf(LOG_UPDATE_AND_REFRESH_LEVEL)( WIDE("Displaying the frame on the real display...") );
 #endif
 	InvokeStartupMacro();
-	BannerNoWait( WIDE("and we go...") );
+	Banner2NoWait( WIDE("and we go...") );
 #ifndef __NO_SQL__
 	SQLSetFeedbackHandler( NULL );
 #endif
@@ -4599,7 +4599,7 @@ int restart( void )
 		{
 			//PRENDERER renderer;
 			Image image = GetControlSurface( g.single_frame );
-			PRENDERER banner_rend = GetBannerRenderer( NULL );
+			PRENDERER banner_rend = GetBanner2Renderer( NULL );
 			canvas->renderer = OpenDisplayUnderSizedAt( banner_rend
 				, g.flags.bTransparent?DISPLAY_ATTRIBUTE_LAYERED:0
 				, image->width, image->height
@@ -4635,7 +4635,7 @@ int restart( void )
 			// this has to wait... until... 
 			// the first rendering pass is done... cause we're behind it...
 			lprintf( WIDE( " ---------- remove banner --------" ) ) ;// 
-			RemoveBannerEx( &banner DBG_SRC );
+			RemoveBanner2Ex( &banner DBG_SRC );
 		}
 		if( first_restart )
 		{
@@ -4702,13 +4702,13 @@ LOGICAL InterShell_GetButtonHighlight( PMENU_BUTTON button )
 static void CPROC MyHandleSQLFeedback( CTEXTSTR message )
 {
 	lprintf( WIDE("SQLMessage %s"), message );
-	BannerNoWait( message );
+	Banner2NoWait( message );
 }
 
 PRIORITY_PRELOAD( LoadingMessage, DEFAULT_PRELOAD_PRIORITY+3 )
 {
 
-	BannerNoWait( WIDE("Loading...") );
+	Banner2NoWait( WIDE("Loading...") );
 	//void SQLSetFeedbackHandler( void (CPROC*HandleSQLFeedback*)(TEXTCHAR *message) );
 #ifndef __NO_SQL__
 	SQLSetFeedbackHandler( MyHandleSQLFeedback );
@@ -4804,7 +4804,7 @@ void CPROC LoadAPlugin( PTRSZVAL psv, CTEXTSTR name, int flags )
 	snprintf( msg, sizeof( msg ), WIDE( "Loading Plugin: %s" ), name );
 	SystemLog( msg );
 	snprintf( msg, sizeof( msg ), WIDE( "Loading Plugin...\n%s" ), name );
-	BannerNoWait( msg );
+	Banner2NoWait( msg );
 #ifdef HAVE_ENVIRONMENT
 	if( pathchr( name ) )
 	{
@@ -4824,7 +4824,7 @@ void CPROC LoadAPlugin( PTRSZVAL psv, CTEXTSTR name, int flags )
 	snprintf( msg, sizeof( msg ), WIDE( "Loaded Plugin: %s" ), name );
 	SystemLog( msg );
 	snprintf( msg, sizeof( msg ), WIDE( "Loaded Plugin...\n%s" ), name );
-	BannerNoWait( msg );
+	Banner2NoWait( msg );
 }
 
 void LoadInterShellPlugins( CTEXTSTR mypath, CTEXTSTR mask )
@@ -4924,7 +4924,7 @@ PUBLIC( int, Main)( int argc, TEXTCHAR **argv, int bConsole )
 	g.system_name = GetSystemName(); // Initialized here. Command argument -Sysname= may override.
 
 	SetManualAllocateCheck( TRUE );
-	BannerNoWait( WIDE("Starting...") );
+	Banner2NoWait( WIDE("Starting...") );
 	{
 		TEXTCHAR buf[256];
 		snprintf( buf, sizeof( buf ), WIDE( "%s.config" ), GetProgramName() );
@@ -4985,7 +4985,7 @@ PUBLIC( int, Main)( int argc, TEXTCHAR **argv, int bConsole )
 			TEXTCHAR msg[256];
 			snprintf( msg, sizeof( msg ), WIDE( "%s\nINVALID Configuration Name to Restore\nShould be like *.AutoConfigBackup*" )
 				, g.config_filename );
-			BannerMessage( msg );
+			Banner2Message( msg );
 			return -1;
 		}
 		g.flags.forceload = 1; // -restore implies -force
@@ -5092,13 +5092,13 @@ namespace InterShell
 			TEXTCHAR    *ch = WcharConvert( wch );			
 			LoadButtonConfig( this_frame, ch );
 
-			BannerNoWait( WIDE("Finish Config...") );
+			Banner2NoWait( WIDE("Finish Config...") );
 			/* this builds menus and junk based on plugins which have been loaded... */
 			InvokeFinishInit();
 			{
 				// cleanup banners.
 				PBANNER Null = NULL;
-				RemoveBanner( Null );
+				RemoveBanner2( Null );
 			}
 			InvokeFinishAllInit();
 			InvokeStartupMacro();

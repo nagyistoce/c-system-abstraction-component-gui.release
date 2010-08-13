@@ -78,7 +78,7 @@ OnKeyPressEvent( MAKE_BANNER_MESSAGE )( PTRSZVAL psvBanner )
 		delay = 2000;
 	else
       delay = banner->delay;
-	yes_no = CreateBannerEx( NULL, &banner->banner
+	yes_no = CreateBanner2Ex( NULL, &banner->banner
 								  , InterShell_TranslateLabelText( NULL, buffer, sizeof( buffer ), banner->text )
 								  , (banner->flags.bTopmost?BANNER_TOP:0)
 									| ((banner->flags.allow_continue&&(!banner->flags.yes_no))?BANNER_NOWAIT:0)
@@ -96,7 +96,7 @@ OnKeyPressEvent( MAKE_BANNER_MESSAGE )( PTRSZVAL psvBanner )
 		if( banner->flags.yes_no || banner->flags.okay_cancel )
 			SetMacroResult( yes_no );// set allow_continue to yes_no
       if( banner->banner )
-			RemoveBannerEx( &banner->banner DBG_SRC );
+			RemoveBanner2Ex( &banner->banner DBG_SRC );
 	}
 	else
 	{
@@ -122,7 +122,7 @@ OnKeyPressEvent( REMOVE_BANNER_MESSAGE )( PTRSZVAL psvBanner )
 	INDEX idx;
 	LIST_FORALL( l.banners, idx, PBANNER_BUTTON, banner )
 	{
-		RemoveBanner( banner->banner );
+		RemoveBanner2( banner->banner );
 		SetLink( &l.banners, idx, NULL );
 	}
 	//BannerMessage( "Yo, whatcha want!?" );

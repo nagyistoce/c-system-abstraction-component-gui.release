@@ -136,7 +136,7 @@ static void CPROC CreatePageFont( PTRSZVAL psv, PSI_CONTROL pc )
 			{
 				if( strcmp( font_preset->name, name_buffer ) == 0 )
 				{
-               BannerMessage( WIDE("Font name already exists") );
+               Banner2Message( WIDE("Font name already exists") );
 					return;
 				}
 			}

@@ -1104,10 +1104,10 @@ static void KillSpawnedPrograms( void )
 
 OnInterShellShutdown( WIDE("DOKillSpawnedPrograms") )(void)
 {
-	BannerNoWait( WIDE("Ending Tasks...") );
+	Banner2NoWait( WIDE("Ending Tasks...") );
 	l.flags.bExit = 2; // magic number indicating we're quitting for sure.
 	KillSpawnedPrograms();
-	BannerNoWait( WIDE("Ended Task....") );
+	Banner2NoWait( WIDE("Ended Task....") );
 }
 
 //---------------------------------------------------------------------------
@@ -1157,7 +1157,7 @@ PTRSZVAL CPROC WaitForCallerThread( PTHREAD thread )
 		return 0;
    bWaiting = 1;
    if( GetThreadParam( thread ) )
-		CreateBannerEx( NULL, &banner, WIDE("Waiting for caller..."), BANNER_TOP|BANNER_NOWAIT|BANNER_DEAD, 0 );
+		CreateBanner2Ex( NULL, &banner, WIDE("Waiting for caller..."), BANNER_TOP|BANNER_NOWAIT|BANNER_DEAD, 0 );
    //SetBannerOptions( banner, BANNER_TOP, 0 );
 	while( 1 )
 	{
@@ -1172,7 +1172,7 @@ PTRSZVAL CPROC WaitForCallerThread( PTHREAD thread )
       WakeableSleep( 1000 );
 	}
 	if( GetThreadParam( thread ) )
-		RemoveBannerEx( &banner DBG_SRC );
+		RemoveBanner2Ex( &banner DBG_SRC );
    bWaiting = 0;
    return 0;
 }
