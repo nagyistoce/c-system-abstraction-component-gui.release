@@ -224,7 +224,7 @@ int main( int argc, char **argv )
 	if( !l.text_color )
       l.text_color = 0xFFFFFFFF;
 
-	result = CreateBannerExtended( NULL, &banner, l.text
+	result = CreateBanner2Extended( NULL, &banner, l.text
 										  , (l.flags.bYesNo?BANNER_OPTION_YESNO:0)
 											|( l.flags.bOkayCancel?BANNER_OPTION_OKAYCANCEL:0)
 											|( l.flags.bTop?BANNER_TOP:0)
@@ -237,7 +237,7 @@ int main( int argc, char **argv )
 										  , l.display );
 
 	{
-		int result2 = WaitForBanner( banner );
+		int result2 = WaitForBanner2( banner );
       lprintf( WIDE( "result is %d" ), result,result2 );
 		return result;
 	}
