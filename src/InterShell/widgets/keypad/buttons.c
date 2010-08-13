@@ -1503,8 +1503,11 @@ void SetKeyShading( PKEY_BUTTON key, CDATA grey_channel ) // set grey_channel to
 
 void SetKeyHighlight( PKEY_BUTTON key, LOGICAL bHighlight )
 {
-	key->flags.bHighlight = bHighlight;
-   SmudgeCommon( key->button );
+	if( key )
+	{
+		key->flags.bHighlight = bHighlight;
+		SmudgeCommon( key->button );
+	}
 }
 
 LOGICAL GetKeyHighlight( PKEY_BUTTON key )
