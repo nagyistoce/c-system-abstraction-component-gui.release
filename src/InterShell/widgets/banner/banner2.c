@@ -102,7 +102,7 @@ static void InitBannerFrame( void )
 #endif
 		GetDisplaySize( &banner_local.w, &banner_local.h );
 #ifndef __NO_OPTIONS__
-		SACK_GetProfileStringEx( "SACK/Widgets/Banner2", "Default Font", "arialbd.ttf", font, sizeof( font ), TRUE );
+		SACK_GetProfileStringEx( "SACK/Widgets/Banner3", "Default Font", "arialbd.ttf", font, sizeof( font ), TRUE );
 #else
 		StrCpy( font, WIDE( "arialbd.ttf" ) );
 #endif
@@ -112,7 +112,7 @@ static void InitBannerFrame( void )
 		if( !banner_local.font )
 		{
 #ifndef __NO_OPTIONS__
-			SACK_GetProfileStringEx( WIDE( "SACK/Widgets/Banner2" ), WIDE( "Alternate Font" ), WIDE( "fonts/arialbd.ttf" ), font, sizeof( font ), TRUE );
+			SACK_GetProfileStringEx( WIDE( "SACK/Widgets/Banner3" ), WIDE( "Alternate Font" ), WIDE( "fonts/arialbd.ttf" ), font, sizeof( font ), TRUE );
 #else
 			StrCpy( font, WIDE( "fonts/arialbd.ttf" ) );
 #endif
@@ -269,7 +269,7 @@ static int OnMouseCommon( BANNER_NAME )
 #ifdef DEBUG_BANNER_DRAW_UPDATE
 				lprintf( WIDE("Remove banner!") );
 #endif
-				RemoveBanner2Ex( ppBanner DBG_SRC );
+				RemoveBanner3Ex( ppBanner DBG_SRC );
 			}
 			banner->_b = b;
 		}
@@ -443,7 +443,7 @@ CONTROL_REGISTRATION banner_control = { BANNER_NAME
 													 | BORDER_NOCAPTION
 													 | BORDER_FIXED }
 };
-PRIORITY_PRELOAD( RegisterBanner2, 65 ) { DoRegisterControl( &banner_control ); }
+PRIORITY_PRELOAD( RegisterBanner3, 65 ) { DoRegisterControl( &banner_control ); }
 //--------------------------------------------------------------------------
 
 
@@ -452,7 +452,7 @@ void CPROC killbanner( PTRSZVAL psv )
 	PBANNER *ppBanner = (PBANNER*)psv;
 	{
       //lprintf( WIDE( "killing banner..." ) );
-      RemoveBanner2Ex( ppBanner DBG_SRC );
+      RemoveBanner3Ex( ppBanner DBG_SRC );
 	}
 }
 
@@ -460,7 +460,7 @@ void CPROC killbanner( PTRSZVAL psv )
 // BANNER_OPTION_OKAY_CANCEL ... etc ? sound flare, colors, blinkings...
 // all kinda stuff availabel...
 
-int CreateBanner2Extended( PRENDERER parent, PBANNER *ppBanner, CTEXTSTR text, int options, int timeout, CDATA textcolor, CDATA basecolor, int lines, int cols, int display )
+int CreateBanner3Extended( PRENDERER parent, PBANNER *ppBanner, CTEXTSTR text, int options, int timeout, CDATA textcolor, CDATA basecolor, int lines, int cols, int display )
 {
 	//PBANNER newBanner;
 	S_32 x, y;
@@ -587,7 +587,7 @@ int CreateBanner2Extended( PRENDERER parent, PBANNER *ppBanner, CTEXTSTR text, i
 	}
 	if( !options ) // basic options...
       options = BANNER_CLICK|BANNER_TIMEOUT;
-	SetBanner2OptionsEx( ppBanner, options, timeout );
+	SetBanner3OptionsEx( ppBanner, options, timeout );
 	if( banner->owners == 1 )
 	{
 		DisplayFrame( banner->frame );
@@ -605,7 +605,7 @@ int CreateBanner2Extended( PRENDERER parent, PBANNER *ppBanner, CTEXTSTR text, i
 #ifdef DEBUG_BANNER_DRAW_UPDATE
 		lprintf( WIDE("-----------------------! BANNER DESTROYED EVEN AS IT WAS CREATED!") );
 #endif
-		RemoveBanner2Ex( ppBanner DBG_SRC );
+		RemoveBanner3Ex( ppBanner DBG_SRC );
 		return FALSE;
 	}
 	banner->me = ppBanner;
@@ -613,26 +613,26 @@ int CreateBanner2Extended( PRENDERER parent, PBANNER *ppBanner, CTEXTSTR text, i
 	lprintf( WIDE("Created banner %p"), banner );
 #endif
 	if( !(options & BANNER_NOWAIT ) )
-		return WaitForBanner2Ex( ppBanner );
+		return WaitForBanner3Ex( ppBanner );
 	return TRUE;
 }
 
-int CreateBanner2Exx( PRENDERER parent, PBANNER *ppBanner, CTEXTSTR text, int options, int timeout, CDATA textcolor, CDATA basecolor )
+int CreateBanner3Exx( PRENDERER parent, PBANNER *ppBanner, CTEXTSTR text, int options, int timeout, CDATA textcolor, CDATA basecolor )
 {
-   return CreateBanner2Extended( parent, ppBanner, text, options, timeout, textcolor, basecolor, 0, 0, 0 );
+   return CreateBanner3Extended( parent, ppBanner, text, options, timeout, textcolor, basecolor, 0, 0, 0 );
 }
 
-int CreateBanner2Ex( PRENDERER parent, PBANNER *ppBanner, CTEXTSTR text, int options, int timeout )
+int CreateBanner3Ex( PRENDERER parent, PBANNER *ppBanner, CTEXTSTR text, int options, int timeout )
 {
-   return CreateBanner2Exx( parent, ppBanner, text, options, timeout, 0, 0 );
+   return CreateBanner3Exx( parent, ppBanner, text, options, timeout, 0, 0 );
 }
 //--------------------------------------------------------------------------
 
-int CreateBanner2( PRENDERER parent, PBANNER *ppBanner, CTEXTSTR text )
+int CreateBanner3( PRENDERER parent, PBANNER *ppBanner, CTEXTSTR text )
 {
 	int retval = 0;
 
-	retval = CreateBanner2Ex( parent, ppBanner, text, BANNER_CLICK|BANNER_TIMEOUT, 5000 );
+	retval = CreateBanner3Ex( parent, ppBanner, text, BANNER_CLICK|BANNER_TIMEOUT, 5000 );
 
 #ifdef DEBUG_BANNER_DRAW_UPDATE
    lprintf(WIDE("CreateBanner is done, retval is %d"), retval);
@@ -642,14 +642,14 @@ int CreateBanner2( PRENDERER parent, PBANNER *ppBanner, CTEXTSTR text )
 
 //--------------------------------------------------------------------------
 
-#undef RemoveBanner2
+#undef RemoveBanner
 // provided for migratory compatibility
-void RemoveBanner2( PBANNER banner )
+void RemoveBanner3( PBANNER banner )
 {
-	RemoveBanner2Ex( &banner DBG_SRC );
+	RemoveBanner3Ex( &banner DBG_SRC );
 }
 
-void RemoveBanner2Ex( PBANNER *ppBanner DBG_PASS )
+void RemoveBanner3Ex( PBANNER *ppBanner DBG_PASS )
 {
 	PBANNER banner;
    //_lprintf( DBG_RELAY )( "Removing something.." );
@@ -723,12 +723,12 @@ void RemoveBanner2Ex( PBANNER *ppBanner DBG_PASS )
 
 //--------------------------------------------------------------------------
 
-void SetBanner2Text( PBANNER banner, TEXTCHAR *text )
+void SetBanner3Text( PBANNER banner, TEXTCHAR *text )
 {
 	if( !banner )
 	{
 		if( !banner_local.banner )
-         CreateBanner2( NULL, &banner_local.banner, text );
+         CreateBanner3( NULL, &banner_local.banner, text );
 		banner = banner_local.banner;
 	}
 	if( banner )
@@ -745,7 +745,7 @@ static void CPROC BannerTimeout( PTRSZVAL ppsv )
 	if( delta < 0 )
 	{
 		PTHREAD thread = ( ppBanner && (*ppBanner) )?(*ppBanner)->pWaitThread:NULL;
-		RemoveBanner2Ex( ppBanner DBG_SRC );
+		RemoveBanner3Ex( ppBanner DBG_SRC );
 		// timer goes away after this.
 		if( thread )
 		{
@@ -770,7 +770,7 @@ void CPROC DrawButton( PTRSZVAL psv, PCONTROL pc )
 */
 //--------------------------------------------------------------------------
 
-void SetBanner2OptionsEx( PBANNER *ppBanner, _32 flags, _32 extra  )
+void SetBanner3OptionsEx( PBANNER *ppBanner, _32 flags, _32 extra  )
 {
    PBANNER banner;
 	if( !ppBanner )
@@ -894,13 +894,13 @@ void SetBanner2OptionsEx( PBANNER *ppBanner, _32 flags, _32 extra  )
 
 //--------------------------------------------------------------------------
 
-#undef WaitForBanner2
-int WaitForBanner2( PBANNER banner )
+#undef WaitForBanner
+int WaitForBanner3( PBANNER banner )
 {
-   return WaitForBanner2Ex( &banner );
+   return WaitForBanner3Ex( &banner );
 }
 
-int WaitForBanner2Ex( PBANNER *ppBanner )
+int WaitForBanner3Ex( PBANNER *ppBanner )
 {
 	if( !ppBanner )
       ppBanner = &banner_local.banner;
@@ -927,7 +927,7 @@ int WaitForBanner2Ex( PBANNER *ppBanner )
 #ifdef DEBUG_BANNER_DRAW_UPDATE
 			lprintf( WIDE("Remove (*ppBanner)!") );
 #endif
-			RemoveBanner2Ex( ppBanner DBG_SRC );
+			RemoveBanner3Ex( ppBanner DBG_SRC );
 			(*ppBanner) = NULL;
 		}
       return result;
@@ -937,7 +937,7 @@ int WaitForBanner2Ex( PBANNER *ppBanner )
 
 //--------------------------------------------------------------------------
 
-Font GetBanner2Font( void )
+Font GetBanner3Font( void )
 {
    InitBannerFrame();
    return banner_local.font;
@@ -945,7 +945,7 @@ Font GetBanner2Font( void )
 
 //--------------------------------------------------------------------------
 
-_32 GetBanner2FontHeight( void )
+_32 GetBanner3FontHeight( void )
 {
    InitBannerFrame();
    return GetFontHeight( banner_local.font );
@@ -953,7 +953,7 @@ _32 GetBanner2FontHeight( void )
 
 //--------------------------------------------------------------------------
 
-PRENDERER GetBanner2Renderer( PBANNER banner )
+PRENDERER GetBanner3Renderer( PBANNER banner )
 {
 	if( !banner )
 		banner = banner_local.banner;
@@ -962,7 +962,7 @@ PRENDERER GetBanner2Renderer( PBANNER banner )
 	return banner->renderer;
 }
 
-PSI_CONTROL GetBanner2Control( PBANNER banner )
+PSI_CONTROL GetBanner3Control( PBANNER banner )
 {
 	if( !banner )
 		banner = banner_local.banner;
@@ -1001,7 +1001,7 @@ struct thread_params {
 };
 
 
-static PCONFIRM_BANNER GetWaitBanner2( CTEXTSTR name )
+static PCONFIRM_BANNER GetWaitBanner3( CTEXTSTR name )
 {
 	INDEX idx;
 	PCONFIRM_BANNER cb;
@@ -1022,26 +1022,26 @@ static PCONFIRM_BANNER GetWaitBanner2( CTEXTSTR name )
    return cb;
 }
 
-void Banner2AnswerYes( CTEXTSTR type )
+void Banner3AnswerYes( CTEXTSTR type )
 {
-	PCONFIRM_BANNER cb = GetWaitBanner2( type );
+	PCONFIRM_BANNER cb = GetWaitBanner3( type );
 	if( cb->banner )
 	{
 		cb->flags.key_result_yes = 1;
 		cb->flags.key_result_no = 0;
 		cb->flags.key_result = 1;
-		RemoveBanner2( cb->banner );
+		RemoveBanner3( cb->banner );
 	}
 }
-void Banner2AnswerNo( CTEXTSTR type )
+void Banner3AnswerNo( CTEXTSTR type )
 {
-	PCONFIRM_BANNER cb = GetWaitBanner2( type );
+	PCONFIRM_BANNER cb = GetWaitBanner3( type );
 	if( cb->banner )
 	{
 		cb->flags.key_result_no = 1;
 		cb->flags.key_result_yes = 0;
 		cb->flags.key_result = 1;
-		RemoveBanner2( cb->banner );
+		RemoveBanner3( cb->banner );
 	}
 }
 
@@ -1051,14 +1051,14 @@ static PTRSZVAL CPROC Confirm( PTHREAD thread )
 	CTEXTSTR msg;
 	int result;
    int yesno;
-	PCONFIRM_BANNER cb = GetWaitBanner2( parms->type );
+	PCONFIRM_BANNER cb = GetWaitBanner3( parms->type );
    // only one ...
 	cb->dokey = parms->dokey;
 	msg = parms->msg;
    yesno = parms->yesno;
 	parms->received = 1;
    cb->pWaiting = thread;
-	result = CreateBanner2Ex( NULL, &cb->banner, parms->msg, BANNER_TOP|(yesno?BANNER_OPTION_YESNO:(BANNER_CLICK|BANNER_TIMEOUT))
+	result = CreateBanner3Ex( NULL, &cb->banner, parms->msg, BANNER_TOP|(yesno?BANNER_OPTION_YESNO:(BANNER_CLICK|BANNER_TIMEOUT))
 								  , (yesno?0:5000) );
 	if( cb->flags.bLog )
 		lprintf( "returned from banner..." );
@@ -1103,7 +1103,7 @@ static PTRSZVAL CPROC Confirm( PTHREAD thread )
 
 }
 
-static int Banner2ThreadConfirmEx( CTEXTSTR type, CTEXTSTR msg, DoConfirmProc dokey, int yesno )
+static int Banner3ThreadConfirmEx( CTEXTSTR type, CTEXTSTR msg, DoConfirmProc dokey, int yesno )
 {
 	struct thread_params parms;
    parms.type = type;
@@ -1117,9 +1117,9 @@ static int Banner2ThreadConfirmEx( CTEXTSTR type, CTEXTSTR msg, DoConfirmProc do
 	return 0;
 }
 
-int Banner2ThreadConfirm( CTEXTSTR type, CTEXTSTR msg, DoConfirmProc dokey )
+int Banner3ThreadConfirm( CTEXTSTR type, CTEXTSTR msg, DoConfirmProc dokey )
 {
-   return Banner2ThreadConfirmEx( type, msg, dokey, TRUE );
+   return Banner3ThreadConfirmEx( type, msg, dokey, TRUE );
 }
 
 //--------------------------------------------------------------------------
@@ -1151,12 +1151,12 @@ namespace SACK {
                     ch, sizeInBytes,
                     wch, sizeInBytes);
 
-			CreateBanner2Ex( NULL, NULL, ch, BANNER_NOWAIT|BANNER_DEAD, 0 );
+			CreateBanner3Ex( NULL, NULL, ch, BANNER_NOWAIT|BANNER_DEAD, 0 );
 			Release( ch );
 		}
 		static void Remove( void )
 		{
-			RemoveBanner2Message();
+			RemoveBanner3Message();
 			//BannerMessageNoWait( string );
 		}
 

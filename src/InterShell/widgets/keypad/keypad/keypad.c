@@ -394,7 +394,7 @@ OnEditControl( WIDE("Keypad Hotkey 2") )(PTRSZVAL psv, PSI_CONTROL parent_frame 
 			}
          else
 				if( !sscanf( buffer, WIDE("%Ld"), &hotkey->value ) )
-					BannerMessage("It's No Good!" );
+					Banner2Message("It's No Good!" );
 			UpdateButton( hotkey->button );
 		}
        DestroyFrame( &frame );
