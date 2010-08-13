@@ -385,7 +385,7 @@ static int resize_keys( PKEYPAD keypad )
 static int CPROC KeypadDraw( PCOMMON frame )
 {
 	ValidatedControlData( PKEYPAD, keypad_control.TypeID, keypad, frame );
-   lprintf( WIDE("attempt Drawing blue keypad backgorund...") );
+   //lprintf( WIDE("attempt Drawing blue keypad backgorund...") );
 	if( keypad )
 	{
 		Image surface = GetControlSurface( frame );
@@ -400,7 +400,7 @@ static int CPROC KeypadDraw( PCOMMON frame )
 		}
 		// there is no border - so if we have a border this
 		// needs to be drawn ourselves....
-		lprintf( WIDE("Drawing blue keypad backgorund...") );
+		//lprintf( WIDE("Drawing blue keypad backgorund...") );
       BlatColorAlpha( surface, 0, 0, surface->width, surface->height, AColor( 0, 0, 64, 150 ) );
 		//ClearImageTo( surface, Color( 0, 0, 64 ) );
 		//UpdateControl( frame );

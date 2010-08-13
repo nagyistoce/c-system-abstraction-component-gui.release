@@ -814,7 +814,7 @@ void SetBanner2OptionsEx( PBANNER *ppBanner, _32 flags, _32 extra  )
 												, WIDE( "Cancel" ), 0
 												, SomeChoiceClicked
 												, (PTRSZVAL)banner );
-         SetButtonColor( banner->cancel, 0xFf9a051d );
+         SetButtonColor( banner->cancel, 0xdf9a051d );
 			banner->okay = MakeButton( banner->frame
 											 , 5 + ( BANNER_WIDTH / 2) - 5
 											 , ( ( BANNER_HEIGHT * 5 ) / 6 ) - 5 - 10
@@ -824,7 +824,7 @@ void SetBanner2OptionsEx( PBANNER *ppBanner, _32 flags, _32 extra  )
 											 , WIDE( "Okay!" ), 0
 											 , SomeChoiceClicked
 											 , (PTRSZVAL)banner );
-         SetButtonColor( banner->okay, 0xff18986c );
+         SetButtonColor( banner->okay, 0xdf18986c );
 			banner->yes = MakeButton( banner->frame
 												, 5, ( ( BANNER_HEIGHT * 4 ) / 6 ) - 5 - 10
 											, ( BANNER_WIDTH / 2) - 10
@@ -833,7 +833,7 @@ void SetBanner2OptionsEx( PBANNER *ppBanner, _32 flags, _32 extra  )
 												, WIDE( "No" ), 0
 												, SomeChoiceClicked
 												, (PTRSZVAL)banner );
-         SetButtonColor( banner->yes, 0xFf9a051d );
+         SetButtonColor( banner->yes, 0xdf9a051d );
 			banner->no = MakeButton( banner->frame
 										  , 5 + ( BANNER_WIDTH / 2) - 5
 										  , ( ( BANNER_HEIGHT * 4 ) / 6 ) - 5 - 10
@@ -842,8 +842,12 @@ void SetBanner2OptionsEx( PBANNER *ppBanner, _32 flags, _32 extra  )
 											 , WIDE( "Yes" ), 0
 											 , SomeChoiceClicked
 											 , (PTRSZVAL)banner );
-         SetButtonColor( banner->no, 0xff18986c );
-         SetBaseColor( TEXTCOLOR, 0xffFFFFFF );
+         SetButtonColor( banner->no, 0xdf18986c );
+         //SetBaseColor( TEXTCOLOR, 0xffFFFFFF );
+         SetControlColor( banner->okay, TEXTCOLOR, 0xffFFFFFF );
+         SetControlColor( banner->cancel, TEXTCOLOR, 0xffFFFFFF );
+         SetControlColor( banner->yes, TEXTCOLOR, 0xffFFFFFF );
+         SetControlColor( banner->no, TEXTCOLOR, 0xffFFFFFF );
 
 		}
       //if( flags & BANNER_TOP )
@@ -857,7 +861,7 @@ void SetBanner2OptionsEx( PBANNER *ppBanner, _32 flags, _32 extra  )
 												, ( flags & BANNER_OPTION_YESNO )?WIDE( "No" ):WIDE( "Cancel" ), 0
 												, CancelChoiceClicked
 												, (PTRSZVAL)banner );
-         SetButtonColor( banner->cancel, 0xFf9a051d );
+         SetButtonColor( banner->cancel, 0xdf9a051d );
 			banner->okay = MakeButton( banner->frame
 											 , 5 + ( BANNER_WIDTH / 2) - 5, ( ( BANNER_HEIGHT * 2 ) / 3 ) - 5 - 10
 											 , ( BANNER_WIDTH / 2) - 10, ((BANNER_HEIGHT * 1 ) / 3 ) - 20
@@ -865,8 +869,9 @@ void SetBanner2OptionsEx( PBANNER *ppBanner, _32 flags, _32 extra  )
 											 , ( flags & BANNER_OPTION_YESNO )?WIDE( "Yes" ):WIDE( "Okay!" ), 0
 											 , OkayChoiceClicked
 											 , (PTRSZVAL)banner );
-         SetButtonColor( banner->okay, 0xff18986c );
-         SetBaseColor( TEXTCOLOR, 0xffFFFFFF );
+         SetButtonColor( banner->okay, 0xdf18986c );
+         SetControlColor( banner->okay, TEXTCOLOR, 0xffFFFFFF );
+         SetControlColor( banner->cancel, TEXTCOLOR, 0xffFFFFFF );
 			//SetCommonMouse( banner->frame, NULL, 0 );
 		}
 		else
