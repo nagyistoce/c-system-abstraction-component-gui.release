@@ -4,6 +4,7 @@ cmake_minimum_required(VERSION 2.8)
 add_subdirectory( widgets )
 add_subdirectory( frames )
 add_subdirectory( images )
+add_subdirectory( calendar )
 
 project( InterShell.core )
 
