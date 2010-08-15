@@ -45,12 +45,12 @@ typedef struct clock_info_tag
 
 PRELOAD( RegisterExtraClockConfig )
 {
-   EasyRegisterResource( "InterShell/" TARGETNAME, CHECKBOX_DATE, RADIO_BUTTON_NAME );
-   EasyRegisterResource( "InterShell/" TARGETNAME, CHECKBOX_DAY_OF_WEEK, RADIO_BUTTON_NAME );
-   EasyRegisterResource( "InterShell/" TARGETNAME, CHECKBOX_ANALOG, RADIO_BUTTON_NAME );
-   EasyRegisterResource( "InterShell/" TARGETNAME, CHECKBOX_DATE, RADIO_BUTTON_NAME );
-   EasyRegisterResource( "InterShell/" TARGETNAME, EDIT_BACKGROUND_IMAGE, EDIT_FIELD_NAME );
-   EasyRegisterResource( "InterShell/" TARGETNAME, EDIT_ANALOG_IMAGE, EDIT_FIELD_NAME );
+   EasyRegisterResource( "InterShell/" "Clock", CHECKBOX_DATE, RADIO_BUTTON_NAME );
+   EasyRegisterResource( "InterShell/" "Clock", CHECKBOX_DAY_OF_WEEK, RADIO_BUTTON_NAME );
+   EasyRegisterResource( "InterShell/" "Clock", CHECKBOX_ANALOG, RADIO_BUTTON_NAME );
+   EasyRegisterResource( "InterShell/" "Clock", CHECKBOX_DATE, RADIO_BUTTON_NAME );
+   EasyRegisterResource( "InterShell/" "Clock", EDIT_BACKGROUND_IMAGE, EDIT_FIELD_NAME );
+   EasyRegisterResource( "InterShell/" "Clock", EDIT_ANALOG_IMAGE, EDIT_FIELD_NAME );
 }
 
 OnCreateControl("Clock")
