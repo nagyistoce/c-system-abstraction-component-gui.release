@@ -38,6 +38,7 @@ static struct local_calendar_info
 	TEXTSTR current_date_extra_long; // thursday march 12, 1999
 	TEXTSTR current_sql_date; // thursday march 12, 1999
 
+   struct day_selector_info *prior_selected;
    PLIST controls;
 } l;
 
@@ -168,7 +169,14 @@ OnQueryShowControl( "Calendar/Date Selector" )( PTRSZVAL psv )
 	{
 		struct day_selector_info *pDay = (struct day_selector_info*)psv;
 		char tmp[32];
-      pDay->day = (l.current_index - l.first_date) + 1;
+		pDay->day = (l.current_index - l.first_date) + 1;
+		if( pDay->day == l.current_day )
+		{
+			InterShell_SetButtonHighlight( pDay->button, TRUE );
+         l.prior_selected = pDay;
+		}
+      else
+			InterShell_SetButtonHighlight( pDay->button, FALSE );
       snprintf( tmp, sizeof( tmp ), "%d", pDay->day );
 		InterShell_SetButtonText( pDay->button, tmp );
 
@@ -183,7 +191,10 @@ OnKeyPressEvent( "Calendar/Date Selector" )( PTRSZVAL psv )
    struct day_selector_info *pDay = (struct day_selector_info*)psv;
    l.current_day = pDay->day;
 	UpdateCalendar( FALSE );
-
+   if( l.prior_selected )
+		InterShell_SetButtonHighlight( l.prior_selected->button, FALSE );
+   InterShell_SetButtonHighlight( pDay->button, TRUE );
+   l.prior_selected = pDay;
 }
 
 OnCreateMenuButton( "Calendar/Date Selector" )( PMENU_BUTTON button )
@@ -191,6 +202,8 @@ OnCreateMenuButton( "Calendar/Date Selector" )( PMENU_BUTTON button )
 	struct day_selector_info *pDay = New(struct day_selector_info);
    MemSet( pDay, 0, sizeof( struct day_selector_info ) );
    pDay->button = button;
+	InterShell_SetButtonStyle( button, "bicolor square" );
+   InterShell_SetButtonColors( button, BASE_COLOR_WHITE, BASE_COLOR_BROWN, BASE_COLOR_BLACK, BASE_COLOR_WHITE );
    return (PTRSZVAL)pDay;
 }
 
@@ -208,6 +221,7 @@ OnKeyPressEvent( "Calendar/Previous Month" )( PTRSZVAL button )
 OnCreateMenuButton( "Calendar/Previous Month" )( PMENU_BUTTON button )
 {
    InterShell_SetButtonText( button, "Previous_Month" );
+   InterShell_SetButtonStyle( button, "square" );
    return (PTRSZVAL)button;
 }
 
@@ -225,6 +239,7 @@ OnKeyPressEvent( "Calendar/Next Month" )( PTRSZVAL button )
 OnCreateMenuButton( "Calendar/Next Month" )( PMENU_BUTTON button )
 {
    InterShell_SetButtonText( button, "Next_Month" );
+   InterShell_SetButtonStyle( button, "square" );
    return (PTRSZVAL)button;
 }
 
@@ -236,7 +251,8 @@ OnKeyPressEvent( "Calendar/Select Today" )( PTRSZVAL button )
 
 OnCreateMenuButton( "Calendar/Select Today" )( PMENU_BUTTON button )
 {
-   InterShell_SetButtonText( button, "Select_Today" );
+	InterShell_SetButtonText( button, "Select_Today" );
+   InterShell_SetButtonStyle( button, "square" );
    return (PTRSZVAL)button;
 }
 
