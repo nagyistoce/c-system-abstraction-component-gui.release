@@ -169,7 +169,7 @@ add_definitions( -D__NO_OPTIONS__ )
    set( ExtraFlags "${ExtraFlags} -DUSE_SQLITE_INTERFACE" )
   endif()
 #else( !SQLITE3_FOUND )
-#   set( ExtraFlags "${ExtraFlags} -DSYSTEM_SQLITE" )
+  set( ExtraFlags "${ExtraFlags} -DSYSTEM_SQLITE" )
 #endif( !SQLITE3_FOUND )
 
   add_definitions( -DUSE_SQLITE )
@@ -370,6 +370,7 @@ set(BASE_SOURCES  ${BASE_SOURCES}
   src/typelib/sets.c
   src/typelib/text.c
   src/typelib/typecode.c
+  src/typelib/spacetree.c
   ${MSG_QUEUE_SOURCES}
   src/timerlib/timers.c
   src/idlelib/idle.c
@@ -702,7 +703,10 @@ add_definitions( -D__OBSCURE_STREAM_INTERNALS )
    
   endif()
 
-#add_subdirectory( src/displaylib )
+add_subdirectory( src/displaylib )
+set( SACK_LIBRARY ${SACK_LIBRARY} bag.display.plugin )
+set( SACK_LIBRARIES ${SACK_LIBRARY} )
+
 
 if( NOT __NO_GUI__ )
 add_subdirectory( src/msgsvr/server )
@@ -711,7 +715,7 @@ endif( NOT __NO_GUI__ )
 if( NOT SACK_ONLY )
  if( NOT __NO_GUI__ )
   if( BUILD_INTERSHELL )
-   add_subdirectory( src/intershell )
+   add_subdirectory( src/InterShell )
   endif( BUILD_INTERSHELL )
   
   add_subdirectory( src/psilib/paltst )

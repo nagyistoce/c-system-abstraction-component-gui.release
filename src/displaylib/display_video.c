@@ -343,7 +343,7 @@ RENDER_DATA( RENDER_INTERFACE, VideoInterface ) =
 	, KeyDown
   	, DisplayIsValid
 , OwnMouseEx
-	, BeginCalibration // begincalib
+	, NULL //BeginCalibration // begincalib
 , SyncRender
 #ifdef __LINUX__
 , EnableOpenGL // EnableOpenGL

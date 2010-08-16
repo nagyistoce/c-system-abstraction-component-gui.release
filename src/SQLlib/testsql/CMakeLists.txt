@@ -25,8 +25,9 @@ project( sqlcmd.portable )
 
 if( __WINDOWS__ )
 set(NET_SOURCES 
-  ../..//netlib/net_winsock2.c
+  ../../netlib/net_winsock2.c
 )
+endif()
 
 
 set(BASE_SOURCES
