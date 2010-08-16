@@ -1,0 +1,63 @@
+
+NO_ANIMATION=not_blank
+
+ifeq '$(COMPILER)' 'wcxx'
+NO_ANIMATION=not_blank
+endif
+
+ifeq '$(COMPILER)' 'lnx++'
+NO_ANIMATION=not_blank
+endif
+
+MORE_PROJECTS=make2
+
+APP_DEFAULT_DATA1=$(foreach img,$(shell ls images/casino/station),images/casino/station/$(img)) \
+	$(foreach img,$(filter-out casino,$(shell ls images)),images/$(img))  \
+	$(foreach img,$(shell ls frames),frames/$(img)) 
+        
+
+INCLUDEDIRS=$(SACK_BASE)/src/pos/include
+
+# keypad is required to be built before paper_issue which uses
+# functions exported by keypad.
+
+VLC_PATH=e:/tools/vlc32-1.0.5/sdk/include
+export VLC_PATH
+PROJECTS=clock tasks graph \
+	windows_shell  \
+        video_player $(if $(shell $(DIR_CMD) $(subst /,$(SYSPATHCHAR),$(VLC_PATH))),vlc_hook,$(warning VLC not found $(VLC_PATH)))
+
+# LINUX BUILDS suffer from lack of 
+# export library called InterShell
+INTERSHELL=intershell.core
+
+####### InterShell.CORE ######################
+
+LITERAL_LIBNAME2=intershell.core
+
+SUBSYSTEM2=windows
+# page_dialog # this was removed, general properties are good enough for page change buttons.
+SRCS2=main loadsave pages fonts text_label sprites macros fileopen security banner_button intershell_plugins $(if $(NO_ANIMATION),,animation animation_plugin)
+SRCS2+=resname
+#RSRCS_IDS2=resource.h
+CXFLAGS2=-DINTERSHELL_SOURCE $(if $(NO_ANIMATION),-D__NO_ANIMATION__,) $(if $(__LINUX__),-DUSE_INTERFACES,) -DSACK_CORE_BUILD
+
+MORELIBS2+=sack.widgets 
+ifdef __WINDOWS__
+else
+SYSLIBS2=mng
+endif
+#ifneq '$(filter static_debug static_release,$(DEST))' ''
+ifdef __WINDOWS__
+SYSLIBS2+=odbc32 
+else
+SYSLIBS2+=odbc
+SYSLIBS2+=$(if $(__ARM__),,$(shell freetype-config --libs|sed 's/-L[^ ]*//g;s/-l//g;s/-Wl[^ ]*//g'))
+SYSLIBS2+=pthread
+endif
+#endif
+
+
+include $(SACK_BASE)/makefiles/makefile.many
+
+
