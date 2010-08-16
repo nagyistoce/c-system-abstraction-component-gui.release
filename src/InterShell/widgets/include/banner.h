@@ -118,7 +118,6 @@ BANNER_PROC( _32, GetBanner3FontHeight )( void );
 BANNER_PROC( PRENDERER, GetBanner3Renderer )( PBANNER banner );
 BANNER_PROC( PSI_CONTROL, GetBanner3Control )( PBANNER banner );
 
-typedef void (CPROC *DoConfirmProc)( void );
 BANNER_PROC( int, Banner3ThreadConfirm )( CTEXTSTR type, CTEXTSTR msg, DoConfirmProc dokey );
 BANNER_PROC( void, Banner3AnswerYes )( CTEXTSTR type );
 BANNER_PROC( void, Banner3AnswerNo )( CTEXTSTR type );
