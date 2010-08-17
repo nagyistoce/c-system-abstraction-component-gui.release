@@ -749,7 +749,9 @@ add_subdirectory( src/netlib/echo )
 add_subdirectory( src/SQLlib/testsql )
 add_subdirectory( src/utils/launcher )
 add_subdirectory( src/utils/deploy )
+if( __WINDOWS__ )
 add_subdirectory( src/utils/pcopy )
+endif( __WINDOWS__ )
 
 set( CMAKE_C_STANDARD_LIBRARIES_INIT "" )
 
