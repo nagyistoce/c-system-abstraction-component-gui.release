@@ -16,6 +16,10 @@
 #include <sack_types.h>
 #include <timers.h>
 
+#ifdef __LINUX__
+#define SetLastError(n)  errno = n
+#endif
+
 #ifdef __cplusplus
 namespace sack {
 	namespace containers {
