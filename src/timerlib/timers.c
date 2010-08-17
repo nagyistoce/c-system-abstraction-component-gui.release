@@ -884,6 +884,10 @@ static PTRSZVAL CPROC ThreadWrapper( PTHREAD pThread )
 #endif
 {
 	PTRSZVAL result = 0;
+#ifdef __LINUX__
+	lprintf( "register handler for sigusr1 (for thread)" );
+	signal( SIGUSR1, ContinueSignal );
+#endif
 #ifdef _WIN32
 	while( !pThread->hThread )
 	{
