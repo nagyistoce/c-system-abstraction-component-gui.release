@@ -736,11 +736,13 @@ TIMER_PROC( void, WakeableSleep )( _32 n )
 #ifdef __LINUX__
 static void ContinueSignal( int sig )
 {
+lprintf( "Sigusr1" );
 }
 
 // network is at GLOBAL_INIT_PRIORITY
 PRIORITY_PRELOAD( IgnoreSignalContinue, GLOBAL_INIT_PRELOAD_PRIORITY-1 )
 {
+lprintf( "register handler for sigusr1" );
    signal( SIGUSR1, ContinueSignal );
 }
 
