@@ -210,7 +210,7 @@ TEXTSTR sack_prepend_path( int group, CTEXTSTR filename )
 	TEXTSTR result = PrependBasePath( group, filegroup, filename );
 	return result;
 }
-#if defined( __WINDOWS__ ) || defined( __LINUX__ )
+#if defined( __WINDOWS__ )
 HANDLE sack_open( int group, CTEXTSTR filename, int opts, ... )
 {
 	HANDLE handle;

@@ -401,28 +401,30 @@ FILESYS_PROC  int FILESYS_API  sack_fwrite ( CPOINTER buffer, int size, int coun
 FILESYS_PROC  int FILESYS_API  sack_unlink ( CTEXTSTR filename );
 FILESYS_PROC  int FILESYS_API  sack_rename ( CTEXTSTR file_source, CTEXTSTR new_name );
 
+#ifdef __WINDOWS__
 #if !defined( SACK_BAG_EXPORTS ) && !defined( BAG_EXTERNALS )
-#define open(a,...) sack_iopen(0,a,##__VA_ARGS__)
-#define _lopen(a,...) sack_open(0,a,##__VA_ARGS__)
-#define lseek(a,b,c) sack_ilseek(a,b,c)
-#define _llseek(a,b,c) sack_lseek(a,b,c)
+# define open(a,...) sack_iopen(0,a,##__VA_ARGS__)
+# define _lopen(a,...) sack_open(0,a,##__VA_ARGS__)
+# define lseek(a,b,c) sack_ilseek(a,b,c)
+# define _llseek(a,b,c) sack_lseek(a,b,c)
 
-#define HFILE HANDLE
-#undef HFILE_ERROR
-#define HFILE_ERROR INVALID_HANDLE_VALUE
+# define HFILE HANDLE
+# undef HFILE_ERROR
+# define HFILE_ERROR INVALID_HANDLE_VALUE
 
-#define creat(a,...)  sack_icreat( 0,a,##__VA_ARGS__ )
-#define close(a)  sack_iclose(a)
-#define OpenFile(a,b,c) sack_openfile(0,a,b,c)
-#define _lclose(a)  sack_close(a)
-#define read(a,b,c) sack_iread(a,b,c)
-#define write(a,b,c) sack_iwrite(a,b,c)
-#define _lread(a,b,c) sack_read(a,b,c)
-#define _lwrite(a,b,c) sack_write(a,b,c)
-#define _lcreat(a,b) sack_creat(0,a,b)
+# define creat(a,...)  sack_icreat( 0,a,##__VA_ARGS__ )
+# define close(a)  sack_iclose(a)
+# define OpenFile(a,b,c) sack_openfile(0,a,b,c)
+# define _lclose(a)  sack_close(a)
+# define read(a,b,c) sack_iread(a,b,c)
+# define write(a,b,c) sack_iwrite(a,b,c)
+# define _lread(a,b,c) sack_read(a,b,c)
+# define _lwrite(a,b,c) sack_write(a,b,c)
+# define _lcreat(a,b) sack_creat(0,a,b)
 
-#define remove(a)   sack_unlink(a)
-#define unlink(a)   sack_unlink(a)
+# define remove(a)   sack_unlink(a)
+# define unlink(a)   sack_unlink(a)
+#endif
 #endif
 
 #if UNICODE
