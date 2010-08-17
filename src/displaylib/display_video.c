@@ -103,11 +103,11 @@ RENDER_PROC( void, SetLoseFocusHandler )( PRENDERER img, LoseFocusCallback metho
 
 //--------------------------------------------------------------------------
 
-RENDER_PROC( void, SetDefaultHandler )( PRENDERER img, GeneralCallback method, PTRSZVAL psv )
-{
-	((PPANEL)img)->DefaultMethod = method;
-	((PPANEL)img)->psvDefault = psv;
-}
+//RENDER_PROC( void, SetDefaultHandler )( PRENDERER img, GeneralCallback method, PTRSZVAL psv )
+//{
+//	((PPANEL)img)->DefaultMethod = method;
+//	((PPANEL)img)->psvDefault = psv;
+//}
 
 //--------------------------------------------------------------------------
 
@@ -329,15 +329,15 @@ RENDER_DATA( RENDER_INTERFACE, VideoInterface ) =
 	,SetRedrawHandler
 	,SetKeyboardHandler
 	,SetLoseFocusHandler
-	,SetDefaultHandler
+	,NULL //SetDefaultHandler
 
 	, GetMousePosition
 	, SetMousePosition
 
         ,(LOGICAL CPROC (*)(PRENDERER))HasFocus
 
-	, SendActiveMessage
-        , CreateActiveMessage
+	, NULL //SendActiveMessage
+        , NULL //CreateActiveMessage
 	, GetKeyText
 	, IsKeyDown
 	, KeyDown

@@ -19,7 +19,7 @@
 RENDER_NAMESPACE
 //-------------------------------------------------------------------------
 
-IMAGE_PROC( Image, DisplayMakeSubImageEx )( Image pImage
+ Image DisplayMakeSubImageEx( Image pImage
 														, S_32 x, S_32 y
 														, _32 width, _32 height DBG_PASS )
 {
@@ -452,7 +452,7 @@ static int LoopHeaderEx( Image image, void **finddata DBG_PASS )
 	return 0;
 }
 
-IMAGE_PROC( void, DisplayPlot )( Image image, S_32 x, S_32 y, CDATA c )
+void DisplayPlot ( Image image, S_32 x, S_32 y, CDATA c )
 {
    IMAGE_RECTANGLE rect;
 	SPACEPOINT p;
@@ -482,7 +482,7 @@ IMAGE_PROC( void, DisplayPlot )( Image image, S_32 x, S_32 y, CDATA c )
 void  CPROC (*pDisplayPlot)( Image image, S_32 x, S_32 y, CDATA c ) = DisplayPlot;
 
 //-------------------------------------------------------------------------
-IMAGE_PROC( CDATA, DisplayGetPixel )( Image image, S_32 x, S_32 y )
+ CDATA  DisplayGetPixel ( Image image, S_32 x, S_32 y )
 {
    IMAGE_RECTANGLE rect;
 	SPACEPOINT p;
@@ -513,7 +513,7 @@ IMAGE_PROC( CDATA, DisplayGetPixel )( Image image, S_32 x, S_32 y )
 CDATA CPROC  (*pDisplayGetPixel)( Image image, S_32 x, S_32 y ) = DisplayGetPixel;
 //-------------------------------------------------------------------------
 
-IMAGE_PROC( void, DisplayPlotAlpha )( Image image, S_32 x, S_32 y, CDATA c )
+ void  DisplayPlotAlpha ( Image image, S_32 x, S_32 y, CDATA c )
 {
 	SPACEPOINT p;
 	PSPACENODE found;
@@ -546,7 +546,7 @@ void  CPROC (*pDisplayPlotAlpha)( Image image, S_32 x, S_32 y, CDATA c ) = Displ
 
 //-------------------------------------------------------------------------
 
-IMAGE_PROC( void, DisplayLine )( Image image, S_32 x, S_32 y, S_32 xto, S_32 yto, CDATA color )
+ void  DisplayLine ( Image image, S_32 x, S_32 y, S_32 xto, S_32 yto, CDATA color )
 {
 	if( !( image->flags & IF_FLAG_IS_PANEL ) )
 	{ // natural images can use the natural functions
@@ -566,7 +566,7 @@ IMAGE_PROC( void, DisplayLine )( Image image, S_32 x, S_32 y, S_32 xto, S_32 yto
 void  CPROC (*pDisplayLine)( Image image, S_32 x, S_32 y, S_32 xto, S_32 yto, CDATA c ) = DisplayLine;
 //-------------------------------------------------------------------------
 
-IMAGE_PROC( void, DisplayLineV )( Image image, S_32 x, S_32 y, S_32 xto, S_32 yto, CDATA color, void(*proc)(Image Image, S_32 x, S_32 y, _32 d ) )
+ void  DisplayLineV ( Image image, S_32 x, S_32 y, S_32 xto, S_32 yto, CDATA color, void(*proc)(Image Image, S_32 x, S_32 y, _32 d ) )
 {
 	if( !( image->flags & IF_FLAG_IS_PANEL ) )
 	{ // natural images can use the natural functions
@@ -586,7 +586,7 @@ void  CPROC (*pDisplayLineV)( Image image, S_32 x, S_32 y
 										, void(*proc)(Image Image, S_32 x, S_32 y, _32 d ) ) = DisplayLineV;
 //-------------------------------------------------------------------------
 
-IMAGE_PROC( void, DisplayLineAlpha )( Image image, S_32 x, S_32 y, S_32 xto, S_32 yto, CDATA color )
+ void  DisplayLineAlpha ( Image image, S_32 x, S_32 y, S_32 xto, S_32 yto, CDATA color )
 {
 	if( !( image->flags & IF_FLAG_IS_PANEL ) )
 	{ // natural images can use the natural functions
@@ -602,7 +602,7 @@ IMAGE_PROC( void, DisplayLineAlpha )( Image image, S_32 x, S_32 y, S_32 xto, S_3
 void  CPROC (*pDisplayLineAlpha)( Image image, S_32 x, S_32 y, S_32 xto, S_32 yto, CDATA c ) = DisplayLineAlpha;
 //-------------------------------------------------------------------------
 
-IMAGE_PROC( void, DisplayHLine )( Image image, S_32 y, S_32 xfrom, S_32 xto, CDATA color )
+ void  DisplayHLine ( Image image, S_32 y, S_32 xfrom, S_32 xto, CDATA color )
 {
 	if( !image )
 		return;
@@ -624,7 +624,7 @@ IMAGE_PROC( void, DisplayHLine )( Image image, S_32 y, S_32 xfrom, S_32 xto, CDA
 void  CPROC (*pDisplayHLine)( Image image, S_32 x, S_32 y, S_32 yto, CDATA c ) = DisplayHLine;
 //-------------------------------------------------------------------------
 
-IMAGE_PROC( void, DisplayHLineAlpha )( Image image, S_32 y, S_32 xfrom, S_32 xto, CDATA color )
+ void  DisplayHLineAlpha ( Image image, S_32 y, S_32 xfrom, S_32 xto, CDATA color )
 {
 	if( !( image->flags & IF_FLAG_IS_PANEL ) )
 	{ // natural images can use the natural functions
@@ -640,7 +640,7 @@ IMAGE_PROC( void, DisplayHLineAlpha )( Image image, S_32 y, S_32 xfrom, S_32 xto
 void  CPROC (*pDisplayHLineAlpha)( Image image, S_32 x, S_32 y, S_32 yto, CDATA c ) = DisplayHLineAlpha;
 //-------------------------------------------------------------------------
 
-IMAGE_PROC( void, DisplayVLine )( Image image, S_32 x, S_32 yfrom, S_32 yto, CDATA color )
+ void  DisplayVLine ( Image image, S_32 x, S_32 yfrom, S_32 yto, CDATA color )
 {
 	if( !( image->flags & IF_FLAG_IS_PANEL ) )
 	{ // natural images can use the natural functions
@@ -661,7 +661,7 @@ IMAGE_PROC( void, DisplayVLine )( Image image, S_32 x, S_32 yfrom, S_32 yto, CDA
 void  CPROC (*pDisplayVLine)( Image image, S_32 x, S_32 yfrom, S_32 yto, CDATA c ) = DisplayVLine;
 //-------------------------------------------------------------------------
 
-IMAGE_PROC( void, DisplayVLineAlpha )( Image image, S_32 x, S_32 yfrom, S_32 yto, CDATA color )
+ void  DisplayVLineAlpha ( Image image, S_32 x, S_32 yfrom, S_32 yto, CDATA color )
 {
 	if( !( image->flags & IF_FLAG_IS_PANEL ) )
 	{ // natural images can use the natural functions
@@ -678,7 +678,7 @@ void  CPROC (*pDisplayVLineAlpha)( Image image, S_32 x, S_32 y, S_32 yto, CDATA 
 //-------------------------------------------------------------------------
 
 
-IMAGE_PROC( void, DisplayBlatColor )( Image image, S_32 x, S_32 y, _32 w, _32 h, CDATA color )
+ void  DisplayBlatColor ( Image image, S_32 x, S_32 y, _32 w, _32 h, CDATA color )
 {
 	if( !( image->flags & IF_FLAG_IS_PANEL ) )
 	{ // natural images can use the natural functions
@@ -695,7 +695,7 @@ IMAGE_PROC( void, DisplayBlatColor )( Image image, S_32 x, S_32 y, _32 w, _32 h,
 	LOOP_TRAILER
 }
 
-IMAGE_PROC( void, DisplayBlatColorAlpha )( Image image, S_32 x, S_32 y, _32 w, _32 h, CDATA color )
+ void  DisplayBlatColorAlpha ( Image image, S_32 x, S_32 y, _32 w, _32 h, CDATA color )
 {
 	if( !( image->flags & IF_FLAG_IS_PANEL ) )
 	{ // natural images can use the natural functions
@@ -708,7 +708,7 @@ IMAGE_PROC( void, DisplayBlatColorAlpha )( Image image, S_32 x, S_32 y, _32 w, _
 	LOOP_TRAILER
 }
 
-IMAGE_PROC( void, DisplayBlotImageEx )( Image dest
+ void  DisplayBlotImageEx ( Image dest
 						, Image image
 						, S_32 xd, S_32 yd
 						, _32 transparency
@@ -741,7 +741,7 @@ IMAGE_PROC( void, DisplayBlotImageEx )( Image dest
 
 //-------------------------------------------------------------------------
 
-IMAGE_PROC( void, DisplayBlotImageSizedEx )( Image dest
+ void  DisplayBlotImageSizedEx ( Image dest
 						, Image image
 						, S_32 xd, S_32 yd
 						, S_32 xs, S_32 ys, _32 ws, _32 hs
@@ -780,7 +780,7 @@ IMAGE_PROC( void, DisplayBlotImageSizedEx )( Image dest
 
 //-------------------------------------------------------------------------
 
-IMAGE_PROC( void, DisplayBlotScaledImageSizedEx )( Image dest
+ void  DisplayBlotScaledImageSizedEx ( Image dest
 						, Image image
 						, S_32 xd, S_32 yd, _32 wd, _32 hd
 						, S_32 xs, S_32 ys, _32 ws, _32 hs
@@ -828,7 +828,7 @@ IMAGE_PROC( void, DisplayBlotScaledImageSizedEx )( Image dest
 
 //-------------------------------------------------------------------------
 
-IMAGE_PROC( void, DisplayPutCharacterFont			)( Image image, S_32 x, S_32 y, CDATA fore, CDATA back, TEXTCHAR c, Font font )
+ void  DisplayPutCharacterFont			( Image image, S_32 x, S_32 y, CDATA fore, CDATA back, TEXTCHAR c, Font font )
 {
 	if( !( image->flags & IF_FLAG_IS_PANEL ) )
 	{ // natural images can use the natural functions
@@ -845,7 +845,7 @@ IMAGE_PROC( void, DisplayPutCharacterFont			)( Image image, S_32 x, S_32 y, CDAT
 
 //-------------------------------------------------------------------------
 
-IMAGE_PROC( void, DisplayPutCharacterVerticalFont	)( Image image, S_32 x, S_32 y, CDATA fore, CDATA back, TEXTCHAR c, Font font )
+ void  DisplayPutCharacterVerticalFont	( Image image, S_32 x, S_32 y, CDATA fore, CDATA back, TEXTCHAR c, Font font )
 {
 	if( !( image->flags & IF_FLAG_IS_PANEL ) )
 	{ // natural images can use the natural functions
@@ -862,7 +862,7 @@ IMAGE_PROC( void, DisplayPutCharacterVerticalFont	)( Image image, S_32 x, S_32 y
 
 //-------------------------------------------------------------------------
 
-IMAGE_PROC( void, DisplayPutCharacterInvertFont			)( Image image, S_32 x, S_32 y, CDATA fore, CDATA back, TEXTCHAR c, Font font )
+ void  DisplayPutCharacterInvertFont			( Image image, S_32 x, S_32 y, CDATA fore, CDATA back, TEXTCHAR c, Font font )
 {
 	if( !( image->flags & IF_FLAG_IS_PANEL ) )
 	{ // natural images can use the natural functions
@@ -879,7 +879,7 @@ IMAGE_PROC( void, DisplayPutCharacterInvertFont			)( Image image, S_32 x, S_32 y
 
 //-------------------------------------------------------------------------
 
-IMAGE_PROC( void, DisplayPutCharacterVerticalInvertFont	)( Image image, S_32 x, S_32 y, CDATA fore, CDATA back, TEXTCHAR c, Font font )
+ void  DisplayPutCharacterVerticalInvertFont	( Image image, S_32 x, S_32 y, CDATA fore, CDATA back, TEXTCHAR c, Font font )
 {
 	if( !( image->flags & IF_FLAG_IS_PANEL ) )
 	{ // natural images can use the natural functions
@@ -897,7 +897,7 @@ IMAGE_PROC( void, DisplayPutCharacterVerticalInvertFont	)( Image image, S_32 x, 
 
 //-------------------------------------------------------------------------
 
-IMAGE_PROC( void, DisplayPutStringFontEx				)( Image image, S_32 x, S_32 y, CDATA fore, CDATA back, CTEXTSTR pc, _32 nLen, Font font )
+ void  DisplayPutStringFontEx				( Image image, S_32 x, S_32 y, CDATA fore, CDATA back, CTEXTSTR pc, _32 nLen, Font font )
 {
 	if( !( image->flags & IF_FLAG_IS_PANEL ) )
 	{ // natural images can use the natural functions
@@ -914,7 +914,7 @@ IMAGE_PROC( void, DisplayPutStringFontEx				)( Image image, S_32 x, S_32 y, CDAT
 
 //-------------------------------------------------------------------------
 
-IMAGE_PROC( void, DisplayPutStringVerticalFontEx	)( Image image, S_32 x, S_32 y, CDATA fore, CDATA back, CTEXTSTR pc, _32 nLen, Font font )
+ void  DisplayPutStringVerticalFontEx	( Image image, S_32 x, S_32 y, CDATA fore, CDATA back, CTEXTSTR pc, _32 nLen, Font font )
 {
 	if( !( image->flags & IF_FLAG_IS_PANEL ) )
 	{ // natural images can use the natural functions
@@ -931,7 +931,7 @@ IMAGE_PROC( void, DisplayPutStringVerticalFontEx	)( Image image, S_32 x, S_32 y,
 
 //-------------------------------------------------------------------------
 
-IMAGE_PROC( void, DisplayPutStringInvertFontEx				)( Image image, S_32 x, S_32 y, CDATA fore, CDATA back, CTEXTSTR pc, _32 nLen, Font font )
+ void  DisplayPutStringInvertFontEx				( Image image, S_32 x, S_32 y, CDATA fore, CDATA back, CTEXTSTR pc, _32 nLen, Font font )
 {
 	if( !( image->flags & IF_FLAG_IS_PANEL ) )
 	{ // natural images can use the natural functions
@@ -948,7 +948,7 @@ IMAGE_PROC( void, DisplayPutStringInvertFontEx				)( Image image, S_32 x, S_32 y
 
 //-------------------------------------------------------------------------
 
-IMAGE_PROC( void, DisplayPutStringInvertVerticalFontEx	)( Image image, S_32 x, S_32 y, CDATA fore, CDATA back, CTEXTSTR pc, _32 nLen, Font font )
+ void  DisplayPutStringInvertVerticalFontEx	( Image image, S_32 x, S_32 y, CDATA fore, CDATA back, CTEXTSTR pc, _32 nLen, Font font )
 {
 	if( !( image->flags & IF_FLAG_IS_PANEL ) )
 	{ // natural images can use the natural functions
@@ -967,7 +967,7 @@ IMAGE_PROC( void, DisplayPutStringInvertVerticalFontEx	)( Image image, S_32 x, S
 
 //-------------------------------------------------------------------------
 
-IMAGE_PROC( void, DisplaySetImageBound )( Image pImage, P_IMAGE_RECTANGLE bound )
+ void  DisplaySetImageBound ( Image pImage, P_IMAGE_RECTANGLE bound )
 {
    //lprintf( WIDE("Setting boundary (aux image %p rect)=(%d,%d)-(%d,%d)"), pImage, bound->x, bound->y, bound->width, bound->height );
    SetImageAuxRect( pImage, bound );
@@ -976,7 +976,7 @@ IMAGE_PROC( void, DisplaySetImageBound )( Image pImage, P_IMAGE_RECTANGLE bound 
 
 //-------------------------------------------------------------------------
 
-IMAGE_PROC( void, DisplayFixImagePosition )( Image pImage )
+ void  DisplayFixImagePosition ( Image pImage )
 {
 	// Passing the first part of the image as a rectangle
    // will be the true, maximum image rectangle....
@@ -1010,7 +1010,7 @@ static void ClearImageFlag( Image image )
 
 //-------------------------------------------------------------------------
 
-IMAGE_PROC( void, DisplayAdoptSubImage )( Image pFoster, Image pOrphan )
+ void  DisplayAdoptSubImage ( Image pFoster, Image pOrphan )
 {
 	AdoptSubImage( pFoster, pOrphan );
 	if( pFoster->flags & IF_FLAG_IS_PANEL )
@@ -1019,7 +1019,7 @@ IMAGE_PROC( void, DisplayAdoptSubImage )( Image pFoster, Image pOrphan )
 
 //-------------------------------------------------------------------------
 
-IMAGE_PROC( void, DisplayOrphanSubImage )( Image pImage )
+ void  DisplayOrphanSubImage ( Image pImage )
 {
 	OrphanSubImage( pImage );
 	if( pImage->flags & IF_FLAG_IS_PANEL )
@@ -1162,7 +1162,7 @@ static POINTER CPROC _DisplayGetImageInterface( void )
 	return (POINTER)&DisplayImageInterface;
 }
 
-IMAGE_PROC( PIMAGE_INTERFACE, GetImageInteface)(void )
+ PIMAGE_INTERFACE  GetImageInteface(void )
 {
    return (PIMAGE_INTERFACE)_DisplayGetImageInterface();
 }
@@ -1172,7 +1172,7 @@ static void CPROC _DisplayDropImageInterface( POINTER p )
 }
 
 #undef DropImageInterface
-IMAGE_PROC( void, DropImageInterface )( PIMAGE_INTERFACE p )
+ void  DropImageInterface ( PIMAGE_INTERFACE p )
 {
 // do stuff here methinks...
    _DisplayDropImageInterface( p );

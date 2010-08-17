@@ -7,9 +7,9 @@ RENDER_NAMESPACE
 typedef void (CPROC *KeyTriggerHandler)(PTRSZVAL,_32 keycode);
 /* <combine sack::image::render::KeyDefine>
    
-   \ \                                      */
+	\ \                                      */
 typedef struct KeyDefine *PKEYDEFINE;
-
+#endif
 //#if !defined( DISPLAY_SOURCE ) && !defined( DISPLAY_SERVICE ) && !defined( DISPLAY_CLIENT )
 #define KEY_STRUCTURE_DEFINED
 typedef struct keybind_tag { // overrides to default definitions
@@ -37,7 +37,7 @@ typedef struct KeyDefine {
    int flags;
 	KEYBIND mod[8];
 } KEYDEFINE;
-#endif
+//#endif
 
 
 RENDER_NAMESPACE_END

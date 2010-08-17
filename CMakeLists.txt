@@ -608,6 +608,8 @@ set( SACK_LIBRARY bag bag.psi bag.image bag.video )
 
 if( NEED_FREETYPE OR NEED_JPEG OR NEED_PNG )
 set( SACK_LIBRARY ${SACK_LIBRARY} bag.externals )
+set( SACK_LIBRARIES ${SACK_LIBRARY} )
+
 add_library( bag.externals SHARED 
     ${JPEG_SOURCE}
     ${ZLIB_SOURCE}

@@ -41,8 +41,8 @@ typedef struct panel_tag PANEL, *PPANEL;
 #include <imglib/imagestruct.h>
 #include <image.h>
 
+#include <render.h>
 #include "displaystruc.h"
-
 #include <keybrd.h>
 
 #include "spacetree.h"
