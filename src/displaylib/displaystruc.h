@@ -115,8 +115,8 @@ struct panel_tag
 	PTRSZVAL psvFocus;
 	KeyProc KeyMethod;
    PTRSZVAL psvKey;
-   GeneralCallback DefaultMethod;
-	PTRSZVAL psvDefault;
+//   GeneralCallback DefaultMethod;
+//	PTRSZVAL psvDefault;
 
    struct panel_tag *parent, *child, *elder, *younger, *above, *below;
 

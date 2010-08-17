@@ -23,6 +23,11 @@ install_default_dest( ${PROJECT_NAME} )
 
 project( sqlcmd.portable )
 
+if( __WINDOWS__ )
+set(NET_SOURCES 
+  ../..//netlib/net_winsock2.c
+)
+
 
 set(BASE_SOURCES
 ${FIRST_GCC_PROGRAM_SOURCE} 
@@ -30,7 +35,7 @@ ${FIRST_GCC_PROGRAM_SOURCE}
     ../../netlib/network.c 
     ../../netlib/udpnetwork.c 
     ../../netlib/tcpnetwork.c 
-    ../../netlib/net_winsock2.c 
+    ${NET_SOURCES} 
     ../../msgsvr/client/client.c
     ../../SQLlib/sqlstub.c
     ../../SQLlib/sqlutil.c

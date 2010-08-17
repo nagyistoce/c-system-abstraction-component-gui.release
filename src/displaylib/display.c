@@ -135,7 +135,7 @@ PRIORITY_PRELOAD( RegisterDisplayInterface, VIDLIB_PRELOAD_PRIORITY )
 //#endif
 //#endif
 #ifndef STANDALONE_SERVICE
-LIBMAIN(){return 1;} LIBEXIT(){return 1;} LIBMAIN_END();
+//LIBMAIN(){return 1;} LIBEXIT(){return 1;} LIBMAIN_END();
 #endif
 
 void AddUpdateRegionEx( PPENDING_RECT update_rect, S_32 x, S_32 y, _32 wd, _32 ht DBG_PASS )
