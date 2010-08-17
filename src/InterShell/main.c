@@ -4654,7 +4654,7 @@ int restart( void )
 			while( !g.flags.bExit )
 			{
 				//ProcessControlMessages();					 
-				lprintf(WIDE( "Waiting to exit..." ) );
+				//lprintf(WIDE( "Waiting to exit..." ) );
 				WakeableSleep( 10000 );
 				//Relinquish();
 			}
