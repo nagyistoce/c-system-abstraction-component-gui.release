@@ -23,7 +23,7 @@ INCLUDEDIRS=$(SACK_BASE)/src/pos/include
 
 VLC_PATH=e:/tools/vlc32-1.0.5/sdk/include
 export VLC_PATH
-PROJECTS=clock tasks graph \
+PROJECTS=clock calendar tasks graph \
 	windows_shell  \
         video_player $(if $(shell $(DIR_CMD) $(subst /,$(SYSPATHCHAR),$(VLC_PATH))),vlc_hook,$(warning VLC not found $(VLC_PATH)))
 

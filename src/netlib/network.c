@@ -1964,6 +1964,7 @@ void ReallocClients( _16 wClients, int nUserData )
 	PCLIENT_SLAB pClientSlab;
 	if( !global_network_data )
 		InvokeDeadstart();
+
 	if( !MAX_NETCLIENTS )
 	{
 		//Log( WIDE("Starting Network Init!") );
@@ -1975,6 +1976,8 @@ void ReallocClients( _16 wClients, int nUserData )
    EnterCriticalSec( &g.csNetwork );
    if( !wClients )
 		wClients = 16;  // default 16 clients...
+	if( !nUserData )
+		nUserData = 16;
 
    // keep the max of specified connections..
 	if( wClients < MAX_NETCLIENTS )
