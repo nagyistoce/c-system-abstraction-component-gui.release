@@ -878,7 +878,8 @@ void FixupButtonEx( PMENU_BUTTON button DBG_PASS )
 	PSI_CONTROL pc_button = QueryGetControl( button );
 	PCanvasData canvas = GetCanvas( GetCommonParent( QueryGetControl( button ) ) );
    //lprintf( WIDE( "Button fixup..." ) );
-#define LoadImg(n) ((n)?LoadImageFileFromGroup(GetFileGroup( "Image Resources", NULL ), (TEXTSTR)n):NULL)
+//#define LoadImg(n) ((n)?LoadImageFileFromGroup(GetFileGroup( "Image Resources", NULL ), (TEXTSTR)n):NULL)
+#define LoadImg(n) ((n)?LoadImageFile((TEXTSTR)n):NULL)
 	if( canvas )
 		if( canvas->flags.bEditMode ) // don't do fixup/reveal if editing...
 		{
@@ -4376,7 +4377,7 @@ ATEXIT_PRIORITY( ExitMisc, ATEXIT_PRIORITY_DEFAULT + 1 )
 		if( !g.flags.multi_edit )
 		{
 #ifndef __NO_OPTIONS__
-			if( SACK_GetProfileIntEx( GetProgramName(), "Destroy Controls at exit", 0, TRUE ) )
+			if( 0 )//SACK_GetProfileIntEx( GetProgramName(), "Destroy Controls at exit", 0, TRUE ) )
 #else
 			if(0)
 #endif
@@ -5155,7 +5156,7 @@ GetCommonButtonControls
 , InterShell_DisablePageUpdate					
 , RestoreCurrentPage						
 , HidePageExx
-, NULL //InterShell_DisableButtonPageChange
+, InterShell_DisableButtonPageChange
 , CreateLabelVariable					
 , CreateLabelVariableEx					
 , LabelVariableChanged					
@@ -5208,8 +5209,8 @@ PRELOAD( RegisterInterShellInterface )
 	{
 		RegisterClassAlias( WIDE( "system/interfaces/InterShell" ), WIDE( "system/interfaces/MILK" ));
 		RegisterClassAlias( WIDE( "InterShell" ), WIDE( "MILK" ) );
-		//RegisterClassAlias( WIDE( "psi/Resources/InterShell" ), WIDE( "psi/Resources/MILK" ) );
 		RegisterClassAlias( WIDE( "sack/widgets" ), WIDE( "altanik/widgets" ) );
+		RegisterClassAlias( WIDE( "psi/Resources/InterShell" ), WIDE( "psi/Resources/MILK" ) );
 	}
 }
 

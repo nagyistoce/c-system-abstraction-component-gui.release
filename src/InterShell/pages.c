@@ -965,6 +965,13 @@ OnDestroyControl( PAGE_CHANGER_NAME )( PTRSZVAL psv )
    Release( (PPAGE_DATA)psv );
 }
 
+void InterShell_DisableButtonPageChange( PMENU_BUTTON button )
+{
+	// set a one shot flag to disable the change associated with this button.
+   if( button )
+		button->flags.bIgnorePageChange = 1;
+}
+
 #undef UpdateButtonEx
 PUBLIC( void, UpdateButtonEx )( PMENU_BUTTON button, int bEndingEdit  )
 {
