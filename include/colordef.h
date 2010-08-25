@@ -122,6 +122,7 @@ SACK_NAMESPACE
    See Also
    <link Colors>                                             */
 #define BASE_COLOR_BROWN         Color( 140, 140, 0 )
+#define BASE_COLOR_LIGHTBROWN         Color( 221, 221, 85 )
 #define BASE_COLOR_MAGENTA       Color( 160, 0, 160 )
 #define BASE_COLOR_LIGHTGREY     Color( 192, 192, 192 )
 /* An opaque darker grey (gray?).
