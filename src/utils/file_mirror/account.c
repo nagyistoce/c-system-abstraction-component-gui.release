@@ -45,8 +45,6 @@ char defaultlogin[128];
 extern int bUseWatchdog;
 extern int bEnableBroadcast;
 extern int bForceLowerCase;
-extern int bGetWinners; // contact a dekware scan agent to parse winners.
-extern int bReceiveLinkedPacket;
 
 #define FILEPERMS
 
@@ -862,23 +860,6 @@ PTRSZVAL CPROC SetAccountAddress( PTRSZVAL psv, arg_list args )
 
 //-------------------------------------------------------------------------
 
-PTRSZVAL CPROC SetWinnerPort( PTRSZVAL psv, arg_list args )
-{
-    PARAM( args, S_64, port );
-    PACCOUNT account;
-    if( account = (PACCOUNT)psv )
-    {
-        account->WinnerPort = port;
-    }
-    else
-    {
-      Log( "Winner port specified without a user name." );
-    }
-   return psv;
-}
-
-//-------------------------------------------------------------------------
-
 PTRSZVAL CPROC SetServerAddress( PTRSZVAL psv, arg_list args )
 {
     PARAM( args, char *, address );
@@ -914,24 +895,6 @@ PTRSZVAL CPROC SetUseWatchdog( PTRSZVAL psv, arg_list args )
 {
     PARAM( args, LOGICAL, bit );
    bUseWatchdog = bit;
-   return psv;
-}
-
-//-------------------------------------------------------------------------
-
-PTRSZVAL CPROC SetReceiveLinked( PTRSZVAL psv, arg_list args )
-{
-    PARAM( args, LOGICAL, bit );
-   bReceiveLinkedPacket = bit;
-   return psv;
-}
-
-//-------------------------------------------------------------------------
-
-PTRSZVAL CPROC SetUseDekware( PTRSZVAL psv, arg_list args )
-{
-    PARAM( args, LOGICAL, bit );
-   bGetWinners = bit;
    return psv;
 }
 
@@ -985,13 +948,10 @@ int ReadAccounts( char *configname )
    AddConfiguration( pch, "incoming=%m", AddIncomingPath );
    AddConfiguration( pch, "outgoing=%m", AddOutgoingPath );
     AddConfiguration( pch, "listen=%w", SetAccountAddress );
-    AddConfiguration( pch, "winners=%i", SetWinnerPort );
     //AddConfiguration( pch, "allow=%w", AddAllowedAddress );
     AddConfiguration( pch, "server=%w", SetServerAddress );
     AddConfiguration( pch, "login=%w", SetLoginName );
     AddConfiguration( pch, "watchdog=%b", SetUseWatchdog );
-    AddConfiguration( pch, "receive=%b", SetReceiveLinked );
-    AddConfiguration( pch, "dekware=%b", SetUseDekware );
     AddConfiguration( pch, "broadcast=%b", SetSendBroadcast );
     //AddConfiguration( pch, "forcecase=%b", SetForceCase );
     SetConfigurationEndProc( pch, FinishReading );
@@ -999,196 +959,3 @@ int ReadAccounts( char *configname )
    DestroyConfigurationEvaluator( pch );
    return 0;
 }
-// $Revision: 1.65 $
-// $Log: account.c,v $
-// Revision 1.65  2003/11/10 15:42:19  jim
-// Massive changes to port to newest filemon lib
-//
-// Revision 1.64  2003/07/25 15:57:44  jim
-// Update to make watcom compile happy
-//
-// Revision 1.63  2003/06/02 22:48:22  jim
-// Intense logging added - found problem code though
-//
-// Revision 1.62  2003/06/02 19:08:29  jim
-// Added errno definition header
-//
-// Revision 1.61  2003/06/02 19:05:58  jim
-// Restored some logging... Added som elogging, handled failures better
-//
-// Revision 1.60  2003/04/23 17:47:02  jim
-// When logging in - send options.... Windows clients will tell linux clients to force lower case...
-//
-// Revision 1.59  2003/04/21 22:09:34  jim
-// Add some logging and safeguards... for when things DO go bad.
-//
-// Revision 1.58  2003/04/21 17:45:52  jim
-// And ask for the correct size of missing file.
-//
-// Revision 1.57  2003/04/21 17:34:32  jim
-// When the file doesn't exist... build the right requests
-//
-// Revision 1.56  2003/04/21 15:46:22  jim
-// Modify the scan loop - max out segment sends...
-//
-// Revision 1.55  2003/04/18 22:40:16  jim
-// And remove the 'current' monitor at logout
-//
-// Revision 1.54  2003/04/18 22:24:03  jim
-// Don't destory a file while it's queued... isntead mark it for later destruction
-//
-// Revision 1.53  2003/04/18 21:36:47  jim
-// Delay deletions into change queue.
-//
-// Revision 1.52  2003/04/18 20:38:34  jim
-// Cleaned up unused variables, and quietened logging
-//
-// Revision 1.51  2003/04/18 17:48:00  jim
-// Add another layer of delay of forwarding changes.
-//
-// Revision 1.50  2003/04/18 15:42:59  jim
-// Log when we get the data for a file we requested..
-//
-// Revision 1.49  2003/04/17 23:08:57  jim
-// Cleanup better on Logout
-//
-// Revision 1.48  2003/04/17 22:09:37  jim
-// Set monitors on the account more correctly.
-//
-// Revision 1.47  2003/04/17 22:08:21  jim
-// ...
-//
-// Revision 1.46  2003/04/17 19:23:27  jim
-// Windows build compatibility.  Should build stat requests to result in deletions.
-//
-// Revision 1.45  2003/04/17 18:38:59  jim
-// CHeck directory even before lowering the case
-//
-// Revision 1.44  2003/04/17 18:38:10  jim
-// Fix handling 'what' responce.  Validate directory before opening a file
-//
-// Revision 1.43  2003/04/17 17:21:28  jim
-// Oops - variable fumble
-//
-// Revision 1.42  2003/04/17 17:02:51  jim
-// Oops strncmp not strcmp
-//
-// Revision 1.41  2003/04/16 23:52:56  jim
-// Added docs.  Added forcecase option
-//
-// Revision 1.40  2003/04/15 21:48:57  jim
-// Standardize to non-standard linux/fcntl.h
-//
-// Revision 1.39  2003/04/08 16:55:06  jim
-// Handle options better.
-//
-// Revision 1.38  2003/04/08 16:17:30  jim
-// Add first command pararmeter as configname
-//
-// Revision 1.37  2003/04/07 22:52:50  jim
-// Updates to linuxfiles, makefile typo fixed
-//
-// Revision 1.36  2003/04/07 18:50:48  jim
-// Enabled more program level logging by default
-//
-// Revision 1.35  2003/04/07 17:35:05  jim
-// Comment out noisy logging
-//
-// Revision 1.34  2003/04/04 23:27:13  jim
-// Use correctly sized buffer for reading...
-//
-// Revision 1.33  2003/04/04 23:18:11  jim
-// Cleaning up logging - but it looks like all is a go.
-//
-// Revision 1.32  2003/04/04 23:01:17  jim
-// Fix when to queue the monitor to the account - otherwise we wait too long.
-//
-// Revision 1.31  2003/04/04 22:26:10  jim
-// Dang typos..
-//
-// Revision 1.30  2003/04/04 22:25:07  jim
-// Used wrong name on outgoing CRC construction.
-//
-// Revision 1.29  2003/04/04 19:20:30  jim
-// Changes to monitor CRC blocks of the file.
-//
-// Revision 1.28  2003/04/04 00:18:57  jim
-// Make sure logging statements after elses are wrapped in {}
-//
-// Revision 1.27  2003/04/03 23:57:08  jim
-// Forced logging... cleaned up opening windows monitor.  fixed KILL message
-//
-// Revision 1.26  2003/04/03 22:03:07  jim
-// Call logout better...
-//
-// Revision 1.25  2003/04/03 21:53:54  jim
-// Supply a logout function to cleanup accounts
-//
-// Revision 1.24  2003/04/03 21:00:31  jim
-// Do file monitor opens in login
-//
-// Revision 1.23  2003/04/03 20:06:11  jim
-// Removed many loggings - shortened timeout - soon to be config param.
-//
-// Revision 1.22  2003/04/03 19:51:28  jim
-// Move logging a bit - check the stat of files, yeah?
-//
-// Revision 1.21  2003/04/03 18:53:44  jim
-// Added much loggings
-//
-// Revision 1.20  2003/04/03 16:56:00  jim
-// Log pathname instead of path ID
-//
-// Revision 1.19  2003/04/03 16:49:34  jim
-// Minor typos...
-//
-// Revision 1.18  2003/04/03 16:47:18  jim
-// Go through account layer to get change updates.  Pass account when creating a file monitor
-//
-// Revision 1.17  2003/04/03 01:33:09  jim
-// Add support option to ignore getting winners from local parser
-//
-// Revision 1.16  2003/04/03 01:19:38  jim
-// Oops forgot to copy the name to the new buffer
-//
-// Revision 1.15  2003/04/02 23:30:23  jim
-// Disable splashman, watchdog, broadcast interfaces optionally
-//
-// Revision 1.14  2003/04/02 23:21:48  jim
-// Should now handle filemasks, and multiple incoming/outgiong directories
-//
-// Revision 1.13  2003/02/19 00:24:11  jim
-// Think somewhere I lost some revisions on linux make... Compatibility with new make system portings
-//
-// Revision 1.12  2002/08/07 14:48:58  panther
-// Modified logging in account.c
-//
-// Revision 1.11  2002/08/07 14:47:38  panther
-// Adding locking - especially important with windows.
-// Also release the allocated read buffer.
-//
-// Revision 1.10  2002/07/17 17:26:53  panther
-// Fixing tracking of master caller statuses...
-//
-// Revision 1.9  2002/07/01 14:51:43  panther
-// Added support for multiple 'common' directories
-// added support for winner information port
-//
-// Revision 1.8  2002/06/25 18:23:30  panther
-// Updated to switch to listening addresses per account, for purposes of
-// multiple callers transmitting simultaneously.
-//
-// Revision 1.7  2002/06/19 15:54:09  panther
-// Updates to listen to seperate callers for all clients connected.
-//
-// Revision 1.6  2002/04/15 22:12:51  panther
-// Updated Accounts.Data
-// remove Author tag... log is sufficent.
-//
-// Revision 1.5  2002/04/15 22:08:55  panther
-// Added additional local-only mirror ability for accounts.
-// This allows directed updates to be performed...
-//
-// Revision 1.4  2002/04/15 16:25:03  panther
-// Added Revision Tags...
-//

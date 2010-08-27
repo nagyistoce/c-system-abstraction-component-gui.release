@@ -38,75 +38,12 @@ PCONNECTION Connection;
 int bDone;
 int bUseWatchdog;
 int bEnableBroadcast;
-int bGetWinners;
 int bForceLowerCase;
-int bReceiveLinkedPacket;
 
 extern SOCKADDR *server;
 extern char defaultlogin[];
 
-_32 GetWinners;
-_16 GetWinnerPort;
 extern PNETBUFFER NetworkBuffers;
-
-//---------------------------------------------------------------------------
-
-void SendCallerStatus( PCLIENT pc )
-{
-    _32 msg[2];
-    PNETBUFFER pCheck = NetworkBuffers;
-    PACCOUNT account = (PACCOUNT)GetNetworkLong( pc, NL_ACCOUNT );
-    msg[0] = *(_32*)"CALR";
-    while( pCheck )
-    {
-        if( account->netbuffer == pCheck )
-            break;
-        pCheck = pCheck->next;
-    }
-    if( pCheck )
-    {
-        if( pCheck->present )
-            msg[1] = 0;
-        else
-            msg[1] = ( GetTickCount() - pCheck->LastMessage ) + 4000;
-        SendTCP( pc, msg, 8 );
-    }
-    else
-    {
-        Log( "Could not find the network buffer for caller state for connection?!" );
-    }
-}
-
-//---------------------------------------------------------------------------
-int UpdateCallerStatus( PNETBUFFER pBuffer )
-{
-    int i;
-    for( i = 0; i < maxconnections; i++ )
-    {
-        PACCOUNT account;
-        if( !Connection[i].pc )
-            continue;
-        if( !NetworkLock( Connection[i].pc ) )
-            continue;
-        account = (PACCOUNT)GetNetworkLong( Connection[i].pc, NL_ACCOUNT );
-        if( account && account->netbuffer == pBuffer )
-        {
-            _32 msg[2];
-            Log3( "Found connection listening to master caller: %s %d %ld"
-                 , account->unique_name
-                 , pBuffer->present
-                 , ( GetTickCount() - pBuffer->LastMessage ) + 4000 );
-            msg[0] = *(_32*)"CALR";
-            if( pBuffer->present )
-                msg[1] = 0;
-            else
-                msg[1] = ( GetTickCount() - pBuffer->LastMessage ) + 4000;
-            SendTCP( Connection[i].pc, msg, 8 );
-        }
-        NetworkUnlock( Connection[i].pc );
-    }
-    return TRUE;
-}
 
 //---------------------------------------------------------------------------
 
@@ -132,121 +69,6 @@ _32 MakeVersionCode( char *version )
     }
     code += accum;
     return code;
-}
-
-//---------------------------------------------------------------------------
-
-void CPROC UDPRecieve( PCLIENT pc, POINTER buffer, int size, SOCKADDR *sa ) /*FOLD00*/
-{
-    int i;
-    char msg[6];
-    static char real_buffer[1024];
-    //static int curupdate, lastsize;
-    if( !buffer )
-    {
-        if( !size )
-        {
-        }
-        else
-        {
-            //Log( "Announcing current state to client..." );
-            *(_32*)msg = *(_32*)"DATA";
-            {
-                if( pc )
-                {
-                    PACCOUNT account = (PACCOUNT)GetNetworkLong( pc, NL_ACCOUNT );
-                    if( account )
-                    {
-                        if( account->netbuffer->valid )
-                        {
-                            *(short*)&msg[4] = account->netbuffer->size;
-                            // in theory this can get grouped together?
-                            //Log1( "Writing Game packet to %s", account->unique_name );
-                            if( SendTCPEx( pc, msg, 6, TRUE ) )
-                            {
-                                if( *(short*)&msg[4] )
-                                    SendTCP( pc
-                                             , account->netbuffer->buffer
-                                             , account->netbuffer->size );
-                            }
-                        }
-                    }
-                    // send little endian to be nice to ourselves
-                    return; // do NOT queue a UDP read here....
-                }
-            }
-        }
-    }
-    else
-    {
-        //int bDidUpdate;
-        PNETBUFFER pCheck;
-        pCheck = NetworkBuffers;
-        while( pCheck )
-        {
-            if( *(_64*)pCheck->sa == *(_64*)sa )
-            {
-                break;
-            }
-            pCheck = pCheck->next;
-        }
-        if( !pCheck )
-        {
-            Log( "Recieved a packet from a caller we weren't listening to." );
-            ReadUDP( pc, real_buffer, sizeof(real_buffer) );
-            return;
-        }
-        // if the current time elapses past this, the master
-        // caller (for this buffer) has left;
-        pCheck->LastMessage = GetTickCount() + 4000;
-        if( !pCheck->present )
-        {
-            pCheck->present = TRUE;
-            Log( "Master Caller has come back! There is joy..." );
-            UpdateCallerStatus( pCheck );
-        }
-        if( size != pCheck->size
-            || !pCheck->valid
-            || memcmp( buffer, pCheck->buffer, size ) // not zero not match.
-          )
-        {
-            pCheck->valid = 1;
-            memcpy( pCheck->buffer, buffer, size );
-            pCheck->size = size;
-            for( i = 0; i < maxconnections; i++ )
-            {
-                if( Connection[i].pc )
-                {
-                    PACCOUNT account = (PACCOUNT)GetNetworkLong( Connection[i].pc, NL_ACCOUNT );
-                    if( account && ( account->netbuffer == pCheck ) )
-                    {
-                        *(_32*)msg = *(_32*)"DATA";
-                        // send little endian to be nice to ourselves
-                        *(short*)&msg[4] = size;
-                        // in theory this can get grouped together?
-                        //Log1( "Writing Game packet to %s", account->unique_name );
-                        if( SendTCPEx( Connection[i].pc, msg, 6, TRUE ) )
-                        {
-                            SendTCP( Connection[i].pc
-                                     , pCheck->buffer
-                                     , pCheck->size);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    ReadUDP( pc, real_buffer, sizeof(real_buffer) );
-}
-
-//---------------------------------------------------------------------------
-
-void CPROC UDPClose( PCLIENT pc ) /*FOLD00*/
-{
-    // this never happens?
-    UDPListen = ServeUDP( "localhost", 3000, UDPRecieve, UDPClose );
-    if( !UDPListen )
-        Log( "Failed to reopen the closed UDP Listener (Relay Server)" );
 }
 
 //---------------------------------------------------------------------------
@@ -430,7 +252,7 @@ void CPROC TCPRead( PCLIENT pc, POINTER buffer, int size ) /*FOLD00*/
     int toread = 4;
     SetNetworkLong( pc
                       , NL_LASTMSGTIME
-                      , dwLastReceive = GetTickCount() );
+                      , dwLastReceive = timeGetTime() );
     if( !buffer )
     {
         buffer = Allocate( 4096 );
@@ -448,40 +270,10 @@ void CPROC TCPRead( PCLIENT pc, POINTER buffer, int size ) /*FOLD00*/
             Log2( "Got Msg: %d %4.4s", size, buffer );
             ((_8*)buffer)[4] = 0;
 
-            // caller status - when it goes away, when it comes back...
-            if( *(_32*)buffer == *(_32*)"CALR" )
+            if( *(_32*)buffer == *(_32*)"OPTS" )
             {
                 SetLastMsg( *(_32*)buffer );
                 toread = 4;
-                LogKnown = FALSE; //
-            }
-            else if( *(_32*)buffer == *(_32*)"OPTS" )
-            {
-                SetLastMsg( *(_32*)buffer );
-                toread = 4;
-            }
-            else if( *(_32*)buffer == *(_32*)"WIN?" )
-            {
-                // 2.5 second delay fairly arbitrary...
-                // but this at least allows multiple destinations to
-                // simultaneously ask for winners and group them together.
-                // since often they WILL be asking based off the same event
-                // which this thing sourced.
-                // delay shortened to 500 mils, this lessens the chance
-                // of caller servers winning exactly the same time
-                // and losing 1/2 the results.
-                _32 IP = GetNetworkLong( pc, GNL_IP );
-                PACCOUNT pAccount;
-                Log1( "%s is asking for a winner", inet_ntoa( *(struct in_addr*)&IP ) );
-                if( pAccount = (PACCOUNT)GetNetworkLong(pc, NL_ACCOUNT) )
-                {
-                    GetWinnerPort = ((PACCOUNT)GetNetworkLong(pc, NL_ACCOUNT))->WinnerPort;
-                    GetWinners = GetTickCount() + 500;
-                }
-                else
-                {
-                    Log( "Account was not found to get the winner port for." );
-                }
             }
             else if( *(_32*)buffer == *(_32*)"DATA" )
             {
@@ -498,7 +290,7 @@ void CPROC TCPRead( PCLIENT pc, POINTER buffer, int size ) /*FOLD00*/
                 {
                     MonitorForgetAll( pDir->monitor );
                 }
-                account->DoScanTime = GetTickCount() - 1;
+                account->DoScanTime = timeGetTime() - 1;
             }
             else if( *(_32*)buffer == *(_32*)"PONG" )
             {
@@ -868,10 +660,6 @@ void CPROC TCPRead( PCLIENT pc, POINTER buffer, int size ) /*FOLD00*/
                     SendTCP( pc, "OKAY", 4 );
                     SetNetworkLong( pc, NL_ACCOUNT, (_32)login );
                     SendTimeEx( pc, FALSE );
-                    // special case to send current state to the currently
-                    // connecting network client...
-                    UDPRecieve( pc, NULL, 1, NULL );
-                    SendCallerStatus( pc );
                     // for all incoming directories - scan them, and report
                     // for 'stat' of files.
                 }
@@ -948,46 +736,6 @@ void *DoUpdate( void *data ) /*FOLD00*/
 
 //---------------------------------------------------------------------------
 
-void CPROC ReadWinnersController( PCLIENT pc, POINTER buffer, int size )
-{
-    if( !buffer )
-    {
-        buffer = Allocate( 1024 );
-    }
-    else
-    {
-        PCLIENT pccontrol = (PCLIENT)GetNetworkLong( pc, 0 );
-        char *buf = buffer;
-        int c, len, end;
-        buf[size] = 0;
-        Log2( "Got a message sized for controller %d: %s", size, buf );
-
-        for( c = 0; c < size; c++ )
-        {
-            if( buf[c] == '*' )
-            {
-                //len = ( size - c ) - 1;
-                end = c;
-                while( buf[end] >= 32 )
-                    end++;
-                len = end-c;
-                if( pccontrol )
-                {
-                    SendTCP( pccontrol, "WINNERS:", 8 );
-                    SendTCP( pccontrol, &len, 1 );
-                    SendTCP( pccontrol, buf+c+1, len & 0xFF );
-                    SendTCP( pccontrol, "ALL DONE", 8 );
-                }
-                RemoveClient( pc );
-                return;
-            }
-        }
-    }
-    ReadTCP( pc, buffer, 1024 );
-}
-
-//---------------------------------------------------------------------------
-
 void CPROC TCPControlRead( PCLIENT pc, POINTER buffer, int size ) /*FOLD00*/
 {
     int toread = 8;
@@ -1032,49 +780,6 @@ void CPROC TCPControlRead( PCLIENT pc, POINTER buffer, int size ) /*FOLD00*/
         {
             Log( "Someone's asking for time... " );
             SendTimeEx( pc, TRUE );
-        }
-        else if( *(_64*)buffer == *(_64*)"WINNERS!" )
-        {
-            Log( "Supposed to do an update of winners NOW" );
-            Log( "Can no longer get winners - have to specify a 'region' to udpate from or something" );
-            //GetWinners = GetTickCount();
-            SendTCP( pc, "ALL DONE", 8 );
-        }
-        else if( *(_64*)buffer == *(_64*)"WINNERS?" )
-        {
-            //PACCOUNT account  = (PACCOUNT)GetNetworkLong( Connection[i].pc, NL_ACCOUNT );
-            {
-                PCLIENT pcWinCheck = OpenTCPClientEx( "localhost", 3033, ReadWinnersController, NULL, NULL );
-                if( !pcWinCheck )
-                {
-                    int len;
-                    char buf[256];
-                    Log( "Log server is down... report error.." );
-                    len = sprintf( buf, "Winner,report,agent,down." );
-
-                    SendTCP( pc, "WINNERS:", 8 );
-                    SendTCP( pc, &len, 1 );
-                    SendTCP( pc, buf, len );
-                }
-                else
-                    SetNetworkLong( pcWinCheck, 0, (PTRSZVAL)pc );
-            }
-            {
-                PCLIENT pcWinCheck = OpenTCPClientEx( "localhost", 3034, ReadWinnersController, NULL, NULL );
-                if( !pcWinCheck )
-                {
-                    int len;
-                    char buf[256];
-                    Log( "Log server is down... report error.." );
-                    len = sprintf( buf, "Winner,report,agent,down." );
-
-                    SendTCP( pc, "WINNERS:", 8 );
-                    SendTCP( pc, &len, 1 );
-                    SendTCP( pc, buf, len );
-                }
-                else
-                    SetNetworkLong( pcWinCheck, 0, (PTRSZVAL)pc );
-            }
         }
         else if( *(_64*)buffer == *(_64*)"MASTER??" )
         {
@@ -1186,7 +891,7 @@ void CPROC TCPControlRead( PCLIENT pc, POINTER buffer, int size ) /*FOLD00*/
                                  {
                                      MonitorForgetAll( pDir->monitor );
                                  }
-                                 account->DoScanTime = GetTickCount() - 1;
+                                 account->DoScanTime = timeGetTime() - 1;
                                  if( user )
                                  {
                                      SendTCP( pc, "ALL DONE", 8 ); // having problems closing this - messages don't get out
@@ -1272,7 +977,7 @@ void CPROC TCPConnection( PCLIENT pServer, PCLIENT pNew ) /*FOLD00*/
             _32 dwIP = GetNetworkLong( pNew, GNL_IP );
             Log2( "New client %d %s", i, inet_ntoa( *(struct in_addr*)&dwIP ) );
             SetNetworkLong( pNew, NL_CONNECTION, (_32)(Connection + i) );
-            Connection[i].LastCommunication = GetTickCount();
+            Connection[i].LastCommunication = timeGetTime();
             Connection[i].pc = pNew;
             SetCloseCallback( pNew, TCPClose );
             SetReadCallback( pNew, TCPRead );
@@ -1289,66 +994,6 @@ void CPROC TCPConnection( PCLIENT pServer, PCLIENT pNew ) /*FOLD00*/
 
 //---------------------------------------------------------------------------
 
-void CPROC ReadWinners( PCLIENT pc, POINTER buffer, int size )
-{
-    if( !buffer )
-    {
-      // /echo *%(winners)lastsession winners: %(winners)lastwinners
-            Log( "Sending request for winners..." );
-        buffer = Allocate( 1024 );
-    //  SendTCP( pc, "/echo *%%(winners)lastsession winners: %%(winners)lastwinners\r"
-    //                  , 60 );
-    }
-    else
-   {
-       char *buf = buffer;
-       int c, i, len, end;
-       buf[size] = 0;
-       Log2( "Got a message sized %d: %s", size, buf );
-       for( c = 0; c < size; c++ )
-       {
-           if( buf[c] == '*' )
-           {
-               //len = ( size - c ) - 1;
-               end = c;
-               while( buf[end] >= 32 )
-                  end++;
-               len = end-c;
-               for( i = 0; i < maxconnections; i++ )
-               {
-                   PCLIENT pcsend = NetworkLock( Connection[i].pc );
-                   PACCOUNT account;
-                   if( pcsend )
-                   {
-                       account = (PACCOUNT)GetNetworkLong( pcsend, NL_ACCOUNT );
-                       if( account && ( account->WinnerPort == GetWinnerPort ) )
-                       {
-                                 if( GetNetworkLong( Connection[i].pc, NL_VERSION ) >= VER_CODE(1,11) )
-                                 {
-                                    SendTCP( pcsend, "WNRS", 4 );
-                                    SendTCP( pcsend, &len, 1 );
-                                    SendTCP( pcsend, buf+c+1, len & 0xFF );
-                                 }
-                                 else
-                                 {
-                           SendTCP( pcsend, "MARQ", 4 );
-                           SendTCP( pcsend, &len, 1 );
-                           SendTCP( pcsend, buf+c+1, len & 0xFF );
-                         }
-                       }
-                       NetworkUnlock( pcsend );
-                   }
-               }
-               RemoveClient( pc );
-               return;
-           }
-       }
-    }
-    ReadTCP( pc, buffer, 1024 );
-}
-
-//---------------------------------------------------------------------------
-
 int bServerRunning;
 
 PTRSZVAL CPROC ServerTimerProc( PTHREAD unused )
@@ -1357,44 +1002,6 @@ PTRSZVAL CPROC ServerTimerProc( PTHREAD unused )
     while(1)
     {
         int i;
-        PNETBUFFER pCheck = NetworkBuffers;
-
-        if( bReceiveLinkedPacket )
-            while( pCheck )
-            {
-                // if the caller is already absent (!present) don't check his time.
-                if( pCheck->present && GetTickCount() > pCheck->LastMessage )
-                {
-                    Log( "A caller has dissappeared.  Setting status." );
-                    pCheck->present = 0;
-                    UpdateCallerStatus( pCheck );
-                }
-                pCheck = pCheck->next;
-            }
-
-
-        if( bGetWinners && GetWinners && ( GetTickCount() > GetWinners ) )
-        {
-            PCLIENT pc = OpenTCPClientEx( "localhost", GetWinnerPort, ReadWinners, NULL, NULL );
-            if( !pc )
-            {
-                for( i = 0; i < maxconnections; i++ )
-                {
-                    PCLIENT pcping = NetworkLock( Connection[i].pc );
-                    if( pcping )
-                    {
-                        PACCOUNT account = (PACCOUNT)GetNetworkLong( pcping, NL_ACCOUNT );
-                        if( account )
-                        {
-                            if( account->WinnerPort == GetWinnerPort )
-                                SendTCP( pcping, "MARQ\x10" "Winners: unknown", 21 );
-                        }
-                        NetworkUnlock( pcping );
-                    }
-                }
-            }
-            GetWinners = 0;
-        }
 
         for( i = 0; i < maxconnections; i++ )
         {
@@ -1408,7 +1015,7 @@ PTRSZVAL CPROC ServerTimerProc( PTHREAD unused )
                 // really 2 pings (3rd fail) but we pad an extra
                 // just to be certain....
                 if( ( GetNetworkLong( pcping, NL_LASTMSGTIME ) + 13000 )
-                    < GetTickCount() )
+                    < timeGetTime() )
 
                 {
                     if( GetNetworkLong( pcping, NL_PINGS_SENT ) > 4 )
@@ -1421,7 +1028,7 @@ PTRSZVAL CPROC ServerTimerProc( PTHREAD unused )
                     }
                     else
                     {
-                        SetNetworkLong( pcping, NL_LASTMSGTIME, GetTickCount() );
+                        SetNetworkLong( pcping, NL_LASTMSGTIME, timeGetTime() );
                         SetNetworkLong( pcping, NL_PINGS_SENT
                                           , GetNetworkLong( pcping, NL_PINGS_SENT ) + 1 );
                         SendTCP( pcping, "PING", 4 );
@@ -1430,7 +1037,7 @@ PTRSZVAL CPROC ServerTimerProc( PTHREAD unused )
                 NetworkUnlock( pcping );
             }
         }
-        Sleep( 2000 );
+        WakeableSleep( 2000 );
     }
    bServerRunning = 0;
    return 0;
@@ -1501,7 +1108,7 @@ PTRSZVAL CPROC ClientTimerProc( PTHREAD thread )
             if( !NetworkLock( TCPClient ) )
                 return 0;
             if( ( GetNetworkLong( TCPClient, NL_LASTMSGTIME ) + 10000 )
-                < GetTickCount() )
+                < timeGetTime() )
             {
                 if( GetNetworkLong( TCPClient, NL_PINGS_SENT ) > 10 )
                 {
@@ -1514,8 +1121,8 @@ PTRSZVAL CPROC ClientTimerProc( PTHREAD thread )
                 else
                 {
 
-                    SetNetworkLong( TCPClient, NL_LASTMSGTIME, GetTickCount() );
-                    dwLastReceive = GetTickCount();
+                    SetNetworkLong( TCPClient, NL_LASTMSGTIME, timeGetTime() );
+                    dwLastReceive = timeGetTime();
 
                     SetNetworkLong( TCPClient, NL_PINGS_SENT
                                       , GetNetworkLong( TCPClient, NL_PINGS_SENT ) + 1 );
@@ -1655,7 +1262,7 @@ int main( char argc, char **argv ) /*FOLD00*/
 			if( !UDPBroadcast )
 			{
 				Log( "Failed to open the socket we're going to broadcast from" );
-				Sleep( 2000 ); // wait 2 seconds
+				WakeableSleep( 2000 ); // wait 2 seconds
 			}
 			else
 			{
@@ -1663,19 +1270,6 @@ int main( char argc, char **argv ) /*FOLD00*/
 				// UDPEnableBroadcast( UDPBroadcast, TRUE );
 			}
 		} while( !UDPBroadcast );
-	}
-
-	if( bReceiveLinkedPacket )
-	{
-		do
-		{
-			UDPListen = ServeUDP( NULL, 3000, UDPRecieve, UDPClose );
-			if( !UDPListen )
-			{
-				Log( "Failed to open UDP listener" );
-				Sleep(15000);
-			}
-		} while( !UDPListen );
 	}
 
 	if( NetworkBuffers ) // had someone to listen to...
@@ -1705,11 +1299,11 @@ int main( char argc, char **argv ) /*FOLD00*/
 	if( pClient )
 		WakeThread( pClient );
 	{
-		_32 start = GetTickCount() + 1000;
-		while( bServerRunning && ( start < GetTickCount() ) )
+		_32 start = timeGetTime() + 1000;
+		while( bServerRunning && ( start < timeGetTime() ) )
 			Relinquish();
 		EndThread( pServer );
-		while( bClientRunning && ( start < GetTickCount() ) )
+		while( bClientRunning && ( start < timeGetTime() ) )
 			Relinquish();
 		EndThread( pClient );
 	}
