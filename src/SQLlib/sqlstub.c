@@ -971,7 +971,7 @@ void CPROC CommitTimer( PTRSZVAL psv )
 {
 	PODBC odbc = (PODBC)psv;
    if( odbc->last_command_tick )
-		if( odbc->last_command_tick < ( GetTickCount() - 250 ) )
+		if( odbc->last_command_tick < ( GetTickCount() - 5000 ) )
 		{
 			RemoveTimer( odbc->commit_timer );
 			odbc->flags.bAutoTransact = 0;
@@ -986,12 +986,14 @@ void CPROC CommitTimer( PTRSZVAL psv )
 
 void SQLCommit( PODBC odbc )
 {
+#if 0
 	int n = odbc->flags.bAutoTransact;
 	odbc->last_command_tick = 0;
 	odbc->flags.bAutoTransact = 0;
 	RemoveTimer( odbc->commit_timer );
 	SQLCommand( odbc, "COMMIT" );
 	odbc->flags.bAutoTransact = n;
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -1000,11 +1002,11 @@ void BeginTransact( PODBC odbc )
 {
 	// I Only test this for SQLITE, specifically the optiondb.
 	// this transaction phrase is not really as important on server based systems.
-	if( odbc->flags.bAutoTransact )
+	if( 0 && odbc->flags.bAutoTransact )
 	{
 		if( !odbc->last_command_tick )
 		{
-			odbc->commit_timer = AddTimer( 100, CommitTimer, (PTRSZVAL)odbc );
+			//odbc->commit_timer = AddTimer( 100, CommitTimer, (PTRSZVAL)odbc );
 			odbc->flags.bAutoTransact = 0;
 #ifdef USE_SQLITE
 			if( odbc->flags.bSQLite_native )
@@ -1021,8 +1023,8 @@ void BeginTransact( PODBC odbc )
 				SQLCommand( odbc, "START TRANSACTION" );
 			}
 			odbc->flags.bAutoTransact = 1;
-			odbc->last_command_tick = GetTickCount();
 		}
+		odbc->last_command_tick = GetTickCount();
 	}
 }
 
