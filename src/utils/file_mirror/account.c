@@ -43,7 +43,6 @@ SOCKADDR *server;
 PNETBUFFER NetworkBuffers;
 char defaultlogin[128];
 extern int bUseWatchdog;
-extern int bEnableBroadcast;
 extern int bForceLowerCase;
 
 #define FILEPERMS
@@ -900,15 +899,6 @@ PTRSZVAL CPROC SetUseWatchdog( PTRSZVAL psv, arg_list args )
 
 //-------------------------------------------------------------------------
 
-PTRSZVAL CPROC SetSendBroadcast( PTRSZVAL psv, arg_list args )
-{
-    PARAM( args, LOGICAL, bit );
-   bEnableBroadcast = bit;
-   return psv;
-}
-
-//-------------------------------------------------------------------------
-
 PTRSZVAL CPROC SetForceCase( PTRSZVAL psv, arg_list args )
 {
     PARAM( args, char *, opt );
@@ -952,7 +942,6 @@ int ReadAccounts( char *configname )
     AddConfiguration( pch, "server=%w", SetServerAddress );
     AddConfiguration( pch, "login=%w", SetLoginName );
     AddConfiguration( pch, "watchdog=%b", SetUseWatchdog );
-    AddConfiguration( pch, "broadcast=%b", SetSendBroadcast );
     //AddConfiguration( pch, "forcecase=%b", SetForceCase );
     SetConfigurationEndProc( pch, FinishReading );
    ProcessConfigurationFile( pch, configname, 0 );
