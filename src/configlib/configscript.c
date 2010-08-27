@@ -1644,7 +1644,7 @@ int IsFilePathVar( PCONFIG_ELEMENT pce, PTEXT *start )
 }
 
 //---------------------------------------------------------------------
-
+#if !defined( __NO_NETWORK__ ) && 0
 int IsAddressVar( PCONFIG_ELEMENT pce, PTEXT *start )
 {
 	PTEXT pWords = NULL;
@@ -1673,7 +1673,7 @@ int IsAddressVar( PCONFIG_ELEMENT pce, PTEXT *start )
 	}
 	return FALSE;
 }
-
+#endif
 //---------------------------------------------------------------------
 
 int IsURLVar( PCONFIG_ELEMENT pce, PTEXT *start )
