@@ -21,9 +21,6 @@
 #define GetLastMsg GetNetworkLong( pc, NL_LASTMSG )
 #define SetLastMsg(n) SetNetworkLong( pc, NL_LASTMSG, (n) )
 
-PCLIENT UDPListen;
-SOCKADDR *saBroadcast[2];
-PCLIENT UDPBroadcast;
 PCLIENT TCPClient, TCPControl;
 int maxconnections;
 typedef struct connection_tag {
@@ -37,7 +34,6 @@ PCONNECTION Connection;
 
 int bDone;
 int bUseWatchdog;
-int bEnableBroadcast;
 int bForceLowerCase;
 
 extern SOCKADDR *server;
@@ -80,13 +76,6 @@ void CPROC TCPClose( PCLIENT pc ) /*FOLD00*/
     {
         TCPClient = NULL;
         Logout( (PACCOUNT)GetNetworkLong( pc, NL_ACCOUNT ) );
-        if( UDPBroadcast )
-        {
-            _32 msg[2];
-            msg[0] = *(_32*)"CONN";
-            msg[1] = 0;
-            SendUDPEx( UDPBroadcast, msg, 8, saBroadcast[1] );
-        }
         return;
     }
 
@@ -263,7 +252,7 @@ void CPROC TCPRead( PCLIENT pc, POINTER buffer, int size ) /*FOLD00*/
     else
     {
         int LogKnown = TRUE;
-        // handle receive DATA, PING/PONG
+        // handle receive PING/PONG
         if( !GetLastMsg && size == 4 )
         {
             // should really option verbose logging or not...
@@ -274,12 +263,6 @@ void CPROC TCPRead( PCLIENT pc, POINTER buffer, int size ) /*FOLD00*/
             {
                 SetLastMsg( *(_32*)buffer );
                 toread = 4;
-            }
-            else if( *(_32*)buffer == *(_32*)"DATA" )
-            {
-                SetLastMsg( *(_32*)buffer );
-                toread = 2;
-                LogKnown = FALSE;
             }
             else if( *(_32*)buffer == *(_32*)"SCAN" )
             {
@@ -367,9 +350,7 @@ void CPROC TCPRead( PCLIENT pc, POINTER buffer, int size ) /*FOLD00*/
                 SetLastMsg( *(_32*)buffer );
             }
             else if( *(_32*)buffer == *(_32*)"USER"
-                      || *(_32*)buffer == *(_32*)"VERS"
-                      || *(_32*)buffer == *(_32*)"MARQ"
-                      || *(_32*)buffer == *(_32*)"WNRS" )
+                      || *(_32*)buffer == *(_32*)"VERS" )
             {
                 // message indicates the user identification of the
                 // agent connecting.... this updates his profile to
@@ -452,28 +433,6 @@ void CPROC TCPRead( PCLIENT pc, POINTER buffer, int size ) /*FOLD00*/
                     Log1( "Unknown option: %4.4s - continuing to read options", buffer );
                 }
                 goto next_read;
-            }
-            else if( (GetLastMsg == *(_32*)"DATA") )
-            {
-                toread = *(_16*)buffer;
-                SetLastMsg( GetLastMsg + 1 );
-                if( toread )
-                {
-                    ReadTCPMsg( pc, buffer, toread );
-                    return;
-                }
-            }
-            else if( UDPBroadcast && GetLastMsg == (*(_32*)"DATA")+1 )
-            {
-                Log( "Received completed data packet to send." );
-                if( !SendUDPEx( UDPBroadcast, buffer, size, saBroadcast[1] ) )
-                {
-                    Log( "Failed to broadcast to SplashMan...." );
-                }
-                if( !SendUDPEx( UDPBroadcast, buffer, size, saBroadcast[0] ) )
-                {
-                    Log( "Failed to broadcast to caller...." );
-                }
             }
             else if( GetLastMsg == *(_32*)"SEND" )
             {
@@ -608,9 +567,7 @@ void CPROC TCPRead( PCLIENT pc, POINTER buffer, int size ) /*FOLD00*/
                 }
             }
             else if( GetLastMsg == *(_32*)"USER"
-                      || GetLastMsg == *(_32*)"VERS"
-                      || GetLastMsg == *(_32*)"MARQ"
-                      || GetLastMsg == *(_32*)"WNRS" )
+                      || GetLastMsg == *(_32*)"VERS" )
             {
                 toread = *(_8*)buffer;
                 SetLastMsg( GetLastMsg + 1 );
@@ -619,16 +576,6 @@ void CPROC TCPRead( PCLIENT pc, POINTER buffer, int size ) /*FOLD00*/
                     ReadTCPMsg( pc, buffer, toread );
                     return;
                 }
-            }
-            else if( GetLastMsg == (*(_32*)"WNRS")+1 )
-            {
-                //char msg[256];
-                TEXTSTR buf = (TEXTSTR)buffer;
-                buf[size] = 0;
-#ifdef _WIN32
-                //sprintf( msg, "Relay received winner report:\n%s", buf );
-                //MessageBox( NULL, msg, "debug", MB_OK );
-#endif
             }
             else if( GetLastMsg == (*(_32*)"VERS")+1 )
             {
@@ -751,8 +698,6 @@ void CPROC TCPControlRead( PCLIENT pc, POINTER buffer, int size ) /*FOLD00*/
         {
             int i;
             Log( "Instructed to die, and I shall do so.\n" );
-            if( UDPListen )
-                RemoveClient( UDPListen );
             if( TCPClient )
                 RemoveClient( TCPClient );
             for( i = 0; i < maxconnections; i++ )
@@ -1087,14 +1032,6 @@ PTRSZVAL CPROC ClientTimerProc( PTHREAD thread )
                     Log2( "Sending message: %s(%d)", msg, len );
                     SendTCP( TCPClient, msg, len );
 #endif
-                    SendTCP( TCPClient, "WIN?", 4 );
-                    if( UDPBroadcast )
-                    {
-                        _32 msg[2];
-                        msg[0] = *(_32*)"CONN";
-                        msg[1] = 1;
-                        SendUDPEx( UDPBroadcast, msg, 8, saBroadcast[1] );
-                    }
                     NetworkUnlock( TCPClient );
                 }
             }
@@ -1198,7 +1135,6 @@ int main( char argc, char **argv ) /*FOLD00*/
 	ReadAccounts( configname );
 
 	// 10 minimum for a client...
-	// one send broadcast
 	// one control service
 	// one open to master server
 	// one watchdog discover
@@ -1249,27 +1185,6 @@ int main( char argc, char **argv ) /*FOLD00*/
 				//Sleep( 2000 );
 			}
 		} while( !TCPControl );
-	}
-	// if broadcast address genuine is used - MUST enable broadcasting.
-	//saBroadcast = CreateRemote( "255.255.255.255", 3000 );
-	if( bEnableBroadcast )
-	{
-		saBroadcast[0] = CreateRemote( "127.0.0.1", 3000 );
-		saBroadcast[1] = CreateRemote( "127.0.0.1", 3003 );
-		do
-		{
-			UDPBroadcast = ServeUDP( NULL, 3001, NULL, NULL );
-			if( !UDPBroadcast )
-			{
-				Log( "Failed to open the socket we're going to broadcast from" );
-				WakeableSleep( 2000 ); // wait 2 seconds
-			}
-			else
-			{
-				// enable broadcasting here.
-				// UDPEnableBroadcast( UDPBroadcast, TRUE );
-			}
-		} while( !UDPBroadcast );
 	}
 
 	if( NetworkBuffers ) // had someone to listen to...
