@@ -710,6 +710,7 @@ set( SACK_LIBRARIES ${SACK_LIBRARY} )
 
 if( NOT __NO_GUI__ )
 add_subdirectory( src/msgsvr/server )
+add_subdirectory( src/msgsvr/servicelist )
 endif( NOT __NO_GUI__ )
 
 if( NOT SACK_ONLY )
