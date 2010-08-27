@@ -45,11 +45,11 @@ static void CPROC RequestTimer( PRESPONCEHANDLER prh )
 		Log( WIDE("Failed to find who to ask them...") );
 }
 
-			struct handler_params {
-				int received;
-				PRESPONCEHANDLER prh;
-				SOCKADDR *sa;
-			} param;
+struct handler_params {
+	int received;
+	PRESPONCEHANDLER prh;
+	SOCKADDR *sa;
+} param;
 
 PTRSZVAL CPROC InvokeHandler( PTHREAD thread )
 {
@@ -61,39 +61,39 @@ PTRSZVAL CPROC InvokeHandler( PTHREAD thread )
 
 static void CPROC UDPMessage( PCLIENT pc, POINTER buffer, int size, SOCKADDR *sa )
 {
-   if( !buffer )
-   {
-   	Log( WIDE("Allocate Buffer for UDP Discovery messages...") );
-      buffer = Allocate( 1024 );
-   }
-   else
-   {
-      if( *(_64*)buffer == *(_64*)"IM HERE!" )
-      {
-		  	PRESPONCEHANDLER prh = responders;
-		  	_16 port;// = GetNetworkLong( pc, GNL_PORT );
+	if( !buffer )
+	{
+		Log( WIDE("Allocate Buffer for UDP Discovery messages...") );
+		buffer = Allocate( 1024 );
+	}
+	else
+	{
+		if( *(_64*)buffer == *(_64*)"IM HERE!" )
+		{
+			PRESPONCEHANDLER prh = responders;
+			_16 port;// = GetNetworkLong( pc, GNL_PORT );
 			GetAddressParts( sa, NULL, &port );
-      	//Log( WIDE("Received a responce from service!") );
-      	while( prh && (prh->port != port ) )
-      	{
-      		prh = prh->next;
-      	}
-      	if( prh && prh->HandleResponce )
-      	{
-			struct handler_params param;
-			param.sa = sa;
-			param.prh = prh;
-			param.received =0;
-      		//Log( WIDE("Found a service handler, calling it...") );
-			ThreadTo( InvokeHandler, (PTRSZVAL)&param );
-			while( !param.received )
-				Relinquish();
-	     }
-	      //else
-		   //   Log( WIDE("Could not find service handler") );
-      }
-   }
-   ReadUDP( pc, buffer, 1024 );
+			//Log( WIDE("Received a responce from service!") );
+			while( prh && (prh->port != port ) )
+			{
+				prh = prh->next;
+			}
+			if( prh && prh->HandleResponce )
+			{
+				struct handler_params param;
+				param.sa = sa;
+				param.prh = prh;
+				param.received =0;
+				//Log( WIDE("Found a service handler, calling it...") );
+				ThreadTo( InvokeHandler, (PTRSZVAL)&param );
+				while( !param.received )
+					Relinquish();
+			}
+			//else
+			//   Log( WIDE("Could not find service handler") );
+		}
+	}
+	ReadUDP( pc, buffer, 1024 );
 }
 
 
