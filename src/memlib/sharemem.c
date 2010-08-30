@@ -196,7 +196,7 @@ struct global_memory_tag global_memory_data = { 0x10000 * 0x08, 0, 1/*auto check
 #include <errno.h>
 #endif
 
-PRIORITY_PRELOAD( InitGlobal, DEFAULT_PRELOAD_PRIORITY-3 )
+PRIORITY_PRELOAD( InitGlobal, DEFAULT_PRELOAD_PRIORITY )
 {
 #ifndef __NO_OPTIONS__
 

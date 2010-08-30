@@ -79,13 +79,9 @@ static LOGICAL bThreadInitComplete = FALSE
     , bThreadInitOkay = TRUE
 	;
 
-PRIORITY_PRELOAD( InitNetworkGlobal, GLOBAL_INIT_PRELOAD_PRIORITY )
+
+PRELOAD( InitNetworkGlobalOptions )
 {
-	SimpleRegisterAndCreateGlobal( global_network_data );
-	if( !g.system_name )
-	{
-  		g.system_name = WIDE("no.network");
-	}
 #ifndef __NO_OPTIONS__
 	g.dwReadTimeout = SACK_GetProfileIntEx( "SACK", "Network/Read wait timeout", 5000, TRUE );
 	g.dwConnectTimeout = SACK_GetProfileIntEx( "SACK", "Network/Connect timeout", 10000, TRUE );
@@ -93,6 +89,15 @@ PRIORITY_PRELOAD( InitNetworkGlobal, GLOBAL_INIT_PRELOAD_PRIORITY )
 	g.dwReadTimeout = 5000;
 	g.dwConnectTimeout = 10000;
 #endif
+}
+
+PRIORITY_PRELOAD( InitNetworkGlobal, GLOBAL_INIT_PRELOAD_PRIORITY )
+{
+	SimpleRegisterAndCreateGlobal( global_network_data );
+	if( !g.system_name )
+	{
+  		g.system_name = WIDE("no.network");
+	}
 }
 
 //----------------------------------------------------------------------------

@@ -5094,6 +5094,10 @@ PRIORITY_PRELOAD( VideoRegisterInterface, VIDLIB_PRELOAD_PRIORITY )
 	   , GetDisplayInterface, DropDisplayInterface );
 	BindEventToKey( NULL, KEY_F4, KEY_MOD_RELEASE|KEY_MOD_ALT, DefaultExit, 0 );
    //EnableLoggingOutput( TRUE );
+}
+
+PRELOAD( VideoLoadOptions )
+{
 #ifndef __NO_OPTIONS__
 	l.flags.bOptimizeHide = SACK_GetProfileIntEx( "SACK", "Video Render/Optimize Hide with SWP_NOCOPYBITS", 0, TRUE );
 #ifndef NO_TRANSPARENCY

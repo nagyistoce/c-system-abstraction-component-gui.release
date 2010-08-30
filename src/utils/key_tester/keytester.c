@@ -5,7 +5,11 @@
 int CPROC Keyproc( PTRSZVAL psv, _32 keycode )
 {
 	char buffer[128];
-   int ofs = 0;
+   _32 newtime = timeGetTime();;
+   static _32 time;
+	int ofs = 0;
+	ofs += snprintf( buffer + ofs, sizeof( buffer ) - ofs, "%05d : ", newtime - time );
+   time = newtime;
 	if( keycode & KEY_PRESSED )
 		ofs += snprintf( buffer + ofs, sizeof( buffer ) - ofs, "press " );
    else

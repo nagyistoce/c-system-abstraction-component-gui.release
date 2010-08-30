@@ -322,6 +322,7 @@ PRIORITY_PRELOAD( RegisterMasterService, MESSAGE_SERVICE_PRELOAD_PRIORITY )
 	// register service returns 0 on success, and non zero base message id otherwise.
 	// register with name of NULL causes setmasterserver...
 	// this is invoked via LoadFunction( msg.core.service )
+   DebugBreak();
 	RegisterService( NULL, MasterServiceTable, NUM_FUNCTIONS );
 }
 

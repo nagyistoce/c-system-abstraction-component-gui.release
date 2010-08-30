@@ -303,7 +303,7 @@ void InvokeDeadstart( void )
 	//   return;
 	InitLocal();
    bInitialStarted = 1;
-	bSuspend = 0; // if invoking, no longer suspend.
+	//bSuspend = 0; // if invoking, no longer suspend.
 #ifdef __WINDOWS__
 	if( !bInitialDone && !bDispatched )
 	{
@@ -583,6 +583,12 @@ ROOT_ATEXIT(AutoRunExits)
 void SuspendDeadstart( void )
 {
    bSuspend = 1;
+}
+void ResumeDeadstart( void )
+{
+	bSuspend = 0;
+	if( bInitialDone )
+		InvokeDeadstart();
 }
 
 SACK_DEADSTART_NAMESPACE_END
