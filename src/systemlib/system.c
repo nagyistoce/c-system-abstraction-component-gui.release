@@ -692,7 +692,10 @@ SYSTEM_PROC( generic_function, LoadFunctionExx )( CTEXTSTR libname, CTEXTSTR fun
 #endif
 		{
 			//DebugBreak();
-			InvokeDeadstart();
+			ResumeDeadstart();
+			// actually bInitialDone will not be done sometimes
+         // and we need to force this here.
+         InvokeDeadstart();
 		}
 		library->nLibrary = ++nLibrary;
 		LinkThing( libraries, library );

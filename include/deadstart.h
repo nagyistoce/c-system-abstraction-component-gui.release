@@ -62,6 +62,7 @@ SACK_DEADSTART_NAMESPACE
 DEADSTART_PROC  void DEADSTART_CALLTYPE  RegisterPriorityStartupProc( void(*)(void), CTEXTSTR,int,void* unused, CTEXTSTR,int);
 DEADSTART_PROC  void DEADSTART_CALLTYPE  RegisterPriorityShutdownProc( void(*)(void), CTEXTSTR,int,void* unused, CTEXTSTR,int);
 DEADSTART_PROC  void DEADSTART_CALLTYPE  SuspendDeadstart ( void );
+DEADSTART_PROC  void DEADSTART_CALLTYPE  ResumeDeadstart ( void );
 DEADSTART_PROC  void DEADSTART_CALLTYPE  InvokeDeadstart (void);
 DEADSTART_PROC  void DEADSTART_CALLTYPE  InvokeExits (void);
 DEADSTART_PROC  void DEADSTART_CALLTYPE  MarkRootDeadstartComplete ( void );
