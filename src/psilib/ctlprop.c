@@ -105,7 +105,7 @@ int FillControlIDList( CTEXTSTR root, PSI_CONTROL listbox, PSI_CONTROL pc, int l
 	PCLASSROOT data = NULL;
 	TEXTCHAR rootname[256];
    //lprintf( "Look for resoruces under %s at %d", root, level );
-	snprintf( rootname, sizeof( rootname ), WIDE("psi/resources%s%s"), root?WIDE("/"):WIDE(""), root?root:WIDE("") );
+	snprintf( rootname, sizeof( rootname ), PSI_ROOT_REGISTRY WIDE("/resources%s%s"), root?WIDE("/"):WIDE(""), root?root:WIDE("") );
 	for( name = GetFirstRegisteredName( rootname, &data );
 		 name;
 		  name = GetNextRegisteredName( &data ) )
@@ -118,7 +118,7 @@ int FillControlIDList( CTEXTSTR root, PSI_CONTROL listbox, PSI_CONTROL pc, int l
 				{
 					CTEXTSTR name2;
 					PCLASSROOT data2 = NULL;
-					snprintf( rootname, sizeof( rootname ), WIDE("psi/resources%s%s/%s"), root?WIDE("/"):WIDE(""), root?root:WIDE(""), name );
+					snprintf( rootname, sizeof( rootname ), PSI_ROOT_REGISTRY WIDE("/resources%s%s/%s"), root?WIDE("/"):WIDE(""), root?root:WIDE(""), name );
                //lprintf( WIDE("newroot = %s"), rootname );
 					for( name2 = GetFirstRegisteredName( rootname, &data2 );
 						 name2;
@@ -196,7 +196,7 @@ void InitFrameControls( PSI_CONTROL pcFrame, PSI_CONTROL pc )
 			SetSelChangeHandler( list, SetControlIDProperty, (PTRSZVAL)pc );
 			FillControlIDList( NULL, list, pc, 0, NULL );
 #if 0
-			for( name = GetFirstRegisteredName( WIDE("psi/resources"), &data );
+			for( name = GetFirstRegisteredName( PSI_ROOT_REGISTRY WIDE("/resources"), &data );
 				 name;
 				  name = GetNextRegisteredName( &data ) )
 			{
@@ -205,7 +205,7 @@ void InitFrameControls( PSI_CONTROL pcFrame, PSI_CONTROL pc )
 					CTEXTSTR name2;
                int first = 1;
 					POINTER data2 = NULL;
-					snprintf( rootname, sizeof(rootname),"psi/resources/%s/%s", name, pc->pTypeName );
+					snprintf( rootname, sizeof(rootname),PSI_ROOT_REGISTRY WIDE("/resources/%s/%s"), name, pc->pTypeName );
                //lprintf( WIDE("newroot = %s"), rootname );
 					for( name2 = GetFirstRegisteredName( rootname, &data2 );
 						 name2;
@@ -232,7 +232,7 @@ void InitFrameControls( PSI_CONTROL pcFrame, PSI_CONTROL pc )
 #if 0
 		char rootname[256];
 		void (CPROC*f)(PTRSZVAL);
-		snprintf( rootname, sizeof( rootname ), WIDE("psi/resources/"), button->pTypeName );
+		snprintf( rootname, sizeof( rootname ), PSI_ROOT_REGISTRY WIDE("/resources/"), button->pTypeName );
 		f = GetRegisteredProcedure2( rootname, void, WIDE("button_destroy"), (PTRSZVAL) );
 		if( f )
 			f(button->psvUser);
@@ -351,7 +351,7 @@ PSI_PROC( int, EditControlProperties )( PSI_CONTROL control )
 			{
 				TEXTCHAR classname[32];
 				GetControlPropSheet gcps;
-				snprintf( classname, sizeof( classname ), WIDE("psi/control/%d/rtti"), control->nType );
+				snprintf( classname, sizeof( classname ), PSI_ROOT_REGISTRY WIDE("/control/%d/rtti"), control->nType );
             			//DumpRegisteredNames();
 				gcps = GetRegisteredProcedure( classname, PSI_CONTROL, get_property_page, (PSI_CONTROL) );
 
@@ -416,7 +416,7 @@ PSI_PROC( int, EditControlProperties )( PSI_CONTROL control )
 				{
 					TEXTCHAR classname[32];
 					ApplyControlPropSheet Apply;
-					snprintf( classname, sizeof( classname ), WIDE("psi/control/%d/rtti"), control->nType );
+					snprintf( classname, sizeof( classname ), PSI_ROOT_REGISTRY WIDE("/control/%d/rtti"), control->nType );
 					Apply = GetRegisteredProcedure( classname, void, read_property_page, (PSI_CONTROL, PCONTROL) );
 					if( Apply )
 					{
@@ -430,7 +430,7 @@ PSI_PROC( int, EditControlProperties )( PSI_CONTROL control )
 				{
 					TEXTCHAR classname[32];
 					DoneControlPropSheet Done;
-					snprintf( classname, sizeof( classname ), WIDE("psi/control/%d/rtti"), control->nType );
+					snprintf( classname, sizeof( classname ), PSI_ROOT_REGISTRY WIDE("/control/%d/rtti"), control->nType );
 					Done = GetRegisteredProcedure( classname, void, done_property_page, (PSI_CONTROL) );
 					if( Done )
 					{
@@ -658,7 +658,7 @@ PSI_PROC( void, EditFrame )( PSI_CONTROL pc, int bEnable )
 			PCLASSROOT data = NULL;
 			pFrameEditMenu = CreatePopup();
 			pCurrentControls = pControls = CreatePopup();
-			for( name = GetFirstRegisteredName( WIDE("psi/control"), &data );
+			for( name = GetFirstRegisteredName( PSI_ROOT_REGISTRY WIDE("/control"), &data );
 				 name;
 				  name = GetNextRegisteredName( &data ) )
 			{
@@ -671,7 +671,7 @@ PSI_PROC( void, EditFrame )( PSI_CONTROL pc, int bEnable )
 						break;
 				if( name[n] )
 				{
-					snprintf( text, sizeof( text ), WIDE("psi/control/%s"), name );
+					snprintf( text, sizeof( text ), PSI_ROOT_REGISTRY WIDE("/control/%s"), name );
 					nItem = GetRegisteredIntValue( text, WIDE("Type") );
 					if( nControls == 10 )
 					{
@@ -681,7 +681,7 @@ PSI_PROC( void, EditFrame )( PSI_CONTROL pc, int bEnable )
 					}
 					pli = AppendPopupItem( pCurrentControls, MF_BYCOMMAND, MNU_ADDCONTROL + nItem, (POINTER)name );
 					nControls++;
-					//SetItemData( pli, (PTRSZVAL)GetRegisteredProcedure( WIDE("psi/control/Button/Click"), int, name, (PTRSZVAL, PCONTROL) ) );
+					//SetItemData( pli, (PTRSZVAL)GetRegisteredProcedure( PSI_ROOT_REGISTRY WIDE("/control/Button/Click"), int, name, (PTRSZVAL, PCONTROL) ) );
 				}
 			}
 			AppendPopupItem( pFrameEditMenu, MF_POPUP, (PTRSZVAL)pControls, WIDE("Add Control") );

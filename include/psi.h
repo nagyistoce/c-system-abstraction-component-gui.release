@@ -25,6 +25,13 @@
 #include <controls.h>
 
 PSI_NAMESPACE
+
+#ifdef __cplusplus
+#define PSI_ROOT_REGISTRY WIDE("psi++")
+#else
+#define PSI_ROOT_REGISTRY WIDE("psi")
+#endif
+
 #ifdef __cplusplus
 //	namespace registration {
 #endif
@@ -163,7 +170,7 @@ typedef struct ControlRegistration_tag *PCONTROL_REGISTRATION;
    
    /psi/control/\<name\>/hide_common=(PSI_CONTROL)@void@_@hide_common */
 #define OnHideCommon(name) \
-	__DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,WIDE("psi"),HideCommon,WIDE("control"),name WIDE("/hide_control"),PASTE(name,WIDE("hide_control")),void,(PSI_CONTROL),__LINE__)
+	__DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,PSI_ROOT_REGISTRY,HideCommon,WIDE("control"),name WIDE("/hide_control"),PASTE(name,WIDE("hide_control")),void,(PSI_CONTROL),__LINE__)
 /* Event given to the control when it is shown. Some controls
    assign new content to themselves if they are now able to be
    shown.
@@ -180,7 +187,7 @@ typedef struct ControlRegistration_tag *PCONTROL_REGISTRATION;
    
    /psi/control/\<name\>/reveal_control/reveal_control=(PSI_CONTROL)@void@_@reveal_control */
 #define OnRevealCommon(name) \
-	__DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,WIDE("psi"),RevealCommon,WIDE("control"),name WIDE("/reveal_control"),WIDE("reveal_control"),void,(PSI_CONTROL),__LINE__)
+	__DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,PSI_ROOT_REGISTRY,RevealCommon,WIDE("control"),name WIDE("/reveal_control"),WIDE("reveal_control"),void,(PSI_CONTROL),__LINE__)
 
 /* This is the first event a control will receive. When it is
    created with MakeNamedControl, et al. this event will be
@@ -202,7 +209,7 @@ typedef struct ControlRegistration_tag *PCONTROL_REGISTRATION;
    
    /psi/control/\<name\>/rtt/init=(PSI_CONTROL)@int@_@init        */
 #define OnCreateCommon(name)  \
-	__DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,WIDE("psi"),unused_name,WIDE("control"),name WIDE("/rtti"),WIDE("init"),int,(PSI_CONTROL), __LINE__)
+	__DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,PSI_ROOT_REGISTRY,unused_name,WIDE("control"),name WIDE("/rtti"),WIDE("init"),int,(PSI_CONTROL), __LINE__)
 /* Event given to a control when it needs to draw.
    Example
    <code lang="c#">
@@ -218,7 +225,7 @@ typedef struct ControlRegistration_tag *PCONTROL_REGISTRATION;
    
    /psi/control/\<name\>/rtti/draw=(PSI_CONTROL)@void@_@draw                           */
 #define OnDrawCommon(name)  \
-	__DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,WIDE("psi"),unused_name,WIDE("control"),name WIDE("/rtti"),WIDE("draw"),int,(PSI_CONTROL), __LINE__)
+	__DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,PSI_ROOT_REGISTRY,unused_name,WIDE("control"),name WIDE("/rtti"),WIDE("draw"),int,(PSI_CONTROL), __LINE__)
 /* User event callback called when a mouse event happens over a
    control, unless the control has claimed the mouse, in which
    case the mouse may not be over the control. X and Y are
@@ -241,7 +248,7 @@ typedef struct ControlRegistration_tag *PCONTROL_REGISTRATION;
    /psi/control/\<name\>/rtti/mouse =
    (PSI_CONTROL,S_32,S_32,_32)@void@_@mouse                                                                */
 #define OnMouseCommon(name)  \
-	__DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,WIDE("psi"),unused_name,WIDE("control"),name WIDE("/rtti"),WIDE("mouse"),int,(PSI_CONTROL,S_32,S_32,_32), __LINE__)
+	__DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,PSI_ROOT_REGISTRY,unused_name,WIDE("control"),name WIDE("/rtti"),WIDE("mouse"),int,(PSI_CONTROL,S_32,S_32,_32), __LINE__)
 /* Controls may register a keyboard event procedure. This will
    receive notifications about what key is hit. Using mouse keys
    are impractical, because you would have to test every key for
@@ -268,7 +275,7 @@ typedef struct ControlRegistration_tag *PCONTROL_REGISTRATION;
    
    /psi/control/\<name\>/rtti/key=(PSI_CONTROL,_32)@int@_@key       */
 #define OnKeyCommon(name)  \
-	__DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,WIDE("psi"),unused_name,WIDE("control"),name WIDE("/rtti"),WIDE("key"),int,(PSI_CONTROL,_32), __LINE__)
+	__DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,PSI_ROOT_REGISTRY,unused_name,WIDE("control"),name WIDE("/rtti"),WIDE("key"),int,(PSI_CONTROL,_32), __LINE__)
 /* This event callback is called when a control's position
    changes. Usually only happens on the outer parent frame.
    Example
@@ -286,7 +293,7 @@ typedef struct ControlRegistration_tag *PCONTROL_REGISTRATION;
    /psi/control/\<name\>/rtti/position_changing=
    (PSI_CONTROL,LOGICAL)@void@_@position_changing                        */
 #define OnMoveCommon(name)  \
-	__DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,WIDE("psi"),unused_name,WIDE("control"),name WIDE("/rtti"),WIDE("position_changing"),void,(PSI_CONTROL,LOGICAL), __LINE__)
+	__DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,PSI_ROOT_REGISTRY,unused_name,WIDE("control"),name WIDE("/rtti"),WIDE("position_changing"),void,(PSI_CONTROL,LOGICAL), __LINE__)
 /* User event that is triggered when the size of a control
    changes.
    Example
@@ -305,7 +312,7 @@ typedef struct ControlRegistration_tag *PCONTROL_REGISTRATION;
    /psi/control/\<name\>/rtti/resize =
    (PSI_CONTROL)@void@_@resize                                                           */
 #define OnSizeCommon(name)  \
-	__DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,WIDE("psi"),unused_name,WIDE("control"),name WIDE("/rtti"),WIDE("resize"),void,(PSI_CONTROL,LOGICAL), __LINE__)
+	__DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,PSI_ROOT_REGISTRY,unused_name,WIDE("control"),name WIDE("/rtti"),WIDE("resize"),void,(PSI_CONTROL,LOGICAL), __LINE__)
 
 	/* move_starting is TRUE when the position starts changing and
 	   is false when the change is done... this allows a critical
@@ -333,7 +340,7 @@ typedef struct ControlRegistration_tag *PCONTROL_REGISTRATION;
 	   
 	   /psi/control/\<name\>/rtti/some_parents_position_changing=(PSI_CONTROL,LOGICAL)@void@_@some_parents_position_changing */
 #define OnMotionCommon(name)  \
-	__DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,WIDE("psi"),unused_name,WIDE("control"),name WIDE("/rtti"),WIDE("some_parents_position_changing"),void,(PSI_CONTROL,LOGICAL), __LINE__)
+	__DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,PSI_ROOT_REGISTRY,unused_name,WIDE("control"),name WIDE("/rtti"),WIDE("some_parents_position_changing"),void,(PSI_CONTROL,LOGICAL), __LINE__)
 
 /* Event when a control is being destroyed. Allows a control to
    destroy any internal resources it may have associated with
@@ -350,7 +357,7 @@ typedef struct ControlRegistration_tag *PCONTROL_REGISTRATION;
    
    /psi/control/\<name\>/rtti/destroy=(PSI_CONTROL)@void@_@destroy   */
 #define OnDestroyCommon(name)  \
-	__DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,WIDE("psi"),unused_name,WIDE("control"),name WIDE("/rtti"),WIDE("destroy"),void,(PSI_CONTROL), __LINE__)
+	__DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,PSI_ROOT_REGISTRY,unused_name,WIDE("control"),name WIDE("/rtti"),WIDE("destroy"),void,(PSI_CONTROL), __LINE__)
 
 /* return a frame page to the caller for display.
    Example
@@ -370,7 +377,7 @@ typedef struct ControlRegistration_tag *PCONTROL_REGISTRATION;
    /psi/control/\<name\>/reveal_control/reveal_control=(PSI_CONTROL)@void@_@reveal_control
                                                                                            */
 #define OnPropertyEdit(name) \
-	DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,WIDE("psi"),PropertyEditControl,WIDE("control"),name WIDE("/rtti"),WIDE("get_property_page"),PSI_CONTROL,(PSI_CONTROL))
+	DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,PSI_ROOT_REGISTRY,PropertyEditControl,WIDE("control"),name WIDE("/rtti"),WIDE("get_property_page"),PSI_CONTROL,(PSI_CONTROL))
 
 	/* bFocused will be true if control gains focus if !bFocused,
 	   control is losing focus.
@@ -401,7 +408,7 @@ typedef struct ControlRegistration_tag *PCONTROL_REGISTRATION;
 	   
 	   /psi/control/\<name\>/rtti/focus_changed=(PSI_CONTROL,LOGICAL)@void@_@focus_changed             */
 #define OnCommonFocus(name) \
-	DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,WIDE("psi"),FocusChanged,WIDE("control"),name WIDE("/rtti"),WIDE("focus_changed"),int,(PSI_CONTROL,LOGICAL))
+	DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,PSI_ROOT_REGISTRY,FocusChanged,WIDE("control"),name WIDE("/rtti"),WIDE("focus_changed"),int,(PSI_CONTROL,LOGICAL))
 
 /* The frame edit mode has begun, and controls are given an
    opportunity to make life good for themselves and those around
@@ -418,7 +425,7 @@ typedef struct ControlRegistration_tag *PCONTROL_REGISTRATION;
    
    /psi/control/\<name\>/rtti/begin_frame_edit=(PSI_CONTROL)@void@_@begin_frame_edit */
 #define OnEditFrame(name) \
-	DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,WIDE("psi"),FrameEditControl,WIDE("control"),name WIDE("/rtti"),WIDE("begin_frame_edit"),void,(PSI_CONTROL))
+	DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,PSI_ROOT_REGISTRY,FrameEditControl,WIDE("control"),name WIDE("/rtti"),WIDE("begin_frame_edit"),void,(PSI_CONTROL))
 /* When a frame's edit phase ends, controls are notified with
    this event.
    Example
@@ -433,10 +440,10 @@ typedef struct ControlRegistration_tag *PCONTROL_REGISTRATION;
    
    /psi/control/\<name\>/rtti/end_frame_edit=(PSI_CONTROL)@void@_@end_frame_edit */
 #define OnEditFrameDone(name) \
-	DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,WIDE("psi"),FrameEditDoneControl,WIDE("control"),name WIDE("/rtti"),WIDE("end_frame_edit"),void,(PSI_CONTROL))
+	DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,PSI_ROOT_REGISTRY,FrameEditDoneControl,WIDE("control"),name WIDE("/rtti"),WIDE("end_frame_edit"),void,(PSI_CONTROL))
 // somet
 //#define OnFrameEdit(name)
-//	DefineRegistryMethod(WIDE("psi"),FrameEditControl,"common",name,"begin_edit",void,(void))
+//	DefineRegistryMethod(PSI_ROOT_REGISTRY,FrameEditControl,"common",name,"begin_edit",void,(void))
 
 /* on okay - read your information for ( your control, from the
    frame )
@@ -452,7 +459,7 @@ typedef struct ControlRegistration_tag *PCONTROL_REGISTRATION;
    
    /psi/control/\<name\>/rtti/read_property_page=(PSI_CONTROL,PSI_CONTROL)@void@_@read_property_page */
 #define OnPropertyEditOkay(name) \
-	DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,WIDE("psi"),PropertyEditOkayControl,WIDE("control"),name WIDE("/rtti"),WIDE("read_property_page"),void,(PSI_CONTROL,PSI_CONTROL))
+	DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,PSI_ROOT_REGISTRY,PropertyEditOkayControl,WIDE("control"),name WIDE("/rtti"),WIDE("read_property_page"),void,(PSI_CONTROL,PSI_CONTROL))
 
 /* on cancel return void ( your_control, the sheet your resulted
    to get_property_page
@@ -465,7 +472,7 @@ typedef struct ControlRegistration_tag *PCONTROL_REGISTRATION;
    }
    </code>                                                                                   */
 #define OnPropertyEditCancel(name) \
-	DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,WIDE("psi"),PropertyEditCancelControl,WIDE("control"),name WIDE("/rtti"),WIDE("abort_property_page"),void,(PSI_CONTROL,PSI_CONTROL))
+	DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,PSI_ROOT_REGISTRY,PropertyEditCancelControl,WIDE("control"),name WIDE("/rtti"),WIDE("abort_property_page"),void,(PSI_CONTROL,PSI_CONTROL))
 
 /* some controls may change their appearance and drawing
    characteristics based on having their properties edited. This
@@ -485,11 +492,11 @@ typedef struct ControlRegistration_tag *PCONTROL_REGISTRATION;
    
    /psi/control/\<name\>/rtti/done_property_page=(PSI_CONTROL)@void@_@done_property_page */
 #define OnPropertyEditDone( name )  \
-	DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,WIDE("psi"),PropertyEditDoneControl,WIDE("control"),name WIDE("/rtti"),WIDE("done_property_page"),void,(PSI_CONTROL))
+	DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,PSI_ROOT_REGISTRY,PropertyEditDoneControl,WIDE("control"),name WIDE("/rtti"),WIDE("done_property_page"),void,(PSI_CONTROL))
 
 // just a passing thought.
 //#define OnEditFrameBegin( name )
-//	DefineRegistryMethod(WIDE("psi"),EditFrameBegin,"common",name,"frame_edit_begin",void,(PSI_CONTROL))
+//	DefineRegistryMethod(PSI_ROOT_REGISTRY,EditFrameBegin,"common",name,"frame_edit_begin",void,(PSI_CONTROL))
 
 // and here we can use that fancy declare method thing
 // to register the appropriate named things LOL!

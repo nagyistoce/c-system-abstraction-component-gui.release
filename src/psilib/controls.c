@@ -112,13 +112,13 @@ static RESOURCE_NAMES resource_names[] = {
 PRIORITY_PRELOAD( InitPSILibrary, PSI_PRELOAD_PRIORITY )
 {
 	//static int bInited;
-	if( !GetRegisteredIntValue( WIDE("psi/init"), WIDE("done") ) )
+	if( !GetRegisteredIntValue( PSI_ROOT_REGISTRY WIDE("/init"), WIDE("done") ) )
 	//if( !bInited )
 	{
 		TEXTCHAR namebuf[64], namebuf2[64];
 #define REG(name) {   \
-	snprintf( namebuf, sizeof( namebuf ), WIDE("psi/control/%d"), name ); \
-	snprintf( namebuf2, sizeof( namebuf2 ), WIDE("psi/control/%s"), name##_NAME );             \
+	snprintf( namebuf, sizeof( namebuf ), PSI_ROOT_REGISTRY WIDE("/control/%d"), name ); \
+	snprintf( namebuf2, sizeof( namebuf2 ), PSI_ROOT_REGISTRY WIDE("/control/%s"), name##_NAME );             \
 	RegisterClassAlias( namebuf2, namebuf );  \
 	RegisterValue( namebuf2, WIDE("Type"), name##_NAME ); \
 	RegisterIntValue( namebuf2, WIDE("Type"), name ); \
@@ -154,7 +154,7 @@ PRIORITY_PRELOAD( InitPSILibrary, PSI_PRELOAD_PRIORITY )
 					TEXTCHAR root[256];
 #define TASK_PREFIX WIDE( "core" )
 					snprintf( root, sizeof( root )
-							  , WIDE("/psi/resources/") TASK_PREFIX WIDE("/%s/%s")
+							  , PSI_ROOT_REGISTRY WIDE("/resources/") TASK_PREFIX WIDE("/%s/%s")
 							  , resource_names[n].type_name
 							  , resource_names[n].resource_name );
 					RegisterIntValue( root
@@ -163,7 +163,7 @@ PRIORITY_PRELOAD( InitPSILibrary, PSI_PRELOAD_PRIORITY )
 					RegisterIntValue( root
 										 , WIDE("range")
 										 , resource_names[n].resource_name_range );
-					snprintf( root, sizeof( root ), WIDE("/psi/resources/") TASK_PREFIX WIDE("/%s"), resource_names[n].type_name );
+					snprintf( root, sizeof( root ), PSI_ROOT_REGISTRY WIDE("/resources/") TASK_PREFIX WIDE("/%s"), resource_names[n].type_name );
 					RegisterIntValue( root
 										 , resource_names[n].resource_name
 										 , resource_names[n].resource_name_id );
@@ -171,7 +171,7 @@ PRIORITY_PRELOAD( InitPSILibrary, PSI_PRELOAD_PRIORITY )
 			}
 		}
 
-		RegisterIntValue( WIDE("psi/init"), WIDE("done"), 1 );
+		RegisterIntValue( PSI_ROOT_REGISTRY WIDE("/init"), WIDE("done"), 1 );
 		//bInited = TRUE;
 	}
 }
@@ -180,14 +180,14 @@ TEXTCHAR *GetResourceIDName( CTEXTSTR pTypeName, int ID )
 {
 	PCLASSROOT data = NULL;
 	CTEXTSTR name;
-	for( name = GetFirstRegisteredName( WIDE("/psi/resources/"), &data );
+	for( name = GetFirstRegisteredName( PSI_ROOT_REGISTRY WIDE("/resources/"), &data );
 		  name;
 		  name = GetNextRegisteredName( &data ) )
 	{
 		TEXTCHAR rootname[256];
 		CTEXTSTR name2;
 		PCLASSROOT data2 = NULL;
-		snprintf( rootname, sizeof(rootname),WIDE("psi/resources/%s/%s"), name, pTypeName );
+		snprintf( rootname, sizeof(rootname),PSI_ROOT_REGISTRY WIDE("/resources/%s/%s"), name, pTypeName );
 		//lprintf( WIDE("newroot = %s"), rootname );
 		for( name2 = GetFirstRegisteredName( rootname, &data2 );
 			 name2;
@@ -221,14 +221,14 @@ int GetResourceID( PSI_CONTROL parent, CTEXTSTR name, _32 nIDDefault )
 		PCLASSROOT data = NULL;
 		CTEXTSTR name;
 		DebugBreak(); // changed 'name' to data and 'name2' to 'data2' ...
-		for( name = GetFirstRegisteredName( WIDE("/psi/resources/"), &data );
+		for( name = GetFirstRegisteredName( PSI_ROOT_REGISTRY WIDE("/resources/"), &data );
 			 name;
 			  name = GetNextRegisteredName( &data ) )
 		{
 			//TEXTCHAR rootname[256];
 			CTEXTSTR name2;
 			PCLASSROOT data2 = NULL;
-			//snprintf( rootname, sizeof(rootname),"psi/resources/%s", name );
+			//snprintf( rootname, sizeof(rootname),PSI_ROOT_REGISTRY "/resources/%s", name );
 			//lprintf( WIDE("newroot = %s"), rootname );
 			for( name2 = GetFirstRegisteredName( (CTEXTSTR)data, &data2 );
 				 name2;
@@ -237,7 +237,7 @@ int GetResourceID( PSI_CONTROL parent, CTEXTSTR name, _32 nIDDefault )
 				TEXTCHAR rootname[256];
 				int nResult;
 				//lprintf( WIDE("Found Name %s"), name2 );
-				snprintf( rootname, sizeof( rootname ), WIDE("psi/resources/%s/%s"), name, name2 );
+				snprintf( rootname, sizeof( rootname ), PSI_ROOT_REGISTRY WIDE("/resources/%s/%s"), name, name2 );
 				if( GetRegisteredStaticIntValue( NULL, rootname, name, &nResult ) )
 				{
 					return nResult;
@@ -268,9 +268,9 @@ int GetResourceID( PSI_CONTROL parent, CTEXTSTR name, _32 nIDDefault )
 			int result;
 			int range;
 			TEXTCHAR buffer[256];
-			snprintf( buffer, sizeof( buffer ), WIDE( "psi/resources/%s" ), name );
-			range = (int)(long)GetRegisteredValueExx( (PCLASSROOT)WIDE("psi/resources"), name, WIDE("range"), TRUE );
-			result = (int)(long)GetRegisteredValueExx( (PCLASSROOT)WIDE("psi/resources"), name, WIDE("value"), TRUE )/* + offset*/;
+			snprintf( buffer, sizeof( buffer ), PSI_ROOT_REGISTRY WIDE( "/resources/%s" ), name );
+			range = (int)(long)GetRegisteredValueExx( (PCLASSROOT)PSI_ROOT_REGISTRY WIDE("/resources"), name, WIDE("range"), TRUE );
+			result = (int)(long)GetRegisteredValueExx( (PCLASSROOT)PSI_ROOT_REGISTRY WIDE("/resources"), name, WIDE("value"), TRUE )/* + offset*/;
 			if( !result && !range && ( nIDDefault != -1 ) )
 			{
 				RegisterIntValue( buffer, WIDE("value"), nIDDefault );
@@ -322,14 +322,14 @@ int DoRegisterControl( PCONTROL_REGISTRATION pcr, int nSize )
 		// okay do this so we get our names right?
 		InitPSILibrary();
 		//pcr->TypeID = ControlID;
-		snprintf( namebuf2, sizeof( namebuf2 ), WIDE("psi/control/%s")
+		snprintf( namebuf2, sizeof( namebuf2 ), PSI_ROOT_REGISTRY WIDE("/control/%s")
 				  , pcr->name );
 		root = GetClassRoot( namebuf2 );
 		pcr->TypeID = (int)(long)GetRegisteredValueExx( root, NULL, WIDE("Type"), TRUE );
 		if( !pcr->TypeID && (StrCaseCmp( pcr->name, WIDE("FRAME") )!=0) )
 		{
 			pcr->TypeID = ControlID;
-			snprintf( namebuf, sizeof( namebuf ), WIDE("psi/control/%") _32f
+			snprintf( namebuf, sizeof( namebuf ), PSI_ROOT_REGISTRY WIDE("/control/%") _32f
 					  , ControlID );
 			root = RegisterClassAlias( namebuf2, namebuf );
 			RegisterValueExx( root, NULL, WIDE("Type"), FALSE, pcr->name );
@@ -339,7 +339,7 @@ int DoRegisterControl( PCONTROL_REGISTRATION pcr, int nSize )
 		else
 		{
 			//char longbuf[128];
-			//snprintf( longbuf, sizeof( longbuf ), "psi/control/%s/rtti", pcr->name );
+			//snprintf( longbuf, sizeof( longbuf ), PSI_ROOT_REGISTRY "/control/%s/rtti", pcr->name );
 			//if( CheckClassRoot( longbuf ) )
 			{
 				//lprintf( "Aborting second registration fo same type." );
@@ -2414,9 +2414,9 @@ PROCEDURE RealCreateCommonExx( PSI_CONTROL *pResult
 	}
 #endif
 	if( pTypeName )
-		snprintf( mydef, sizeof( mydef ), WIDE("/psi/control/%s"), pTypeName );
+		snprintf( mydef, sizeof( mydef ), PSI_ROOT_REGISTRY WIDE("/control/%s"), pTypeName );
 	else
-		snprintf( mydef, sizeof( mydef ), WIDE("/psi/control/%") _32f , nType );
+		snprintf( mydef, sizeof( mydef ), PSI_ROOT_REGISTRY WIDE("/control/%") _32f , nType );
 	root = GetClassRoot( mydef );
 	if( pTypeName )
 		nType = (int)(long)GetRegisteredValueExx( root, NULL, WIDE("type"), TRUE );
@@ -2514,7 +2514,7 @@ PROCEDURE RealCreateCommonExx( PSI_CONTROL *pResult
 	SetFraction( pc->scaley, 1, 1 );
 	// from here forward, root and mydef reference the RTTI of the control...
    //
-	snprintf( mydef, sizeof( mydef ), WIDE("/psi/control/%") _32f WIDE("/rtti"), nType );
+	snprintf( mydef, sizeof( mydef ), PSI_ROOT_REGISTRY WIDE("/control/%") _32f WIDE("/rtti"), nType );
 	root = GetClassRoot( mydef );
 	SetCommonDraw( pc, GetRegisteredProcedureExx(root,(CTEXTSTR)NULL,int,WIDE("draw"),(PSI_CONTROL)));
 	SetCommonMouse( pc, GetRegisteredProcedureExx(root,(CTEXTSTR)NULL,int,WIDE("mouse"),(PSI_CONTROL,S_32,S_32,_32)));
@@ -2906,7 +2906,7 @@ static void InvokeControlHidden( PSI_CONTROL pc )
 	TEXTCHAR keyname[32];
 	PCLASSROOT data = NULL;
 	CTEXTSTR name;
-	snprintf( keyname, sizeof( keyname ), WIDE("/psi/control/%d/hide_control"), pc->nType );
+	snprintf( keyname, sizeof( keyname ), PSI_ROOT_REGISTRY WIDE("/control/%d/hide_control"), pc->nType );
 	for( name = GetFirstRegisteredName( keyname, &data );
 		  name;
 		  name = GetNextRegisteredName( &data ) )
@@ -2927,7 +2927,7 @@ static void InvokeControlRevealed( PSI_CONTROL pc )
 	TEXTCHAR keyname[40];
 	PCLASSROOT data = NULL;
    CTEXTSTR name;
-   snprintf( keyname, sizeof( keyname ), WIDE("/psi/control/%d/reveal_control"), pc->nType );
+   snprintf( keyname, sizeof( keyname ), PSI_ROOT_REGISTRY WIDE("/control/%d/reveal_control"), pc->nType );
 	for( name = GetFirstRegisteredName( keyname, &data );
 		  name;
 		  name = GetNextRegisteredName( &data ) )
@@ -3368,7 +3368,7 @@ void InvokePosChange( PSI_CONTROL pc, LOGICAL updating )
 	TEXTCHAR keyname[64];
 	PCLASSROOT data = NULL;
 	CTEXTSTR name;
-	snprintf( keyname, sizeof( keyname ), WIDE("/psi/control/%d/position_changing"), pc->nType );
+	snprintf( keyname, sizeof( keyname ), PSI_ROOT_REGISTRY WIDE("/control/%d/position_changing"), pc->nType );
 	for( name = GetFirstRegisteredName( keyname, &data );
 		  name;
 		  name = GetNextRegisteredName( &data ) )
@@ -3387,7 +3387,7 @@ void InvokeMotionChange( PSI_CONTROL pc, LOGICAL updating )
 	TEXTCHAR keyname[64];
 	PCLASSROOT data = NULL;
 	CTEXTSTR name;
-	snprintf( keyname, sizeof( keyname ), WIDE("/psi/control/%d/some_parents_position_changing"), pc->nType );
+	snprintf( keyname, sizeof( keyname ), PSI_ROOT_REGISTRY WIDE("/control/%d/some_parents_position_changing"), pc->nType );
 	for( name = GetFirstRegisteredName( keyname, &data );
 		  name;
 		  name = GetNextRegisteredName( &data ) )
@@ -3966,9 +3966,9 @@ PSI_CONTROL CreateCommonExxx( PSI_CONTROL pContainer
 		{
 			TEXTCHAR mydef[256];
 			if( pTypeName )
-				snprintf( mydef, sizeof( mydef ), WIDE("/psi/control/%s/rtti/extra init"), pTypeName );
+				snprintf( mydef, sizeof( mydef ), PSI_ROOT_REGISTRY WIDE("/control/%s/rtti/extra init"), pTypeName );
 			else
-				snprintf( mydef, sizeof( mydef ), WIDE("/psi/control/%") _32f WIDE("/rtti/extra init"), nType );
+				snprintf( mydef, sizeof( mydef ), PSI_ROOT_REGISTRY WIDE("/control/%") _32f WIDE("/rtti/extra init"), nType );
 			if( !(ExtraBorderType & BORDER_NO_EXTRA_INIT ) )
 			{
 				int (CPROC *CustomInit)(PSI_CONTROL);
@@ -3979,7 +3979,7 @@ PSI_CONTROL CreateCommonExxx( PSI_CONTROL pContainer
 					int (CPROC *CustomInit)(PSI_CONTROL);
 					// dispatch for a common proc that is registered to handle extra init for
                // any control...
-					for( name = GetFirstRegisteredName( WIDE("/psi/control/rtti/extra init"), &data );
+					for( name = GetFirstRegisteredName( PSI_ROOT_REGISTRY WIDE("/control/rtti/extra init"), &data );
 						 name;
 						  name = GetNextRegisteredName( &data ) )
 					{
@@ -4235,7 +4235,7 @@ void DestroyCommonExx( PSI_CONTROL *ppc, int level DBG_PASS )
 					TEXTCHAR mydef[256];
 					CTEXTSTR name;
 					PCLASSROOT data = NULL;
-					snprintf( mydef, sizeof( mydef ), WIDE("/psi/control/rtti/extra destroy") );
+					snprintf( mydef, sizeof( mydef ), PSI_ROOT_REGISTRY WIDE("/control/rtti/extra destroy") );
 					for( name = GetFirstRegisteredName( mydef, &data );
 						 name;
 						  name = GetNextRegisteredName( &data ) )
@@ -4251,7 +4251,7 @@ void DestroyCommonExx( PSI_CONTROL *ppc, int level DBG_PASS )
 						}
 					}
 
-					snprintf( mydef, sizeof( mydef ), WIDE("/psi/control/%d/rtti/extra destroy"), pc->nType );
+					snprintf( mydef, sizeof( mydef ), PSI_ROOT_REGISTRY WIDE("/control/%d/rtti/extra destroy"), pc->nType );
 					for( name = GetFirstRegisteredName( mydef, &data );
 						 name;
 						  name = GetNextRegisteredName( &data ) )
@@ -5000,7 +5000,7 @@ PSI_PROC( void, GetFrameSize )( PSI_CONTROL pf, int *w, int *h )
 CTEXTSTR GetControlTypeName( PSI_CONTROL pc )
 {
 	TEXTCHAR mydef[32];
-	snprintf( mydef, sizeof( mydef ), WIDE("/psi/control/%d"), pc->nType );
+	snprintf( mydef, sizeof( mydef ), PSI_ROOT_REGISTRY WIDE("/control/%d"), pc->nType );
 	return GetRegisteredValueExx( mydef, NULL, WIDE("type"), FALSE );
 }
 

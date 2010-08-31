@@ -2,6 +2,7 @@
 #include <sharemem.h>
 #include <../src/genx/genx.h>
 #include "controlstruc.h"
+#include <psi.h>
 #include <filedotnet.h>
 PSI_XML_NAMESPACE
 
@@ -50,7 +51,7 @@ void WriteCommonData( PSI_CONTROL pc )
 		l.current_context->pc = pc;
 		genxAddText(l.current_context->w, (constUtf8)"\n");
 		genxStartElement( l.current_context->eControl );
-		snprintf( buf, sizeof( buf ), WIDE("psi/control/%d"), pc->nType );
+		snprintf( buf, sizeof( buf ), PSI_ROOT_REGISTRY WIDE("/control/%d"), pc->nType );
 		genxAddAttribute( l.current_context->aType, (constUtf8)GetRegisteredValue( buf, WIDE("Type") ) );
 		snprintf( buf, sizeof( buf ), WIDE("%") _32f WIDE(",") WIDE("%") _32f, pc->original_rect.x, pc->original_rect.y );
 		genxAddAttribute( l.current_context->aPosition, (constUtf8)buf );
@@ -79,7 +80,7 @@ void WriteCommonData( PSI_CONTROL pc )
 			int (CPROC *Save)(PCONTROL,PVARTEXT);
 			TEXTCHAR id[32];
          PVARTEXT out = VarTextCreate();
-			snprintf( id, sizeof( id ), WIDE("psi/control/%d/rtti"), pc->nType );
+			snprintf( id, sizeof( id ), PSI_ROOT_REGISTRY WIDE("/control/%d/rtti"), pc->nType );
 			if( ( Save=GetRegisteredProcedure( id, int, save,(PSI_CONTROL,PVARTEXT)) ) )
 			{
 				PTEXT data;
