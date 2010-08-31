@@ -19,6 +19,7 @@ struct procreg_local_tag {
 		_32 bInterfacesLoaded : 1;
 		_32 bIndexNameTable : 1;
 	} flags;
+
 	PTREEDEF Names;
 	PTREEROOT NameIndex;
 	PTREEDEFSET TreeNodes;
@@ -36,8 +37,16 @@ struct procreg_local_tag {
 };
 
 //#ifdef __STATIC__
-static struct procreg_local_tag *procreg_local_data;
+//#ifdef __cplusplus
+//#define procreg_local_data procreg_local_data_plusplus
+//#define l (*procreg_local_data_plusplus)
+//#define SAFE_INIT()      if( !procreg_local_data )	SimpleRegisterAndCreateGlobalWithInit( procreg_local_data_plusplus, InitGlobalSpace );
+//
+//#else
 #define l (*procreg_local_data)
+#define SAFE_INIT()      if( !procreg_local_data )	SimpleRegisterAndCreateGlobalWithInit( procreg_local_data, InitGlobalSpace );
+//#endif
+static struct procreg_local_tag *procreg_local_data;
 //#else
 //static struct procreg_local_tag l;
 //#endif
@@ -405,8 +414,7 @@ static void CPROC InitGlobalSpace( POINTER p, PTRSZVAL size )
 
 static void Init( void )
 {
-   if( !procreg_local_data )
-		SimpleRegisterAndCreateGlobalWithInit( procreg_local_data, InitGlobalSpace );
+	SAFE_INIT();
 }
 
 PRIORITY_PRELOAD( InitProcreg, NAMESPACE_PRELOAD_PRIORITY )
@@ -457,8 +465,7 @@ PTREEDEF GetClassTreeEx( PTREEDEF root, PTREEDEF _name_class, PTREEDEF alias, LO
 	//Init();
 	if( !root )
 	{
-      if( !procreg_local_data )
-			SimpleRegisterAndCreateGlobalWithInit( procreg_local_data, InitGlobalSpace );
+      SAFE_INIT();
 
 		if( !l.Names )
 			InitGlobalSpace( &l, 0);
@@ -600,9 +607,7 @@ PROCREG_PROC( PTREEDEF, GetClassRootEx )( PCLASSROOT root, CTEXTSTR name_class )
 
 PROCREG_PROC( PTREEDEF, GetClassRoot )( CTEXTSTR name_class )
 {
-//#ifdef __STATIC__
-	SimpleRegisterAndCreateGlobalWithInit( procreg_local_data, InitGlobalSpace );
-//#endif
+	SAFE_INIT();
 	return GetClassRootEx( l.Names, name_class );
 }
 #ifdef __cplusplus
@@ -613,9 +618,7 @@ PROCREG_PROC( PTREEDEF, GetClassRootEx )( PCLASSROOT root, PCLASSROOT name_class
 
 PROCREG_PROC( PTREEDEF, GetClassRoot )( PCLASSROOT name_class )
 {
-//#ifdef __STATIC__
-	SimpleRegisterAndCreateGlobalWithInit( procreg_local_data, InitGlobalSpace );
-//#endif
+	SAFE_INIT();
 	return GetClassRootEx( l.Names, (PCLASSROOT)name_class );
 }
 #endif
@@ -1379,10 +1382,7 @@ PROCREG_PROC( PCLASSROOT, RegisterClassAliasEx )( PCLASSROOT root, CTEXTSTR orig
 
 PROCREG_PROC( PCLASSROOT, RegisterClassAlias )( CTEXTSTR original, CTEXTSTR alias )
 {
-//#ifdef __STATIC__
-	if( !procreg_local_data )
-		SimpleRegisterAndCreateGlobalWithInit( procreg_local_data, InitGlobalSpace );
-//#endif
+	SAFE_INIT();
 	return RegisterClassAliasEx( l.Names, original, alias );
 }
 
@@ -1562,8 +1562,7 @@ PROCREG_PROC( PTRSZVAL, CreateRegisteredDataType)( CTEXTSTR classname
 //#ifdef __STATIC__
 //	return CreateRegisteredDataTypeEx( NULL, classname, name, instancename );
 //#else
-      if( !procreg_local_data )
-			SimpleRegisterAndCreateGlobalWithInit( procreg_local_data, InitGlobalSpace );
+	SAFE_INIT();
 	return CreateRegisteredDataTypeEx( l.Names, classname, name, instancename );
 //#endif
 }
