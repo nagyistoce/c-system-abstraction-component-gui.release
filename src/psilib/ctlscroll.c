@@ -526,7 +526,7 @@ scroll_bar = { SCROLLBAR_CONTROL_NAME
 PRIORITY_PRELOAD( RegisterScrollBar,PSI_PRELOAD_PRIORITY )
 {
    DoRegisterControl( &scroll_bar );
-	SimpleRegisterMethod( WIDE("psi/control/") SCROLLBAR_CONTROL_NAME WIDE("/rtti")
+	SimpleRegisterMethod( PSI_ROOT_REGISTRY WIDE("/control/") SCROLLBAR_CONTROL_NAME WIDE("/rtti")
 							  , ResizeScrollbar
 							  , WIDE("void"), WIDE("resize"), WIDE("(PSI_CONTROL)") );
 }

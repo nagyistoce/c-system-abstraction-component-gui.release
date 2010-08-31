@@ -286,7 +286,7 @@ combobox_control = { COMBOBOX_CONTROL_NAME
 PRIORITY_PRELOAD( RegisterComboBox, PSI_PRELOAD_PRIORITY )
 {
 	DoRegisterControl( &combobox_control );
-   //RegisterAlias( WIDE("psi/control/") EDIT_FIELD_NAME "/rtti", WIDE("psi/control/combobox/rtti") );
+   //RegisterAlias( PSI_ROOT_REGISTRY WIDE("/control/") EDIT_FIELD_NAME "/rtti", WIDE("psi/control/combobox/rtti") );
 }
 
 

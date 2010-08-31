@@ -1668,7 +1668,7 @@ static void CPROC ResizeListbox( PSI_CONTROL pc )
 PRIORITY_PRELOAD( RegisterListbox, PSI_PRELOAD_PRIORITY )
 {
    DoRegisterControl( &listbox );
-	SimpleRegisterMethod( WIDE("psi/control/") LISTBOX_CONTROL_NAME WIDE("/rtti")
+	SimpleRegisterMethod( PSI_ROOT_REGISTRY WIDE("/control/") LISTBOX_CONTROL_NAME WIDE("/rtti")
 							  , ResizeListbox
 							  , WIDE("void"), WIDE("resize"), WIDE("(PSI_CONTROL)") );
 }

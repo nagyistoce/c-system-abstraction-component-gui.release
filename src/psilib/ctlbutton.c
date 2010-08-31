@@ -246,7 +246,7 @@ void InvokeButton( PSI_CONTROL pc )
 			TEXTCHAR mydef[256];
 			CTEXTSTR name;
 			PCLASSROOT data = NULL;
-			snprintf( mydef, sizeof( mydef ), WIDE("/psi/control/rtti/%d/extra click"), pc->nType );
+			snprintf( mydef, sizeof( mydef ), PSI_ROOT_REGISTRY WIDE("/control/rtti/%d/extra click"), pc->nType );
 			for( name = GetFirstRegisteredName( mydef, &data );
 				 name;
 				  name = GetNextRegisteredName( &data ) )
@@ -376,16 +376,16 @@ CONTROL_PROPERTIES( Button )( PSI_CONTROL pc )
 		PCLASSROOT data = NULL;
 		PSI_CONTROL pList;
 		CTEXTSTR name;
-		//PCLASSROOT pcr = GetClassRoot( WIDE("psi/control/Button/Click") );
+		//PCLASSROOT pcr = GetClassRoot( PSI_ROOT_REGISTRY WIDE("/control/Button/Click") );
 		MakeTextControl( page, PROP_PAD, PROP_PAD, 116, 12, TXT_STATIC, WIDE("Click Method"), 0 );
 		//MakeTextControl( page, 0, PROP_PAD, PROP_PAD, 116, 12, TXT_STATIC, WIDE("Click Method") );
 		pList = MakeListBox( page, PROP_PAD, PROP_PAD + 16, PROP_WIDTH - 2*PROP_PAD, 120, LISTBOX, 0 );
 		//pList = MakeListBox( page, 0, PROP_PAD, PROP_PAD + 16, PROP_WIDTH - 2*PROP_PAD, 120, LISTBOX );
 
-		for( name = GetFirstRegisteredName( WIDE("psi/control/Button/Click"), &data ); name; name = GetNextRegisteredName( &data ) )
+		for( name = GetFirstRegisteredName( PSI_ROOT_REGISTRY WIDE("/control/Button/Click"), &data ); name; name = GetNextRegisteredName( &data ) )
 		{
 			PLISTITEM pli = AddListItem( pList, name );
-			SetItemData( pli, (PTRSZVAL)GetRegisteredProcedure( WIDE("psi/control/Button/Click"), int, name, (PTRSZVAL, PCONTROL) ) );
+			SetItemData( pli, (PTRSZVAL)GetRegisteredProcedure( PSI_ROOT_REGISTRY WIDE("/control/Button/Click"), int, name, (PTRSZVAL, PCONTROL) ) );
 		}
 		// maybe a list box or some junk like that....
 	}
@@ -412,7 +412,7 @@ CTEXTSTR GetMethodName( POINTER Method, CTEXTSTR type, CTEXTSTR method )
 	TEXTCHAR buffer[256];
 	if( !Method )
 		return NULL;
-	snprintf( buffer, sizeof( buffer ), WIDE("psi/methods/%s/%s"), type, method );
+	snprintf( buffer, sizeof( buffer ), PSI_ROOT_REGISTRY WIDE("/methods/%s/%s"), type, method );
 	for( name = GetFirstRegisteredName( buffer, &data );
 		 name;
 		  name = GetNextRegisteredName( &data ) )

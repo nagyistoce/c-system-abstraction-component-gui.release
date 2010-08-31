@@ -30,7 +30,7 @@ TEXTCHAR *GetBorderTypeString( _32 BorderType )
 static void SaveCommon( PSI_CONTROL pc, PVARTEXT out )
 {
 	char id[32];
-	snprintf( id, sizeof( id ), WIDE("psi/control/%d"), pc->nType );
+	snprintf( id, sizeof( id ), PSI_ROOT_REGISTRY WIDE("/control/%d"), pc->nType );
 	vtprintf( out, WIDE("\'%s\'"), GetRegisteredValue( id, WIDE("Type") ) );
 
 	vtprintf( out, WIDE(" %d "), pc->nID );
@@ -52,7 +52,7 @@ static int SaveControlFile( PCONTROL pc, PVARTEXT out, int level )
 {
 	// + 1 includes the null - +3 & makes it integral number of dwords...
 	char id[32];
-	snprintf( id, sizeof( id ), WIDE("psi/control/%d/rtti"), pc->nType );
+	snprintf( id, sizeof( id ), PSI_ROOT_REGISTRY WIDE("/control/%d/rtti"), pc->nType );
 	{
 		int n;
 		for( n = 0; n < level; n++ )
@@ -77,7 +77,7 @@ static int SaveFrameFile( PSI_CONTROL pc, PVARTEXT out, int level )
 	return 0;
 #if 0
 	char id[32];
-	snprintf( id, sizeof( id ), WIDE("psi/control/%d"), pc->nType );
+	snprintf( id, sizeof( id ), PSI_ROOT_REGISTRY WIDE("/control/%d"), pc->nType );
 	{
 		int n;
 		for( n = 0; n < level; n++ )
@@ -171,7 +171,7 @@ static int DecodeControlInfo( POINTER rawinfo, _32 size, PSI_CONTROL pFrame )
 		  , info->rect.width, info->rect.height );
 	 {
 		 char procclass[64];
-       sprintf( procclass, WIDE("psi/control/%d"), info->nType );
+       sprintf( procclass, PSI_ROOT_REGISTRY WIDE("/control/%d"), info->nType );
 		 ControlInit = GetRegisteredProcedure( procclass, int, Init, (PTRSZVAL,PCONTROL,_32) );
 		 pc = RestoreControl( pFrame, info->rect.x, info->rect.y
 							  , info->rect.width, info->rect.height

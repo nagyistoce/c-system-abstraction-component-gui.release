@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <sharemem.h>
 #include <colordef.h>
-#include "controlstruc.h"
-#include "psi.h"
+//#include "controlstruc.h"
+#include <psi.h>
 #include <psi/shadewell.h>
 #include <filedotnet.h>
 
@@ -217,8 +217,8 @@ int CPROC DrawPalette( PSI_CONTROL pc )
 		{
 			ppcd->CurrentColor = SetAlpha( ppcd->CurrentColor, ppcd->Alpha );
 			BlatColorAlpha( Surface, 0, 0
-							  , pc->surface_rect.width
-							  , pc->surface_rect.height
+							  , Surface->width
+							  , Surface->height
 							  , ppcd->CurrentColor );
 		}
 	}
@@ -631,8 +631,8 @@ static int CPROC ColorWellDraw( PCONTROL pc )
 static int CPROC ColorWellMouse( PSI_CONTROL pc, S_32 x, S_32 y, _32 b )
 {
    ValidatedControlData( PCOLOR_WELL, color_well.TypeID, pcw, pc );
-	if( pc->flags.bDisable ) // ignore mouse on these...
-		return FALSE;
+	//if( pc->flags.bDisable ) // ignore mouse on these...
+	//	return FALSE;
 	if( b == -1 )
 	{
 		return FALSE;
@@ -819,7 +819,6 @@ void CPROC ColorWellDestroy( PSI_CONTROL pc )
 }
 
 //----------------------------------------------------------------------------
-#include <psi.h>
 
 CONTROL_REGISTRATION color_well = { WIDE("Color Well")
 											 , { {32, 32}, sizeof( COLOR_WELL ), BORDER_INVERT|BORDER_THIN }
