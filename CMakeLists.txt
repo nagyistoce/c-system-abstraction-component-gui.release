@@ -506,11 +506,6 @@ set( SACK_SOURCES ${SACK_SOURCES}
   ${LAST_GCC_LIBRARY_SOURCE} 
 )
 
-#message( SOURCES:${SACK_SOURCES} )
-#message( C++SOURCE:${cplusplus_sources} )
-
-#set_source_files_properties( ${SOURCES} PROPERTIES LANGUAGE "CXX" )
-
 set( quote \" )
 SET_TARGET_PROPERTIES(sack_bag PROPERTIES
                   DEFINE_SYMBOL SACK_BAG_EXPORTS
