@@ -1112,10 +1112,11 @@ void GetGLMatrix( PTRANSFORM pt, PMATRIX out )
 #define SPRINTF(a,b,...) snprintf(a,sizeof(a),b,##__VA_ARGS__)
 #endif
 
+#define DOUBLE_FORMAT  "%g"
 
 void PrintVectorEx( CTEXTSTR lpName, PCVECTOR v DBG_PASS )
 {
-   _xlprintf( 1 DBG_RELAY )( WIDE("Vector  %s = <%lg, %lg, %lg> %lg"),
+   _xlprintf( 1 DBG_RELAY )( WIDE("Vector  %s = <"DOUBLE_FORMAT", "DOUBLE_FORMAT", "DOUBLE_FORMAT"> "DOUBLE_FORMAT""),
             lpName, v[0], v[1], v[2], Length( v ) );
 }
 #undef PrintVector
@@ -1127,7 +1128,7 @@ void PrintVector( CTEXTSTR lpName, PCVECTOR v )
  void PrintVectorStdEx( CTEXTSTR lpName, VECTOR v DBG_PASS )
 {
    TEXTCHAR byBuffer[256];
-   SPRINTF( byBuffer, WIDE("Vector  %s = <%lg, %lg, %lg> %lg\n"),
+   SPRINTF( byBuffer, WIDE("Vector  %s = <"DOUBLE_FORMAT", "DOUBLE_FORMAT", "DOUBLE_FORMAT"> "DOUBLE_FORMAT"\n"),
             lpName, v[0], v[1], v[2], Length(v) );
    PRINTF( WIDE("%s"), byBuffer );
 }
@@ -1147,13 +1148,13 @@ void PrintMatrix( CTEXTSTR lpName, MATRIX m )
 
 void PrintMatrixEx( CTEXTSTR lpName, MATRIX m DBG_PASS )
 {
-   _xlprintf( 1 DBG_RELAY )( WIDE("Vector  %s = <%lg, %lg, %lg, %lg> %lg"),
+   _xlprintf( 1 DBG_RELAY )( WIDE("Vector  %s = <"DOUBLE_FORMAT", "DOUBLE_FORMAT", "DOUBLE_FORMAT", "DOUBLE_FORMAT"> "DOUBLE_FORMAT""),
             lpName, m[0][0], m[0][1], m[0][2], m[0][3], Length( m[0] ) );
-   _xlprintf( 1 DBG_RELAY )( WIDE("Vector  %s = <%lg, %lg, %lg, %lg> %lg"),
+   _xlprintf( 1 DBG_RELAY )( WIDE("Vector  %s = <"DOUBLE_FORMAT", "DOUBLE_FORMAT", "DOUBLE_FORMAT", "DOUBLE_FORMAT"> "DOUBLE_FORMAT""),
             lpName, m[1][0], m[1][1], m[1][2], m[1][3], Length( m[1] ) );
-   _xlprintf( 1 DBG_RELAY )( WIDE("Vector  %s = <%lg, %lg, %lg, %lg> %lg"),
+   _xlprintf( 1 DBG_RELAY )( WIDE("Vector  %s = <"DOUBLE_FORMAT", "DOUBLE_FORMAT", "DOUBLE_FORMAT", "DOUBLE_FORMAT"> "DOUBLE_FORMAT""),
             lpName, m[2][0], m[2][1], m[2][2], m[2][3], Length( m[2] ) );
-   _xlprintf( 1 DBG_RELAY )( WIDE("Vector  %s = <%lg, %lg, %lg, %lg> %lg"),
+   _xlprintf( 1 DBG_RELAY )( WIDE("Vector  %s = <"DOUBLE_FORMAT", "DOUBLE_FORMAT", "DOUBLE_FORMAT", "DOUBLE_FORMAT"> "DOUBLE_FORMAT""),
             lpName, m[3][0], m[3][1], m[3][2], m[3][3], Length( m[3] ) );
    {
 	   VECTOR v;
@@ -1171,9 +1172,10 @@ void PrintMatrixEx( CTEXTSTR lpName, MATRIX m DBG_PASS )
 void ShowTransformEx( PTRANSFORM pt, char *header DBG_PASS )
 {
    _xlprintf( 1 DBG_RELAY )( WIDE("transform %s"), header );
-   _xlprintf( 1 DBG_RELAY )( WIDE("     -----------------"));
-#define F4(name) _xlprintf( 1 DBG_RELAY )( _WIDE(#name) WIDE(" <%g %g %g %g> %g"), pt->name[0], pt->name[1], pt->name[2], pt->name[3], Length( pt->name ) )
-#define F(name) _xlprintf( 1 DBG_RELAY )( _WIDE(#name) WIDE(" <%g %g %g> %g"), pt->name[0], pt->name[1], pt->name[2], Length( pt->name ) )
+	_xlprintf( 1 DBG_RELAY )( WIDE("     -----------------"));
+#define DOUBLE_FORMAT  "%g"
+#define F4(name) _xlprintf( 1 DBG_RELAY )( _WIDE(#name) WIDE(" <"DOUBLE_FORMAT" "DOUBLE_FORMAT" "DOUBLE_FORMAT" "DOUBLE_FORMAT"> "DOUBLE_FORMAT""), pt->name[0], pt->name[1], pt->name[2], pt->name[3], Length( pt->name ) )
+#define F(name) _xlprintf( 1 DBG_RELAY )( _WIDE(#name) WIDE(" <"DOUBLE_FORMAT" "DOUBLE_FORMAT" "DOUBLE_FORMAT"> "DOUBLE_FORMAT""), pt->name[0], pt->name[1], pt->name[2], Length( pt->name ) )
    F(speed);
    F(rotation);
    F4(m[0]);
@@ -1194,8 +1196,8 @@ void showstd( PTRANSFORM pt, char *header )
 	TEXTCHAR byMsg[256];
 #undef F4
 #undef F
-#define F4(name) SPRINTF( byMsg, _WIDE(#name) WIDE(" <%g %g %g %g>"), pt->name[0], pt->name[1], pt->name[2], pt->name[3] )
-#define F(name) SPRINTF( byMsg, _WIDE(#name) WIDE(" <%g %g %g>"), pt->name[0], pt->name[1], pt->name[2] )
+#define F4(name) SPRINTF( byMsg, _WIDE(#name) WIDE(" <"DOUBLE_FORMAT" "DOUBLE_FORMAT" "DOUBLE_FORMAT" "DOUBLE_FORMAT">"), pt->name[0], pt->name[1], pt->name[2], pt->name[3] )
+#define F(name) SPRINTF( byMsg, _WIDE(#name) WIDE(" <"DOUBLE_FORMAT" "DOUBLE_FORMAT" "DOUBLE_FORMAT">"), pt->name[0], pt->name[1], pt->name[2] )
    PRINTF( WIDE("%s"), header );
    PRINTF( WIDE("%s"), WIDE("     -----------------\n"));
    F(speed);
