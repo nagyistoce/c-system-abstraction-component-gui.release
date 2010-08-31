@@ -3,6 +3,7 @@
 #include "global.h"
 #include <sharemem.h>
 #include <controls.h>
+#include <psi.h>
 
 PSI_NAMESPACE 
 
@@ -96,7 +97,7 @@ void RegisterResource( CTEXTSTR appname, CTEXTSTR resource_name, int resource_na
 		TEXTCHAR root[256];
 		//lprintf( "resource name = %s", resource_names[n].type_name );
 		//lprintf( "resource name = %s", resource_names[n].resource_name );
-		snprintf( root, sizeof( root ), WIDE( "/psi/resources/") WIDE("%s") WIDE( "/%s/%s" )
+		snprintf( root, sizeof( root ), PSI_ROOT_REGISTRY WIDE( "/resources/") WIDE("%s") WIDE( "/%s/%s" )
 				  , appname
 					//snprintf( root, sizeof( root ), WIDE("/psi/resources/core/%s/%s")
 				  , type_name
@@ -107,7 +108,7 @@ void RegisterResource( CTEXTSTR appname, CTEXTSTR resource_name, int resource_na
 			RegisterIntValue( root
 								 , WIDE("range")
 								 , resource_name_range );
-			snprintf( root, sizeof( root ), WIDE("/psi/resources/") WIDE("%s") WIDE("/%s")
+			snprintf( root, sizeof( root ), PSI_ROOT_REGISTRY WIDE("/resources/") WIDE("%s") WIDE("/%s")
 					  , appname, type_name );
 			RegisterIntValue( root
 								 , resource_name
