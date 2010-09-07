@@ -3,11 +3,7 @@
 
 cmake_minimum_required(VERSION 2.8)
 
-if(MSVC)
-project( InterShell_window_stop )
-else(MSVC)
 project( InterShell_window.stop )
-endif(MSVC)
 
 
 set(SOURCES 
@@ -24,12 +20,7 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 target_link_libraries( ${PROJECT_NAME}  ${SACK_LIBRARY} )
 install( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin/InterShell ) 
 
-
-if(MSVC)
-project( InterShell_console_stop )
-else(MSVC)
 project( InterShell_console.stop )
-endif(MSVC)
 
 
 set(SOURCES 

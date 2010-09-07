@@ -21,8 +21,6 @@ add_library(${PROJECT_NAME} SHARED ${SOURCES} )
 string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL}"
-                  PREFIX ""
-                  SUFFIX ""
 )
 target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} ${VLC_INTERFACE} sack_widgets)
 install_default_dest_binary( ${PROJECT_NAME} )
