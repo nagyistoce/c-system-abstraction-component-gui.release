@@ -17,9 +17,9 @@ target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} )
 install_default_dest( ${PROJECT_NAME} )
 
 if(MSVC)
-project( lstrip.portable )
-else(MSVC)
 project( lstrip_portable )
+else(MSVC)
+project( lstrip.portable )
 endif(MSVC)
 
 if( __WINDOWS__ )

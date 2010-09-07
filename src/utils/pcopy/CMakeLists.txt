@@ -19,7 +19,11 @@ COMPILE_FLAGS  "-DTARGET_LABEL=${PROJECT_NAME}" )
 target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} )
 install_default_dest_binary( ${PROJECT_NAME} )
 
+if(MSVC)
+project( pcopy_portable )
+else(MSVC)
 project( pcopy.portable )
+endif(MSVC)
 
 set(BASE_SOURCES
 ${FIRST_GCC_PROGRAM_SOURCE} 
