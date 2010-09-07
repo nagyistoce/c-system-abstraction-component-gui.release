@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 if(MSVC)
-set( core_service bag-msg-core-service )
+set( core_service bag.msg-core-service )
 else()
 set( core_service bag.msg.core.service )
 
