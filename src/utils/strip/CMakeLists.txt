@@ -16,7 +16,11 @@ COMPILE_FLAGS  "-DTARGET_LABEL=${PROJECT_NAME}" )
 target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} )
 install_default_dest( ${PROJECT_NAME} )
 
+if(MSVC)
 project( lstrip.portable )
+else(MSVC)
+project( lstrip_portable )
+endif(MSVC)
 
 if( __WINDOWS__ )
 set( NET_SOURCES     ../../../netlib/net_winsock2.c  )
