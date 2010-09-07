@@ -14,7 +14,7 @@ if( C++ )
 set_source_files_properties( ${BASE_SOURCES} PROPERTIES LANGUAGE "CXX" )
 endif()
 
-add_executable(${PROJECT_NAME} WIN32 ${BASE_SOURCES} )
+add_executable(${PROJECT_NAME} ${BASE_SOURCES} )
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 COMPILE_FLAGS  "-DTARGET_LABEL=${PROJECT_NAME}" )
 target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} ${SACK_PSI_LIBRARY} )

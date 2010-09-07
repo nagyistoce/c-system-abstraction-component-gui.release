@@ -1,4 +1,5 @@
 #include <stdhdrs.h>
+#include <final_types.h>
 #include <sharemem.h>
 #include <stddef.h>
 #include <timers.h>
