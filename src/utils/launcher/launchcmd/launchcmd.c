@@ -1,5 +1,6 @@
 #define VERSION "2.01"
 #include <stdhdrs.h>
+#include <system.h>
 #ifdef __WINDOWS__
 #include <shellapi.h>
 #endif
@@ -119,7 +120,7 @@ static void CPROC Connected( PCLIENT pc_server, PCLIENT pc_new )
 #endif
 }
 
-#if defined( _MSC_VER )
+#if defined(WINDOWS_MODE)
 int APIENTRY WinMain( HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmdLine, int nCmdShow )
 {
 	int argc;
@@ -305,6 +306,6 @@ int main( int argc, char **argv )
 	RemoveClient( pcCommand );
 	return 0;
 }
-#ifdef _MSC_VER
+#if defined(WINDOWS_MODE)
 }
 #endif
