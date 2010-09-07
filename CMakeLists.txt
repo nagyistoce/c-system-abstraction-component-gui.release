@@ -685,7 +685,7 @@ add_definitions( -D__OBSCURE_STREAM_INTERNALS )
 
 
   if( USE_SQLITE_EXTERNAL )
-   set( sqlite_external bag.sqlite3-external )
+   set( sqlite_external bag.sqlite3.external )
    set( ExtraFlags "${ExtraFlags} -DUSE_SQLITE_INTERFACE" )
    add_library( ${sqlite_external} SHARED 
       ${FIRST_GCC_LIBRARY_SOURCE} 
