@@ -2,7 +2,14 @@
 
 cmake_minimum_required(VERSION 2.8)
 
-project( bag.msg.core.service )
+if(MSVC)
+set( core_service bag-msg-core-service )
+else()
+set( core_service bag.msg.core.service )
+
+endif(MSVC)
+
+project( ${core_service} )
 
 
 set(SOURCES 

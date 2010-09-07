@@ -388,8 +388,6 @@ set(BASE_SOURCES  ${BASE_SOURCES}
   src/filesyslib/filescan.c
   src/systemlib/system.c
   ${OPTION_SOURCE}
-  ${GENX_SOURCES}
-  ${EXPAT_SOURCES}
 )
 
 
@@ -460,24 +458,38 @@ set( BASE_SOURCES ${BASE_SOURCES}
 )
 endif( NOT __NO_GUI__ )
 
-set( SACK_SOURCES 
-  ${FIRST_GCC_LIBRARY_SOURCE} 
-    ${BASE_SOURCES} 
-    ${ODBC_SOURCES}
+set( C_SOURCES
     ${JPEG_SOURCE}
     ${ZLIB_SOURCE}
     ${PNG_SOURCE}
     ${FREETYPE_SOURCE}
+    ${EXPAT_SOURCES}
+)
+
+set( SACK_SOURCES 
+  ${FIRST_GCC_LIBRARY_SOURCE} 
+    ${BASE_SOURCES} 
+    ${ODBC_SOURCES}
+    ${BAG_SQLITE_SOURCES}
+    ${C_SOURCES}
+    ${GENX_SOURCES}
   ${LAST_GCC_LIBRARY_SOURCE} 
 )
 
-add_library( sack_bag SHARED 
-  ${SACK_SOURCES} 
-  )
+set( SACK_PLUSPLUS_SOURCES 
+  ${FIRST_GCC_LIBRARY_SOURCE} 
+    ${BASE_SOURCES} 
+    ${ODBC_SOURCES}
+    ${BAG_SQLITE_SOURCES}
+    ${GENX_SOURCES}
+  ${LAST_GCC_LIBRARY_SOURCE} 
+)
+
+add_library( sack_bag SHARED   ${SACK_SOURCES}  )
 
 set( cplusplus_sources )
 
-FOREACH(SOURCE ${SACK_SOURCES})
+FOREACH(SOURCE ${SACK_PLUSPLUS_SOURCES})
    if( ${SOURCE} MATCHES "(.*)\\.c" )
      set( BASENAME ${CMAKE_MATCH_1} )
      if( ${SOURCE} MATCHES "${PROJECT_SOURCE_DIR}.*" )
@@ -496,15 +508,6 @@ FOREACH(SOURCE ${SACK_SOURCES})
       #message( "NOT THING ${SOURCE}" )
    endif()
 ENDFOREACH(SOURCE)
-
-set( SACK_SOURCES ${SACK_SOURCES}
-    ${BAG_SQLITE_SOURCES}
-)
-
-
-set( SACK_SOURCES ${SACK_SOURCES}
-  ${LAST_GCC_LIBRARY_SOURCE} 
-)
 
 set( quote \" )
 SET_TARGET_PROPERTIES(sack_bag PROPERTIES
@@ -682,15 +685,16 @@ add_definitions( -D__OBSCURE_STREAM_INTERNALS )
 
 
   if( USE_SQLITE_EXTERNAL )
+   set( sqlite_external bag.sqlite3-external )
    set( ExtraFlags "${ExtraFlags} -DUSE_SQLITE_INTERFACE" )
-   add_library( bag.sqlite3.external SHARED 
+   add_library( ${sqlite_external} SHARED 
       ${FIRST_GCC_LIBRARY_SOURCE} 
       ${SQLITE_SOURCES}
       ${LAST_GCC_LIBRARY_SOURCE} )
    # required link back to bag for register interface
-   target_link_libraries( bag.sqlite3.external ${SACK_LIBRARY} )
-   install_default_dest( bag.sqlite3.external )
-   SET_TARGET_PROPERTIES( bag.sqlite3.external PROPERTIES 
+   target_link_libraries( ${sqlite_external} ${SACK_LIBRARY} )
+   install_default_dest( ${sqlite_external} )
+   SET_TARGET_PROPERTIES( ${sqlite_external} PROPERTIES 
                   COMPILE_FLAGS  "-DTARGET_LABEL=bag_sqlite3 -DSQLITE_SOURCE"
                   SUFFIX ""
                   PREFIX ""
@@ -698,8 +702,11 @@ add_definitions( -D__OBSCURE_STREAM_INTERNALS )
    
   endif()
 
+if( !MSVC )
 add_subdirectory( src/displaylib )
-set( SACK_LIBRARY ${SACK_LIBRARY} bag.display.plugin )
+endif( !MSVC )
+
+#set( SACK_LIBRARY ${SACK_LIBRARY} )
 set( SACK_LIBRARIES ${SACK_LIBRARY} )
 
 
