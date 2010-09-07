@@ -1,4 +1,4 @@
-
+#include <final_types.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -7,7 +7,7 @@
 int SetRegistryItem( HKEY hRoot, char *pPrefix,
                      char *pProduct, char *pKey, 
                      DWORD dwType,
-                     char *pValue, int nSize )
+                     const BYTE *pValue, int nSize )
 {
    char szString[512];
    char *pszString = szString;
@@ -15,9 +15,9 @@ int SetRegistryItem( HKEY hRoot, char *pPrefix,
    HKEY hTemp;
 
    if( pProduct )
-      wsprintf( pszString, "%s%s", pPrefix, pProduct );
+      snprintf( pszString, sizeof( pszString ),"%s%s", pPrefix, pProduct );
    else
-      wsprintf( pszString, "%s", pPrefix );
+      snprintf( pszString, sizeof( pszString ),"%s", pPrefix );
 
    dwStatus = RegOpenKeyEx( hRoot,
                             pszString, 0, 
