@@ -11,6 +11,7 @@
 //#define LOG_ACTUAL_CONNECTION
 //#define LOG_COLLECTOR_STATES
 //#define LOG_EVERYTHING
+
 #define SQLLIB_SOURCE
 #define DO_LOGGING
 #ifdef USE_SQLITE_INTERFACE
@@ -970,13 +971,14 @@ int OpenSQLConnection( PODBC odbc )
 void CPROC CommitTimer( PTRSZVAL psv )
 {
 	PODBC odbc = (PODBC)psv;
+   lprintf( "Commit timer tick" );
    if( odbc->last_command_tick )
 		if( odbc->last_command_tick < ( GetTickCount() - 5000 ) )
 		{
+         lprintf( "Commit timer fire." );
 			RemoveTimer( odbc->commit_timer );
 			odbc->flags.bAutoTransact = 0;
 			SQLCommand( odbc, "COMMIT" );
-         lprintf( "Commit complete." );
 			odbc->flags.bAutoTransact = 1;
 			odbc->last_command_tick = 0;
 		}
@@ -986,14 +988,13 @@ void CPROC CommitTimer( PTRSZVAL psv )
 
 void SQLCommit( PODBC odbc )
 {
-#if 0
 	int n = odbc->flags.bAutoTransact;
+	lprintf( "manual commit." );
 	odbc->last_command_tick = 0;
 	odbc->flags.bAutoTransact = 0;
 	RemoveTimer( odbc->commit_timer );
 	SQLCommand( odbc, "COMMIT" );
 	odbc->flags.bAutoTransact = n;
-#endif
 }
 
 //----------------------------------------------------------------------
@@ -1002,11 +1003,13 @@ void BeginTransact( PODBC odbc )
 {
 	// I Only test this for SQLITE, specifically the optiondb.
 	// this transaction phrase is not really as important on server based systems.
-	if( 0 && odbc->flags.bAutoTransact )
+   lprintf( "BeginTransact." );
+	if( odbc->flags.bAutoTransact )
 	{
+      lprintf( "Allowed." );
 		if( !odbc->last_command_tick )
 		{
-			//odbc->commit_timer = AddTimer( 100, CommitTimer, (PTRSZVAL)odbc );
+			odbc->commit_timer = AddTimer( 100, CommitTimer, (PTRSZVAL)odbc );
 			odbc->flags.bAutoTransact = 0;
 #ifdef USE_SQLITE
 			if( odbc->flags.bSQLite_native )
@@ -1026,6 +1029,8 @@ void BeginTransact( PODBC odbc )
 		}
 		odbc->last_command_tick = GetTickCount();
 	}
+	else
+      lprintf( "No auto transact here." );
 }
 
 //----------------------------------------------------------------------
