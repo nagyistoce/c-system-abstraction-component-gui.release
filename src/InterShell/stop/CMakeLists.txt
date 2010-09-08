@@ -1,6 +1,3 @@
-
-
-
 cmake_minimum_required(VERSION 2.8)
 
 project( InterShell_window.stop )
@@ -16,6 +13,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL}"
+                  FOLDER InterShell
 )
 target_link_libraries( ${PROJECT_NAME}  ${SACK_LIBRARY} )
 install( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin/InterShell ) 
@@ -33,6 +31,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL}"
+                  FOLDER InterShell
 )
 target_link_libraries( ${PROJECT_NAME}  ${SACK_LIBRARY} )
 install( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin/InterShell ) 

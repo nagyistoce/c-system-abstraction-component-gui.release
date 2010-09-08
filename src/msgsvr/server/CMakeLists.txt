@@ -14,10 +14,6 @@ ${LAST_GCC_LIBRARY_SOURCE}
 )
 
 
-if( C++ )
-set_source_files_properties( ${SOURCES} PROPERTIES LANGUAGE "CXX" )
-endif()
-
 add_library( ${PROJECT_NAME} SHARED ${SOURCES} )
 
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
@@ -25,6 +21,7 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   COMPILE_FLAGS  "-DTARGET_LABEL=bag_msg_core_service"
                   PREFIX ""
                   SUFFIX ""
+                  FOLDER "Message Service"
 )
 
 target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} )
@@ -53,6 +50,7 @@ string( REGEX REPLACE "(.*)\\.(.*)" "\\1_\\2" TARGET_LABEL ${PROJECT_NAME} )
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   DEFINE_SYMBOL INTERSHELL_SOURCE
                   COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL} -DSERVERMSG_SOURCE -DBAG"
+                  FOLDER "Message Service"
 )
 install_default_dest_binary( ${PROJECT_NAME} )
 

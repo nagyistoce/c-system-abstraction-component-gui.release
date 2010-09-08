@@ -232,8 +232,8 @@ PRIORITY_PRELOAD( LoadSQLiteInterface, SQL_PRELOAD_PRIORITY )
 #define sqlite3_last_insert_rowid    sqlite_iface->sqlite3_last_insert_rowid
 #define sqlite3_create_function      sqlite_iface->sqlite3_create_function
 #define sqlite3_get_autocommit       sqlite_iface->sqlite3_get_autocommit
-#define sqlite3_open                 sqlite_iface->sqlite3_open
-#define sqlite3_errmsg               sqlite_iface->sqlite3_errmsg
+#define sqlite3_open(a,b)                 (sqlite_iface)?(sqlite_iface)->sqlite3_open(a,b):SQLITE_ERROR
+#define sqlite3_errmsg(db)               (sqlite_iface)?(sqlite_iface)->sqlite3_errmsg(db):"No Sqlite3 Interface"
 #define sqlite3_finalize             sqlite_iface->sqlite3_finalize
 #define sqlite3_close                sqlite_iface->sqlite3_close
 #define sqlite3_prepare_v2           sqlite_iface->sqlite3_prepare_v2

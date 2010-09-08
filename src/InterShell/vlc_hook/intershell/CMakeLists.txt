@@ -23,6 +23,7 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL}"
                   PREFIX ""
                   SUFFIX ""
+                  FOLDER "Video Streaming" 
                   )
 target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} ${VLC_INTERFACE} sack_widgets)
 install_default_dest_binary( ${PROJECT_NAME} )
