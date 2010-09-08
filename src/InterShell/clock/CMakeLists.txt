@@ -23,6 +23,7 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL} ${LibraryExtraFlags}"
                   PREFIX ""
                   SUFFIX ""
+                  FOLDER InterShell/plugins
 )
 target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} )
 install_literal_product( ${PROJECT_NAME} InterShell ) 

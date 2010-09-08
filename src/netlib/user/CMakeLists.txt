@@ -7,5 +7,6 @@ ${LAST_GCC_PROGRAM_SOURCE}
 )
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL} ${LibraryExtraFlags}"
+                  FOLDER tests
 )
 target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} )

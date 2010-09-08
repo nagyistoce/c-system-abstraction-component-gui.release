@@ -1,6 +1,8 @@
 
 
 cmake_minimum_required(VERSION 2.8)
+
+
 add_subdirectory( widgets )
 add_subdirectory( frames )
 add_subdirectory( images )
@@ -40,6 +42,8 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL} -D__NO_ANIMATION__"
                   SUFFIX ""
                   PREFIX ""
+                  FOLDER InterShell
+
 )
 
 target_link_libraries( ${PROJECT_NAME} sack_widgets ${SACK_LIBRARY} )

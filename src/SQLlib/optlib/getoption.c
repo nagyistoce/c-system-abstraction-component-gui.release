@@ -235,12 +235,12 @@ SQLGETOPTION_PROC( void, CreateOptionDatabase )( void )
 
 void InitMachine( void )
 {
-   if( !og.flags.bInited )
+	if( !og.flags.bInited )
 	{
-      _32 timeout;
-      CreateOptionDatabase();
+		_32 timeout;
+		CreateOptionDatabase();
 		// acutlaly init should be called always ....
-      timeout = GetTickCount() + 1000;
+		timeout = GetTickCount() + 1000;
 		while( !IsSQLOpen( og.Option ) && ( timeout > GetTickCount() ) )
 		{
 			Sleep( 100 );
@@ -248,20 +248,20 @@ void InitMachine( void )
 		if( !IsSQLOpen(og.Option) )
 		{
 			lprintf( WIDE("Get Option init failed... no database...") );
-         return;
+			return;
 		}
-      // og.system = GetSYstemID( WIDE("SYSTEMNAME") );
-      og.SystemID = 0;  // default - any system...
-      og.flags.bInited = 1;
-      {
+		// og.system = GetSYstemID( WIDE("SYSTEMNAME") );
+		og.SystemID = 0;  // default - any system...
+		og.flags.bInited = 1;
+		{
 #ifdef _WIN32
-         WSADATA ws;
-         WSAStartup( MAKEWORD(1,1), &ws );
+			WSADATA ws;
+			WSAStartup( MAKEWORD(1,1), &ws );
 #endif
-         gethostname( og.SystemName, sizeof( og.SystemName ) );
+			gethostname( og.SystemName, sizeof( og.SystemName ) );
 			og.SystemID = SQLReadNameTable( og.Option, og.SystemName, WIDE("systems"), WIDE("system_id")  );
-      }
-   }
+		}
+	}
 }
 
 //------------------------------------------------------------------------

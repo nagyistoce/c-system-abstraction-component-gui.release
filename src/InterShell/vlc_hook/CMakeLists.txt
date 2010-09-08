@@ -17,17 +17,13 @@ ${LAST_GCC_LIBRARY_SOURCE} )
 
 include_directories( ${VLC_PATH}/sdk/include )
 
-if( C++ )
-set_source_files_properties( ${SOURCES} PROPERTIES LANGUAGE "CXX" )
-endif()
-
-
 add_library(${PROJECT_NAME} SHARED ${SOURCES} )
 
-
-SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
-                  COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL} ${ExtraFlags}"
+SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES 
+        COMPILE_FLAGS "-DTARGET_LABEL=${TARGET_LABEL} ${ExtraFlags}" 
+        FOLDER "Video Streaming" 
 )
+
 target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} )
 
 install_default_dest( ${PROJECT_NAME} )

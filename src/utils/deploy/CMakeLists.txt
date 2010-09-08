@@ -4,6 +4,10 @@ cmake_minimum_required(VERSION 2.8)
 PROJECT( sack_deploy )
 
 ADD_EXECUTABLE( ${PROJECT_NAME} deploy )
+SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
+                  FOLDER install
+)
+
 #TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${SACK_LIBRARIES} )
 
 

@@ -698,9 +698,9 @@ add_definitions( -D__OBSCURE_STREAM_INTERNALS )
                   COMPILE_FLAGS  "-DTARGET_LABEL=bag_sqlite3 -DSQLITE_SOURCE"
                   SUFFIX ""
                   PREFIX ""
+                  FOLDER sqlite
    )
-   
-  endif()
+  endif(USE_SQLITE_EXTERNAL)
 
 if( !MSVC )
 add_subdirectory( src/displaylib )
