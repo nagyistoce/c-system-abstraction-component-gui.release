@@ -1929,12 +1929,13 @@ void SmudgeCommonEx( PSI_CONTROL pc DBG_PASS )
 				if( parent->flags.bNoUpdate || parent->flags.bHidden )
 				{
 #if DEBUG_UPDAATE_DRAW > 3
-					lprintf( WIDE("a control %p(%d) (self, or some parent %p(%d)) has %s or %s")
+					lprintf( WIDE("a control %p(%d) (self, or some parent %p(%d)) has %s or %s  (marks me as dirty anhow, but doesn't attempt anything further)")
 							 , pc, pc->nType, parent, parent->nType
 							 , parent->flags.bNoUpdate?WIDE( "noupdate" ):WIDE( "..." )
 							 , parent->flags.bHidden?WIDE( "hidden" ):WIDE( "..." )
 							 );
 #endif
+					pc->flags.bDirty = 1;
 					return;
 				}
 			}
