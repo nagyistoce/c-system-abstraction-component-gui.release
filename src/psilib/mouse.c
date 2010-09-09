@@ -1735,7 +1735,7 @@ int CPROC AltFrameMouse( PTRSZVAL psvCommon, S_32 x, S_32 y, _32 b )
 
 //---------------------------------------------------------------------------
 
-int CPROC DefaultFrameMouse( PSI_CONTROL pc, S_32 x, S_32 y, _32 b )
+static int OnMouseCommon( "Frame" )( PSI_CONTROL pc, S_32 x, S_32 y, _32 b )
 {
 	// okay really frame mouse proc is JUST like every other
 	// control proc- mouse coordinates are relative to the surface.
