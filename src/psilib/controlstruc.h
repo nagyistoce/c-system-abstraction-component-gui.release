@@ -343,7 +343,7 @@ typedef struct common_control_frame
 		/* control has been temporarily displaced from its parent
 		   control.                                               */
 			_32 detached : 1;
-         // edit mode enabled visibility of this window and opened it.
+			// edit mode enabled visibility of this window and opened it.
 			_32 auto_opened : 1;
          // first time this is being cleaned (during the course of refresh this could be called many times)
 			_32 bFirstCleaning : 1;
@@ -366,7 +366,9 @@ typedef struct common_control_frame
 		/* Set when resized by a mouse drag, causes a dirty state. */
 			_32 bResizedDirty : 1;
          // during control update the effective surface region was set while away.
-		_32 bUpdateRegionSet : 1; 
+			_32 bUpdateRegionSet : 1;
+         // control was in the process of being cleaned, and received a smudge again... control needs to draw itself AGAIN
+			BIT_FIELD bDirtied : 1;
 	} flags;
 
 

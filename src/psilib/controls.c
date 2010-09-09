@@ -1627,6 +1627,7 @@ static void DoUpdateCommonEx( PPENDING_RECT upd, PSI_CONTROL pc, int bDraw, int 
 			_xlprintf(1 DBG_RELAY)( WIDE(">>Begin control %p update forced?%s"), pc, bDraw?WIDE( "Yes" ):WIDE( "No" ) );
 #endif
 			pc->flags.bCleaning = 1;
+		retry_update:
 			if( pc->parent && !pc->device )
 			{
 				// if my parent is initial, become initial also...
@@ -1840,6 +1841,14 @@ static void DoUpdateCommonEx( PPENDING_RECT upd, PSI_CONTROL pc, int bDraw, int 
 					DoUpdateCommonEx( upd, child, cleaned, level+1 DBG_RELAY );
 				}
 			}
+			if( pc->flags.bDirtied )
+			{
+				pc->flags.bDirtied = 0;
+#ifdef DEBUG_UPDAATE_DRAW
+				lprintf( "Recovered dirty that was set while we were cleaning... going back to draw again." );
+#endif
+            goto retry_update;
+			}
 			pc->flags.children_cleaned = 1;
 			pc->flags.bCleaning = 0;
 			pc->flags.bFirstCleaning = 1;
@@ -1942,6 +1951,11 @@ void SmudgeCommonEx( PSI_CONTROL pc DBG_PASS )
 		}
 		if( pc->flags.bDirty || pc->flags.bCleaning )
 		{
+			if( pc->flags.bCleaning )
+			{
+            // something changed, and we'll have to draw that control again... as soon as it's done cleaning actually.
+				pc->flags.bDirtied = 1;
+			}
 #if DEBUG_UPDAATE_DRAW > 3
 			_xlprintf(LOG_DEBUG DBG_RELAY)( WIDE("%s %s %s %p")
 					 , pc->flags.bDirty?WIDE( "already smudged" ):WIDE( "" )
@@ -1949,6 +1963,7 @@ void SmudgeCommonEx( PSI_CONTROL pc DBG_PASS )
 					 , pc->flags.bCleaning?WIDE( "in process of cleaning..." ):WIDE( "" )
 					  , pc );
 #endif
+
          //Sleep( 10 );
 			//return;
 		}
@@ -3711,6 +3726,9 @@ PSI_PROC( void, EnableCommonUpdates )( PSI_CONTROL common, int bEnable )
 	{
 		if( common->flags.bNoUpdate && bEnable )
 		{
+#ifdef DEBUG_UPDAATE_DRAW
+			lprintf( "Enable Common Updates on %p", common );
+#endif
 			common->flags.bNoUpdate = FALSE;
          // this is the work that deleteuse does...
 			// anything dirty will avhe already been drawn.
@@ -3721,8 +3739,13 @@ PSI_PROC( void, EnableCommonUpdates )( PSI_CONTROL common, int bEnable )
          //common->InUse--;
          //DeleteUse( common );
 		}
-      else
+		else
+		{
+#ifdef DEBUG_UPDAATE_DRAW
+			lprintf( "Disable Common Updates on %p", common );
+#endif
 			common->flags.bNoUpdate = !bEnable;
+		}
 	}
 }
 
