@@ -11,6 +11,7 @@
 #include "resource.h"
 
 
+PSI_NAMESPACE
 
 static void CPROC FileDroppedOnFrame( PTRSZVAL psvControl, CTEXTSTR filename, S_32 x, S_32 y )
 {
@@ -571,4 +572,5 @@ PSI_PROC( PSI_CONTROL, CreateFrameFromRenderer )( CTEXTSTR caption
 	return pc;
 }
 
+PSI_NAMESPACE_END
 

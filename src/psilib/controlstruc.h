@@ -568,14 +568,16 @@ void DeleteWaitEx( PSI_CONTROL *pc DBG_PASS );
                                                       
                                                       \ \                                                   */
 
+
+_MOUSE_NAMESPACE_END
+USE_MOUSE_NAMESPACE
+
+
 PPHYSICAL_DEVICE OpenPhysicalDevice( PSI_CONTROL pc, PSI_CONTROL over, PRENDERER pActImg, PSI_CONTROL under );
 void TryLoadingFrameImage( void );
 Image CopyOriginalSurfaceEx( PCONTROL pc, Image use_image DBG_PASS );
 #define CopyOriginalSurface(pc,i) CopyOriginalSurfaceEx(pc,i DBG_SRC )
 
-
-_MOUSE_NAMESPACE_END
-USE_MOUSE_NAMESPACE
 #define PCOMMON PSI_CONTROL
 
 PSI_NAMESPACE_END
