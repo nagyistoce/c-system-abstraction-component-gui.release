@@ -32,7 +32,7 @@ INCLUDEDIRS+=$(ALTANIK_BASE)/include
 
 
 ifndef VLC_PATH
-VLC_PATH=e:/tools/vlc-0.9.9z/sdk/include
+VLC_PATH=c:/tools/vlc-1.0.5/sdk/include
 $(warning VLC_PATH ?  default (from this makefile) $(VLC_PATH))
 endif
 
