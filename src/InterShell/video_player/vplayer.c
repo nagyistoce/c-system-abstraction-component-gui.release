@@ -7,11 +7,13 @@
 #include <sqlgetoption.h>
 #include "../widgets/include/banner.h"
 #define PLUGIN_MODULE
+#define DEFINES_DEKWARE_INTERFACE
 #include "space.h"
 
 #define DEFINES_INTERSHELL_INTERFACE
 #define USES_INTERSHELL_INTERFACE
 #include <../intershell_export.h>
+#include <../intershell_registry.h>
 
 typedef struct file_info *PFILE_INFO;
 struct file_info
@@ -228,7 +230,7 @@ void ReloadPlaylist( void )
 }
 
 
-PRELOAD( asdfasdf)
+PRELOAD( BeginVideoPlayer )
 {
 	ThreadTo( Thread, 0 );
 	ThreadTo( Thread2, 0 );
@@ -712,7 +714,7 @@ static void CPROC AcceptFile( PSI_CONTROL pc, CTEXTSTR file, S_32 x, S_32 y )
 {
 	if( !l.base_video_path )
 	{
-      BannerMessage( "No current location specified...." );
+      Banner2Message( "No current location specified...." );
 	}
 	else
 	{

@@ -72,7 +72,7 @@ MORE_PROJECTS+=src/imglib/Makefile \
 	$(if $(__WINDOWS__),,src/displaylib/Makefile.display.bag) \
         src/psilib/Makefile.PSI.bag \
         $(if $(__WINDOWS__),,src/displaylib/Makefile.display2.bag) \
-	$(if $(__WINDOWS__),,src/intershell/Makefile) \
+	$(if $(__WINDOWS__),src/intershell/Makefile,) \
         $(if $(__WINDOWS__),src/streamlib/Makefile,) \
         $(if $(__NO_SQL__),,src/SQLlib/optlib/Makefile)
 else
