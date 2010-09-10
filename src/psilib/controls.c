@@ -140,13 +140,9 @@ PRIORITY_PRELOAD( InitPSILibrary, PSI_PRELOAD_PRIORITY )
 		REG(CONSOLE_CONTROL );
 		REG(SHEET_CONTROL );
 		REG(COMBOBOX_CONTROL );
-		//RegisterProcedure( S(NORMAL_BUTTON), WIDE("Okay"), void, TARGETNAME, ButtonOkay, PTRSZVAL, PCONTROL );
-	//RegisterProcedure( S(NORMAL_BUTTON), WIDE("Cancel"), void, TARGETNAME, ButtonOkay, PTRSZVAL, PCONTROL );
-      //if(0)
 		{
 			int nResources = sizeof( resource_names ) / sizeof( resource_names[0] );
 			int n;
-			//DebugBreak();
 			for( n = 0; n < nResources; n++ )
 			{
 				if( resource_names[n].resource_name_id )
@@ -172,7 +168,6 @@ PRIORITY_PRELOAD( InitPSILibrary, PSI_PRELOAD_PRIORITY )
 		}
 
 		RegisterIntValue( PSI_ROOT_REGISTRY WIDE("/init"), WIDE("done"), 1 );
-		//bInited = TRUE;
 	}
 }
 
@@ -672,84 +667,6 @@ void FixFrameFocus( PPHYSICAL_DEVICE pf, int dir )
 
 //---------------------------------------------------------------------------
 
-int CPROC FrameKeyProc( PTRSZVAL psvFrame, _32 key )
-{
-   PPHYSICAL_DEVICE pf = (PPHYSICAL_DEVICE)psvFrame;
-	//PFRAME pf = (PFRAME)psvFrame;
-	PSI_CONTROL pc = pf->common;
-   int result = 0;
-	if( pc->flags.bDestroy )
-      return 0;
-	AddUse( pc );
-#ifdef DEBUG_KEY_EVENTS
-	lprintf( WIDE("Added use for a key %08lx"), key );
-#endif
-	{
-		if( pf->EditState.flags.bActive && pf->EditState.pCurrent )
-		{
-			//if( pf->EditState.pCurrent->KeyProc )
-			//	pf->EditState.pCurrent->KeyProc( pf->EditState.pCurrent->psvKey, key );
-			AddUse( pf->EditState.pCurrent );
-#ifdef DEBUG_KEY_EVENTS
-			lprintf( WIDE("invoking control use...") );
-#endif
-         InvokeResultingMethod( result, pf->EditState.pCurrent, _KeyProc, ( pf->EditState.pCurrent, key ) );
-         DeleteUse( pf->EditState.pCurrent );
-		}
-		else if( pf->pFocus )
-		{
-			//if( pf->pFocus->KeyProc )
-			//	pf->pFocus->KeyProc( pf->pFocus->psvKey, key );
-			AddUse( pf->pFocus );
-#ifdef DEBUG_KEY_EVENTS
-			lprintf( WIDE("invoking control focus use...") );
-#endif
-			//	lprintf( WIDE("dispatch a key event to focused contro... ") );
-			InvokeResultingMethod( result, pf->pFocus, _KeyProc, ( pf->pFocus, key ) );
-			DeleteUse( pf->pFocus );
-		}
-	}
-	// passed the key to the child window first...
-   // if it did not process, then the frame can get a shot at it..
-	if( !result && pc && pc->_KeyProc )
-	{
-#ifdef DEBUG_KEY_EVENTS
-		lprintf( WIDE("Invoking control key method.") );
-#endif
-		InvokeResultingMethod( result, pc, _KeyProc, (pc,key));
-		DeleteUse( pc );
-		return result;
-	}
-	if( !result )
-	{
-		if( (KEY_CODE(key) == KEY_TAB) && (key & KEY_PRESSED))
-		{
-			//DebugBreak();
-			if( !(key & (KEY_ALT_DOWN|KEY_CONTROL_DOWN)) ) // not control or alt...
-			{
-				if( key & KEY_SHIFT_DOWN ) // shift-tab backwards
-				{
-					FixFrameFocus( pf, FFF_BACKWARD );
-					result = 1;
-				}
-				else
-				{
-					FixFrameFocus( pf, FFF_FORWARD );
-					result = 1;
-				}
-			}
-		}
-		if( KEY_CODE(key) == KEY_ESCAPE && (key & KEY_PRESSED))
-			result = InvokeDefault( pc, TRUE );
-		if( KEY_CODE(key) == KEY_ENTER && (key & KEY_PRESSED))
-			result = InvokeDefault( pc, FALSE );
-	}
-	DeleteUse( pc );
-	return result;
-}
-
-//---------------------------------------------------------------------------
-
 void RestoreBackground( PSI_CONTROL pc, P_IMAGE_RECTANGLE r )
 {
 	PSI_CONTROL parent;
@@ -782,79 +699,60 @@ void RestoreBackground( PSI_CONTROL pc, P_IMAGE_RECTANGLE r )
 
 void UpdateSomeControlsWork( int level, PSI_CONTROL pc, P_IMAGE_RECTANGLE pRect )
 {
-//cpg26dec2006 c:\work\sack\src\psilib\controls.c(661): Warning! W202: Symbol 'wind_rect' has been defined, but not referenced
-//    IMAGE_RECTANGLE wind_rect;
-   IMAGE_RECTANGLE surf_rect;
+	IMAGE_RECTANGLE surf_rect;
 
-   if( pc )
-    //for( ;pc; /*pc = pc->next*/ )
-	 {
-		 if( pc->flags.bHidden )
-		 {
-			 lprintf( WIDE("Control is hidden, skipping it.") );
+	if( pc )
+	{
+		if( pc->flags.bHidden )
+		{
+			lprintf( WIDE("Control is hidden, skipping it.") );
 			return;
-			 //continue;
-		 }
+			//continue;
+		}
 #ifdef DEBUG_UPDAATE_DRAW
-		 lprintf( WIDE("updating some controls... rectangles and stuff.") );
+		lprintf( WIDE("updating some controls... rectangles and stuff.") );
 #endif
-	 //Log( WIDE("Update some controls....") );
-		 //if( !IntersectRectangle( &wind_rect, pRect, &pc->rect ) )
-		 //{
-          //return;
-			 //continue;
-		 //}
-		 //wind_rect.x -= pc->rect.x;
-		 //wind_rect.y -= pc->rect.y;
-		 // bound window rect (frame update)
-       // The update region may be
-		 if( IntersectRectangle( &surf_rect, pRect, &pc->surface_rect ) )
-		 {
-            //SetImageBound( pc->Window, &wind_rect );
-            //surf_rect.x -= pc->surface_rect.x;
-            //surf_rect.y -= pc->surface_rect.y;
-            // bound surface rect
-				//SetImageBound( pc->Surface, &surf_rect );
+		// bound window rect (frame update)
+		// The update region may be
+		if( IntersectRectangle( &surf_rect, pRect, &pc->surface_rect ) )
+		{
 #ifdef DEBUG_UPDAATE_DRAW
-				lprintf( WIDE("Some controls using normal updatecommon to draw...") );
+			lprintf( WIDE("Some controls using normal updatecommon to draw...") );
 #endif
-            // enabled minimal update region...
-				pc->dirty_rect = surf_rect;
-				//AddCommonUpdateRegion( upd, FALSE, pc );
-
-            //UpdateCommon( pc ); // and all children, if dirtied...
-        }
-        else
-		  {
-		  // wind_rect is the merge of the update needed
-		  // and the window's bounds, but none of the surface
-		  // setting the image bound to this will short many things like blotting the
-           //fancy image borders.
-            //SetImageBound( pc->Window, &wind_rect );
-            // yes redundant with above, but need to fix the image pos
-				// AFTER the update... and well....
-				//Log( WIDE("Hit the rectange, but didn't hit the content... so update border only.") );
-			  if( pc->DrawBorder )
-			  {
+			// enabled minimal update region...
+			pc->dirty_rect = surf_rect;
+		}
+		else
+		{
+			// wind_rect is the merge of the update needed
+			// and the window's bounds, but none of the surface
+			// setting the image bound to this will short many things like blotting the
+			//fancy image borders.
+			//SetImageBound( pc->Window, &wind_rect );
+			// yes redundant with above, but need to fix the image pos
+			// AFTER the update... and well....
+			//Log( WIDE("Hit the rectange, but didn't hit the content... so update border only.") );
+			if( pc->DrawBorder )
+			{
 #ifdef DEBUG_BORDER_DRAWING
 #endif
-				  lprintf( WIDE("Draw border.") );
-				  pc->DrawBorder( pc );
-			  }
-				if( pc->device )
-				{
-					//void DrawFrameCaption( PSI_CONTROL );
+				lprintf( WIDE("Draw border.") );
+				pc->DrawBorder( pc );
+			}
+			if( pc->device )
+			{
+				//void DrawFrameCaption( PSI_CONTROL );
 #ifdef DEBUG_UPDAATE_DRAW
-					lprintf( WIDE("Drew border, drawing caption uhmm update some work controls") );
+				lprintf( WIDE("Drew border, drawing caption uhmm update some work controls") );
 #endif
-					DrawFrameCaption( pc );
-				}
-            pc->dirty_rect.width = 0;
-            pc->dirty_rect.height = 0;
-            // reset image boundry for further drawing.
-				//FixImagePosition( pc->Window );
-        }
-    }
+				DrawFrameCaption( pc );
+			}
+			pc->dirty_rect.width = 0;
+			pc->dirty_rect.height = 0;
+			// reset image boundry for further drawing.
+			//FixImagePosition( pc->Window );
+		}
+	}
 }
 
 //---------------------------------------------------------------------------
@@ -897,10 +795,7 @@ void UpdateSomeControls( PSI_CONTROL pc, P_IMAGE_RECTANGLE pRect )
 	}
 	//lprintf( WIDE("UpdateSomeControls - input rect is %d,%d  %d,%d"), pRect->x, pRect->y, pRect->width, pRect->height );
 	//lprintf( WIDE("UpdateSomeControls - changed rect is %d,%d  %d,%d"), pRect->x, pRect->y, pRect->width, pRect->height );
-	//prior_flag = pc->flags.bInitial;
-	//pc->flags.bInitial = 1;
-	//UpdateSomeControlsWork( 0, pc, pRect );
-	//pc->flags.bInitial = prior_flag;
+
 	// Uhmm well ... transporting dirty_rect ... on the control
 	// passing a rect in...
 	//(*pRect) = pc->dirty_rect;
@@ -957,10 +852,10 @@ void UpdateSomeControls( PSI_CONTROL pc, P_IMAGE_RECTANGLE pRect )
 
 void SmudgeSomeControlsWork( PSI_CONTROL pc, P_IMAGE_RECTANGLE pRect )
 {
-    IMAGE_RECTANGLE wind_rect;
+	IMAGE_RECTANGLE wind_rect;
 	IMAGE_RECTANGLE surf_rect;
-   
-    for( ;pc; pc = pc->next )
+
+	for( ;pc; pc = pc->next )
 	{
 		{
 			PSI_CONTROL parent;
@@ -1106,18 +1001,13 @@ void SmudgeSomeControls( PSI_CONTROL pc, P_IMAGE_RECTANGLE pRect )
 
 //---------------------------------------------------------------------------
 
-int CPROC DefaultFrameDraw( PSI_CONTROL pc )
+static int OnDrawCommon( "Frame" )( PSI_CONTROL pc )
 {
-	//void DrawFrameCaption( PSI_CONTROL );
-	//PPHYSICAL_DEVICE pf = pc->device;
-	// border drawing will be done after this...
 #ifdef DEBUG_UPDAATE_DRAW
 	lprintf( WIDE( "-=-=-=-=- Output Frame background..." ) );
 #endif
 	BlatColorAlpha( pc->Surface, 0, 0, pc->surface_rect.width, pc->surface_rect.height, basecolor(pc)[NORMAL] );
-	//lprintf( WIDE("Drawing frame caption...") );
 	DrawFrameCaption( pc );
-	// frame border will be drawn after this.
 	return 1;
 }
 
@@ -1142,26 +1032,22 @@ static void DoUpdateFrame( PSI_CONTROL pc
 								  DBG_PASS)
 {
 	static int level;
-//	PPHYSICAL_DEVICE pf = pc->device;
 	PPHYSICAL_DEVICE pf = NULL;
 
 	if( pc )
 	{
 		if( pc->flags.bHidden )
-         return;
+			return;
 		pf = pc->device;
 	}
 	else
 	{
 		lprintf( WIDE( "Why did ypu pass a NULL control to this?! ( the event to close happeend before updat" ) );
 		return;
-		//DebugBreak();
 	}
 #if DEBUG_UPDAATE_DRAW > 2
 	_lprintf(DBG_RELAY)( WIDE( "Do Update frame.. x, y on frame of %d,%d,%d,%d " ), x, y, w, h );
 #endif
-   //_xlprintf( 1 DBG_RELAY )( WIDE("Update Frame ------------") );
-	//ValidatedControlData( PFRAME, CONTROL_FRAME, pf, pc );
 	level++;
 	if( pc && !pf )
 	{
@@ -1198,29 +1084,9 @@ static void DoUpdateFrame( PSI_CONTROL pc
 			return;
 		}
 
-		//lprintf( WIDE("Uhh... %d %d  , %d %d  %d %d"), pc->surface_rect.x, x, pc->surface_rect.y, y, w, h );
 		{
-			//PSI_CONTROL tmp;
 			int bias_x = 0;
 			int bias_y = 0;
-#if 0
-			if( surface_bias )
-			{
-				bias_x = pc->surface_rect.x;
-				bias_y = pc->surface_rect.y;
-			}
-			for( tmp = pc; tmp; tmp = tmp->parent )
-			{
-            bias_x += pc->rect.x;
-				bias_y += pc->rect.y;
-				if( tmp != pc )
-				{
-					bias_x += tmp->surface_rect.x;
-					bias_y += tmp->surface_rect.y;
-				}
-
-			}
-#endif
 #ifdef DEBUG_UPDAATE_DRAW
 			_xlprintf( 1 DBG_RELAY )( WIDE("updating display portion %d,%d (%d,%d)")
 											, bias_x + x
@@ -1232,17 +1098,12 @@ static void DoUpdateFrame( PSI_CONTROL pc
 							  , x //+ pc->surface_rect.x
 							  , y //+ pc->surface_rect.y
 							  , w, h, TESTCOLOR );
-			//BlatColorAlpha( pc->Surface
-			//				  , x //+ pc->surface_rect.x
-			//				  , y //+ pc->surface_rect.y
-			//				  , w, h, BASE_COLOR_YELLOW );
 #endif
 			UpdateDisplayPortion( pf->pActImg
 									  , bias_x + x
 									  , bias_y + y
 									  , w, h );
 		}
-		//UpdateDisplayPortion( pf->pActImg, 0, 0, 0, 0 );
 	}
 	level--;
 }
@@ -1289,12 +1150,6 @@ PSI_PROC( void, UpdateFrameEx )( PSI_CONTROL pc
 								  , pc->surface_rect.y + y
 										, w, h );
 #endif
-      /*
-		BlatColor( GetDisplayImage( pf->pActImg )
-								  , x
-								  , y
-								  , w, h, BASE_COLOR_WHITE );
-      */
 #ifdef BLAT_COLOR_UPDATE_PORTION
 		BlatColorAlpha( pc->Window,  x + pc->surface_rect.x
 						  ,  y + pc->surface_rect.y
@@ -1596,10 +1451,10 @@ Image CopyOriginalSurfaceEx( PCONTROL pc, Image use_image DBG_PASS )
    return NULL;
 }
 
-#define CopyOriginalSurface(pc,i) CopyOriginalSurfaceEx(pc,i DBG_SRC )
-
 //---------------------------------------------------------------------------
 
+
+// This routine actually sends the draw events to dirty rectangles.
 static void DoUpdateCommonEx( PPENDING_RECT upd, PSI_CONTROL pc, int bDraw, int level DBG_PASS )
 {
 	int cleaned = 0;
@@ -1610,8 +1465,6 @@ static void DoUpdateCommonEx( PPENDING_RECT upd, PSI_CONTROL pc, int bDraw, int 
 #endif
 		if( pc->flags.bNoUpdate || !GetImageSurface(pc->Surface) )
          return;
-	//#undef DEBUG_UPDAATE_DRAW
-//#if 0
 #if DEBUG_UPDAATE_DRAW > 3
       // might filter this to just if dirty, we get called a lot without dirty controls
 		lprintf( WIDE("Control %p is %s"), pc, pc->flags.bDirty?WIDE( "SMUDGED" ):WIDE( "clean" ) );
@@ -1672,7 +1525,7 @@ static void DoUpdateCommonEx( PPENDING_RECT upd, PSI_CONTROL pc, int bDraw, int 
 							pc->flags.bParentCleaned = 1;
 							BlotImage( pc->Window, pc->OriginalSurface, 0, 0 );
 						}
-               /* consider adding this, because the parent is now cleaned? */
+					/* consider adding this, because the parent is now cleaned? */
 					//pc->flags.bParentCleaned = 1; // has now drawn itself, and we must assume that it's not clean.
 				}
 				else
@@ -1930,7 +1783,6 @@ void SmudgeCommonEx( PSI_CONTROL pc DBG_PASS )
 #endif
 	if(pc)
 	{
-		//PSI_CONTROL child = pc->child;
 		{
 			PSI_CONTROL parent;
 			for( parent = pc; parent; parent = parent->parent )
@@ -2020,12 +1872,8 @@ void SmudgeCommonEx( PSI_CONTROL pc DBG_PASS )
 		// actually when it comes time to do the update
 		// the children's draw is forced-run because the
 		// parent updated, and therefore obviously oblitereted
-      // the region the child had, the child therefore NEEDS to draw.
-		//while( child )
-		//{
-		//	SmudgeCommonEx( child DBG_RELAY );
-		//	child = child->next;
-		//}
+		// the region the child had, the child therefore NEEDS to draw.
+
 		// if dirty, but nothings in use...
 		// then I guess we get to clear stuff out.
 		if( !pc->InUse && !ChildInUse( pc, 0 ) )
@@ -2124,235 +1972,9 @@ PSI_PROC( void, UpdateCommonEx )( PSI_CONTROL pc, int bDraw DBG_PASS )
 		}
 	}
 }
-//---------------------------------------------------------------------------
-
-void CPROC FrameRedraw( PTRSZVAL psvFrame, PRENDERER psvSelf )
-{
-   PPHYSICAL_DEVICE pf = (PPHYSICAL_DEVICE)psvFrame;
-	_32 update = 0;
-	PSI_CONTROL pc;
-	//lprintf( WIDE("frame %p"), pf );
-		
-	pc = pf->common;
-	if( !pc ) // might (and probalby isn't) attached to anything yet.
-	{
-#ifdef DEBUG_UPDAATE_DRAW
-		Log( WIDE("no frame... early return") );
-#endif
-		return;
-	}
-#ifdef DEBUG_UPDAATE_DRAW
-	lprintf( WIDE( " ------------- BEGIN FRAME DRAW -----------------" ) );
-#endif
-   pc->flags.bShown = 1;
-	GetCurrentDisplaySurface(pf);
-	if( pc->flags.bDirty || pc->flags.bResizedDirty )
-	{
-		pc->flags.bResizedDirty = 0;
-      pc->flags.bDirty = 1;
-#ifdef DEBUG_UPDAATE_DRAW
-		Log( WIDE("Redraw frame...") );
-#endif
-		AddUse( pc );
-
-		if( pc->flags.bTransparent && pc->flags.bFirstCleaning )
-		{
-			Image OldSurface;
-#ifdef DEBUG_UPDAATE_DRAW
-			lprintf( WIDE( "Saving old image..." ) );
-#endif
-			if( ( OldSurface = CopyOriginalSurface( pc, pc->OriginalSurface ) ) )
-			{
-				pc->OriginalSurface = OldSurface;
-			}
-			else
-				if( pc->OriginalSurface )
-				{
-#ifdef DEBUG_UPDAATE_DRAW
-					lprintf( WIDE( "------------ Restoring old image..." ) );
-					lprintf( WIDE( "Restoring orignal background... " ) );
-#endif
-					BlotImage( pc->Surface, pc->OriginalSurface, 0, 0 );
-				}
-		}
-		//pc->flags.bParentCleaned = 1; // has now drawn itself, and we must assume that it's not clean.
-
-		// surface could have changed...
-		if( pc->Window->width != pc->rect.width )
-		{
-			pc->rect.width = pc->Window->width;
-			update++;
-		}
-		if( pc->Window->height != pc->rect.height )
-		{
-			pc->rect.height = pc->Window->height;
-			update++;
-		}
-		// but then again...
-		//update++; // what if we only moved, and the driver requires a refresh?
-
-#ifdef __DISPLAY_NO_BUFFER__
-		lprintf( WIDE("REDRAW?!") );
-#endif
-		// if using "displaylib"
-		//if( update )
-		{
-			//lprintf( WIDE("Recomputing border...") );
-			// fix up surface rect.
-			{
-            extern void UpdateSurface( PSI_CONTROL pc );
-            UpdateSurface( pc );
-			}
-			//SetCommonBorder( pc, pc->BorderType );
-			if( pc->DrawBorder )
-			{
-#ifdef DEBUG_BORDER_DRAWING
-				lprintf( "Drawing border here too.." );
-#endif
-				pc->DrawBorder( pc );
-			}
-			// probably should just invoke draw... but then we won't get marked
-			// dirty - so redundant smudges wont be merged... and we'll do this all twice.
-#ifdef DEBUG_UPDAATE_DRAW
-			lprintf( WIDE( "Smudging the form... %p" ), pc );
-#endif
-		}
-		//SmudgeCommon( pc );
-		//else
-#ifdef DEBUG_UPDAATE_DRAW
-		lprintf( WIDE("delete use should refresh rectangle. %p"), pc );
-#endif
-		DeleteUse( pc );
-	}
-	else
-	{
-#ifdef DEBUG_UPDAATE_DRAW
-		lprintf( WIDE( "trusting that the frame is already drawn to the stable buffer..." ) );
-#endif
-		UpdateDisplay( pf->pActImg );
-	}
-}
 
 //---------------------------------------------------------------------------
-
-void CPROC FrameFocusProc( PTRSZVAL psvFrame, PRENDERER loss )
-{
-   int added_use = 0;
-	PPHYSICAL_DEVICE frame = (PPHYSICAL_DEVICE)psvFrame;
-	//PFRAME frame = (PFRAME)psvFrame;
-	PSI_CONTROL pc = frame->common;
-	if( pc->flags.bShown )
-	{
-      added_use = 1;
-		AddUse( pc );
-	}
-	GetCurrentDisplaySurface(frame);
-	if( loss )
-	{
-		if( frame->pFocus )
-			frame->pFocus->flags.bFocused = 0;
-		pc->flags.bFocused = 0;
-	}
-	else
-	{
-		pc->flags.bFocused = 1;
-		if( frame->pFocus && ( frame->pFocus != frame->common ) )
-		{
-			frame->pFocus->flags.bFocused = 1;
-		}
-	}
-	if( pc->flags.bInitial )
-	{
-		// still in the middle of displaying... this is a false draw point.
-      if( added_use )
-			DeleteUse( pc );
-		return;
-	}
-#ifdef DEBUG_UPDAATE_DRAW
-	else
-      lprintf( WIDE( "Frame is not initial..." ) );
-#endif
-
-//#ifdef DEBUG_UPDAATE_DRAW
-#ifdef DEBUG_FOCUS_STUFF
-	Log1( WIDE("PSI Focus change called: %p"), loss );
-#endif
-//#endif
-	if( loss )
-	{
-		if( frame->pFocus && ( frame->pFocus != frame->common ) )
-		{
-#ifdef DEBUG_FOCUS_STUFF
-			lprintf( WIDE("Dispatch to current focused control also?") );
-#endif
-			frame->pFocus->flags.bFocused = 0;
-			if( frame->pFocus->ChangeFocus )
-				frame->pFocus->ChangeFocus( frame->pFocus, FALSE );
-		}
-#ifdef DEBUG_FOCUS_STUFF
-		lprintf( WIDE("Control lost focus. (the frame itself loses focus)") );
-#endif
-		pc->flags.bFocused = 0;
-		if( pc->ChangeFocus )
-         pc->ChangeFocus( pc, FALSE );
-	}
-	else
-	{
-		pc->flags.bFocused = 1;
-#ifdef DEBUG_FOCUS_STUFF
-		lprintf( WIDE("Control gains focus. (the frame itself gains focus)") );
-#endif
-		if( pc->ChangeFocus )
-         pc->ChangeFocus( pc, TRUE );
-		if( frame->pFocus && ( frame->pFocus != frame->common ) )
-		{
-         AddUse( frame->pFocus );
-			// cause we need to unfocus it's control also
-			// otherwise we get stupid cursors...
-			frame->pFocus->flags.bFocused = 1;
-#ifdef DEBUG_FOCUS_STUFF
-			lprintf( WIDE("Dispatch to current focused control also?") );
-#endif
-			if( frame->pFocus->ChangeFocus )
-				frame->pFocus->ChangeFocus( frame->pFocus, FALSE );
-			DeleteUse( frame->pFocus );
-		}
-	}
-	if( !pc->flags.bHidden )
-	{
-		//void DrawFrameCaption( PSI_CONTROL pc );
-
-		DrawFrameCaption( pc );
-		// update just the caption portion?
-		if( pc->surface_rect.y && !pc->flags.bRestoring )
-		{
-#ifdef DEBUG_FOCUS_STUFF
-			lprintf( WIDE("Updating the frame caption...") );
-			lprintf( WIDE("Update portion %d,%d to %d,%d"), 0, 0, pc->rect.width, pc->surface_rect.y );
-			lprintf( WIDE( "Updating just the caption portion to the display" ) );
-#endif
-#ifdef DEBUG_UPDAATE_DRAW
-			lprintf( WIDE("updating display portion %d,%d")
-					 , pc->rect.width
-					 , pc->surface_rect.y );
-#endif
-			UpdateDisplayPortion( frame->pActImg
-									  , 0, 0
-									  , pc->rect.width
-									  , pc->surface_rect.y );
-		}
-		// and draw here...
-	}
-#ifdef DEBUG_UPDAATE_DRAW
-	else
-		lprintf( WIDE("Did not draw frame of hidden frame.") );
-#endif
-	if( added_use )
-		DeleteUse( pc );
-}
-
-//---------------------------------------------------------------------------
-int CPROC InitFrame( PSI_CONTROL pc )
+static int OnCreateCommon( "Frame" )( PSI_CONTROL pc )
 {
 	// cannot fail create frame - it's a simple control
 	// later - if DisplayFrame( pc ) creates a physical display
@@ -2364,25 +1986,13 @@ int CPROC InitFrame( PSI_CONTROL pc )
 void CPROC DeinitFrame( PSI_CONTROL pc )
 {
    PPHYSICAL_DEVICE pf = pc->device;
-	//ValidatedControlData( PFRAME, CONTROL_FRAME, pf, pc );
-	//lprintf( WIDE("Closing physical frame device...") );
 	if( pf )
 	{
-      // closedevice
-		//CloseDisplay( pf->pActImg );
-     // Release( pf );
-      // and that's about it, eh?
 	}
 }
 
 
 CONTROL_REGISTRATION frame_controls = { WIDE("Frame"), { { 320, 240 }, 0, BORDER_NORMAL }
-												  , InitFrame
-                                      , NULL
-												  , DefaultFrameDraw
-												  , DefaultFrameMouse
-                                      , NULL
-												  , NULL //DeinitFrame
 };
 
 PRIORITY_PRELOAD( register_frame_control, PSI_PRELOAD_PRIORITY )
@@ -2584,16 +2194,6 @@ PROCEDURE RealCreateCommonExx( PSI_CONTROL *pResult
 
 //---------------------------------------------------------------------------
 
-void CPROC FrameClose( PTRSZVAL psv )
-{
-	PPHYSICAL_DEVICE device = (PPHYSICAL_DEVICE)psv;
-	PSI_CONTROL common;
-	device->pActImg = NULL;
-	DeleteLink( &g.shown_frames, device->common );
-	common = device->common;
-	DestroyCommon( &common );
-}
-
 void GetCurrentDisplaySurface( PPHYSICAL_DEVICE device )
 {
 	PSI_CONTROL pc = device->common;
@@ -2611,245 +2211,6 @@ void GetCurrentDisplaySurface( PPHYSICAL_DEVICE device )
 }
 
 //---------------------------------------------------------------------------
-
-static int IsMeOrInMe( PSI_CONTROL isme, PSI_CONTROL pc )
-{
-	while( pc )
-	{
-		if( pc->child )
-			if( IsMeOrInMe( isme, pc->child ) )
-				return TRUE;
-		if( isme == pc )
-			return TRUE;
-      pc = pc->next;
-	}
-   return FALSE;
-}
-
-void CPROC FileDroppedOnFrame( PTRSZVAL psvControl, CTEXTSTR filename, S_32 x, S_32 y )
-{
-	PSI_CONTROL frame = (PSI_CONTROL)psvControl;
-	if( frame )
-	{
-		x -= frame->surface_rect.x;
-		y -= frame->surface_rect.y;
-		{
-			int found = 0;
-			PSI_CONTROL current;
-			for( current = frame->child; current; current = current->next )
-			{
-				if( ( x < current->original_rect.x ) || 
-					( y < current->original_rect.y ) || 
-					( x > ( current->original_rect.x + current->original_rect.width ) ) || 
-					( y > ( current->original_rect.y + current->original_rect.height ) ) )
-				{
-					continue;
-				}
-				found = 1;
-				FileDroppedOnFrame( (PTRSZVAL)current, filename
-						, x - (current->original_rect.x )
-						, y - (current->original_rect.y ) );
-			}
-			if( !found )
-			{
-				InvokeMethod( frame, AcceptDroppedFiles, (frame, filename, x, y ) );
-			}
-			///////////////
-		}
-	}
-}
-
-PPHYSICAL_DEVICE OpenPhysicalDevice( PSI_CONTROL pc, PSI_CONTROL over, PRENDERER pActImg, PSI_CONTROL under )
-{
-	if( pc && !pc->device )
-	{
-		//Image surface;
-		PPHYSICAL_DEVICE device = (PPHYSICAL_DEVICE)Allocate( sizeof( PHYSICAL_DEVICE ) );
-		MemSet( device, 0, sizeof( PHYSICAL_DEVICE ) );
-		device->common = pc;
-		pc->device = device;
-		device->nIDDefaultOK = BTN_OKAY;
-		device->nIDDefaultCancel = BTN_CANCEL;
-		if( under )
-			under = GetFrame( under );
-		if( over )
-			over = GetFrame( over );
-		else
-			if( pc->parent )
-			{
-				over = pc->parent;
-				{
-					PSI_CONTROL parent;
-					for( parent = pc->parent; parent; parent = parent->parent )
-					{
-						if( parent->device )
-						{
-							if( IsMeOrInMe( parent->device->pFocus, pc ) )
-							{
-								//lprintf( "!!!!!!!!!!!! FIXED THE FOCUS!!!!!!!!!!" );
-								parent->device->pFocus = NULL;
-								break;
-							}
-						}
-					}
-				}
-				//DebugBreak();
-				//OrphanCommon( pc );
-				// some other method to save this?
-				// for now I can guess...
-				// pc->device->EditState.parent = parent ?
-				// leave it otherwise linked into the stack of controls...
-				pc->parent = NULL;
-			}
-		if( !pActImg )
-		{
-#ifdef DEBUG_CREATE
-			lprintf( WIDE("Creating a device to show this control on ... %d,%d %d,%d")
-					 , pc->rect.x
-					 , pc->rect.y
-					 , pc->rect.width
-					 , pc->rect.height );
-#endif
-         //lprintf( WIDE("Original show - extending frame bounds...") );
-			pc->original_rect.width += FrameBorderX(pc->BorderType);
-			pc->original_rect.height += FrameBorderY(pc, pc->BorderType, GetText( pc->caption.text ) );
-         // apply scale to rect from original...
-			pc->rect.width += FrameBorderX(pc->BorderType);
-			pc->rect.height += FrameBorderY(pc, pc->BorderType, GetText( pc->caption.text ) );
-			device->pActImg = OpenDisplayAboveUnderSizedAt( 0
-																  , pc->rect.width
-																  , pc->rect.height
-																  , pc->rect.x
-																  , pc->rect.y
-																  , (over&&over->device)?over->device->pActImg:NULL
-																  , (under&&under->device)?under->device->pActImg:NULL);
-#ifdef __WINDOWS__
-			WinShell_AcceptDroppedFiles( device->pActImg, FileDroppedOnFrame, (PTRSZVAL)pc );
-#endif
-         AddLink( &g.shown_frames, pc );
-         SetRendererTitle( device->pActImg, GetText( pc->caption.text ) );
-#ifdef DEBUG_CREATE
-			lprintf( WIDE("Resulting with surface...") );
-#endif
-		}
-		else
-		{
-			// have to resize the frame then to this display...
-#ifdef DEBUG_CREATE
-			lprintf( WIDE("Using externally assigned render surface...") );
-			lprintf( WIDE("Adjusting the frame to that size?!") );
-#endif
-			if( pc->rect.x && pc->rect.y )
-				MoveDisplay( pActImg, pc->rect.x, pc->rect.y );
-
-			if( pc->rect.width && pc->rect.height )
-				SizeDisplay( pActImg, pc->rect.width, pc->rect.height );
-			else
-			{
-				_32 width, height;
-				GetDisplaySize( &width, &height );
-				SizeCommon( pc, width, height );
-			}
-			device->pActImg = pActImg;
-#ifdef __WINDOWS__
-			WinShell_AcceptDroppedFiles( device->pActImg, FileDroppedOnFrame, (PTRSZVAL)pc );
-#endif
-			AddLink( &g.shown_frames, pc );
-         
-		}
-		pc->BorderType |= BORDER_FRAME; // mark this as outer frame... as a popup we still have 'parent'
-		GetCurrentDisplaySurface( device );
-
-		// sets up the surface iamge...
-		// computes it's offset based on border type and caption
-		// characteristics...
-		// readjusts surface (again) after adoption.
-		//lprintf( WIDE("------------------- COMMON BORDER RE-SET on draw -----------------") );
-
-		TryLoadingFrameImage();
-
-		if( g.BorderImage )
-			SetCommonTransparent( pc, TRUE );
-		SetCommonBorder( pc, pc->BorderType );
-
-		SetMouseHandler( device->pActImg, AltFrameMouse, (PTRSZVAL)device );
-		SetCloseHandler( device->pActImg, FrameClose, (PTRSZVAL)device );
-		SetRedrawHandler( device->pActImg, FrameRedraw, (PTRSZVAL)device );
-		SetKeyboardHandler( device->pActImg, FrameKeyProc, (PTRSZVAL)device );
-		//lprintf( WIDE("------------ to set frame focus...") );
-		SetLoseFocusHandler( device->pActImg, FrameFocusProc, (PTRSZVAL)device );
-		//lprintf( WIDE("------------- Set all the handling methods?") );
-		// these methods should aready be set by the creation above...
-		// have to attach the mouse events to this frame...
-	}
-	if( pc )
-		return pc->device;
-   return NULL;
-}
-
-//---------------------------------------------------------------------------
-
-void DetachFrameFromRenderer(PSI_CONTROL pc )
-{
-	if( pc->device )
-	{
-		PPHYSICAL_DEVICE pf = pc->device;
-		//ValidatedControlData( PFRAME, CONTROL_FRAME, pf, pc );
-		//lprintf( WIDE("Closing physical frame device...") );
-		if( pf->EditState.flags.bActive )
-		{
-			// there may also be data in the edit state to take care of...
-		}
-		if( pf )
-		{
-			SetCloseHandler( pf->pActImg, NULL, 0 );
-			// closedevice
-			OrphanSubImage( pc->Surface );
-			//UnmakeImageFile( pc->Surface );
-			if( pf->pActImg )
-				CloseDisplay( pf->pActImg );
-			// closing the main image closes all children?
-			pc->Window = NULL;
-			// this is a subimage of window, and as such, is invalid now.
-			//pc->Surface = NULL;
-			Release( pf );
-			// and that's about it, eh?
-		}
-		pc->device = NULL;
-	}
-}
-
-//---------------------------------------------------------------------------
-PSI_PROC( PSI_CONTROL, AttachFrameToRenderer )( PSI_CONTROL pc, PRENDERER pActImg )
-{
-	OpenPhysicalDevice( pc
-							, pc?pc->parent:NULL
-							, pActImg, NULL );
-	return pc;
-}
-
-PSI_PROC( PSI_CONTROL, CreateFrameFromRenderer )( CTEXTSTR caption
-                                           , _32 BorderTypeFlags
-                                           , PRENDERER pActImg )
-{
-	PSI_CONTROL pc = NULL;
-   S_32 x, y;
-	_32 width, height;
-#ifdef USE_INTERFACES
-	GetMyInterface();
-	if( !g.MyImageInterface )
-		return NULL;
-#endif
-	GetDisplayPosition( pActImg, &x, &y, &width, &height );
-	pc = MakeCaptionedControl( NULL, CONTROL_FRAME
-									 , x, y, width, height
-									 , 0
-									 , caption
-									 );
-   AttachFrameToRenderer( pc, pActImg );
-	SetCommonBorder( pc, BorderTypeFlags|((BorderTypeFlags & BORDER_WITHIN)?0:BORDER_FRAME) );
-	return pc;
-}
 
 #define CreateCommonExx(pc,pt,nt,x,y,w,h,id,cap,ebt,p,ep) CreateCommonExxx(pc,pt,nt,x,y,w,h,id,NULL,cap,ebt,p,ep)
 PSI_PROC( PSI_CONTROL, CreateCommonExxx)( PSI_CONTROL pContainer
@@ -3190,9 +2551,6 @@ PSI_PROC( void, HideCommon )( PSI_CONTROL pc )
 	}
 	if( hidden )
 	{
-		//IMAGE_RECTANGLE upd = _pc->rect;
-		//SmudgeCommon( pc );
-		//UpdateSomeControls( _pc, &upd );
 		// tell people that the control is hiding, in case they wanna do additional work
       // the clock for instance disables it's checked entirely when hidden.
 		InvokeControlHidden( pc );
@@ -3321,25 +2679,12 @@ PSI_PROC( void, SizeCommon )( PSI_CONTROL pc, _32 width, _32 height )
 		}
 		pc->rect.width = width;
 		pc->rect.height = height;
-      // original shall be before possible frame exapansion... did need to update it though.
-		//pc->original_rect.width = width;
-      //pc->original_rect.height = height;
-
-		//if( !pc->parent && pc->device && pc->device->pActImg )
-		{
-         // was laready enlarged.
-         //lprintf( WIDE("Enlarging size...") );
-			//pc->rect.width += FrameBorderX(pc->BorderType);
-			//pc->rect.height += FrameBorderY(pc, pc->BorderType, GetText( pc->caption.text ) );
-			//pc->original_rect.width += FrameBorderX(pc->BorderType);
-			//pc->original_rect.height += FrameBorderY(pc, pc->BorderType, GetText( pc->caption.text ) );
-		}
 
 		ResizeImage( pc->Window, width, height );
 
 		{
-				extern void UpdateSurface( PSI_CONTROL pc );
-				UpdateSurface( pc );
+			extern void UpdateSurface( PSI_CONTROL pc );
+			UpdateSurface( pc );
 		}
 
 		if( pFrame && !pFrame->flags.bNoUpdate )
@@ -3630,62 +2975,62 @@ PSI_PROC( void, MoveSizeCommon )( PSI_CONTROL pc, S_32 x, S_32 y, _32 width, _32
 {
 	if( pc )
 	{
-	PPHYSICAL_DEVICE pf = pc->device;
-	PEDIT_STATE pEditState = pf?&pf->EditState:NULL;
-	IMAGE_RECTANGLE old;
-   // timestamp these...
-   //lprintf( WIDE("move %p %d,%d %d,%d"), pc, x, y, width, height );
-	if( !pc )
-		return;
-	if( pf )
-	{
-      InvokePosChange( pc, TRUE );
-		MoveSizeDisplay( pf->pActImg, x, y, width, height );
-	}
+		PPHYSICAL_DEVICE pf = pc->device;
+		PEDIT_STATE pEditState = pf?&pf->EditState:NULL;
+		IMAGE_RECTANGLE old;
+		// timestamp these...
+		//lprintf( WIDE("move %p %d,%d %d,%d"), pc, x, y, width, height );
+		if( !pc )
+			return;
+		if( pf )
+		{
+			InvokePosChange( pc, TRUE );
+			MoveSizeDisplay( pf->pActImg, x, y, width, height );
+		}
 
-	// lock out auto updates...
-   if( pf )
-		pf->flags.bNoUpdate = TRUE;
-	old = pc->rect;
-	if( pf && pEditState->flags.bActive &&
-		pEditState->pCurrent == pc )
-	{
-		old.x -= SPOT_SIZE;
-		old.y -= SPOT_SIZE;
-		old.width += 2*SPOT_SIZE;
-		old.height += 2*SPOT_SIZE;
-	}
-	MoveCommon( pc, x, y );
-	SizeCommon( pc, width, height );
+		// lock out auto updates...
+		if( pf )
+			pf->flags.bNoUpdate = TRUE;
+		old = pc->rect;
+		if( pf && pEditState->flags.bActive &&
+			pEditState->pCurrent == pc )
+		{
+			old.x -= SPOT_SIZE;
+			old.y -= SPOT_SIZE;
+			old.width += 2*SPOT_SIZE;
+			old.height += 2*SPOT_SIZE;
+		}
+		MoveCommon( pc, x, y );
+		SizeCommon( pc, width, height );
 
-	if( pf )
-	{
-		pf->flags.bNoUpdate = FALSE;
-	}
-   InvokePosChange( pc, FALSE );
-	// move and or size common will have done a smudge
-	// we don't need to do this also here...
+		if( pf )
+		{
+			pf->flags.bNoUpdate = FALSE;
+		}
+		InvokePosChange( pc, FALSE );
+		// move and or size common will have done a smudge
+		// we don't need to do this also here...
 #if 0
-	//SmudgeCommon( pc->parent?pc->parent:pc );
-	newrect = pc->rect;
-	if( pf && pEditState->flags.bActive &&
-		 pEditState->pCurrent == pc )
-	{
-		newrect.x -= SPOT_SIZE;
-		newrect.y -= SPOT_SIZE;
-		newrect.width += 2*SPOT_SIZE;
-		newrect.height += 2*SPOT_SIZE;
-	}
-	//MergeRectangle( &upd, &old, &newrect );
-	upd.x -= pc->rect.x;
-	upd.y -= pc->rect.y;
-	//UpdateSomeControls( pc, &upd );
-	if( pf && pEditState->flags.bActive &&
-		pEditState->pCurrent == pc )
-	{
-		SetupHotSpots( pEditState );
-		DrawHotSpots( pf->common, pEditState );
-	}
+		//SmudgeCommon( pc->parent?pc->parent:pc );
+		newrect = pc->rect;
+		if( pf && pEditState->flags.bActive &&
+			pEditState->pCurrent == pc )
+		{
+			newrect.x -= SPOT_SIZE;
+			newrect.y -= SPOT_SIZE;
+			newrect.width += 2*SPOT_SIZE;
+			newrect.height += 2*SPOT_SIZE;
+		}
+		//MergeRectangle( &upd, &old, &newrect );
+		upd.x -= pc->rect.x;
+		upd.y -= pc->rect.y;
+		//UpdateSomeControls( pc, &upd );
+		if( pf && pEditState->flags.bActive &&
+			pEditState->pCurrent == pc )
+		{
+			SetupHotSpots( pEditState );
+			DrawHotSpots( pf->common, pEditState );
+		}
 #endif
 	}
 }
@@ -3730,14 +3075,7 @@ PSI_PROC( void, EnableCommonUpdates )( PSI_CONTROL common, int bEnable )
 			lprintf( "Enable Common Updates on %p", common );
 #endif
 			common->flags.bNoUpdate = FALSE;
-         // this is the work that deleteuse does...
-			// anything dirty will avhe already been drawn.
-         //AddUse( common );
-			//SmudgeCommon( common );
-			//lprintf( WIDE("Uses when releasing EnableCommonUpdate %d"), common->InUse );
-//         lprintf( "cheating on the delete use used to mark control smudged." );
-         //common->InUse--;
-         //DeleteUse( common );
+         // probably doing mass updates so just mark the status, and make the application draw.
 		}
 		else
 		{
@@ -4598,7 +3936,6 @@ PSI_CONTROL GetCommonParent( PSI_CONTROL pc )
 PSI_PROC( void, ProcessControlMessages )( void )
 {
 	Idle();
-    //while( ProcessDisplayMessages() );
 }
 
 //---------------------------------------------------------------------------
@@ -4618,24 +3955,10 @@ PSI_PROC( void, CommonLoop )( int *done, int *okay )
 		  )
 		if( !Idle() )
 		{
-         // this is a legtitimate condition, that does not fail.
-			//lprintf( WIDE("Sleeping forever, cause I'm not doing anything else..>") );
+			// this is a legtitimate condition, that does not fail.
+			//lprintf( WIDE("Sleeping forever, cause I'm not doing anything else...") );
 			WakeableSleep( SLEEP_FOREVER );
 		}
-	//DeleteWait( pc );
-
-      /*
-	//PCOMMON_BUTTON_DATA pcbd;
-	if( !done && !okay )
-        return;
-	while( 1 )
-	{
-		if( done && (*done) )
-			break;
-		if( okay && (*okay) )
-			break;
-			}
-         */
 }
 
 //---------------------------------------------------------------------------
@@ -5044,125 +4367,3 @@ void EnableControlOpenGL( PSI_CONTROL pc )
 PSI_NAMESPACE_END
 
 //---------------------------------------------------------------------------
-// $Log: controls.c,v $
-// Revision 1.207  2005/07/26 00:54:49  d3x0r
-// Fix reveal to unmark 'hiddenparent'
-//
-// Revision 1.206  2005/07/25 17:52:54  d3x0r
-// FIxed some drawing features.
-//
-// Revision 1.205  2005/07/19 17:58:14  d3x0r
-// Fix parent hidden copy thing.
-//
-// Revision 1.204  2005/07/10 23:57:59  d3x0r
-// Protect against setting null caption text.  Fix text control over-draw
-//
-// Revision 1.203  2005/07/05 17:50:51  d3x0r
-// fixes to update local region - esp as related to popup menus
-//
-// Revision 1.202  2005/06/28 18:26:43  d3x0r
-// Fix wake thread from common wait
-//
-// Revision 1.201  2005/06/19 08:08:32  d3x0r
-// Fix borders on buttons (somehow becaem border THINNER).  Also fix control update portion... was updating the surface x,y with the control width, height, overflowing...
-//
-// Revision 1.200  2005/05/30 11:56:35  d3x0r
-// various fixes... working on psilib update optimization... various stabilitizations... also extending msgsvr functionality.
-//
-// Revision 1.199  2005/05/25 16:50:18  d3x0r
-// Synch with working repository.
-//
-// Revision 1.251  2005/05/17 18:37:32  jim
-// remove noisy logging.
-//
-// Revision 1.250  2005/05/16 17:22:30  jim
-// Remove noisy message about control destruction.
-//
-// Revision 1.249  2005/05/14 00:10:44  jim
-// Remove noisy logging.
-//
-// Revision 1.248  2005/04/25 17:32:39  jim
-// Use AddWait instead of AddUse - AddWait does not dispatch redraw events...Also our refresh events are redundant-ated still.
-//
-// Revision 1.247  2005/04/25 16:06:11  jim
-// Updated to support new SyncRender
-//
-// Revision 1.246  2005/04/12 23:57:48  jim
-// Remove some logging, remove obsolete code.  Compute bias on owned controls.
-//
-// Revision 1.245  2005/04/10 13:43:42  panther
-// Added more protection around debug drawing statements.
-//
-// Revision 1.244  2005/03/30 11:36:38  panther
-// Remove a lot of debugging messages...
-//
-// Revision 1.243  2005/03/30 10:52:00  panther
-// duh wrong function used.
-//
-// Revision 1.242  2005/03/30 03:26:37  panther
-// Checkpoint on stabilizing display projects, and the exiting thereof
-//
-// Revision 1.241  2005/03/23 20:58:54  chrisg
-// If Image interface has not been defined/loaded - do not attempt to load fancy border image.
-//
-// Revision 1.240  2005/03/23 12:29:45  panther
-// Okay and use the center color of the fancy border as the base color, and do not re-set that color at AlignToWindows
-//
-// Revision 1.239  2005/03/23 12:20:53  panther
-// Fix positioning of common buttons.  Also do a quick implementation of fancy borders.
-//
-// Revision 1.238  2005/03/23 02:43:07  panther
-// Okay probably a couple more badly initialized 'unusable' flags.. but font rendering/picking seems to work again.
-//
-// Revision 1.237  2005/03/22 12:41:58  panther
-// Wow this transparency thing is going to rock! :) It was much closer than I had originally thought.  Need a new class of controls though to support click-masks.... oh yeah and buttons which have roundable scaleable edged based off of a dot/circle
-//
-// Revision 1.236  2005/03/13 23:34:35  panther
-// Focus and mouse capture issues resolved for windows libraries... need to tinker with this same function within Linux.
-//
-// Revision 1.235  2005/03/13 21:46:14  panther
-// Add capture mouse method specifically the popup module can use it.  Right now focus chain loss works between applications, but not within the same app.  This is best solved by allowing the popups to capture the mouse and receive clicks outside of themselves.
-//
-// Revision 1.234  2005/03/12 23:31:20  panther
-// Edit controls nearly works... have some issues with those dang popups.
-//
-// Revision 1.233  2005/03/07 00:03:04  panther
-// Reformatting, removed a lot of superfluous logging statements.
-//
-// Revision 1.232  2005/03/04 19:07:32  panther
-// Define SetItemText
-//
-// Revision 1.231  2005/03/03 19:41:02  panther
-// Draw border again when the dialog is shown.
-//
-// Revision 1.230  2005/02/28 22:31:45  panther
-// Okay this should work for a moment... modified adding/setting NULL methods for controls
-//
-// Revision 1.229  2005/02/27 00:59:47  panther
-// option out noisy logging.
-//
-// Revision 1.228  2005/02/24 22:33:14  panther
-// Begin modifications to allow multiple draw/key and mouse routings to be attached to a control - sub/super-classing ability
-//
-// Revision 1.227  2005/02/23 13:01:35  panther
-// Fix scrollbar definition.  Also update vc projects
-//
-// Revision 1.226  2005/02/18 19:42:38  panther
-// fix some update issues with hiding and revealing controls/frames... minor fixes for new API changes
-//
-// Revision 1.225  2005/02/09 21:23:44  panther
-// Update macros and function definitions to follow the common MakeControl parameter ordering.
-//
-// Revision 1.224  2005/02/01 02:20:23  panther
-// Debugging added...
-//
-// Revision 1.223  2005/01/28 00:13:17  panther
-// Checkpoint
-//
-// Revision 1.222  2005/01/24 22:34:06  panther
-// Comment on how the frame is initially drawn, and why
-//
-// Revision 1.221  2005/01/24 22:26:43  panther
-// This should work for initial update.
-//
-//

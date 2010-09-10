@@ -244,6 +244,8 @@ typedef struct physical_device_interface PHYSICAL_DEVICE;
 typedef struct physical_device_interface*PPHYSICAL_DEVICE;
 
 
+
+
 typedef struct common_button_data {
 //DOM-IGNORE-BEGIN
 	PTHREAD thread;
@@ -568,8 +570,16 @@ void DeleteWaitEx( PSI_CONTROL *pc DBG_PASS );
                                                       
                                                       \ \                                                   */
 
+
 _MOUSE_NAMESPACE_END
 USE_MOUSE_NAMESPACE
+
+
+PPHYSICAL_DEVICE OpenPhysicalDevice( PSI_CONTROL pc, PSI_CONTROL over, PRENDERER pActImg, PSI_CONTROL under );
+void TryLoadingFrameImage( void );
+Image CopyOriginalSurfaceEx( PCONTROL pc, Image use_image DBG_PASS );
+#define CopyOriginalSurface(pc,i) CopyOriginalSurfaceEx(pc,i DBG_SRC )
+
 #define PCOMMON PSI_CONTROL
 
 PSI_NAMESPACE_END
@@ -581,263 +591,6 @@ PSI_NAMESPACE_END
 // $Log: controlstruc.h,v $
 // Revision 1.73  2005/07/08 00:45:47  d3x0r
 // Define NotInUse in control structure.
-//
-// Revision 1.72  2005/05/30 11:56:36  d3x0r
-// various fixes... working on psilib update optimization... various stabilitizations... also extending msgsvr functionality.
-//
-// Revision 1.71  2005/05/25 16:50:18  d3x0r
-// Synch with working repository.
-//
-// Revision 1.84  2005/04/25 17:32:39  jim
-// Use AddWait instead of AddUse - AddWait does not dispatch redraw events...Also our refresh events are redundant-ated still.
-//
-// Revision 1.83  2005/03/30 11:36:38  panther
-// Remove a lot of debugging messages...
-//
-// Revision 1.82  2005/03/22 12:41:58  panther
-// Wow this transparency thing is going to rock! :) It was much closer than I had originally thought.  Need a new class of controls though to support click-masks.... oh yeah and buttons which have roundable scaleable edged based off of a dot/circle
-//
-// Revision 1.81  2005/03/13 23:34:35  panther
-// Focus and mouse capture issues resolved for windows libraries... need to tinker with this same function within Linux.
-//
-// Revision 1.80  2005/03/12 23:31:21  panther
-// Edit controls nearly works... have some issues with those dang popups.
-//
-// Revision 1.79  2005/03/06 11:21:40  panther
-// Mouse works really good now, need to fix scrollbars next.  Also sheet control dialogs still have funk and need to be de-funked no wait they are defunct
-//
-// Revision 1.78  2005/03/04 19:07:32  panther
-// Define SetItemText
-//
-// Revision 1.77  2005/02/28 22:31:45  panther
-// Okay this should work for a moment... modified adding/setting NULL methods for controls
-//
-// Revision 1.76  2005/02/24 22:33:14  panther
-// Begin modifications to allow multiple draw/key and mouse routings to be attached to a control - sub/super-classing ability
-//
-// Revision 1.75  2004/12/16 10:32:45  panther
-// Scroll scrollbar to font... handle rendering the top and bottom buttons better... next to restore function to scrollbars.
-//
-// Revision 1.74  2004/12/16 06:53:30  panther
-// Minor updates for edit controls
-//
-// Revision 1.73  2004/12/04 01:57:44  panther
-// Don't destroy a child common control if it is in use - do unlink it and pretend we did most of the work.
-//
-// Revision 1.72  2004/12/02 08:49:13  panther
-// Duh - fix check button drawing... should offer the option to attach the border to the frame of the control
-//
-// Revision 1.71  2004/11/29 11:29:53  panther
-// Minor code cleanups, investigate incompatible display driver
-//
-// Revision 1.70  2004/11/05 02:34:51  d3x0r
-// Minor mods...
-//
-// Revision 1.69  2004/10/24 20:09:46  d3x0r
-// Sync to psilib2... stable enough to call it mainstream.
-//
-// Revision 1.13  2004/10/22 09:23:32  d3x0r
-// Caption scaling correct.... all is going more well... need to test the verification thing tomowrrow...
-//
-// Revision 1.12  2004/10/21 16:45:51  d3x0r
-// Updaes to dialog handling... still ahve  aproblem with caption resize
-//
-// Revision 1.11  2004/10/13 11:13:53  d3x0r
-// Looks like this is cleaning up very nicely... couple more rough edges and it'll be good to go.
-//
-// Revision 1.10  2004/10/12 08:10:51  d3x0r
-// checkpoint... frames are controls, and anything can be displayed...
-//
-// Revision 1.9  2004/10/09 00:30:26  d3x0r
-// Progress... better drawings - hide and obscure seems to not work yet...
-//
-// Revision 1.8  2004/10/08 13:07:42  d3x0r
-// Okay beginning to look a lot like PRO-GRESS
-//
-// Revision 1.7  2004/10/07 04:37:16  d3x0r
-// Okay palette and listbox seem to nearly work... controls draw, now about that mouse... looks like my prior way of cheating is harder to step away from than I thought.
-//
-// Revision 1.6  2004/10/06 10:38:47  d3x0r
-// Frames are created once again...
-//
-// Revision 1.5  2004/10/06 09:52:16  d3x0r
-// checkpoint... total conversion... now how does it work?
-//
-// Revision 1.4  2004/10/05 00:58:27  d3x0r
-// Checkpoint.
-//
-// Revision 1.3  2004/10/05 00:20:29  d3x0r
-// Break out these rather meaty parts from controls.c
-//
-// Revision 1.2  2004/09/27 20:44:28  d3x0r
-// Sweeping changes only a couple modules left...
-//
-// Revision 1.1  2004/09/19 19:22:30  d3x0r
-// Begin version 2 psilib...
-//
-// Revision 1.72  2004/09/18 00:13:46  d3x0r
-// checkpoint psi... hate this broken thing I did... but I should have done it from the start...
-//
-// Revision 1.71  2004/09/17 16:18:29  d3x0r
-// ...
-//
-// Revision 1.70  2004/09/17 02:51:21  d3x0r
-// checkpoint
-//
-// Revision 1.69  2004/09/16 03:48:43  d3x0r
-// Once again I talk myself into fucking the world!
-//
-// Revision 1.68  2004/09/15 16:12:42  d3x0r
-// Tear apart controls, commons and frames...
-//
-// Revision 1.67  2004/09/13 09:12:40  d3x0r
-// Simplify procregsitration, standardize registration, cleanups...
-//
-// Revision 1.66  2004/09/09 00:54:20  d3x0r
-// Compiles...
-//
-// Revision 1.65  2004/09/07 07:05:46  d3x0r
-// Stablized up to palette dialog, which is internal... may require recompile binary upgrade may not work.
-//
-// Revision 1.64  2004/09/07 01:13:01  d3x0r
-// Checkpoint - really really tempting to break all existing code....
-//
-// Revision 1.63  2004/09/06 23:38:56  d3x0r
-// This control thing... I think I took a wrong turn somewhere there...
-//
-// Revision 1.62  2004/09/06 19:28:09  d3x0r
-// Checkpoint... buttons are nearly ready to generically instance...
-//
-// Revision 1.61  2004/09/04 18:49:48  d3x0r
-// Changes to support scaling and font selection of dialogs
-//
-// Revision 1.60  2004/09/03 14:43:48  d3x0r
-// flexible frame reactions to font changes...
-//
-// Revision 1.59  2004/09/02 22:01:33  d3x0r
-// Extended PSI Controls to have fonts on frames, and some controls to have private fonts.
-//
-// Revision 1.58  2004/08/29 18:52:12  d3x0r
-// Yeah it's still broke.... need to do some work with hide/show child.
-//
-// Revision 1.57  2004/08/25 08:44:52  d3x0r
-// Portability changes for MSVC... Updated projects, all projects build up to PSI, no display...
-//
-// Revision 1.56  2004/08/24 11:15:15  d3x0r
-// Checkpoint Visual studio mods.
-//
-// Revision 1.55  2004/08/17 02:34:11  d3x0r
-// begin implementation of lockout on controls...
-//
-// Revision 1.54  2004/06/01 21:54:13  d3x0r
-// Fix definitions of functions
-//
-// Revision 1.53  2004/05/28 17:11:52  d3x0r
-// Just clean clean build, distclean... make system...
-//
-// Revision 1.52  2004/05/27 23:39:16  d3x0r
-// fix CONTROL_INIT_EX def for gcc
-//
-// Revision 1.51  2004/05/27 08:16:48  d3x0r
-// Removed noisy intro logging.
-//
-// Revision 1.50  2004/05/27 00:08:11  d3x0r
-// Checkpoint - whatever.
-//
-// Revision 1.49  2004/05/26 02:06:49  d3x0r
-// Begin making registration a bit more efficient
-//
-// Revision 1.48  2004/05/24 21:05:54  d3x0r
-// Checkpoint - all builds.
-//
-// Revision 1.47  2004/05/24 16:03:36  d3x0r
-// Begin using registered data type
-//
-// Revision 1.46  2004/05/23 09:50:44  d3x0r
-// Updates to extend dynamic edit dialogs.
-//
-// Revision 1.45  2004/05/22 00:39:57  d3x0r
-// Lots of progress on dynamic editing of frames.
-//
-// Revision 1.46  2004/05/22 00:42:20  jim
-// Score - specific property pages will work also.
-//
-// Revision 1.45  2004/05/21 18:12:59  jim
-// Checkpoint, need to add registered functions to link to.
-//
-// Revision 1.44  2004/04/12 10:49:53  d3x0r
-// checkpoint
-//
-// Revision 1.43  2003/11/23 08:42:20  panther
-// Added option for frames to request always getting mouse messages
-//
-// Revision 1.42  2003/10/12 02:47:05  panther
-// Cleaned up most var-arg stack abuse ARM seems to work.
-//
-// Revision 1.41  2003/10/06 19:04:13  panther
-// Phase one lockdown to avoid destroy while in use
-//
-// Revision 1.40  2003/10/06 16:46:41  panther
-// Begin scheduling flags for destruction
-//
-// Revision 1.39  2003/09/28 21:52:51  panther
-// Include stdio.h to support FILE*
-//
-// Revision 1.38  2003/09/21 11:49:04  panther
-// Fix service refernce counting for unload.  Fix Making sub images hidden.
-// Fix Linking of services on server side....
-// cleanup some comments...
-//
-// Revision 1.37  2003/09/18 12:14:49  panther
-// MergeRectangle Added.  Seems Control edit near done (fixing move/size errors)
-//
-// Revision 1.36  2003/09/18 08:43:16  panther
-// Move editcontrolprops public...
-//
-// Revision 1.35  2003/09/18 07:42:48  panther
-// Changes all across the board...image support, display support, controls editable in psi...
-//
-// Revision 1.34  2003/09/15 17:06:37  panther
-// Fixed to image, display, controls, support user defined clipping , nearly clearing correct portions of frame when clearing hotspots...
-//
-// Revision 1.33  2003/09/15 01:02:25  panther
-// Well most of the work recovered... but still need partial update
-//
-// Revision 1.32  2003/09/13 17:06:29  panther
-// Okay - and now we use stdargs... ugly kinda but okay...
-//
-// Revision 1.31  2003/09/13 11:33:42  panther
-// Checkpoint dialog edit
-//
-// Revision 1.30  2003/09/11 22:07:11  panther
-// Figure out that ## var arg constructs work with watcom, also minor mods... probably incoming conflicts.
-//
-// Revision 1.29  2003/09/11 16:55:01  panther
-// Okay and progress on Load/Save, looks a little cumbersome, but perhaps usable...
-//
-// Revision 1.28  2003/09/11 14:14:31  panther
-// Rough cut save and load code for frames...
-//
-// Revision 1.27  2003/09/11 13:09:25  panther
-// Looks like we maintained integrety while overhauling the Make/Create/Init/Config interface for controls
-//
-// Revision 1.26  2003/07/24 23:47:22  panther
-// 3rd pass visit of CPROC(cdecl) updates for callbacks/interfaces
-//
-// Revision 1.25  2003/05/01 19:18:15  panther
-// broken - but will fix
-//
-// Revision 1.24  2003/05/01 18:55:52  panther
-// Create control for subgframes, extra params
-//
-// Revision 1.23  2003/03/30 19:40:14  panther
-// Encapsulate pick color data better.
-//
-// Revision 1.22  2003/03/28 22:37:28  panther
-// Move control/frame focus var to common.
-//
-// Revision 1.21  2003/03/26 00:35:17  panther
-// Handle Resizable borders! yay!
 //
 // Revision 1.20  2003/03/25 08:45:56  panther
 // Added CVS logging tag

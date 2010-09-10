@@ -290,6 +290,7 @@ set( PSI_SOURCES
   src/psilib/calctl/clock.c
   src/psilib/calctl/analog.c
   src/psilib/controls.c
+  src/psilib/control_physical.c
   src/psilib/ctlbutton.c
   src/psilib/ctledit.c
   src/psilib/ctllistbox.c

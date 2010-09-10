@@ -732,10 +732,8 @@ PSI_PROC( void, EditFrame )( PSI_CONTROL pc, int bEnable )
 	{
 		if( !pc->flags.auto_opened )
 		{
-			extern PPHYSICAL_DEVICE OpenPhysicalDevice( PSI_CONTROL pc, PSI_CONTROL over, PRENDERER pActImg );
 			pc->flags.auto_opened = 1;
 			DisplayFrame( pc );
-			//OpenPhysicalDevice( pc, pc->parent, NULL );
 		}
 	}
 	if( !bEnable && pc->device )

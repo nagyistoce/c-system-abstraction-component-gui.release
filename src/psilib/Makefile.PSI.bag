@@ -9,7 +9,7 @@ LIBNAME1=bag.psi
 # and the local version are NEARLY tthe same - except the server
 # does not take advantaage of psi_interface... (might/could, but doesn't)
 
-COMN_SOURCES=borders mouse popups controls palette ctlbutton \
+COMN_SOURCES=borders mouse popups controls control_physical palette ctlbutton \
       ctltext ctledit ctlslider  ctllistbox \
       fileopen ctlscroll ctlmisc ctlprop \
                 ctlcombo ctlsheet loadsave xml_load xml_save \
