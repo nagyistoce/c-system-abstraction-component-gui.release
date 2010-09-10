@@ -712,31 +712,15 @@ void UpdateSomeControlsWork( int level, PSI_CONTROL pc, P_IMAGE_RECTANGLE pRect 
 #ifdef DEBUG_UPDAATE_DRAW
 		lprintf( WIDE("updating some controls... rectangles and stuff.") );
 #endif
-		//Log( WIDE("Update some controls....") );
-		//if( !IntersectRectangle( &wind_rect, pRect, &pc->rect ) )
-		//{
-		//return;
-		//continue;
-		//}
-		//wind_rect.x -= pc->rect.x;
-		//wind_rect.y -= pc->rect.y;
 		// bound window rect (frame update)
 		// The update region may be
 		if( IntersectRectangle( &surf_rect, pRect, &pc->surface_rect ) )
 		{
-			//SetImageBound( pc->Window, &wind_rect );
-			//surf_rect.x -= pc->surface_rect.x;
-			//surf_rect.y -= pc->surface_rect.y;
-			// bound surface rect
-			//SetImageBound( pc->Surface, &surf_rect );
 #ifdef DEBUG_UPDAATE_DRAW
 			lprintf( WIDE("Some controls using normal updatecommon to draw...") );
 #endif
 			// enabled minimal update region...
 			pc->dirty_rect = surf_rect;
-			//AddCommonUpdateRegion( upd, FALSE, pc );
-
-			//UpdateCommon( pc ); // and all children, if dirtied...
 		}
 		else
 		{
@@ -811,10 +795,7 @@ void UpdateSomeControls( PSI_CONTROL pc, P_IMAGE_RECTANGLE pRect )
 	}
 	//lprintf( WIDE("UpdateSomeControls - input rect is %d,%d  %d,%d"), pRect->x, pRect->y, pRect->width, pRect->height );
 	//lprintf( WIDE("UpdateSomeControls - changed rect is %d,%d  %d,%d"), pRect->x, pRect->y, pRect->width, pRect->height );
-	//prior_flag = pc->flags.bInitial;
-	//pc->flags.bInitial = 1;
-	//UpdateSomeControlsWork( 0, pc, pRect );
-	//pc->flags.bInitial = prior_flag;
+
 	// Uhmm well ... transporting dirty_rect ... on the control
 	// passing a rect in...
 	//(*pRect) = pc->dirty_rect;
@@ -2555,9 +2536,6 @@ PSI_PROC( void, HideCommon )( PSI_CONTROL pc )
 	}
 	if( hidden )
 	{
-		//IMAGE_RECTANGLE upd = _pc->rect;
-		//SmudgeCommon( pc );
-		//UpdateSomeControls( _pc, &upd );
 		// tell people that the control is hiding, in case they wanna do additional work
       // the clock for instance disables it's checked entirely when hidden.
 		InvokeControlHidden( pc );
@@ -2686,25 +2664,12 @@ PSI_PROC( void, SizeCommon )( PSI_CONTROL pc, _32 width, _32 height )
 		}
 		pc->rect.width = width;
 		pc->rect.height = height;
-      // original shall be before possible frame exapansion... did need to update it though.
-		//pc->original_rect.width = width;
-      //pc->original_rect.height = height;
-
-		//if( !pc->parent && pc->device && pc->device->pActImg )
-		{
-         // was laready enlarged.
-         //lprintf( WIDE("Enlarging size...") );
-			//pc->rect.width += FrameBorderX(pc->BorderType);
-			//pc->rect.height += FrameBorderY(pc, pc->BorderType, GetText( pc->caption.text ) );
-			//pc->original_rect.width += FrameBorderX(pc->BorderType);
-			//pc->original_rect.height += FrameBorderY(pc, pc->BorderType, GetText( pc->caption.text ) );
-		}
 
 		ResizeImage( pc->Window, width, height );
 
 		{
-				extern void UpdateSurface( PSI_CONTROL pc );
-				UpdateSurface( pc );
+			extern void UpdateSurface( PSI_CONTROL pc );
+			UpdateSurface( pc );
 		}
 
 		if( pFrame && !pFrame->flags.bNoUpdate )
@@ -2995,62 +2960,62 @@ PSI_PROC( void, MoveSizeCommon )( PSI_CONTROL pc, S_32 x, S_32 y, _32 width, _32
 {
 	if( pc )
 	{
-	PPHYSICAL_DEVICE pf = pc->device;
-	PEDIT_STATE pEditState = pf?&pf->EditState:NULL;
-	IMAGE_RECTANGLE old;
-   // timestamp these...
-   //lprintf( WIDE("move %p %d,%d %d,%d"), pc, x, y, width, height );
-	if( !pc )
-		return;
-	if( pf )
-	{
-      InvokePosChange( pc, TRUE );
-		MoveSizeDisplay( pf->pActImg, x, y, width, height );
-	}
+		PPHYSICAL_DEVICE pf = pc->device;
+		PEDIT_STATE pEditState = pf?&pf->EditState:NULL;
+		IMAGE_RECTANGLE old;
+		// timestamp these...
+		//lprintf( WIDE("move %p %d,%d %d,%d"), pc, x, y, width, height );
+		if( !pc )
+			return;
+		if( pf )
+		{
+			InvokePosChange( pc, TRUE );
+			MoveSizeDisplay( pf->pActImg, x, y, width, height );
+		}
 
-	// lock out auto updates...
-   if( pf )
-		pf->flags.bNoUpdate = TRUE;
-	old = pc->rect;
-	if( pf && pEditState->flags.bActive &&
-		pEditState->pCurrent == pc )
-	{
-		old.x -= SPOT_SIZE;
-		old.y -= SPOT_SIZE;
-		old.width += 2*SPOT_SIZE;
-		old.height += 2*SPOT_SIZE;
-	}
-	MoveCommon( pc, x, y );
-	SizeCommon( pc, width, height );
+		// lock out auto updates...
+		if( pf )
+			pf->flags.bNoUpdate = TRUE;
+		old = pc->rect;
+		if( pf && pEditState->flags.bActive &&
+			pEditState->pCurrent == pc )
+		{
+			old.x -= SPOT_SIZE;
+			old.y -= SPOT_SIZE;
+			old.width += 2*SPOT_SIZE;
+			old.height += 2*SPOT_SIZE;
+		}
+		MoveCommon( pc, x, y );
+		SizeCommon( pc, width, height );
 
-	if( pf )
-	{
-		pf->flags.bNoUpdate = FALSE;
-	}
-   InvokePosChange( pc, FALSE );
-	// move and or size common will have done a smudge
-	// we don't need to do this also here...
+		if( pf )
+		{
+			pf->flags.bNoUpdate = FALSE;
+		}
+		InvokePosChange( pc, FALSE );
+		// move and or size common will have done a smudge
+		// we don't need to do this also here...
 #if 0
-	//SmudgeCommon( pc->parent?pc->parent:pc );
-	newrect = pc->rect;
-	if( pf && pEditState->flags.bActive &&
-		 pEditState->pCurrent == pc )
-	{
-		newrect.x -= SPOT_SIZE;
-		newrect.y -= SPOT_SIZE;
-		newrect.width += 2*SPOT_SIZE;
-		newrect.height += 2*SPOT_SIZE;
-	}
-	//MergeRectangle( &upd, &old, &newrect );
-	upd.x -= pc->rect.x;
-	upd.y -= pc->rect.y;
-	//UpdateSomeControls( pc, &upd );
-	if( pf && pEditState->flags.bActive &&
-		pEditState->pCurrent == pc )
-	{
-		SetupHotSpots( pEditState );
-		DrawHotSpots( pf->common, pEditState );
-	}
+		//SmudgeCommon( pc->parent?pc->parent:pc );
+		newrect = pc->rect;
+		if( pf && pEditState->flags.bActive &&
+			pEditState->pCurrent == pc )
+		{
+			newrect.x -= SPOT_SIZE;
+			newrect.y -= SPOT_SIZE;
+			newrect.width += 2*SPOT_SIZE;
+			newrect.height += 2*SPOT_SIZE;
+		}
+		//MergeRectangle( &upd, &old, &newrect );
+		upd.x -= pc->rect.x;
+		upd.y -= pc->rect.y;
+		//UpdateSomeControls( pc, &upd );
+		if( pf && pEditState->flags.bActive &&
+			pEditState->pCurrent == pc )
+		{
+			SetupHotSpots( pEditState );
+			DrawHotSpots( pf->common, pEditState );
+		}
 #endif
 	}
 }
@@ -3092,14 +3057,7 @@ PSI_PROC( void, EnableCommonUpdates )( PSI_CONTROL common, int bEnable )
 		if( common->flags.bNoUpdate && bEnable )
 		{
 			common->flags.bNoUpdate = FALSE;
-         // this is the work that deleteuse does...
-			// anything dirty will avhe already been drawn.
-         //AddUse( common );
-			//SmudgeCommon( common );
-			//lprintf( WIDE("Uses when releasing EnableCommonUpdate %d"), common->InUse );
-//         lprintf( "cheating on the delete use used to mark control smudged." );
-         //common->InUse--;
-         //DeleteUse( common );
+         // probably doing mass updates so just mark the status, and make the application draw.
 		}
       else
 			common->flags.bNoUpdate = !bEnable;
@@ -3955,7 +3913,6 @@ PSI_CONTROL GetCommonParent( PSI_CONTROL pc )
 PSI_PROC( void, ProcessControlMessages )( void )
 {
 	Idle();
-    //while( ProcessDisplayMessages() );
 }
 
 //---------------------------------------------------------------------------
@@ -3975,24 +3932,10 @@ PSI_PROC( void, CommonLoop )( int *done, int *okay )
 		  )
 		if( !Idle() )
 		{
-         // this is a legtitimate condition, that does not fail.
-			//lprintf( WIDE("Sleeping forever, cause I'm not doing anything else..>") );
+			// this is a legtitimate condition, that does not fail.
+			//lprintf( WIDE("Sleeping forever, cause I'm not doing anything else...") );
 			WakeableSleep( SLEEP_FOREVER );
 		}
-	//DeleteWait( pc );
-
-      /*
-	//PCOMMON_BUTTON_DATA pcbd;
-	if( !done && !okay )
-        return;
-	while( 1 )
-	{
-		if( done && (*done) )
-			break;
-		if( okay && (*okay) )
-			break;
-			}
-         */
 }
 
 //---------------------------------------------------------------------------
@@ -4401,125 +4344,3 @@ void EnableControlOpenGL( PSI_CONTROL pc )
 PSI_NAMESPACE_END
 
 //---------------------------------------------------------------------------
-// $Log: controls.c,v $
-// Revision 1.207  2005/07/26 00:54:49  d3x0r
-// Fix reveal to unmark 'hiddenparent'
-//
-// Revision 1.206  2005/07/25 17:52:54  d3x0r
-// FIxed some drawing features.
-//
-// Revision 1.205  2005/07/19 17:58:14  d3x0r
-// Fix parent hidden copy thing.
-//
-// Revision 1.204  2005/07/10 23:57:59  d3x0r
-// Protect against setting null caption text.  Fix text control over-draw
-//
-// Revision 1.203  2005/07/05 17:50:51  d3x0r
-// fixes to update local region - esp as related to popup menus
-//
-// Revision 1.202  2005/06/28 18:26:43  d3x0r
-// Fix wake thread from common wait
-//
-// Revision 1.201  2005/06/19 08:08:32  d3x0r
-// Fix borders on buttons (somehow becaem border THINNER).  Also fix control update portion... was updating the surface x,y with the control width, height, overflowing...
-//
-// Revision 1.200  2005/05/30 11:56:35  d3x0r
-// various fixes... working on psilib update optimization... various stabilitizations... also extending msgsvr functionality.
-//
-// Revision 1.199  2005/05/25 16:50:18  d3x0r
-// Synch with working repository.
-//
-// Revision 1.251  2005/05/17 18:37:32  jim
-// remove noisy logging.
-//
-// Revision 1.250  2005/05/16 17:22:30  jim
-// Remove noisy message about control destruction.
-//
-// Revision 1.249  2005/05/14 00:10:44  jim
-// Remove noisy logging.
-//
-// Revision 1.248  2005/04/25 17:32:39  jim
-// Use AddWait instead of AddUse - AddWait does not dispatch redraw events...Also our refresh events are redundant-ated still.
-//
-// Revision 1.247  2005/04/25 16:06:11  jim
-// Updated to support new SyncRender
-//
-// Revision 1.246  2005/04/12 23:57:48  jim
-// Remove some logging, remove obsolete code.  Compute bias on owned controls.
-//
-// Revision 1.245  2005/04/10 13:43:42  panther
-// Added more protection around debug drawing statements.
-//
-// Revision 1.244  2005/03/30 11:36:38  panther
-// Remove a lot of debugging messages...
-//
-// Revision 1.243  2005/03/30 10:52:00  panther
-// duh wrong function used.
-//
-// Revision 1.242  2005/03/30 03:26:37  panther
-// Checkpoint on stabilizing display projects, and the exiting thereof
-//
-// Revision 1.241  2005/03/23 20:58:54  chrisg
-// If Image interface has not been defined/loaded - do not attempt to load fancy border image.
-//
-// Revision 1.240  2005/03/23 12:29:45  panther
-// Okay and use the center color of the fancy border as the base color, and do not re-set that color at AlignToWindows
-//
-// Revision 1.239  2005/03/23 12:20:53  panther
-// Fix positioning of common buttons.  Also do a quick implementation of fancy borders.
-//
-// Revision 1.238  2005/03/23 02:43:07  panther
-// Okay probably a couple more badly initialized 'unusable' flags.. but font rendering/picking seems to work again.
-//
-// Revision 1.237  2005/03/22 12:41:58  panther
-// Wow this transparency thing is going to rock! :) It was much closer than I had originally thought.  Need a new class of controls though to support click-masks.... oh yeah and buttons which have roundable scaleable edged based off of a dot/circle
-//
-// Revision 1.236  2005/03/13 23:34:35  panther
-// Focus and mouse capture issues resolved for windows libraries... need to tinker with this same function within Linux.
-//
-// Revision 1.235  2005/03/13 21:46:14  panther
-// Add capture mouse method specifically the popup module can use it.  Right now focus chain loss works between applications, but not within the same app.  This is best solved by allowing the popups to capture the mouse and receive clicks outside of themselves.
-//
-// Revision 1.234  2005/03/12 23:31:20  panther
-// Edit controls nearly works... have some issues with those dang popups.
-//
-// Revision 1.233  2005/03/07 00:03:04  panther
-// Reformatting, removed a lot of superfluous logging statements.
-//
-// Revision 1.232  2005/03/04 19:07:32  panther
-// Define SetItemText
-//
-// Revision 1.231  2005/03/03 19:41:02  panther
-// Draw border again when the dialog is shown.
-//
-// Revision 1.230  2005/02/28 22:31:45  panther
-// Okay this should work for a moment... modified adding/setting NULL methods for controls
-//
-// Revision 1.229  2005/02/27 00:59:47  panther
-// option out noisy logging.
-//
-// Revision 1.228  2005/02/24 22:33:14  panther
-// Begin modifications to allow multiple draw/key and mouse routings to be attached to a control - sub/super-classing ability
-//
-// Revision 1.227  2005/02/23 13:01:35  panther
-// Fix scrollbar definition.  Also update vc projects
-//
-// Revision 1.226  2005/02/18 19:42:38  panther
-// fix some update issues with hiding and revealing controls/frames... minor fixes for new API changes
-//
-// Revision 1.225  2005/02/09 21:23:44  panther
-// Update macros and function definitions to follow the common MakeControl parameter ordering.
-//
-// Revision 1.224  2005/02/01 02:20:23  panther
-// Debugging added...
-//
-// Revision 1.223  2005/01/28 00:13:17  panther
-// Checkpoint
-//
-// Revision 1.222  2005/01/24 22:34:06  panther
-// Comment on how the frame is initially drawn, and why
-//
-// Revision 1.221  2005/01/24 22:26:43  panther
-// This should work for initial update.
-//
-//
