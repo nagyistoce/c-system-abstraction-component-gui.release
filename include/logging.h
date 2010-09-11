@@ -49,6 +49,38 @@
    there are options, when options code is enabled, which
    control logging output and format. Log file location can be
    specified generically for instance.... see Options.          */
+/* This namespace contains the logging functions. The most basic
+   thing you can do to start logging is use 'lprintf'.
+   
+   <code lang="c++">
+   lprintf( "My printf like format %s %d times", "string", 15 );
+   </code>
+   
+   This function takes a format string and arguments compatible
+   with vsnprintf. Internally strings are truncated to 4k
+   length. (that is no single logging message can be more than
+   4k in length).
+   
+   
+   
+   There are functions to control logging behavior.
+   
+   
+   See Also
+   SetSystemLog
+   
+   SystemLogTime
+   
+   SystemLogOptions
+   
+   lprintf
+   
+   _lprintf
+   
+   xlprintf
+   
+   _xlprintf
+                                                                 */
 LOGGING_NAMESPACE
 
 

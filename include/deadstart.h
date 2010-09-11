@@ -12,6 +12,73 @@
 #define USE_SACK_DEADSTART_NAMESPACE using namespace sack::app::deadstart;
 #define SACK_DEADSTART_NAMESPACE   SACK_NAMESPACE namespace app { namespace deadstart {
 #define SACK_DEADSTART_NAMESPACE_END    } } SACK_NAMESPACE_END
+SACK_NAMESPACE
+	namespace app{
+/* Application namespace. */
+/* These are compiler-platform abstractions to provide a method
+   of initialization that allows for creation of threads, and
+   transparent (easy to use) method of scheduling routines for
+   initialization.
+   
+   
+   Example
+   This schedules a routine to run at startup. Fill in the
+   routine with the code you want, and it will run at
+   DEFAULT_PRELOAD_PRIORITY which is the number 69.
+   
+   <code lang="c++">
+   
+   PRELOAD( MyCustomInit )
+   {
+       // do something here (do anything here,
+       // without limitations that are imposed by DllMain/LibMain.
+   }
+   
+   </code>
+   
+   If you wanted a routine which was guaranteed to run before
+   MyCustomInit you might use PRIORITY_PRELOAD whcih allows you
+   to specify a priority.
+   <code lang="c++">
+   
+   PRIORITY_PRELOAD( MyOtherInit, DEFAULT_PRELOAD_PRIORITY-10 )
+   {
+      // this will run before other things.
+   }
+   
+   </code>
+   
+   Priorities are listed in deadstart.h and exit_priorities.h. The
+   priorities are treated backwards, so low number startup
+   priorities go first, and higher number shutdown priorities go
+   first.
+   
+   
+   
+   
+   Remarks
+   In some compilers and compile modes this is also fairly easy
+   to do. A lot of compilers do not offer priority, and are
+   impossible to maintain an order in. Some compilers only
+   provide startup priority for C++ mode. This system works as
+   \long as there is a way to run a single function at some
+   point before main() and after C runtime initializes.
+   
+   
+   
+   In Windows, you might think you have this ability with
+   DllMain, but there are severe limitations that you would have
+   to get around; primary is the inability to create a thread,
+   well, you can create it, but it will remain suspended until
+   you leave DllMains and all DllMains finish. There is also no
+   way to consistantly provide initialization order, like memory
+   needs to be initialized before anything else.
+   
+   
+                                                                   */
+
+		namespace deadstart {
+
 #else
 #define USE_SACK_DEADSTART_NAMESPACE 
 #define SACK_DEADSTART_NAMESPACE
@@ -21,60 +88,188 @@
 #ifdef TYPELIB_SOURCE
 #define DEADSTART_SOURCE
 #endif
-#    define DEADSTART_CALLTYPE CPROC
+
+/* A macro to specify the call type of schedule routines. This
+   can be changed in most projects without affect, it comes into
+   play if plugins built by different compilers are used,
+   __cdecl is most standard.                                     */
+#define DEADSTART_CALLTYPE CPROC
+
 #  if defined( _TYPELIBRARY_SOURCE_STEAL )
 #    define DEADSTART_PROC type DEADSTART_CALLTYPE name type CPROC name
 #  elif defined( _TYPELIBRARY_SOURCE )
 #    define DEADSTART_PROC EXPORT_METHOD
 #  else
+/* A definition for how to declare these functions. if the
+   source itself is comipling these are _export, otherwise
+   external things linking here are _import.               */
 #    define DEADSTART_PROC IMPORT_METHOD
 #  endif
 
-/* Application namespace. */
-SACK_DEADSTART_NAMESPACE
 
 
-   // this is just a global space initializer (shared, named region, allows static link plugins to share information)
+   /* this is just a global space initializer (shared, named
+      region, allows static link plugins to share information)
+      
+      
+      
+      Allocates its shared memory global region, so if this library
+      is built statically and referenced in multiple plugins
+      ConfigScript can share the same symbol tables. This also
+      provides sharing between C++ and C.                           */
 #define CONFIG_SCRIPT_PRELOAD_PRIORITY    (SQL_PRELOAD_PRIORITY-1)
    // this is just a global space initializer (shared, named region, allows static link plugins to share information)
 #define SQL_PRELOAD_PRIORITY    (SYSLOG_PRELOAD_PRIORITY-1)
+/* Level at which logging is initialized. Nothing under this
+   should be doing logging, if it does, the behavior is not as
+   well defined.                                               */
 #define SYSLOG_PRELOAD_PRIORITY 35
    // global_init_preload_priority-1 is used by sharemem.. memory needs init before it can register itself
 #define GLOBAL_INIT_PRELOAD_PRIORITY 37
 
 #define OSALOT_PRELOAD_PRIORITY (CONFIG_SCRIPT_PRELOAD_PRIORITY-1) // OS A[bstraction] L[ayer] O[n] T[op] - system lib
 
+/* Level which names initializes. Names is the process
+   registration code. It has a common shared global registered.
+   
+   <link sack::app::registry, procreg; aka names.c>             */
 #define NAMESPACE_PRELOAD_PRIORITY 39
-   // image_preload MUST be fter Namespce preload (anything that uses RegisterAndCreateGlobal)
-#define IMAGE_PRELOAD_PRIORITY  45 // should init this before vidlib (which needs image?)
+/* image_preload MUST be after Namespce preload (anything that
+   uses RegisterAndCreateGlobal) should init this before vidlib
+   (which needs image?)                                         */
+#define IMAGE_PRELOAD_PRIORITY  45 
+/* Level at which the video render library performs its
+   initialization; RegisterClass() level code.          */
 #define VIDLIB_PRELOAD_PRIORITY 46
+/* Initialization level where PSI registers its builtin
+   controls.                                            */
 #define PSI_PRELOAD_PRIORITY    47
 
 // need to open the queues and threads before the service server can begin...
 #define MESSAGE_CLIENT_PRELOAD_PRIORITY 65
+/* Level which message core service initializes. During startup
+   message services can register themselves also; but not before
+   this priority level.                                          */
 #define MESSAGE_SERVICE_PRELOAD_PRIORITY 66
+/* Routines are scheduled at this priority when the PRELOAD
+   function is used.                                        */
 #define DEFAULT_PRELOAD_PRIORITY (DEADSTART_PRELOAD_PRIORITY-1)
+/* Not sure where this is referenced, this the core routine
+   itself is scheduled with this symbol to the compiler if
+   appropriate.                                             */
 #define DEADSTART_PRELOAD_PRIORITY 70
 
-// proc, proc_name, priority DEADSTART_PRIORTY_,unused to hack in self reference of static symbol
-// this will trick most compilers.
-// uses a compiler-native function (not cproc)
+/* Used by PRELOAD and PRIORITY_PRELOAD macros to register a
+   startup routine at a specific priority. Lower number
+   priorities are scheduled to run before higher number
+   priorities*backwards from ATEXIT priorities*. Using this
+   scheduling mechanisms, routines which create threads under
+   windows are guaranteed to run before main, and are guaranteed
+   able to create threads. (They are outside of the loader lock)
+   
+   
+   Parameters
+   function :  pointer to a function to call at startup.
+   name :      text name of the function
+   priority :  priority at which to call the function.
+   unused :    this is an unused parameter. The macros fill it
+               with &amp;ThisRegisteringRoutine, so that the
+               routine itself is referenced by code, and helps
+               the compile not optimize out this code. The
+               functions which perform the registration are prone
+               to be optimized because it's hard for the compiler
+               to identify that they are refernced by other names
+               indirectly.
+   file\ :     usually __FILE__ of the code doing this
+               registration.
+   line :      usually __LINE__ of the code doing this
+               registration.                                      */
 DEADSTART_PROC  void DEADSTART_CALLTYPE  RegisterPriorityStartupProc( void(*)(void), CTEXTSTR,int,void* unused, CTEXTSTR,int);
+/* Used by ATEXIT and PRIORITY_ATEXIT macros to register a
+   shutdown routine at a specific priority. Higher number
+   priorities are scheduled to run before lower number
+   priorities. *backwards from PRELOAD priorities* This
+   registers functions which are run while the program exits if
+   it is at all able to run when exiting. calling exit() or
+   BAG_Exit() will invoke these.
+   Parameters
+   function :  pointer to a function to call at shutdown.
+   name :      text name of the function
+   priority :  priority at which to call the function.
+   unused :    this is an unused parameter. The macros fill it
+               with &amp;ThisRegisteringRoutine, so that the
+               routine itself is referenced by code, and helps
+               the compile not optimize out this code. The
+               functions which perform the registration are prone
+               to be optimized because it's hard for the compiler
+               to identify that they are refernced by other names
+               indirectly.
+   file\ :     usually __FILE__ of the code doing this
+               registration.
+   line :      usually __LINE__ of the code doing this
+               registration.                                      */
 DEADSTART_PROC  void DEADSTART_CALLTYPE  RegisterPriorityShutdownProc( void(*)(void), CTEXTSTR,int,void* unused, CTEXTSTR,int);
+/* This routine is used internally when LoadFunction is called.
+   After MarkDeadstartComplete is called, any call to a
+   RegisterPriorityStartupProc will call the startup routine
+   immediately instead of waiting. This function disables the
+   auto-running of this function, and instead enques the startup
+   to the list of startups. When completed, at some later point,
+   call ResumeDeadstart() to dispatched all scheduled routines,
+   and release the suspend; however, if initial deastart was not
+   dispatched, then ResumeDeadstart does not do the invoke, it
+   only releases the suspend.                                    */
 DEADSTART_PROC  void DEADSTART_CALLTYPE  SuspendDeadstart ( void );
+/* Resumes a suspended deadstart. If root deadstart is
+   completed, then ResumeDeadstart will call InvokeDeadstarts
+   after resuming deadstart.                                  */
 DEADSTART_PROC  void DEADSTART_CALLTYPE  ResumeDeadstart ( void );
+/* Not usually used by user code, but this invokes all the
+   routines which have been scheduled to run for startup. If
+   your compiler doesn't have a method of handling deadstart
+   code, this can be manually called. It can also be called if
+   you loaded a library yourself without using the LoadFunction
+   interface, to invoke startups scheduled in the loaded
+   library.                                                     */
 DEADSTART_PROC  void DEADSTART_CALLTYPE  InvokeDeadstart (void);
+/* This just calls the list of shutdown procedures. This should
+   not be used usually from user code, since internally this is
+   handled by catching atexit() or with a static destructor.    */
 DEADSTART_PROC  void DEADSTART_CALLTYPE  InvokeExits (void);
+/* This is typically called after the first InvokeDeadstarts
+   completes. The code that runs this is usually a routine just
+   before main(). So once code in main begins to run, all prior
+   initialization has been performed.                           */
 DEADSTART_PROC  void DEADSTART_CALLTYPE  MarkRootDeadstartComplete ( void );
+/* \returns whether MarkRootDeadstartComplete has been called. */
 DEADSTART_PROC  LOGICAL DEADSTART_CALLTYPE  IsRootDeadstartStarted ( void );
 
-#ifdef __LINUX__
+#if defined( __LINUX__ )
 // call this after a fork().  Otherwise, it will falsely invoke shutdown when it exits.
 DEADSTART_PROC  void DEADSTART_CALLTYPE  DispelDeadstart ( void );
 #endif
 
-#if ( defined( __cplusplus) || defined( _WIN64 ) ) && 0 
+#ifdef DOC_O_MAT
+// call this after a fork().  Otherwise, it will falsely invoke shutdown when it exits.
+DEADSTART_PROC  void DEADSTART_CALLTYPE  DispelDeadstart ( void );
+#endif
 
+#ifdef __cplusplus
+
+/* Defines some code to run at program inialization time. Allows
+   specification of a priority. Lower priorities run first. (default
+   is 69).
+   Example
+   <code>
+   
+   PRIORITY_PRELOAD( MyOtherInit, 153 )
+   {
+      // run some code probably after most all other initializtion is done.
+   }
+   
+   </code>
+   See Also
+   <link sack::app::deadstart, deadstart Namespace>                         */
 #define PRIORITY_PRELOAD(name,priority) static void name(void); \
    static class schedule_##name {   \
      public:schedule_##name() {    \
@@ -82,6 +277,8 @@ DEADSTART_PROC  void DEADSTART_CALLTYPE  DispelDeadstart ( void );
 	  }  \
 	} do_schedul_##name;     \
 	static void name(void)
+/* This is used once in deadstart_prog.c which is used to invoke
+   startups when the program finishes loading.                   */
 #define MAGIC_PRIORITY_PRELOAD(name,priority) static void name(void); \
    static class schedule_##name {   \
 	  public:schedule_##name() {  \
@@ -89,6 +286,12 @@ DEADSTART_PROC  void DEADSTART_CALLTYPE  DispelDeadstart ( void );
 	  }  \
 	} do_schedul_##name;     \
 	static void name(void)
+/* A macro to define some code to run during program shutdown. An
+   additional priority may be specified if the order matters. Higher
+   numbers are called first.
+   
+   
+                                                                     */
 #define ATEXIT_PRIORITY(name,priority) static void name(void); \
    static class schedule_##name {   \
      public:schedule_##name() {    \
@@ -96,6 +299,20 @@ DEADSTART_PROC  void DEADSTART_CALLTYPE  DispelDeadstart ( void );
 	  }  \
 	} do_schedul_##name;     \
 	static void name(void)
+/* Defines some code to run at program shutdown time. Allows
+   specification of a priority. Higher priorities are run first.
+   Example
+   <code>
+   
+   PRIORITY_ATEXIT( MyOtherShutdown, 153 )
+   {
+      // run some code probably before most library code dissolves.
+      // last to load, first to unload.
+   }
+   
+   </code>
+   See Also
+   <link sack::app::deadstart, deadstart Namespace>                 */
 #define PRIORITY_ATEXIT(name,priority) static void name(void); \
    static class shutdown_##name {   \
 	public:shutdown_##name() {    \
@@ -106,8 +323,38 @@ DEADSTART_PROC  void DEADSTART_CALLTYPE  DispelDeadstart ( void );
 	static void name(void)
 
 
+/* This is the most basic way to define some code to run
+   initialization before main.
+   
+   
+   
+   
+   Example
+   <code lang="c++">
+   
+   PRELOAD( MyInitCode )
+   {
+      // some code here
+   }
+   
+   </code>
+   See Also
+   <link sack::app::deadstart, deadstart Namespace>      */
 #define PRELOAD(name) PRIORITY_PRELOAD(name,DEFAULT_PRELOAD_PRIORITY)
+/* Basic way to register a routine to run when the program exits
+   gracefully.
+   Example
+   \ \ 
+   <code>
+   
+   ATEXIT( MyExitRoutine )
+   {
+       // this will be run sometime during program shutdown
+   }
+   </code>                                                       */
 #define ATEXIT(name)      PRIORITY_ATEXIT(name,ATEXIT_PRIORITY_DEFAULT)
+/* This is the core atexit. It dispatches all other exit
+   routines. This is defined for internal use only...    */
 #define ROOT_ATEXIT(name) ATEXIT_PRIORITY(name,ATEXIT_PRIORITY_ROOT)
 
 //------------------------------------------------------------------------------------
@@ -530,6 +777,12 @@ void name(void)
 //------------------------------------------------------------------------------------
 #else
 #error "there's nothing I can do to wrap PRELOAD() or ATEXIT()!"
+/* This is the most basic way to define some startup code that
+   runs at some point before the program starts. This code is
+   declared as static, so the same preload initialization name
+   can be used in multiple files.
+   
+   <link sack::app::deadstart, See Also.>                      */
 #define PRELOAD(name)
 #endif
 
