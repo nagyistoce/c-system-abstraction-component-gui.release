@@ -988,13 +988,16 @@ void CPROC CommitTimer( PTRSZVAL psv )
 
 void SQLCommit( PODBC odbc )
 {
-	int n = odbc->flags.bAutoTransact;
-	lprintf( "manual commit." );
-	odbc->last_command_tick = 0;
-	odbc->flags.bAutoTransact = 0;
-	RemoveTimer( odbc->commit_timer );
-	SQLCommand( odbc, "COMMIT" );
-	odbc->flags.bAutoTransact = n;
+	if( 0 && odbc->flags.bAutoTransact )
+	{
+		int n = odbc->flags.bAutoTransact;
+		lprintf( "manual commit." );
+		odbc->last_command_tick = 0;
+		odbc->flags.bAutoTransact = 0;
+		RemoveTimer( odbc->commit_timer );
+		SQLCommand( odbc, "COMMIT" );
+		odbc->flags.bAutoTransact = n;
+	}
 }
 
 //----------------------------------------------------------------------
@@ -1004,7 +1007,7 @@ void BeginTransact( PODBC odbc )
 	// I Only test this for SQLITE, specifically the optiondb.
 	// this transaction phrase is not really as important on server based systems.
    lprintf( "BeginTransact." );
-	if( odbc->flags.bAutoTransact )
+	if( 0 && odbc->flags.bAutoTransact )
 	{
       lprintf( "Allowed." );
 		if( !odbc->last_command_tick )
