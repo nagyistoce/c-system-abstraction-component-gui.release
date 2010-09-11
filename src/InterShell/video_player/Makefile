@@ -5,6 +5,7 @@ all .DEFAULT:
 else
 INCLUDEDIRS=$(DEKWARE_BASE)/include
 LITERAL_LIBNAME=vplayer.isp
+CXFLAGS=-DSACK_CORE_BUILD
 SRCS=vplayer
 MORELIBS=psi.console sack.widgets
 MORE_LITERAL_LIBS=dekware.core
