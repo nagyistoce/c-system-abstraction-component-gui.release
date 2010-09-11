@@ -1570,6 +1570,27 @@ __declspec(dllimport)
 extern
 #endif
 #  endif
+/* a function true/false which indicates whether the root
+   deadstart has been invoked already. If not, one should call
+   InvokeDeadstart and MarkDeadstartComplete.
+   
+   <code lang="c++">
+   int main( )
+   {
+       if( !is_deadstart_complete() )
+       {
+           InvokeDeadstart();
+           MarkDeadstartComplete()
+       }
+   
+       ... your code here ....
+   
+   
+       return 0;  // or some other appropriate return.
+   }
+   </code>
+   
+   sack::app::deadstart                                        */
 LOGICAL
 #  if defined( __WATCOMC__ )
 __cdecl

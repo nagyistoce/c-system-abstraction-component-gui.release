@@ -183,6 +183,23 @@
        should be provided that can just open X displays directly to
        copy <link sack::image::Image, Images> to.
      * bag.psi &#45; provides the PSI namespace.                      */
+/* \File system abstractions. A few things like get current path
+   may or may not exist on a function.
+   
+   
+   
+   Primarily this defines functions 'pathchr' and 'pathrchr'
+   which resemble 'strchr' and 'strrchr' but search a string for
+   a path character. A path character is either a / or a \\.
+   
+   
+   
+   Also in this area is file monitoring functions which support
+   methods on windows and linux to get event notifications when
+   directories and, by filtering, files that have changed.
+   
+   
+                                                                 */
 FILESYS_NAMESPACE
 
 	enum ScanFileFlags {
