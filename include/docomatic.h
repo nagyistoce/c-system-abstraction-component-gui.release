@@ -1,6 +1,7 @@
 #define RCOORD_IS_DOUBLE 1
 
 #define DOC_O_DOC 1
+
 #define CPROC __cdecl
 #define IMAGE_API __cdecl
 #define TYPELIB_CALLTYPE __cdecl
@@ -13,7 +14,7 @@
 #define _LINKLIST_NAMESPACE_END }
 
 #define INTERSHELL_PROC(type,name) IMPORT_METHOD type CPROC name
-#define INTERSHELL_PROC_PTR(type,name) type (CPROC *name)
+#define INTERSHELL_PROC_PTR(type,name) type CPROC (*name)
 #define _DEFINE_INTERFACE
 
 #define SACK_DEADSTART_NAMESPACE   namespace sack { namespace app { namespace deadstart {
@@ -47,7 +48,7 @@
 #define _FILEMON_NAMESPACE  namespace monitor {
 #define _FILEMON_NAMESPACE_END }
 
-#define IMPROT_METHOD __declspec(dllimprot)
+#define IMPROT_METHOD __declspec(dllimport)
 #define PASTE(a,b)  b
 #define RENDER_PROC(type,name)  type name
 #define RENDER_NAMESPACE namespace sack { namespace image { namespace render {
@@ -260,11 +261,13 @@
    PSI_PROC( int, Config##name)( PSI_CONTROL );  \
 
 
-
-
-
-
-
 #define DeclMethod( name ) int n##name; _##name *name
 #define DeclSingleMethod( name ) _##name name
+
+#define KEYPAD_NAMESPACE namespace sack { namespace widgets { namespace buttons {
+#define KEYPAD_NAMESPACE_END } } SACK_NAMESPACE_END
+#define BANNER_NAMESPACE namespace sack { namespace widgets { namespace banner {
+#define BANNER_NAMESPACE_END } } SACK_NAMESPACE_END
+
+#define SACK_OPTION_NAMESPACE namespace sack { namespace sql { namespace options {
 

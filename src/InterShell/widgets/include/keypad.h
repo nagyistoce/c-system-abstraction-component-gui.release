@@ -2,21 +2,27 @@
 #define __KEYPAD_WIDGET_DEFINED__
 #include <controls.h>
 
-#if !defined(__STATIC__) && !defined(__UNIX__)
 #ifdef KEYPAD_SOURCE
 #define KEYPAD_PROC(type,name) EXPORT_METHOD type CPROC name
 #else
 #define KEYPAD_PROC(type,name) IMPORT_METHOD type CPROC name
 #endif
-#else
-#ifdef KEYPAD_SOURCE
-#define KEYPAD_PROC(type,name) type name
-#else
-#define KEYPAD_PROC(type,name) extern type name
-#endif
-#endif
 
 //-- keypad.c --------------------
+
+#ifdef __cplusplus
+#define KEYPAD_NAMESPACE SACK_NAMESPACE namespace widgets { namespace buttons {
+#define KEYPAD_NAMESPACE_END } } SACK_NAMESPACE_END
+#else
+#define KEYPAD_NAMESPACE
+#define KEYPAD_NAMESPACE_END
+#endif
+
+SACK_NAMESPACE
+#ifdef __cplusplus
+	namespace widgets {
+		namespace buttons {
+#endif
 
 #ifndef KEYPAD_STRUCTURE_DEFINED
 typedef PSI_CONTROL PKEYPAD;
@@ -62,4 +68,7 @@ KEYPAD_PROC( PSI_CONTROL, MakeKeypadHotkey )( PSI_CONTROL frame
 														  );
 KEYPAD_PROC( void, KeyIntoKeypad )( PSI_CONTROL keypad, _64 value );
 KEYPAD_PROC( void, KeypadInvertValue )( PSI_CONTROL keypad );
+
+KEYPAD_NAMESPACE_END
+
 #endif

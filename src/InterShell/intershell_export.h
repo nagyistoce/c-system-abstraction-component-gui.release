@@ -1,4 +1,28 @@
+/* Defines the interface InterShell exports for plugin modules
+   to use.
+   
+   
+   
+   
+   Note
+   When using the intershell interface in a project, each file
+   must define USES_INTERSHELL_INTERFACE, and a single file must
+   define DEFINES_INTERSHELL_INTERFACE.
+   
+   <code lang="c++">
+   
+   // only define this in a single source
+   \#define DEFINES_INTERSHELL_INTERFACE
+   // define this for each source that uses methods in InterShell.
+   \#define USES_INTERSHELL_INTERFACE
+   \#include \<InterShell_export.h\>
+   </code>
+   
+   
+   
+                                                                   */
 #ifndef InterShell_EXPORT
+/* One-short inclusion protection symbol for this file. */
 #define InterShell_EXPORT
 #include <sack_types.h>
 #ifdef SACK_CORE_BUILD
@@ -10,29 +34,23 @@
 #endif
 #include <configscript.h>
 
+//DOM-IGNORE-BEGIN
 
-#define _DEFINE_INTERFACE
+/* Used to declare a function in the interface table. */
+#define INTERSHELL_PROC_PTR(type,name)  type (CPROC* name)
 
-//!defined(__STATIC__) &&
-#    define INTERSHELL_PROC_PTR(type,name)  type (CPROC* name)
-
-#if !defined(__LINUX__)
-#ifdef INTERSHELL_SOURCE
-#define INTERSHELL_PROC(type,name) type CPROC name
-#else
-#define INTERSHELL_PROC(type,name) extern type CPROC name
-#endif
-#else
 #ifdef INTERSHELL_SOURCE
 #define INTERSHELL_PROC(type,name) EXPORT_METHOD type CPROC name
 #else
 #define INTERSHELL_PROC(type,name) IMPORT_METHOD type CPROC name
 #endif
-#endif
 
+//DOM-IGNORE-END
 
 #ifdef __cplusplus
+/* A macro used to open the InterShell namespace. */
 #define INTERSHELL_NAMESPACE SACK_NAMESPACE namespace intershell {
+/* A macro used to close the InterShell namespace */
 #define INTERSHELL_NAMESPACE_END  } SACK_NAMESPACE_END
 
 
@@ -102,17 +120,11 @@ namespace sack {
 	   <code lang="c++">
 	   
 	   OnShowControl( “basic/List Test” )( PTRSZVAL psvList )
-	   
 	   {
-	   
 	         PSI_CONTROL pc_list = (PSI_CONTROL)psvList;
-	   
 	         ResetList( pc_list );
-	   
 	         AddListItem( pc_list, “One List Item” );
-	   
 	         AddListItem( pc_list, “Another List Item” );
-	   
 	   }
 	   
 	   
@@ -134,55 +146,39 @@ namespace sack {
 	   OnCreateControl( “basic/Other Control” )( PSI_CONTROL frame, S_32 x, S_32 y, _32 w, _32 h )
 	   
 	   {
-	   
 	         // this code results with a create PSI control.
-	   
 	         // the PSI control must have been previously registered
-	   
-	   // or defined in some way.
-	   
+	         // or defined in some way.
 	         // the result of creating an invalid control,
-	   
 	   // or of creating a control that fails creation
-	   
 	   // for one reason or another is NULL, which will in turn
-	   
 	   // fails creation of the MILK control.
 	   
 	         return (PTRSZVAL)MakeNamedControl( frame
-	   
-	   , “Some PSI Control type-name”
-	   
-	   , x, y  // control position passed to event
-	   
-	   , w, h  // control size passed to event
-	   
-	   , \-1 ); // control ID; typically unused.
-	   
+	                 , “Some PSI Control type-name”
+	                 , x, y  // control position passed to event
+	   </code>
+	   <code>
+	                 , w, h  // control size passed to event
+	                 , \-1 ); // control ID; typically unused.
+	   </code>
+	   <code lang="c++">
 	   }
 	   
 	   
 	   
 	   // For MILK to be able to hide the control when pages change,
-	   
 	   // show the control when pages change, move the control to
-	   
 	   // a new position, or to resize the control, this method MUST
-	   
 	   // be defined for MILK widgets created through OnCreateControl.
 	   
 	   
 	   
 	   OnQueryGetControl( PTRSZVAL psv )
-	   
 	   {
-	   
 	         // since we know that we returned a PSI_CONTROL from the
-	   
 	         // creation event, this can simply be typecast and returned.
-	   
 	         return (PSI_CONTROL)psv;
-	   
 	   }
 	   </code>                                                                                     */
 	namespace intershell {
@@ -195,13 +191,21 @@ namespace sack {
 
 #ifndef MENU_BUTTON_DEFINED
 #define MENU_BUTTON_DEFINED
-		typedef struct menu_button *PMENU_BUTTON;
+typedef struct menu_button *PMENU_BUTTON;
 #endif
+/* An abstract type used to point to a Page. A canvas manages a
+   list of pages that will show at any given time one of.       */
 typedef struct page_data   *PPAGE_DATA;
 
 
-// pabel label is actually just a text label thing... 
+/* label is actually just a text label thing... It's only known
+   about internally, so it's better to use the function for
+   translating label text which takes your menu button control
+   container.                                                   */
 typedef struct page_label      *PPAGE_LABEL;
+/* A named font preset. The font may be extracted from this at
+   any given time, but internally handles scaling of the font to
+   match the one-size fits all.                                  */
 typedef struct font_preset     *PFONT_PRESET;
 
 
@@ -222,11 +226,16 @@ typedef struct font_preset     *PFONT_PRESET;
 
 typedef struct variable_tag *PVARIABLE;
 
-/* moved from text_label.h
- these values need to be exposed to peer modules
- */
+/* moved from text_label.h these values need to be exposed to
+   peer modules
+   
+   
+   
+   This enumeration defines values used in CreateLabelVariable
+   and CreateLabelVariableEx.                                  */
 enum label_variable_types {
-   /* POINTER data should be the address of a CTEXSTR (a pointer to the pointer of a string )*/
+   /* POINTER data should be the address of a CTEXTSTR (a pointer
+      to the pointer of a string )                                */
 	LABEL_TYPE_STRING
       /* POINTER data should be the address of an integer, changing the integer will reflect in the output*/
 								  , LABEL_TYPE_INT
@@ -243,13 +252,48 @@ enum label_variable_types {
                           /* POINTER data is a pointer to a simple string, the value is copied and used on the control */
 	, LABEL_TYPE_CONST_STRING
 };
+/* This is the type of the variable expected if a label is
+   created with LABEL_TYPE_STRING.
+   
+   
+   See Also
+   CreateLabelVariable
+   
+   CreateLabelVariableEx                                   */
 typedef CTEXTSTR  *label_string_value;
+/* This is the type of the variable expected if a label is
+   created with LABEL_TYPE_INT.
+   See Also
+   CreateLabelVariable
+   
+   CreateLabelVariableEx                                   */
 typedef _32       *label_int_value;
+/* This is the type of the variable expected if a label is
+   created with LABEL_TYPE_PROC.
+   
+   
+   See Also
+   CreateLabelVariable
+   
+   CreateLabelVariableEx                                   */
 typedef CTEXTSTR (*label_gettextproc)(void);
+/* This is the type of the variable expected if a label is
+   created with LABEL_TYPE_PROC_EX.
+   See Also
+   CreateLabelVariable
+   
+   CreateLabelVariableEx                                   */
 typedef CTEXTSTR (*label_gettextproc_ex)(PTRSZVAL);
+/* This is the type of the variable expected if a label is
+   created with LABEL_TYPE_PROC_CONTROL_EX.
+   
+   
+   See Also
+   CreateLabelVariable
+   
+   CreateLabelVariableEx                                   */
 typedef CTEXTSTR (*label_gettextproc_control)(PTRSZVAL, PMENU_BUTTON);
 
-#ifdef _DEFINE_INTERFACE
 struct intershell_interface {
 
 // magically knows which button we're editing at the moment.
@@ -446,8 +490,6 @@ INTERSHELL_PROC_PTR( PTRSZVAL,  InterShell_CreateControl )( CTEXTSTR type, int x
 
 };  //struct intershell_interface {
 
-#endif
-
 
 #ifdef INTERSHELL_SOURCE
 // magically knows which button we're editing at the moment.
@@ -465,6 +507,9 @@ INTERSHELL_PROC( void, ResumeMenu )( PTRSZVAL psv, _32 keycode );
 
 // a zero (0) passed as a primary/secondary or tertiary color indicates no change. (err or disable)
 #define COLOR_DISABLE 0x00010000 // okay transparent level 1 red is disable key. - cause that's such a useful color alone.
+/* A Special color symbol used to pass to InterShell_
+   SetButtonColors which causes the color to remain whatever it
+   was, ignore any change.                                      */
 #define COLOR_IGNORE  0x00000000
 INTERSHELL_PROC( void, InterShell_GetButtonColors )( PMENU_BUTTON button
 													, CDATA *cText

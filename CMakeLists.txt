@@ -22,18 +22,18 @@ SET( CMAKE_RC_COMPILER "rc" )
  set( ConsoleProgramExtraFlags "-bc" )
  set( WindowsProgramExtraFlags "-bg" )
  
-if( CMAKE_BUILD_TYPE MATCHES "Debug" )
-  set( CMAKE_C_LINK_EXECUTABLE   "${CMAKE_C_LINK_EXECUTABLE} debug all" )
-  add_definitions( -D_DEBUG )
-endif()
+#if( CMAKE_BUILD_TYPE MATCHES "Debug" )
+#  set( CMAKE_C_LINK_EXECUTABLE   "${CMAKE_C_LINK_EXECUTABLE} debug all" )
+#endif()
 
-set(WIN32_VERSION "0x0500" CACHE STRING
-      "Set minimum windows build version")
-  set_property(CACHE WIN32_VERSION PROPERTY STRINGS
-               "0x0500" "0x0400")
-add_definitions( -D_WIN32_WINNT=${WIN32_VERSION} )
 
 endif( ${CMAKE_GENERATOR} MATCHES "Watcom WMake" )
+
+set(WIN32_VERSION "0x0501" CACHE STRING
+      "Set minimum windows build version")
+  set_property(CACHE WIN32_VERSION PROPERTY STRINGS
+               "0x501" "0x0500" "0x0400")
+add_definitions( -D_WIN32_WINNT=${WIN32_VERSION} )
 
 #ENABLE_LANGUAGE(RC)
 
@@ -189,7 +189,6 @@ if( NEED_JPEG OR NEED_PNG OR NEED_FREETYPE )
 include( Externals.cmake )
 endif()
 
-if( NOT C++ )
   if( ${CMAKE_COMPILER_IS_GNUCC} ) 
   SET( FIRST_GCC_LIBRARY_SOURCE ${SACK_BASE}/src/deadstart/deadstart_list.c ) 
   SET( FIRST_GCC_PROGRAM_SOURCE ${SACK_BASE}/src/deadstart/deadstart_list.c ) 
@@ -199,15 +198,14 @@ if( NOT C++ )
   if( ${MSVC}${WATCOM} ) 
   SET( LAST_GCC_PROGRAM_SOURCE ${SACK_BASE}/src/deadstart/deadstart_prog.c ) 
   endif()
-else()
-  if( ${CMAKE_COMPILER_IS_GNUCC} ) 
-  # gcc I still need this, otherwise a program needs to InvokeDeadstarts()
-  SET( LAST_GCC_PROGRAM_SOURCE ${SACK_BASE}/src/deadstart/deadstart_prog.c ) 
-  endif()
-endif()
 
 
+if( CMAKE_BUILD_TYPE MATCHES "Debug" )
   add_definitions( -D_DEBUG )
+endif()
+if( CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo" )
+  add_definitions( -D_DEBUG )
+endif()
 
 if( USE_ASSEMBLY )
 set( ExtraFlags "${ExtraFlags} -DHAS_ASSEMBLY )
@@ -511,20 +509,31 @@ FOREACH(SOURCE ${SACK_PLUSPLUS_SOURCES})
 ENDFOREACH(SOURCE)
 
 set( quote \" )
+if(WATCOM)
+set( TARGETNAME -DTARGETNAME=\"${CMAKE_SHARED_LIBRARY_PREFIX}sack_bag${CMAKE_SHARED_LIBRARY_SUFFIX}\" )
+else(WATCOM)
+set( TARGETNAME -DTARGETNAME=\"\\\"${CMAKE_SHARED_LIBRARY_PREFIX}sack_bag${CMAKE_SHARED_LIBRARY_SUFFIX}\\\"\" )
+endif(WATCOM)
+
 SET_TARGET_PROPERTIES(sack_bag PROPERTIES
                   DEFINE_SYMBOL SACK_BAG_EXPORTS
-                  COMPILE_FLAGS  "-DTARGET_LABEL=sack_bag ${ExtraFlags} -DTARGETNAME=\"\\\"${CMAKE_SHARED_LIBRARY_PREFIX}sack_bag${CMAKE_SHARED_LIBRARY_SUFFIX}\\\"\" ${ExtraRenderFlags}"
+                  COMPILE_FLAGS  "-DTARGET_LABEL=sack_bag ${ExtraFlags} ${TARGETNAME} ${ExtraRenderFlags}"
 		  SOLUTION_FOLDER "MyFolder" 
 )
 
+if( WATCOM )
+set( SACK_BAG_PLUSPLUS sack_bag_pp )
+else(WATCOM)
+set( SACK_BAG_PLUSPLUS sack_bag++ )
+endif(WATCOM)
 
-add_library( sack_bag++ SHARED 
+add_library( ${SACK_BAG_PLUSPLUS} SHARED 
   ${cplusplus_sources} 
 )
-SET_TARGET_PROPERTIES(sack_bag++ PROPERTIES
+SET_TARGET_PROPERTIES(${SACK_BAG_PLUSPLUS} PROPERTIES
                   DEFINE_SYMBOL SACK_BAG_EXPORTS
                   COMPILE_FLAGS  "-DTARGET_LABEL=sack_bag_plusplus -DTARGETNAME=\"\\\"${CMAKE_SHARED_LIBRARY_PREFIX}sack_bag${CMAKE_SHARED_LIBRARY_SUFFIX}\\\"\" ${ExtraFlags} ${ExtraRenderFlags}"
-		  SOLUTION_FOLDER "sack_bag++" 
+		  SOLUTION_FOLDER "${SACK_BAG_PLUSPLUS}" 
 )
 
 if( __WINDOWS_ARM_CE__ )
@@ -546,30 +555,30 @@ set( SACK_LIBRARIES sack_bag )
 if( __WINDOWS__ )
   if( __ARM__ )
     target_link_libraries( sack_bag ws2 mmtimer iphlpapi coredll corelibc.lib)
-    target_link_libraries( sack_bag++ sack_bag ws2 mmtimer iphlpapi coredll corelibc.lib)
+    target_link_libraries( ${SACK_BAG_PLUSPLUS} sack_bag ws2 mmtimer iphlpapi coredll corelibc.lib)
   else()
     target_link_libraries( sack_bag wsock32 ws2_32 opengl32 winmm iphlpapi)
-    target_link_libraries( sack_bag++ sack_bag wsock32 ws2_32 opengl32 winmm iphlpapi)
+    target_link_libraries( ${SACK_BAG_PLUSPLUS} sack_bag wsock32 ws2_32 opengl32 winmm iphlpapi)
   endif()
 else( __WINDOWS__ )
   target_link_libraries( sack_bag odbc ${SQLITE3_LIBRARIES} ${PNG_LIBRARIES} ${JPEG_LIBRARIES} )
-  target_link_libraries( sack_bag++ sack_bag odbc ${SQLITE3_LIBRARIES} ${PNG_LIBRARIES} ${JPEG_LIBRARIES} )
+  target_link_libraries( ${SACK_BAG_PLUSPLUS} sack_bag odbc ${SQLITE3_LIBRARIES} ${PNG_LIBRARIES} ${JPEG_LIBRARIES} )
 endif( __WINDOWS__ )
 
 install_default_dest( sack_bag )
-install_default_dest( sack_bag++ )
+install_default_dest( ${SACK_BAG_PLUSPLUS} )
 
 if( NOT NEED_PNG ) 
   target_link_libraries( sack_bag png )
-  target_link_libraries( sack_bag++ png )
+  target_link_libraries( ${SACK_BAG_PLUSPLUS} png )
 endif() 
 if( NOT NEED_JPEG ) 
   target_link_libraries( sack_bag jpeg   )
-  target_link_libraries( sack_bag++ jpeg   )
+  target_link_libraries( ${SACK_BAG_PLUSPLUS} jpeg   )
 endif() 
 if( NOT NEED_FREETYPE )
   target_link_libraries( sack_bag  freetype  )
-  target_link_libraries( sack_bag++  freetype  )
+  target_link_libraries( ${SACK_BAG_PLUSPLUS}  freetype  )
 endif()
 
 

@@ -69,64 +69,6 @@
 #        define IMAGE_PROC_D  IMPORT_METHOD
 #     endif
 
-#if 0
-#  ifdef BCC16
-#     ifdef IMAGE_LIBRARY_SOURCE
-#        define IMAGE_PROC(type,name) type STDPROC _export PASTE(SECOND_IMAGE_LEVEL,name)
-#     else
-#        define IMAGE_PROC(type,name) extern type STDPROC PASTE(SECOND_IMAGE_LEVEL,name)
-#     endif
-#  else
-#     if !defined(__STATIC__) && !defined( GCC )
-#        ifdef IMAGE_LIBRARY_SOURCE 
-#           define IMAGE_PROC(type,name) LITERAL_LIB_EXPORT_METHOD type CPROC PASTE(SECOND_IMAGE_LEVEL,name)
-#           ifdef IMAGE_MAIN
-#               define IMAGE_PROC_D(type,name,args) LITERAL_LIB_EXPORT_METHOD type (CPROC*PASTE(SECOND_IMAGE_LEVEL,name))args
-#           else
-#             ifdef _MSC_VER
-#                define IMAGE_PROC_D(type,name,args) extern type (CPROC*PASTE(SECOND_IMAGE_LEVEL,name))args
-#             else
-#                define IMAGE_PROC_D(type,name,args) extern __declspec(dllexport) type (CPROC*PASTE(SECOND_IMAGE_LEVEL,name))args
-#             endif
-#           endif
-#        else
-#           define IMAGE_PROC(type,name) LITERAL_LIB_IMPORT_METHOD type CPROC PASTE(SECOND_IMAGE_LEVEL,name)
-#           define IMAGE_PROC_D(type,name,args) LITERAL_LIB_IMPORT_METHOD type (CPROC*PASTE(SECOND_IMAGE_LEVEL,name))args
-#        endif
-#     else
-#        if defined( __CYGWIN__ ) && 0
-#define STUPID_NO_DATA_EXPORTS
-#           ifdef IMAGE_LIBRARY_SOURCE 
-#              define IMAGE_PROC(type,name) LITERAL_LIB_EXPORT_METHOD type CPROC PASTE(SECOND_IMAGE_LEVEL,name)
-#              ifdef IMAGE_MAIN
-#                 define IMAGE_PROC_D(type,name,args) type CPROC PASTE(SECOND_IMAGE_LEVEL,name)args; \
-                       type (CPROC*PASTE(SECOND_IMAGE_LEVEL,_PASTE(_,name)))args
-#              else
-#                 define IMAGE_PROC_D(type,name,args) extern type CPROC PASTE(SECOND_IMAGE_LEVEL,name)args; \
-                                  extern type (CPROC*PASTE(SECOND_IMAGE_LEVEL,_PASTE(_,name)))args
-#              endif
-#           else
-#              define IMAGE_PROC(type,name) extern type CPROC PASTE(SECOND_IMAGE_LEVEL,name)
-#              define IMAGE_PROC_D(type,name,args) extern type CPROC PASTE(SECOND_IMAGE_LEVEL,name)args; \
-                                    extern type (CPROC*PASTE(SECOND_IMAGE_LEVEL,_PASTE(_,name)))args
-#           endif
-#        else
-#           ifdef IMAGE_LIBRARY_SOURCE 
-#              define IMAGE_PROC(type,name) LITERAL_LIB_EXPORT_METHOD type CPROC PASTE(SECOND_IMAGE_LEVEL,name)
-#              ifdef IMAGE_MAIN
-#                 define IMAGE_PROC_D(type,name,args) type (CPROC*PASTE(SECOND_IMAGE_LEVEL,name))args
-#              else
-#                 define IMAGE_PROC_D(type,name,args) extern type (CPROC*PASTE(SECOND_IMAGE_LEVEL,name))args
-#              endif
-#           else
-#              define IMAGE_PROC(type,name) extern type CPROC PASTE(SECOND_IMAGE_LEVEL,name)
-#              define IMAGE_PROC_D(type,name,args) extern type (CPROC*PASTE(SECOND_IMAGE_LEVEL,name))args
-#           endif
-#        endif
-#     endif
-#  endif
-#endif
-
 #ifdef _WIN32 
 #define _INVERT_IMAGE
 #endif

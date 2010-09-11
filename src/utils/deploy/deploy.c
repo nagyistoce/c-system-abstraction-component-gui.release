@@ -109,11 +109,14 @@ int main( int argc, char **argv )
 		}
 #endif
       fprintf( out, "set( SACK_BASE %s )\n", path );
-      fprintf( out, "set( SACK_INCLUDE_DIR ${SACK_BASE}/include/sack )\n" );
-      fprintf( out, "set( SACK_LIBRARIES sack_bag sack_bag++ )\n" );
+		fprintf( out, "set( SACK_INCLUDE_DIR ${SACK_BASE}/include/sack )\n" );
+#ifdef __WATCOMC__
+		fprintf( out, "set( SACK_LIBRARIES sack_bag sack_bag_pp )\n" );
+#else
+		fprintf( out, "set( SACK_LIBRARIES sack_bag sack_bag++ )\n" );
+#endif
       fprintf( out, "set( SACK_LIBRARY_DIR ${SACK_BASE}/lib )\n" );
       fprintf( out, "\n" );
-      fprintf( out, "if( NOT C++ )\n" );
       fprintf( out, "  if( ${CMAKE_COMPILER_IS_GNUCC} )\n" );
       fprintf( out, "  SET( FIRST_GCC_LIBRARY_SOURCE ${SACK_BASE}/src/sack/deadstart_list.c )\n" );
       fprintf( out, "  SET( FIRST_GCC_PROGRAM_SOURCE ${SACK_BASE}/src/sack/deadstart_list.c )\n" );
@@ -123,12 +126,6 @@ int main( int argc, char **argv )
       fprintf( out, "  if( ${MSVC}${WATCOM} )\n" );
       fprintf( out, "  SET( LAST_GCC_PROGRAM_SOURCE ${SACK_BASE}/src/sack/deadstart_prog.c )\n" );
       fprintf( out, "  endif()\n" );
-      fprintf( out, "else()\n" );
-      fprintf( out, "  if( ${CMAKE_COMPILER_IS_GNUCC} )\n" );
-      fprintf( out, "  # gcc I still need this, otherwise a program needs to InvokeDeadstarts()\n" );
-      fprintf( out, "  SET( LAST_GCC_PROGRAM_SOURCE ${SACK_BASE}/src/sack/deadstart_prog.c )\n" );
-      fprintf( out, "  endif()\n" );
-      fprintf( out, "endif()\n" );
       fclose( out );
 	}
    return 0;

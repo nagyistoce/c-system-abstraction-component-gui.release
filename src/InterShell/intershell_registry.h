@@ -17,6 +17,11 @@ namespace sack {
 
 #ifndef MENU_BUTTON_DEFINED
 #define MENU_BUTTON_DEFINED
+		/* Pointer to the basic control that InterShell uses to track
+		   controls on pages. This is given to a plugin when a control
+		   is created, and the control should just treat this as a
+		   handle and use proper interface methods with intershell.core
+		   to get information.                                          */
 		typedef struct menu_button *PMENU_BUTTON;
 #endif
 

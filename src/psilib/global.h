@@ -1,7 +1,9 @@
 #ifndef GLOBAL_STRUCTURE_DEFINED
 #define GLOBAL_STRUCTURE_DEFINED
 
+//DOM-IGNORE-BEGIN
 #define g global_psi_structure
+//DOM-IGNORE-END
 #ifndef PSI_SERVICE
 #  ifndef FORCE_NO_INTERFACE
 #    ifndef USE_IMAGE_INTERFACE // some people including this may have already defined this

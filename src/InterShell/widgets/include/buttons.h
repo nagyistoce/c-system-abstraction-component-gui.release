@@ -32,6 +32,8 @@
 
 #include "keypad.h"
 
+KEYPAD_NAMESPACE
+
 #define KEY_BACKGROUND_IMAGE 0x0001 // passing an image for the background...
 #define KEY_BACKGROUND_COLOR 0x0000 // !image
 
@@ -184,5 +186,7 @@ KEYPAD_PROC( void, SetKeyImageMargin )( PKEY_BUTTON key, _32 hMargin, _32 vMargi
 KEYPAD_PROC( void, SetKeyHighlight )( PKEY_BUTTON key, LOGICAL bEnable );
 KEYPAD_PROC( LOGICAL, GetKeyHighlight )( PKEY_BUTTON key );
 KEYPAD_PROC( PRENDERER, GetButtonAnimationLayer )( PSI_CONTROL pc_key_button );
+
+KEYPAD_NAMESPACE_END
 
 #endif

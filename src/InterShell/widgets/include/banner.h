@@ -2,21 +2,25 @@
 #define BANNER_WIDGET_DEFINED
 
 #include <controls.h>
+#include <render.h>
 
+#ifdef __cplusplus
+#define BANNER_NAMESPACE SACK_NAMESPACE namespace widgets { namespace banner {
+#define BANNER_NAMESPACE_END } } SACK_NAMESPACE_END
+SACK_NAMESPACE
+	namespace widgets {
+		namespace banner {
+#else
+#define BANNER_NAMESPACE
+#define BANNER_NAMESPACE_END
+#endif
 
-#if !defined(__STATIC__) && !defined(__UNIX__)
 #ifdef BANNER_SOURCE
 #define BANNER_PROC(type,name) EXPORT_METHOD type CPROC name
 #else
 #define BANNER_PROC(type,name) IMPORT_METHOD type CPROC name
 #endif
-#else
-#ifdef BANNER_SOURCE
-#define BANNER_PROC(type,name) EXPORT_METHOD type name
-#else
-#define BANNER_PROC(type,name) extern type name
-#endif
-#endif
+
 
 
 typedef struct banner_tag *PBANNER;
@@ -40,7 +44,6 @@ typedef struct banner_tag *PBANNER;
 
 	// banner will have a keyboard to enter a value...
    // banner text will show above the keyboard?
-#include <render.h>
 
 #define BANNER_OPTION_KEYBOARD       0x01000000
 
@@ -133,6 +136,6 @@ BANNER_PROC( void, Banner3AnswerNo )( CTEXTSTR type );
 #define Banner3MessageEx( renderparent,text ) CreateBanner3( renderparent, NULL, text )
 #define RemoveBanner3Message() RemoveBanner3( NULL )
 
-
+BANNER_NAMESPACE_END
 
 #endif

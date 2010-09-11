@@ -104,6 +104,5 @@ using namespace sack::sql::options::interface;
 #define OptGetProfileIntEx             METHOD_ALIAS((DEFAULT_OPTION_INTERFACE),GetProfileIntEx)
 //#endif
 
-
-
+SACK_OPTION_NAMESPACE_END
 #endif 

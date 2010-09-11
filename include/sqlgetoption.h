@@ -4,7 +4,7 @@
 #include <sqloptint.h>
 
 
-//SACK_OPTION_NAMESPACE
+SACK_OPTION_NAMESPACE
 
 #define SQLGetProfileInt SACK_GetProfileInt
 //#define SQLGetProfileBlob SACK_GetProfileBlob
