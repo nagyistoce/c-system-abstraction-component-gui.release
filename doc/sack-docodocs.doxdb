@@ -100,6 +100,9 @@
       <target id="html">../output/!!FUNCTIONS_sack__image__render.html</target>
       <target id="pdf">pdf://1000@sack-docodocs.pdf</target>
     </link>
+    <link topicid="!!FUNCTIONS_sack::intershell" displaystring="Functions">
+      <target id="html">../output/!!FUNCTIONS_sack__intershell.html</target>
+    </link>
     <link topicid="!!FUNCTIONS_sack::logging" displaystring="Functions">
       <target id="html">../output/!!FUNCTIONS_sack__logging.html</target>
       <target id="pdf">pdf://1133@sack-docodocs.pdf</target>
@@ -160,9 +163,15 @@
     <link topicid="!!FUNCTIONS_sack::sql" displaystring="Functions">
       <target id="html">../output/!!FUNCTIONS_sack__sql.html</target>
     </link>
+    <link topicid="!!FUNCTIONS_sack::sql::options" displaystring="Functions">
+      <target id="html">../output/!!FUNCTIONS_sack__sql__options.html</target>
+    </link>
     <link topicid="!!FUNCTIONS_sack::timers" displaystring="Functions">
       <target id="html">../output/!!FUNCTIONS_sack__timers.html</target>
       <target id="pdf">pdf://1263@sack-docodocs.pdf</target>
+    </link>
+    <link topicid="!!FUNCTIONS_sack::widgets::buttons" displaystring="Functions">
+      <target id="html">../output/!!FUNCTIONS_sack__widgets__buttons.html</target>
     </link>
     <link topicid="!!MACROS" displaystring="Macros">
       <target id="html">../output/!!MACROS.html</target>
@@ -305,6 +314,9 @@
     <link topicid="!!MACROS_sack::timers" displaystring="Macros">
       <target id="html">../output/!!MACROS_sack__timers.html</target>
       <target id="pdf">pdf://1267@sack-docodocs.pdf</target>
+    </link>
+    <link topicid="!!MACROS_sack::widgets::buttons" displaystring="Macros">
+      <target id="html">../output/!!MACROS_sack__widgets__buttons.html</target>
     </link>
     <link topicid="!!MEMBEROVERVIEW_sack::containers::list::iList" displaystring="iList Members">
       <target id="html">../output/!!MEMBEROVERVIEW_sack__containers__list__iList.html</target>
@@ -469,7 +481,6 @@
       <target id="pdf">pdf://1@sack-docodocs.pdf</target>
     </link>
     <link topicid="!!TYPES" displaystring="Types">
-      <target id="html">../output/!!TYPES.html</target>
       <target id="pdf">pdf://1686@sack-docodocs.pdf</target>
     </link>
     <link topicid="!!TYPES_sack" displaystring="Types">
@@ -553,6 +564,9 @@
     <link topicid="!!TYPES_sack::timers" displaystring="Types">
       <target id="html">../output/!!TYPES_sack__timers.html</target>
       <target id="pdf">pdf://1265@sack-docodocs.pdf</target>
+    </link>
+    <link topicid="!!TYPES_sack::widgets::buttons" displaystring="Types">
+      <target id="html">../output/!!TYPES_sack__widgets__buttons.html</target>
     </link>
     <link topicid="!!VARIABLES_sack::containers::text" displaystring="Variables">
       <target id="pdf">pdf://549@sack-docodocs.pdf</target>
@@ -644,9 +658,6 @@
     <link topicid="_CONTAINER_NAMESPACE_END" displaystring="_CONTAINER_NAMESPACE_END Macro">
       <target id="html">../output/_CONTAINER_NAMESPACE_END.html</target>
       <target id="pdf">pdf://1722@sack-docodocs.pdf</target>
-    </link>
-    <link topicid="_DEFINE_INTERFACE" displaystring="_DEFINE_INTERFACE Macro">
-      <target id="html">../output/_DEFINE_INTERFACE.html</target>
     </link>
     <link topicid="_DefineRegistryMethod" displaystring="_DefineRegistryMethod Macro">
       <target id="pdf">pdf://1723@sack-docodocs.pdf</target>
@@ -934,9 +945,6 @@
       <target id="html">../output/BAGIMAGE_EXPORTS.html</target>
       <target id="pdf">pdf://1748@sack-docodocs.pdf</target>
     </link>
-    <link topicid="BeginBatchUpdate" displaystring="BeginBatchUpdate Function">
-      <target id="html">../output/BeginBatchUpdate.html</target>
-    </link>
     <link topicid="BORDER_BUMP" displaystring="BORDER_BUMP Macro">
       <target id="pdf">pdf://1749@sack-docodocs.pdf</target>
     </link>
@@ -1023,15 +1031,6 @@
     </link>
     <link topicid="BUTTON_DRAW" displaystring="BUTTON_DRAW Macro">
       <target id="html">../output/BUTTON_DRAW.html</target>
-    </link>
-    <link topicid="BUTTON_FIELD_CENTER" displaystring="BUTTON_FIELD_CENTER Macro">
-      <target id="html">../output/BUTTON_FIELD_CENTER.html</target>
-    </link>
-    <link topicid="BUTTON_FIELD_RIGHT" displaystring="BUTTON_FIELD_RIGHT Macro">
-      <target id="html">../output/BUTTON_FIELD_RIGHT.html</target>
-    </link>
-    <link topicid="BUTTON_FLAG_TEXT_ON_TOP" displaystring="BUTTON_FLAG_TEXT_ON_TOP Macro">
-      <target id="html">../output/BUTTON_FLAG_TEXT_ON_TOP.html</target>
     </link>
     <link topicid="BUTTON_METHODS_DEFINED" displaystring="BUTTON_METHODS_DEFINED Macro">
       <target id="html">../output/BUTTON_METHODS_DEFINED.html</target>
@@ -1163,42 +1162,6 @@
     <link topicid="CONSTRUCT_SOURCE" displaystring="CONSTRUCT_SOURCE Macro">
       <target id="html">../output/CONSTRUCT_SOURCE.html</target>
       <target id="pdf">pdf://1786@sack-docodocs.pdf</target>
-    </link>
-    <link topicid="CONTENT_CENTER" displaystring="CONTENT_CENTER Macro">
-      <target id="html">../output/CONTENT_CENTER.html</target>
-    </link>
-    <link topicid="CONTENT_CENTERALL" displaystring="CONTENT_CENTERALL Macro">
-      <target id="html">../output/CONTENT_CENTERALL.html</target>
-    </link>
-    <link topicid="CONTENT_LEFT" displaystring="CONTENT_LEFT Macro">
-      <target id="html">../output/CONTENT_LEFT.html</target>
-    </link>
-    <link topicid="CONTENT_NORMAL" displaystring="CONTENT_NORMAL Macro">
-      <target id="html">../output/CONTENT_NORMAL.html</target>
-    </link>
-    <link topicid="CONTENT_RIGHT" displaystring="CONTENT_RIGHT Macro">
-      <target id="html">../output/CONTENT_RIGHT.html</target>
-    </link>
-    <link topicid="CONTENT_SAMELINE_CENTER" displaystring="CONTENT_SAMELINE_CENTER Macro">
-      <target id="html">../output/CONTENT_SAMELINE_CENTER.html</target>
-    </link>
-    <link topicid="CONTENT_SAMELINE_CENTERALL" displaystring="CONTENT_SAMELINE_CENTERALL Macro">
-      <target id="html">../output/CONTENT_SAMELINE_CENTERALL.html</target>
-    </link>
-    <link topicid="CONTENT_SAMELINE_LEFT" displaystring="CONTENT_SAMELINE_LEFT Macro">
-      <target id="html">../output/CONTENT_SAMELINE_LEFT.html</target>
-    </link>
-    <link topicid="CONTENT_SAMELINE_NORMAL" displaystring="CONTENT_SAMELINE_NORMAL Macro">
-      <target id="html">../output/CONTENT_SAMELINE_NORMAL.html</target>
-    </link>
-    <link topicid="CONTENT_SAMELINE_RIGHT" displaystring="CONTENT_SAMELINE_RIGHT Macro">
-      <target id="html">../output/CONTENT_SAMELINE_RIGHT.html</target>
-    </link>
-    <link topicid="CONTENT_SAMELINE_VCENTER" displaystring="CONTENT_SAMELINE_VCENTER Macro">
-      <target id="html">../output/CONTENT_SAMELINE_VCENTER.html</target>
-    </link>
-    <link topicid="CONTENT_VCENTER" displaystring="CONTENT_VCENTER Macro">
-      <target id="html">../output/CONTENT_VCENTER.html</target>
     </link>
     <link topicid="CONTROL_FRAME" displaystring="CONTROL_FRAME Macro">
       <target id="pdf">pdf://1787@sack-docodocs.pdf</target>
@@ -1529,9 +1492,6 @@
     <link topicid="CreateFrameFromRenderer@CTEXTSTR@_32@PRENDERER" displaystring="CreateFrameFromRenderer Function">
       <target id="pdf">pdf://1317@sack-docodocs.pdf</target>
     </link>
-    <link topicid="CreateOptionDatabase" displaystring="CreateOptionDatabase Function">
-      <target id="html">../output/CreateOptionDatabase.html</target>
-    </link>
     <link topicid="CreatePopup" displaystring="CreatePopup Function">
       <target id="pdf">pdf://1303@sack-docodocs.pdf</target>
     </link>
@@ -1555,7 +1515,6 @@
       <target id="pdf">pdf://1639@sack-docodocs.pdf</target>
     </link>
     <link topicid="DEADSTART_CALLTYPE" displaystring="DEADSTART_CALLTYPE Macro">
-      <target id="html">../output/DEADSTART_CALLTYPE.html</target>
       <target id="pdf">pdf://1638@sack-docodocs.pdf</target>
     </link>
     <link topicid="DEADSTART_DEFINED" displaystring="DEADSTART_DEFINED Macro">
@@ -1563,7 +1522,6 @@
       <target id="pdf">pdf://1794@sack-docodocs.pdf</target>
     </link>
     <link topicid="DEADSTART_PROC" displaystring="DEADSTART_PROC Macro">
-      <target id="html">../output/DEADSTART_PROC.html</target>
       <target id="pdf">pdf://1637@sack-docodocs.pdf</target>
     </link>
     <link topicid="DebugBreak" displaystring="DebugBreak Macro">
@@ -1581,9 +1539,6 @@
     </link>
     <link topicid="DeleteListItem@PSI_CONTROL@PLISTITEM" displaystring="DeleteListItem Function">
       <target id="pdf">pdf://1362@sack-docodocs.pdf</target>
-    </link>
-    <link topicid="DeleteOption@INDEX" displaystring="DeleteOption Function">
-      <target id="html">../output/DeleteOption@INDEX.html</target>
     </link>
     <link topicid="DeletePopupItem@PMENU@_32@_32" displaystring="DeletePopupItem Function">
       <target id="pdf">pdf://1310@sack-docodocs.pdf</target>
@@ -1654,9 +1609,6 @@
     <link topicid="DumpFrameContents@PCOMMON" displaystring="DumpFrameContents Function">
       <target id="pdf">pdf://1486@sack-docodocs.pdf</target>
     </link>
-    <link topicid="DuplicateOption@INDEX@CTEXTSTR" displaystring="DuplicateOption Function">
-      <target id="html">../output/DuplicateOption@INDEX@CTEXTSTR.html</target>
-    </link>
     <link topicid="EasyRegisterControl" displaystring="EasyRegisterControl Macro">
       <target id="pdf">pdf://1804@sack-docodocs.pdf</target>
     </link>
@@ -1714,17 +1666,8 @@
     <link topicid="EnableFrameUpdates" displaystring="EnableFrameUpdates Macro">
       <target id="pdf">pdf://1815@sack-docodocs.pdf</target>
     </link>
-    <link topicid="EndBatchUpdate" displaystring="EndBatchUpdate Function">
-      <target id="html">../output/EndBatchUpdate.html</target>
-    </link>
     <link topicid="EnumListItems@PSI_CONTROL@PLISTITEM@void __cdecl *HandleListItem PTRSZVAL,PSI_CONTROL,PLISTITEM@PTRSZVAL" displaystring="EnumListItems Function">
       <target id="pdf">pdf://1492@sack-docodocs.pdf</target>
-    </link>
-    <link topicid="EnumOptions@INDEX@int __cdecl *ProcessPTRSZVAL psv, CTEXTSTR name, _32 ID, int flags@PTRSZVAL" displaystring="EnumOptions Function">
-      <target id="html">../output/EnumOptions@INDEX@int___cdecl__ProcessPTRSZVAL_psv,_CTEXTSTR_name,__32_ID,_int_flags@PTRSZVAL.html</target>
-    </link>
-    <link topicid="EnumOptionsEx@PODBC@INDEX@int __cdecl *ProcessPTRSZVAL psv, CTEXTSTR name, _32 ID, int flags@PTRSZVAL" displaystring="EnumOptionsEx Function">
-      <target id="html">../output/EnumOptionsEx@PODBC@INDEX@int___cdecl__ProcessPTRSZVAL_psv,_CTEXTSTR_name,__32_ID,_int_flags@PTRSZVAL.html</target>
     </link>
     <link topicid="EnumSelectedListItems@PCONTROL@PLISTITEM@void __cdecl *HandleListItem PTRSZVAL,PCOMMON,PLISTITEM@PTRSZVAL" displaystring="EnumSelectedListItems Function">
       <target id="pdf">pdf://1493@sack-docodocs.pdf</target>
@@ -1793,7 +1736,6 @@
       <target id="pdf">pdf://1824@sack-docodocs.pdf</target>
     </link>
     <link topicid="FILESYS_PROC" displaystring="FILESYS_PROC Macro">
-      <target id="html">../output/FILESYS_PROC.html</target>
       <target id="pdf">pdf://603@sack-docodocs.pdf</target>
     </link>
     <link topicid="FILESYSTEM_LIBRARY_SOURCE" displaystring="FILESYSTEM_LIBRARY_SOURCE Macro">
@@ -1859,9 +1801,6 @@
     </link>
     <link topicid="FrameInitProc" displaystring="FrameInitProc Type">
       <target id="pdf">pdf://1646@sack-docodocs.pdf</target>
-    </link>
-    <link topicid="g" displaystring="g Macro">
-      <target id="html">../output/g.html</target>
     </link>
     <link topicid="GET_PUBLIC_DATA" displaystring="GET_PUBLIC_DATA Macro">
       <target id="pdf">pdf://1832@sack-docodocs.pdf</target>
@@ -1967,15 +1906,6 @@
     <link topicid="GetItemText@PLISTITEM@int@TEXTSTR" displaystring="GetItemText Function">
       <target id="pdf">pdf://1375@sack-docodocs.pdf</target>
     </link>
-    <link topicid="GetKeypad" displaystring="GetKeypad Macro">
-      <target id="html">../output/GetKeypad.html</target>
-    </link>
-    <link topicid="GetKeypadCommon" displaystring="GetKeypadCommon Macro">
-      <target id="html">../output/GetKeypadCommon.html</target>
-    </link>
-    <link topicid="GetKeyValue@PKEY_BUTTON" displaystring="GetKeyValue Function">
-      <target id="html">../output/GetKeyValue@PKEY_BUTTON.html</target>
-    </link>
     <link topicid="GetLastError" displaystring="GetLastError Macro">
       <target id="html">../output/GetLastError.html</target>
       <target id="pdf">pdf://317@sack-docodocs.pdf</target>
@@ -1997,18 +1927,6 @@
     </link>
     <link topicid="GetNthTreeItem@PSI_CONTROL@PLISTITEM@int@int" displaystring="GetNthTreeItem Function">
       <target id="pdf">pdf://1511@sack-docodocs.pdf</target>
-    </link>
-    <link topicid="GetOptionStringValue@INDEX@char *@_32" displaystring="GetOptionStringValue Function">
-      <target id="html">../output/GetOptionStringValue@INDEX@char__@_32.html</target>
-    </link>
-    <link topicid="GetOptionStringValueEx@PODBC@INDEX@char *@_32 len" displaystring="GetOptionStringValueEx Function">
-      <target id="html">../output/GetOptionStringValueEx@PODBC@INDEX@char__@_32_len.html</target>
-    </link>
-    <link topicid="GetOptionValueIndex@INDEX" displaystring="GetOptionValueIndex Function">
-      <target id="html">../output/GetOptionValueIndex@INDEX.html</target>
-    </link>
-    <link topicid="GetOptionValueIndexEx@PODBC@INDEX" displaystring="GetOptionValueIndexEx Function">
-      <target id="html">../output/GetOptionValueIndexEx@PODBC@INDEX.html</target>
     </link>
     <link topicid="GetPhysicalCoordinate@PSI_CONTROL@S_32 *@S_32 *@int" displaystring="GetPhysicalCoordinate Function">
       <target id="pdf">pdf://1512@sack-docodocs.pdf</target>
@@ -2046,9 +1964,6 @@
     <link topicid="GetSheetSize@PSI_CONTROL@_32 *@_32 *" displaystring="GetSheetSize Function">
       <target id="pdf">pdf://1515@sack-docodocs.pdf</target>
     </link>
-    <link topicid="GetSystemID" displaystring="GetSystemID Function">
-      <target id="html">../output/GetSystemID.html</target>
-    </link>
     <link topicid="GLASS_LIKE_BUTTONS_DEFINED_HERE" displaystring="GLASS_LIKE_BUTTONS_DEFINED_HERE Macro">
       <target id="html">../output/GLASS_LIKE_BUTTONS_DEFINED_HERE.html</target>
     </link>
@@ -2069,9 +1984,6 @@
     </link>
     <link topicid="HideFrame@PSI_CONTROL" displaystring="HideFrame Function">
       <target id="pdf">pdf://1377@sack-docodocs.pdf</target>
-    </link>
-    <link topicid="HideKeypad" displaystring="HideKeypad Macro">
-      <target id="html">../output/HideKeypad.html</target>
     </link>
     <link topicid="HIGHLIGHT" displaystring="HIGHLIGHT Macro">
       <target id="pdf">pdf://1849@sack-docodocs.pdf</target>
@@ -2172,12 +2084,6 @@
     <link topicid="INTERSHELL_NAMESPACE_END" displaystring="INTERSHELL_NAMESPACE_END Macro">
       <target id="html">../output/INTERSHELL_NAMESPACE_END.html</target>
     </link>
-    <link topicid="INTERSHELL_PROC" displaystring="INTERSHELL_PROC Macro">
-      <target id="html">../output/INTERSHELL_PROC.html</target>
-    </link>
-    <link topicid="INTERSHELL_PROC_PTR" displaystring="INTERSHELL_PROC_PTR Macro">
-      <target id="html">../output/INTERSHELL_PROC_PTR.html</target>
-    </link>
     <link topicid="InterShell_REGISTRY" displaystring="InterShell_REGISTRY Macro">
       <target id="html">../output/InterShell_REGISTRY.html</target>
     </link>
@@ -2219,24 +2125,6 @@
     <link topicid="ISSUE_POS_REGISTRY_SHORTCUTS_DEFINED" displaystring="ISSUE_POS_REGISTRY_SHORTCUTS_DEFINED Macro">
       <target id="html">../output/ISSUE_POS_REGISTRY_SHORTCUTS_DEFINED.html</target>
     </link>
-    <link topicid="KDF_CAPSKEY" displaystring="KDF_CAPSKEY Macro">
-      <target id="html">../output/KDF_CAPSKEY.html</target>
-    </link>
-    <link topicid="KDF_NODEFINE" displaystring="KDF_NODEFINE Macro">
-      <target id="html">../output/KDF_NODEFINE.html</target>
-    </link>
-    <link topicid="KDF_NOKEY" displaystring="KDF_NOKEY Macro">
-      <target id="html">../output/KDF_NOKEY.html</target>
-    </link>
-    <link topicid="KDF_NOREDEF" displaystring="KDF_NOREDEF Macro">
-      <target id="html">../output/KDF_NOREDEF.html</target>
-    </link>
-    <link topicid="KDF_NUMKEY" displaystring="KDF_NUMKEY Macro">
-      <target id="html">../output/KDF_NUMKEY.html</target>
-    </link>
-    <link topicid="KDF_UPACTION" displaystring="KDF_UPACTION Macro">
-      <target id="html">../output/KDF_UPACTION.html</target>
-    </link>
     <link topicid="KEY_ALPHA_LOCK_ON" displaystring="KEY_ALPHA_LOCK_ON Macro">
       <target id="html">../output/KEY_ALPHA_LOCK_ON.html</target>
       <target id="pdf">pdf://1865@sack-docodocs.pdf</target>
@@ -2244,12 +2132,6 @@
     <link topicid="KEY_ALT_DOWN" displaystring="KEY_ALT_DOWN Macro">
       <target id="html">../output/KEY_ALT_DOWN.html</target>
       <target id="pdf">pdf://1866@sack-docodocs.pdf</target>
-    </link>
-    <link topicid="KEY_BACKGROUND_COLOR" displaystring="KEY_BACKGROUND_COLOR Macro">
-      <target id="html">../output/KEY_BACKGROUND_COLOR.html</target>
-    </link>
-    <link topicid="KEY_BACKGROUND_IMAGE" displaystring="KEY_BACKGROUND_IMAGE Macro">
-      <target id="html">../output/KEY_BACKGROUND_IMAGE.html</target>
     </link>
     <link topicid="KEY_CODE" displaystring="KEY_CODE Macro">
       <target id="html">../output/KEY_CODE.html</target>
@@ -2321,35 +2203,14 @@
     <link topicid="keydefs.h" displaystring="keydefs.h">
       <target id="html">../output/keydefs_h.html</target>
     </link>
-    <link topicid="KEYMOD_ALT" displaystring="KEYMOD_ALT Macro">
-      <target id="html">../output/KEYMOD_ALT.html</target>
-    </link>
-    <link topicid="KEYMOD_ANY" displaystring="KEYMOD_ANY Macro">
-      <target id="html">../output/KEYMOD_ANY.html</target>
-    </link>
-    <link topicid="KEYMOD_CTRL" displaystring="KEYMOD_CTRL Macro">
-      <target id="html">../output/KEYMOD_CTRL.html</target>
-    </link>
-    <link topicid="KEYMOD_NORMAL" displaystring="KEYMOD_NORMAL Macro">
-      <target id="html">../output/KEYMOD_NORMAL.html</target>
-    </link>
-    <link topicid="KEYMOD_SHIFT" displaystring="KEYMOD_SHIFT Macro">
-      <target id="html">../output/KEYMOD_SHIFT.html</target>
-    </link>
     <link topicid="keypad.h" displaystring="keypad.h">
       <target id="html">../output/keypad_h.html</target>
     </link>
-    <link topicid="KEYPAD_FLAG_ALPHANUM" displaystring="KEYPAD_FLAG_ALPHANUM Macro">
-      <target id="html">../output/KEYPAD_FLAG_ALPHANUM.html</target>
+    <link topicid="KEYPAD_NAMESPACE" displaystring="KEYPAD_NAMESPACE Macro">
+      <target id="html">../output/KEYPAD_NAMESPACE.html</target>
     </link>
-    <link topicid="KEYPAD_FLAG_DISPLAY" displaystring="KEYPAD_FLAG_DISPLAY Macro">
-      <target id="html">../output/KEYPAD_FLAG_DISPLAY.html</target>
-    </link>
-    <link topicid="KEYPAD_FLAG_ENTRY" displaystring="KEYPAD_FLAG_ENTRY Macro">
-      <target id="html">../output/KEYPAD_FLAG_ENTRY.html</target>
-    </link>
-    <link topicid="KEYPAD_FLAG_PASSWORD" displaystring="KEYPAD_FLAG_PASSWORD Macro">
-      <target id="html">../output/KEYPAD_FLAG_PASSWORD.html</target>
+    <link topicid="KEYPAD_NAMESPACE_END" displaystring="KEYPAD_NAMESPACE_END Macro">
+      <target id="html">../output/KEYPAD_NAMESPACE_END.html</target>
     </link>
     <link topicid="KEYPAD_PROC" displaystring="KEYPAD_PROC Macro">
       <target id="html">../output/KEYPAD_PROC.html</target>
@@ -2738,9 +2599,6 @@
       <target id="html">../output/NETWORK_SOURCE.html</target>
       <target id="pdf">pdf://1955@sack-docodocs.pdf</target>
     </link>
-    <link topicid="NewDuplicateOption@PODBC@INDEX@CTEXTSTR" displaystring="NewDuplicateOption Function">
-      <target id="html">../output/NewDuplicateOption@PODBC@INDEX@CTEXTSTR.html</target>
-    </link>
     <link topicid="NORMAL" displaystring="NORMAL Macro">
       <target id="pdf">pdf://1956@sack-docodocs.pdf</target>
     </link>
@@ -2773,9 +2631,6 @@
     </link>
     <link topicid="OnKeyCommon" displaystring="OnKeyCommon Macro">
       <target id="pdf">pdf://1966@sack-docodocs.pdf</target>
-    </link>
-    <link topicid="OnKeyPressEvent" displaystring="OnKeyPressEvent Macro">
-      <target id="html">../output/OnKeyPressEvent.html</target>
     </link>
     <link topicid="OnMotionCommon" displaystring="OnMotionCommon Macro">
       <target id="pdf">pdf://1967@sack-docodocs.pdf</target>
@@ -2884,12 +2739,6 @@
     <link topicid="PickScaledFontWithUpdate@S_32@S_32@PFRACTION@PFRACTION@P_32@POINTER *@PCOMMON@void __cdecl *UpdateFont PTRSZVAL psv, Font font@PTRSZVAL" displaystring="PickScaledFontWithUpdate Function">
       <target id="pdf">pdf://1545@sack-docodocs.pdf</target>
     </link>
-    <link topicid="PKEY_BUTTON" displaystring="PKEY_BUTTON Type">
-      <target id="html">../output/PKEY_BUTTON.html</target>
-    </link>
-    <link topicid="PKEYPAD" displaystring="PKEYPAD Type">
-      <target id="html">../output/PKEYPAD.html</target>
-    </link>
     <link topicid="PLISTITEM" displaystring="PLISTITEM Type">
       <target id="pdf">pdf://1287@sack-docodocs.pdf</target>
     </link>
@@ -2911,9 +2760,6 @@
     </link>
     <link topicid="PressButton@PSI_CONTROL@int" displaystring="PressButton Function">
       <target id="pdf">pdf://1391@sack-docodocs.pdf</target>
-    </link>
-    <link topicid="PressHandler" displaystring="PressHandler Type">
-      <target id="html">../output/PressHandler.html</target>
     </link>
     <link topicid="PRIOR_PRELOAD" displaystring="PRIOR_PRELOAD Macro">
       <target id="pdf">pdf://1987@sack-docodocs.pdf</target>
@@ -3107,9 +2953,6 @@
     <link topicid="PSSQL_STUB_DEFINED" displaystring="PSSQL_STUB_DEFINED Macro">
       <target id="html">../output/PSSQL_STUB_DEFINED.html</target>
     </link>
-    <link topicid="PTEXT_PLACEMENT" displaystring="PTEXT_PLACEMENT Type">
-      <target id="html">../output/PTEXT_PLACEMENT.html</target>
-    </link>
     <link topicid="PUBLIC_DATA" displaystring="PUBLIC_DATA Macro">
       <target id="pdf">pdf://2027@sack-docodocs.pdf</target>
     </link>
@@ -3295,14 +3138,29 @@
     <link topicid="sack::app::deadstart" displaystring="sack::app::deadstart Namespace">
       <target id="html">../output/sack__app__deadstart.html</target>
     </link>
+    <link topicid="sack::app::deadstart::ATEXIT" displaystring="sack::app::deadstart::ATEXIT Macro">
+      <target id="html">../output/sack__app__deadstart__ATEXIT.html</target>
+    </link>
+    <link topicid="sack::app::deadstart::ATEXIT_PRIORITY" displaystring="sack::app::deadstart::ATEXIT_PRIORITY Macro">
+      <target id="html">../output/sack__app__deadstart__ATEXIT_PRIORITY.html</target>
+    </link>
     <link topicid="sack::app::deadstart::CONFIG_SCRIPT_PRELOAD_PRIORITY" displaystring="sack::app::deadstart::CONFIG_SCRIPT_PRELOAD_PRIORITY Macro">
       <target id="html">../output/sack__app__deadstart__CONFIG_SCRIPT_PRELOAD_PRIORITY.html</target>
+    </link>
+    <link topicid="sack::app::deadstart::DEADSTART_CALLTYPE" displaystring="sack::app::deadstart::DEADSTART_CALLTYPE Macro">
+      <target id="html">../output/sack__app__deadstart__DEADSTART_CALLTYPE.html</target>
     </link>
     <link topicid="sack::app::deadstart::DEADSTART_PRELOAD_PRIORITY" displaystring="sack::app::deadstart::DEADSTART_PRELOAD_PRIORITY Macro">
       <target id="html">../output/sack__app__deadstart__DEADSTART_PRELOAD_PRIORITY.html</target>
     </link>
+    <link topicid="sack::app::deadstart::DEADSTART_PROC" displaystring="sack::app::deadstart::DEADSTART_PROC Macro">
+      <target id="html">../output/sack__app__deadstart__DEADSTART_PROC.html</target>
+    </link>
     <link topicid="sack::app::deadstart::DEFAULT_PRELOAD_PRIORITY" displaystring="sack::app::deadstart::DEFAULT_PRELOAD_PRIORITY Macro">
       <target id="html">../output/sack__app__deadstart__DEFAULT_PRELOAD_PRIORITY.html</target>
+    </link>
+    <link topicid="sack::app::deadstart::DispelDeadstart" displaystring="sack::app::deadstart::DispelDeadstart Function">
+      <target id="html">../output/sack__app__deadstart__DispelDeadstart.html</target>
     </link>
     <link topicid="sack::app::deadstart::GLOBAL_INIT_PRELOAD_PRIORITY" displaystring="sack::app::deadstart::GLOBAL_INIT_PRELOAD_PRIORITY Macro">
       <target id="html">../output/sack__app__deadstart__GLOBAL_INIT_PRELOAD_PRIORITY.html</target>
@@ -3318,6 +3176,9 @@
     </link>
     <link topicid="sack::app::deadstart::IsRootDeadstartStarted" displaystring="sack::app::deadstart::IsRootDeadstartStarted Function">
       <target id="html">../output/sack__app__deadstart__IsRootDeadstartStarted.html</target>
+    </link>
+    <link topicid="sack::app::deadstart::MAGIC_PRIORITY_PRELOAD" displaystring="sack::app::deadstart::MAGIC_PRIORITY_PRELOAD Macro">
+      <target id="html">../output/sack__app__deadstart__MAGIC_PRIORITY_PRELOAD.html</target>
     </link>
     <link topicid="sack::app::deadstart::MarkRootDeadstartComplete" displaystring="sack::app::deadstart::MarkRootDeadstartComplete Function">
       <target id="html">../output/sack__app__deadstart__MarkRootDeadstartComplete.html</target>
@@ -3337,6 +3198,12 @@
     <link topicid="sack::app::deadstart::PRELOAD" displaystring="sack::app::deadstart::PRELOAD Macro">
       <target id="html">../output/sack__app__deadstart__PRELOAD.html</target>
     </link>
+    <link topicid="sack::app::deadstart::PRIORITY_ATEXIT" displaystring="sack::app::deadstart::PRIORITY_ATEXIT Macro">
+      <target id="html">../output/sack__app__deadstart__PRIORITY_ATEXIT.html</target>
+    </link>
+    <link topicid="sack::app::deadstart::PRIORITY_PRELOAD" displaystring="sack::app::deadstart::PRIORITY_PRELOAD Macro">
+      <target id="html">../output/sack__app__deadstart__PRIORITY_PRELOAD.html</target>
+    </link>
     <link topicid="sack::app::deadstart::PSI_PRELOAD_PRIORITY" displaystring="sack::app::deadstart::PSI_PRELOAD_PRIORITY Macro">
       <target id="html">../output/sack__app__deadstart__PSI_PRELOAD_PRIORITY.html</target>
     </link>
@@ -3348,6 +3215,9 @@
     </link>
     <link topicid="sack::app::deadstart::ResumeDeadstart" displaystring="sack::app::deadstart::ResumeDeadstart Function">
       <target id="html">../output/sack__app__deadstart__ResumeDeadstart.html</target>
+    </link>
+    <link topicid="sack::app::deadstart::ROOT_ATEXIT" displaystring="sack::app::deadstart::ROOT_ATEXIT Macro">
+      <target id="html">../output/sack__app__deadstart__ROOT_ATEXIT.html</target>
     </link>
     <link topicid="sack::app::deadstart::SQL_PRELOAD_PRIORITY" displaystring="sack::app::deadstart::SQL_PRELOAD_PRIORITY Macro">
       <target id="html">../output/sack__app__deadstart__SQL_PRELOAD_PRIORITY.html</target>
@@ -3393,9 +3263,6 @@
     </link>
     <link topicid="sack::app::registry::CreateRegisteredDataType@CTEXTSTR@CTEXTSTR@CTEXTSTR" displaystring="sack::app::registry::CreateRegisteredDataType Function">
       <target id="html">../output/sack__app__registry__CreateRegisteredDataType@CTEXTSTR@CTEXTSTR@CTEXTSTR.html</target>
-    </link>
-    <link topicid="sack::app::registry::CreateRegisteredDataTypeEx@PCLASSROOT@CTEXTSTR@CTEXTSTR@CTEXTSTR" displaystring="sack::app::registry::CreateRegisteredDataTypeEx Function">
-      <target id="html">../output/sack__app__registry__CreateRegisteredDataTypeEx@PCLASSROOT@CTEXTSTR@CTEXTSTR@CTEXTSTR.html</target>
     </link>
     <link topicid="sack::app::registry::DefineRegistryMethod" displaystring="sack::app::registry::DefineRegistryMethod Macro">
       <target id="html">../output/sack__app__registry__DefineRegistryMethod.html</target>
@@ -6664,6 +6531,15 @@
     <link topicid="sack::image::render.DISPLAY_ATTRIBUTE_NO_MOUSE" displaystring="DISPLAY_ATTRIBUTE_NO_MOUSE">
       <target id="html">../output/sack__image__render__DisplayAttributes.html</target>
     </link>
+    <link topicid="sack::image::render.KEYDATA" displaystring="KEYDATA">
+      <target id="html">../output/sack__image__render__KeyDataEventType.html</target>
+    </link>
+    <link topicid="sack::image::render.KEYDATA_DEFINED" displaystring="KEYDATA_DEFINED">
+      <target id="html">../output/sack__image__render__KeyDataEventType.html</target>
+    </link>
+    <link topicid="sack::image::render.KEYTRIGGER" displaystring="KEYTRIGGER">
+      <target id="html">../output/sack__image__render__KeyDataEventType.html</target>
+    </link>
     <link topicid="sack::image::render.MK_ALT" displaystring="MK_ALT">
       <target id="html">../output/sack__image__render__ButtonFlags.html</target>
     </link>
@@ -6935,6 +6811,24 @@
       <target id="html">../output/sack__image__render__IsTouchDisplay.html</target>
       <target id="pdf">pdf://827@sack-docodocs.pdf</target>
     </link>
+    <link topicid="sack::image::render::KDF_CAPSKEY" displaystring="sack::image::render::KDF_CAPSKEY Macro">
+      <target id="html">../output/sack__image__render__KDF_CAPSKEY.html</target>
+    </link>
+    <link topicid="sack::image::render::KDF_NODEFINE" displaystring="sack::image::render::KDF_NODEFINE Macro">
+      <target id="html">../output/sack__image__render__KDF_NODEFINE.html</target>
+    </link>
+    <link topicid="sack::image::render::KDF_NOKEY" displaystring="sack::image::render::KDF_NOKEY Macro">
+      <target id="html">../output/sack__image__render__KDF_NOKEY.html</target>
+    </link>
+    <link topicid="sack::image::render::KDF_NOREDEF" displaystring="sack::image::render::KDF_NOREDEF Macro">
+      <target id="html">../output/sack__image__render__KDF_NOREDEF.html</target>
+    </link>
+    <link topicid="sack::image::render::KDF_NUMKEY" displaystring="sack::image::render::KDF_NUMKEY Macro">
+      <target id="html">../output/sack__image__render__KDF_NUMKEY.html</target>
+    </link>
+    <link topicid="sack::image::render::KDF_UPACTION" displaystring="sack::image::render::KDF_UPACTION Macro">
+      <target id="html">../output/sack__image__render__KDF_UPACTION.html</target>
+    </link>
     <link topicid="sack::image::render::KEY_STRUCTURE_DEFINED" displaystring="sack::image::render::KEY_STRUCTURE_DEFINED Macro">
       <target id="html">../output/sack__image__render__KEY_STRUCTURE_DEFINED.html</target>
     </link>
@@ -6959,15 +6853,30 @@
     <link topicid="sack::image::render::keyboard::KeyUpDownState" displaystring="sack::image::render::keyboard::KeyUpDownState Enumeration">
       <target id="html">../output/sack__image__render__keyboard__KeyUpDownState.html</target>
     </link>
+    <link topicid="sack::image::render::KeyDataEventType" displaystring="sack::image::render::KeyDataEventType Enumeration">
+      <target id="html">../output/sack__image__render__KeyDataEventType.html</target>
+    </link>
     <link topicid="sack::image::render::KeyDefine" displaystring="sack::image::render::KeyDefine Structure">
       <target id="html">../output/sack__image__render__KeyDefine.html</target>
-    </link>
-    <link topicid="sack::image::render::KEYDEFINE" displaystring="sack::image::render::KEYDEFINE Structure">
-      <target id="html">../output/sack__image__render__KEYDEFINE1.html</target>
     </link>
     <link topicid="sack::image::render::KeyDown@PRENDERER@int" displaystring="sack::image::render::KeyDown Function">
       <target id="html">../output/sack__image__render__KeyDown@PRENDERER@int.html</target>
       <target id="pdf">pdf://828@sack-docodocs.pdf</target>
+    </link>
+    <link topicid="sack::image::render::KEYMOD_ALT" displaystring="sack::image::render::KEYMOD_ALT Macro">
+      <target id="html">../output/sack__image__render__KEYMOD_ALT.html</target>
+    </link>
+    <link topicid="sack::image::render::KEYMOD_ANY" displaystring="sack::image::render::KEYMOD_ANY Macro">
+      <target id="html">../output/sack__image__render__KEYMOD_ANY.html</target>
+    </link>
+    <link topicid="sack::image::render::KEYMOD_CTRL" displaystring="sack::image::render::KEYMOD_CTRL Macro">
+      <target id="html">../output/sack__image__render__KEYMOD_CTRL.html</target>
+    </link>
+    <link topicid="sack::image::render::KEYMOD_NORMAL" displaystring="sack::image::render::KEYMOD_NORMAL Macro">
+      <target id="html">../output/sack__image__render__KEYMOD_NORMAL.html</target>
+    </link>
+    <link topicid="sack::image::render::KEYMOD_SHIFT" displaystring="sack::image::render::KEYMOD_SHIFT Macro">
+      <target id="html">../output/sack__image__render__KEYMOD_SHIFT.html</target>
     </link>
     <link topicid="sack::image::render::KeyProc" displaystring="sack::image::render::KeyProc Type">
       <target id="html">../output/sack__image__render__KeyProc.html</target>
@@ -7125,20 +7034,11 @@
     <link topicid="sack::image::render::PANEL_ATTRIBUTE_INTERNAL" displaystring="sack::image::render::PANEL_ATTRIBUTE_INTERNAL Macro">
       <target id="pdf">pdf://905@sack-docodocs.pdf</target>
     </link>
-    <link topicid="sack::image::render::PBO_Info" displaystring="sack::image::render::PBO_Info Structure">
-      <target id="html">../output/sack__image__render__PBO_Info.html</target>
-    </link>
-    <link topicid="sack::image::render::PBOInfo" displaystring="sack::image::render::PBOInfo Structure">
-      <target id="html">../output/sack__image__render__PBOInfo.html</target>
-    </link>
     <link topicid="sack::image::render::PKEYBIND" displaystring="sack::image::render::PKEYBIND Structure">
       <target id="html">../output/sack__image__render__PKEYBIND.html</target>
     </link>
     <link topicid="sack::image::render::PKEYDEFINE" displaystring="sack::image::render::PKEYDEFINE Type">
       <target id="pdf">pdf://924@sack-docodocs.pdf</target>
-    </link>
-    <link topicid="sack::image::render::PPBO_Info" displaystring="sack::image::render::PPBO_Info Structure">
-      <target id="html">../output/sack__image__render__PPBO_Info.html</target>
     </link>
     <link topicid="sack::image::render::PRENDER_INTERFACE" displaystring="sack::image::render::PRENDER_INTERFACE Structure">
       <target id="pdf">pdf://914@sack-docodocs.pdf</target>
@@ -7646,14 +7546,152 @@
     <link topicid="sack::intershell.LABEL_TYPE_STRING" displaystring="LABEL_TYPE_STRING">
       <target id="html">../output/sack__intershell__label_variable_types.html</target>
     </link>
+    <link topicid="sack::intershell::AddButtonLayout@PMENU_BUTTON@int@int@Font *@CDATA@_32" displaystring="sack::intershell::AddButtonLayout Function">
+      <target id="html">../output/sack__intershell__AddButtonLayout@PMENU_BUTTON@int@int@Font__@CDATA@_32.html</target>
+    </link>
+    <link topicid="sack::intershell::BeginCanvasConfiguration@PSI_CONTROL" displaystring="sack::intershell::BeginCanvasConfiguration Function">
+      <target id="html">../output/sack__intershell__BeginCanvasConfiguration@PSI_CONTROL.html</target>
+    </link>
+    <link topicid="sack::intershell::BeginSubConfiguration@TEXTCHAR *@TEXTCHAR *" displaystring="sack::intershell::BeginSubConfiguration Function">
+      <target id="html">../output/sack__intershell__BeginSubConfiguration@TEXTCHAR__@TEXTCHAR__.html</target>
+    </link>
+    <link topicid="sack::intershell::ClearPageList" displaystring="sack::intershell::ClearPageList Function">
+      <target id="html">../output/sack__intershell__ClearPageList.html</target>
+    </link>
+    <link topicid="sack::intershell::COLOR_DISABLE" displaystring="sack::intershell::COLOR_DISABLE Macro">
+      <target id="html">../output/sack__intershell__COLOR_DISABLE.html</target>
+    </link>
+    <link topicid="sack::intershell::COLOR_IGNORE" displaystring="sack::intershell::COLOR_IGNORE Macro">
+      <target id="html">../output/sack__intershell__COLOR_IGNORE.html</target>
+    </link>
+    <link topicid="sack::intershell::CreateAFont@CTEXTSTR@Font@POINTER@_32" displaystring="sack::intershell::CreateAFont Function">
+      <target id="html">../output/sack__intershell__CreateAFont@CTEXTSTR@Font@POINTER@_32.html</target>
+    </link>
+    <link topicid="sack::intershell::CreateLabelVariable@CTEXTSTR@enum label_variable_types@CPOINTER" displaystring="sack::intershell::CreateLabelVariable Function">
+      <target id="html">../output/sack__intershell__CreateLabelVariable@CTEXTSTR@enum_label_variable_types@CPOINTER.html</target>
+    </link>
+    <link topicid="sack::intershell::CreateLabelVariableEx@CTEXTSTR@enum label_variable_types@CPOINTER@PTRSZVAL" displaystring="sack::intershell::CreateLabelVariableEx Function">
+      <target id="html">../output/sack__intershell__CreateLabelVariableEx@CTEXTSTR@enum_label_variable_types@CPOINTER@PTRSZVAL.html</target>
+    </link>
     <link topicid="sack::intershell::ENDALL_REGISTERED" displaystring="sack::intershell::ENDALL_REGISTERED Macro">
       <target id="html">../output/sack__intershell__ENDALL_REGISTERED.html</target>
     </link>
     <link topicid="sack::intershell::EndSecurityContext" displaystring="sack::intershell::EndSecurityContext Macro">
       <target id="html">../output/sack__intershell__EndSecurityContext.html</target>
     </link>
+    <link topicid="sack::intershell::EscapeMenuString@CTEXTSTR" displaystring="sack::intershell::EscapeMenuString Function">
+      <target id="html">../output/sack__intershell__EscapeMenuString@CTEXTSTR.html</target>
+    </link>
+    <link topicid="sack::intershell::FixupButton" displaystring="sack::intershell::FixupButton Macro">
+      <target id="html">../output/sack__intershell__FixupButton.html</target>
+    </link>
     <link topicid="sack::intershell::GETALL_REGISTERED" displaystring="sack::intershell::GETALL_REGISTERED Macro">
       <target id="html">../output/sack__intershell__GETALL_REGISTERED.html</target>
+    </link>
+    <link topicid="sack::intershell::GetCommonButtonControls@PSI_CONTROL" displaystring="sack::intershell::GetCommonButtonControls Function">
+      <target id="html">../output/sack__intershell__GetCommonButtonControls@PSI_CONTROL.html</target>
+    </link>
+    <link topicid="sack::intershell::GetPageSize@P_32@P_32" displaystring="sack::intershell::GetPageSize Function">
+      <target id="html">../output/sack__intershell__GetPageSize@P_32@P_32.html</target>
+    </link>
+    <link topicid="sack::intershell::HidePageEx" displaystring="sack::intershell::HidePageEx Macro">
+      <target id="html">../output/sack__intershell__HidePageEx.html</target>
+    </link>
+    <link topicid="sack::intershell::HidePageExx@PSI_CONTROL pc_canvas" displaystring="sack::intershell::HidePageExx Function">
+      <target id="html">../output/sack__intershell__HidePageExx@PSI_CONTROL_pc_canvas.html</target>
+    </link>
+    <link topicid="sack::intershell::InterShell_CommonImageLoad@CTEXTSTR" displaystring="sack::intershell::InterShell_CommonImageLoad Function">
+      <target id="html">../output/sack__intershell__InterShell_CommonImageLoad@CTEXTSTR.html</target>
+    </link>
+    <link topicid="sack::intershell::InterShell_CommonImageUnloadByImage@Image" displaystring="sack::intershell::InterShell_CommonImageUnloadByImage Function">
+      <target id="html">../output/sack__intershell__InterShell_CommonImageUnloadByImage@Image.html</target>
+    </link>
+    <link topicid="sack::intershell::InterShell_CommonImageUnloadByName@CTEXTSTR" displaystring="sack::intershell::InterShell_CommonImageUnloadByName Function">
+      <target id="html">../output/sack__intershell__InterShell_CommonImageUnloadByName@CTEXTSTR.html</target>
+    </link>
+    <link topicid="sack::intershell::InterShell_CreateControl@CTEXTSTR@int@int@int@int" displaystring="sack::intershell::InterShell_CreateControl Function">
+      <target id="html">../output/sack__intershell__InterShell_CreateControl@CTEXTSTR@int@int@int@int.html</target>
+    </link>
+    <link topicid="sack::intershell::InterShell_DisableButtonPageChange@PMENU_BUTTON" displaystring="sack::intershell::InterShell_DisableButtonPageChange Function">
+      <target id="html">../output/sack__intershell__InterShell_DisableButtonPageChange@PMENU_BUTTON.html</target>
+    </link>
+    <link topicid="sack::intershell::InterShell_DisablePageUpdate@LOGICAL" displaystring="sack::intershell::InterShell_DisablePageUpdate Function">
+      <target id="html">../output/sack__intershell__InterShell_DisablePageUpdate@LOGICAL.html</target>
+    </link>
+    <link topicid="sack::intershell::InterShell_GetButtonColors@PMENU_BUTTON@CDATA *@CDATA *@CDATA *@CDATA *" displaystring="sack::intershell::InterShell_GetButtonColors Function">
+      <target id="html">../output/sack__intershell__InterShell_GetButtonColors@PMENU_BUTTON@CDATA__@CDATA__@CDATA__@CDATA__.html</target>
+    </link>
+    <link topicid="sack::intershell::InterShell_GetButtonControl@PMENU_BUTTON" displaystring="sack::intershell::InterShell_GetButtonControl Function">
+      <target id="html">../output/sack__intershell__InterShell_GetButtonControl@PMENU_BUTTON.html</target>
+    </link>
+    <link topicid="sack::intershell::InterShell_GetButtonHighlight@PMENU_BUTTON" displaystring="sack::intershell::InterShell_GetButtonHighlight Function">
+      <target id="html">../output/sack__intershell__InterShell_GetButtonHighlight@PMENU_BUTTON.html</target>
+    </link>
+    <link topicid="sack::intershell::InterShell_GetButtonText@PMENU_BUTTON@TEXTSTR@int" displaystring="sack::intershell::InterShell_GetButtonText Function">
+      <target id="html">../output/sack__intershell__InterShell_GetButtonText@PMENU_BUTTON@TEXTSTR@int.html</target>
+    </link>
+    <link topicid="sack::intershell::InterShell_GetControlLabelText@PMENU_BUTTON@PPAGE_LABEL@CTEXTSTR" displaystring="sack::intershell::InterShell_GetControlLabelText Function">
+      <target id="html">../output/sack__intershell__InterShell_GetControlLabelText@PMENU_BUTTON@PPAGE_LABEL@CTEXTSTR.html</target>
+    </link>
+    <link topicid="sack::intershell::InterShell_GetCurrentConfigHandler" displaystring="sack::intershell::InterShell_GetCurrentConfigHandler Function">
+      <target id="html">../output/sack__intershell__InterShell_GetCurrentConfigHandler.html</target>
+    </link>
+    <link topicid="sack::intershell::InterShell_GetCurrentLoadingControl" displaystring="sack::intershell::InterShell_GetCurrentLoadingControl Function">
+      <target id="html">../output/sack__intershell__InterShell_GetCurrentLoadingControl.html</target>
+    </link>
+    <link topicid="sack::intershell::InterShell_GetLabelText@PPAGE_LABEL@CTEXTSTR" displaystring="sack::intershell::InterShell_GetLabelText Function">
+      <target id="html">../output/sack__intershell__InterShell_GetLabelText@PPAGE_LABEL@CTEXTSTR.html</target>
+    </link>
+    <link topicid="sack::intershell::InterShell_GetPhysicalButton@PMENU_BUTTON" displaystring="sack::intershell::InterShell_GetPhysicalButton Function">
+      <target id="html">../output/sack__intershell__InterShell_GetPhysicalButton@PMENU_BUTTON.html</target>
+    </link>
+    <link topicid="sack::intershell::InterShell_GetSystemName" displaystring="sack::intershell::InterShell_GetSystemName Function">
+      <target id="html">../output/sack__intershell__InterShell_GetSystemName.html</target>
+    </link>
+    <link topicid="sack::intershell::InterShell_Hide" displaystring="sack::intershell::InterShell_Hide Function">
+      <target id="html">../output/sack__intershell__InterShell_Hide.html</target>
+    </link>
+    <link topicid="sack::intershell::intershell_interface" displaystring="sack::intershell::intershell_interface Structure">
+      <target id="html">../output/sack__intershell__intershell_interface.html</target>
+    </link>
+    <link topicid="sack::intershell::InterShell_IsButtonVirtual@PMENU_BUTTON" displaystring="sack::intershell::InterShell_IsButtonVirtual Function">
+      <target id="html">../output/sack__intershell__InterShell_IsButtonVirtual@PMENU_BUTTON.html</target>
+    </link>
+    <link topicid="sack::intershell::InterShell_Reveal" displaystring="sack::intershell::InterShell_Reveal Function">
+      <target id="html">../output/sack__intershell__InterShell_Reveal.html</target>
+    </link>
+    <link topicid="sack::intershell::InterShell_SaveCommonButtonParameters@FILE *" displaystring="sack::intershell::InterShell_SaveCommonButtonParameters Function">
+      <target id="html">../output/sack__intershell__InterShell_SaveCommonButtonParameters@FILE__.html</target>
+    </link>
+    <link topicid="sack::intershell::InterShell_SetButtonColor@PMENU_BUTTON@CDATA@CDATA" displaystring="sack::intershell::InterShell_SetButtonColor Function">
+      <target id="html">../output/sack__intershell__InterShell_SetButtonColor@PMENU_BUTTON@CDATA@CDATA.html</target>
+    </link>
+    <link topicid="sack::intershell::InterShell_SetButtonColors@PMENU_BUTTON@CDATA@CDATA@CDATA@CDATA" displaystring="sack::intershell::InterShell_SetButtonColors Function">
+      <target id="html">../output/sack__intershell__InterShell_SetButtonColors@PMENU_BUTTON@CDATA@CDATA@CDATA@CDATA.html</target>
+    </link>
+    <link topicid="sack::intershell::InterShell_SetButtonFont@PMENU_BUTTON@Font *" displaystring="sack::intershell::InterShell_SetButtonFont Function">
+      <target id="html">../output/sack__intershell__InterShell_SetButtonFont@PMENU_BUTTON@Font__.html</target>
+    </link>
+    <link topicid="sack::intershell::InterShell_SetButtonHighlight@PMENU_BUTTON@LOGICAL" displaystring="sack::intershell::InterShell_SetButtonHighlight Function">
+      <target id="html">../output/sack__intershell__InterShell_SetButtonHighlight@PMENU_BUTTON@LOGICAL.html</target>
+    </link>
+    <link topicid="sack::intershell::InterShell_SetButtonImage@PMENU_BUTTON@CTEXTSTR" displaystring="sack::intershell::InterShell_SetButtonImage Function">
+      <target id="html">../output/sack__intershell__InterShell_SetButtonImage@PMENU_BUTTON@CTEXTSTR.html</target>
+    </link>
+    <link topicid="sack::intershell::InterShell_SetButtonImageAlpha@PMENU_BUTTON@S_16" displaystring="sack::intershell::InterShell_SetButtonImageAlpha Function">
+      <target id="html">../output/sack__intershell__InterShell_SetButtonImageAlpha@PMENU_BUTTON@S_16.html</target>
+    </link>
+    <link topicid="sack::intershell::InterShell_SetButtonStyle@PMENU_BUTTON@TEXTCHAR *" displaystring="sack::intershell::InterShell_SetButtonStyle Function">
+      <target id="html">../output/sack__intershell__InterShell_SetButtonStyle@PMENU_BUTTON@TEXTCHAR__.html</target>
+    </link>
+    <link topicid="sack::intershell::InterShell_SetButtonText@PMENU_BUTTON@CTEXTSTR" displaystring="sack::intershell::InterShell_SetButtonText Function">
+      <target id="html">../output/sack__intershell__InterShell_SetButtonText@PMENU_BUTTON@CTEXTSTR.html</target>
+    </link>
+    <link topicid="sack::intershell::InterShell_TranslateLabelText@PPAGE_LABEL@TEXTSTR@int@CTEXTSTR" displaystring="sack::intershell::InterShell_TranslateLabelText Function">
+      <target id="html">../output/sack__intershell__InterShell_TranslateLabelText@PPAGE_LABEL@TEXTSTR@int@CTEXTSTR.html</target>
+    </link>
+    <link topicid="sack::intershell::InterShell_TranslateLabelTextEx@PMENU_BUTTON@PPAGE_LABEL@TEXTSTR@int@CTEXTSTR" displaystring="sack::intershell::InterShell_TranslateLabelTextEx Function">
+      <target id="html">../output/sack__intershell__InterShell_TranslateLabelTextEx@PMENU_BUTTON@PPAGE_LABEL@TEXTSTR@int@CTEXTSTR.html</target>
     </link>
     <link topicid="sack::intershell::label_gettextproc" displaystring="sack::intershell::label_gettextproc Type">
       <target id="html">../output/sack__intershell__label_gettextproc.html</target>
@@ -7672,6 +7710,12 @@
     </link>
     <link topicid="sack::intershell::label_variable_types" displaystring="sack::intershell::label_variable_types Enumeration">
       <target id="html">../output/sack__intershell__label_variable_types.html</target>
+    </link>
+    <link topicid="sack::intershell::LabelVariableChanged@PVARIABLE" displaystring="sack::intershell::LabelVariableChanged Function">
+      <target id="html">../output/sack__intershell__LabelVariableChanged@PVARIABLE.html</target>
+    </link>
+    <link topicid="sack::intershell::LabelVariablesChanged@PLIST" displaystring="sack::intershell::LabelVariablesChanged Function">
+      <target id="html">../output/sack__intershell__LabelVariablesChanged@PLIST.html</target>
     </link>
     <link topicid="sack::intershell::MENU_BUTTON_DEFINED" displaystring="sack::intershell::MENU_BUTTON_DEFINED Macro">
       <target id="html">../output/sack__intershell__MENU_BUTTON_DEFINED.html</target>
@@ -7817,8 +7861,68 @@
     <link topicid="sack::intershell::PVARIABLE" displaystring="sack::intershell::PVARIABLE Type">
       <target id="html">../output/sack__intershell__PVARIABLE.html</target>
     </link>
+    <link topicid="sack::intershell::RestartMenu@PTRSZVAL@_32" displaystring="sack::intershell::RestartMenu Function">
+      <target id="html">../output/sack__intershell__RestartMenu@PTRSZVAL@_32.html</target>
+    </link>
+    <link topicid="sack::intershell::RestoreCurrentPage@PSI_CONTROL" displaystring="sack::intershell::RestoreCurrentPage Function">
+      <target id="html">../output/sack__intershell__RestoreCurrentPage@PSI_CONTROL.html</target>
+    </link>
+    <link topicid="sack::intershell::ResumeMenu@PTRSZVAL@_32" displaystring="sack::intershell::ResumeMenu Function">
+      <target id="html">../output/sack__intershell__ResumeMenu@PTRSZVAL@_32.html</target>
+    </link>
+    <link topicid="sack::intershell::SaveCanvasConfiguration@FILE *@PSI_CONTROL" displaystring="sack::intershell::SaveCanvasConfiguration Function">
+      <target id="html">../output/sack__intershell__SaveCanvasConfiguration@FILE__@PSI_CONTROL.html</target>
+    </link>
+    <link topicid="sack::intershell::SaveCanvasConfiguration_XML@genxWriter@PSI_CONTROL" displaystring="sack::intershell::SaveCanvasConfiguration_XML Function">
+      <target id="html">../output/sack__intershell__SaveCanvasConfiguration_XML@genxWriter@PSI_CONTROL.html</target>
+    </link>
+    <link topicid="sack::intershell::SelectAFont@PSI_CONTROL@CTEXTSTR *" displaystring="sack::intershell::SelectAFont Function">
+      <target id="html">../output/sack__intershell__SelectAFont@PSI_CONTROL@CTEXTSTR__.html</target>
+    </link>
+    <link topicid="sack::intershell::SetButtonTextField@PMENU_BUTTON@PTEXT_PLACEMENT@TEXTCHAR *" displaystring="sack::intershell::SetButtonTextField Function">
+      <target id="html">../output/sack__intershell__SetButtonTextField@PMENU_BUTTON@PTEXT_PLACEMENT@TEXTCHAR__.html</target>
+    </link>
+    <link topicid="sack::intershell::SetCommonButtonControls@PSI_CONTROL" displaystring="sack::intershell::SetCommonButtonControls Function">
+      <target id="html">../output/sack__intershell__SetCommonButtonControls@PSI_CONTROL.html</target>
+    </link>
+    <link topicid="sack::intershell::ShellCallSetCurrentPage@CTEXTSTR" displaystring="sack::intershell::ShellCallSetCurrentPage Function">
+      <target id="html">../output/sack__intershell__ShellCallSetCurrentPage@CTEXTSTR.html</target>
+    </link>
+    <link topicid="sack::intershell::ShellCallSetCurrentPageEx@PSI_CONTROL@CTEXTSTR" displaystring="sack::intershell::ShellCallSetCurrentPageEx Function">
+      <target id="html">../output/sack__intershell__ShellCallSetCurrentPageEx@PSI_CONTROL@CTEXTSTR.html</target>
+    </link>
+    <link topicid="sack::intershell::ShellGetCurrentPage" displaystring="sack::intershell::ShellGetCurrentPage Function">
+      <target id="html">../output/sack__intershell__ShellGetCurrentPage.html</target>
+    </link>
+    <link topicid="sack::intershell::ShellGetCurrentPageEx@PSI_CONTROL" displaystring="sack::intershell::ShellGetCurrentPageEx Function">
+      <target id="html">../output/sack__intershell__ShellGetCurrentPageEx@PSI_CONTROL.html</target>
+    </link>
+    <link topicid="sack::intershell::ShellGetNamedPage@PSI_CONTROL@CTEXTSTR" displaystring="sack::intershell::ShellGetNamedPage Function">
+      <target id="html">../output/sack__intershell__ShellGetNamedPage@PSI_CONTROL@CTEXTSTR.html</target>
+    </link>
+    <link topicid="sack::intershell::ShellReturnCurrentPage" displaystring="sack::intershell::ShellReturnCurrentPage Function">
+      <target id="html">../output/sack__intershell__ShellReturnCurrentPage.html</target>
+    </link>
+    <link topicid="sack::intershell::ShellSetCurrentPage@CTEXTSTR" displaystring="sack::intershell::ShellSetCurrentPage Function">
+      <target id="html">../output/sack__intershell__ShellSetCurrentPage@CTEXTSTR.html</target>
+    </link>
+    <link topicid="sack::intershell::ShellSetCurrentPageEx@PSI_CONTROL@CTEXTSTR" displaystring="sack::intershell::ShellSetCurrentPageEx Function">
+      <target id="html">../output/sack__intershell__ShellSetCurrentPageEx@PSI_CONTROL@CTEXTSTR.html</target>
+    </link>
     <link topicid="sack::intershell::TestSecurityContext" displaystring="sack::intershell::TestSecurityContext Macro">
       <target id="html">../output/sack__intershell__TestSecurityContext.html</target>
+    </link>
+    <link topicid="sack::intershell::UpdateButton" displaystring="sack::intershell::UpdateButton Macro">
+      <target id="html">../output/sack__intershell__UpdateButton.html</target>
+    </link>
+    <link topicid="sack::intershell::UpdateButtonEx" displaystring="sack::intershell::UpdateButtonEx Macro">
+      <target id="html">../output/sack__intershell__UpdateButtonEx.html</target>
+    </link>
+    <link topicid="sack::intershell::UpdateButtonExx@PMENU_BUTTON@int bEndingEdit" displaystring="sack::intershell::UpdateButtonExx Function">
+      <target id="html">../output/sack__intershell__UpdateButtonExx@PMENU_BUTTON@int_bEndingEdit.html</target>
+    </link>
+    <link topicid="sack::intershell::UseAFont@CTEXTSTR" displaystring="sack::intershell::UseAFont Function">
+      <target id="html">../output/sack__intershell__UseAFont@CTEXTSTR.html</target>
     </link>
     <link topicid="sack::INVALID_INDEX" displaystring="sack::INVALID_INDEX Macro">
       <target id="html">../output/sack__INVALID_INDEX.html</target>
@@ -9037,9 +9141,6 @@
     <link topicid="sack::PSI::AttachFrameToRenderer@PSI_CONTROL@PRENDERER" displaystring="sack::PSI::AttachFrameToRenderer Function">
       <target id="html">../output/sack__PSI__AttachFrameToRenderer@PSI_CONTROL@PRENDERER.html</target>
     </link>
-    <link topicid="sack::PSI::basecolor" displaystring="sack::PSI::basecolor Macro">
-      <target id="html">../output/sack__PSI__basecolor.html</target>
-    </link>
     <link topicid="sack::PSI::BorderOptionTypes" displaystring="sack::PSI::BorderOptionTypes Enumeration">
       <target id="html">../output/sack__PSI__BorderOptionTypes.html</target>
     </link>
@@ -9196,9 +9297,6 @@
     <link topicid="sack::PSI::COMMON_BUTTON_WIDTH" displaystring="sack::PSI::COMMON_BUTTON_WIDTH Macro">
       <target id="html">../output/sack__PSI__COMMON_BUTTON_WIDTH.html</target>
     </link>
-    <link topicid="sack::PSI::common_control_frame" displaystring="sack::PSI::common_control_frame Structure">
-      <target id="html">../output/sack__PSI__common_control_frame.html</target>
-    </link>
     <link topicid="sack::PSI::CommonLoop@int *@int *" displaystring="sack::PSI::CommonLoop Function">
       <target id="html">../output/sack__PSI__CommonLoop@int__@int__.html</target>
     </link>
@@ -9273,9 +9371,6 @@
     </link>
     <link topicid="sack::PSI::DeclSingleMethod" displaystring="sack::PSI::DeclSingleMethod Macro">
       <target id="html">../output/sack__PSI__DeclSingleMethod.html</target>
-    </link>
-    <link topicid="sack::PSI::defaultcolor" displaystring="sack::PSI::defaultcolor Macro">
-      <target id="html">../output/sack__PSI__defaultcolor.html</target>
     </link>
     <link topicid="sack::PSI::DefaultColors" displaystring="sack::PSI::DefaultColors Variable">
       <target id="html">../output/sack__PSI__DefaultColors.html</target>
@@ -9442,9 +9537,6 @@
     <link topicid="sack::PSI::FP_ARG" displaystring="sack::PSI::FP_ARG Macro">
       <target id="html">../output/sack__PSI__FP_ARG.html</target>
     </link>
-    <link topicid="sack::PSI::FR_CT_COMMON" displaystring="sack::PSI::FR_CT_COMMON Structure">
-      <target id="html">../output/sack__PSI__FR_CT_COMMON.html</target>
-    </link>
     <link topicid="sack::PSI::FrameBorderX@_32" displaystring="sack::PSI::FrameBorderX Function">
       <target id="html">../output/sack__PSI__FrameBorderX@_32.html</target>
     </link>
@@ -9459,9 +9551,6 @@
     </link>
     <link topicid="sack::PSI::FrameInitProc" displaystring="sack::PSI::FrameInitProc Type">
       <target id="html">../output/sack__PSI__FrameInitProc.html</target>
-    </link>
-    <link topicid="sack::PSI::g" displaystring="sack::PSI::g Variable">
-      <target id="html">../output/sack__PSI__g.html</target>
     </link>
     <link topicid="sack::PSI::GetBaseColor@INDEX" displaystring="sack::PSI::GetBaseColor Function">
       <target id="html">../output/sack__PSI__GetBaseColor@INDEX.html</target>
@@ -9546,9 +9635,6 @@
     </link>
     <link topicid="sack::PSI::GetPhysicalCoordinate@PSI_CONTROL@S_32 *@S_32 *@int" displaystring="sack::PSI::GetPhysicalCoordinate Function">
       <target id="html">../output/sack__PSI__GetPhysicalCoordinate@PSI_CONTROL@S_32__@S_32__@int.html</target>
-    </link>
-    <link topicid="sack::PSI::global_tag" displaystring="sack::PSI::global_tag Structure">
-      <target id="html">../output/sack__PSI__global_tag.html</target>
     </link>
     <link topicid="sack::PSI::HideCommon@PSI_CONTROL" displaystring="sack::PSI::HideCommon Function">
       <target id="html">../output/sack__PSI__HideCommon@PSI_CONTROL.html</target>
@@ -10030,7 +10116,7 @@
     <link topicid="sack::PSI::PCOMMON_BUTTON_DATA" displaystring="sack::PSI::PCOMMON_BUTTON_DATA Structure">
       <target id="html">../output/sack__PSI__PCOMMON_BUTTON_DATA.html</target>
     </link>
-    <link topicid="sack::PSI::PCONTROL" displaystring="sack::PSI::PCONTROL Structure">
+    <link topicid="sack::PSI::PCONTROL" displaystring="sack::PSI::PCONTROL Macro">
       <target id="html">../output/sack__PSI__PCONTROL.html</target>
     </link>
     <link topicid="sack::PSI::PCONTROL_REGISTRATION" displaystring="sack::PSI::PCONTROL_REGISTRATION Type">
@@ -10110,9 +10196,6 @@
     </link>
     <link topicid="sack::PSI::PSI_CONTROL" displaystring="sack::PSI::PSI_CONTROL Type">
       <target id="html">../output/sack__PSI__PSI_CONTROL.html</target>
-    </link>
-    <link topicid="sack::PSI::PSI_GLOBAL" displaystring="sack::PSI::PSI_GLOBAL Structure">
-      <target id="html">../output/sack__PSI__PSI_GLOBAL.html</target>
     </link>
     <link topicid="sack::PSI::PSI_OpenFile@CTEXTSTR@CTEXTSTR@TEXTSTR" displaystring="sack::PSI::PSI_OpenFile Function">
       <target id="html">../output/sack__PSI__PSI_OpenFile@CTEXTSTR@CTEXTSTR@TEXTSTR.html</target>
@@ -10741,6 +10824,42 @@
     <link topicid="sack::sql::options" displaystring="sack::sql::options Namespace">
       <target id="html">../output/sack__sql__options.html</target>
     </link>
+    <link topicid="sack::sql::options::BeginBatchUpdate" displaystring="sack::sql::options::BeginBatchUpdate Function">
+      <target id="html">../output/sack__sql__options__BeginBatchUpdate.html</target>
+    </link>
+    <link topicid="sack::sql::options::CreateOptionDatabase" displaystring="sack::sql::options::CreateOptionDatabase Function">
+      <target id="html">../output/sack__sql__options__CreateOptionDatabase.html</target>
+    </link>
+    <link topicid="sack::sql::options::DeleteOption@INDEX" displaystring="sack::sql::options::DeleteOption Function">
+      <target id="html">../output/sack__sql__options__DeleteOption@INDEX.html</target>
+    </link>
+    <link topicid="sack::sql::options::DuplicateOption@INDEX@CTEXTSTR" displaystring="sack::sql::options::DuplicateOption Function">
+      <target id="html">../output/sack__sql__options__DuplicateOption@INDEX@CTEXTSTR.html</target>
+    </link>
+    <link topicid="sack::sql::options::EndBatchUpdate" displaystring="sack::sql::options::EndBatchUpdate Function">
+      <target id="html">../output/sack__sql__options__EndBatchUpdate.html</target>
+    </link>
+    <link topicid="sack::sql::options::EnumOptions@INDEX@int __cdecl *ProcessPTRSZVAL psv, CTEXTSTR name, _32 ID, int flags@PTRSZVAL" displaystring="sack::sql::options::EnumOptions Function">
+      <target id="html">../output/sack__sql__options__EnumOptions@INDEX@int___cdecl__ProcessPTRSZVAL_psv,_CTEXTSTR_name,__32_ID,_int_flags@PTRSZVAL.html</target>
+    </link>
+    <link topicid="sack::sql::options::EnumOptionsEx@PODBC@INDEX@int __cdecl *ProcessPTRSZVAL psv, CTEXTSTR name, _32 ID, int flags@PTRSZVAL" displaystring="sack::sql::options::EnumOptionsEx Function">
+      <target id="html">../output/sack__sql__options__EnumOptionsEx@PODBC@INDEX@int___cdecl__ProcessPTRSZVAL_psv,_CTEXTSTR_name,__32_ID,_int_flags@PTRSZVAL.html</target>
+    </link>
+    <link topicid="sack::sql::options::GetOptionStringValue@INDEX@char *@_32" displaystring="sack::sql::options::GetOptionStringValue Function">
+      <target id="html">../output/sack__sql__options__GetOptionStringValue@INDEX@char__@_32.html</target>
+    </link>
+    <link topicid="sack::sql::options::GetOptionStringValueEx@PODBC@INDEX@char *@_32 len" displaystring="sack::sql::options::GetOptionStringValueEx Function">
+      <target id="html">../output/sack__sql__options__GetOptionStringValueEx@PODBC@INDEX@char__@_32_len.html</target>
+    </link>
+    <link topicid="sack::sql::options::GetOptionValueIndex@INDEX" displaystring="sack::sql::options::GetOptionValueIndex Function">
+      <target id="html">../output/sack__sql__options__GetOptionValueIndex@INDEX.html</target>
+    </link>
+    <link topicid="sack::sql::options::GetOptionValueIndexEx@PODBC@INDEX" displaystring="sack::sql::options::GetOptionValueIndexEx Function">
+      <target id="html">../output/sack__sql__options__GetOptionValueIndexEx@PODBC@INDEX.html</target>
+    </link>
+    <link topicid="sack::sql::options::GetSystemID" displaystring="sack::sql::options::GetSystemID Function">
+      <target id="html">../output/sack__sql__options__GetSystemID.html</target>
+    </link>
     <link topicid="sack::sql::options::interface" displaystring="sack::sql::options::interface Namespace">
       <target id="html">../output/sack__sql__options__interface.html</target>
     </link>
@@ -10795,6 +10914,9 @@
     <link topicid="sack::sql::options::interface::pOptionInterface" displaystring="sack::sql::options::interface::pOptionInterface Variable">
       <target id="html">../output/sack__sql__options__interface__pOptionInterface.html</target>
     </link>
+    <link topicid="sack::sql::options::NewDuplicateOption@PODBC@INDEX@CTEXTSTR" displaystring="sack::sql::options::NewDuplicateOption Function">
+      <target id="html">../output/sack__sql__options__NewDuplicateOption@PODBC@INDEX@CTEXTSTR.html</target>
+    </link>
     <link topicid="sack::sql::options::OptGetPrivateProfileInt" displaystring="sack::sql::options::OptGetPrivateProfileInt Macro">
       <target id="html">../output/sack__sql__options__OptGetPrivateProfileInt.html</target>
     </link>
@@ -10831,14 +10953,95 @@
     <link topicid="sack::sql::options::OptWriteProfileString" displaystring="sack::sql::options::OptWriteProfileString Macro">
       <target id="html">../output/sack__sql__options__OptWriteProfileString.html</target>
     </link>
+    <link topicid="sack::sql::options::SACK_GetPrivateProfileInt@CTEXTSTR@CTEXTSTR@S_32@CTEXTSTR" displaystring="sack::sql::options::SACK_GetPrivateProfileInt Function">
+      <target id="html">../output/sack__sql__options__SACK_GetPrivateProfileInt@CTEXTSTR@CTEXTSTR@S_32@CTEXTSTR.html</target>
+    </link>
+    <link topicid="sack::sql::options::SACK_GetPrivateProfileIntEx@CTEXTSTR@CTEXTSTR@S_32@CTEXTSTR@LOGICAL" displaystring="sack::sql::options::SACK_GetPrivateProfileIntEx Function">
+      <target id="html">../output/sack__sql__options__SACK_GetPrivateProfileIntEx@CTEXTSTR@CTEXTSTR@S_32@CTEXTSTR@LOGICAL.html</target>
+    </link>
+    <link topicid="sack::sql::options::SACK_GetPrivateProfileString@CTEXTSTR@CTEXTSTR@CTEXTSTR@char *@_32@CTEXTSTR" displaystring="sack::sql::options::SACK_GetPrivateProfileString Function">
+      <target id="html">../output/sack__sql__options__SACK_GetPrivateProfileString@CTEXTSTR@CTEXTSTR@CTEXTSTR@char__@_32@CTEXTSTR.html</target>
+    </link>
+    <link topicid="sack::sql::options::SACK_GetPrivateProfileStringEx@CTEXTSTR@CTEXTSTR@CTEXTSTR@char *@_32@CTEXTSTR@LOGICAL" displaystring="sack::sql::options::SACK_GetPrivateProfileStringEx Function">
+      <target id="html">../output/sack__sql__options__SACK_GetPrivateProfileStringEx@CTEXTSTR@CTEXTSTR@CTEXTSTR@char__@_32@CTEXTSTR@LOGICAL.html</target>
+    </link>
+    <link topicid="sack::sql::options::SACK_GetProfileBlob@CTEXTSTR@CTEXTSTR@char **@_32 *" displaystring="sack::sql::options::SACK_GetProfileBlob Function">
+      <target id="html">../output/sack__sql__options__SACK_GetProfileBlob@CTEXTSTR@CTEXTSTR@char___@_32__.html</target>
+    </link>
+    <link topicid="sack::sql::options::SACK_GetProfileBlobOdbc@PODBC@CTEXTSTR@CTEXTSTR@char **@_32 *" displaystring="sack::sql::options::SACK_GetProfileBlobOdbc Function">
+      <target id="html">../output/sack__sql__options__SACK_GetProfileBlobOdbc@PODBC@CTEXTSTR@CTEXTSTR@char___@_32__.html</target>
+    </link>
+    <link topicid="sack::sql::options::SACK_GetProfileInt@CTEXTSTR@CTEXTSTR@S_32" displaystring="sack::sql::options::SACK_GetProfileInt Function">
+      <target id="html">../output/sack__sql__options__SACK_GetProfileInt@CTEXTSTR@CTEXTSTR@S_32.html</target>
+    </link>
+    <link topicid="sack::sql::options::SACK_GetProfileIntEx@CTEXTSTR@CTEXTSTR@S_32@LOGICAL" displaystring="sack::sql::options::SACK_GetProfileIntEx Function">
+      <target id="html">../output/sack__sql__options__SACK_GetProfileIntEx@CTEXTSTR@CTEXTSTR@S_32@LOGICAL.html</target>
+    </link>
+    <link topicid="sack::sql::options::SACK_GetProfileString@CTEXTSTR@CTEXTSTR@CTEXTSTR@char *@_32" displaystring="sack::sql::options::SACK_GetProfileString Function">
+      <target id="html">../output/sack__sql__options__SACK_GetProfileString@CTEXTSTR@CTEXTSTR@CTEXTSTR@char__@_32.html</target>
+    </link>
+    <link topicid="sack::sql::options::SACK_GetProfileStringEx@CTEXTSTR@CTEXTSTR@CTEXTSTR@char *@_32@LOGICAL" displaystring="sack::sql::options::SACK_GetProfileStringEx Function">
+      <target id="html">../output/sack__sql__options__SACK_GetProfileStringEx@CTEXTSTR@CTEXTSTR@CTEXTSTR@char__@_32@LOGICAL.html</target>
+    </link>
     <link topicid="sack::sql::options::SACK_OPTION_NAMESPACE" displaystring="sack::sql::options::SACK_OPTION_NAMESPACE Macro">
       <target id="html">../output/sack__sql__options__SACK_OPTION_NAMESPACE.html</target>
     </link>
     <link topicid="sack::sql::options::SACK_OPTION_NAMESPACE_END" displaystring="sack::sql::options::SACK_OPTION_NAMESPACE_END Macro">
       <target id="html">../output/sack__sql__options__SACK_OPTION_NAMESPACE_END.html</target>
     </link>
+    <link topicid="sack::sql::options::SACK_WritePrivateProfileInt@CTEXTSTR@CTEXTSTR@S_32@CTEXTSTR" displaystring="sack::sql::options::SACK_WritePrivateProfileInt Function">
+      <target id="html">../output/sack__sql__options__SACK_WritePrivateProfileInt@CTEXTSTR@CTEXTSTR@S_32@CTEXTSTR.html</target>
+    </link>
+    <link topicid="sack::sql::options::SACK_WritePrivateProfileIntEx@CTEXTSTR@CTEXTSTR@S_32@CTEXTSTR@LOGICAL" displaystring="sack::sql::options::SACK_WritePrivateProfileIntEx Function">
+      <target id="html">../output/sack__sql__options__SACK_WritePrivateProfileIntEx@CTEXTSTR@CTEXTSTR@S_32@CTEXTSTR@LOGICAL.html</target>
+    </link>
+    <link topicid="sack::sql::options::SACK_WritePrivateProfileString@CTEXTSTR@CTEXTSTR@CTEXTSTR@CTEXTSTR" displaystring="sack::sql::options::SACK_WritePrivateProfileString Function">
+      <target id="html">../output/sack__sql__options__SACK_WritePrivateProfileString@CTEXTSTR@CTEXTSTR@CTEXTSTR@CTEXTSTR.html</target>
+    </link>
+    <link topicid="sack::sql::options::SACK_WritePrivateProfileStringEx@CTEXTSTR@CTEXTSTR@CTEXTSTR@CTEXTSTR@LOGICAL" displaystring="sack::sql::options::SACK_WritePrivateProfileStringEx Function">
+      <target id="html">../output/sack__sql__options__SACK_WritePrivateProfileStringEx@CTEXTSTR@CTEXTSTR@CTEXTSTR@CTEXTSTR@LOGICAL.html</target>
+    </link>
+    <link topicid="sack::sql::options::SACK_WriteProfileBlob@CTEXTSTR@CTEXTSTR@char *@_32" displaystring="sack::sql::options::SACK_WriteProfileBlob Function">
+      <target id="html">../output/sack__sql__options__SACK_WriteProfileBlob@CTEXTSTR@CTEXTSTR@char__@_32.html</target>
+    </link>
+    <link topicid="sack::sql::options::SACK_WriteProfileBlobOdbc@PODBC@CTEXTSTR@CTEXTSTR@char *@_32" displaystring="sack::sql::options::SACK_WriteProfileBlobOdbc Function">
+      <target id="html">../output/sack__sql__options__SACK_WriteProfileBlobOdbc@PODBC@CTEXTSTR@CTEXTSTR@char__@_32.html</target>
+    </link>
+    <link topicid="sack::sql::options::SACK_WriteProfileInt@CTEXTSTR@CTEXTSTR@S_32" displaystring="sack::sql::options::SACK_WriteProfileInt Function">
+      <target id="html">../output/sack__sql__options__SACK_WriteProfileInt@CTEXTSTR@CTEXTSTR@S_32.html</target>
+    </link>
+    <link topicid="sack::sql::options::SACK_WriteProfileIntEx@CTEXTSTR@CTEXTSTR@S_32@LOGICAL" displaystring="sack::sql::options::SACK_WriteProfileIntEx Function">
+      <target id="html">../output/sack__sql__options__SACK_WriteProfileIntEx@CTEXTSTR@CTEXTSTR@S_32@LOGICAL.html</target>
+    </link>
+    <link topicid="sack::sql::options::SACK_WriteProfileString@CTEXTSTR@CTEXTSTR@CTEXTSTR" displaystring="sack::sql::options::SACK_WriteProfileString Function">
+      <target id="html">../output/sack__sql__options__SACK_WriteProfileString@CTEXTSTR@CTEXTSTR@CTEXTSTR.html</target>
+    </link>
+    <link topicid="sack::sql::options::SACK_WriteProfileStringEx@CTEXTSTR@CTEXTSTR@CTEXTSTR@LOGICAL" displaystring="sack::sql::options::SACK_WriteProfileStringEx Function">
+      <target id="html">../output/sack__sql__options__SACK_WriteProfileStringEx@CTEXTSTR@CTEXTSTR@CTEXTSTR@LOGICAL.html</target>
+    </link>
+    <link topicid="sack::sql::options::SetOptionDatabase@PODBC" displaystring="sack::sql::options::SetOptionDatabase Function">
+      <target id="html">../output/sack__sql__options__SetOptionDatabase@PODBC.html</target>
+    </link>
+    <link topicid="sack::sql::options::SetOptionDatabaseOption@PODBC@int" displaystring="sack::sql::options::SetOptionDatabaseOption Function">
+      <target id="html">../output/sack__sql__options__SetOptionDatabaseOption@PODBC@int.html</target>
+    </link>
+    <link topicid="sack::sql::options::SetOptionStringValue@INDEX@CTEXTSTR" displaystring="sack::sql::options::SetOptionStringValue Function">
+      <target id="html">../output/sack__sql__options__SetOptionStringValue@INDEX@CTEXTSTR.html</target>
+    </link>
     <link topicid="sack::sql::options::SQLGETOPTION_PROC" displaystring="sack::sql::options::SQLGETOPTION_PROC Macro">
       <target id="html">../output/sack__sql__options__SQLGETOPTION_PROC.html</target>
+    </link>
+    <link topicid="sack::sql::options::SQLGetPrivateProfileInt" displaystring="sack::sql::options::SQLGetPrivateProfileInt Macro">
+      <target id="html">../output/sack__sql__options__SQLGetPrivateProfileInt.html</target>
+    </link>
+    <link topicid="sack::sql::options::SQLGetProfileInt" displaystring="sack::sql::options::SQLGetProfileInt Macro">
+      <target id="html">../output/sack__sql__options__SQLGetProfileInt.html</target>
+    </link>
+    <link topicid="sack::sql::options::SQLGetProfileIntEx" displaystring="sack::sql::options::SQLGetProfileIntEx Macro">
+      <target id="html">../output/sack__sql__options__SQLGetProfileIntEx.html</target>
+    </link>
+    <link topicid="sack::sql::options::SQLGetProfileStringEx" displaystring="sack::sql::options::SQLGetProfileStringEx Macro">
+      <target id="html">../output/sack__sql__options__SQLGetProfileStringEx.html</target>
     </link>
     <link topicid="sack::sql::PODBC" displaystring="sack::sql::PODBC Type">
       <target id="html">../output/sack__sql__PODBC.html</target>
@@ -11169,6 +11372,108 @@
       <target id="html">../output/sack__WIDE__FILE__.html</target>
       <target id="pdf">pdf://106@sack-docodocs.pdf</target>
     </link>
+    <link topicid="sack::widgets" displaystring="sack::widgets Namespace">
+      <target id="html">../output/sack__widgets.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons" displaystring="sack::widgets::buttons Namespace">
+      <target id="html">../output/sack__widgets__buttons.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::BUTTON_FIELD_CENTER" displaystring="sack::widgets::buttons::BUTTON_FIELD_CENTER Macro">
+      <target id="html">../output/sack__widgets__buttons__BUTTON_FIELD_CENTER.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::BUTTON_FIELD_RIGHT" displaystring="sack::widgets::buttons::BUTTON_FIELD_RIGHT Macro">
+      <target id="html">../output/sack__widgets__buttons__BUTTON_FIELD_RIGHT.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::BUTTON_FLAG_TEXT_ON_TOP" displaystring="sack::widgets::buttons::BUTTON_FLAG_TEXT_ON_TOP Macro">
+      <target id="html">../output/sack__widgets__buttons__BUTTON_FLAG_TEXT_ON_TOP.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::CONTENT_CENTER" displaystring="sack::widgets::buttons::CONTENT_CENTER Macro">
+      <target id="html">../output/sack__widgets__buttons__CONTENT_CENTER.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::CONTENT_CENTERALL" displaystring="sack::widgets::buttons::CONTENT_CENTERALL Macro">
+      <target id="html">../output/sack__widgets__buttons__CONTENT_CENTERALL.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::CONTENT_LEFT" displaystring="sack::widgets::buttons::CONTENT_LEFT Macro">
+      <target id="html">../output/sack__widgets__buttons__CONTENT_LEFT.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::CONTENT_NORMAL" displaystring="sack::widgets::buttons::CONTENT_NORMAL Macro">
+      <target id="html">../output/sack__widgets__buttons__CONTENT_NORMAL.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::CONTENT_RIGHT" displaystring="sack::widgets::buttons::CONTENT_RIGHT Macro">
+      <target id="html">../output/sack__widgets__buttons__CONTENT_RIGHT.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::CONTENT_SAMELINE_CENTER" displaystring="sack::widgets::buttons::CONTENT_SAMELINE_CENTER Macro">
+      <target id="html">../output/sack__widgets__buttons__CONTENT_SAMELINE_CENTER.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::CONTENT_SAMELINE_CENTERALL" displaystring="sack::widgets::buttons::CONTENT_SAMELINE_CENTERALL Macro">
+      <target id="html">../output/sack__widgets__buttons__CONTENT_SAMELINE_CENTERALL.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::CONTENT_SAMELINE_LEFT" displaystring="sack::widgets::buttons::CONTENT_SAMELINE_LEFT Macro">
+      <target id="html">../output/sack__widgets__buttons__CONTENT_SAMELINE_LEFT.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::CONTENT_SAMELINE_NORMAL" displaystring="sack::widgets::buttons::CONTENT_SAMELINE_NORMAL Macro">
+      <target id="html">../output/sack__widgets__buttons__CONTENT_SAMELINE_NORMAL.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::CONTENT_SAMELINE_RIGHT" displaystring="sack::widgets::buttons::CONTENT_SAMELINE_RIGHT Macro">
+      <target id="html">../output/sack__widgets__buttons__CONTENT_SAMELINE_RIGHT.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::CONTENT_SAMELINE_VCENTER" displaystring="sack::widgets::buttons::CONTENT_SAMELINE_VCENTER Macro">
+      <target id="html">../output/sack__widgets__buttons__CONTENT_SAMELINE_VCENTER.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::CONTENT_VCENTER" displaystring="sack::widgets::buttons::CONTENT_VCENTER Macro">
+      <target id="html">../output/sack__widgets__buttons__CONTENT_VCENTER.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::GetKeypad" displaystring="sack::widgets::buttons::GetKeypad Macro">
+      <target id="html">../output/sack__widgets__buttons__GetKeypad.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::GetKeypadCommon" displaystring="sack::widgets::buttons::GetKeypadCommon Macro">
+      <target id="html">../output/sack__widgets__buttons__GetKeypadCommon.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::GetKeyValue@PKEY_BUTTON" displaystring="sack::widgets::buttons::GetKeyValue Function">
+      <target id="html">../output/sack__widgets__buttons__GetKeyValue@PKEY_BUTTON.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::HideKeypad" displaystring="sack::widgets::buttons::HideKeypad Macro">
+      <target id="html">../output/sack__widgets__buttons__HideKeypad.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::KEY_BACKGROUND_COLOR" displaystring="sack::widgets::buttons::KEY_BACKGROUND_COLOR Macro">
+      <target id="html">../output/sack__widgets__buttons__KEY_BACKGROUND_COLOR.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::KEY_BACKGROUND_IMAGE" displaystring="sack::widgets::buttons::KEY_BACKGROUND_IMAGE Macro">
+      <target id="html">../output/sack__widgets__buttons__KEY_BACKGROUND_IMAGE.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::KEYPAD_FLAG_ALPHANUM" displaystring="sack::widgets::buttons::KEYPAD_FLAG_ALPHANUM Macro">
+      <target id="html">../output/sack__widgets__buttons__KEYPAD_FLAG_ALPHANUM.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::KEYPAD_FLAG_DISPLAY" displaystring="sack::widgets::buttons::KEYPAD_FLAG_DISPLAY Macro">
+      <target id="html">../output/sack__widgets__buttons__KEYPAD_FLAG_DISPLAY.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::KEYPAD_FLAG_ENTRY" displaystring="sack::widgets::buttons::KEYPAD_FLAG_ENTRY Macro">
+      <target id="html">../output/sack__widgets__buttons__KEYPAD_FLAG_ENTRY.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::KEYPAD_FLAG_PASSWORD" displaystring="sack::widgets::buttons::KEYPAD_FLAG_PASSWORD Macro">
+      <target id="html">../output/sack__widgets__buttons__KEYPAD_FLAG_PASSWORD.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::OnKeyPressEvent" displaystring="sack::widgets::buttons::OnKeyPressEvent Macro">
+      <target id="html">../output/sack__widgets__buttons__OnKeyPressEvent.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::PKEY_BUTTON" displaystring="sack::widgets::buttons::PKEY_BUTTON Type">
+      <target id="html">../output/sack__widgets__buttons__PKEY_BUTTON.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::PKEYPAD" displaystring="sack::widgets::buttons::PKEYPAD Type">
+      <target id="html">../output/sack__widgets__buttons__PKEYPAD.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::PressHandler" displaystring="sack::widgets::buttons::PressHandler Type">
+      <target id="html">../output/sack__widgets__buttons__PressHandler.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::PTEXT_PLACEMENT" displaystring="sack::widgets::buttons::PTEXT_PLACEMENT Type">
+      <target id="html">../output/sack__widgets__buttons__PTEXT_PLACEMENT.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::ShowKeypad" displaystring="sack::widgets::buttons::ShowKeypad Macro">
+      <target id="html">../output/sack__widgets__buttons__ShowKeypad.html</target>
+    </link>
+    <link topicid="sack::widgets::buttons::SimplePressHandler" displaystring="sack::widgets::buttons::SimplePressHandler Type">
+      <target id="html">../output/sack__widgets__buttons__SimplePressHandler.html</target>
+    </link>
     <link topicid="sack::X_16" displaystring="sack::X_16 Type">
       <target id="html">../output/sack__X_16.html</target>
       <target id="pdf">pdf://139@sack-docodocs.pdf</target>
@@ -11204,36 +11509,6 @@
       <target id="html">../output/SACK_DEADSTART_NAMESPACE_END.html</target>
       <target id="pdf">pdf://2057@sack-docodocs.pdf</target>
     </link>
-    <link topicid="SACK_GetPrivateProfileInt@CTEXTSTR@CTEXTSTR@S_32@CTEXTSTR" displaystring="SACK_GetPrivateProfileInt Function">
-      <target id="html">../output/SACK_GetPrivateProfileInt@CTEXTSTR@CTEXTSTR@S_32@CTEXTSTR.html</target>
-    </link>
-    <link topicid="SACK_GetPrivateProfileIntEx@CTEXTSTR@CTEXTSTR@S_32@CTEXTSTR@LOGICAL" displaystring="SACK_GetPrivateProfileIntEx Function">
-      <target id="html">../output/SACK_GetPrivateProfileIntEx@CTEXTSTR@CTEXTSTR@S_32@CTEXTSTR@LOGICAL.html</target>
-    </link>
-    <link topicid="SACK_GetPrivateProfileString@CTEXTSTR@CTEXTSTR@CTEXTSTR@char *@_32@CTEXTSTR" displaystring="SACK_GetPrivateProfileString Function">
-      <target id="html">../output/SACK_GetPrivateProfileString@CTEXTSTR@CTEXTSTR@CTEXTSTR@char__@_32@CTEXTSTR.html</target>
-    </link>
-    <link topicid="SACK_GetPrivateProfileStringEx@CTEXTSTR@CTEXTSTR@CTEXTSTR@char *@_32@CTEXTSTR@LOGICAL" displaystring="SACK_GetPrivateProfileStringEx Function">
-      <target id="html">../output/SACK_GetPrivateProfileStringEx@CTEXTSTR@CTEXTSTR@CTEXTSTR@char__@_32@CTEXTSTR@LOGICAL.html</target>
-    </link>
-    <link topicid="SACK_GetProfileBlob@CTEXTSTR@CTEXTSTR@char **@_32 *" displaystring="SACK_GetProfileBlob Function">
-      <target id="html">../output/SACK_GetProfileBlob@CTEXTSTR@CTEXTSTR@char___@_32__.html</target>
-    </link>
-    <link topicid="SACK_GetProfileBlobOdbc@PODBC@CTEXTSTR@CTEXTSTR@char **@_32 *" displaystring="SACK_GetProfileBlobOdbc Function">
-      <target id="html">../output/SACK_GetProfileBlobOdbc@PODBC@CTEXTSTR@CTEXTSTR@char___@_32__.html</target>
-    </link>
-    <link topicid="SACK_GetProfileInt@CTEXTSTR@CTEXTSTR@S_32" displaystring="SACK_GetProfileInt Function">
-      <target id="html">../output/SACK_GetProfileInt@CTEXTSTR@CTEXTSTR@S_32.html</target>
-    </link>
-    <link topicid="SACK_GetProfileIntEx@CTEXTSTR@CTEXTSTR@S_32@LOGICAL" displaystring="SACK_GetProfileIntEx Function">
-      <target id="html">../output/SACK_GetProfileIntEx@CTEXTSTR@CTEXTSTR@S_32@LOGICAL.html</target>
-    </link>
-    <link topicid="SACK_GetProfileString@CTEXTSTR@CTEXTSTR@CTEXTSTR@char *@_32" displaystring="SACK_GetProfileString Function">
-      <target id="html">../output/SACK_GetProfileString@CTEXTSTR@CTEXTSTR@CTEXTSTR@char__@_32.html</target>
-    </link>
-    <link topicid="SACK_GetProfileStringEx@CTEXTSTR@CTEXTSTR@CTEXTSTR@char *@_32@LOGICAL" displaystring="SACK_GetProfileStringEx Function">
-      <target id="html">../output/SACK_GetProfileStringEx@CTEXTSTR@CTEXTSTR@CTEXTSTR@char__@_32@LOGICAL.html</target>
-    </link>
     <link topicid="SACK_MATH_FRACTION_NAMESPACE_END" displaystring="SACK_MATH_FRACTION_NAMESPACE_END Macro">
       <target id="html">../output/SACK_MATH_FRACTION_NAMESPACE_END.html</target>
     </link>
@@ -11248,36 +11523,6 @@
     <link topicid="sack_types.h" displaystring="sack_types.h">
       <target id="html">../output/sack_types_h.html</target>
       <target id="pdf">pdf://302@sack-docodocs.pdf</target>
-    </link>
-    <link topicid="SACK_WritePrivateProfileInt@CTEXTSTR@CTEXTSTR@S_32@CTEXTSTR" displaystring="SACK_WritePrivateProfileInt Function">
-      <target id="html">../output/SACK_WritePrivateProfileInt@CTEXTSTR@CTEXTSTR@S_32@CTEXTSTR.html</target>
-    </link>
-    <link topicid="SACK_WritePrivateProfileIntEx@CTEXTSTR@CTEXTSTR@S_32@CTEXTSTR@LOGICAL" displaystring="SACK_WritePrivateProfileIntEx Function">
-      <target id="html">../output/SACK_WritePrivateProfileIntEx@CTEXTSTR@CTEXTSTR@S_32@CTEXTSTR@LOGICAL.html</target>
-    </link>
-    <link topicid="SACK_WritePrivateProfileString@CTEXTSTR@CTEXTSTR@CTEXTSTR@CTEXTSTR" displaystring="SACK_WritePrivateProfileString Function">
-      <target id="html">../output/SACK_WritePrivateProfileString@CTEXTSTR@CTEXTSTR@CTEXTSTR@CTEXTSTR.html</target>
-    </link>
-    <link topicid="SACK_WritePrivateProfileStringEx@CTEXTSTR@CTEXTSTR@CTEXTSTR@CTEXTSTR@LOGICAL" displaystring="SACK_WritePrivateProfileStringEx Function">
-      <target id="html">../output/SACK_WritePrivateProfileStringEx@CTEXTSTR@CTEXTSTR@CTEXTSTR@CTEXTSTR@LOGICAL.html</target>
-    </link>
-    <link topicid="SACK_WriteProfileBlob@CTEXTSTR@CTEXTSTR@char *@_32" displaystring="SACK_WriteProfileBlob Function">
-      <target id="html">../output/SACK_WriteProfileBlob@CTEXTSTR@CTEXTSTR@char__@_32.html</target>
-    </link>
-    <link topicid="SACK_WriteProfileBlobOdbc@PODBC@CTEXTSTR@CTEXTSTR@char *@_32" displaystring="SACK_WriteProfileBlobOdbc Function">
-      <target id="html">../output/SACK_WriteProfileBlobOdbc@PODBC@CTEXTSTR@CTEXTSTR@char__@_32.html</target>
-    </link>
-    <link topicid="SACK_WriteProfileInt@CTEXTSTR@CTEXTSTR@S_32" displaystring="SACK_WriteProfileInt Function">
-      <target id="html">../output/SACK_WriteProfileInt@CTEXTSTR@CTEXTSTR@S_32.html</target>
-    </link>
-    <link topicid="SACK_WriteProfileIntEx@CTEXTSTR@CTEXTSTR@S_32@LOGICAL" displaystring="SACK_WriteProfileIntEx Function">
-      <target id="html">../output/SACK_WriteProfileIntEx@CTEXTSTR@CTEXTSTR@S_32@LOGICAL.html</target>
-    </link>
-    <link topicid="SACK_WriteProfileString@CTEXTSTR@CTEXTSTR@CTEXTSTR" displaystring="SACK_WriteProfileString Function">
-      <target id="html">../output/SACK_WriteProfileString@CTEXTSTR@CTEXTSTR@CTEXTSTR.html</target>
-    </link>
-    <link topicid="SACK_WriteProfileStringEx@CTEXTSTR@CTEXTSTR@CTEXTSTR@LOGICAL" displaystring="SACK_WriteProfileStringEx Function">
-      <target id="html">../output/SACK_WriteProfileStringEx@CTEXTSTR@CTEXTSTR@CTEXTSTR@LOGICAL.html</target>
     </link>
     <link topicid="SaveFrame@PSI_CONTROL@CTEXTSTR" displaystring="SaveFrame Function">
       <target id="pdf">pdf://1556@sack-docodocs.pdf</target>
@@ -11545,15 +11790,6 @@
     <link topicid="SetNoFocus@PSI_CONTROL" displaystring="SetNoFocus Function">
       <target id="pdf">pdf://1424@sack-docodocs.pdf</target>
     </link>
-    <link topicid="SetOptionDatabase@PODBC" displaystring="SetOptionDatabase Function">
-      <target id="html">../output/SetOptionDatabase@PODBC.html</target>
-    </link>
-    <link topicid="SetOptionDatabaseOption@PODBC@int" displaystring="SetOptionDatabaseOption Function">
-      <target id="html">../output/SetOptionDatabaseOption@PODBC@int.html</target>
-    </link>
-    <link topicid="SetOptionStringValue@INDEX@CTEXTSTR" displaystring="SetOptionStringValue Function">
-      <target id="html">../output/SetOptionStringValue@INDEX@CTEXTSTR.html</target>
-    </link>
     <link topicid="SetRadioButtonGroup@PSI_CONTROL@int" displaystring="SetRadioButtonGroup Function">
       <target id="pdf">pdf://1598@sack-docodocs.pdf</target>
     </link>
@@ -11629,14 +11865,8 @@
     <link topicid="SHEET_CONTROL_NAME" displaystring="SHEET_CONTROL_NAME Macro">
       <target id="pdf">pdf://2082@sack-docodocs.pdf</target>
     </link>
-    <link topicid="ShowKeypad" displaystring="ShowKeypad Macro">
-      <target id="html">../output/ShowKeypad.html</target>
-    </link>
     <link topicid="SimpleMessageBox@PSI_CONTROL@CTEXTSTR@CTEXTSTR" displaystring="SimpleMessageBox Function">
       <target id="pdf">pdf://1440@sack-docodocs.pdf</target>
-    </link>
-    <link topicid="SimplePressHandler" displaystring="SimplePressHandler Type">
-      <target id="html">../output/SimplePressHandler.html</target>
     </link>
     <link topicid="SimpleRegisterAndCreateGlobal" displaystring="SimpleRegisterAndCreateGlobal Macro">
       <target id="pdf">pdf://2083@sack-docodocs.pdf</target>
@@ -11720,18 +11950,6 @@
     <link topicid="SQLGETOPTION_SOURCE" displaystring="SQLGETOPTION_SOURCE Macro">
       <target id="html">../output/SQLGETOPTION_SOURCE.html</target>
       <target id="pdf">pdf://2097@sack-docodocs.pdf</target>
-    </link>
-    <link topicid="SQLGetPrivateProfileInt" displaystring="SQLGetPrivateProfileInt Macro">
-      <target id="html">../output/SQLGetPrivateProfileInt.html</target>
-    </link>
-    <link topicid="SQLGetProfileInt" displaystring="SQLGetProfileInt Macro">
-      <target id="html">../output/SQLGetProfileInt.html</target>
-    </link>
-    <link topicid="SQLGetProfileIntEx" displaystring="SQLGetProfileIntEx Macro">
-      <target id="html">../output/SQLGetProfileIntEx.html</target>
-    </link>
-    <link topicid="SQLGetProfileStringEx" displaystring="SQLGetProfileStringEx Macro">
-      <target id="html">../output/SQLGetProfileStringEx.html</target>
     </link>
     <link topicid="sqloptint.h" displaystring="sqloptint.h">
       <target id="html">../output/sqloptint_h.html</target>
@@ -12394,64 +12612,14 @@
             <field name="MSG_RedrawMethod"></field>
             <field name="MSG_ThreadEventPost"></field>
           </class>
-          <class name="HVIDEO_tag" language="1" type="4" using="">
-            <field name="cs"></field>
-            <field name="dwCloseData"></field>
-            <field name="dwKeyData"></field>
-            <field name="dwLoseFocus"></field>
-            <field name="dwMouseData"></field>
-            <field name="dwRedrawData"></field>
-            <field name="fade_alpha"></field>
-            <field name="flags"></field>
-            <field name="hDeferedAfter"></field>
-            <field name="hOldBitmap"></field>
-            <field name="hWndContainer"></field>
-            <field name="idle_timer_id"></field>
-            <field name="kbd"></field>
-            <field name="KeyDefs"></field>
-            <field name="mouse"></field>
-            <field name="over"></field>
-            <field name="pAbove"></field>
-            <field name="pBelow"></field>
-            <field name="pImage"></field>
-            <field name="pInput"></field>
-            <field name="pKeyProc"></field>
-            <field name="pLoseFocus"></field>
-            <field name="pMouseCallback"></field>
-            <field name="pNext"></field>
-            <field name="pPrior"></field>
-            <field name="pRedrawCallback"></field>
-            <field name="psvRead"></field>
-            <field name="pTitle"></field>
-            <field name="pWindowClose"></field>
-            <field name="ReadComplete"></field>
-            <field name="sprites"></field>
-            <field name="thread"></field>
-            <field name="under"></field>
-            <class name="flags@1"></class>
-            <class name="mouse@1"></class>
+          <class name="HVIDEO_tag" language="1" type="4" using=""></class>
+          <class name="keybind_tag" language="1" type="4" using=""></class>
+          <class name="KeyDataEventType" language="1" type="7" using="">
+            <field name="KEYDATA"></field>
+            <field name="KEYDATA_DEFINED"></field>
+            <field name="KEYTRIGGER"></field>
           </class>
-          <class name="keybind_tag" language="1" type="4" using="">
-            <field name="data"></field>
-            <field name="extended_key_psv"></field>
-            <field name="flags"></field>
-            <field name="psv"></field>
-            <class name="flags@1"></class>
-            <class name="key_triggers"></class>
-          </class>
-          <class name="KeyDefine" language="1" type="4" using="">
-            <field name="flags"></field>
-            <field name="mod"></field>
-            <field name="name1"></field>
-            <field name="name2"></field>
-          </class>
-          <class name="PBOInfo" language="1" type="4" using="">
-            <field name="dest_buffer"></field>
-            <field name="index"></field>
-            <field name="nextIndex"></field>
-            <field name="pboIds"></field>
-            <field name="raw"></field>
-          </class>
+          <class name="KeyDefine" language="1" type="4" using=""></class>
         </namespace>
         <class name="AlphaModifier" language="1" type="7" using="">
           <field name="ALPHA_TRANSPARENT"></field>
@@ -12536,19 +12704,7 @@
           <field name="actual_width"></field>
           <field name="actual_x"></field>
           <field name="actual_y"></field>
-          <field name="auxrect"></field>
-          <field name="eff_maxx"></field>
-          <field name="eff_maxy"></field>
-          <field name="eff_x"></field>
-          <field name="eff_y"></field>
-          <field name="flags"></field>
           <field name="height"></field>
-          <field name="image"></field>
-          <field name="pChild"></field>
-          <field name="pElder"></field>
-          <field name="pParent"></field>
-          <field name="pwidth"></field>
-          <field name="pYounger"></field>
           <field name="width"></field>
           <field name="x"></field>
           <field name="y"></field>
@@ -12608,6 +12764,74 @@
         </class>
       </namespace>
       <namespace name="intershell" language="1">
+        <class name="intershell_interface" language="1" type="4" using="">
+          <field name="AddButtonLayout"></field>
+          <field name="BeginCanvasConfiguration"></field>
+          <field name="BeginSubConfiguration"></field>
+          <field name="ClearPageList"></field>
+          <field name="CreateAFont"></field>
+          <field name="CreateLabelVariable"></field>
+          <field name="CreateLabelVariableEx"></field>
+          <field name="EscapeMenuString"></field>
+          <field name="GetCommonButtonControls"></field>
+          <field name="GetPageSize"></field>
+          <field name="HidePageExx"></field>
+          <field name="InterShell_CommonImageLoad"></field>
+          <field name="InterShell_CommonImageUnloadByImage"></field>
+          <field name="InterShell_CommonImageUnloadByName"></field>
+          <field name="InterShell_CreateControl"></field>
+          <field name="InterShell_DisableButtonPageChange"></field>
+          <field name="InterShell_DisablePageUpdate"></field>
+          <field name="InterShell_GetButtonColors"></field>
+          <field name="InterShell_GetButtonControl"></field>
+          <field name="InterShell_GetButtonFont"></field>
+          <field name="InterShell_GetButtonFontName"></field>
+          <field name="InterShell_GetButtonHighlight"></field>
+          <field name="InterShell_GetButtonText"></field>
+          <field name="InterShell_GetControlLabelText"></field>
+          <field name="InterShell_GetCurrentButton"></field>
+          <field name="InterShell_GetCurrentButtonFont"></field>
+          <field name="InterShell_GetCurrentConfigHandler"></field>
+          <field name="InterShell_GetCurrentLoadingControl"></field>
+          <field name="InterShell_GetLabelText"></field>
+          <field name="InterShell_GetPhysicalButton"></field>
+          <field name="InterShell_GetSystemName"></field>
+          <field name="InterShell_Hide"></field>
+          <field name="InterShell_IsButtonVirtual"></field>
+          <field name="InterShell_Reveal"></field>
+          <field name="InterShell_SaveCommonButtonParameters"></field>
+          <field name="InterShell_SetButtonColor"></field>
+          <field name="InterShell_SetButtonColors"></field>
+          <field name="InterShell_SetButtonFont"></field>
+          <field name="InterShell_SetButtonFontName"></field>
+          <field name="InterShell_SetButtonHighlight"></field>
+          <field name="InterShell_SetButtonImage"></field>
+          <field name="InterShell_SetButtonImageAlpha"></field>
+          <field name="InterShell_SetButtonStyle"></field>
+          <field name="InterShell_SetButtonText"></field>
+          <field name="InterShell_TranslateLabelText"></field>
+          <field name="InterShell_TranslateLabelTextEx"></field>
+          <field name="LabelVariableChanged"></field>
+          <field name="LabelVariablesChanged"></field>
+          <field name="RestartMenu"></field>
+          <field name="RestoreCurrentPage"></field>
+          <field name="ResumeMenu"></field>
+          <field name="SaveCanvasConfiguration"></field>
+          <field name="SaveCanvasConfiguration_XML"></field>
+          <field name="SelectAFont"></field>
+          <field name="SetButtonTextField"></field>
+          <field name="SetCommonButtonControls"></field>
+          <field name="ShellCallSetCurrentPage"></field>
+          <field name="ShellCallSetCurrentPageEx"></field>
+          <field name="ShellGetCurrentPage"></field>
+          <field name="ShellGetCurrentPageEx"></field>
+          <field name="ShellGetNamedPage"></field>
+          <field name="ShellReturnCurrentPage"></field>
+          <field name="ShellSetCurrentPage"></field>
+          <field name="ShellSetCurrentPageEx"></field>
+          <field name="UpdateButtonExx"></field>
+          <field name="UseAFont"></field>
+        </class>
         <class name="label_variable_types" language="1" type="7" using="">
           <field name="LABEL_TYPE_CONST_STRING"></field>
           <field name="LABEL_TYPE_INT"></field>
@@ -12895,66 +13119,7 @@
           <field name="BORDER_WANTMOUSE"></field>
           <field name="BORDER_WITHIN"></field>
         </class>
-        <class name="common_button_data" language="1" type="4" using="">
-          <field name="done_value"></field>
-          <field name="flags"></field>
-          <field name="okay_value"></field>
-          <field name="thread"></field>
-          <class name="button_flags"></class>
-        </class>
-        <class name="common_control_frame" language="1" type="4" using="">
-          <field name="_DrawThySelf"></field>
-          <field name="_KeyProc"></field>
-          <field name="_MouseMethod"></field>
-          <field name="AcceptDroppedFiles"></field>
-          <field name="AddedControl"></field>
-          <field name="basecolors"></field>
-          <field name="BeginEdit"></field>
-          <field name="BorderType"></field>
-          <field name="caption"></field>
-          <field name="CaptionChanged"></field>
-          <field name="ChangeFocus"></field>
-          <field name="child"></field>
-          <field name="Destroy"></field>
-          <field name="detached_at"></field>
-          <field name="device"></field>
-          <field name="dirty_rect"></field>
-          <field name="draw_result"></field>
-          <field name="DrawBorder"></field>
-          <field name="EndEdit"></field>
-          <field name="flags"></field>
-          <field name="InUse"></field>
-          <field name="InWait"></field>
-          <field name="n_DrawThySelf"></field>
-          <field name="n_KeyProc"></field>
-          <field name="n_MouseMethod"></field>
-          <field name="nAcceptDroppedFiles"></field>
-          <field name="next"></field>
-          <field name="nExtra"></field>
-          <field name="nID"></field>
-          <field name="NotInUse"></field>
-          <field name="nType"></field>
-          <field name="original_rect"></field>
-          <field name="OriginalSurface"></field>
-          <field name="parent"></field>
-          <field name="pCommonButtonData"></field>
-          <field name="pIDName"></field>
-          <field name="prior"></field>
-          <field name="psvUser"></field>
-          <field name="pTypeName"></field>
-          <field name="pUser"></field>
-          <field name="rect"></field>
-          <field name="Resize"></field>
-          <field name="save_name"></field>
-          <field name="scalex"></field>
-          <field name="scaley"></field>
-          <field name="Surface"></field>
-          <field name="surface_rect"></field>
-          <field name="update_rect"></field>
-          <field name="Window"></field>
-          <class name="caption@1"></class>
-          <class name="flags@1"></class>
-        </class>
+        <class name="common_button_data" language="1" type="4" using=""></class>
         <class name="ControlColorTypes" language="1" type="7" using="">
           <field name="CAPTION"></field>
           <field name="CAPTIONTEXTCOLOR"></field>
@@ -12990,49 +13155,12 @@
           <field name="TypeID"></field>
           <class name="control_extra_data"></class>
         </class>
-        <class name="edit_state_tag" language="1" type="4" using="">
-          <field name="_KeyProc"></field>
-          <field name="_x"></field>
-          <field name="_y"></field>
-          <field name="bias"></field>
-          <field name="BorderType"></field>
-          <field name="bound"></field>
-          <field name="delxaccum"></field>
-          <field name="delyaccum"></field>
-          <field name="flags"></field>
-          <field name="hotspot"></field>
-          <field name="n_KeyProc"></field>
-          <field name="pCurrent"></field>
-          <class name="flags@1"></class>
-        </class>
+        <class name="edit_state_tag" language="1" type="4" using=""></class>
         <class name="enum@1" language="1" type="7" using="">
           <field name="COMMON_PROC_ANY"></field>
           <field name="COMMON_PROC_DRAW"></field>
           <field name="COMMON_PROC_KEY"></field>
           <field name="COMMON_PROC_MOUSE"></field>
-        </class>
-        <class name="enum@2" language="1" type="7" using="">
-          <field name="SEGMENT_BOTTOM"></field>
-          <field name="SEGMENT_BOTTOM_LEFT"></field>
-          <field name="SEGMENT_BOTTOM_RIGHT"></field>
-          <field name="SEGMENT_CENTER"></field>
-          <field name="SEGMENT_LEFT"></field>
-          <field name="SEGMENT_RIGHT"></field>
-          <field name="SEGMENT_TOP"></field>
-          <field name="SEGMENT_TOP_LEFT"></field>
-          <field name="SEGMENT_TOP_RIGHT"></field>
-        </class>
-        <class name="global_tag" language="1" type="4" using="">
-          <field name="BorderHeight"></field>
-          <field name="BorderImage"></field>
-          <field name="BorderSegment"></field>
-          <field name="BorderWidth"></field>
-          <field name="defaultcolors"></field>
-          <field name="flags"></field>
-          <field name="MyDisplayInterface"></field>
-          <field name="MyImageInterface"></field>
-          <field name="shown_frames"></field>
-          <class name="flags@1"></class>
         </class>
         <class name="HotspotLocations" language="1" type="7" using="">
           <field name="SPOT_BOTTOM"></field>
@@ -13046,23 +13174,7 @@
           <field name="SPOT_TOP_LEFT"></field>
           <field name="SPOT_TOP_RIGHT"></field>
         </class>
-        <class name="physical_device_interface" language="1" type="4" using="">
-          <field name="_b"></field>
-          <field name="_x"></field>
-          <field name="_y"></field>
-          <field name="common"></field>
-          <field name="CurrentBias"></field>
-          <field name="EditState"></field>
-          <field name="flags"></field>
-          <field name="nIDDefaultCancel"></field>
-          <field name="nIDDefaultOK"></field>
-          <field name="pActImg"></field>
-          <field name="pCurrent"></field>
-          <field name="pFocus"></field>
-          <field name="psvInit"></field>
-          <class name="CurrentBias@1"></class>
-          <class name="device_flags"></class>
-        </class>
+        <class name="physical_device_interface" language="1" type="4" using=""></class>
       </namespace>
       <namespace name="sql" language="1">
         <namespace name="options" language="1">
@@ -13135,11 +13247,9 @@
           <field name="dwUpdating"></field>
         </class>
       </namespace>
+      <namespace name="widgets" language="1">
+        <namespace name="buttons" language="1"></namespace>
+      </namespace>
     </namespace>
-    <class name="enum@1" language="1" type="7" using="">
-      <field name="KEYDATA"></field>
-      <field name="KEYDATA_DEFINED"></field>
-      <field name="KEYTRIGGER"></field>
-    </class>
   </classinformation>
 </projectdatabase>
