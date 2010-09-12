@@ -32,6 +32,8 @@
 #define LOGGING_NAMESPACE 
 #define LOGGING_NAMESPACE_END
 #endif
+#ifdef __cplusplus
+	namespace sack {
 /* Handles log output. Logs can be directed to UDP directed, or
    broadcast, or localhost, or to a file location, and under
    windows the debugging console log.
@@ -48,8 +50,10 @@
    
    there are options, when options code is enabled, which
    control logging output and format. Log file location can be
-   specified generically for instance.... see Options.          */
-/* This namespace contains the logging functions. The most basic
+   specified generically for instance.... see Options.
+
+
+	This namespace contains the logging functions. The most basic
    thing you can do to start logging is use 'lprintf'.
    
    <code lang="c++">
@@ -81,7 +85,8 @@
    
    _xlprintf
                                                                  */
-LOGGING_NAMESPACE
+		namespace logging {
+#endif
 
 
 /* \Parameters for SetSystemLog() to specify where the logging

@@ -1,17 +1,18 @@
 #ifndef CONTROL_SOURCE
 #define CONTROL_SOURCE
+#include <stdhdrs.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <procreg.h>
 #include <fractions.h>
 #include <controls.h>
 #include "global.h"
-//#include <vidlib.h>
 
-//#define DEBUG_BORDER_DRAWING
-//#define QUICK_DEBUG_BORDER_FLAGS
 
-PSI_NAMESPACE
+
+SACK_NAMESPACE
+
+_PSI_NAMESPACE
 // define this to prevent multiple definition to application 
 // viewpoint...
 //---------------------------------------------------------------------------

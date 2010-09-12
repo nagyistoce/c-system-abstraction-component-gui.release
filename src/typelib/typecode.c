@@ -299,7 +299,8 @@ static PTRSZVAL CPROC RemoveItem( PTRSZVAL value, INDEX i, POINTER *link )
 	ForAllLinks( pList, RemoveItem, 0 );
 }
 #ifdef __cplusplus
-};//		namespace list {
+		};//		namespace list {
+namespace data_list {
 #endif
 
 //--------------------------------------------------------------------------
@@ -409,6 +410,7 @@ POINTER GetDataItem( PDATALIST *ppdl, INDEX idx )
 //--------------------------------------------------------------------------
 
 #ifdef __cplusplus
+		};//		namespace data_list {
 namespace link_stack {
 #endif
 

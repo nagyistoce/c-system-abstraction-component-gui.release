@@ -236,21 +236,21 @@ typedef struct variable_tag *PVARIABLE;
 enum label_variable_types {
    /* POINTER data should be the address of a CTEXTSTR (a pointer
       to the pointer of a string )                                */
-	LABEL_TYPE_STRING
+	LABEL_TYPE_STRING,
       /* POINTER data should be the address of an integer, changing the integer will reflect in the output*/
-								  , LABEL_TYPE_INT
-                          /* POINTER data is the address of a routine which takes (void) parameters and returns a CTEXTSTR*/
-								  , LABEL_TYPE_PROC
-								  /* POINTER data is the address of a routine which takes a (PTRSZVAL) and returns a CTEXTSTR */
-                          /* PTRSZVAL psv is user data to pass to the procedure */
-								  , LABEL_TYPE_PROC_EX
+	LABEL_TYPE_INT,
+   /* POINTER data is the address of a routine which takes (void) parameters and returns a CTEXTSTR*/
+	LABEL_TYPE_PROC,
+	/* POINTER data is the address of a routine which takes a (PTRSZVAL) and returns a CTEXTSTR */
+   /* PTRSZVAL psv is user data to pass to the procedure */
+	LABEL_TYPE_PROC_EX,
 
-								  /* POINTER data is the address of a routine which takes a (PTRSZVAL) and returns a CTEXTSTR */
-								  /* PTRSZVAL psv is user data to pass to the procedure */
-                          /* routine also gets the control the text is contained on? */
-								  , LABEL_TYPE_PROC_CONTROL_EX
-                          /* POINTER data is a pointer to a simple string, the value is copied and used on the control */
-	, LABEL_TYPE_CONST_STRING
+	/* POINTER data is the address of a routine which takes a (PTRSZVAL) and returns a CTEXTSTR */
+	/* PTRSZVAL psv is user data to pass to the procedure */
+   /* routine also gets the control the text is contained on? */
+	LABEL_TYPE_PROC_CONTROL_EX,
+   /* POINTER data is a pointer to a simple string, the value is copied and used on the control */
+	LABEL_TYPE_CONST_STRING
 };
 /* This is the type of the variable expected if a label is
    created with LABEL_TYPE_STRING.
@@ -296,15 +296,15 @@ typedef CTEXTSTR (*label_gettextproc_control)(PTRSZVAL, PMENU_BUTTON);
 
 struct intershell_interface {
 
-// magically knows which button we're editing at the moment.
-// intended to only be used during OnEditControl() Event Handler
+
+/* <combine sack::intershell::GetCommonButtonControls@PSI_CONTROL>
+   
+   \ \                                                             */
 INTERSHELL_PROC_PTR( void, GetCommonButtonControls )( PSI_CONTROL frame );
-// magically knows which button we're editing at the moment.
-// intended to only be used during OnEditControl() Event Handler
+
 INTERSHELL_PROC_PTR( void, SetCommonButtonControls )( PSI_CONTROL frame );
 
-// wake up menu processing... there's a flag that was restart that this thinks
-// it might want...
+
 INTERSHELL_PROC_PTR( void, RestartMenu )( PTRSZVAL psv, _32 keycode );
 INTERSHELL_PROC_PTR( void, ResumeMenu )( PTRSZVAL psv, _32 keycode );
 
@@ -312,6 +312,9 @@ INTERSHELL_PROC_PTR( void, ResumeMenu )( PTRSZVAL psv, _32 keycode );
 // a zero (0) passed as a primary/secondary or tertiary color indicates no change. (err or disable)
 #define COLOR_DISABLE 0x00010000 // okay transparent level 1 red is disable key. - cause that's such a useful color alone.
 #define COLOR_IGNORE  0x00000000
+/* <combine sack::intershell::InterShell_GetButtonColors@PMENU_BUTTON@CDATA *@CDATA *@CDATA *@CDATA *>
+   
+   \ \                                                                                                 */
 INTERSHELL_PROC_PTR( void, InterShell_GetButtonColors )( PMENU_BUTTON button
 													, CDATA *cText
 													, CDATA *cBackground1
@@ -320,36 +323,40 @@ INTERSHELL_PROC_PTR( void, InterShell_GetButtonColors )( PMENU_BUTTON button
 INTERSHELL_PROC_PTR( void, InterShell_SetButtonColors )( PMENU_BUTTON button, CDATA cText, CDATA cBackground1, CDATA cBackground2, CDATA cBackground3 );
 INTERSHELL_PROC_PTR( void, InterShell_SetButtonColor )( PMENU_BUTTON button, CDATA primary, CDATA secondary );
 INTERSHELL_PROC_PTR( void, InterShell_SetButtonText )( PMENU_BUTTON button, CTEXTSTR text );
+/* <combine sack::intershell::InterShell_GetButtonText@PMENU_BUTTON@TEXTSTR@int>
+   
+   \ \                                                                           */
 INTERSHELL_PROC_PTR( void, InterShell_GetButtonText )( PMENU_BUTTON button, TEXTSTR text, int text_buf_len );
 INTERSHELL_PROC_PTR( void, InterShell_SetButtonImage )( PMENU_BUTTON button, CTEXTSTR name );
 #ifndef __NO_ANIMATION__
-//INTERSHELL_PROC_PTR( void, InterShell_SetButtonAnimation )( PMENU_BUTTON button, CTEXTSTR name );
+
 #endif
+/* <combine sack::intershell::InterShell_CommonImageLoad@CTEXTSTR>
+   
+   \ \                                                             */
 INTERSHELL_PROC_PTR( Image, InterShell_CommonImageLoad )( CTEXTSTR name );
+/* <combine sack::intershell::InterShell_CommonImageUnloadByName@CTEXTSTR>
+   
+   \ \                                                                     */
 INTERSHELL_PROC_PTR( void, InterShell_CommonImageUnloadByName )( CTEXTSTR name );
+/* <combine sack::intershell::InterShell_CommonImageUnloadByImage@Image>
+   
+   \ \                                                                   */
 INTERSHELL_PROC_PTR( void, InterShell_CommonImageUnloadByImage )( Image unload );
-/*
- *  For InterShell_SetButtonImageAlpha.....
- *    0 is no alpha change.
- *    alpha < 0 increases transparency
- *    alpha > 0 increases opacity.
- *    Max value is +/-255
- */
+
 INTERSHELL_PROC_PTR( void, InterShell_SetButtonImageAlpha )( PMENU_BUTTON button, S_16 alpha );
 
 
-// return if the button is just virtual (part of a macro)
+
 INTERSHELL_PROC_PTR( LOGICAL, InterShell_IsButtonVirtual )( PMENU_BUTTON button );
 
 INTERSHELL_PROC_PTR( void, InterShell_SetButtonFont )( PMENU_BUTTON button, Font *font );
-// THis function returns the font of the current button being edited...
-// this result can be used for controls that are not really buttons to get the common
-// properties of the font being used for this control...
+
 INTERSHELL_PROC_PTR( Font*, InterShell_GetCurrentButtonFont )( void );
 INTERSHELL_PROC_PTR( void, InterShell_SetButtonStyle )( PMENU_BUTTON button, TEXTCHAR *style );
 INTERSHELL_PROC_PTR( void, InterShell_SaveCommonButtonParameters )( FILE *file );
 INTERSHELL_PROC_PTR( CTEXTSTR, InterShell_GetSystemName )( void );
-//INTERSHELL_PROC_PTR( void, UpdateButtonEx )( PMENU_BUTTON button, int bEndingEdit );
+
 INTERSHELL_PROC_PTR( void, UpdateButtonExx )( PMENU_BUTTON button, int bEndingEdit DBG_PASS );
 #define UpdateButtonEx( button, edit ) UpdateButtonExx( button, edit DBG_SRC )
 //#define UpdateButtonEx( button, edit ) UpdateButtonExx( button, edit DBG_SRC )
@@ -361,94 +368,103 @@ INTERSHELL_PROC_PTR( void, UpdateButtonExx )( PMENU_BUTTON button, int bEndingEd
 //INTERSHELL_PROC_PTR( void, FixupButtonEx )( PMENU_BUTTON button DBG_PASS);
 #define FixupButton(b) FixupButtonEx((b) DBG_SRC)
 
-//---------------------------------------
-// pages controls here...
-//
+
 INTERSHELL_PROC_PTR(PPAGE_DATA, ShellGetCurrentPageEx)( PSI_CONTROL pc_canvas_or_control_in_canvas);
 INTERSHELL_PROC_PTR(PPAGE_DATA, ShellGetCurrentPage)( void );
-// pass pc NULL defaults internally to using the main frame surface.  The page
-// name returns the current page of that name.
+
 INTERSHELL_PROC_PTR(PPAGE_DATA, ShellGetNamedPage)( PSI_CONTROL pc, CTEXTSTR pagename );
-// special names
-// start, next, prior are keywords that imply direct
-// page stacking.
+
 INTERSHELL_PROC_PTR( int, ShellSetCurrentPage )( CTEXTSTR name );
 INTERSHELL_PROC_PTR( int, ShellSetCurrentPageEx )( PSI_CONTROL pc, CTEXTSTR name );
 
-// a call will push the current page on a stack
-// which will be returned to if returncurrentpage is used.
-// clear page list will flush the stack cause
-// there is such a temptation to call to all pages, providing
-// near inifinite page recall (back back back)
+
 INTERSHELL_PROC_PTR( int, ShellCallSetCurrentPage )( CTEXTSTR name );
 INTERSHELL_PROC_PTR( int, ShellCallSetCurrentPageEx )( PSI_CONTROL pc_canvas, CTEXTSTR name );
 
 INTERSHELL_PROC_PTR( void, ShellReturnCurrentPage )( void );
+/* <combine sack::intershell::ClearPageList>
+   
+   \ \                                       */
 INTERSHELL_PROC_PTR( void, ClearPageList )( void );
-// disable updates on the page, disable updating of buttons...
+
+/* <combine sack::intershell::InterShell_DisablePageUpdate@LOGICAL>
+   
+   \ \                                                              */
 INTERSHELL_PROC_PTR( void, InterShell_DisablePageUpdate )( LOGICAL bDisable );
 INTERSHELL_PROC_PTR( void, RestoreCurrentPage )( PSI_CONTROL pc_canvas );
+/* <combine sack::intershell::HidePageExx@PSI_CONTROL pc_canvas>
+   
+   \ \                                                           */
 INTERSHELL_PROC_PTR( void, HidePageExx )( PSI_CONTROL pc_canvas DBG_PASS);
 #define HidePageEx2(page) HidePageExx( page DBG_SRC )
 
 
 
-//---------------------------------------
-// this sets a one time flag on a button which disables
-// the auto page change which may be assigned to a button.
-//   tend/issue/perform these types of verbs may fail, and this is the only
-//   sort of thing at the moment that happens... perhaps renaming this to
-// button_abort_function could be done?
+
+/* <combine sack::intershell::InterShell_DisableButtonPageChange@PMENU_BUTTON>
+   
+   \ \                                                                         */
 INTERSHELL_PROC_PTR( void, InterShell_DisableButtonPageChange )( PMENU_BUTTON button );
 
+/* <combine sack::intershell::CreateLabelVariable@CTEXTSTR@enum label_variable_types@CPOINTER>
+   
+   \ \                                                                                         */
 INTERSHELL_PROC_PTR( PVARIABLE, CreateLabelVariable )( CTEXTSTR name, enum label_variable_types type, CPOINTER data );
+/* <combine sack::intershell::CreateLabelVariableEx@CTEXTSTR@enum label_variable_types@CPOINTER@PTRSZVAL>
+   
+   \ \                                                                                                    */
 INTERSHELL_PROC_PTR( PVARIABLE, CreateLabelVariableEx )( CTEXTSTR name, enum label_variable_types type, CPOINTER data, PTRSZVAL psv );
-// pass NULL to update all labels, otherwise, one can pass the result of a CreateLableVariable
-// to update only text labels using that variable.
-INTERSHELL_PROC_PTR( void, LabelVariableChanged )( PVARIABLE ); // update any labels which are using this variable.
-INTERSHELL_PROC_PTR( void, LabelVariablesChanged )( PLIST ); // update any labels which are using this variable. list of PVARIABLE types
+INTERSHELL_PROC_PTR( void, LabelVariableChanged )( PVARIABLE ); 
+INTERSHELL_PROC_PTR( void, LabelVariablesChanged )( PLIST ); 
 
-// local export to allow exxternal plugins to control whether the main display is showing...
-//  (specially for Tasks at this time... when an exclusive task is launched, display is hidden)
+
 INTERSHELL_PROC_PTR( void, InterShell_Hide )( void );
 INTERSHELL_PROC_PTR( void, InterShell_Reveal )( void );
 
 
-//----------------------------------------------------------
-//
+
+/* <combine sack::intershell::GetPageSize@P_32@P_32>
+   
+   \ \                                               */
 INTERSHELL_PROC_PTR( void, GetPageSize )( P_32 width, P_32 height );
 
-//-----------------------------------------------------
-// layout members which have a position x, y, font, text and color of their own
-// may be created on buttons.  They are displayed below the lense/ridge[up/down] and above the background.
+
 INTERSHELL_PROC_PTR( void, SetButtonTextField )( PMENU_BUTTON pKey, PTEXT_PLACEMENT pField, TEXTCHAR *text );
+/* <combine sack::intershell::AddButtonLayout@PMENU_BUTTON@int@int@Font *@CDATA@_32>
+   
+   \ \                                                                               */
 INTERSHELL_PROC_PTR( PTEXT_PLACEMENT, AddButtonLayout )( PMENU_BUTTON pKey, int x, int y, Font *font, CDATA color, _32 flags );
 
 
-//-----------------------------------------------------
-// this provides low level access to a button, let the programmer beware.
+
+/* <combine sack::intershell::InterShell_GetButtonControl@PMENU_BUTTON>
+   
+   \ \                                                                  */
 INTERSHELL_PROC_PTR( PSI_CONTROL, InterShell_GetButtonControl )( PMENU_BUTTON button );
 
-// result in substituted text from variables registered for InterShell
-// if called from a context that does not have PPAGE_LABEL, pass NULL
+
 INTERSHELL_PROC_PTR( CTEXTSTR, InterShell_GetLabelText )( PPAGE_LABEL label, CTEXTSTR variable );
-// use of this is preferred, otherwise thread conflicts will destroy the buffer.
+
 INTERSHELL_PROC_PTR( CTEXTSTR, InterShell_TranslateLabelText )( PPAGE_LABEL label, TEXTSTR output, int buffer_len, CTEXTSTR variable );
 
-/* actual worker function for InterShell_GetLabelText - but suport dispatch to bProcControlEx*/
+
+/* <combine sack::intershell::InterShell_GetControlLabelText@PMENU_BUTTON@PPAGE_LABEL@CTEXTSTR>
+   
+   \ \                                                                                          */
 INTERSHELL_PROC_PTR( CTEXTSTR, InterShell_GetControlLabelText )( PMENU_BUTTON button, PPAGE_LABEL label, CTEXTSTR variable );
-
-//-----------------------------------------------------
-
-//-------- FONTS -----------------------------------------------------
 
 
 INTERSHELL_PROC_PTR( Font *, SelectAFont )( PSI_CONTROL parent, CTEXTSTR *default_name );
 INTERSHELL_PROC_PTR( Font *, UseAFont )( CTEXTSTR name );
 
-// depricated - used for forward migration...
+/* <combine sack::intershell::CreateAFont@CTEXTSTR@Font@POINTER@_32>
+   
+   \ \                                                               */
 INTERSHELL_PROC_PTR( Font *, CreateAFont )( CTEXTSTR name, Font font, POINTER data, _32 datalen );
 
+/* <combine sack::intershell::BeginCanvasConfiguration@PSI_CONTROL>
+   
+   \ \                                                              */
 INTERSHELL_PROC_PTR( void, BeginCanvasConfiguration )( PSI_CONTROL pc_canvas );
 INTERSHELL_PROC_PTR( void, SaveCanvasConfiguration )( FILE *file, PSI_CONTROL pc_canvas );
 INTERSHELL_PROC_PTR( void, SaveCanvasConfiguration_XML )( genxWriter w, PSI_CONTROL pc_canvas );
@@ -462,14 +478,17 @@ INTERSHELL_PROC_PTR( PCONFIG_HANDLER, InterShell_GetCurrentConfigHandler )( void
 //PTRSZVAL GetButtonExtension( struct menu_button_tag * button );
 
 
-// BeginSubConfiguration....
-//   colntrol_type_name is a InterShell widget path/name for the type of
-//   other info to save... the method for setting additional configuration methods
-//   is invoked by thisname.
-//   Then end_type_name is the last string which will close the subconfiguration.
+
+/* <combine sack::intershell::BeginSubConfiguration@TEXTCHAR *@TEXTCHAR *>
+   
+   \ \                                                                     */
 INTERSHELL_PROC_PTR( LOGICAL, BeginSubConfiguration )( TEXTCHAR *control_type_name, const TEXTCHAR *end_type_name );
+/* <combine sack::intershell::EscapeMenuString@CTEXTSTR>
+   
+   \ \                                                   */
 INTERSHELL_PROC_PTR( CTEXTSTR, EscapeMenuString )( CTEXTSTR string );
 INTERSHELL_PROC_PTR( PMENU_BUTTON, InterShell_GetCurrentLoadingControl )( void );
+
 
 
 INTERSHELL_PROC_PTR( Font*, InterShell_GetButtonFont )( PMENU_BUTTON pc );
@@ -477,14 +496,20 @@ INTERSHELL_PROC_PTR( CTEXTSTR, InterShell_GetButtonFontName )( PMENU_BUTTON pc )
 INTERSHELL_PROC_PTR( PMENU_BUTTON, InterShell_GetCurrentButton )( void );
 INTERSHELL_PROC_PTR( void, InterShell_SetButtonFontName )( PMENU_BUTTON button, CTEXTSTR name );
 
-// return the physical button associate with this button (might be a macro element... and it might want to update the outer button's status.)
+
 INTERSHELL_PROC_PTR( PMENU_BUTTON, InterShell_GetPhysicalButton )( PMENU_BUTTON button );
 
 INTERSHELL_PROC_PTR( void, InterShell_SetButtonHighlight )( PMENU_BUTTON button, LOGICAL bEnable );
+/* <combine sack::intershell::InterShell_GetButtonHighlight@PMENU_BUTTON>
+   
+   \ \                                                                    */
 INTERSHELL_PROC_PTR( LOGICAL, InterShell_GetButtonHighlight )( PMENU_BUTTON button );
 
 INTERSHELL_PROC_PTR( CTEXTSTR, InterShell_TranslateLabelTextEx )( PMENU_BUTTON button, PPAGE_LABEL label, TEXTSTR output, int buffer_len, CTEXTSTR variable );
 
+/* <combine sack::intershell::InterShell_CreateControl@CTEXTSTR@int@int@int@int>
+   
+   \ \                                                                           */
 INTERSHELL_PROC_PTR( PTRSZVAL,  InterShell_CreateControl )( CTEXTSTR type, int x, int y, int w, int h );
 
 

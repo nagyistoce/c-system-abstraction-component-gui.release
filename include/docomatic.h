@@ -12,6 +12,10 @@
 #define _CONTAINER_NAMESPACE_END }
 #define _LINKLIST_NAMESPACE namespace list {
 #define _LINKLIST_NAMESPACE_END }
+#define _DATALIST_NAMESPACE namespace data_list {
+#define _DATALIST_NAMESPACE_END }
+
+
 
 #define INTERSHELL_PROC(type,name) IMPORT_METHOD type CPROC name
 #define INTERSHELL_PROC_PTR(type,name) type CPROC (*name)

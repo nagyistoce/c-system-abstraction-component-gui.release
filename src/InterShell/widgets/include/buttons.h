@@ -32,17 +32,21 @@
 
 #include "keypad.h"
 
+#ifdef __cplusplus
+namespace sack {
 /* This namespace contains a few external widgets which are PSI
    based. They are used in InterShell for a bit of its basic
    functionality.
    
    
    
-   sack::widgets::buttons
+   <link sack::widgets::buttons, Buttons>
    
-   sack::widgets::banner                                        */
-KEYPAD_NAMESPACE
+   <link sack::widgets::banner, Banners>                        */
 
+	namespace widgets {
+		namespace buttons {
+#endif
 #define KEY_BACKGROUND_IMAGE 0x0001 // passing an image for the background...
 #define KEY_BACKGROUND_COLOR 0x0000 // !image
 

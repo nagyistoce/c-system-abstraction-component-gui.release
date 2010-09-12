@@ -14448,8 +14448,7 @@ BodySourceUseSyntaxHighlight=0
 Count=0
 
 [Configurations\Configuration 1\Enabled Topics]
-Count=1
-ID0=sack::intershell
+Count=0
 
 [Configurations\Configuration 1\Export Symbols]
 Classes=1
@@ -27535,8 +27534,7 @@ BodySourceUseSyntaxHighlight=0
 Count=0
 
 [Configurations\Configuration 2\Enabled Topics]
-Count=1
-ID0=sack::intershell
+Count=0
 
 [Configurations\Configuration 2\Export Symbols]
 Classes=1
@@ -40622,8 +40620,7 @@ BodySourceUseSyntaxHighlight=0
 Count=0
 
 [Configurations\Configuration 3\Enabled Topics]
-Count=1
-ID0=sack::intershell
+Count=0
 
 [Configurations\Configuration 3\Export Symbols]
 Classes=1
@@ -50631,8 +50628,7 @@ BodySourceUseSyntaxHighlight=0
 Count=0
 
 [Configurations\Configuration 4\Enabled Topics]
-Count=1
-ID0=sack::intershell
+Count=0
 
 [Configurations\Configuration 4\Export Symbols]
 Classes=1
@@ -55520,8 +55516,7 @@ BodySourceUseSyntaxHighlight=0
 Count=0
 
 [Configurations\Configuration 5\Enabled Topics]
-Count=1
-ID0=sack::intershell
+Count=0
 
 [Configurations\Configuration 5\Export Symbols]
 Classes=1
@@ -56718,8 +56713,7 @@ BodySourceUseSyntaxHighlight=0
 Count=0
 
 [Configurations\Configuration 6\Enabled Topics]
-Count=1
-ID0=sack::intershell
+Count=0
 
 [Configurations\Configuration 6\Export Symbols]
 Classes=1
@@ -58677,24 +58671,27 @@ ID9=9
 SavedValues=1
 
 [Source Files]
-Count=17
+Count=20
 File0=Colors Table.dtx
 File1=image.dtx
-File10=..\include\vidlib\keydef.h
-File11=..\include\vidlib\vidstruc.h
-File12=..\src\imglib\fntglobal.h
-File13=..\src\intershell\intershell_export.h
-File14=..\src\intershell\intershell_registry.h
-File15=..\src\psilib\controlstruc.h
-File16=..\src\vidlib\keydefs.h
+File10=..\include\typelib.h
+File11=..\include\vectlib.h
+File12=..\include\vectypes.h
+File13=..\include\vidlib\keydef.h
+File14=..\include\vidlib\vidstruc.h
+File15=..\src\imglib\fntglobal.h
+File16=..\src\intershell\intershell_export.h
+File17=..\src\intershell\intershell_registry.h
+File18=..\src\psilib\controlstruc.h
+File19=..\src\vidlib\keydefs.h
 File2=..\include\controls.h
-File3=..\include\image.h
-File4=..\include\psi.h
-File5=..\include\render.h
-File6=..\include\sack_types.h
-File7=..\include\sqlgetoption.h
-File8=..\include\stdhdrs.h
-File9=..\include\typelib.h
+File3=..\include\filemon.h
+File4=..\include\image.h
+File5=..\include\psi.h
+File6=..\include\render.h
+File7=..\include\sack_types.h
+File8=..\include\sqlgetoption.h
+File9=..\include\stdhdrs.h
 
 [Source Include Directories]
 Count=0

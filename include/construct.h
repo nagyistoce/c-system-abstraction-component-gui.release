@@ -53,10 +53,18 @@
    namespace ending.                                     */
 #define CONSTRUCT_NAMESPACE_END _CONSTRUCT_NAMESPACE_END _TASK_NAMESPACE_END SACK_NAMESPACE_END
 
-/* Called to indicate that a process is done initializing and is
-   ready to process.                                             */
-CONSTRUCT_NAMESPACE
+	SACK_NAMESPACE
+	_TASK_NAMESPACE
+	/* Registers with message service, assuming the summoner message service is active.
+	 Provides communication methods with a task manager, so the application can notify,
+	 start has completed.   The service is ready to work.*/
+_CONSTRUCT_NAMESPACE
 
+/* Called to indicate that a process is done initializing and is
+   ready to process. Notifies summoner service of Loading
+   completed. If enabled, there is also a library component that
+   will run at deadstart to just confirm initializing, this
+   would actually indicate the service is now ready to serve.    */
 CONSTRUCT_PROC void CONSTRUCT_API LoadComplete( void );
 
 CONSTRUCT_NAMESPACE_END
