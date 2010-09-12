@@ -1064,7 +1064,10 @@ Name=Types
 Count=0
 
 [Class Hierarchy\3\Node Positions]
-Count=0
+Count=1
+ID0000=sack::containers::list::iList
+X0000=20
+Y0000=19
 
 [Class Hierarchy\3\Options]
 Zoom=1
@@ -14445,7 +14448,8 @@ BodySourceUseSyntaxHighlight=0
 Count=0
 
 [Configurations\Configuration 1\Enabled Topics]
-Count=0
+Count=1
+ID0=sack::intershell
 
 [Configurations\Configuration 1\Export Symbols]
 Classes=1
@@ -27531,7 +27535,8 @@ BodySourceUseSyntaxHighlight=0
 Count=0
 
 [Configurations\Configuration 2\Enabled Topics]
-Count=0
+Count=1
+ID0=sack::intershell
 
 [Configurations\Configuration 2\Export Symbols]
 Classes=1
@@ -40617,7 +40622,8 @@ BodySourceUseSyntaxHighlight=0
 Count=0
 
 [Configurations\Configuration 3\Enabled Topics]
-Count=0
+Count=1
+ID0=sack::intershell
 
 [Configurations\Configuration 3\Export Symbols]
 Classes=1
@@ -50625,7 +50631,8 @@ BodySourceUseSyntaxHighlight=0
 Count=0
 
 [Configurations\Configuration 4\Enabled Topics]
-Count=0
+Count=1
+ID0=sack::intershell
 
 [Configurations\Configuration 4\Export Symbols]
 Classes=1
@@ -55513,7 +55520,8 @@ BodySourceUseSyntaxHighlight=0
 Count=0
 
 [Configurations\Configuration 5\Enabled Topics]
-Count=0
+Count=1
+ID0=sack::intershell
 
 [Configurations\Configuration 5\Export Symbols]
 Classes=1
@@ -56710,7 +56718,8 @@ BodySourceUseSyntaxHighlight=0
 Count=0
 
 [Configurations\Configuration 6\Enabled Topics]
-Count=0
+Count=1
+ID0=sack::intershell
 
 [Configurations\Configuration 6\Export Symbols]
 Classes=1
@@ -58048,20 +58057,23 @@ SupportXMLDoc=1
 TabExpandCount=4
 TopicSeparator=@@
 TrailerChars=-+~/#
-UseCodeSkip=0
+UseCodeSkip=1
 UseParameterListInlineComments=1
 WallCharacters="#$%&'*+-/=@[\]^_`{|}~
 
 [Parsing\ConditionalDefines]
-Count=8
+Count=11
 Define_0=__WINDOWS__
 Define_1=__WATCOMC__
+Define_10=DOC_O_MAT
 Define_2=WIN32
 Define_3=USE_ODBC
 Define_4=_DEBUG
 Define_5=SACK_CORE_BUILD
 Define_6=SACK_BAG_EXPORTS
 Define_7=__cplusplus
+Define_8=INTERSHELL_SOURCE
+Define_9=_DEFINE_INTERFACE
 HandleConditionalDefines=1
 
 [Parsing\Excluded Source Files]

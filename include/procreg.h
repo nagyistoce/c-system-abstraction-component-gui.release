@@ -71,56 +71,77 @@ SACK_NAMESPACE
    the access to it was encapsulated by DoRegisterControl
    registering the appropriate methods.                          */
 	_APP_NAMESPACE
-   /*Contains methods dealing with registering routines and values
-   in memory. Provisions are available to save the configuration
-   state, but the best that can be offered here would be a
-   translation tool for text strings. The namespace is savable,
-   but most of the content of the registration space are short
-   term pointers. Namespace containing registry namespace.
-   Contains application features... I guess.
-   
-   
-// POINTER in these two are equal to (void(*)(void))
-// but - that's rarely the most useful thing... so
-
-
-// name class is a tree of keys...
-//   <libname>/<...>
-//
-//   psi/control/## might contain procs
-//       Init
-//       Destroy
-//       Move
-//
-//   RegAlias( WIDE("psi/control/3"), WIDE("psi/control/button") );
-//     psi/control/button and
-//     psi/control/3   might reference the same routines
-//
-//   psi/frame
-//       Init
-//       Destroy
-//       Move
-//  memlib
-//     Alloc
-//     Free
-//
-//   network/tcp
-//
-//
-// I guess name class trees are somewhat shallow at the moment
-//  not going beyond 1-3 layers
-//
-//  names may eventually be registered and
-//  reference out of body services, even out of box...
-//
-//
-
-// the values passed as returntype and parms/args need not be
-// real genuine types, but do need to be consistant between the
-// registrant and the requestor... this provides for full name
-// dressing, return type and paramter type may both cause
-// overridden functions to occur...
-   */
+   /* Contains methods dealing with registering routines and values
+      in memory. Provisions are available to save the configuration
+      state, but the best that can be offered here would be a
+      translation tool for text strings. The namespace is savable,
+      but most of the content of the registration space are short
+      term pointers. Namespace containing registry namespace.
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      old notes - very discongruant probably should delete them.
+      
+      
+      
+      Process name registry
+      
+      
+      
+      it's a tree of names.
+      
+      there are paths, and entries
+      
+      paths are represented as class_name
+      
+      PCLASSROOT is also a suitable class name
+      
+      PCLASSROOT is defined as a valid CTEXTSTR.
+      
+      there is (apparently) a name that is not valid as a path name
+      
+      that is TREE
+      
+      
+      
+      guess.
+      
+      POINTER in these two are equal to (void(*)(void)) but -
+      that's rarely the most useful thing... so
+      
+      name class is a tree of keys... /\<...\>
+      
+      psi/control/## might contain procs Init Destroy Move
+      
+      RegAlias( WIDE("psi/control/3"), WIDE("psi/control/button")
+      ); psi/control/button and psi/control/3 might reference the
+      same routines
+      
+      psi/frame Init Destroy Move memlib Alloc Free
+      
+      network/tcp
+      
+      I guess name class trees are somewhat shallow at the moment
+      not going beyond 1-3 layers
+      
+      names may eventually be registered and reference out of body
+      services, even out of box...
+      
+      
+      
+      the values passed as returntype and parms/args need not be
+      real genuine types, but do need to be consistant between the
+      registrant and the requestor... this provides for full name
+      dressing, return type and paramter type may both cause
+      overridden functions to occur...                              */
 _PROCREG_NAMESPACE
 
 
@@ -147,58 +168,111 @@ _PROCREG_NAMESPACE
 #endif
 #endif
 
-///
-///what is this
-///Triple Comment...
-	//void GetClassRoot( CTEXTSTR class_name );
 
-
-// Process name registry
-	// document
-	// it's a tree of names.
-	// there are paths, and entries
-	// paths are represented as class_name
-	// PCLASSROOT is also a suitable class name
-	// PCLASSROOT is defined as a valid CTEXTSTR.
-	// there is (apparently) a name that is not valid as a path namne
-	// that is TREE
-
-
+/* CheckClassRoot reads for a path of names, but does not create
+   it if it does not exist.                                      */
 PROCREG_PROC( PCLASSROOT, CheckClassRoot )( CTEXTSTR class_name );
+/* \Returns a PCLASSROOT of a specified path. The path may be
+   either a PCLASSROOT or a text string indicating the path. the
+   Ex versions allow passing a base PCLASSROOT path and an
+   additional subpath to get. GetClassRoot will always create
+   the path if it did not exist before, and will always result
+   with a root.
+   
+   
+   
+   
+   Remarks
+   a CTEXTSTR (plain text string, probably wide character if
+   compiled unicode) and a PCLASSROOT are always
+   interchangeable. Though you may need a forced type cast, I
+   have defined both CTEXTSTR and PCLASSROOT function overloads
+   for c++ compiled code, and C isn't so unkind about the
+   conversion. I think problem might lie that CTEXTSTR has a
+   const qualifier and PCLASSROOT doesn't (but should).
+   Example
+   <code lang="c++">
+   
+   PCLASSROOT root = GetClassRoot( "psi/resource" );
+   // returns the root of all resource names.
+   
+   </code>
+   <code>
+   PCLASSROOT root2 = GetClassRootEx( "psi/resource", "buttons" );
+   
+   </code>                                                         */
 PROCREG_PROC( PCLASSROOT, GetClassRoot )( CTEXTSTR class_name );
+/* <combine sack::app::registry::GetClassRoot@CTEXTSTR>
+   
+   \ \                                                  */
 PROCREG_PROC( PCLASSROOT, GetClassRootEx )( PCLASSROOT root, CTEXTSTR name_class );
 #ifdef __cplusplus
+/* <combine sack::app::registry::GetClassRoot@CTEXTSTR>
+   
+   \ \                                                  */
 PROCREG_PROC( PCLASSROOT, GetClassRoot )( PCLASSROOT class_name );
+/* <combine sack::app::registry::GetClassRoot@CTEXTSTR>
+   
+   \ \                                                  */
 PROCREG_PROC( PCLASSROOT, GetClassRootEx )( PCLASSROOT root, PCLASSROOT name_class );
 #endif
 
 PROCREG_PROC( void, SetInterfaceConfigFile )( TEXTCHAR *filename );
 
 
-// data is a &(POINTER data = NULL);
-// POINTER data = NULL; .. Get[First/Next]RegisteredName( WIDE("classname"), &data );
-// these operations are not threadsafe and multiple thread accesses will cause mis-stepping
-//
-// Usage: 
-/*  CTEXTSTR result;
- *  POINTER data = NULL;
- *  for( result = GetFirstRegisteredName( "some/class/path", &data );
- *       result;
- *       result = GetNextRegisteredName( &data ) )
- *  {
- *     if( NameHasBranches( &data ) )  // for consitancy in syntax
- *     {
- *        // consider recursing through tree, name becomes a valid classname for GetFirstRegisteredName()
- *     } 
- */
-// these functions as passed the address of a POINTER.
-// this POINTER is for the use of the browse routines and should 
-// is meaningless to he calling application.
-// 
+/* Get[First/Next]RegisteredName( WIDE("classname"), &amp;data );
+   these operations are not threadsafe and multiple thread
+   accesses will cause mis-stepping
+   
+   
+   
+   These functions as passed the address of a POINTER. this
+   POINTER is for the use of the browse routines and should is
+   meaningless to he calling application.
+   Parameters
+   root :       The root to search from
+   classname :  A sub\-path from the root to search from
+   data :       the address of a pointer that keeps track of
+                information about the search. (opaque to user)
+   
+   Example
+   Usage:
+   <code lang="c++">
+   CTEXTSTR result;
+   POINTER data = NULL;
+   for( result = GetFirstRegisteredName( "some/class/path", &amp;data );
+        \result;
+        \result = GetNextRegisteredName( &amp;data ) )
+   {
+        // result is a string name of the current node.
+        // can use that name and GetRegistered____ (function/int/value)
+        if( NameHasBranches( &amp;data ) ) // for consitancy in syntax
+        {
+            // consider recursing through tree, name becomes a valid classname for GetFirstRegisteredName()
+        }
+   }
+   </code>                                                                                                  */
 PROCREG_PROC( CTEXTSTR, GetFirstRegisteredNameEx )( PCLASSROOT root, CTEXTSTR classname, PCLASSROOT *data );
+/* <combine sack::app::registry::GetFirstRegisteredNameEx@PCLASSROOT@CTEXTSTR@PCLASSROOT *>
+   
+   \ \                                                                                      */
 PROCREG_PROC( CTEXTSTR, GetFirstRegisteredName )( CTEXTSTR classname, PCLASSROOT *data );
+/* Steps to the next registered name being browsed. Is passed
+   only the pointer to data. See GetFirstRegisteredName for
+   usage.
+   See Also
+   <link sack::app::registry::GetFirstRegisteredNameEx@PCLASSROOT@CTEXTSTR@PCLASSROOT *, sack::app::registry::GetFirstRegisteredNameEx Function> */
 PROCREG_PROC( CTEXTSTR, GetNextRegisteredName )( PCLASSROOT *data );
-// result with the current node ( useful for pulling registered subvalues like description....
+/* When using GetFirstRegisteredName and GetNextRegisteredName
+   to browse through names, this function is able to get the
+   current PCLASSROOT of the current node, usually you end up
+   with just the content of that registered name.
+   
+   
+   
+   \result with the current node ( useful for pulling registered
+   subvalues like description, or file and line )
+                                                                 */
 PROCREG_PROC( PCLASSROOT, GetCurrentRegisteredTree )( PCLASSROOT *data );
 #ifdef __cplusplus
 //PROCREG_PROC( CTEXTSTR, GetFirstRegisteredName )( CTEXTSTR classname, POINTER *data );
@@ -254,6 +328,9 @@ PROCREG_PROC( int, RegisterProcedureExx )( PCLASSROOT root // root name or PCLAS
 				// really only a single modified value.
 /* parameters to RegisterClassAliasEx are the original name, and the new alias name for the origianl branch*/
 PROCREG_PROC( PCLASSROOT, RegisterClassAliasEx )( PCLASSROOT root, CTEXTSTR original, CTEXTSTR alias );
+/* <combine sack::app::registry::RegisterClassAliasEx@PCLASSROOT@CTEXTSTR@CTEXTSTR>
+   
+   \ \                                                                              */
 PROCREG_PROC( PCLASSROOT, RegisterClassAlias )( CTEXTSTR original, CTEXTSTR newalias );
 
 
@@ -265,6 +342,7 @@ PROCREG_PROC( PROCEDURE, ReadRegisteredProcedureEx )( PCLASSROOT root
 																	 , CTEXTSTR parms
 																  );
 #define ReadRegisteredProcedure( root,rt,a) ((rt(CPROC*)a)ReadRegisteredProcedureEx(root,#rt,#a))
+/* Gets a function that has been registered. */
 PROCREG_PROC( PROCEDURE, GetRegisteredProcedureExxx )( PCLASSROOT root
 																	 , PCLASSROOT name_class
                                                     , CTEXTSTR returntype
@@ -275,6 +353,9 @@ PROCREG_PROC( PROCEDURE, GetRegisteredProcedureExxx )( PCLASSROOT root
 #define GetRegisteredProcedure2(nc,rtype,name,args) (rtype (CPROC*)args)GetRegisteredProcedureEx((nc),WIDE(#rtype), name, WIDE(#args) )
 #define GetRegisteredProcedureNonCPROC(nc,rtype,name,args) (rtype (*)args)GetRegisteredProcedureEx((nc),WIDE(#rtype), name, WIDE(#args) )
 
+/* <combine sack::app::registry::GetRegisteredProcedureExxx@PCLASSROOT@PCLASSROOT@CTEXTSTR@CTEXTSTR@CTEXTSTR>
+   
+   \ \                                                                                                        */
 PROCREG_PROC( PROCEDURE, GetRegisteredProcedureEx )( PCLASSROOT name_class
 																	, CTEXTSTR returntype
 																	, CTEXTSTR name
@@ -292,24 +373,36 @@ PROCREG_PROC( LOGICAL, RegisterFunctionExx )( PCLASSROOT root
 													  DBG_PASS
 														  );
 #ifdef __cplusplus
+/* <combine sack::app::registry::GetRegisteredProcedureExxx@PCLASSROOT@PCLASSROOT@CTEXTSTR@CTEXTSTR@CTEXTSTR>
+   
+   \ \                                                                                                        */
 PROCREG_PROC( PROCEDURE, GetRegisteredProcedureExxx )( CTEXTSTR root
 																	 , CTEXTSTR name_class
                                                     , CTEXTSTR returntype
 																	 , CTEXTSTR name
 																	 , CTEXTSTR parms
 																	 );
+/* <combine sack::app::registry::GetRegisteredProcedureExxx@PCLASSROOT@PCLASSROOT@CTEXTSTR@CTEXTSTR@CTEXTSTR>
+   
+   \ \                                                                                                        */
 PROCREG_PROC( PROCEDURE, GetRegisteredProcedureExxx )( CTEXTSTR root
 																	 , PCLASSROOT name_class
                                                     , CTEXTSTR returntype
 																	 , CTEXTSTR name
 																	 , CTEXTSTR parms
 																	 );
+/* <combine sack::app::registry::GetRegisteredProcedureExxx@PCLASSROOT@PCLASSROOT@CTEXTSTR@CTEXTSTR@CTEXTSTR>
+   
+   \ \                                                                                                        */
 PROCREG_PROC( PROCEDURE, GetRegisteredProcedureExxx )( PCLASSROOT root
 																	 , CTEXTSTR name_class
                                                     , CTEXTSTR returntype
 																	 , CTEXTSTR name
 																	 , CTEXTSTR parms
 																	 );
+/* <combine sack::app::registry::GetRegisteredProcedureExxx@PCLASSROOT@PCLASSROOT@CTEXTSTR@CTEXTSTR@CTEXTSTR>
+   
+   \ \                                                                                                        */
 PROCREG_PROC( PROCEDURE, GetRegisteredProcedureEx )( CTEXTSTR name_class
 																	, CTEXTSTR returntype
 																	, CTEXTSTR name
@@ -344,25 +437,64 @@ PROCREG_PROC( int, RegisterValueExx )( PCLASSROOT root, CTEXTSTR name_class, CTE
 PROCREG_PROC( int, RegisterValueEx )( CTEXTSTR name_class, CTEXTSTR name, int bIntVal, CTEXTSTR value );
 PROCREG_PROC( int, RegisterValue )( CTEXTSTR name_class, CTEXTSTR name, CTEXTSTR value );
 
+/* \ \ 
+   Parameters
+   root :        Root class to start searching from
+   name_class :  An additional sub\-path to get the name from
+   name :        the name within the path specified
+   bIntVal :     a true/false whether to get the string or
+                 integer value from the specified node.
+   
+   Returns
+   A pointer to a string if bIntVal is not set. (NULL if there
+   was no string).
+   
+   Otherwise will be an int shorter than or equal to the size of
+   a pointer, which should be cast to an int if bIntVal is set,
+   and there is a value registered there. Probably 0 if no
+   value, so registered 0 value and no value is
+   indistinguisable.                                             */
 PROCREG_PROC( CTEXTSTR, GetRegisteredValueExx )( PCLASSROOT root, CTEXTSTR name_class, CTEXTSTR name, int bIntVal );
+/* <combine sack::app::registry::GetRegisteredValueExx@PCLASSROOT@CTEXTSTR@CTEXTSTR@int>
+   
+   \ \                                                                                   */
 PROCREG_PROC( CTEXTSTR, GetRegisteredValueEx )( CTEXTSTR name_class, CTEXTSTR name, int bIntVal );
+/* <combine sack::app::registry::GetRegisteredValueExx@PCLASSROOT@CTEXTSTR@CTEXTSTR@int>
+   
+   \ \                                                                                   */
 PROCREG_PROC( CTEXTSTR, GetRegisteredValue )( CTEXTSTR name_class, CTEXTSTR name );
 #ifdef __cplusplus
+/* <combine sack::app::registry::GetRegisteredValueExx@PCLASSROOT@CTEXTSTR@CTEXTSTR@int>
+   
+   \ \                                                                                   */
 PROCREG_PROC( CTEXTSTR, GetRegisteredValueExx )( CTEXTSTR root, CTEXTSTR name_class, CTEXTSTR name, int bIntVal );
 PROCREG_PROC( int, RegisterIntValueEx )( CTEXTSTR root, CTEXTSTR name_class, CTEXTSTR name, PTRSZVAL value );
 #endif
 
-// if bIntVale, result should be passed as an (&int)
+/* This is like GetRegisteredValue, but takes the address of the
+   type to return into instead of having to cast the final
+   \result.
+   
+   
+   
+   if bIntValue, result should be passed as an (&amp;int)        */
 PROCREG_PROC( int, GetRegisteredStaticValue )( PCLASSROOT root, CTEXTSTR name_class, CTEXTSTR name
 															, CTEXTSTR *result
 															, int bIntVal );
 #define GetRegisteredStaticIntValue(r,nc,name,result) GetRegisteredStaticValue(r,nc,name,(CTEXTSTR*)result,TRUE )
 
-// these should be avoided...
-// the above
+/* <combine sack::app::registry::GetRegisteredValueExx@PCLASSROOT@CTEXTSTR@CTEXTSTR@int>
+   
+   \ \                                                                                   */
 PROCREG_PROC( int, GetRegisteredIntValueEx )( PCLASSROOT root, CTEXTSTR name_class, CTEXTSTR name );
+/* <combine sack::app::registry::GetRegisteredIntValueEx@PCLASSROOT@CTEXTSTR@CTEXTSTR>
+   
+   \ \                                                                                 */
 PROCREG_PROC( int, GetRegisteredIntValue )( CTEXTSTR name_class, CTEXTSTR name );
 #ifdef __cplusplus
+/* <combine sack::app::registry::GetRegisteredIntValueEx@PCLASSROOT@CTEXTSTR@CTEXTSTR>
+   
+   \ \                                                                                 */
 PROCREG_PROC( int, GetRegisteredIntValue )( PCLASSROOT name_class, CTEXTSTR name );
 #endif
 
@@ -386,6 +518,28 @@ PROCREG_PROC( PTRSZVAL, RegisterDataType )( CTEXTSTR classname
 												 , PTRSZVAL size
 												 , OpenCloseNotification open
 												 , OpenCloseNotification close );
+/* Registers a structure as creatable in shared memory by name.
+   So a single name of the structure can be used to retrieve a
+   pointer to one created.
+   
+   
+   
+   
+   Example
+   \ \ 
+   <code lang="c++">
+   
+   POINTER p = CreateRegisteredDataType( "My types", "my_registered_type", "my instance" );
+   // p will result to a region of type 'my_registered_type' called 'my_instance'
+   // if it did not exist, it will be created, otherwise the one existing is returned.
+   
+   </code>
+   
+   Parameters
+   root :          optional root name (ex version uses this)
+   classname :     path to the type
+   name :          name of the type to create an instance of
+   instancename :  a name for the instance created.                                         */
 PROCREG_PROC( PTRSZVAL, CreateRegisteredDataType)( CTEXTSTR classname
 																 , CTEXTSTR name
 																 , CTEXTSTR instancename );
@@ -397,12 +551,18 @@ PROCREG_PROC( PTRSZVAL, RegisterDataTypeEx )( PCLASSROOT root
 													, OpenCloseNotification Open
 													, OpenCloseNotification Close );
 
+/* <combine sack::app::registry::CreateRegisteredDataType@CTEXTSTR@CTEXTSTR@CTEXTSTR>
+   
+   \ \                                                                                */
 PROCREG_PROC( PTRSZVAL, CreateRegisteredDataTypeEx)( PCLASSROOT root
 																	, CTEXTSTR classname
 																	, CTEXTSTR name
 																	, CTEXTSTR instancename );
 
+/* Outputs through syslog a tree dump of all names registered. */
 PROCREG_PROC( void, DumpRegisteredNames )( void );
+/* Dumps through syslog all names registered from the specified
+   root point. (instead of dumping the whole tree)              */
 PROCREG_PROC( void, DumpRegisteredNamesFrom )( PCLASSROOT root );
 
 PROCREG_PROC( int, SaveTree )( void );
@@ -414,7 +574,24 @@ PROCREG_PROC( int, LoadTree )( void );
 #define METHOD_ALIAS(i,name) ((i)->_##name)
 #define PDMETHOD_ALIAS(i,name) (*(i)->_##name)
 
+/* Releases an interface. When interfaces are registered, they
+   register with a OnGetInterface and an OnDropInterface
+   callback so that it may do additional work to cleanup from
+   giving you a copy of the interface.
+   
+   
+   Example
+   <code lang="c++">
+   
+   POINTER p = GetInterface( "image" );
+   DropInterface( p );
+   
+   </code>                                                     */
 PROCREG_PROC( void, DropInterface )( TEXTCHAR *pServiceName, POINTER interface_x );
+/* \Returns the pointer to a registered interface. This is
+   typically a structure that contains pointer to functions. Takes
+   a text string to an interface. Interfaces are registered at a
+   known location in the registry tree.                            */
 PROCREG_PROC( POINTER, GetInterface )( CTEXTSTR pServiceName );
 
 #define GetRegisteredInterface(name) GetInterface(name)
@@ -463,8 +640,8 @@ PROCREG_PROC( int, ReleaseRegisteredFunctionEx )( PCLASSROOT root
 #define DefineRegistryMethod(task,name,classtype,classbase,methodname,returntype,argtypes)  \
 	_DefineRegistryMethod(task,name,classtype,classbase,methodname,returntype,argtypes,__LINE__)
 
-// this fails. Because this is used with complex names
-// an extra alias of priority_preload must be used to fully resolve paramters.
+// this macro is used for ___DefineRegistryMethodP. Because this is used with complex names
+// an extra define wrapper of priority_preload must be used to fully resolve paramters.
 #define PRIOR_PRELOAD(a,p) PRIORITY_PRELOAD(a,p)
 #define ___DefineRegistryMethodP(priority,task,name,classtype,classbase,methodname,returntype,argtypes,line)   \
 	CPROC paste(name,line)argtypes;       \
@@ -622,12 +799,9 @@ PROCREG_PROC( CTEXTSTR, SaveText )( CTEXTSTR text );
 
 
 PROCREG_NAMESPACE_END
+
+
 #ifdef __cplusplus
-
-//PROCREG_PROC( PCLASSROOT, GetClassRootEx )( CTEXTSTR root, CTEXTSTR name_class );
-//PROCREG_PROC( PCLASSROOT, GetClassRootEx )( CTEXTSTR root, PCLASSROOT name_class );
-//PROCREG_PROC( PCLASSROOT, GetClassRootEx )( PCLASSROOT root, PCLASSROOT name_class );
-
 	using namespace sack::app::registry;
 #endif
 
