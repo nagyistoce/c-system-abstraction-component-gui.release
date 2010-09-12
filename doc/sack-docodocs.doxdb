@@ -3291,20 +3291,8 @@
     <link topicid="sack::app::registry::GetClassRoot@CTEXTSTR" displaystring="sack::app::registry::GetClassRoot Function">
       <target id="html">../output/sack__app__registry__GetClassRoot@CTEXTSTR.html</target>
     </link>
-    <link topicid="sack::app::registry::GetClassRoot@PCLASSROOT" displaystring="sack::app::registry::GetClassRoot Function">
-      <target id="html">../output/sack__app__registry__GetClassRoot@PCLASSROOT.html</target>
-    </link>
-    <link topicid="sack::app::registry::GetClassRootEx@PCLASSROOT@CTEXTSTR" displaystring="sack::app::registry::GetClassRootEx Function">
-      <target id="html">../output/sack__app__registry__GetClassRootEx@PCLASSROOT@CTEXTSTR.html</target>
-    </link>
-    <link topicid="sack::app::registry::GetClassRootEx@PCLASSROOT@PCLASSROOT" displaystring="sack::app::registry::GetClassRootEx Function">
-      <target id="html">../output/sack__app__registry__GetClassRootEx@PCLASSROOT@PCLASSROOT.html</target>
-    </link>
     <link topicid="sack::app::registry::GetCurrentRegisteredTree@PCLASSROOT *" displaystring="sack::app::registry::GetCurrentRegisteredTree Function">
       <target id="html">../output/sack__app__registry__GetCurrentRegisteredTree@PCLASSROOT__.html</target>
-    </link>
-    <link topicid="sack::app::registry::GetFirstRegisteredName@CTEXTSTR@PCLASSROOT *" displaystring="sack::app::registry::GetFirstRegisteredName Function">
-      <target id="html">../output/sack__app__registry__GetFirstRegisteredName@CTEXTSTR@PCLASSROOT__.html</target>
     </link>
     <link topicid="sack::app::registry::GetFirstRegisteredNameEx@PCLASSROOT@CTEXTSTR@PCLASSROOT *" displaystring="sack::app::registry::GetFirstRegisteredNameEx Function">
       <target id="html">../output/sack__app__registry__GetFirstRegisteredNameEx@PCLASSROOT@CTEXTSTR@PCLASSROOT__.html</target>
@@ -3318,38 +3306,14 @@
     <link topicid="sack::app::registry::GetRegisteredInterface" displaystring="sack::app::registry::GetRegisteredInterface Macro">
       <target id="html">../output/sack__app__registry__GetRegisteredInterface.html</target>
     </link>
-    <link topicid="sack::app::registry::GetRegisteredIntValue@CTEXTSTR@CTEXTSTR" displaystring="sack::app::registry::GetRegisteredIntValue Function">
-      <target id="html">../output/sack__app__registry__GetRegisteredIntValue@CTEXTSTR@CTEXTSTR.html</target>
-    </link>
-    <link topicid="sack::app::registry::GetRegisteredIntValue@PCLASSROOT@CTEXTSTR" displaystring="sack::app::registry::GetRegisteredIntValue Function">
-      <target id="html">../output/sack__app__registry__GetRegisteredIntValue@PCLASSROOT@CTEXTSTR.html</target>
-    </link>
-    <link topicid="sack::app::registry::GetRegisteredIntValueEx@PCLASSROOT@CTEXTSTR@CTEXTSTR" displaystring="sack::app::registry::GetRegisteredIntValueEx Function">
-      <target id="html">../output/sack__app__registry__GetRegisteredIntValueEx@PCLASSROOT@CTEXTSTR@CTEXTSTR.html</target>
-    </link>
     <link topicid="sack::app::registry::GetRegisteredProcedure" displaystring="sack::app::registry::GetRegisteredProcedure Macro">
       <target id="html">../output/sack__app__registry__GetRegisteredProcedure.html</target>
     </link>
     <link topicid="sack::app::registry::GetRegisteredProcedure2" displaystring="sack::app::registry::GetRegisteredProcedure2 Macro">
       <target id="html">../output/sack__app__registry__GetRegisteredProcedure2.html</target>
     </link>
-    <link topicid="sack::app::registry::GetRegisteredProcedureEx@CTEXTSTR@CTEXTSTR@CTEXTSTR@CTEXTSTR" displaystring="sack::app::registry::GetRegisteredProcedureEx Function">
-      <target id="html">../output/sack__app__registry__GetRegisteredProcedureEx@CTEXTSTR@CTEXTSTR@CTEXTSTR@CTEXTSTR.html</target>
-    </link>
-    <link topicid="sack::app::registry::GetRegisteredProcedureEx@PCLASSROOT@CTEXTSTR@CTEXTSTR@CTEXTSTR" displaystring="sack::app::registry::GetRegisteredProcedureEx Function">
-      <target id="html">../output/sack__app__registry__GetRegisteredProcedureEx@PCLASSROOT@CTEXTSTR@CTEXTSTR@CTEXTSTR.html</target>
-    </link>
     <link topicid="sack::app::registry::GetRegisteredProcedureExx" displaystring="sack::app::registry::GetRegisteredProcedureExx Macro">
       <target id="html">../output/sack__app__registry__GetRegisteredProcedureExx.html</target>
-    </link>
-    <link topicid="sack::app::registry::GetRegisteredProcedureExxx@CTEXTSTR@CTEXTSTR@CTEXTSTR@CTEXTSTR@CTEXTSTR" displaystring="sack::app::registry::GetRegisteredProcedureExxx Function">
-      <target id="html">../output/sack__app__registry__GetRegisteredProcedureExxx@CTEXTSTR@CTEXTSTR@CTEXTSTR@CTEXTSTR@CTEXTSTR.html</target>
-    </link>
-    <link topicid="sack::app::registry::GetRegisteredProcedureExxx@CTEXTSTR@PCLASSROOT@CTEXTSTR@CTEXTSTR@CTEXTSTR" displaystring="sack::app::registry::GetRegisteredProcedureExxx Function">
-      <target id="html">../output/sack__app__registry__GetRegisteredProcedureExxx@CTEXTSTR@PCLASSROOT@CTEXTSTR@CTEXTSTR@CTEXTSTR.html</target>
-    </link>
-    <link topicid="sack::app::registry::GetRegisteredProcedureExxx@PCLASSROOT@CTEXTSTR@CTEXTSTR@CTEXTSTR@CTEXTSTR" displaystring="sack::app::registry::GetRegisteredProcedureExxx Function">
-      <target id="html">../output/sack__app__registry__GetRegisteredProcedureExxx@PCLASSROOT@CTEXTSTR@CTEXTSTR@CTEXTSTR@CTEXTSTR.html</target>
     </link>
     <link topicid="sack::app::registry::GetRegisteredProcedureExxx@PCLASSROOT@PCLASSROOT@CTEXTSTR@CTEXTSTR@CTEXTSTR" displaystring="sack::app::registry::GetRegisteredProcedureExxx Function">
       <target id="html">../output/sack__app__registry__GetRegisteredProcedureExxx@PCLASSROOT@PCLASSROOT@CTEXTSTR@CTEXTSTR@CTEXTSTR.html</target>
@@ -3362,15 +3326,6 @@
     </link>
     <link topicid="sack::app::registry::GetRegisteredStaticValue@PCLASSROOT@CTEXTSTR@CTEXTSTR@CTEXTSTR *@int" displaystring="sack::app::registry::GetRegisteredStaticValue Function">
       <target id="html">../output/sack__app__registry__GetRegisteredStaticValue@PCLASSROOT@CTEXTSTR@CTEXTSTR@CTEXTSTR__@int.html</target>
-    </link>
-    <link topicid="sack::app::registry::GetRegisteredValue@CTEXTSTR@CTEXTSTR" displaystring="sack::app::registry::GetRegisteredValue Function">
-      <target id="html">../output/sack__app__registry__GetRegisteredValue@CTEXTSTR@CTEXTSTR.html</target>
-    </link>
-    <link topicid="sack::app::registry::GetRegisteredValueEx@CTEXTSTR@CTEXTSTR@int" displaystring="sack::app::registry::GetRegisteredValueEx Function">
-      <target id="html">../output/sack__app__registry__GetRegisteredValueEx@CTEXTSTR@CTEXTSTR@int.html</target>
-    </link>
-    <link topicid="sack::app::registry::GetRegisteredValueExx@CTEXTSTR@CTEXTSTR@CTEXTSTR@int" displaystring="sack::app::registry::GetRegisteredValueExx Function">
-      <target id="html">../output/sack__app__registry__GetRegisteredValueExx@CTEXTSTR@CTEXTSTR@CTEXTSTR@int.html</target>
     </link>
     <link topicid="sack::app::registry::GetRegisteredValueExx@PCLASSROOT@CTEXTSTR@CTEXTSTR@int" displaystring="sack::app::registry::GetRegisteredValueExx Function">
       <target id="html">../output/sack__app__registry__GetRegisteredValueExx@PCLASSROOT@CTEXTSTR@CTEXTSTR@int.html</target>
@@ -3425,9 +3380,6 @@
     </link>
     <link topicid="sack::app::registry::RegisterAndCreateGlobalWithInit@POINTER *@PTRSZVAL@CTEXTSTR@void __cdecl*InitPOINTER,PTRSZVAL" displaystring="sack::app::registry::RegisterAndCreateGlobalWithInit Function">
       <target id="html">../output/sack__app__registry__RegisterAndCreateGlobalWithInit@POINTER__@PTRSZVAL@CTEXTSTR@void___cdecl_InitPOINTER,PTRSZVAL.html</target>
-    </link>
-    <link topicid="sack::app::registry::RegisterClassAlias@CTEXTSTR@CTEXTSTR" displaystring="sack::app::registry::RegisterClassAlias Function">
-      <target id="html">../output/sack__app__registry__RegisterClassAlias@CTEXTSTR@CTEXTSTR.html</target>
     </link>
     <link topicid="sack::app::registry::RegisterClassAliasEx@PCLASSROOT@CTEXTSTR@CTEXTSTR" displaystring="sack::app::registry::RegisterClassAliasEx Function">
       <target id="html">../output/sack__app__registry__RegisterClassAliasEx@PCLASSROOT@CTEXTSTR@CTEXTSTR.html</target>

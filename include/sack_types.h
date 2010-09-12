@@ -245,6 +245,12 @@ using namespace System;
 /* Define the container namespace (when building with C++, the
    wrappers are namespace{} instead of extern"c"{} )           */
 #define _LINKLIST_NAMESPACE_END }
+/* Define the container namespace (when building with C++, the
+   wrappers are namespace{} instead of extern"c"{} )           */
+#define _DATALIST_NAMESPACE namespace data_list {
+/* Define the container namespace (when building with C++, the
+   wrappers are namespace{} instead of extern"c"{} )           */
+#define _DATALIST_NAMESPACE_END }
 #else
 /* Define the sack namespace (when building with C++, the
    wrappers are namespace{} instead of extern"c"{} )           */
@@ -264,6 +270,12 @@ using namespace System;
 /* Define the container namespace (when building with C++, the
    wrappers are namespace{} instead of extern"c"{} )           */
 #define _LINKLIST_NAMESPACE_END
+/* Define the container namespace (when building with C++, the
+   wrappers are namespace{} instead of extern"c"{} )           */
+#define _DATALIST_NAMESPACE
+/* Define the container namespace (when building with C++, the
+   wrappers are namespace{} instead of extern"c"{} )           */
+#define _DATALIST_NAMESPACE_END
 #endif
 
 /* declare composite SACK_CONTAINER namespace to declare sack::container in a single line */
@@ -351,10 +363,6 @@ using namespace System;
 // private thing left as a note, and forgotten.  some compilers did not define offsetof
 #define my_offsetof( ppstruc, member ) ((PTRSZVAL)&((*ppstruc)->member)) - ((PTRSZVAL)(*ppstruc))
 
-
-// okay move this out, tired of recompiling the world... only those things that use
-// deadstart will include PRELOAD() functionality (for now)
-//#include <deadstart.h>
 
 SACK_NAMESPACE
 
@@ -1415,13 +1423,13 @@ typedef struct LinkBlock
 	POINTER pNode[1];
 } LIST, *PLIST;
 
-/* Defintiion of a type which is a struct DataList *. */
 _LINKLIST_NAMESPACE_END
 
 #ifdef __cplusplus
 using namespace sack::containers::list;
 #endif
 
+_DATALIST_NAMESPACE
 /* a list of data structures... a slab array of N members of X size */
 typedef struct DataBlock  DATALIST;
 /* A typedef of a pointer to a DATALIST struct DataList. */
@@ -1448,6 +1456,7 @@ struct DataBlock
 	/* The physical array. */
 	_8      data[1];
 };
+_DATALIST_NAMESPACE_END
 
 /* This is a stack that contains pointers to user objects.
    Remarks
@@ -1548,7 +1557,7 @@ typedef struct DataQueue
 _CONTAINER_NAMESPACE_END
 SACK_NAMESPACE_END
 
-#include <typelib.h> // general functions for using basic types
+#include <typelib.h> 
 
 
 SACK_NAMESPACE

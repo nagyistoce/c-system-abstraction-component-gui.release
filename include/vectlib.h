@@ -1,6 +1,3 @@
-#ifndef ROTATE_DECLARATION
-#define ROTATE_DECLARATION
-
 // one day I'd like to make a multidimensional library
 // but for now - 3D is sufficient - it can handle everything
 // under 2D ignoring the Z axis... although it would be more
@@ -9,6 +6,9 @@
 // become much too complex.. well perhaps - maybe I can
 // make all the required functions with a suffix - and 
 // supply defines to choose the default based on the dimension number
+#ifndef ROTATE_DECLARATION
+// vector multiple inclusion protection
+#define ROTATE_DECLARATION
 
 #if !defined(__STATIC__) && !defined(__UNIX__)
 #  ifdef VECTOR_LIBRARY_SOURCE
@@ -189,7 +189,10 @@ typedef struct orthoarea_tag {
 
 // should end up layering this macro based on DIMENSIONS
 #define SetPoint( d, s ) ( (d)[0] = (s)[0], (d)[1]=(s)[1], (d)[2]=(s)[2] )
-// invert vector....
+/* Inverts a vector. that is vector * -1. (a,b,c) = (-a,-b,-c)
+   
+   <b>Parameters</b>
+                                                               */
 MATHLIB_EXPORT P_POINT Invert( P_POINT a );
 /* Macro which can be used to make a vector's direction be
    exactly opposite of what it is now.                     */
@@ -213,11 +216,26 @@ MATHLIB_EXPORT void PrintVectorEx( CTEXTSTR lpName, PCVECTOR v DBG_PASS );
    
    \ \                                                               */
 #define PrintVector(v) PrintVectorEx( WIDE(#v), v DBG_SRC )
+/* Same as PrintVectorEx, but prints to standard output using
+   printf.                                                    */
 MATHLIB_EXPORT void PrintVectorStdEx( CTEXTSTR lpName, VECTOR v DBG_PASS );
 /* <combine sack::math::vector::PrintVectorStdEx@CTEXTSTR@VECTOR v>
    
    \ \                                                                */
 #define PrintVectorStd(v) PrintVectorStd( WIDE(#v), v DBG_SRC )
+/* Dumps to syslog a current matrix. Shows both matrix content,
+   and the cross products between the matrix that cross1 should
+   be row 0, cross2 should be row 1 and cross3 should be row2.
+   Pass a text name to identify this matrix from others.
+   Parameters
+   lpName :    Name to write into the log.
+   m :         the matrix to dump.
+   DBG_PASS :  standard debug paramters
+   
+   Remarks
+   A PTRANSFORM is not a MATRIX; there is a matrix in a
+   transform, and is the first member, so a ptransform can be
+   cast to a matrix and logged with this function.              */
 MATHLIB_EXPORT void PrintMatrixEx( CTEXTSTR lpName, MATRIX m DBG_PASS );
 /* <combine sack::math::vector::PrintMatrixEx@CTEXTSTR@MATRIX m>
    
@@ -264,7 +282,17 @@ MATHLIB_DEXPORT const PCTRANSFORM _I;
    sides, but it's pretty good.                                      */
 #define Near( a, b ) ( COMPARE(a[0],b[0]) && COMPARE( a[1], b[1] ) && COMPARE( a[2], b[2] ) )
 
+/* Add two vectors together. (a1,b1,c1) + (a2,b2,c2) =
+   (a1+a2,b1+b2,c1+c2)
+   Remarks
+   The result vector may be the same as one of the source
+   vectors.                                               */
 MATHLIB_EXPORT P_POINT add( P_POINT pr, PC_POINT pv1, PC_POINT pv2 );
+/* subtracts two vectors and stores the result in another
+   vector.
+   Remarks
+   The result vector may be the same as one of the source
+   vectors.                                               */
 MATHLIB_EXPORT P_POINT sub( P_POINT pr, PC_POINT pv1, PC_POINT pv2 );
 /* Scales a vector by a scalar
    Parameters
@@ -280,16 +308,75 @@ MATHLIB_EXPORT P_POINT sub( P_POINT pr, PC_POINT pv1, PC_POINT pv2 );
    scale( result, start, 3 );
    </code>                                   */
 MATHLIB_EXPORT P_POINT scale( P_POINT pr, PC_POINT pv1, RCOORD k );
+/* Adds a vector scaled by a scalar to another vector, results
+   in a third vector.
+   
+   
+   Parameters
+   pr :   pointer to a result vector
+   pv1 :  pointer to vector 1
+   pv2 :  pointer to vector 2
+   k :    scalar quantity to apply to vector 2 when adding to
+          vector 1.
+   
+   Remarks
+   The pointer to the result vector may be the same vector as
+   vector 1 or vector 2.
+   Example
+   <code lang="c++">
+   _POINT result;
+   P_POINT v1 = _X;
+   P_POINT v2 = _Y;
+   RCOORD k = 1.414;
+   addscaled( result, v1, v2, k );
+   
+   // result is ( 1, 1.414, 0 )
+   </code>                                                     */
 MATHLIB_EXPORT P_POINT addscaled( P_POINT pr, PC_POINT pv1, PC_POINT pv2, RCOORD k );
+/* Normalizes a non-zero vector. That is the resulting length of
+   the vector is 1.0. Modifies the vector in place.              */
 MATHLIB_EXPORT void normalize( P_POINT pv );
 MATHLIB_EXPORT void crossproduct( P_POINT pr, PC_POINT pv1, PC_POINT pv2 );
+/* \Returns the sin of the angle between two vectors.
+   Parameters
+   pv1 :  one vector
+   pv2 :  another vector
+   
+   Remarks
+   If the length of either vector is 0, then a divide by zero
+   exception will happen.                                     */
 MATHLIB_EXPORT RCOORD SinAngle( PC_POINT pv1, PC_POINT pv2 );
+/* \Returns the cos (cosine) of the angle between two vectors.
+   Parameters
+   pv1 :  one vector
+   pv2 :  another vector
+   
+   Remarks
+   If the length of either vector is 0, then a divide by zero
+   exception will happen.                                      */
 MATHLIB_EXPORT RCOORD CosAngle( PC_POINT pv1, PC_POINT pv2 );
 MATHLIB_EXPORT RCOORD dotproduct( PC_POINT pv1, PC_POINT pv2 );
 // result is the projection of project onto onto
 MATHLIB_EXPORT P_POINT project( P_POINT pr, PC_POINT onto, PC_POINT project );
+/* \Returns the scalar length of a vector. */
 MATHLIB_EXPORT RCOORD Length( PC_POINT pv );
+/* \Returns the distance between two points.
+   
+   
+   Parameters
+   v1 :  some point
+   v2 :  another point
+   
+   Returns
+   The distance between the two points.      */
 MATHLIB_EXPORT RCOORD Distance( PC_POINT v1, PC_POINT v2 );
+/* \Returns the distance a point is as projected on another
+   vector. The result is the distance along that vector from the
+   origin.
+   Parameters
+   pvOn :  Vector to project on
+   pvOf :  vector to get projection length of.                   */
+MATHLIB_EXPORT RCOORD DirectedDistance( PC_POINT pvOn, PC_POINT pvOf );
 
 /* copies the value of a ray into another ray
    Parameters
@@ -309,9 +396,34 @@ MATHLIB_EXPORT RCOORD Distance( PC_POINT v1, PC_POINT v2 );
 
 
 
+/* Allocates and initializes a new transform for the user.  */
 MATHLIB_EXPORT PTRANSFORM CreateTransform ( void );
 MATHLIB_EXPORT void DestroyTransform      ( PTRANSFORM pt );
+/* Resets a transform back to initial conitions. */
 MATHLIB_EXPORT void ClearTransform        ( PTRANSFORM pt );
+/* Badly named function.
+   
+   InvertTransform turns a transform sideways, that is takes
+   axis-normal transforms and turns them for sending to other
+   graphic systems.
+   <code lang="c++">
+   
+   
+     \+-         -+
+     | 0   1   2 |
+     | 3   4   5 |
+     | 6   7   8 |
+     \+-         -+
+   becomes
+     \+-         -+
+     | 0   3   6 |
+     | 1   4   7 |
+     | 2   5   8 |
+     \+-         -+
+   
+   
+   Not entirely useful at all :)
+   </code>                                                    */
 MATHLIB_EXPORT void InvertTransform        ( PTRANSFORM pt );
 MATHLIB_EXPORT void Scale                 ( PTRANSFORM pt, RCOORD sx, RCOORD sy, RCOORD sz );
 
@@ -428,21 +540,89 @@ MATHLIB_EXPORT void ApplyInverseTranslationT( PCTRANSFORM pt, PTRANSFORM ptd, PT
 
 // after Move() these callbacks are invoked.
 typedef void (*MotionCallback)( PTRSZVAL, PTRANSFORM );
+/* When Move is called on the transform, these callbacks are
+   invoked so user code can get even update for motion.
+   Parameters
+   pt :        PTRANSFORM transform matrix to hook to
+   callback :  user callback routine
+   psv :       pointer size value data to be passed to user
+               callback routine.                             */
 MATHLIB_EXPORT void AddTransformCallback( PTRANSFORM pt, MotionCallback callback, PTRSZVAL psv );
 
-MATHLIB_EXPORT RCOORD SetTimeScale(RCOORD scale );
-
+/* Set the speed vector used when Move is applied to a
+   PTRANSFORM.
+   Parameters
+   pt :  transform to set the current speed of.
+   s :   the speed vector to set.                      */
 MATHLIB_EXPORT PC_POINT SetSpeed( PTRANSFORM pt, PC_POINT s );
 MATHLIB_EXPORT P_POINT GetSpeed( PTRANSFORM pt, P_POINT s );
+/* Sets the acceleration applied to the speed when Move is
+   called.                                                 */
 MATHLIB_EXPORT PC_POINT SetAccel( PTRANSFORM pt, PC_POINT s );
 MATHLIB_EXPORT P_POINT GetAccel( PTRANSFORM pt, P_POINT s );
+/* Sets the forward direction speed in a PTRANSFORM.
+   Parameters
+   pt :        Transform to set the right speed of.
+   distance :  How far it should go in the next time interval. */
 MATHLIB_EXPORT void Forward( PTRANSFORM pt, RCOORD distance );
+/* Sets the up direction speed in a PTRANSFORM.
+   Parameters
+   pt :        Transform to set the right speed of.
+   distance :  How far it should go in the next time interval. */
 MATHLIB_EXPORT void Up( PTRANSFORM pt, RCOORD distance );
+/* Sets the right direction speed in a PTRANSFORM.
+   Parameters
+   pt :        Transform to set the right speed of.
+   distance :  How far it should go in the next time interval. */
 MATHLIB_EXPORT void Right( PTRANSFORM pt, RCOORD distance );
 MATHLIB_EXPORT PC_POINT SetRotation( PTRANSFORM pt, PC_POINT r );
+/* Set how long it takes, in milliseconds, to move 1 unit of
+   speed vector or rotate 1 unit of rotation vector when Move is
+   called. Each matrix maintains a last tick. If many thousands
+   of matrixes were used, probably a batch move could be
+   implemented that would maintain tick counts for a group of
+   matrixes... don't know how long it takes to compute move, but
+   timeGetTime will slow it down a lot.
+   
+   
+   Parameters
+   pt :                 transform to set the time interval on.
+   speed_interval :     what the time interval should be for
+                        speed.
+   rotation_interval :  what the time interval should be for
+                        rotation.
+   Remarks
+   A default interval of 1000 is used. So it will take 1000
+   milliseconds to move one unit of speed. This could be set to
+   3600000 and then it would take one hour to move one unit of
+   speed. (miles per hour)
+   
+   
+   
+   Rotation has its own interval that affects rotation the same
+   way; If your rotation was set to roll 2*pi radians, then it
+   would revolve one full rotation in the said time.
+   
+   
+                                                                 */
+MATHLIB_EXPORT void SetTimeInterval( PTRANSFORM pt, RCOORD speed_interval, RCOORD rotation_interval );
 
+/* Updates a transform by it's current speed and rotation
+   assuming speed and rotation are specified in x per 1 second.
+   Applies the fraction of time between now and the prior time
+   move was called and scales speed and rotation by that when
+   applying it.
+   
+   
+   Parameters
+   pt :  Pointer to a transform to update.
+   
+   See Also
+   <link sack::math::vector::SetTimeInterval@PTRANSFORM@RCOORD@RCOORD, SetTimeInterval> */
 MATHLIB_EXPORT void Move( PTRANSFORM pt );
-MATHLIB_EXPORT void Unmove( PTRANSFORM pt );
+#if 0
+	MATHLIB_EXPORT void Unmove( PTRANSFORM pt );
+#endif
 
 MATHLIB_EXPORT void showstdEx( PTRANSFORM pt, char *header );  
 MATHLIB_EXPORT void ShowTransformEx( PTRANSFORM pt, char *header DBG_PASS );  

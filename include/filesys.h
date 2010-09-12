@@ -61,128 +61,8 @@
 /* Defines the file montior namespace when compiling C++. */
 #define FILEMON_NAMESPACE SACK_NAMESPACE _FILESYS_NAMESPACE _FILEMON_NAMESPACE
 
-/* It's called System Abstraction Component Kit - that is almost
-   what it is, self descriptively, but that's not what it
-   entirely. It's more appropriately just a sack-o-goodies. A
-   grab-bag of tidbits. The basic aggregation of group of
-   objects in sack is bag. Bag contains everything that is not
-   graphic.
-   
-   It abstracts loading external libraries (.dll and .so shared
-   objects) so applications can be unbothered by platform
-   details.
-   
-   It abstracts system features like threads into a consistent
-   API.
-   
-   It abstracts system shared memory allocation and management,
-   does have a custom allocation and release method, but
-   currently falls back to using malloc and free.
-   
-   It abstracts access to system file system browsing; getting
-   the contents of directories.
-   
-   It abstracts creating external processes, and the use of
-   standard input-output methods to communicate with those
-   tasks.
-   
-   It has a custom timer implementation using a thread and
-   posting timer events as calls to user callbacks.
-   
-   It contains a variety of structures to manage data from
-   lists, stack and queues to complex linked list of slab
-   allocated structures, and management for text as words and
-   phrases.
-   
-   It contains an event based networking system, using an
-   external thread to coordinate network socket events.
-   
-   It contains methods to work with images.
-   
-   It contains methods to display images on a screen. This is
-   also a system abstraction point, since to put a display out
-   under Linux and Windows is entirely different.
-   
-   It contains a control system based on the above images and
-   display, managing events to controls as user event callbacks.
-   
-   It contains a method of registering values, code, and even
-   structures, and methods to browse and invoke registered code,
-   create registered structures, and get back registered values.
-   
-   It contains a SQL abstraction that boils SQL communication to
-   basically 2 methods, Commands and Queries.
-   
-   It provides application logging features, for debug, and
-   crash diagnostics. This is basically a single command
-   'lprintf'.
-   
-   It provides a vector and matrix library for 3D and even 4D
-   graphics projects.
-   
-   
-   
-   Beyond that - it uses libpng, jpeg, and freetype for dealing
-   with images. These are included in this one package for
-   windows where they are not system libraries. Internal are up
-   to date as of march 2010. Also includes sqlite. All of these
-   \version compile as C++ replacing extern "C"{} with an
-   appropriate namespace XXX {}.
-   Example
-   The current build system is CMake. Previously I had a bunch
-   of makefiles, but then required gnu make to compile with open
-   watcom, with cmake, the correct makefiles appropriate for
-   each package is generated. Visual studio support is a little
-   lacking in cmake. So installed output should be compatible
-   with cmake find XXX.
-   <code>
-   PROJECT( new_project )
-   ADD_EXECTUABLE( my_program my_source.c )
-   LINK_TARGET_LIBRARIES( my_program ${SACK_LIBRARY} )
-   </code>
-   
-   The problem with this... depends on the mode of sack being
-   built against... maybe I should have a few families of
-   compile-options and link libraries.
-   Remarks
-   If sack is built 'monolithic' then everything that is any
-   sort of library is compiled together.
-   
-   If sack is not built monolithic, then it produces
-     * \  bag &#45; everything that requires no system display,
-       it is all the logic components for lists, SQL, processes,
-       threads, networking
-       * ODBC is currently linked here, so unixodbc or odbc32
-         will be required as appropriate. Considering moving SQL
-         entirely to a seperate module, but the core library can take
-         advantage options, which may require SQL.
-     * \  bag.external &#45; external libraries zlib, libpng,
-       jpeg, freetype.
-     * bag.sqlite3.external &#45; external sqlite library, with
-       sqlite interface structure. This could be split to be just
-       the sqlite interface, and link to a system sqlite library.
-     * bag.image &#45; library that provides an image namespace
-       interface.
-     * bag.video &#45; library that provides a render namespace
-       interface. Windows system only. Provides OpenGL support for
-       displays also.
-     * bag.display.image &#45; a client library that
-       communicates to a remote image namespace interface.
-     * bag.image.video &#45; a client library that communicates
-       to a remote render namespace interface.
-     * bag.display &#45; a host library that provides window
-       management for render interface, which allows the application
-       multliple windows. bag.display was built against SDL, and SDL
-       only supplies a single display surface for an application, so
-       popup dialogs and menus needed to be tracked internally.
-       Bag.display can be loaded as a display service, and shared
-       between multiple applications. SDL Can provide OpenGL support
-       for render interface also. This can be mounted against
-       bag.video also, for developing window support. This has
-       fallen by the wayside... and really a display interface
-       should be provided that can just open X displays directly to
-       copy <link sack::image::Image, Images> to.
-     * bag.psi &#45; provides the PSI namespace.                      */
+SACK_NAMESPACE
+
 /* \File system abstractions. A few things like get current path
    may or may not exist on a function.
    
@@ -200,7 +80,7 @@
    
    
                                                                  */
-FILESYS_NAMESPACE
+_FILESYS_NAMESPACE
 
 	enum ScanFileFlags {
 

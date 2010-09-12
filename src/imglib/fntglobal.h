@@ -1,3 +1,4 @@
+#include <stdhdrs.h>
 
 #ifndef STRUCT_ONLY
 #include <ft2build.h>
@@ -7,12 +8,10 @@
 #endif
 
 #include <deadstart.h>
-//#ifndef NO_FONT_GLOBAL_DECLARATION
 #define fg (*global_font_data)
-//#else
-//#define fg (*GetGlobalFonts())
-//#endif
-IMAGE_NAMESPACE
+
+SACK_NAMESPACE
+_IMAGE_NAMESPACE
 
 #ifndef FONT_CACHE_STRUCTS
 

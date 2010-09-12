@@ -45,9 +45,10 @@ struct transform_tag
 	// rot_accel is not used... just rotation velocity. ( use vRight, vUp, vForward to index array )
     // pitch, yaw, roll delta
 	RCOORD rot_accel[3];
-	// these are working factors updated by Move
-	// scale of time for scaling accelleration and speeds
-	RCOORD time_scale;
+   // how long it takes to move one unit vector of speed
+	RCOORD speed_time_interval;
+   // how long it takes to rotate one unit vector of rotation
+	RCOORD rotation_time_interval;
    // what time the last time we processed this matrix for Move.
 	_32 last_tick;
 #if 0

@@ -52,7 +52,8 @@ const TRANSFORM __I = { { { 1, 0, 0, 0 }
 							 , { 0, 0, 0 } // accel
 							 , { 0, 0, 0 } // rotation
 							 , { 0, 0, 0 } // rotaccel
-							 , ONE // time_scale
+							 , 1000 // speed_time_interval
+							 , 1000 // rotation_time_interval
 							 , 0 // last_cpu
 							 //, 0 // something
 //							 , NULL // callbacks
@@ -177,7 +178,9 @@ RCOORD Distance( PC_POINT v1, PC_POINT v2 )
 
  void normalize( P_POINT pv )
 {
-   DOFUNC(scale)( pv, pv, ONE / DOFUNC(Length)( pv ) );
+	RCOORD k = DOFUNC(Length)( pv );
+   if( k != 0 )
+		DOFUNC(scale)( pv, pv, ONE / k );
 }
 
 //----------------------------------------------------------------
@@ -265,7 +268,8 @@ P_POINT project( P_POINT pr, PC_POINT onto, PC_POINT project )
     pt->s[0] = ONE;
     pt->s[1] = ONE;
 	 pt->s[2] = ONE;
-    pt->time_scale = ZERO;
+    pt->rotation_time_interval = 1000;
+    pt->speed_time_interval = 1000;
 	//pt->last_tick = 0;
     //memset( pt->speed, 0, sizeof(pt->speed));
     //memset( pt->rotation, 0, sizeof(pt->rotation));
@@ -805,7 +809,9 @@ void InvokeCallbacks( PTRANSFORM pt )
    // matrix...  this is later referenced
    // to trasform the remaining points
 	// (application of this matrix)
-   VECTOR v;
+	VECTOR v;
+	RCOORD speed_step;
+   RCOORD rotation_step;
 	if( !pt ) 
 		return;
 #ifdef _MSC_VER
@@ -828,6 +834,8 @@ void InvokeCallbacks( PTRANSFORM pt )
 				_32 delta = ( now = timeGetTime() ) - pt->last_tick;
 				if( !delta )
 				{
+					return;  // on 0 time elapse, don't try this... cpu scaling will mess this up.
+#if HAVE_CHEAP_CPU_FREQUENCY
 					if( !tick_freq_cpu )
 						tick_freq_cpu = GetCPUFrequency();
 					{
@@ -841,32 +849,26 @@ void InvokeCallbacks( PTRANSFORM pt )
 						tick_cpu = now;
 						last_tick_cpu = now_cpu;
 					}
+#endif
 					// err we have a cycle rate greater than 1ms 1000/sec?
 				}
 				else
 				{
-					// okay how many time did delta happen before now?
-					// where delta is an ida of 33ms time spaces.
-					RCOORD delta2 = delta / 33.0f; // times 1000 so we get extra precision.
-					// then scalar is 1/n where n is chunks of something
-					// if delta was 16 (2 these will happen in 33)
-					// scalar would be .5
-					// if delta was 66 (0.5 these happen in 33 )
-					// scalar would be 2
-					pt->time_scale = ( ONE * (RCOORD)delta2 );
-					if( pt->time_scale < 6e-14 )
-						lprintf( WIDE( "Blah" ) );
-					//* target * delta/(1000/30)*/) ) * (1024.0f);
-					//lprintf( WIDE( "scalar is %g %d" ), scalar, delta );
-
+					speed_step = delta / pt->speed_time_interval; // times 1000 so we get extra precision.
+					rotation_step = delta / pt->rotation_time_interval; // times 1000 so we get extra precision.
 				}
 				pt->last_tick = now;
 			}
 			else
 			{
+				// don't move on the first tick.
+#if CONSTANT_CPU_TICK
 				tick_cpu = pt->last_tick = timeGetTime();
 				last_tick_cpu = GetCPUTick();
 				pt->time_scale = ONE;
+#endif
+				pt->last_tick = timeGetTime();
+            return;
 			}
 		}			
 	}
@@ -875,8 +877,8 @@ void InvokeCallbacks( PTRANSFORM pt )
 		lprintf( WIDE( "blah" ) );
 #endif
 	//add( v, pt->speed, pt->accel );
-	addscaled( pt->speed, pt->speed, pt->accel, pt->time_scale );
-	scale( v, pt->speed, pt->time_scale );
+	addscaled( pt->speed, pt->speed, pt->accel, speed_step );
+	scale( v, pt->speed, speed_step );
 	//scale( v, v, pt->time_scale ); // velocity applied across this time
    pt->m[3][0] += v[0] * pt->m[0][0]
                 + v[1] * pt->m[1][0]
@@ -896,8 +898,8 @@ void InvokeCallbacks( PTRANSFORM pt )
 	{
 		VECTOR  r;
 		//lprintf( WIDE(WIDE( "Time scale is not applied" )) );
-		addscaled( pt->rotation, pt->rotation, pt->rot_accel, pt->time_scale );
-		scale( r, pt->rotation, pt->time_scale );
+		addscaled( pt->rotation, pt->rotation, pt->rot_accel, rotation_step );
+		scale( r, pt->rotation, rotation_step );
 
 		RotateRelV( pt, r );
 #ifdef _MSC_VER
@@ -917,7 +919,7 @@ void InvokeCallbacks( PTRANSFORM pt )
 }
 
 //----------------------------------------------------------------
-
+#if 0
  void Unmove( PTRANSFORM pt )
 {
    // this matrix of course....
@@ -927,27 +929,118 @@ void InvokeCallbacks( PTRANSFORM pt )
    // x-y-z-a-b-c position and orientation 
    // matrix...  this is later referenced
    // to trasform the remaining points
-   // (application of this matrix)
-   if( pt->rotation[0] || pt->rotation[1] || pt->rotation[2] )
-   {
-      _POINT anti_r;
-      anti_r[0] = -pt->rotation[0];
-      anti_r[1] = -pt->rotation[1];
-      anti_r[1] = -pt->rotation[2];
-      RotateRelV( pt, anti_r );
-   }
+	// (application of this matrix)
+	VECTOR v;
+	RCOORD speed_step;
+   RCOORD rotation_step;
+	if( !pt ) 
+		return;
+#ifdef _MSC_VER
+	if( _isnan( pt->m[0][0] ) )
+	{
+		return;
+		lprintf( WIDE( "blah" ) );
+	}
+#endif
+	{
+		{
+			static _64 tick_freq_cpu;
+			static _64 last_tick_cpu;
+			static _32 tick_cpu;
+			if( pt->last_tick )
+			{
+				// how much time passed between then and no
+				// and what's our target resolution?
+				static _32 now;
+				_32 delta = ( now = timeGetTime() ) - pt->last_tick;
+				if( !delta )
+				{
+					return;  // on 0 time elapse, don't try this... cpu scaling will mess this up.
+#if HAVE_CHEAP_CPU_FREQUENCY
+					if( !tick_freq_cpu )
+						tick_freq_cpu = GetCPUFrequency();
+					{
+						
+						static _64 now_cpu;
+						_64 delta_cpu = ( last_tick_cpu - (now_cpu = GetCPUTick() ) )
+							- ( ( now - tick_cpu ) * tick_freq_cpu );
+						RCOORD delta2 = ( (RCOORD)delta_cpu * 1000 ) / ( (RCOORD)tick_freq_cpu * 33 );
+						pt->time_scale = ONE / (RCOORD)( delta2 );
+			//					//);
+						tick_cpu = now;
+						last_tick_cpu = now_cpu;
+					}
+#endif
+					// err we have a cycle rate greater than 1ms 1000/sec?
+				}
+				else
+				{
+					speed_step = delta / pt->speed_time_interval; // times 1000 so we get extra precision.
+					rotation_step = delta / pt->rotation_time_interval; // times 1000 so we get extra precision.
+				}
+            pt->prior_tick = pt->last_tick;
+				pt->last_tick = now;
+			}
+			else
+			{
+				// don't move on the first tick.
+#if CONSTANT_CPU_TICK
+				tick_cpu = pt->last_tick = timeGetTime();
+				last_tick_cpu = GetCPUTick();
+				pt->time_scale = ONE;
+#endif
+				pt->last_tick = timeGetTime();
+            pt->prior_tick = pt->last_tick - 1;
+            return;
+			}
+		}			
+	}
+#ifdef _MSC_VER
+	if( _isnan( pt->m[0][0] ) )
+		lprintf( WIDE( "blah" ) );
+#endif
+	//add( v, pt->speed, pt->accel );
+	addscaled( pt->speed, pt->speed, pt->accel, -speed_step );
+	scale( v, pt->speed, -speed_step );
+	//scale( v, v, pt->time_scale ); // velocity applied across this time
+   pt->m[3][0] += v[0] * pt->m[0][0]
+                + v[1] * pt->m[1][0]
+                + v[2] * pt->m[2][0];
+   pt->m[3][1] += v[0] * pt->m[0][1]
+                + v[1] * pt->m[1][1]
+                + v[2] * pt->m[2][1];
+   pt->m[3][2] += v[0] * pt->m[0][2]
+                + v[1] * pt->m[1][2]
+		+ v[2] * pt->m[2][2];
+#ifdef _MSC_VER
+   	if( _isnan( pt->m[0][0] ) )
+			lprintf( WIDE( "blah" ) );
+#endif
+   // include time scale for rotation also...
+	if( pt->rotation[0] || pt->rotation[1] || pt->rotation[2] )
+	{
+		VECTOR  r;
+		//lprintf( WIDE(WIDE( "Time scale is not applied" )) );
+		addscaled( pt->rotation, pt->rotation, pt->rot_accel, -rotation_step );
+		scale( r, pt->rotation, -rotation_step );
 
-   pt->m[3][0] -= pt->speed[0] * pt->m[0][0]
-                + pt->speed[1] * pt->m[1][0]
-                + pt->speed[2] * pt->m[2][0];
-   pt->m[3][1] -= pt->speed[0] * pt->m[0][1]
-                + pt->speed[1] * pt->m[1][1]
-                + pt->speed[2] * pt->m[2][1];
-   pt->m[3][2] -= pt->speed[0] * pt->m[0][2]
-                + pt->speed[1] * pt->m[1][2]
-                + pt->speed[2] * pt->m[2][2];
+		RotateRelV( pt, r );
+#ifdef _MSC_VER
+   	if( _isnan( pt->m[0][0] ) )
+			lprintf( WIDE( "blah" ) );
+#endif
+	}
+#ifdef _MSC_VER
+	if( _isnan( pt->m[0][0] ) )
+		lprintf( WIDE( "blah" ) );
+#endif
+	InvokeCallbacks( pt );
+#ifdef _MSC_VER
+	if( _isnan( pt->m[0][0] ) )
+		lprintf( WIDE( "blah" ) );
+#endif
 }
-
+#endif
 //----------------------------------------------------------------
 
 P_POINT GetSpeed( PTRANSFORM pt, P_POINT s )
@@ -966,10 +1059,10 @@ PC_POINT  SetSpeed( PTRANSFORM pt, PC_POINT s )
 
 //----------------------------------------------------------------
 
-RCOORD SetTimeScale( RCOORD scale )
+void SetTimeInterval( PTRANSFORM pt, RCOORD speed_interval, RCOORD rotation_interval )
 {
-   time_scale = scale; // application of motion uses this factor
-   return scale;
+   pt->rotation_time_interval = rotation_interval; // application of motion uses this factor
+   pt->speed_time_interval = speed_interval; // application of motion uses this factor
 }
 
 //----------------------------------------------------------------

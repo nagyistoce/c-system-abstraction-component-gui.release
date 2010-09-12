@@ -5,9 +5,9 @@
 
 #include <sack_types.h>
 
-//#include <spacetree.h>
 
-SACK_CONTAINER_NAMESPACE
+	SACK_NAMESPACE
+	_CONTAINER_NAMESPACE
 
 #    define TYPELIB_CALLTYPE CPROC
 #  if defined( _TYPELIBRARY_SOURCE_STEAL )
@@ -210,6 +210,7 @@ TYPELIB_PROC  PTRSZVAL TYPELIB_CALLTYPE     ForAllLinks    ( PLIST *pList, ForPr
 	};//		namespace list;
 #endif
 //--------------------------------------------------------
+_DATALIST_NAMESPACE
 
 TYPELIB_PROC  PDATALIST TYPELIB_CALLTYPE  CreateDataListEx ( PTRSZVAL nSize DBG_PASS );
 TYPELIB_PROC  void TYPELIB_CALLTYPE       DeleteDataListEx ( PDATALIST *ppdl DBG_PASS );
@@ -265,6 +266,8 @@ TYPELIB_PROC  void TYPELIB_CALLTYPE       EmptyDataList ( PDATALIST *ppdl );
    ppDataList :  pointer to the PDATALIST.   */
 #define DeleteDataList(p)  ( DeleteDataListEx( (p) DBG_SRC ) )
 #define SetDataItem(p,i,v) ( SetDataItemEx( (p),(i),(v) DBG_SRC ) )
+
+   _DATALIST_NAMESPACE_END
 
 //--------------------------------------------------------
 
