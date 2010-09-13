@@ -280,6 +280,7 @@ PTRANSFORM CreateTransformMotion( PTRANSFORM pt )
 	if( !pt->motion )
 	{
 		pt->motion = New( struct motion_frame_tag );
+      MemSet( pt->motion, 0, sizeof( struct motion_frame_tag ) );
 		pt->motion->rocket = 1;
       pt->motion->speed_time_interval = 1000; // speed_time_interval
       pt->motion->rotation_time_interval = 1000;
@@ -1302,8 +1303,11 @@ void ShowTransformEx( PTRANSFORM pt, char *header DBG_PASS )
 #define DOUBLE_FORMAT  "%g"
 #define F4(name) _xlprintf( 1 DBG_RELAY )( _WIDE(#name) WIDE(" <"DOUBLE_FORMAT" "DOUBLE_FORMAT" "DOUBLE_FORMAT" "DOUBLE_FORMAT"> "DOUBLE_FORMAT""), pt->name[0], pt->name[1], pt->name[2], pt->name[3], Length( pt->name ) )
 #define F(name) _xlprintf( 1 DBG_RELAY )( _WIDE(#name) WIDE(" <"DOUBLE_FORMAT" "DOUBLE_FORMAT" "DOUBLE_FORMAT"> "DOUBLE_FORMAT""), pt->name[0], pt->name[1], pt->name[2], Length( pt->name ) )
-   F(motion->speed);
-   F(motion->rotation);
+	if( pt->motion )
+	{
+		F(motion->speed);
+		F(motion->rotation);
+	}
    F4(m[0]);
    F4(m[1]);
    F4(m[2]);
