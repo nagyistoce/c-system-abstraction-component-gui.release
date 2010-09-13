@@ -398,7 +398,7 @@ MATHLIB_EXPORT RCOORD DirectedDistance( PC_POINT pvOn, PC_POINT pvOf );
 
 /* Allocates and initializes a new transform for the user.  */
 MATHLIB_EXPORT PTRANSFORM CreateTransform ( void );
-PTRANSFORM CreateTransformMotion( PTRANSFORM pt );
+MATHLIB_EXPORT PTRANSFORM CreateTransformMotion( PTRANSFORM pt );
 MATHLIB_EXPORT void DestroyTransform      ( PTRANSFORM pt );
 /* Resets a transform back to initial conitions. */
 MATHLIB_EXPORT void ClearTransform        ( PTRANSFORM pt );
