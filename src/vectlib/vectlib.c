@@ -48,16 +48,7 @@ const TRANSFORM __I = { { { 1, 0, 0, 0 }
 								, { 0, 0, 1, 0 }
 								, { 0, 0, 0, 1 } }
 							 , { 1, 1, 1 } // s
-							 , { 0, 0, 0 } // speed
-							 , { 0, 0, 0 } // accel
-							 , { 0, 0, 0 } // rotation
-							 , { 0, 0, 0 } // rotaccel
-							 , 1000 // speed_time_interval
-							 , 1000 // rotation_time_interval
-							 , 0 // last_cpu
-							 //, 0 // something
-//							 , NULL // callbacks
-  //                    , NULL // userdata
+  //                    , NULL // motion
 };
 PRE_EXTERN MATHLIB_DEXPORT const PCTRANSFORM _I = &__I;
 
@@ -259,39 +250,48 @@ P_POINT project( P_POINT pr, PC_POINT onto, PC_POINT project )
 
 //----------------------------------------------------------------
 
- void ClearTransform( PTRANSFORM pt ) {
-    MemSet( pt, 0, sizeof( *pt ) );
-    pt->m[0][0] = ONE;
-    pt->m[1][1] = ONE;
-    pt->m[2][2] = ONE;
-    pt->m[3][3] = ONE;
-    pt->s[0] = ONE;
-    pt->s[1] = ONE;
-	 pt->s[2] = ONE;
-    pt->rotation_time_interval = 1000;
-    pt->speed_time_interval = 1000;
-	//pt->last_tick = 0;
-    //memset( pt->speed, 0, sizeof(pt->speed));
-    //memset( pt->rotation, 0, sizeof(pt->rotation));
-    //memset( pt->accel, 0, sizeof(pt->accel));
-    //memset( pt->rot_accel, 0, sizeof(pt->rot_accel));
-
+void ClearTransform( PTRANSFORM pt )
+{
+	MemSet( pt, 0, sizeof( *pt ) );
+	pt->m[0][0] = ONE;
+	pt->m[1][1] = ONE;
+	pt->m[2][2] = ONE;
+	pt->m[3][3] = ONE;
+	pt->s[0] = ONE;
+	pt->s[1] = ONE;
+	pt->s[2] = ONE;
 };
 
 //----------------------------------------------------------------
- PTRANSFORM CreateTransform( void )
-{ 
+
+PTRANSFORM CreateTransform( void )
+{
    PTRANSFORM pt;
-   pt = New( struct transform_tag );
-   ClearTransform(pt);
+	pt = New( struct transform_tag );
+   pt->motion = NULL;
+	ClearTransform(pt);
    return pt;
 };
 
 //----------------------------------------------------------------
 
- void DestroyTransform( PTRANSFORM pt )
+PTRANSFORM CreateTransformMotion( PTRANSFORM pt )
 {
-   Release( pt );
+	if( !pt->motion )
+	{
+		pt->motion = New( struct motion_frame_tag );
+		pt->motion->rocket = 1;
+      pt->motion->speed_time_interval = 1000; // speed_time_interval
+      pt->motion->rotation_time_interval = 1000;
+	}
+	return pt;
+};
+
+//----------------------------------------------------------------
+
+void DestroyTransform( PTRANSFORM pt )
+{
+	Release( pt );
 }
 
 //----------------------------------------------------------------
@@ -451,9 +451,10 @@ INLINEFUNC( void, Rotate, ( RCOORD dAngle, P_POINT vaxis1, P_POINT vaxis2 ) )
 #define RotatePitch(m,a)      if(a) DOFUNC(Rotate)( a,m[vForward],m[vUp] );
 #define RotateRoll(m,a)       if(a) DOFUNC(Rotate)( a,m[vUp],m[vRight] );
 
- void RotateRelV( PTRANSFORM pt, PC_POINT r )
+void RotateRelV( PTRANSFORM pt, PC_POINT r )
 { // depends on Scale function....
-   switch( pt->nTime++ )
+   if( pt->motion )
+   switch( pt->motion->nTime++ )
    {
    case 0:
       RotateYaw   ( pt->m, r[vUp] );
@@ -481,7 +482,7 @@ INLINEFUNC( void, Rotate, ( RCOORD dAngle, P_POINT vaxis1, P_POINT vaxis2 ) )
       RotateYaw   ( pt->m, r[vUp] );
       break;
    default:
-      pt->nTime = 0;
+      pt->motion->nTime = 0;
       RotateRoll  ( pt->m, r[vForward] );
       RotateYaw   ( pt->m, r[vUp] );
       RotatePitch ( pt->m, r[vRight] );
@@ -754,31 +755,37 @@ REALFUNC( Apply, ( PCTRANSFORM pt, P_POINT dest, PC_POINT src ), (pt, dest, src 
 
  void Forward( PTRANSFORM pt, RCOORD distance )
 {
-   pt->speed[vForward] = distance;
+	if( pt && pt->motion )
+		pt->motion->speed[vForward] = distance;
 }
 
 //----------------------------------------------------------------
 
  void Up( PTRANSFORM pt, RCOORD distance )
 {
-   pt->speed[vUp] = distance;
+	if( pt && pt->motion )
+		pt->motion->speed[vUp] = distance;
 }
 
 //----------------------------------------------------------------
 
  void Right( PTRANSFORM pt, RCOORD distance )
 {
-   pt->speed[vRight] = distance;
+	if( pt && pt->motion )
+		pt->motion->speed[vRight] = distance;
 }
 
 //----------------------------------------------------------------
 
 void AddTransformCallback( PTRANSFORM pt, MotionCallback callback, PTRSZVAL psv )
 {
-	INDEX idx;
-	AddLink( &pt->callbacks, callback );
-   idx = FindLink( &pt->callbacks, (POINTER)callback );
-   SetLink( &pt->userdata, idx, psv );
+	if( pt && pt->motion )
+	{
+		INDEX idx;
+		AddLink( &pt->motion->callbacks, callback );
+		idx = FindLink( &pt->motion->callbacks, (POINTER)callback );
+		SetLink( &pt->motion->userdata, idx, psv );
+	}
 }
 
 //----------------------------------------------------------------
@@ -786,15 +793,18 @@ void AddTransformCallback( PTRANSFORM pt, MotionCallback callback, PTRSZVAL psv 
 void InvokeCallbacks( PTRANSFORM pt )
 {
 	INDEX idx;
-   MotionCallback callback;
-	LIST_FORALL( pt->callbacks, idx, MotionCallback, callback )
+	MotionCallback callback;
+	if( pt && pt->motion )
 	{
-      callback( (PTRSZVAL)GetLink( &pt->userdata, idx ), pt );
-	#ifdef _MSC_VER
-	if( _isnan( pt->m[0][0] ) )
-		lprintf( WIDE( "blah" ) );
+		LIST_FORALL( pt->motion->callbacks, idx, MotionCallback, callback )
+		{
+			callback( (PTRSZVAL)GetLink( &pt->motion->userdata, idx ), pt );
+#ifdef _MSC_VER
+			if( _isnan( pt->m[0][0] ) )
+				lprintf( WIDE( "blah" ) );
 #endif
-}
+		}
+	}
 }
 
 //----------------------------------------------------------------
@@ -809,6 +819,8 @@ void InvokeCallbacks( PTRANSFORM pt )
    // matrix...  this is later referenced
    // to trasform the remaining points
 	// (application of this matrix)
+	if( pt && pt->motion )
+	{
 	VECTOR v;
 	RCOORD speed_step;
    RCOORD rotation_step;
@@ -826,12 +838,12 @@ void InvokeCallbacks( PTRANSFORM pt )
 			static _64 tick_freq_cpu;
 			static _64 last_tick_cpu;
 			static _32 tick_cpu;
-			if( pt->last_tick )
+			if( pt->motion->last_tick )
 			{
 				// how much time passed between then and no
 				// and what's our target resolution?
 				static _32 now;
-				_32 delta = ( now = timeGetTime() ) - pt->last_tick;
+				_32 delta = ( now = timeGetTime() ) - pt->motion->last_tick;
 				if( !delta )
 				{
 					return;  // on 0 time elapse, don't try this... cpu scaling will mess this up.
@@ -854,20 +866,20 @@ void InvokeCallbacks( PTRANSFORM pt )
 				}
 				else
 				{
-					speed_step = delta / pt->speed_time_interval; // times 1000 so we get extra precision.
-					rotation_step = delta / pt->rotation_time_interval; // times 1000 so we get extra precision.
+					speed_step = delta / pt->motion->speed_time_interval; // times 1000 so we get extra precision.
+					rotation_step = delta / pt->motion->rotation_time_interval; // times 1000 so we get extra precision.
 				}
-				pt->last_tick = now;
+				pt->motion->last_tick = now;
 			}
 			else
 			{
 				// don't move on the first tick.
 #if CONSTANT_CPU_TICK
-				tick_cpu = pt->last_tick = timeGetTime();
+				tick_cpu = pt->motion->last_tick = timeGetTime();
 				last_tick_cpu = GetCPUTick();
-				pt->time_scale = ONE;
+				pt->motion->time_scale = ONE;
 #endif
-				pt->last_tick = timeGetTime();
+				pt->motion->last_tick = timeGetTime();
             return;
 			}
 		}			
@@ -876,46 +888,67 @@ void InvokeCallbacks( PTRANSFORM pt )
 	if( _isnan( pt->m[0][0] ) )
 		lprintf( WIDE( "blah" ) );
 #endif
-	//add( v, pt->speed, pt->accel );
-	addscaled( pt->speed, pt->speed, pt->accel, speed_step );
-	scale( v, pt->speed, speed_step );
-	//scale( v, v, pt->time_scale ); // velocity applied across this time
-   pt->m[3][0] += v[0] * pt->m[0][0]
-                + v[1] * pt->m[1][0]
-                + v[2] * pt->m[2][0];
-   pt->m[3][1] += v[0] * pt->m[0][1]
-                + v[1] * pt->m[1][1]
-                + v[2] * pt->m[2][1];
-   pt->m[3][2] += v[0] * pt->m[0][2]
-                + v[1] * pt->m[1][2]
-		+ v[2] * pt->m[2][2];
+	{
+		VECTOR v;
+		if( pt->motion->rocket )
+		{
+			scale( v, pt->motion->accel, speed_step );
+         // add the scaled acceleration in the current direction of this
+			pt->motion->speed[0] += v[0] * pt->m[0][0]
+				+ v[1] * pt->m[1][0]
+				+ v[2] * pt->m[2][0];
+			pt->motion->speed[1] += v[0] * pt->m[0][1]
+				+ v[1] * pt->m[1][1]
+				+ v[2] * pt->m[2][1];
+			pt->motion->speed[2] += v[0] * pt->m[0][2]
+				+ v[1] * pt->m[1][2]
+				+ v[2] * pt->m[2][2];
+         addscaled( pt->m[3], pt->m[3], pt->motion->speed, speed_step );
+		}
+		else
+		{
+			addscaled( pt->motion->speed, pt->motion->speed, pt->motion->accel, speed_step );
+			scale( v, pt->motion->speed, speed_step );
+			//scale( v, v, pt->time_scale ); // velocity applied across this time
+			pt->m[3][0] += v[0] * pt->m[0][0]
+				+ v[1] * pt->m[1][0]
+				+ v[2] * pt->m[2][0];
+			pt->m[3][1] += v[0] * pt->m[0][1]
+				+ v[1] * pt->m[1][1]
+				+ v[2] * pt->m[2][1];
+			pt->m[3][2] += v[0] * pt->m[0][2]
+				+ v[1] * pt->m[1][2]
+				+ v[2] * pt->m[2][2];
+		}
 #ifdef _MSC_VER
-   	if( _isnan( pt->m[0][0] ) )
+		if( _isnan( pt->m[0][0] ) )
 			lprintf( WIDE( "blah" ) );
 #endif
-   // include time scale for rotation also...
-	if( pt->rotation[0] || pt->rotation[1] || pt->rotation[2] )
-	{
-		VECTOR  r;
-		//lprintf( WIDE(WIDE( "Time scale is not applied" )) );
-		addscaled( pt->rotation, pt->rotation, pt->rot_accel, rotation_step );
-		scale( r, pt->rotation, rotation_step );
+		// include time scale for rotation also...
+		if( pt->motion->rotation[0] || pt->motion->rotation[1] || pt->motion->rotation[2] )
+		{
+			VECTOR  r;
+			//lprintf( WIDE(WIDE( "Time scale is not applied" )) );
+			addscaled( pt->motion->rotation, pt->motion->rotation, pt->motion->rot_accel, rotation_step );
+			scale( r, pt->motion->rotation, rotation_step );
 
-		RotateRelV( pt, r );
+			RotateRelV( pt, r );
 #ifdef _MSC_VER
-   	if( _isnan( pt->m[0][0] ) )
+			if( _isnan( pt->m[0][0] ) )
+				lprintf( WIDE( "blah" ) );
+#endif
+		}
+#ifdef _MSC_VER
+		if( _isnan( pt->m[0][0] ) )
+			lprintf( WIDE( "blah" ) );
+#endif
+		InvokeCallbacks( pt );
+#ifdef _MSC_VER
+		if( _isnan( pt->m[0][0] ) )
 			lprintf( WIDE( "blah" ) );
 #endif
 	}
-#ifdef _MSC_VER
-	if( _isnan( pt->m[0][0] ) )
-		lprintf( WIDE( "blah" ) );
-#endif
-	InvokeCallbacks( pt );
-#ifdef _MSC_VER
-	if( _isnan( pt->m[0][0] ) )
-		lprintf( WIDE( "blah" ) );
-#endif
+	}
 }
 
 //----------------------------------------------------------------
@@ -1045,7 +1078,7 @@ void InvokeCallbacks( PTRANSFORM pt )
 
 P_POINT GetSpeed( PTRANSFORM pt, P_POINT s )
 {
-   SetPoint( s, pt->speed );
+   SetPoint( s, pt->motion->speed );
    return s;
 }
 
@@ -1053,7 +1086,7 @@ P_POINT GetSpeed( PTRANSFORM pt, P_POINT s )
 
 PC_POINT  SetSpeed( PTRANSFORM pt, PC_POINT s )
 {
-	SetPoint( pt->speed, s );
+	SetPoint( pt->motion->speed, s );
    return s;
 }
 
@@ -1061,14 +1094,14 @@ PC_POINT  SetSpeed( PTRANSFORM pt, PC_POINT s )
 
 void SetTimeInterval( PTRANSFORM pt, RCOORD speed_interval, RCOORD rotation_interval )
 {
-   pt->rotation_time_interval = rotation_interval; // application of motion uses this factor
-   pt->speed_time_interval = speed_interval; // application of motion uses this factor
+   pt->motion->rotation_time_interval = rotation_interval; // application of motion uses this factor
+   pt->motion->speed_time_interval = speed_interval; // application of motion uses this factor
 }
 
 //----------------------------------------------------------------
 P_POINT  GetAccel( PTRANSFORM pt, P_POINT s )
 {
-   SetPoint( s, pt->accel );
+   SetPoint( s, pt->motion->accel );
    return s;
 }
 
@@ -1076,7 +1109,7 @@ P_POINT  GetAccel( PTRANSFORM pt, P_POINT s )
 
  PC_POINT  SetAccel( PTRANSFORM pt, PC_POINT s )
 {
-   SetPoint( pt->accel, s );
+   SetPoint( pt->motion->accel, s );
    return s;
 }
 
@@ -1084,7 +1117,7 @@ P_POINT  GetAccel( PTRANSFORM pt, P_POINT s )
 
  PC_POINT SetRotation( PTRANSFORM pt, PC_POINT r )
 {
-	SetPoint( pt->rotation, r );
+	SetPoint( pt->motion->rotation, r );
    return r;
 }
 
@@ -1269,8 +1302,8 @@ void ShowTransformEx( PTRANSFORM pt, char *header DBG_PASS )
 #define DOUBLE_FORMAT  "%g"
 #define F4(name) _xlprintf( 1 DBG_RELAY )( _WIDE(#name) WIDE(" <"DOUBLE_FORMAT" "DOUBLE_FORMAT" "DOUBLE_FORMAT" "DOUBLE_FORMAT"> "DOUBLE_FORMAT""), pt->name[0], pt->name[1], pt->name[2], pt->name[3], Length( pt->name ) )
 #define F(name) _xlprintf( 1 DBG_RELAY )( _WIDE(#name) WIDE(" <"DOUBLE_FORMAT" "DOUBLE_FORMAT" "DOUBLE_FORMAT"> "DOUBLE_FORMAT""), pt->name[0], pt->name[1], pt->name[2], Length( pt->name ) )
-   F(speed);
-   F(rotation);
+   F(motion->speed);
+   F(motion->rotation);
    F4(m[0]);
    F4(m[1]);
    F4(m[2]);
@@ -1293,9 +1326,9 @@ void showstd( PTRANSFORM pt, char *header )
 #define F(name) SPRINTF( byMsg, _WIDE(#name) WIDE(" <"DOUBLE_FORMAT" "DOUBLE_FORMAT" "DOUBLE_FORMAT">"), pt->name[0], pt->name[1], pt->name[2] )
    PRINTF( WIDE("%s"), header );
    PRINTF( WIDE("%s"), WIDE("     -----------------\n"));
-   F(speed);
+   F(motion->speed);
    PRINTF( WIDE("%s"), byMsg );
-   F(rotation);
+   F(motion->rotation);
    PRINTF( WIDE("%s"), byMsg );
    F(m[0]);
    PRINTF( WIDE("%s"), byMsg );
@@ -1329,6 +1362,7 @@ void LoadTransform( PTRANSFORM pt, CTEXTSTR filename )
 	if( file )
 	{
 		fread( pt, 1, sizeof( *pt ), file );
+      pt->motion = NULL;
 		fclose( file );
 	}
 
@@ -1336,40 +1370,3 @@ void LoadTransform( PTRANSFORM pt, CTEXTSTR filename )
 
 VECTOR_NAMESPACE_END
 
-// $Log: vectlib.c,v $
-// Revision 1.15  2005/01/27 08:14:39  panther
-// Linux cleaned.
-//
-// Revision 1.14  2004/08/24 09:26:23  d3x0r
-// Tweaks and updates... mostly comment chagnes I guess
-//
-// Revision 1.13  2004/08/24 05:25:44  d3x0r
-// Extend vector logging to get real original source to show...
-//
-// Revision 1.12  2004/06/12 09:13:05  d3x0r
-// Checkpoint... moving to linux...
-//
-// Revision 1.11  2004/01/11 23:24:11  panther
-// Fix type warnings, conflicts, fix const issues
-//
-// Revision 1.10  2004/01/02 03:11:53  panther
-// ApplyT and ApplyInverseT broken - need to figure those out
-//
-// Revision 1.9  2003/12/29 08:10:08  panther
-// Added more functions for applying transforms
-//
-// Revision 1.8  2003/11/22 23:27:20  panther
-// Fix type passed to printvector
-//
-// Revision 1.7  2003/09/01 20:04:37  panther
-// Added OpenGL Interface to windows video lib, Modified RCOORD comparison
-//
-// Revision 1.6  2003/08/29 02:07:41  panther
-// Fixed logging, and nearness comparison
-//
-// Revision 1.5  2003/07/27 14:20:47  panther
-// Updates for watcom inlines
-//
-// Revision 1.4  2003/03/25 08:45:58  panther
-// Added CVS logging tag
-//
