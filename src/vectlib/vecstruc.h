@@ -1,6 +1,37 @@
 
 VECTOR_NAMESPACE
 
+struct motion_frame_tag
+{
+	// if rocket is 0, then it's virtual point camera mode.
+	// that is motion is always forward, with rocket only
+   // acceleration is applied forward, speed is constant to the world.
+   int rocket;
+   // speed right, up, forward ( use vRight, vUp, vForward to index array )
+	RCOORD speed[3];
+	// acceleration right, up and forward (after rotation matrix is applied, this is always relative
+   // to the current transformation's forward, left and right.   ( use vRight, vUp, vForward to index array )
+   RCOORD accel[3];
+	// pitch, yaw, roll delta ( use vRight, vUp, vForward to index array )
+	RCOORD rotation[3];
+	// rot_accel is not used... just rotation velocity. ( use vRight, vUp, vForward to index array )
+    // pitch, yaw, roll delta
+	RCOORD rot_accel[3];
+   // how long it takes to move one unit vector of speed
+	RCOORD speed_time_interval;
+   // how long it takes to rotate one unit vector of rotation
+	RCOORD rotation_time_interval;
+   // what time the last time we processed this matrix for Move.
+	_32 last_tick;
+   // rotation stepping for consistant rotation
+	int nTime;
+   // list of void(*)(PTRSZVAL,PTRANSFORM)
+	PLIST callbacks;
+   // actually PTRSZVAL storage...
+	PLIST userdata; 
+
+};
+
 /* This structure maintains basically an inertial frame for an
    object. It contains the current orientation and position of
    an object. But it also contains speed and acceleration
@@ -33,34 +64,9 @@ struct transform_tag
 	
    /* scalar, which can apply independant scalar values to
       resulting x y and y transformation. */
-   RCOORD s[3];
-
-   // speed right, up, forward ( use vRight, vUp, vForward to index array )
-	RCOORD speed[3];
-	// acceleration right, up and forward (after rotation matrix is applied, this is always relative
-   // to the current transformation's forward, left and right.   ( use vRight, vUp, vForward to index array )
-   RCOORD accel[3];
-	// pitch, yaw, roll delta ( use vRight, vUp, vForward to index array )
-	RCOORD rotation[3];
-	// rot_accel is not used... just rotation velocity. ( use vRight, vUp, vForward to index array )
-    // pitch, yaw, roll delta
-	RCOORD rot_accel[3];
-   // how long it takes to move one unit vector of speed
-	RCOORD speed_time_interval;
-   // how long it takes to rotate one unit vector of rotation
-	RCOORD rotation_time_interval;
-   // what time the last time we processed this matrix for Move.
-	_32 last_tick;
-#if 0
-   // next time this is set to update... different objects may have different scales
-	//RCOORD next_time;
-#endif
-   // rotation stepping for consistant rotation
-	int nTime;
-   // list of void(*)(PTRSZVAL,PTRANSFORM)
-	PLIST callbacks;
-   // actually PTRSZVAL storage...
-	PLIST userdata; 
+	RCOORD s[3];
+   // Optional extension for transforms that track things that move, or move themselves.
+   struct motion_frame_tag *motion;
 };
 
 VECTOR_NAMESPACE_END
