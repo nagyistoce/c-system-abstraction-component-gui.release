@@ -2350,7 +2350,9 @@ SOCKADDR *CreateRemote(CTEXTSTR lpName,_16 nHisPort)
 			{
 				ADDRINFO *result;
 				ADDRINFO *test;
-				getaddrinfo( lpName, NULL, NULL, (struct addrinfo**)&result );
+            int error;
+				if( ( error = getaddrinfo( lpName, NULL, NULL, (struct addrinfo**)&result ) ) == 0 )
+				{
 				for( test = result; test; test = test->ai_next )
 				{
 					//SOCKADDR *tmp;
@@ -2359,6 +2361,9 @@ SOCKADDR *CreateRemote(CTEXTSTR lpName,_16 nHisPort)
 					SET_SOCKADDR_LENGTH( lpsaAddr, test->ai_addrlen );
                break;
 				}
+				}
+				else
+					lprintf( "Error: %d", error );
 			}
 #else //__WINDOWS__
 
