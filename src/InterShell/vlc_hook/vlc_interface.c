@@ -390,10 +390,11 @@ CPROC lock_frame(
 
 static void AdjustAlpha( struct my_vlc_interface *pmyi )
 {
-	PCDATA surface = GetImageSurface( pmyi->surface );
-	_32 oo = pmyi->surface->pwidth;
-	_32 width = pmyi->surface->width;
-   _32 height = pmyi->surface->height;
+   Image image = GetDisplayImage( pmyi->host_surface );
+	PCDATA surface = GetImageSurface( image );
+	_32 oo = image->pwidth;
+	_32 width = image->width;
+   _32 height = image->height;
 	_32 r;
 	for( r = 0; r < height; r++ )
 	{
