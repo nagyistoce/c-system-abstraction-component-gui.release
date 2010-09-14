@@ -1,6 +1,6 @@
 
 
-#include <bard.h>
+#include <../bard.h>
 
 void CPROC GetAnyEvent( PTRSZVAL psv, char *extra )
 {
