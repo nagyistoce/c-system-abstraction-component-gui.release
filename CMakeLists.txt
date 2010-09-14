@@ -759,6 +759,8 @@ endif( USE_OPTIONS )
 
 add_subdirectory( src/netlib/user )
 add_subdirectory( src/netlib/echo )
+add_subdirectory( src/netlib/forward )
+add_subdirectory( src/netlib/proxy )
 add_subdirectory( src/SQLlib/testsql )
 add_subdirectory( src/utils/launcher )
 add_subdirectory( src/utils/deploy )
