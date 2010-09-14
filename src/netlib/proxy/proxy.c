@@ -539,7 +539,11 @@ int main( int argc, char **argv )
 	FILE *file;
 	char *filename;
 	if( argc < 2 )
-		filename = "proxy.conf";
+	{
+		static TEXTCHAR tmp[256];
+      snprintf( tmp, sizeof( tmp ), "%s/%s.conf", GetProgramPath(), GetProgramName() );
+		filename = tmp;
+	}
 	else
 		filename = argv[1];
 
