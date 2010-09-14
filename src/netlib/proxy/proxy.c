@@ -192,16 +192,7 @@ void CPROC TCPConnected( PCLIENT pc, int error )
 		// this secondary thing...
 		while( !GetNetworkLong( pc, NL_CONNECT_START ) )
 			Relinquish();
-		LIST_FORALL( pPendingList, idx, PCLIENT, pending )
-		{
-			if( pending == pc )
-			{
-            //Log4( WIDE("Delayed connect completed - removing. %p,%p,%d,%p"), pPendingList, &pPendingList, idx, pc );
-				SetLink( &pPendingList, idx, NULL );
-            //Log1( WIDE("Removed.... %d"), idx );
-				break;
-			}
-		}
+      DeleteLink( &pPendingList, pending );
 	}
 	if( !error )
 	{
@@ -305,8 +296,8 @@ void AddRoute( int set_ip_transmit
 		strcpy( route->name, WIDE("unnamed") );
 	route->flags.ip_transmit = set_ip_transmit;
    route->flags.ip_route = set_ip_route;
-	route->in = CreateRemote( src_name, src_port );
-	route->out = CreateRemote( dest_name, dest_port );
+	route->in = CreateSockAddress( src_name, src_port );
+	route->out = CreateSockAddress( dest_name, dest_port );
  	route->paths = NULL;
  	route->me = &routes;
  	if( ( route->next = routes ) )
@@ -554,7 +545,7 @@ int main( int argc, char **argv )
 	//SetAllocateLogging( TRUE );
 	// true to disable...
 	SetAllocateDebug( TRUE );
-
+   NetworkStart();
 
 	if( !file )
 	{
