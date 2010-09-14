@@ -7,4 +7,4 @@ PROGNAME2=bardsend
 SRCS2=bardsend
 MORELIBS2=bardclient
 
-include $(ALTANIK_BASE)/makefiles/makefile.many
+include $(SACK_BASE)/makefiles/makefile.many
