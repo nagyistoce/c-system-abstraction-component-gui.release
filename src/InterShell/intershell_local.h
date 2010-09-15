@@ -336,8 +336,8 @@ PSI_CONTROL OpenPageFrame( PPAGE_DATA page ); // used for multi edit to open eac
 PGLARE_SET GetGlareSet( CTEXTSTR name );
 
 PMENU_BUTTON CreateInvisibleControl( TEXTCHAR *name );
-void ConfigureKeyEx( PCanvasData parent, PMENU_BUTTON button );
-void ConfigureKeyExx( PCanvasData parent, PMENU_BUTTON button, int bWaitComplete, int bIgnorePrivate );
+void ConfigureKeyEx( PSI_CONTROL parent, PMENU_BUTTON button );
+void ConfigureKeyExx( PSI_CONTROL parent, PMENU_BUTTON button, int bWaitComplete, int bIgnorePrivate );
 
 void DumpGeneric( FILE *file, PMENU_BUTTON button );
 

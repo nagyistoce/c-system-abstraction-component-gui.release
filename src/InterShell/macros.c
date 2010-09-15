@@ -124,8 +124,7 @@ static void CPROC AddButtonType( PTRSZVAL psv, PSI_CONTROL control )
 				// global code allows this to continue... which means loss of current_configuration datablock.
 				// faking this starts a configuration thread.
 				//g.flags.bIgnoreKeys = 0;
-				PCanvasData canvas = configure_key_dispatch.canvas;
-				ConfigureKeyExx( canvas, pme->button, TRUE, FALSE );
+				ConfigureKeyExx( configure_key_dispatch.frame, pme->button, TRUE, FALSE );
 				//g.flags.bIgnoreKeys = 1;
 			    // I'm still editing this mode...
 			}
@@ -254,7 +253,7 @@ static void CPROC ConfigureElement( PTRSZVAL psv, PSI_CONTROL control )
 			{
 				canvas->flags.bIgnoreKeys = 0;
 				// wait for completion.
-				ConfigureKeyExx( canvas, pme->button, TRUE, FALSE );
+				ConfigureKeyExx( control, pme->button, TRUE, FALSE );
 				SetItemText( pli, (pme->button->text&&pme->button->text[0])?pme->button->text:pme->button->pTypeName );
 				canvas->flags.bIgnoreKeys = 1;
 			}

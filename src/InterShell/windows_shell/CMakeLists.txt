@@ -25,5 +25,5 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   FOLDER InterShell/plugins
 )
 target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} )
-install_literal_product( ${PROJECT_NAME} InterShell ) 
+install_literal_product( ${PROJECT_NAME} InterShell/plugins ) 
 
