@@ -23,3 +23,5 @@ XTRN void ReleaseUpdates( void );
 
 XTRN void PlayList( PLIST files, S_32 x, S_32 y, _32 w, _32 h );
 XTRN void PlaySoundFile( CTEXTSTR file );
+
+XTRN void StopItemIn( PSI_CONTROL pc );

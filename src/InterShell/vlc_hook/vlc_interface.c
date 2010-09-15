@@ -38,6 +38,7 @@ static struct {
 		BIT_FIELD bHoldUpdates : 1; // rude global flag, stops all otuputs on all surfaces...
 		BIT_FIELD bUpdating : 1; // set while an update is happening...
 	} flags;
+	PLIST interfaces;
 }l;
 
 void ReleaseInstance( struct my_vlc_interface *pmyi );
@@ -247,6 +248,8 @@ struct my_vlc_interface
 	struct {
 		BIT_FIELD bDone : 1;
 		BIT_FIELD bPlaying : 1;
+		BIT_FIELD bNeedsStop : 1;
+		BIT_FIELD bStarted : 1; // we told it to play, but it might not be playing yet
 		BIT_FIELD direct_output : 1;
 		BIT_FIELD transparent : 1;
 	} flags;
@@ -261,7 +264,6 @@ struct my_vlc_interface
    PTHREAD update_thread;
 };
 
-PLIST interfaces;
 
 #ifdef USE_PRE_1_1_0_VLC
 void MyRaise( libvlc_exception_t *ex DBG_PASS )
@@ -285,11 +287,30 @@ static void CPROC _libvlc_callback_t( const libvlc_event_t *event, void *user )
 static void CPROC PlayerEvent( const libvlc_event_t *event, void *user )
 {
 	struct my_vlc_interface *pmyi = (struct my_vlc_interface *)user;
+   lprintf( "Event %d", event->type );
 	switch( event->type )
 	{
+	case libvlc_MediaPlayerPlaying:
+		lprintf( "Really playing." );
+		pmyi->flags.bPlaying = 1;
+      break;
+
+	case libvlc_MediaPlayerOpening:
+      lprintf( "Media opening... that's progress?" );
+      break;
+	case libvlc_MediaPlayerEncounteredError:
+		lprintf( "Media connection error... cleanup... (stop it, so we can restart it, clear playing and started)" );
+		pmyi->flags.bStarted = 0;
+		pmyi->flags.bPlaying = 0;
+      pmyi->flags.bNeedsStop = 1;
+
+      // http stream fails to connect we get this
+      break;
 	case libvlc_MediaPlayerStopped:
 		lprintf( "Stopped." );
 		pmyi->flags.bDone = 1;
+      pmyi->flags.bPlaying = 0;
+		pmyi->flags.bStarted = 0;
       if( pmyi->waiting )
 			WakeThread( pmyi->waiting );
       break;
@@ -303,6 +324,9 @@ static void CPROC PlayerEvent( const libvlc_event_t *event, void *user )
 			AddLink( &l.vlc_releases, vlc_release );
 		}
 		pmyi->flags.bDone = 1;
+      pmyi->flags.bPlaying = 0;
+		pmyi->flags.bStarted = 0;
+      pmyi->flags.bNeedsStop = 1;
       if( pmyi->waiting )
 			WakeThread( pmyi->waiting );
       break;
@@ -356,27 +380,6 @@ CPROC lock_frame(
 		pmyi->host_image = capture; // last captured image for unlock to enque.
 		data = GetImageSurface( pmyi->host_image );
 
-#if 0
-		//EnterCriticalSec( &l.buffer );
-		if( pmyi->host_image )
-		{
-			if( l.flags.bLogTiming )
-				lprintf( "Result soft-image" );
-			data = GetImageSurface ( pmyi->surface = pmyi->host_image );
-		}
-		else if( pmyi->host_control )
-			data = GetImageSurface( pmyi->surface = GetControlSurface( pmyi->host_control ) );
-		else if( pmyi->host_surface )
-		{
-			//lprintf( "Resulting render surface..." );
-			data = GetImageSurface( pmyi->surface = GetDisplayImage( pmyi->host_surface ) );
-		}
-#endif
-
-		if( !pmyi->flags.bPlaying )
-		{
-			pmyi->flags.bPlaying = 1;
-		}
 #ifdef INVERT_DATA
 		data += pmyi->surface->pwidth * (pmyi->surface->height -1);
 #endif
@@ -635,7 +638,7 @@ void ReleaseInstance( struct my_vlc_interface *pmyi )
 	}
 		lprintf( "Released instance..." );
 
-	DeleteLink( &interfaces, pmyi );
+	DeleteLink( &l.interfaces, pmyi );
 	Release( pmyi );
 }
 
@@ -760,7 +763,7 @@ void LoadVLC( void )
 void SetupInterface( struct my_vlc_interface *pmyi )
 {
 	LoadVLC();
-   AddLink( &interfaces, pmyi );
+   AddLink( &l.interfaces, pmyi );
 
 }
 
@@ -769,7 +772,7 @@ struct my_vlc_interface *FindInstance( CTEXTSTR url )
 {
 	INDEX idx;
    struct my_vlc_interface *i;
-	LIST_FORALL( interfaces, idx, struct my_vlc_interface *, i )
+	LIST_FORALL( l.interfaces, idx, struct my_vlc_interface *, i )
 	{
 		if( StrCaseCmp( i->name, url ) == 0 )
          return i;
@@ -831,6 +834,7 @@ struct my_vlc_interface *CreateInstanceInEx( PSI_CONTROL pc, CTEXTSTR url, CTEXT
 			Image image;
 			pmyi = New( struct my_vlc_interface );
 			MemSet( pmyi, 0, sizeof( struct my_vlc_interface ) );
+
          image = MakeImageFile( pmyi->image_w = surface->width, pmyi->image_h = surface->height );
 			
          EnqueLink( &pmyi->available_frames, image );
@@ -839,6 +843,8 @@ struct my_vlc_interface *CreateInstanceInEx( PSI_CONTROL pc, CTEXTSTR url, CTEXT
 			pmyi->host_image = image;
 			pmyi->host_control = NULL;//pc;
 			pmyi->host_surface = NULL;
+			pmyi->image_w = pmyi->host_image->width;
+			pmyi->image_h = pmyi->host_image->height;
          pmyi->name = StrDup( url );
  			SetupInterface( pmyi );
 
@@ -851,36 +857,12 @@ struct my_vlc_interface *CreateInstanceInEx( PSI_CONTROL pc, CTEXTSTR url, CTEXT
 						//" --file-logging"
 						" -I dummy --config=%s"
 						" --no-osd"
-						" --no-audio"
 						//" --file-caching=0"
-						" --plugin-path=%s\\%s"
-#ifdef USE_PRE_1_1_0_VLC
-						" --vout=vmem"
-						" --vmem-data=%ld"
-						" --vmem-width=%ld"
-						" --vmem-height=%ld"
-						" --vmem-pitch=%ld"
-						" --vmem-chroma=RV32"
-						" --vmem-lock=%ld"
-						" --vmem-unlock=%ld"
-#endif
+						" --plugin-path=%s\\plugins"
                   " %s"
 						//, OSALOT_GetEnvironmentVariable( "MY_LOAD_PATH" )
 					  , l.vlc_config
 					  , l.vlc_path
-					  , "plugins"
-#ifdef USE_PRE_1_1_0_VLC
-					  , pmyi
-					  , image->width
-					  , image->height
-#ifdef INVERT_DATA
-					  , -image->pwidth*4
-#else
-					  , image->pwidth*4
-#endif
-					  , lock_frame
-					  , unlock_frame
-#endif
 					  , extra_opts?extra_opts:""
 					  );
 			lprintf( "Creating instance with %s", GetText( VarTextPeek( pvt ) ) );
@@ -896,8 +878,6 @@ struct my_vlc_interface *CreateInstanceInEx( PSI_CONTROL pc, CTEXTSTR url, CTEXT
 
 		}
 	}
-
-	AddLink( &pmyi->controls, pc );
 
 	return pmyi;
 }
@@ -945,7 +925,6 @@ struct my_vlc_interface *CreateInstanceOn( PRENDERER renderer, CTEXTSTR name, LO
 
       pmyi->name = StrDup( name );
       //pmyi->host_images = NewArray( Image, 6 );
-      lprintf( "Adding to panels..." );
       AddLink( &pmyi->panels, renderer );
       SetupInterface( pmyi );
 
@@ -959,36 +938,12 @@ struct my_vlc_interface *CreateInstanceOn( PRENDERER renderer, CTEXTSTR name, LO
 					//" --file-logging"
 					" -I dummy --config=c:\\ftn3000\\etc\\vlc.cfg"
 					" --no-osd"
-					//" --noaudio"
                //" --skip-frames"
-					" --plugin-path=%s\\%s"
+					" --plugin-path=%s\\plugins"
                //" --drop-late-frames"
                //" --file-caching=0"
-#ifdef USE_PRE_1_1_0_VLC
-					" --vout vmem"
-					" --vmem-data %ld"
-					" --vmem-width %ld"
-					" --vmem-height %ld"
-					" --vmem-pitch %ld"
-					" --vmem-chroma RV32"
-               " --vmem-lock %ld"
-					" --vmem-unlock %ld"
-#endif
                " %s"
 				  , l.vlc_path
-				  , "plugins"
-#ifdef USE_PRE_1_1_0_VLC
-				  , pmyi
-				  , pmyi->host_image->width
-				  , pmyi->host_image->height
-#ifdef INVERT_DATA
-				  , -pmyi->host_image->pwidth*4
-#else
-				  , pmyi->host_image->pwidth*4
-#endif
-				  , lock_frame
-				  , unlock_frame
-#endif
                , ""//extra_opts
 				  );
 
@@ -1040,7 +995,6 @@ struct my_vlc_interface *CreateInstanceAt( CTEXTSTR address, CTEXTSTR instance_n
 
 		pmyi->name = StrDup( name );
 
-      lprintf( "Adding to panels..." );
       SetupInterface( pmyi );
 
 		pvt = VarTextCreate();
@@ -1091,7 +1045,7 @@ ATEXIT( unload_vlc_interface )
 {
 	INDEX idx;
 	struct my_vlc_interface *pmyi;
-	LIST_FORALL( interfaces, idx, struct my_vlc_interface*, pmyi )
+	LIST_FORALL( l.interfaces, idx, struct my_vlc_interface*, pmyi )
 	{
 		//DestroyFrame( &pmyi->host_control );
 #ifdef __WATCOMC__
@@ -1171,6 +1125,44 @@ void StopItem( struct my_vlc_interface *pmyi )
 	vlc.libvlc_media_player_stop (pmyi->mp PASS_EXCEPT_PARAM);
 }
 
+void BindAllEvents( struct my_vlc_interface *pmyi )
+{
+	int n;
+	for( n = 0; n <= libvlc_MediaStateChanged; n++ )
+	{
+		vlc.libvlc_event_attach( pmyi->mpev, n
+									  , PlayerEvent, pmyi PASS_EXCEPT_PARAM );
+	}
+	for( n = libvlc_MediaPlayerMediaChanged; n <= libvlc_MediaPlayerLengthChanged; n++ )
+	{
+		if( n == libvlc_MediaPlayerPositionChanged
+			|| n == libvlc_MediaPlayerTimeChanged )
+		{
+         // these are noisy events.
+			continue;
+		}
+		vlc.libvlc_event_attach( pmyi->mpev, n
+									  , PlayerEvent, pmyi PASS_EXCEPT_PARAM );
+	}
+	for( n = libvlc_MediaListItemAdded; n <= libvlc_MediaListWillDeleteItem; n++ )
+	{
+		vlc.libvlc_event_attach( pmyi->mpev, n
+									  , PlayerEvent, pmyi PASS_EXCEPT_PARAM );
+	}
+	for( n = libvlc_MediaListViewItemAdded; n <= libvlc_MediaListViewWillDeleteItem; n++ )
+	{
+		vlc.libvlc_event_attach( pmyi->mpev, n
+									  , PlayerEvent, pmyi PASS_EXCEPT_PARAM );
+	}
+
+	for( n = libvlc_MediaListPlayerPlayed; n <= libvlc_MediaListPlayerStopped; n++ )
+	{
+		vlc.libvlc_event_attach( pmyi->mpev, n
+									  , PlayerEvent, pmyi PASS_EXCEPT_PARAM );
+	}
+
+}
+
 
 struct my_vlc_interface * PlayItemInEx( PSI_CONTROL pc, CTEXTSTR url_name, CTEXTSTR extra_opts )
 {
@@ -1179,8 +1171,9 @@ struct my_vlc_interface * PlayItemInEx( PSI_CONTROL pc, CTEXTSTR url_name, CTEXT
 	{
 		pmyi = CreateInstanceInEx( pc, url_name, extra_opts );
 
-		pmyi->ml = vlc.libvlc_media_list_new( pmyi->inst PASS_EXCEPT_PARAM );
-		RAISE( vlc, &pmyi->ex );
+		AddLink( &pmyi->controls, pc );
+		//pmyi->ml = vlc.libvlc_media_list_new( pmyi->inst PASS_EXCEPT_PARAM );
+		//RAISE( vlc, &pmyi->ex );
 
 #ifndef USE_PRE_1_1_0_VLC
 	if( StrStr( url_name, "://" ) )
@@ -1198,51 +1191,49 @@ struct my_vlc_interface * PlayItemInEx( PSI_CONTROL pc, CTEXTSTR url_name, CTEXT
 			//vlc.libvlc_media_add_option( pmyi->m, extra_opts PASS_EXCEPT_PARAM );
 			RAISE( vlc, &pmyi->ex );
 		}
-		vlc.libvlc_media_list_add_media( pmyi->ml, pmyi->m PASS_EXCEPT_PARAM );
-		RAISE( vlc, &pmyi->ex );
-
-		vlc.libvlc_media_release (pmyi->m);
-		RAISE( vlc, &pmyi->ex );
-      pmyi->m = NULL;
-
-		pmyi->mlp = vlc.libvlc_media_list_player_new( pmyi->inst PASS_EXCEPT_PARAM);
-		RAISE( vlc, &pmyi->ex );
 
 		/* Create a media player playing environement */
-		pmyi->mp = vlc.libvlc_media_player_new( pmyi->inst PASS_EXCEPT_PARAM);
+		pmyi->mp = vlc.libvlc_media_player_new_from_media( pmyi->m PASS_EXCEPT_PARAM);
 		RAISE( vlc, &pmyi->ex );
 
-		vlc.libvlc_media_list_player_set_media_list( pmyi->mlp, pmyi->ml PASS_EXCEPT_PARAM );
-		RAISE( vlc, &pmyi->ex );
+#ifndef USE_PRE_1_1_0_VLC
+      lprintf( "vlc 1.1.x set callbacks, get ready." );
+		vlc.libvlc_video_set_callbacks( pmyi->mp, lock_frame, unlock_frame, display_frame, pmyi );
+      lprintf( "Output %d %d", pmyi->image_w, pmyi->image_h );
+		vlc.libvlc_video_set_format(pmyi->mp, "RV32", pmyi->image_w, pmyi->image_h, -pmyi->image_w*sizeof(CDATA));
+#endif
 
-		vlc.libvlc_media_list_player_set_media_player( pmyi->mlp, pmyi->mp PASS_EXCEPT_PARAM );
-		RAISE( vlc, &pmyi->ex );
 
-		{
-			//libvlc_time_t t_length = vlc.libvlc_media_player_get_length( pmyi->mp PASS_EXCEPT_PARAM );
-			//lprintf( "length %ld", t_length );
-		}
+		pmyi->mpev = vlc.libvlc_media_player_event_manager( pmyi->mp PASS_EXCEPT_PARAM );
+      BindAllEvents( pmyi );
 
-		//vlc.libvlc_media_release (pmyi->m);
-		{
-			//libvlc_time_t t_length = vlc.libvlc_media_player_get_length( pmyi->mp PASS_EXCEPT_PARAM );
-			//lprintf( "length %ld", t_length );
-		}
+		vlc.libvlc_media_release (pmyi->m);
 
-		vlc.libvlc_media_list_player_play_item_at_index( pmyi->mlp, 0 PASS_EXCEPT_PARAM );
+		vlc.libvlc_media_player_play( pmyi->mp PASS_EXCEPT_PARAM);
+      pmyi->flags.bStarted = 1;
 
-		//vlc.libvlc_media_list_player_play( pmyi->mlp PASS_EXCEPT_PARAM );
-
-		/* play the media_player */
-		//vlc.libvlc_media_player_play (pmyi->mp PASS_EXCEPT_PARAM);
-		RAISE( vlc, &pmyi->ex );
-		{
-		//libvlc_time_t t_length = vlc.libvlc_media_player_get_length( pmyi->mp PASS_EXCEPT_PARAM );
-			//lprintf( "length %ld", t_length );
-		}
 	}
 	else
-      AddLink( &pmyi->controls, pc );
+	{
+		if( !pmyi->flags.bStarted )
+		{
+			if( pmyi->flags.bNeedsStop )
+			{
+				vlc.libvlc_media_player_stop (pmyi->mp PASS_EXCEPT_PARAM);
+            pmyi->flags.bNeedsStop = 0;
+			}
+
+			vlc.libvlc_media_player_play( pmyi->mp PASS_EXCEPT_PARAM);
+         pmyi->flags.bStarted = 1;
+		}
+
+		{
+			if( FindLink( &pmyi->controls, pc ) == INVALID_INDEX )
+			{
+				AddLink( &pmyi->controls, pc );
+			}
+		}
+	}
 	return pmyi;
 }
 
@@ -1251,6 +1242,43 @@ struct my_vlc_interface * PlayItemIn( PSI_CONTROL pc, CTEXTSTR url_name )
    return PlayItemInEx( pc, url_name, NULL );
 }
 
+void StopItemIn( PSI_CONTROL pc )
+{
+	INDEX idx;
+	struct my_vlc_interface *pmyi;
+	LIST_FORALL( l.interfaces, idx, struct my_vlc_interface*, pmyi )
+	{
+		INDEX idx2;
+		PSI_CONTROL pc_check;
+		LIST_FORALL( pmyi->controls, idx2, PSI_CONTROL, pc_check )
+		{
+			if( pc_check == pc )
+			{
+            lprintf( "Stopped item in %p", pc );
+				SetLink( &pmyi->controls, idx2, NULL );
+            break;
+			}
+		}
+
+		if( pc_check )
+         break;
+	}
+
+	if( pmyi )
+	{
+      int controls = 0;
+		INDEX idx2;
+		PSI_CONTROL pc_check;
+		LIST_FORALL( pmyi->controls, idx2, PSI_CONTROL, pc_check )
+		{
+         controls++;
+		}
+		if( !controls )
+		{
+         StopItem( pmyi );
+		}
+	}
+}
 
 
 struct on_thread_params
@@ -1295,8 +1323,6 @@ PTRSZVAL CPROC PlayItemOnThread( PTHREAD thread )
       lprintf( "Output %d %d", pmyi->image_w, pmyi->image_h );
 		vlc.libvlc_video_set_format(pmyi->mp, "RV32", pmyi->image_w, pmyi->image_h, -pmyi->image_w*sizeof(CDATA));
 #endif
-		parms->done = 1;
-
 
 		pmyi->mpev = vlc.libvlc_media_player_event_manager( pmyi->mp PASS_EXCEPT_PARAM );
 		vlc.libvlc_event_attach( pmyi->mpev, libvlc_MediaPlayerEndReached, PlayerEvent, pmyi PASS_EXCEPT_PARAM );
@@ -1312,7 +1338,6 @@ PTRSZVAL CPROC PlayItemOnThread( PTHREAD thread )
 
 		RAISE( vlc, &pmyi->ex );
 		pmyi->waiting = thread;
-		parms->done = 1;
 		while( !pmyi->flags.bDone )
 		{
 			lprintf( "Waiting for done..." );
@@ -1884,41 +1909,3 @@ void ReleaseUpdates( void )
    l.flags.bHoldUpdates = 0;
 }
 
-
-//------------------------------------------------------------------------
-//------------------------------------------------------------------------
-///  0.8.6 compatibility...
-//------------------------------------------------------------------------
-
-#if 0
-static void quit_on_exception (libvlc_exception_t *excp) {
-   if (libvlc_exception_raised (excp)) {
-      fprintf(stderr, "error: %s\n", libvlc_exception_get_message(excp));
-      exit(-1);
-   }
-}
-
-int main(int argc, char **argv) {
-   libvlc_exception_t excp;
-   libvlc_instance_t *inst;
-   int item;
-   char *myarg0 = "-I";  char *myarg1 = "dummy";
-   char *myarg2 = "--plugin-path=c:\\program files\\videolan\\plugins";
-   char *myargs[4] = {myarg0, myarg1, myarg2, NULL};
-   char *filename = "c:\\video\\main\\Everybody_Hates_Chris_Feb_26.mpg";
-
-#ifdef USE_PRE_1_1_0_VLC
-	libvlc_exception_init (&excp);
-#endif
-   inst = libvlc_new (3, myargs, &excp);
-   quit_on_exception (&excp);
-   item = libvlc_playlist_add (inst, filename, NULL, &excp); 
-   quit_on_exception (&excp);
-   libvlc_playlist_play (inst, item, 0, NULL, &excp); 
-   quit_on_exception (&excp);
-   Sleep (10000);
-   libvlc_destroy (inst);
-   return 0;
-}
-
-#endif
