@@ -15,6 +15,9 @@ XTRN void StopItem( struct my_vlc_interface *);
 XTRN struct my_vlc_interface *PlayItemOn( PRENDERER renderer, CTEXTSTR url_name );
 XTRN struct my_vlc_interface * PlayItemOnEx( PRENDERER renderer, CTEXTSTR url_name, CTEXTSTR extra_opts );
 XTRN struct my_vlc_interface * PlayItemOnExx( PRENDERER renderer, CTEXTSTR url_name, CTEXTSTR extra_opts, int transparent );
+XTRN struct my_vlc_interface *PlayItemAt( PRENDERER renderer, CTEXTSTR url_name );
+XTRN struct my_vlc_interface * PlayItemAtEx( PRENDERER renderer, CTEXTSTR url_name, CTEXTSTR extra_opts );
+XTRN struct my_vlc_interface * PlayItemAtExx( PRENDERER renderer, CTEXTSTR url_name, CTEXTSTR extra_opts, int transparent );
 XTRN void HoldUpdates( void );
 XTRN void ReleaseUpdates( void );
 

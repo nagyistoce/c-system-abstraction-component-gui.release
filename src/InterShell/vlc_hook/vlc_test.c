@@ -17,6 +17,7 @@ int main( int argc, char ** argv )
 	int in_control = 0;
    int make_top = 0;
    int is_transparent = 0;
+   int is_stream = 0;
 	PLIST names = NULL;
 	SetSystemLog( SYSLOG_FILE, stderr );
 
@@ -48,6 +49,10 @@ int main( int argc, char ** argv )
 				else if( stricmp( argv[n]+1, WIDE("transparent") ) == 0 )
 				{
                is_transparent = 1;
+				}
+				else if( stricmp( argv[n]+1, WIDE("stream") ) == 0 )
+				{
+               is_stream = 1;
 				}
 				else if( stricmp( argv[n]+1, WIDE("control") ) == 0 )
 				{
@@ -81,22 +86,30 @@ int main( int argc, char ** argv )
 		return 0;
 	}
 	{
-		PRENDERER transparent = OpenDisplaySizedAt( is_transparent?DISPLAY_ATTRIBUTE_LAYERED:0, w, h, x, y );
-		PSI_CONTROL surface = in_control?CreateFrameFromRenderer( "Video Display"
-																				  , BORDER_NONE|BORDER_NOCAPTION
-																				  , transparent ):0;
-		DisableMouseOnIdle( transparent, TRUE );
-      if( surface )
-			DisplayFrame( surface );
-      else
-			UpdateDisplay( transparent );
-      if( make_top )
-			MakeTopmost( transparent );
+		PRENDERER transparent;
+		PSI_CONTROL surface;
+
+		if( !is_stream )
+		{
+			transparent = OpenDisplaySizedAt( is_transparent?DISPLAY_ATTRIBUTE_LAYERED:0, w, h, x, y );
+			surface = in_control?CreateFrameFromRenderer( "Video Display"
+																	  , BORDER_NONE|BORDER_NOCAPTION
+																	  , transparent ):0;
+			DisableMouseOnIdle( transparent, TRUE );
+			if( surface )
+				DisplayFrame( surface );
+			else
+				UpdateDisplay( transparent );
+			if( make_top )
+				MakeTopmost( transparent );
+		}
 		{
 			CTEXTSTR tmp = (CTEXTSTR)GetLink( &names, 0 );
 			if( tmp )
 			{
-				if( in_control )
+				if( is_stream )
+					PlayItemAtEx( NULL, tmp, extra_opts );
+				else if( in_control )
 					PlayItemInEx( surface, tmp, extra_opts );
             else
 					PlayItemOnExx( transparent, tmp, extra_opts, is_transparent );
@@ -104,9 +117,11 @@ int main( int argc, char ** argv )
 		}
 		while( 1 )
 		{
-			IdleFor( 250 );
-			if( !DisplayIsValid( transparent ) )
-            break;
+         lprintf( "sleep..." );
+			IdleFor( 250000 );
+         if( !is_stream )
+				if( !DisplayIsValid( transparent ) )
+					break;
 		}
 	}
    return 0;

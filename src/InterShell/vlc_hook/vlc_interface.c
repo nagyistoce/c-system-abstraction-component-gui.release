@@ -944,14 +944,6 @@ struct my_vlc_interface *CreateInstanceOn( PRENDERER renderer, CTEXTSTR name, LO
 		//pmyi->update_thread = ThreadTo( UpdateThread, (PTRSZVAL)pmyi );
 
       pmyi->name = StrDup( name );
-		{
-			int x;
-			for( x =0; x < 6; x++ )
-			{
-				//pmyi->host_images[x] = MakeImageFile( 1024, 768 );
-            //EnqueLink( &pmyi->host_image, pmyi->host_images[x] );
-			}
-		}
       //pmyi->host_images = NewArray( Image, 6 );
       lprintf( "Adding to panels..." );
       AddLink( &pmyi->panels, renderer );
@@ -1006,6 +998,75 @@ struct my_vlc_interface *CreateInstanceOn( PRENDERER renderer, CTEXTSTR name, LO
 #ifdef USE_PRE_1_1_0_VLC
 		vlc.libvlc_exception_init (&pmyi->ex);
 #endif
+		/* init vlc modules, should be done only once */
+#ifdef _MSC_VER
+		__try
+		{
+#endif
+			pmyi->inst = vlc.libvlc_new ( argc, (char const*const*)argv PASS_EXCEPT_PARAM);
+#ifdef _MSC_VER
+		}
+		__except( EvalExcept( GetExceptionCode() ) )
+		{
+									lprintf( "Caught exception in libvlc_new" );
+		}
+#endif
+		RAISE( vlc, &pmyi->ex );
+		VarTextDestroy( &pvt );
+   
+	}
+   return pmyi;
+}
+
+struct my_vlc_interface *CreateInstanceAt( CTEXTSTR address, CTEXTSTR instance_name, CTEXTSTR name, LOGICAL transparent )
+{
+	struct my_vlc_interface *pmyi;
+	pmyi  = FindInstance( instance_name );
+   if( !pmyi )
+	{
+		PVARTEXT pvt;
+		char **argv;
+		int argc;
+      //Image image = MakeImageFile( pmyi->image_w = 352, pmyi->image_h = 240 );//GetDisplayImage( renderer );
+		pmyi = New( struct my_vlc_interface );
+      MemSet( pmyi, 0, sizeof( struct my_vlc_interface ) );
+      pmyi->host_control = NULL;
+		pmyi->host_surface = NULL;
+		pmyi->host_image = NULL;
+      pmyi->image_w = 0;
+      pmyi->image_h = 0;
+		pmyi->flags.direct_output = 0;
+      pmyi->flags.transparent = transparent;
+
+		pmyi->name = StrDup( name );
+
+      lprintf( "Adding to panels..." );
+      SetupInterface( pmyi );
+
+		pvt = VarTextCreate();
+
+		vtprintf( pvt, "--verbose=2"
+					//" --file-logging"
+					" -I dummy --config=c:\\ftn3000\\etc\\vlc.cfg"
+					" --no-osd"
+					" --sout=#transcode{vcodec=theo,vb=800,scale=1,acodec=vorb,ab=128,channels=2,samplerate=44100}:http{mux=ogg,dst=:1234/}"
+					" --no-sout-rtp-sap"
+					" --no-sout-standard-sap"
+					" --sout-all"
+					" --sout-keep"
+					//" --noaudio"
+               //" --skip-frames"
+					" --plugin-path=%s\\plugins"
+               //" --drop-late-frames"
+               //" --file-caching=0"
+               " %s"
+				  , l.vlc_path
+				  , ""//extra_opts
+				  );
+
+      lprintf( "Creating instance with %s", GetText( VarTextPeek( pvt ) ) );
+		ParseIntoArgs( GetText( VarTextPeek( pvt ) ), &argc, &argv );
+
 		/* init vlc modules, should be done only once */
 #ifdef _MSC_VER
 		__try
@@ -1311,6 +1372,123 @@ struct my_vlc_interface * PlayItemOnEx( PRENDERER renderer, CTEXTSTR url_name, C
 	parms.done = 0;
    //EnterCriticalSec( &l.creation );
 	ThreadTo( PlayItemOnThread, (PTRSZVAL)&parms );
+	while( !parms.done )
+      Relinquish();
+   //LeaveCriticalSec( &l.creation );
+	return NULL;
+}
+
+PTRSZVAL CPROC PlayItemAtThread( PTHREAD thread )
+{
+	PTRSZVAL psv = GetThreadParam( thread );
+	struct on_thread_params *parms = (struct on_thread_params*)psv;
+	struct my_vlc_interface *pmyi;
+
+	TEXTCHAR buffer[566];
+	GetCurrentPath( buffer, sizeof(buffer) );
+	pmyi = FindInstance( parms->url_name );
+	if( !pmyi )
+	{
+      lprintf( "Creating item http..." );
+		pmyi = CreateInstanceAt( ":1234", "fake name", parms->url_name, parms->transparent );
+
+#ifndef USE_PRE_1_1_0_VLC
+		if( StrStr( parms->url_name, "://" ) )
+			pmyi->m = vlc.libvlc_media_new_location (pmyi->inst, parms->url_name PASS_EXCEPT_PARAM);
+		else
+			pmyi->m = vlc.libvlc_media_new_path (pmyi->inst, parms->url_name PASS_EXCEPT_PARAM);
+#else
+		pmyi->m = vlc.libvlc_media_new (pmyi->inst, parms->url_name PASS_EXCEPT_PARAM);
+#endif
+		RAISE( vlc, &pmyi->ex );
+		parms->done = 1;
+
+		/* Create a media player playing environement */
+		pmyi->mp = vlc.libvlc_media_player_new_from_media( pmyi->m PASS_EXCEPT_PARAM);
+		RAISE( vlc, &pmyi->ex );
+
+#ifndef USE_PRE_1_1_0_VLC
+      lprintf( "vlc 1.1.x set callbacks, get ready." );
+		vlc.libvlc_video_set_callbacks( pmyi->mp, lock_frame, unlock_frame, display_frame, pmyi );
+      lprintf( "Output %d %d", pmyi->image_w, pmyi->image_h );
+		vlc.libvlc_video_set_format(pmyi->mp, "RV32", pmyi->image_w, pmyi->image_h, -pmyi->image_w*sizeof(CDATA));
+#endif
+		parms->done = 1;
+
+		pmyi->mpev = vlc.libvlc_media_player_event_manager( pmyi->mp PASS_EXCEPT_PARAM );
+		vlc.libvlc_event_attach( pmyi->mpev, libvlc_MediaPlayerEndReached, PlayerEvent, pmyi PASS_EXCEPT_PARAM );
+
+
+		vlc.libvlc_media_release (pmyi->m);
+
+      //WakeableSleep( 1000 );
+		/* play the media_player */
+		//lprintf( "Instance play." );
+      lprintf( "PLAY" );
+		vlc.libvlc_media_player_play( pmyi->mp PASS_EXCEPT_PARAM);
+
+		RAISE( vlc, &pmyi->ex );
+		pmyi->waiting = thread;
+		parms->done = 1;
+		while( !pmyi->flags.bDone )
+		{
+			lprintf( "Waiting for done..." );
+			WakeableSleep( 10000 );
+		}
+		lprintf( "Vdieo ended... cleanup." );
+		ReleaseInstance( pmyi );
+	}
+	else
+	{
+      lprintf( "Device already open... adding renderer." );
+      // probably another thread is already running this...
+		AddLink( &pmyi->panels, parms->renderer );
+      parms->done = 1;
+	}
+	return 0;
+}
+
+struct my_vlc_interface * PlayItemAt( PRENDERER renderer, CTEXTSTR url_name )
+{
+	struct on_thread_params parms;
+	parms.renderer = renderer;
+	parms.url_name = url_name;
+   parms.transparent = 0;
+	parms.done = 0;
+   //EnterCriticalSec( &l.creation );
+	ThreadTo( PlayItemAtThread, (PTRSZVAL)&parms );
+	while( !parms.done )
+      Relinquish();
+   //LeaveCriticalSec( &l.creation );
+	return NULL;
+}
+
+
+struct my_vlc_interface * PlayItemAtExx( PRENDERER renderer, CTEXTSTR url_name, CTEXTSTR extra_opts, int transparent )
+{
+	struct on_thread_params parms;
+	parms.renderer = renderer;
+	parms.url_name = url_name;
+   parms.transparent = transparent;
+	parms.done = 0;
+
+   //EnterCriticalSec( &l.creation );
+	ThreadTo( PlayItemAtThread, (PTRSZVAL)&parms );
+	while( !parms.done )
+      Relinquish();
+   //LeaveCriticalSec( &l.creation );
+	return NULL;
+}
+
+struct my_vlc_interface * PlayItemAtEx( PRENDERER renderer, CTEXTSTR url_name, CTEXTSTR extra_opts )
+{
+	struct on_thread_params parms;
+	parms.renderer = renderer;
+	parms.url_name = url_name;
+   parms.transparent = 0;
+	parms.done = 0;
+   //EnterCriticalSec( &l.creation );
+	ThreadTo( PlayItemAtThread, (PTRSZVAL)&parms );
 	while( !parms.done )
       Relinquish();
    //LeaveCriticalSec( &l.creation );
