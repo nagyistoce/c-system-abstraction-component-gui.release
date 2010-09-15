@@ -2396,12 +2396,11 @@ PTRSZVAL CPROC ThreadConfigureButton( PTHREAD thread )
 
 //---------------------------------------------------------------------------
 
-void ConfigureKeyExx( PCanvasData canvas, PMENU_BUTTON button, int bWaitComplete, int bIgnoreControlOverload )
+void ConfigureKeyExx( PSI_CONTROL parent, PMENU_BUTTON button, int bWaitComplete, int bIgnoreControlOverload )
 {
-	//PMENU_BUTTON prior_edit;
-	//ValidatedControlData( PCanvasData, menu_surface.TypeID, canvas, parent );
+	ValidatedControlData( PCanvasData, menu_surface.TypeID, canvas, parent );
 	struct configure_info info;
-	info.parent = canvas->edit_glare_frame;
+	info.parent = parent;
 	info.button = button;
 	info.canvas = canvas;
 	info.flags.received = 0;
@@ -2425,7 +2424,7 @@ void ConfigureKeyExx( PCanvasData canvas, PMENU_BUTTON button, int bWaitComplete
 			IdleFor( 250 );
 }
 
-void ConfigureKeyEx( PCanvasData parent, PMENU_BUTTON button )
+void ConfigureKeyEx( PSI_CONTROL parent, PMENU_BUTTON button )
 {
 	ConfigureKeyExx( parent, button, FALSE, FALSE );
 }
@@ -2992,10 +2991,10 @@ static int ProcessContextMenu( PCanvasData canvas, PSI_CONTROL pc, S_32 px, S_32
 						InvokePasteControl( canvas->pCurrentControl );
 						break;
 					case MNU_EDIT_CONTROL:
-						ConfigureKeyEx( canvas, canvas->pCurrentControl );
+						ConfigureKeyEx( pc, canvas->pCurrentControl );
 						break;
 					case MNU_EDIT_CONTROL_COMMON:
-						ConfigureKeyExx( canvas, canvas->pCurrentControl, FALSE, TRUE );
+						ConfigureKeyExx( pc, canvas->pCurrentControl, FALSE, TRUE );
 						break;
 					case MNU_DESTROY_CONTROL:
 						// first locate it I suppose...
@@ -3447,7 +3446,7 @@ static void MouseFirstRelease( PCanvasData canvas, PTRSZVAL psv )
 							// if not a custom control it's a fancy key-button
 							//if( !canvas->pCurrentControl->flags.bCustom )
 							//	ReleaseCommonUse( GetKeyCommon( canvas->pCurrentControl->key ) );
-							ConfigureKeyEx( canvas, canvas->pCurrentControl );
+							ConfigureKeyEx( canvas->pc_canvas, canvas->pCurrentControl );
 						}
 					}
 				}
@@ -4836,11 +4835,7 @@ void LoadInterShellPlugins( CTEXTSTR mypath, CTEXTSTR mask )
 	TEXTCHAR *ext;
 	if( !mypath )
 	{
-#ifdef HAVE_ENVIRONMENT
-		mypath = StrDup( getenv( WIDE("MY_LOAD_PATH") ) );
-#else
 		mypath = StrDup( GetProgramPath() );
-#endif
 		bLocalPath = TRUE;
 	}
 	lprintf( WIDE( "Read line from file: %s" ), mask );
@@ -4920,6 +4915,7 @@ PUBLIC( int, Main)( int argc, TEXTCHAR **argv, int bConsole )
    g.flags.bTransparent = SACK_GetProfileIntEx( GetProgramName(), "Intershell Layout/Display is transparent", 1, TRUE );
    g.flags.bSpanDisplay = SACK_GetProfileIntEx( GetProgramName(), "Intershell Layout/Use Both Displays(horizontal)", 0, TRUE );
 #endif
+   SetSystemLog( SYSLOG_FILE, stderr );
 	//SystemLogTime( SYSLOG_TIME_CPU| SYSLOG_TIME_DELTA );
 
 	g.system_name = GetSystemName(); // Initialized here. Command argument -Sysname= may override.
