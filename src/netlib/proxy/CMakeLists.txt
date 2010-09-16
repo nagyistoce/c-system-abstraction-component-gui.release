@@ -7,6 +7,8 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL}"
                   FOLDER "Network examples"
 )
+install_default_dest( ${PROJECT_NAME} )
+
 
 PROJECT( proxy.portable )
 if( __WINDOWS__ )
@@ -59,6 +61,7 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   COMPILE_FLAGS  "${my_add_definitions} -DTARGET_LABEL=${TARGET_LABEL} ${CORE_SOURCE_FLAGS}"
                   FOLDER "Network examples"
 )
+install_default_dest( ${PROJECT_NAME} )
 
 
 PROJECT( proxy.service )
@@ -113,5 +116,6 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   COMPILE_FLAGS  "${my_add_definitions} -DTARGET_LABEL=${TARGET_LABEL} ${CORE_SOURCE_FLAGS}"
                   FOLDER "Network examples"
 )
+install_default_dest( ${PROJECT_NAME} )
 
 
