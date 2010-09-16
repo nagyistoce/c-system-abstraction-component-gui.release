@@ -30,6 +30,8 @@ void PlayOnPlayers( CTEXTSTR url_name )
 {
    PVLC vlc;
 	INDEX idx;
+	if( !url_name )
+      return;
 	LIST_FORALL( l.players, idx, PVLC, vlc )
 	{
 		if( vlc->playing )
