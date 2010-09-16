@@ -194,7 +194,11 @@ static struct vlc_interface
                                          void *user_data EXCEPT_PARAM ) );
    declare_func( libvlc_event_manager_t *,
 					 libvlc_media_event_manager,( libvlc_media_t * p_md  EXCEPT_PARAM ) );
-   declare_func( libvlc_event_manager_t *, libvlc_media_player_event_manager, ( libvlc_media_player_t *EXCEPT_PARAM ) );
+	declare_func( libvlc_event_manager_t *, libvlc_media_player_event_manager, ( libvlc_media_player_t *EXCEPT_PARAM ) );
+   declare_func( int, libvlc_video_get_size, ( libvlc_media_player_t *p_mi, unsigned num,
+															 unsigned *px, unsigned *py ) );
+   declare_func( void,libvlc_media_parse, (libvlc_media_t *media) );
+
 	//void (*raise)(libvlc_exception_t*);
 #ifdef USE_PRE_1_1_0_VLC
 #define RAISE(a,b) a.raise( b )
@@ -294,6 +298,35 @@ static void CPROC PlayerEvent( const libvlc_event_t *event, void *user )
 		lprintf( "Really playing." );
 		pmyi->flags.bPlaying = 1;
       break;
+	case libvlc_MediaPlayerLengthChanged:
+		lprintf( "mangle the format(a)" );
+		if(0)
+		{
+	case libvlc_MediaPlayerPositionChanged:
+		lprintf( "mangle the format(b)" );
+		}
+#if 0
+		{
+			int x, y;
+			Image image;
+         int n;
+			for( n = -1; n < 5; n++ )
+			{
+			if( vlc.libvlc_video_get_size( pmyi->mp, n, &x, &y ) )
+			{
+				lprintf( "error... no stream?" );
+				x = 640;
+            y = 480;
+			}
+			else
+				lprintf( "Stream size is %d,%d", x, y );
+			}
+			pmyi->image_w = x;
+         pmyi->image_h = y;
+			//vlc.libvlc_video_set_format(pmyi->mp, "RV32", pmyi->image_w, pmyi->image_h, pmyi->image_w*sizeof(CDATA));
+		}
+#endif
+      break;
 
 	case libvlc_MediaPlayerOpening:
       lprintf( "Media opening... that's progress?" );
@@ -350,7 +383,7 @@ CPROC lock_frame(
 {
 	struct my_vlc_interface *pmyi = (struct my_vlc_interface*)psv;
 #ifdef DEBUG_LOCK_UNLOCK
-	lprintf( "LOCK." );
+ lprintf( "LOCK." );
 #endif
 	if( pmyi->flags.direct_output )
 	{
@@ -757,6 +790,9 @@ void LoadVLC( void )
    setup_func( libvlc_event_manager_t *,
 					 libvlc_media_event_manager,( libvlc_media_t * p_md  EXCEPT_PARAM ) );
    setup_func( libvlc_event_manager_t *, libvlc_media_player_event_manager, ( libvlc_media_player_t * EXCEPT_PARAM ) );
+   setup_func( int, libvlc_video_get_size, ( libvlc_media_player_t *p_mi, unsigned num,
+                           unsigned *px, unsigned *py ) );
+   setup_func( void,libvlc_media_parse, (libvlc_media_t *media) );
 	VarTextDestroy( &pvt );
 }
 
@@ -835,9 +871,9 @@ struct my_vlc_interface *CreateInstanceInEx( PSI_CONTROL pc, CTEXTSTR url, CTEXT
 			pmyi = New( struct my_vlc_interface );
 			MemSet( pmyi, 0, sizeof( struct my_vlc_interface ) );
 
-         image = MakeImageFile( pmyi->image_w = surface->width, pmyi->image_h = surface->height );
+         //image = MakeImageFile( pmyi->image_w = surface->width, pmyi->image_h = surface->height );
 			
-         EnqueLink( &pmyi->available_frames, image );
+         //EnqueLink( &pmyi->available_frames, image );
 			pmyi->update_thread = ThreadTo( UpdateThread, (PTRSZVAL)pmyi );
 
 			pmyi->host_image = image;
@@ -1136,10 +1172,11 @@ void BindAllEvents( struct my_vlc_interface *pmyi )
 	for( n = libvlc_MediaPlayerMediaChanged; n <= libvlc_MediaPlayerLengthChanged; n++ )
 	{
 		if( n == libvlc_MediaPlayerPositionChanged
-			|| n == libvlc_MediaPlayerTimeChanged )
+			|| n == libvlc_MediaPlayerTimeChanged
+		  )
 		{
          // these are noisy events.
-			continue;
+			//continue;
 		}
 		vlc.libvlc_event_attach( pmyi->mpev, n
 									  , PlayerEvent, pmyi PASS_EXCEPT_PARAM );
@@ -1185,6 +1222,11 @@ struct my_vlc_interface * PlayItemInEx( PSI_CONTROL pc, CTEXTSTR url_name, CTEXT
 #endif
 		RAISE( vlc, &pmyi->ex );
 
+		//lprintf( "Begin parse..." );
+      //  this just hangs...
+		//vlc.libvlc_media_parse( pmyi->m );
+		//lprintf( "..." );
+
 		if( extra_opts )
 		{
 			lprintf( "Adding options: %s", extra_opts );
@@ -1192,26 +1234,70 @@ struct my_vlc_interface * PlayItemInEx( PSI_CONTROL pc, CTEXTSTR url_name, CTEXT
 			RAISE( vlc, &pmyi->ex );
 		}
 
+
+#if use_media_list
+		pmyi->ml = vlc.libvlc_media_list_new( pmyi->inst PASS_EXCEPT_PARAM );
+		RAISE( vlc, &pmyi->ex );
+
+		pmyi->mev = vlc.libvlc_media_event_manager( pmyi->m PASS_EXCEPT_PARAM );
+		RAISE( vlc, &pmyi->ex );
+
+		vlc.libvlc_media_list_add_media( pmyi->ml, pmyi->m PASS_EXCEPT_PARAM );
+		RAISE( vlc, &pmyi->ex );
+
+		pmyi->mlp = vlc.libvlc_media_list_player_new( pmyi->inst PASS_EXCEPT_PARAM);
+		RAISE( vlc, &pmyi->ex );
+
+		/* Create a media player playing environement */
+		pmyi->mp = vlc.libvlc_media_player_new( pmyi->inst PASS_EXCEPT_PARAM);
+		RAISE( vlc, &pmyi->ex );
+
+		vlc.libvlc_media_list_player_set_media_list( pmyi->mlp, pmyi->ml PASS_EXCEPT_PARAM );
+		RAISE( vlc, &pmyi->ex );
+
+		vlc.libvlc_media_list_player_set_media_player( pmyi->mlp, pmyi->mp PASS_EXCEPT_PARAM );
+		RAISE( vlc, &pmyi->ex );
+
+		//vlc.libvlc_media_list_player_play_item_at_index( pmyi->mlp, 0 PASS_EXCEPT_PARAM );
+		//RAISE( vlc, &pmyi->ex );
+#else
 		/* Create a media player playing environement */
 		pmyi->mp = vlc.libvlc_media_player_new_from_media( pmyi->m PASS_EXCEPT_PARAM);
 		RAISE( vlc, &pmyi->ex );
-
-#ifndef USE_PRE_1_1_0_VLC
-      lprintf( "vlc 1.1.x set callbacks, get ready." );
-		vlc.libvlc_video_set_callbacks( pmyi->mp, lock_frame, unlock_frame, display_frame, pmyi );
-      lprintf( "Output %d %d", pmyi->image_w, pmyi->image_h );
-		vlc.libvlc_video_set_format(pmyi->mp, "RV32", pmyi->image_w, pmyi->image_h, -pmyi->image_w*sizeof(CDATA));
 #endif
+		{
+			int x, y;
+			Image image;
 
+			if( vlc.libvlc_video_get_size( pmyi->mp, 0, &x, &y ) )
+			{
+				lprintf( "error... no stream?" );
+				x = 640;
+            y = 480;
+			}
+			else
+				lprintf( "Stream size is %d,%d", x, y );
+
+			image = MakeImageFile( pmyi->image_w = x, pmyi->image_h = y );
+			EnqueLink( &pmyi->available_frames, image );
+			
+#ifndef USE_PRE_1_1_0_VLC
+			lprintf( "vlc 1.1.x set callbacks, get ready." );
+			vlc.libvlc_video_set_callbacks( pmyi->mp, lock_frame, unlock_frame, display_frame, pmyi );
+			lprintf( "Output %d %d", pmyi->image_w, pmyi->image_h );
+			vlc.libvlc_video_set_format(pmyi->mp, "RV32", pmyi->image_w, pmyi->image_h, -pmyi->image_w*sizeof(CDATA));
+#endif
+		}
 
 		pmyi->mpev = vlc.libvlc_media_player_event_manager( pmyi->mp PASS_EXCEPT_PARAM );
       BindAllEvents( pmyi );
 
 		vlc.libvlc_media_release (pmyi->m);
 
+      //vlc.libvlc_media_list_player_play_item_at_index( pmyi->mlp, 0 PASS_EXCEPT_PARAM );
 		vlc.libvlc_media_player_play( pmyi->mp PASS_EXCEPT_PARAM);
-      pmyi->flags.bStarted = 1;
 
+		pmyi->flags.bStarted = 1;
 	}
 	else
 	{
@@ -1234,6 +1320,7 @@ struct my_vlc_interface * PlayItemInEx( PSI_CONTROL pc, CTEXTSTR url_name, CTEXT
 			}
 		}
 	}
+   lprintf( "Setup to play item in control is done... should be playing soon." );
 	return pmyi;
 }
 
