@@ -678,13 +678,6 @@ PTRSZVAL CPROC SetMenuRowCols( PTRSZVAL psv, arg_list args )
 	//lprintf( WIDE("Attempt to make font for screen 40x25")
 	//  	 , X( (PART_RESOLUTION-(g.button_space*g.button_cols))/(g.button_cols*10)  )
 	//  	 , Y( (PART_RESOLUTION-(g.button_space*g.button_rows))/(g.button_rows*5) ), 0 )
-	if( !g.keyfont )
-	{
-		g.keyfont = RenderFontFile( WIDE("./fonts/arialbd.ttf")
-										  , _X(canvas, (PART_RESOLUTION)/(canvas->nPartsX) )
-										  , _Y(canvas, (PART_RESOLUTION)/(canvas->nPartsY) )
-										  , 3 ); // 8 bit alpha (1=0,2=1,4=2,8=3)
-	}
 	// this scaled font... what's the reverse of this if applied
 	// with g.width_scale and g.height_scale?  (which is the screen proportion scalar)
    // the above is a button surface relative scaling...
