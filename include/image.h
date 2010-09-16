@@ -1220,6 +1220,8 @@ IMAGE_PROC  Font IMAGE_API  RenderScaledFontData( PFONTDATA pfd, PFRACTION width
    \ \                                                                       */
 #define RenderFontData(pfd) RenderScaledFontData( pfd,NULL,NULL )
 
+IMAGE_PROC Font IMAGE_API RenderScaledFont( CTEXTSTR name, _32 width, _32 height, PFRACTION width_scale, PFRACTION height_scale, _32 flags );
+
 /* Renders a font file and returns a Font. The font can then be
    used in string output functions to images.
    Parameters

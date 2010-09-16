@@ -1290,6 +1290,35 @@ Font RenderFontFile( CTEXTSTR file, _32 width, _32 height, _32 flags )
    return InternalRenderFontFile( file, width, height, flags );
 }
 
+Font RenderScaledFont( CTEXTSTR name, _32 width, _32 height, PFRACTION width_scale, PFRACTION height_scale, _32 flags )
+{
+	PFONT_ENTRY pfe;
+	INDEX family_idx;
+
+	LoadAllFonts(); // load cache data so we can resolve user data
+	for( family_idx = 0; family_idx < fg.nFonts; family_idx++ )
+	{
+		pfe = fg.pFontCache + family_idx;
+		if( StrCaseCmp( pfe->name, name ) == 0 )
+			break;
+	}
+	if( family_idx < fg.nFonts )
+	{
+		Font return_font = InternalRenderFont( family_idx
+														 , 0
+														 , 0
+														 , width_scale?ScaleValue(width_scale,width):width
+														 , height_scale?ScaleValue(height_scale,height):height
+														 , flags );
+		return return_font;
+	}
+
+	return InternalRenderFontFile( name
+										  , width_scale?ScaleValue(width_scale,width):width
+										  , height_scale?ScaleValue(height_scale,height):height
+										  , flags );
+}
+
 int GetFontRenderData( Font font, POINTER *fontdata, _32 *fontdatalen )
 {
 	// set pointer and _32 datalen passed by address
