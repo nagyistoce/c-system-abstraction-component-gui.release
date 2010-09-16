@@ -386,9 +386,11 @@ set(BASE_SOURCES  ${BASE_SOURCES}
   src/filesyslib/pathops.c
   src/filesyslib/filescan.c
   src/systemlib/system.c
+  src/commlib/sackcomm.c
   ${OPTION_SOURCE}
 )
 
+set( ExtraFlags "${ExtraFlags} -DSACKCOMM_SOURCE" )
 
 if( __WINDOWS__ )
 set(BASE_SOURCES ${BASE_SOURCES}
