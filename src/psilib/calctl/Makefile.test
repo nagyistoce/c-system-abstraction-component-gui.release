@@ -1,0 +1,15 @@
+
+#__NO_AUTO_LIBS__=1
+#DEST_PREFIX=bag_
+SRCS=testclock
+PROGNAME=testclock
+#MORELIBS=sack
+#BAG=yes
+#SACK_BUILD=1
+#export SACK_BUILD
+#export BAG
+#__NO_AUTO_LIBS__=1
+#MORELIBS=sack
+
+include $(SACK_BASE)/makefiles/makefile.single
+
