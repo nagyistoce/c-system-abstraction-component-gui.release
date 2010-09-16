@@ -1371,8 +1371,8 @@ PMENU_BUTTON CreateInvisibleControl( TEXTCHAR *name )
 		button->flags.bListbox = FALSE;
 		button->flags.bInvisible = TRUE;
 		button->pTypeName = StrDup( name );
-		button->font_preset = &g.keyfont;
-		button->font_preset_name = NULL;
+		button->font_preset = UseAFont( "Default" );
+		button->font_preset_name = "Default";
 		//lprintf( WIDE( "Creating a virtual control %s" ), name );
 		InvokeButtonCreate( NULL, button, FALSE );
 		return button;
@@ -1394,8 +1394,8 @@ PMENU_BUTTON CreateSomeControl( PSI_CONTROL pc_canvas, int x, int y, int w, int 
 	button->w = w;
 	button->h = h;
 	button->pTypeName = StrDup( name );
-	button->font_preset = &g.keyfont;
-	button->font_preset_name = NULL; 
+	button->font_preset = UseAFont( "Default" );
+	button->font_preset_name = "Default"; 
 	//lprintf( WIDE( "Creating a control %s on page %s" ), name, g.current_page->title );
 	{
 		button->page = canvas->current_page;
@@ -2801,19 +2801,24 @@ static int OnDrawCommon( WIDE( "Menu Canvas" ) )( PSI_CONTROL pf )
 			}
 			if( controls == 0 )
 			{
+            Font *font = UseAFont( "Default" );
 				int y = 15;
-            int skip = 14;
-				PutString( surface
+				int skip = GetFontHeight( (*font ) );
+				PutStringFont( surface
 							, (S_32)15, (S_32)y, BASE_COLOR_WHITE, SetAlpha( BASE_COLOR_BLACK, 90 )
-							, "There are no controls defined..." );
+							, "There are no controls defined...", (*font) );
             y += skip;
-				PutString( surface
+				PutStringFont( surface
 							, (S_32)15, (S_32)y, BASE_COLOR_WHITE, SetAlpha( BASE_COLOR_BLACK, 90 )
-							, "Press Alt-C to edit" );
+								 , "Press Alt-C to edit"
+								 , (*font)
+								 );
             y += skip;
-				PutString( surface
+				PutStringFont( surface
 							, (S_32)15, (S_32)y, BASE_COLOR_WHITE, SetAlpha( BASE_COLOR_BLACK, 90 )
-							, "Right click on empty space to edit other properties and add plugins..." );
+								 , "Right click on empty space to edit other properties and add plugins..."
+								 , (*font)
+								 );
 			}
 		}
 
@@ -3463,7 +3468,7 @@ int CPROC MouseEditGlare( PTRSZVAL psv, S_32 x, S_32 y, _32 b )
 	static _32 _b;
 	static S_32 _x, _y;
 	int px, py;
-   lprintf( WIDE( "Glare mouse %d %d %d" ), x, y, b );
+   //lprintf( WIDE( "Glare mouse %d %d %d" ), x, y, b );
 #define PARTOFX(xc) ( ( xc ) * canvas->current_page->grid.nPartsX ) / canvas->width
 #define PARTOFY(yc) ( ( yc ) * canvas->current_page->grid.nPartsY ) / canvas->height
 	px = PARTOFX( x );

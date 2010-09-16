@@ -144,7 +144,7 @@ typedef struct global_tag
 	//PSI_CONTROL keypad;
    PLIST extra_types; // char * name of extra types available to create
    TEXTCHAR *config_filename;
-	Font   keyfont;
+	Font   *_keyfont;
 	PLIST glare_sets;
    /*
 	struct {

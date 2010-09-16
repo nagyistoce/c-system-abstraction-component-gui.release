@@ -57,6 +57,13 @@ PFONT_PRESET _CreateAFont( PCanvasData canvas, CTEXTSTR name, Font font, POINTER
 	{
 		font_preset = New( FONT_PRESET );
 		font_preset->name = StrDup( name );
+		if( !l.fonts )
+		{
+			if( !font && !data )
+			{
+            font = RenderScaledFont( "Times New Roman", 25, 35, &canvas->width_scale, &canvas->height_scale, 3 );
+			}
+		}
 		AddLink( &l.fonts, font_preset );
 	}
 	else
@@ -171,6 +178,8 @@ Font * UseAFont( CTEXTSTR name )
 	ValidatedControlData( PCanvasData, menu_surface.TypeID, canvas, g.single_frame );
 	PFONT_PRESET font_preset;
 	INDEX idx;
+	if( !name )
+		name = "Default";
 	LIST_FORALL( l.fonts, idx, PFONT_PRESET, font_preset )
 	{
 		if( !strcmp( font_preset->name, name ) )
