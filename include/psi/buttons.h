@@ -6,17 +6,17 @@
 // of the correct type, it's pretty easy to cheat here...
 
 #define BUTTON_CLICK( name, args ) PUBLIC( void, name )args;   \
-	PRELOAD( name##_Init ) { SimpleRegisterMethod( PSI_ROOT_REGISTRY WIDE("methods/Button/Click") \
+	PRELOAD( name##_Init ) { SimpleRegisterMethod( PSI_ROOT_REGISTRY WIDE("/methods/Button/Click") \
 	                                        , name, WIDE("void"), _WIDE(#name), WIDE("(PTRSZVAL,PCOMMON)") ); } \
 	void CPROC name args
 
 #define BUTTON_DRAW( name, args ) PUBLIC( void, name )args;   \
-	PRELOAD( name##_Init ) { SimpleRegisterMethod( PSI_ROOT_REGISTRY WIDE("methods/Button/Draw") \
+	PRELOAD( name##_Init ) { SimpleRegisterMethod( PSI_ROOT_REGISTRY WIDE("/methods/Button/Draw") \
 	                                        , name, WIDE("void"), _WIDE(#name), WIDE("(PTRSZVAL,PCOMMON)") ); } \
 	void CPROC name args
 
 #define BUTTON_CHECK( name, args ) PUBLIC( void, name )args;   \
-	PRELOAD( name##_Init ) { SimpleRegisterMethod( PSI_ROOT_REGISTRY WIDE("methods/Button/Check") \
+	PRELOAD( name##_Init ) { SimpleRegisterMethod( PSI_ROOT_REGISTRY WIDE("/methods/Button/Check") \
 	                                        , name, WIDE("void"), _WIDE(#name), WIDE("(PTRSZVAL,PCOMMON)") ); } \
 	void CPROC name args
 
