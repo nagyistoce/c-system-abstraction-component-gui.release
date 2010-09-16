@@ -1,8 +1,9 @@
 #include <stdhdrs.h>
 
-static {
+static struct {
    CTEXTSTR next_service_name;
 } local_service_info;
+#define l local_service_info
 
 SERVICE_STATUS ServiceStatus;
 SERVICE_STATUS_HANDLE hStatus;
@@ -65,7 +66,7 @@ void APIENTRY ServiceMain( _32 argc, char **argv )
    ServiceStatus.dwWaitHint = 0; 
  
    hStatus = RegisterServiceCtrlHandler(
-      next_service_name,
+      l.next_service_name,
       (LPHANDLER_FUNCTION)ControlHandler); 
    if (hStatus == (SERVICE_STATUS_HANDLE)0) 
    { 
@@ -102,7 +103,7 @@ void APIENTRY ServiceMain( _32 argc, char **argv )
 void SetupService( CTEXTSTR name )
 {
 	SERVICE_TABLE_ENTRY ServiceTable[2];
-   next_service_name = name;
+   l.next_service_name = name;
 	ServiceTable[0].lpServiceName = name;
 	ServiceTable[0].lpServiceProc = ServiceMain;
 	ServiceTable[1].lpServiceName = NULL;
