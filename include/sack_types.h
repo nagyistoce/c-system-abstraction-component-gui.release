@@ -309,7 +309,7 @@ using namespace System;
 #   define LITERAL_LIB_IMPORT_METHOD extern
 //__declspec(dllimport)
 #  else
-#    ifdef __LINUX__
+#   if defined( __STATIC__ ) || defined( __LINUX__ )
 #      define EXPORT_METHOD
 #      define IMPORT_METHOD extern
 #    else
