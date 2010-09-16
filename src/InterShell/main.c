@@ -11,7 +11,7 @@
 
 //
 
-#define DEBUG_BACKGROUND_UPDATE
+//#define DEBUG_BACKGROUND_UPDATE
 
 #define LOG_UPDATE_AND_REFRESH_LEVEL LOG_ALWAYS
 //#define LOG_UPDATE_AND_REFRESH_LEVEL LOG_NEVER
@@ -2557,12 +2557,6 @@ void CPROC DrawEditGlare( PTRSZVAL psv, Image surface )
 			// should use X to capture an image of the current menu config
 			// then during editing we do not have to redraw all controls all the time..
 			ClearImageTo( surface, 0x01000000 );
-			//lprintf( WIDE( ".... some kinda mystical update here" ) );
-			//EnableFrameUpdates( pf, FALSE );
-			//ReleaseCommonUse(pf);
-			//EnableFrameUpdates( pf, TRUE );
-			lprintf( WIDE( ".... some kinda mystical update end here" ) );
-			//lprintf( WIDE("Continue background") );
 
 			{
 				PMENU_BUTTON button;
@@ -2838,7 +2832,9 @@ static int OnDrawCommon( WIDE( "Menu Canvas" ) )( PSI_CONTROL pf )
 			//EnableFrameUpdates( pf, FALSE );
 			//ReleaseCommonUse(pf);
 			//EnableFrameUpdates( pf, TRUE );
+#ifdef DEBUG_BACKGROUND_UPDATE
 			lprintf( WIDE( ".... some kinda mystical update end here" ) );
+#endif
 			//lprintf( WIDE("Continue background") );
 			if( x )
 			{
@@ -3467,6 +3463,7 @@ int CPROC MouseEditGlare( PTRSZVAL psv, S_32 x, S_32 y, _32 b )
    PSI_CONTROL pc = canvas->pc_canvas; // was the canvas mouse routine so...
 	static _32 _b;
 	static S_32 _x, _y;
+	static int _px, _py;
 	int px, py;
    //lprintf( WIDE( "Glare mouse %d %d %d" ), x, y, b );
 #define PARTOFX(xc) ( ( xc ) * canvas->current_page->grid.nPartsX ) / canvas->width
@@ -3485,34 +3482,40 @@ int CPROC MouseEditGlare( PTRSZVAL psv, S_32 x, S_32 y, _32 b )
 
 
 
-	if( canvas->flags.bEditMode )
+	do
 	{
-		if( b & MK_LBUTTON)
+		if( canvas->flags.bEditMode )
 		{
-			//lprintf( WIDE("left down.") );
-			if( !(_b & MK_LBUTTON ) )
+			if( ( b == _b ) && ( canvas->flags.dragging || canvas->flags.sizing || canvas->flags.selecting ) )
+				if( ( _px == px ) && ( _py == py ) )
+					break;
+			if( b & MK_LBUTTON)
 			{
-				MouseFirstDown( canvas, psv, px, py );
+				//lprintf( WIDE("left down.") );
+				if( !(_b & MK_LBUTTON ) )
+				{
+					MouseFirstDown( canvas, psv, px, py );
+				}
+				else
+				{
+					// was down, is down....
+					MouseDrag( canvas, psv, px, py );
+				}
 			}
 			else
 			{
-				// was down, is down....
-				MouseDrag( canvas, psv, px, py );
-			}
-		}
-		else
-		{
-			if( _b & MK_LBUTTON )
-			{
-				MouseFirstRelease( canvas, psv );
-			}
-			else
-			{
-				// was released, still released.
+				if( _b & MK_LBUTTON )
+				{
+					MouseFirstRelease( canvas, psv );
+				}
+				else
+				{
+					// was released, still released.
+				}
 			}
 		}
 	}
-
+   while( 0 );
 
 	//-----------------------------------------------------
 	///   Right button context menu stuff
@@ -3527,6 +3530,8 @@ int CPROC MouseEditGlare( PTRSZVAL psv, S_32 x, S_32 y, _32 b )
 		}
 	}
 
+	_px = px;
+	_py = py;
 	_b = b;
 	_x = x;
 	_y = y;
