@@ -123,6 +123,7 @@ int main( int argc, char **argv )
       fprintf( out, "  SET( LAST_GCC_LIBRARY_SOURCE ${SACK_BASE}/src/sack/deadstart_lib.c ${SACK_BASE}/src/sack/deadstart_end.c )\n" );
       fprintf( out, "  SET( LAST_GCC_PROGRAM_SOURCE ${SACK_BASE}/src/sack/deadstart_lib.c ${SACK_BASE}/src/sack/deadstart_prog.c ${SACK_BASE}/src/sack/deadstart_end.c )\n" );
 		fprintf( out, "  endif()\n" );
+#if didnt_find_solution_in_cmake
 		fprintf( out, "if(WATCOM)\n" );
       fprintf( out, "  SET( DEFINE_STRING_QUOTE_OPEN \\\" )\n" );
       fprintf( out, "  SET( DEFINE_STRING_QUOTE_CLOSE \\\" )\n" );
@@ -134,7 +135,8 @@ int main( int argc, char **argv )
 		fprintf( out, "\n" );
       fprintf( out, "SET( PROGRAM_NAME ${DEFINE_STRING_QUOTE_OPEN}${PROJECT_NAME}${CMAKE_EXECUTABLE_SUFFIX}${DEFINE_STRING_QUOTE_CLOSE})\n" );
 		fprintf( out, "SET( LIBRARY_NAME ${DEFINE_STRING_QUOTE_OPEN}${CMAKE_LIBRARY_PREFIX}${PROJECT_NAME}${CMAKE_LIBRARY_SUFFIX}${DEFINE_STRING_QUOTE_CLOSE})\n" );
-      fprintf( out, "SET( LITERAL_LIBRARY_NAME ${DEFINE_STRING_QUOTE_OPEN}${PROJECT_NAME}${DEFINE_STRING_QUOTE_CLOSE})\n" );
+		fprintf( out, "SET( LITERAL_LIBRARY_NAME ${DEFINE_STRING_QUOTE_OPEN}${PROJECT_NAME}${DEFINE_STRING_QUOTE_CLOSE})\n" );
+#endif
       fprintf( out, "\n" );
 		fprintf( out, "if( ${MSVC}${WATCOM} )\n" );
       fprintf( out, "  SET( LAST_GCC_PROGRAM_SOURCE ${SACK_BASE}/src/sack/deadstart_prog.c )\n" );
