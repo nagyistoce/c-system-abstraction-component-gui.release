@@ -589,8 +589,8 @@ typedef int pid_t;
 #define FILELINE_VOIDRELAY   pFile, nLine
 /* specify a consistant macro to format file and line information for printf formated strings. */
 #define FILELINE_FILELINEFMT WIDE("%s(%") _32f WIDE("): ")
-//#define FILELINE_NULL        , NULL, 0
-//#define FILELINE_VOIDNULL    NULL, 0
+#define FILELINE_NULL        , NULL, 0
+#define FILELINE_VOIDNULL    NULL, 0
 /* define static parameters which are the declaration's current file and line, for stubbing in where debugging is being stripped. 
   usage
     FILELINE_VARSRC: // declare pFile and nLine variables.
