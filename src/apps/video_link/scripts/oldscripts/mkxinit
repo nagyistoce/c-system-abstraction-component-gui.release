@@ -1,0 +1,122 @@
+#!/bin/bash
+
+tmpfile=~/.xinitrc
+logfile=/tmp/mkx.log
+#echo $tmpfile
+
+case $1 in 
+    $(hostname))
+    	# this command is to me... probably means that $2 is the
+        # address that I should be sending on... 
+        # perhaps there's a $3 for secondary audio/video $4?..... etc?
+        echo "this computer is $1 and will be broadcasting at $2" >> $logfile
+echo "#!/bin/bash
+export PATH=$PATH:/usr/bin/X11:/usr/local/bin
+alsactl restore -f /usr/src/FortuNet/asound.state.nosound
+nvidia-settings -l
+xset -dpms
+setterm -blank 0
+xset s off
+" > /root/.xinitrc
+        echo "
+#cd ~/bingolink/fbi_replicator_backup
+cd /usr/src/FortuNet/fbi-replicator-0.1
+# support for login dialog
+#/usr/bin/xterm -geometry 80x20+1024+51 -e ./fbi-rep-server -p&
+# some sort of login dialog...
+#/usr/bin/xterm -geometry 80x20+1024+400 -e ./fbi-rep-gui $(hostname)& 
+./blctrl setup
+./blctrl host
+DISPLAY=:0.1 ./ianson broadcast $2 &
+#wait for server to be ready, then tell remotes
+/usr/src/FortuNet/watchnetstat >/tmp/waiting
+/usr/src/FortuNet/launchcmds /usr/src/FortuNet/mkxinit display $1 $2
+exec /usr/bin/xterm
+           " >> /root/.xinitrc
+      killall X
+        ;;
+    guestverify)
+    	# this command is to me... probably means that $2 is the
+        # address that I should be sending on... 
+        # perhaps there's a $3 for secondary audio/video $4?..... etc?
+        echo "this computer is $2 and will be broadcasting at $3" >> $logfile
+echo "#!/bin/bash
+export PATH=$PATH:/usr/bin/X11:/usr/local/bin
+cp asound.state.nosound /etc/asound.state
+alsactl restore -f /usr/src/FortuNet/asound.state.nosound
+nvidia-settings -l
+xset -dpms
+setterm -blank 0
+xset s off
+" > /root/.xinitrc
+        echo "
+#cd ~/bingolink/fbi_replicator_backup
+cd /usr/src/FortuNet/fbi-replicator-0.1
+# support for login dialog
+#/usr/bin/xterm -geometry 80x20+1024+51 -e ./fbi-rep-server -p&
+# some sort of login dialog...
+#/usr/bin/xterm -geometry 80x20+1024+400 -e ./fbi-rep-gui $(hostname)& 
+./blctrl setup
+./blctrl guestverify
+DISPLAY=:0.1 ./ianson broadcast $3 &
+#wait for server to be ready, then tell remotes
+/usr/src/FortuNet/watchnetstat >/tmp/waiting
+/usr/src/FortuNet/launchcmds /usr/src/FortuNet/mkxinit display $2 $3
+exec /usr/bin/xterm
+           " >> /root/.xinitrc
+      killall X
+        ;;
+    localmode)
+echo "#!/bin/bash
+export PATH=$PATH:/usr/bin/X11:/usr/local/bin
+alsactl restore -f /usr/src/FortuNet/asound.state.nosound
+nvidia-settings -l
+xset -dpms
+setterm -blank 0
+xset s off
+" > /root/.xinitrc
+    	echo "
+cd /usr/src/FortuNet/fbi-replicator-0.1
+./blctrl setup
+./blctrl local" >> /root/.xinitrc
+         echo "exec /usr/bin/xterm" >> /root/.xinitrc
+
+
+      killall X
+	;;
+    display)
+      case $2 in 
+        $(hostname))
+           echo "host is already $2 ignoring display..." >> $logfile
+           ;;
+        *)
+      # everyone else passed as this command becomes a master...
+      # slave all control to $2
+      args=$#-1
+        echo "this computer will be displaying $2 at $3" >> $logfile
+echo "#!/bin/bash
+export PATH=$PATH:/usr/bin/X11:/usr/local/bin
+alsactl restore -f /usr/src/FortuNet/asound.state.sound
+nvidia-settings -l
+xset -dpms
+setterm -blank 0
+xset s off
+" > /root/.xinitrc
+	echo "cd /usr/src/FortuNet/fbi-replicator-0.1
+./blctrl setup
+./blctrl guest" >> /root/.xinitrc
+	 echo "/usr/src/FortuNet/fbi-replicator-0.1/ianson display $3 &" >> /root/.xinitrc
+         echo "exec /usr/bin/xterm" >> /root/.xinitrc
+
+
+      killall X
+       ;;
+       esac
+       ;;
+    *)
+    echo "no operation... waitin for real operation" >> $logfile
+    ;;
+esac       
+# need to build in some sort of safety....
+#      echo "/root/work/testbed/bin/debug-wc/milk" >> /root/.xinitrc
+

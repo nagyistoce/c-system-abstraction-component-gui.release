@@ -1,0 +1,57 @@
+#!/bin/bash
+
+
+echo "Thank you for $*" >> /tmp/ianson.log
+#echo "SCRIPTSEZ: For the record \$1 is $1 \$2 is $2 "
+
+    case "$1" in
+       broadcast)                       
+
+#          DISPLAY :0.1 vlc -vvv v4l:/dev/video  --sout '#transcode{vcodec=mp4v,vb=3072,height=480,width=720}:duplicate{dst=display:0.1,dst=standard{access=udp,mux=ts,url='$2',height=480,width=720,caching=0,ttl=0,hurry-up}}';
+#         DISPLAY=:0.1 vlc --fullscreen -vvv v4l:/dev/video --sout '#transcode{vcodec=mp4v,acodec=mpga,vb=800,height=480,width=720,ab=192,channels=2}:duplicate{dst=display,dst=standard{access=udp,mux=ts,url='$2',height=480,width=720}}'; 
+         echo "broadcasting..." >>/tmp/ianson.log
+         DISPLAY=:0.1 vlc --fullscreen -vvv v4l:/dev/video --sout '#transcode{vcodec=mp4v,acodec=mpga,vb=3072,height=480,width=720,ab=192,channels=2}:duplicate{dst=display,dst=standard{access=http,mux=ts,dst=0.0.0.0:1234,height=480,width=720}}' >/tmp/vlc.log 2>&1 
+         echo "vlc broadcasted" >>/tmp/ianson.log              
+		;;
+
+       terminate)
+       #echo "SCRIPTSEZ: Killing '$2'";
+	kill -s TERM $2              
+        shift;;
+#          case "$2" in
+#             BOULDER)
+#	        shift;;
+#              REDROCK)
+#        	shift;;
+#              PALACE)
+#                shift;;
+#	      SANTAFE)
+#        	shift;;
+#	      SUNSET)
+#             	shift;;
+#	      TEXAS)
+#        	shift;;                  
+#              *)
+#               shift;;
+       display) 	
+
+           #DISPLAY=:0.1 vlc --fullscreen udp:@$2                       
+           DISPLAY=:0.1 vlc --fullscreen http://$2                       
+           ;;
+	
+          
+       test)
+          case "$2" in
+             test)
+               echo "SCRIPTSEZ: Test, test.";;
+               
+             *) echo "whtvr"
+                shift;;
+                
+          esac;;
+          
+       *) echo "whatever for \$1 : $1"
+          shift;;
+          
+    esac
+

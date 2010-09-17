@@ -1,0 +1,53 @@
+#!/bin/bash
+
+DBHOST=172.20.2.81
+OKAY1() {
+	#echo "use fortunet;replace into link_hall_state (hall_id,master_ready,enabled) select hall_id,1,1 from hall_info where hall_name='$(hostname)';"
+	echo "use fortunet;replace into link_hall_state (hall_id,master_ready,enabled) select hall_id,1,1 from hall_info where hall_name='$(hostname)';" | mysql -u fortunet -h $DBHOST --password=dkc408a1f
+}
+OKAY2() {
+           echo "use fortunet;replace into link_hall_state (hall_id,delegate_ready,enabled) select hall_id,1,1 from hall_info where hall_name='$(hostname)';" | mysql -u fortunet -h $DBHOST --password=dkc408a1f
+}
+OKAY3() {
+           echo "use fortunet;replace into link_hall_state (hall_id,participating,enabled) select hall_id,1,1 from hall_info where hall_name='$(hostname)';" | mysql -u fortunet -h $DBHOST --password=dkc408a1f
+}
+OKAY4() {
+           echo "use fortunet;replace into link_hall_state (hall_id,participating,enabled) select hall_id,1,1 from hall_info where hall_name='$(hostname)';" | mysql -u fortunet -h $DBHOST --password=dkc408a1f
+}
+
+FAIL() {
+
+           echo "use fortunet;replace into link_hall_state (hall_id,enabled) select hall_id,1 from hall_info where hall_name='$(hostname)';"
+           echo "use fortunet;replace into link_hall_state (hall_id,enabled) select hall_id,1 from hall_info where hall_name='$(hostname)';" | mysql -u fortunet -h $DBHOST --password=dkc408a1f
+}
+#DBHOST=vsrvr.texasstation
+case $1 in 
+        broadcast)
+           echo "I need to send FBI box commands here...to broadcast " 
+           echo "watching netstat for server..."
+	   if(/usr/src/FortuNet/watchnetstat.new server); then OKAY1; else FAIL; fi;
+           ;;
+        delegate_broadcast)
+           echo "watching netstat for server..."
+	   if(/usr/src/FortuNet/watchnetstat.new server); then OKAY2; else FAIL; fi;
+           ;;
+	display)
+           echo "I need to send FBI box commands here...to listen to host" 
+	   if(/usr/src/FortuNet/watchnetstat.new client); then OKAY3; else FAIL; fi;
+	   ;;
+        delegate_display)
+           echo "watching netstat for server..."
+	   if(/usr/src/FortuNet/watchnetstat.new client); then OKAY4; else FAIL; fi;
+           ;;
+	LOCAL)
+          echo "use fortunet;replace into link_hall_state (hall_id,enabled,controller) select hall_info.hall_id,enabled,controller from hall_info join link_hall_state on link_hall_state.hall_id=hall_info.hall_id where hall_name='$(hostname)';" | mysql -u fortunet -h $DBHOST --password=dkc408a1f
+          ;;
+	RESETLOCAL)
+          echo "use fortunet;replace into link_hall_state (hall_id,enabled) select hall_info.hall_id,enabled from hall_info join link_hall_state on link_hall_state.hall_id=hall_info.hall_id where hall_name='$(hostname)';" | mysql -u fortunet -h $DBHOST --password=dkc408a1f
+	  ;;
+        announcement)
+          echo "use fortunet;replace into link_hall_state (hall_id,enabled,participating,master_ready,delegate_ready,controller) select hall_info.hall_id,enabled,participating,master_ready,delegate_ready,controller from hall_info join link_hall_state on link_hall_state.hall_id=hall_info.hall_id where hall_name='$(hostname)';" | mysql -h fortunet -h $DBHOST --password=dkc408a1f
+          ;;
+esac
+
+          /usr/src/FortuNet/bardsend "check video state"

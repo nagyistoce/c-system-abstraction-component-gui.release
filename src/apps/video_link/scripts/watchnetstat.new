@@ -1,0 +1,41 @@
+#!/bin/bash
+
+
+case $1 in
+   server)
+val=$(netstat -ant|grep 1234|awk '{print $6}')
+
+echo $val waiting for vlc to be ready...
+for((times=0;times<10;times++)); do
+	for i in $val; do
+          echo "$i is in $val"
+	  if [[ $i == "LISTEN" ]]; then
+              exit 0
+          fi;
+        done
+  	sleep 1;
+  	echo -n .
+  val=$(netstat -ant|grep 1234|awk '{print $6}')
+  #echo "new $val is"
+done
+if((times==10)); then exit 1; fi;
+   ;;
+   client)
+val=$(netstat -ant|grep 1234|awk '{print $6}')
+
+echo $val waiting for vlc to be ready...
+for((times=0;times<10;times++)); do
+	for i in $val; do
+	  if [[ $i == "ESTABLISHED" ]]; then
+              exit 0
+          fi;
+        done
+  	sleep 1;
+  	echo -n .
+  val=$(netstat -ant|grep 1234|awk '{print $6}')
+done
+if((times==10)); then exit 1; fi;
+   ;;
+esac
+echo "done..."
+exit 0

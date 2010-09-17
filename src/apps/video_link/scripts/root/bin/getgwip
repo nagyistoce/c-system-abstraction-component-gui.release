@@ -1,0 +1,1 @@
+ifconfig eth0|awk '/inet addr:/ {print $2;}'|sed 's/addr://'

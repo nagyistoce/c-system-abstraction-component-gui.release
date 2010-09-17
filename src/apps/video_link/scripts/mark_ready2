@@ -1,0 +1,89 @@
+#!/bin/bash
+
+DBCMD="isql MySQL -b"
+
+OKAY1() {
+	echo "replace into link_hall_state (id,link_hall_state.hall_id,master_ready,enabled,prohibited) select link_hall_state.id,location.id,1,1,link_hall_state.prohibited from location join link_hall_state on link_hall_state.hall_id=location.id where packed_name='$(hostname)'" >>/tmp/mark.sql
+	echo "replace into link_hall_state (id,link_hall_state.hall_id,master_ready,enabled,prohibited) select link_hall_state.id,location.id,1,1,link_hall_state.prohibited from location join link_hall_state on link_hall_state.hall_id=location.id where packed_name='$(hostname)'
+" | $DBCMD
+}
+OKAY2() {
+           echo "replace into link_hall_state (id,link_hall_state.hall_id,delegate_ready,enabled,prohibited) select link_hall_state.id,location.id,1,1,link_hall_state.prohibited from location join link_hall_state on link_hall_state.hall_id=location.id where packed_name='$(hostname)'" >>/tmp/mark.sql
+           echo "replace into link_hall_state (id,link_hall_state.hall_id,delegate_ready,enabled,prohibited) select link_hall_state.id,location.id,1,1,link_hall_state.prohibited from location join link_hall_state on link_hall_state.hall_id=location.id where packed_name='$(hostname)'
+" | $DBCMD
+}
+OKAY3() {
+           echo "replace into link_hall_state (id,link_hall_state.hall_id,participating,enabled,prohibited) select link_hall_state.id,location.id,1,1,link_hall_state.prohibited from location join link_hall_state on link_hall_state.hall_id=location.id where packed_name='$(hostname)'" >>/tmp/mark.sql
+           echo "replace into link_hall_state (id,link_hall_state.hall_id,participating,enabled,prohibited) select link_hall_state.id,location.id,1,1,link_hall_state.prohibited from location join link_hall_state on link_hall_state.hall_id=location.id where packed_name='$(hostname)'
+" | $DBCMD
+}
+OKAY4() {
+           echo "replace into link_hall_state (id,link_hall_state.hall_id,participating,enabled,prohibited) select link_hall_state.id,location.id,1,1,link_hall_state.prohibited from location join link_hall_state on link_hall_state.hall_id=location.id where packed_name='$(hostname)'" >>/tmp/mark.sql
+           echo "replace into link_hall_state (id,link_hall_state.hall_id,participating,enabled,prohibited) select link_hall_state.id,location.id,1,1,link_hall_state.prohibited from location join link_hall_state on link_hall_state.hall_id=location.id where packed_name='$(hostname)'
+" | $DBCMD
+}
+
+FAIL() {
+           echo "replace into link_hall_state (id,link_hall_state.hall_id,enabled,prohibited) select link_hall_state.id,location.id,1,link_hall_state.prohibited from location join link_hall_state on link_hall_state.hall_id=location.id where packed_name='$(hostname)'" >>/tmp/mark.sql
+           echo "replace into link_hall_state (id,link_hall_state.hall_id,enabled,prohibited) select link_hall_state.id,location.id,1,link_hall_state.prohibited from location join link_hall_state on link_hall_state.hall_id=location.id where packed_name='$(hostname)'
+" | $DBCMD
+}
+#DBHOST=vsrvr.texasstation
+case $1 in 
+        broadcast)
+           echo "I need to send FBI box commands here...to broadcast " 
+           echo "watching netstat for server..."
+	   if(/usr/src/FortuNet/alpha2/watchnetstat.new server); then OKAY1; else FAIL; fi;
+	   SCRIPT_PATH=$SCRIPT_PATH $SCRIPT_PATH/blctrl host
+           ;;
+        delegate_broadcast)
+           echo "watching netstat for server..."
+	   if(/usr/src/FortuNet/alpha2/watchnetstat.new server); then OKAY2; else FAIL; fi;
+	   SCRIPT_PATH=$SCRIPT_PATH $SCRIPT_PATH/blctrl guestverify
+           ;;
+	display)
+           echo "I need to send FBI box commands here...to listen to host" 
+	   if(/usr/src/FortuNet/alpha2/watchnetstat.new client); then OKAY3; else FAIL; fi;
+       	   SCRIPT_PATH=$SCRIPT_PATH $SCRIPT_PATH/blctrl guest
+	   ;;
+        delegate_display)
+           echo "watching netstat for server..."
+	   if(/usr/src/FortuNet/alpha2/watchnetstat.new client); then OKAY4; else FAIL; fi;
+	   SCRIPT_PATH=$SCRIPT_PATH $SCRIPT_PATH/blctrl guest
+           ;;
+           
+	general)
+        # any general task can call this to clear the task_launched bit.
+          echo "update link_hall_state join location on link_hall_state.hall_id=location.id set task_launched=0 where packed_name='$(hostname)'" | $DBCMD
+          ;;
+	LOCAL)
+          echo "replace into link_hall_state (id,link_hall_state.hall_id,enabled,controller,prohibited) select link_hall_state.id,location.id,link_hall_state.enabled,link_hall_state.controller,link_hall_state.prohibited from location join link_hall_state on link_hall_state.hall_id=location.id where packed_name='$(hostname)'" | $DBCMD
+          ;;
+	RESETLOCAL)
+          echo "replace into link_hall_state (id,link_hall_state.hall_id,enabled,prohibited) select link_hall_state.id,location.id,enabled,prohibited from location join link_hall_state on link_hall_state.hall_id=location.id where packed_name='$(hostname)'" >>/tmp/mark.sql
+          echo "replace into link_hall_state (id,link_hall_state.hall_id,enabled,prohibited) select link_hall_state.id,location.id,link_hall_state.enabled,link_hall_state.prohibited from location join link_hall_state on link_hall_state.hall_id=location.id where packed_name='$(hostname)'
+" | $DBCMD
+	  ;;
+        announcement)
+          echo "replace into link_hall_state (id,link_hall_state.hall_id,enabled,participating,master_ready,delegate_ready,controller,prohibited) select link_hall_state.id,location.id,link_hall_state.enabled,link_hall_state.participating,link_hall_state.master_ready,link_hall_state.delegate_ready,link_hall_state.controller,link_hall_state.prohibited from location join link_hall_state on link_hall_state.hall_id=location.id where packed_name='$(hostname)'
+" | $DBCMD
+          ;;
+        announcing)
+          echo "replace into link_hall_state (id,link_hall_state.hall_id,enabled,participating,master_ready,delegate_ready,controller,prohibited,announcing) select link_hall_state.id,location.id,link_hall_state.enabled,link_hall_state.participating,link_hall_state.master_ready,link_hall_state.delegate_ready,link_hall_state.controller,link_hall_state.prohibited,1 from location join link_hall_state on link_hall_state.hall_id=location.id where packed_name='$(hostname)'
+" | $DBCMD
+	  ;;
+        bdata_control)
+          echo "replace into link_hall_state (id,link_hall_state.hall_id,enabled,participating,master_ready,delegate_ready,controller,prohibited,announcing) select link_hall_state.id,location.id,link_hall_state.enabled,link_hall_state.participating,link_hall_state.master_ready,link_hall_state.delegate_ready,link_hall_state.controller,link_hall_state.prohibited,link_hall_state.announcing from location join link_hall_state on link_hall_state.hall_id=location.id where packed_name='$(hostname)'
+" | $DBCMD
+	  ;;
+	playpromo)                                                                                           
+	echo "replace into link_hall_state (id,link_hall_state.hall_id,master_ready,participating,enabled,prohibited,dvd_active) select link_hall_state.id,location.id,link_hall_state.master_ready,link_hall_state.participating,link_hall_state.enabled,link_hall_state.prohibited,link_hall_state.dvd_active from location join link_hall_state on link_hall_state.hall_id=location.id where packed_name='$(hostname)'" >>/tmp/mark.sql
+	echo "replace into link_hall_state (id,link_hall_state.hall_id,master_ready,participating,enabled,prohibited,dvd_active) select link_hall_state.id,location.id,link_hall_state.master_ready,link_hall_state.participating,link_hall_state.enabled,link_hall_state.prohibited,link_hall_state.dvd_active from location join link_hall_state on link_hall_state.hall_id=location.id where packed_name='$(hostname)'"  | $DBCMD        
+          ;;
+	killpromo)                                                                                           
+	echo "replace into link_hall_state (id,link_hall_state.hall_id,master_ready,participating,enabled,prohibited,dvd_active) select link_hall_state.id,location.id,link_hall_state.master_ready,link_hall_state.participating,link_hall_state.enabled,link_hall_state.prohibited,link_hall_state.dvd_active from location join link_hall_state on link_hall_state.hall_id=location.id where packed_name='$(hostname)'" >>/tmp/mark.sql
+	echo "replace into link_hall_state (id,link_hall_state.hall_id,master_ready,participating,enabled,prohibited,dvd_active) select link_hall_state.id,location.id,link_hall_state.master_ready,link_hall_state.participating,link_hall_state.enabled,link_hall_state.prohibited,link_hall_state.dvd_active from location join link_hall_state on link_hall_state.hall_id=location.id where packed_name='$(hostname)'"  | $DBCMD        
+          ;;
+esac
+
+#          /usr/src/FortuNet/alpha2/bardsend "check video state"

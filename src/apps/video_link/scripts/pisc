@@ -1,0 +1,113 @@
+#!/bin/bash
+
+YORN=0
+D=$(date)
+YesOrNo()
+{
+  read KeyStroke
+  case "$KeyStroke" in
+    y) YORN=1 ; shift ;;
+    *) YORN=0 ;;
+  esac
+}
+NoOrYes()
+{
+  read KeyStroke
+  case "$KeyStroke" in
+    n) YORN=0 ; shift ;;
+    *) YORN=1 ;;
+  esac
+}
+
+set_clock_properly()
+{
+ while [ $YORN -eq "0" ]
+  do
+#D="14:45 05/31/2008"
+  echo "enter correct date here HH:MM[SPACE]MO/DA/YEAR  like this---->14:45 05/31/2008"
+  read D
+  echo $D "  is this correct? [y/N]"
+  YesOrNo
+done
+
+}
+
+echo
+echo "Welcome to pisc. The {p}OST {i}NSTALLATION {s}ORCERER {c}LONE script"
+echo "This script is intended to be run directly after a clone of the"
+echo "Jumbo Progressive Bingo Video Link drive to assist in completion"
+echo "of Post Installation procedures."
+echo
+echo
+
+z=$(ls -l /etc/localtime)
+echo "Current timezone is $(ls -l /etc/localtime | awk '{print $10}') Set to PST8PDT? [y/N]"
+YesOrNo
+if [[ $YORN -eq "1" ]] ; then 
+  rm /etc/localtime -f
+  ln -s /usr/share/zoneinfo/PST8PDT /etc/localtime
+fi
+
+YORN=0
+echo "Current Date is $D.  Is this correct? [Y/n]"
+NoOrYes
+if [[ $YORN -eq "0" ]] ; then
+  set_clock_properly
+fi
+
+YORN=0
+echo "Set date to $D ?  [y/N]"
+YesOrNo
+2if [[ $YORN -eq "1" ]] ; then
+ date --set=$D
+fi
+
+YORN=0
+echo "Set hwclock?  [y/N]"
+YesOrNo
+if [[ $YORN -eq "1" ]] ; then
+#sync hwclock?
+ hwclock --systohc --localtime
+fi
+
+echo
+echo "is the network up? pinging hotmail...."
+echo
+  ping www.hotmail.com -c 3
+fi
+#awk/sed the server.ini to have the correct hallname
+
+echo 
+echo 
+echo 
+echo 
+
+#make sure the DVD drive is connected correctly
+DEVDVDLIST=$(grep "$(date | awk '{print $2" "$3}')" /var/log/messages | grep 'DVD-ROM DVD-R CD-R'  | awk '{print $6}') 
+echo "DVD must be hda: and is $DEVDVDLIST"
+if [[ $DEVDVDLIST = "hda:" ]] ; then
+  echo "DVD is installed correctly"
+else
+  echo
+  echo
+  echo
+  echo "*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*"
+  echo "*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*"
+  echo "*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*"
+  echo
+  echo "The DVD drive needs to be connected as PRIMARY MASTER, labelled as /dev/hda"
+  echo "It is currently connected as >> $DEVDVDLIST <<  which is incorrect.  FIX"
+  echo "THIS BEFORE GOING ANY FURTHER.  FAILURE TO REMEDY THIS SITUATION WILL RESULT"
+  echo "IN VLC FAILING TO LAUNCH CORRECTLY.  Most likely cause is cable connected to"
+  echo "the motherboard in the wrong socket and/or wrong end connected to DVD drive."
+  echo "Should be the very end of the cable connected to the DVD drive, the other end"
+  echo "connected to the socket on the motherboard marked PRI_IDE."
+  echo
+  echo "*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*"
+  echo "*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*"
+  echo "*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*"
+  echo
+  echo
+  echo
+  
+fi

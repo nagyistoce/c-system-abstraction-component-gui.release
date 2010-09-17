@@ -1,0 +1,20 @@
+#!/bin/bash
+
+function test {
+  read -s INPUT
+  #echo "RECEVIED [$INPUT]"
+  case $INPUT in
+     *nothing?to?play)
+        #echo "killing VLC AT $(cat vlc_sound_pid)"
+        /bin/kill $(/bin/cat /tmp/vlc_sound_pid)
+        exit 0
+        ;;
+     *)
+        #echo "NO ACTION"
+        ;;
+  esac
+}
+
+while [[ 1 ]]; do
+ test
+done;

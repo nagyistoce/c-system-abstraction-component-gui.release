@@ -1,0 +1,58 @@
+#!/bin/bash
+
+SCRIPT_PATH=/usr/src/FortuNet/alpha2
+MYADDR=$(hostname)
+SIBLING="FiestaHenderson"
+#SIBLING="SunsetStation"
+#SIBLING="BoulderStation"
+
+FILENAME="/etc/odbc.ini"
+#FILENAME="/home/christopher/freshies/eggy/odbc.ini"
+#PARENT="PalaceStation"
+PARENT="SunsetStation"
+#PARENT="TexasStation"
+
+case "$1" in
+    family)    SCRIPT_PATH=$SCRIPT_PATH $SCRIPT_PATH/ianson LOCAL 
+               SCRIPT_PATH=$SCRIPT_PATH $SCRIPT_PATH/set_current_db "vsrvr.$PARENT" $PARENT
+#               SCRIPT_PATH=$SCRIPT_PATH $SCRIPT_PATH/mkxinit DATABASE
+               killall X
+    ;;
+    peer)      SCRIPT_PATH=$SCRIPT_PATH $SCRIPT_PATH/ianson LOCAL 
+               SCRIPT_PATH=$SCRIPT_PATH $SCRIPT_PATH/set_current_db "vsrvr.$SIBLING" "xyzabc"
+#               SCRIPT_PATH=$SCRIPT_PATH $SCRIPT_PATH/mkxinit DATABASE
+               killall X
+   ;;
+    *) if [ "$MYADDR" = "$SIBLING" ]
+       then
+       echo "$MYADDR is $SIBLING";
+	else
+        echo "$MYADDR is not $SIBLING";
+       fi                              
+	;;
+esac
+
+   # case $2 in
+   # LOCAL)     SCRIPT_PATH=$SCRIPT_PATH $SCRIPT_PATH/ianson LOCAL
+   # ;;
+   # broadcast) SCRIPT_PATH=$SCRIPT_PATH $SCRIPT_PATH/ianson broadcast
+   # ;;
+   # display)   SCRIPT_PATH=$SCRIPT_PATH $SCRIPT_PATH/ianson display $SIBLING
+   # ;;
+   # *)          echo "Hey, what am I supposed to do with $*"
+   # ;;
+   # esac
+
+   # case "$3" in
+   # family)    sed -e "s/$SIBLING/$PARENT/g" $FILENAME >> $FILENAME
+#               killall X
+#               killall -9 tail
+#    ;;
+   # peer)      sed -e "s/$PARENT/$SIBLING/g" $FILENAME >> $FILENAME
+#               killall X
+#               killall -9 tail
+#    ;;
+   # *)  	echo "Hey, what am I supposed to do with $*"
+#    esac
+
+	
