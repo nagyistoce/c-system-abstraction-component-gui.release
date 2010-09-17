@@ -431,6 +431,8 @@ void InitSyslog( void )
 
 #ifndef __NO_OPTIONS__
 	LoadOptions( pProgramName );
+#else
+	SetDefaultName( NULL, NULL, NULL );
 #endif
 
 	flags.bInitialized = 1;
