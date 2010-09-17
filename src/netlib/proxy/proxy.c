@@ -2,13 +2,8 @@
 
 #define DO_LOGGING
 #include <stdhdrs.h>
-
-#include <sack_types.h>
 #include <network.h>
-#include <logging.h>
-#include <sharemem.h>
-#include <timers.h>
-
+#include <service_hook.h>
 #define DEFAULT_SOCKETS 64
 #define DEFAULT_TIMEOUT 5000
 
@@ -42,11 +37,19 @@ typedef struct route_tag {
 	struct route_tag *next, **me;
 } ROUTE, *PROUTE;
 
+static struct local_proxy_tag
+{
+	struct proxy_flags{
+		BIT_FIELD not_first_run : 1
+	} flags;
+	PLIST pPendingList;
+
+} local_proxy_data;
+#define l local_proxy_data
 
 PROUTE routes;
 _32 dwTimeout = DEFAULT_TIMEOUT;
 _16 wSockets; // default to 64 client/servers
-PLIST pPendingList;
 
 //---------------------------------------------------------------------------
 
@@ -192,7 +195,7 @@ void CPROC TCPConnected( PCLIENT pc, int error )
 		// this secondary thing...
 		while( !GetNetworkLong( pc, NL_CONNECT_START ) )
 			Relinquish();
-      DeleteLink( &pPendingList, pending );
+      DeleteLink( &l.pPendingList, pc );
 	}
 	if( !error )
 	{
@@ -225,8 +228,8 @@ PCLIENT ConnectMate( PROUTE pRoute, PCLIENT pExisting, SOCKADDR *sa )
 		SetClientKeepAlive( out, TRUE );
 		SetNetworkLong( out, NL_ROUTE, (PTRSZVAL)pRoute );
 		MakeNewPath( pRoute, pExisting, out );
-		SetNetworkLong( out, NL_CONNECT_START, GetTickCount() );
-		AddLink( &pPendingList, out );
+		SetNetworkLong( out, NL_CONNECT_START, timeGetTime() );
+		AddLink( &l.pPendingList, out );
 	}
 	else
 	{
@@ -503,18 +506,18 @@ PTRSZVAL CPROC CheckPendingConnects( PTHREAD pUnused )
 	INDEX idx;
 	while( 1 )
 	{
-		LIST_FORALL( pPendingList, idx, PCLIENT, pending )
+		LIST_FORALL( l.pPendingList, idx, PCLIENT, pending )
 		{
 			_32 dwStart = GetNetworkLong( pending, NL_CONNECT_START );
 
 			//Log2( WIDE("Checking pending connect %ld vs %ld"),
 			//     ( GetNetworkLong( pending, NL_CONNECT_START ) + dwTimeout ) , GetTickCount() );
-			if( dwStart && ( ( dwStart + dwTimeout ) < GetTickCount() ) )
+			if( dwStart && ( ( dwStart + dwTimeout ) < timeGetTime() ) )
 			{
 				Log( WIDE("Failed Connect... timeout") );
 				RemoveClient( pending );
 				Log( WIDE("Done removing the pending client... "));
-				SetLink( &pPendingList, idx, NULL ); // remove it from the list.
+				SetLink( &l.pPendingList, idx, NULL ); // remove it from the list.
 			}
 		}
 		WakeableSleep( 250 );
@@ -524,11 +527,147 @@ PTRSZVAL CPROC CheckPendingConnects( PTHREAD pUnused )
 
 //---------------------------------------------------------------------------
 
+int task_done;
+void CPROC MyTaskEnd( PTRSZVAL psv, PTASK_INFO task )
+{
+   task_done = 1;
+}
+void CPROC GetOutput( PTRSZVAL psv, PTASK_INFO task, CTEXTSTR buffer, _32 length )
+{
+   lprintf( "%s", buffer );
+}
+
+//---------------------------------------------------------------------------
+static char *filename;
+
+static void CPROC Start( void )
+{
+	FILE *file;
+   // should clear all routes here, and reload them.
+   file = fopen( filename, WIDE("rb") );
+	lprintf( "config would be [%s]", filename );
+#ifndef BUILD_SERVICE
+	SetSystemLog( SYSLOG_FILE, stdout );
+   SystemLogTime( SYSLOG_TIME_HIGH|SYSLOG_TIME_DELTA );
+	//SetAllocateLogging( TRUE );
+	// true to disable...
+	SetAllocateDebug( TRUE );
+#endif
+
+	if( !l.flags.not_first_run )
+	{
+		NetworkStart();
+		l.flags.not_first_run = 1;
+
+		if( !file )
+		{
+			Log1( WIDE("Could not locate %s in current directory."), filename );
+			return;
+		}
+		ReadConfig( file );
+		fclose( file );
+
+		if( !wSockets )
+		{
+			wSockets = DEFAULT_SOCKETS;
+			if( !NetworkWait( 0, wSockets, NETWORK_WORDS ) )
+			{
+				Log( WIDE("Could not begin network!") );
+				return;
+			}
+		}
+
+		// successful test if client connects, loops though this
+		// and then disconnects
+		// fail test if client connects through loops, and last connection fails.
+
+		//AddRoute( WIDE("Local1"), NULL, 4000, WIDE("localhost"), 4001 );
+		//AddRoute( WIDE("Local1"), NULL, 4001, WIDE("localhost"), 4002 );
+		//AddRoute( WIDE("Local1"), NULL, 4002, WIDE("localhost"), 4003 );
+
+		//AddRoute( NULL, WIDE("mail.fortunet.com"), 3000, WIDE("172.16.100.1"), 3000 );
+		//AddRoute( NULL, WIDE("mail.fortunet.com"), 3001, WIDE("172.16.100.1"), 3001 );
+		//AddRoute( NULL, WIDE("mail.fortunet.com"), 3002, WIDE("172.16.100.1"), 23 );
+
+		//AddRoute( WIDE("Local1"), NULL, 4000, WIDE("172.16.100.1"), 3001 );
+		Log1( WIDE("Pending timer is set to %") _32f, dwTimeout );
+		ThreadTo( CheckPendingConnects, 0 );
+		//AddTimer( 250, CheckPendingConnects, 0 );
+		BeginRouting();
+	}
+	else
+	{
+		lprintf( "Might want to re-read configuration and do something with it." );
+      fclose( file );
+	}
+
+}
+
+//---------------------------------------------------------------------------
+
 int main( int argc, char **argv )
 {
 
-	FILE *file;
-	char *filename;
+   int ofs = 0;
+#ifdef BUILD_SERVICE
+	if( argc > (1+ofs) && StrCaseCmp( argv[1+ofs], "install" ) == 0 )
+	{
+		TEXTCHAR **args;
+		int nArgs;
+      PVARTEXT pvt_cmd = VarTextCreate();
+		ofs++;
+		vtprintf( pvt_cmd, "sc create \"%s\" binpath= %s\\%s.exe start= auto"
+				  , GetProgramName()
+				  , GetProgramPath()
+				  , GetProgramName() );
+      ParseIntoArgs( GetText( VarTextPeek( pvt_cmd ) ), &nArgs, &args );
+		VarTextEmpty( pvt_cmd );
+		LaunchPeerProgram( "sc.exe", NULL, (PCTEXTSTR)args,  GetOutput, MyTaskEnd, 0 );
+		while( !task_done )
+			WakeableSleep( 100 );
+      task_done = 0;
+		vtprintf( pvt_cmd, "sc start \"%s\""
+				  , GetProgramName() );
+      ParseIntoArgs( GetText( VarTextPeek( pvt_cmd ) ), &nArgs, &args );
+		VarTextEmpty( pvt_cmd );
+		LaunchPeerProgram( "sc.exe", NULL, (PCTEXTSTR)args,  GetOutput, MyTaskEnd, 0 );
+		while( !task_done )
+			WakeableSleep( 100 );
+      return 0;
+	}
+	if( argc > (1+ofs) && StrCaseCmp( argv[1+ofs], "uninstall" ) == 0 )
+	{
+		TEXTCHAR **args;
+		int nArgs;
+      PVARTEXT pvt_cmd = VarTextCreate();
+		ofs++;
+		vtprintf( pvt_cmd, "sc stop \"%s\""
+				  , GetProgramName() );
+		ParseIntoArgs( GetText( VarTextPeek( pvt_cmd ) ), &nArgs, &args );
+		VarTextEmpty( pvt_cmd );
+		LaunchPeerProgram( "sc", NULL, (PCTEXTSTR)args,  GetOutput, MyTaskEnd, 0 );
+		while( !task_done )
+			WakeableSleep( 100 );
+      task_done = 0;
+		vtprintf( pvt_cmd, "sc delete \"%s\""
+				  , GetProgramName() );
+		ParseIntoArgs( GetText( VarTextPeek( pvt_cmd ) ), &nArgs, &args );
+		VarTextEmpty( pvt_cmd );
+		LaunchPeerProgram( "sc", NULL, (PCTEXTSTR)args,  GetOutput, MyTaskEnd, 0 );
+		while( !task_done )
+			WakeableSleep( 100 );
+      task_done = 0;
+      return 0;
+	}
+#endif
+#ifdef BUILD_SERVICE
+	{
+		static TEXTCHAR tmp[256];
+		snprintf( tmp, sizeof( tmp ), "%s/%s.conf", GetProgramPath(), GetProgramName() );
+		filename = tmp;
+	}
+	SetupService( GetProgramName(), Start );
+#else
 	if( argc < 2 )
 	{
 		static TEXTCHAR tmp[256];
@@ -538,51 +677,11 @@ int main( int argc, char **argv )
 	else
 		filename = argv[1];
 
-   file = fopen( filename, WIDE("rb") );
+   Start();
 
-	SetSystemLog( SYSLOG_FILE, stdout );
-   SystemLogTime( SYSLOG_TIME_HIGH|SYSLOG_TIME_DELTA );
-	//SetAllocateLogging( TRUE );
-	// true to disable...
-	SetAllocateDebug( TRUE );
-   NetworkStart();
-
-	if( !file )
-	{
-		Log1( WIDE("Could not locate %s in current directory."), filename );
-		return -1;
-	}
-	ReadConfig( file );
-	fclose( file );
-	if( !wSockets )
-	{
-      wSockets = DEFAULT_SOCKETS;
-		if( !NetworkWait( 0, wSockets, NETWORK_WORDS ) )
-		{
-			Log( WIDE("Could not begin network!") );
-			return -1;
-		}
-	}
-
-	// successful test if client connects, loops though this
-	// and then disconnects
-	// fail test if client connects through loops, and last connection fails.
-
-	//AddRoute( WIDE("Local1"), NULL, 4000, WIDE("localhost"), 4001 );
-	//AddRoute( WIDE("Local1"), NULL, 4001, WIDE("localhost"), 4002 );
-	//AddRoute( WIDE("Local1"), NULL, 4002, WIDE("localhost"), 4003 );
-
-	//AddRoute( NULL, WIDE("mail.fortunet.com"), 3000, WIDE("172.16.100.1"), 3000 );
-	//AddRoute( NULL, WIDE("mail.fortunet.com"), 3001, WIDE("172.16.100.1"), 3001 );
-	//AddRoute( NULL, WIDE("mail.fortunet.com"), 3002, WIDE("172.16.100.1"), 23 );
-
- 	//AddRoute( WIDE("Local1"), NULL, 4000, WIDE("172.16.100.1"), 3001 );
-   Log1( WIDE("Pending timer is set to %") _32f, dwTimeout );
-	ThreadTo( CheckPendingConnects, 0 );
-   //AddTimer( 250, CheckPendingConnects, 0 );
-	BeginRouting();
 	while( 1 )
 		Sleep( 100000 );
+#endif
 	return 0;
 }
 
