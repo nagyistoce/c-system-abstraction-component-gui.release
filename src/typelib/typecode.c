@@ -271,9 +271,9 @@ static PTRSZVAL CPROC IsLink( PTRSZVAL value, INDEX i, POINTER *link )
 
 static PTRSZVAL CPROC KillLink( PTRSZVAL value, INDEX i, POINTER *link )
 {
-	if( value == (*((PTRSZVAL*)link)) )
+	if( value == (PTRSZVAL)(*link) )
 	{
-		*link = NULL;
+		(*link) = NULL;
 		return 1; // stop searching
 	}
 	return 0;
