@@ -1,0 +1,524 @@
+#!/bin/bash  
+#the shebang, poouunnnnd BANG! slashhhh *Bin* SLASH! *BASH!*
+# defining some constants.
+DUPLICATE=8
+GOLDEN_MASTER=4
+A=1
+B=2
+#defining some variables.
+sda=0
+sdb=0
+y=0
+x=0
+DEVGM="/dev/null"
+DEVDU="/dev/null"
+DEVDUDEV="null"
+DEVGMROOT="nothing"
+DEVGMBOOT="notmuch"
+DEVDUROOT="verylittle"
+DEVDUBOOT="squat"
+ESTIMATEDTIME="0"
+
+bail_out()
+{
+   echo "Exiting gracefully.  Shutdown the computer? [y/N]"
+   read KeyStroke
+   case "$KeyStroke" in
+      y)  shutdown -r now;;
+      *)  exit 0; shift;;
+   esac
+}
+
+identify_fresh_duplicate_drive()
+{
+   echo "Please enter your name or initials"
+   read OPNAME
+   if [[ -z $OPNAME ]] ; then
+      OPNAME="SomeScriptOperator"
+   fi
+   mount ${DEVDU}2 /tmp/x
+   echo " " > /tmp/x/driveidentity.txt
+   DATE=`date +'%m-%d-%Y'`   
+   echo "Duplicated by $OPNAME on $DATE" >> /tmp/x/driveidentity.txt
+   echo " " >> /tmp/x/driveidentity.txt
+   umount /tmp/x
+}
+
+make_filesystem_with_checking()
+{
+   mkfs -t ext2 -L /boot    -c ${DEVDU}1 
+   mkfs -t ext2 -L /        -c ${DEVDU}2
+   mkswap ${DEVDU}3                     
+   mkfs -t ext3 -L /storage -c ${DEVDU}4
+ 
+}
+make_filesystem_without_checking()
+{
+  
+   mkfs -t ext2 -L /boot     ${DEVDU}1
+   mkfs -t ext2 -L /         ${DEVDU}2
+   mkswap ${DEVDU}3                   
+   mkfs -t ext3 -L /storage  ${DEVDU}4
+ 
+}
+make_filesystem()
+{
+#   echo "Include the -c attribute to CHECK DRIVES? "
+#   echo "Saying yes will probably take $ESTIMATEDTIME minutes longer [y/N]"
+#   read KeyStroke
+#   case "$KeyStroke" in
+#      y)  make_filesystem_with_checking ;;
+#      *)  
+make_filesystem_without_checking; 
+#shift;;
+#   esac
+   
+}
+make_partitions_differently()
+{
+	echo 'w'|fdisk ${DEVDU}
+#   cfdisk ${DEVDU}
+  parted -s ${DEVDU} rm 1
+   parted -s ${DEVDU} rm 2
+   parted -s ${DEVDU} rm 3
+   parted -s ${DEVDU} rm 4
+   
+   #64 MB
+   parted -s ${DEVDU} mkpart primary 0c 8c
+   
+   #20 GB   ( or 20480 MB or 2490 cylinders)
+   parted -s ${DEVDU} mkpart primary 8c 2498c
+   
+   #4 GB    ( or 4096 MB  or 498 cylinders)
+   parted -s ${DEVDU} mkpart primary 2498c 2996c
+   
+   #the rest (intentionally to the last cylidner)
+   parted -s ${DEVDU} mkpart primary 2996c 60800c
+   
+   #the boot flag
+   parted -s ${DEVDU} set 1 boot on
+   sfdisk -R ${DEVDU}
+    tmp=500107
+   ESTIMATEDTIME=$((tmp/2111))
+
+}
+
+make_partitions()
+{
+   
+   tmp=$(fdisk -l ${DEVDU}|awk '/Units =/{next;};/[0-9] bytes/ {print $5/(1024*1024);}')
+   if [[ -z $tmp ]] ; then
+      echo "Drive Capacity? (in MB, enter for 500107 )"
+      read KeyStroke
+      if [[ -z $KeyStroke ]] ; then
+         tmp=500107
+      else
+         tmp=$KeyStroke
+      fi
+   fi
+
+   if [[ $tmp -lt 30720 ]] ; then
+      echo
+      echo
+      echo "Only $tmp MB on ${DEVDU}.  This is a failure condition.  Need at least".
+      echo "30720 MB (30 Gigabytes) to make this work.  You can get creative to trick"
+      echo "out the script but for now, I'm bailing.  Sorry it didn't work out."
+      echo
+      echo "By the way:  64 MB for /boot + 20 GB for / + 4 GB for swap  = 24.1 GB."
+      echo "             /storage is supposed to take whatever is between 24.1 and"
+      echo "             the rest of this disk.  Using a disk less than 30 GB leaves"
+      echo "             nothing for /storage.  Why and how would you want to do that?"
+      exit 32
+   fi
+
+   parted -s ${DEVDU} rm 1
+   parted -s ${DEVDU} rm 2
+   parted -s ${DEVDU} rm 3
+   parted -s ${DEVDU} rm 4
+   
+   #64 MB
+   parted -s ${DEVDU} mkpart primary 1 65
+   
+   #20 GB   ( or 20480 MB )
+   parted -s ${DEVDU} mkpart primary 65 20545
+   
+   #4 GB    ( or 4096 MB )
+   parted -s ${DEVDU} mkpart primary 20546 24642
+   
+   #the rest
+   parted -s ${DEVDU} mkpart primary 24643 $tmp
+   
+   #the boot flag
+   parted -s ${DEVDU} set 1 boot on
+   ESTIMATEDTIME=$((tmp/2111))
+   mkswap ${DEVDU}3
+}
+make_proc()
+{
+#   make_partitions
+   make_partitions_differently
+   make_filesystem
+   identify_fresh_duplicate_drive   
+   echo "Prepare for duplication."
+   mount ${DEVDU}2 /tmp/x
+   cp /tmp/clonesorcerer /tmp/x
+   umount ${DEVDU}2
+   echo "Please shutdown the computer and install the Golden Master drive."
+   bail_out
+   
+
+}
+
+init_drive()
+{
+   clear
+   echo " !Warning!Warning!Warning!Warning!Warning!Warning!Warning!"
+   echo "************************************************************"
+   echo "***  This will destroy ALL DATA on this drive.  You are  ***"
+   echo "*** about to shoot yourself in the foot if there is more ***"
+   echo "***   than one drive connected at this time or if the    ***"
+   echo "***  connected drive is not intended to be initialized.  ***"
+   echo "************************************************************"
+   echo " !Warning!Warning!Warning!Warning!Warning!Warning!Warning!"
+   echo
+   echo
+   echo "Is there only one drive connected and should it be initialized? ${DEVDU} [y/N]"
+   echo 
+   read KeyStrokeA
+   case "$KeyStrokeA" in
+      y) make_proc;;      
+      *) bail_out; shift;;
+   
+   esac
+      
+}
+
+init_proc()
+{
+   echo
+   echo
+   echo "Initialize a brand new drive? ${DEVDU}[y/N] (can skip if you just want to recopy)"
+   read KeyStroke
+   case "$KeyStroke" in
+      y)  
+          init_drive
+          ;;
+   esac
+
+
+
+}
+
+assign_golden_master_device()
+{
+	return
+   # y needs to be $GOLDEN_MASTER, x needs to be $DUPLICATE
+   if [[ ( $y -gt $GOLDEN_MASTER) && ( $y -lt $DUPLICATE) ]] ; then
+      n=`expr $y-$GOLDEN_MASTER`
+      if [[ $n -eq $A ]] ; then
+         DEVGM="/dev/sda"
+         #echo "Golden Master finally "$DEVGM" mounted on /tmp/y.  This is a success condition."
+      elif [[ $n -eq $B ]] ; then
+         DEVGM="/dev/sdb"
+         #echo "Golden Master finally "$DEVGM" mounted on /tmp/y.  This is a success condition."
+      else
+         echo "The /tmp/y disk drive is neither /dev/sda2 nor /dev/sdb2.  This is an error condition.  Goodbye."
+         exit -3
+      fi
+   else
+      echo "/tmp/y is $y which apparently is DUPLICATE $DUPLICATE or greater.  This is an error condition.  Goodbye."
+      exit -3
+   fi
+   
+}
+
+assign_duplicate_device()
+{
+	return
+   if [[ $x -gt $DUPLICATE  ]] ; then
+      n=`expr $x-$DUPLICATE`
+      if [[ $n -eq $A ]] ; then
+         DEVDU="/dev/sda"
+         DEVDUDEV=sda
+         #echo "Duplicate finally "$DEVDU" and mounted on /tmp/x."
+      elif [[ $n -eq $B ]] ; then
+         DEVDU="/dev/sdb"
+         DEVDUDEV=sdb
+         #echo "Duplicate finally "$DEVDU" mounted on /tmp/x."
+      else
+         echo "The /tmp/x disk drive is neither /dev/sda2 or /dev/sdb2.  This is an error condition.  Goodbye."
+         exit -3
+      fi
+   else
+      echo "/tmp/x is $x which apparently is less than or equal to DUPLICATE $DUPLICATE.  This is an error condition.  Goodbye."
+      exit -3
+   fi
+   
+
+}
+
+
+
+assign_sdb()
+{
+   mount /dev/sdb2 /tmp/z
+   if [ -f "/tmp/z/driveidentity.txt" ] ; then
+      if grep 'Golden Master' /tmp/z/driveidentity.txt; then
+         if [[ $sda -ne $GOLDEN_MASTER ]] ; then
+            sdb=$GOLDEN_MASTER;
+            #echo "Found sdb2 to be Golden Master. sdb is now "$sdb
+            umount /tmp/z
+            mount /dev/sdb2 /tmp/y
+            y=`expr $GOLDEN_MASTER+$B`
+            DEVGM="/dev/sdb"
+            #echo "y is now "$y" GOLDEN_MASTER is "$GOLDEN_MASTER" and B is "$B
+         else
+            echo "Hm.  /dev/sdb2 is Golden Master, but so is /dev/sda2.  Now what? This is an error condition.  I guess I'll bail out."
+            umount /tmp/z
+            exit -1
+         fi         
+      elif grep 'Duplicate' /tmp/z/driveidentity.txt ; then
+         if [[ $sda -ne $DUPLICATE ]] ; then
+            sdb=$DUPLICATE
+            #echo "Found sdb2 to be Duplicate. sdb is now "$sdb
+            umount /dev/tmp/z
+            mount /dev/sdb2 /tmp/x
+            x=`expr $DUPLICATE+$B`
+            #echo "x is now "$x" DUPLICATE IS "$DUPLICATE" and B is "$B
+         else
+            echo "Hm. Already found a duplicate. This is an error condition.  Bail out."
+            exit -1
+         fi
+         
+      else 
+         echo "I don't know what this is in /tmp/z/driveidentity, but it's not Duplicate or Golden Master"
+         DEVDU="/dev/sdb"
+         DEVDUDEV=sdb
+
+         cat /tmp/z/driveidentity.txt
+         umount /tmp/z
+         let sdb=0
+      fi  
+   else
+      echo "No drive identity on sdb, assuming this will be the duplicate..."
+      mount /dev/sdb2 /tmp/x
+      DEVDU="/dev/sdb"
+   	DEVDUDEV=sdb
+
+      umount /tmp/z
+   fi        
+}
+
+
+assign_sda()
+{
+   mount /dev/sda2 /tmp/z
+   if [ -f "/tmp/z/driveidentity.txt" ] ; then
+      if grep 'Golden Master' /tmp/z/driveidentity.txt; then
+         sda=$GOLDEN_MASTER;
+         #echo "Found sda2 to be Golden Master. sda is now"$sda 
+         umount /tmp/z
+         mount /dev/sda2 /tmp/y
+         DEVGM="/dev/sda"
+         y=`expr $GOLDEN_MASTER+$A`
+         #echo "y is now "$y" GOLDEN_MASTER is "$GOLDEN_MASTER" and A is "$A
+      elif grep 'Duplicate' /tmp/z/driveidentity.txt ; then
+            sda=$DUPLICATE
+            echo "Found /dev/sda2 to be Duplicate.  sda is now "$sda
+            umount /tmp/z
+            mount /dev/sda2 /tmp/x
+            x=`expr $DUPLICATE+$A`
+            DEVGM="/dev/sdb"
+            #echo "x is now "$x" DUPLICATE IS "$DUPLICATE" and A is "$A
+      else 
+         echo "I don't know what this is in /dev/sda2's mount of /tmp/z/driveidentity, but it's not Duplicate or Golden Master"
+         DEVDU="/dev/sda"
+         DEVDUDEV=sda
+         cat /tmp/z/driveidentity.txt
+         umount /tmp/z
+         sda=0
+      fi  
+   else
+      echo "No drive identity on sda, assuming this will be the duplicate..."
+      mount /dev/sda2 /tmp/x
+      DEVDU="/dev/sda"
+      DEVDUDEV=sda
+      umount /tmp/z
+   fi
+}
+clean_exit()
+{
+         umount /tmp/x >/dev/null 2>&1
+         umount /tmp/y >/dev/null 2>&1
+         umount /tmp/z >/dev/null 2>&1
+	exit $1
+}
+
+
+test_y()
+{
+   if [ -f "/tmp/y/driveidentity.txt" ] ; then
+      if grep 'Duplicate' /tmp/y/driveidentity.txt ; then
+         echo "/tmp/y cannot be Duplicate, it must be Golden Master.  This is an error condition.  Goodbye."
+         clean_exit -2
+      elif grep 'Golden Master' /tmp/y/driveidentity.txt; then
+         echo "/tmp/y is correctly Golden Master." 
+      else 
+         echo "I don't know what this is in /tmp/y/driveidentity, but it's not Duplicate or Golden Master"
+         cat /tmp/y/driveidentity.txt
+         clean_exit -2
+      fi  
+#   else   
+      # Yeah... but Y without identity means it hasn't been cloned
+      #echo "Bummer, no driveidentity.txt in /tmp/y."
+      #clean_exit 99
+   fi
+}
+
+
+test_x()
+{
+   #echo "testing x"
+   if [ -f "/tmp/x/driveidentity.txt" ] ; then
+      if grep 'Duplicate' /tmp/x/driveidentity.txt ; then
+         echo "/tmp/x is correctly Duplicate."
+      elif grep 'Golden Master' /tmp/x/driveidentity.txt; then
+         echo "/tmp/x cannot be Golden Master, it must be Duplicate.  This is an error condition.  Goodbye." 
+         clean_exit -2
+      else 
+         echo "I don't know what this is in /tmp/x/driveidentity, but it's not Duplicate or Golden Master"
+         cat /tmp/x/driveidentity.txt
+      fi 
+   else
+      echo "No driveidentity.txt in /tmp/x; this is fine, probably a new drive."
+   #   clean_exit 99
+   fi
+   #echo "finished testing x"
+}
+
+test_for_sameness()
+{
+   if [[ $sda -eq $sdb ]] ; then
+      echo "Uh, oh. Both drives are the same? /dev/sda is "$sda" and /dev/sdb is "$sdb"."
+      echo "For the record, the constants are:  GOLDEN_MASTER ="$GOLDEN_MASTER" and DUPLICATE ="$DUPLICATE
+      clean_exit -1
+   fi
+}
+
+
+
+#the beginning of the main routine.
+
+mkdir /tmp/x /tmp/y /tmp/z
+init_proc
+assign_sda
+assign_sdb
+test_for_sameness
+test_y
+test_x
+#assign_golden_master_device
+#assign_duplicate_device
+
+# Now that it is clear /tmp/y aka y is the Golden Master and 
+# /tmp/x aka x is the Duplicate
+# it is safe to 'dupe' the second partition of the Golden Master disk drive.
+echo "Please wait...copying the Golden Master files to the Duplicate..."
+mv /tmp/x/driveidentity.txt /tmp/x/driveidentity.bak
+echo "This could take a while."
+cp -ax /tmp/y/* /tmp/x
+mv /tmp/x/driveidentity.bak /tmp/x/driveidentity.txt 
+
+   echo "Please enter your name or initials"
+   read OPNAME
+   if [[ -z $OPNAME ]] ; then
+      OPNAME="SomeScriptOperator"
+   fi
+   DATE=`date +'%m-%d-%Y'`   
+   echo "Overwritten by $OPNAME on $DATE" >> /tmp/x/driveidentity.txt
+
+echo "Done copying files from Golden Master to Duplicate."
+
+# And now that's finished, 'dupe' the first partition...the boot partition.
+umount /tmp/y
+umount /tmp/x
+DEVGMBOOT=$DEVGM"1"
+DEVDUBOOT=$DEVDU"1"
+DEVGMROOT=$DEVGM"2"      
+DEVDUROOT=$DEVDU"2"
+mount $DEVGMBOOT /tmp/y
+mount $DEVDUBOOT /tmp/x
+echo "Please wait ... copying boot files now ..."
+cp -ax /tmp/y/* /tmp/x
+echo "Done copying the boot files."
+umount /tmp/y
+umount /tmp/x
+mount $DEVGMROOT /tmp/y
+mount $DEVDUROOT /tmp/x
+
+mount --bind /dev /tmp/x/dev
+echo "#!/bin/bash" > /tmp/x/finishme
+echo "YORN=0" >> /tmp/x/finishme
+echo "make_hall_name()" >> /tmp/x/finishme
+echo "{" >> /tmp/x/finishme
+echo "   echo \"What is the hall name where this server will be located?    \"" >> /tmp/x/finishme
+echo "   read HOST" >> /tmp/x/finishme
+echo "   echo \$HOST > /etc/hostname" >> /tmp/x/finishme
+echo "}" >> /tmp/x/finishme
+
+echo "mount ${DEVDU}1 /boot" >> /tmp/x/finishme
+echo "/sbin/lilo -c /etc/lilo.${DEVDUDEV}.conf" >> /tmp/x/finishme
+echo "mount -a"  >> /tmp/x/finishme
+echo "sync" >> /tmp/x/finishme
+echo "rm /etc/udev/rules.d/70-persistent-net.rules" >> /tmp/x/finishme
+echo "echo" >> /tmp/x/finishme
+
+echo "while [ \$YORN -eq \"0\" ]" >> /tmp/x/finishme
+echo "do" >> /tmp/x/finishme
+echo "   make_hall_name" >> /tmp/x/finishme
+echo "   cat /etc/hostname" >> /tmp/x/finishme
+echo "   echo \"Is this the correct hall name? [y/N] \"" >> /tmp/x/finishme
+echo "   read KeyStroke" >> /tmp/x/finishme
+echo "   case \"\$KeyStroke\" in" >> /tmp/x/finishme
+echo "      y) YORN=1 ; shift ;;" >> /tmp/x/finishme
+echo "      *) YORN=0 ;;" >> /tmp/x/finishme
+echo "   esac" >> /tmp/x/finishme
+echo "done" >> /tmp/x/finishme
+echo "echo" >> /tmp/x/finishme
+echo "echo" >> /tmp/x/finishme
+echo "echo" >> /tmp/x/finishme
+echo "echo \"Ensure the Rescue CD has been removed from the CD/RW drive,\"" >> /tmp/x/finishme
+echo "echo \"then pressing enter should shutdown the computer automatically.\"" >> /tmp/x/finishme
+echo "echo \"Then, remove power completely from the computer and recover the\""  >> /tmp/x/finishme 
+echo "echo \"Golden Master disk drive. Store and secure the Golden Master.\""  >> /tmp/x/finishme
+echo "echo \"Then, apply power and continue with Post-Installation procedure.\"" >> /tmp/x/finishme
+echo "echo" >> /tmp/x/finishme
+echo "echo" >> /tmp/x/finishme
+echo "echo \"Press Enter to shutdown the computer.\"" >> /tmp/x/finishme
+echo "read KeyPress" >> /tmp/x/finishme
+#echo "mv finishme .finishme" >> /tmp/x/finishme
+#echo "chmod .finishme 644" >> /tmp/x/finishme
+#echo "#This script can be removed, as it is no longer needed." >> /tmp/x/finishme
+echo "rm finishme" >> /tmp/x/finishme
+echo "mv /var/log/messages /var/log/messages.preinstall" >> /tmp/x/finishme
+echo "touch /var/log/messages" >> /tmp/x/finishme
+echo "shutdown -r now" >> /tmp/x/finishme
+chmod 755 /tmp/x/finishme
+echo
+
+clear
+
+echo
+echo
+echo "Please take the Rescue CD out of the CD/RW drive,"
+echo "And Press Enter To Continue"
+read Keypress
+clear
+
+#copy myself
+cp clonesorcerer /tmp/x/.clonesorcerer
+#protect myself. 644 is read/write, read, read.  That way, no unintentional execution is possible.
+chmod 644 /tmp/x/.clonesorcerer
+
+chroot /tmp/x finishme
+      
+#end

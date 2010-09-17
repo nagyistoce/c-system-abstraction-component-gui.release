@@ -1,0 +1,57 @@
+#!/bin/bash
+x=1;
+
+clear
+while(1>0)
+do
+tput cup 0 0
+netstat -ant | grep 6740 > /tmp/netnet
+cat /tmp/netnet |  egrep 'ESTA' | egrep '6740' |  awk '{print $5}' | grep '6740' > /tmp/n1;sed -e s/:6740/""/g /tmp/n1 > /tmp/n2;grep -f /tmp/n2 /etc/hosts | awk '{print "     connected to me: "$2}'
+/sbin/ifconfig | egrep 'addr:10.4'| awk '{print $2}' > /tmp/n1;sed -e s/"addr:"/""/g /tmp/n1 > /tmp/n2;grep -f /tmp/n2 /etc/hosts | awk '{print "    I am  "$2}' 
+cat /tmp/netnet | grep 6740 | awk '{print $4 "  " $5 }' > /tmp/n3; cat /tmp/n2 | sed -e 's/.20/.20:6740/' > /tmp/n4;grep -f /tmp/n4 /tmp/n3 | awk '{print $2}' | cut -d":" -f1 > /tmp/n2;grep -f /tmp/n2 /etc/hosts | awk '{print "    BData from  "$2}'
+
+tail /usr/src/FortuNet/alpha2/alpha2server.log
+top -b -d 0.1 -n 1 > /tmp/nag
+tput cup 35 0
+echo "                                                         "
+tput cup 35 0
+cat /tmp/nag | egrep 'alpha2server' | awk '{print "  "$9" % cpu for " $12 "  "$13"               "}'
+tput cup 36 0
+echo "                                                         "
+tput cup 36 0
+cat /tmp/nag | egrep 'bardservice' | awk '{print "  "$9" % cpu for " $12 "  "$13"               "}'
+tput cup 37 0
+echo "                                                         "
+tput cup 37 0
+cat /tmp/nag | egrep 'launchpads' | awk '{print "  "$9" % cpu for " $12 "  "$13"               "}'
+tput cup 38 0
+echo "                                                         "
+tput cup 38 0
+cat /tmp/nag | egrep 'msgsvr' | awk '{print "  "$9" % cpu for " $12 "  "$13"               "}'
+tput cup 39 0
+echo "                                                         "
+tput cup 39 0
+cat /tmp/nag | egrep 'video_event_relay' | awk '{print "  "$9" % cpu for " $12 "  "$13"               "}'
+tput cup 40 0
+echo "                                                         "
+tput cup 40 0
+cat /tmp/nag | egrep 'vlc' | awk '{print "  "$9" % cpu for " $12 "  "$13"               "}'
+echo "                    "
+tput cup 41 0
+echo "                                                         "
+tput cup 41 0
+cat /tmp/nag | egrep 'netstat' | awk '{print "  "$9" % cpu for " $12 "  "$13"               "}'
+echo "                    "
+ps -ely   | egrep 'vlc|video_event_relay|msgsvr|launchpads|bardservice|alpha2server' 
+#tput cup 31 0
+#cat /tmp/nag | egrep 'alpha2server|bardservice|launchpads|msgsvr|video_event_relay|vlc' | awk '{print "  "$10" % cpu for " $12 "  "$13"               "}'
+#echo "                                                         "
+#tail /usr/src/FortuNet/alpha2/alpha2server.log
+#sleep 1
+if [ $x = 6 ];
+then
+ let "x = 1"; clear; 
+ else
+ let "x += 1";
+fi;
+done

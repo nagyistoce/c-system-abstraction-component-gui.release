@@ -1,0 +1,14 @@
+#!/bin/bash
+# pass $1 as HOSTNAME of desired host... all others will be client
+
+# this is primary hall audio (caller mic) and hall projection
+VIDEO=$2
+# announcements go over this
+AUDIO=239.20.30.40:1240
+# other audio or videos may also be used
+# uhmm
+# AUDIO2=239.20.30.40:1240
+
+#sample any station may be built with this...
+exec /usr/src/FortuNet/mkxinit guestverify $1 $VIDEO $AUDIO bdata.localhost
+

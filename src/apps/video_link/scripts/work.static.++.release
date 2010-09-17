@@ -1,0 +1,10 @@
+export PATH=$PATH:/opt/gcc/current/bin
+export SACK_BASE=$(pwd)/sack
+export ALTANIK_BASE=$(pwd)/altanik
+# dekware isn't really used here...
+#export DEKWARE_BASE=$(pwd)/dekware
+export FINALDEST=$(pwd)/testbed
+export COMPILER=lnx++64
+export __LINUX64__=1
+export DEFAULT_DEST=static_release
+export __NO_GUI__=1

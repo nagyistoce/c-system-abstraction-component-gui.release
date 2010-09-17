@@ -1,0 +1,81 @@
+#!/bin/bash
+
+echo '1)Texas Station'
+echo '2)Boulder Station'
+echo '3)Palace Station'
+echo '4)Sunset Station'
+echo '5)Santa Fe Station'
+echo '6)Red Rock Casino'
+echo '7)Fiesta Henderson'
+echo '8)Fiesta Rancho'
+echo '9)ACE'
+echo '10)ACD'
+echo 'Please enter the number of the station this system is for'
+
+read test
+echo you entered $test
+case $test in
+	1)
+        	NEW_HOST=TexasStation
+                NEW_HOSTNAME=vsrvr.texasstation
+                ;;
+	2)
+        	NEW_HOST=BoulderStation
+                NEW_HOSTNAME=vsrvr.boulderstation
+                ;;
+	3)
+        	NEW_HOST=PalaceStation
+                NEW_HOSTNAME=vsrvr.palacestation
+                ;;
+	4)
+        	NEW_HOST=SunsetStation
+                NEW_HOSTNAME=vsrvr.sunsetstation
+                ;;
+	5)
+        	NEW_HOST=SantaFeStation
+                NEW_HOSTNAME=vsrvr.santafestation
+                ;;
+	6)
+        	NEW_HOST=RedRock
+                NEW_HOSTNAME=vsrvr.redrock
+                ;;
+	7)
+        	NEW_HOST=FiestaHenderson
+                NEW_HOSTNAME=vsrvr.fiestahenderson
+                ;;
+	8)
+        	NEW_HOST=FiestaRancho
+                NEW_HOSTNAME=vsrvr.fiestarancho
+                ;;
+	9)
+        	NEW_HOST=ACD
+                NEW_HOSTNAME=vsrvr.acd
+                ;;
+	10)
+        	NEW_HOST=ACE
+                NEW_HOSTNAME=vsrvr.ace
+                ;;
+esac
+
+#echo "NETWORKING=yes" >/etc/sysconfig/network
+#echo "HOSTNAME=$NEW_HOST" >>/etc/sysconfig/network
+echo "HOSTNAME=$NEW_HOST" >>/etc/hostname
+hostname $NEW_HOST
+#sed -i 's/IPADDR=.*/IPADDR='$(ipof $NEW_HOSTNAME)'/' /etc/sysconfig/network-scripts/ifcfg-eth0
+sed -i 's/IP=.*/IP='$(ipof $NEW_HOSTNAME)'/' /etc/networks.d/00-eth0
+#cp /etc/sysconfig/network-scripts/ifcfg-eth0 /etc/sysconfig/networking/devices
+#ifdown eth0
+#ifup eth0
+/etc/networks.d/00-eth0 restart
+case $test in 
+	[1-8])
+		/usr/src/FortuNet/alpha2/set_current_db vsrvr.texasstation TexasStation
+		;;
+        9,10)
+        	/usr/src/FortuNet/alpha2/set_current_db vsrvr.ace ACE
+                ;;
+esac
+
+/usr/src/FortuNet/mkxinit DATABASE
+# reload hostname changes
+exec bash

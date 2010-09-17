@@ -1,0 +1,3 @@
+#!/bin/bash
+cd /usr/src/FortuNet/alpha2
+SCRIPTPATH=/usr/src/FortuNet/alpha2 ./ianson announcement sounds/$1&

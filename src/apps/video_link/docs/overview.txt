@@ -1,0 +1,359 @@
+---BEGIN Installation.text ---CUT HERE---Cut Here---cut here---
+
+Video Server:
+
+MySQL must be installed and ODBC configured, and access to the database
+confirmed.  
+
+
+VLC installed ( from http://www.videolan.org ) on the server.
+
+
+Within source control, a sample /etc/hosts file is located at
+binglink/resources/hostsbak
+
+---END Installation.text ---CUT HERE---Cut Here---cut here---
+
+
+---BEGIN overview.txt ---CUT HERE---Cut Here---cut here---
+
+
+heading:  GLOSSARY:
+
+Bingoday - a formated date representation that represents all games to
+be played and recorded within one period of time (a day).
+
+Hall -  The physical, logical, and theoretical place where bingo is
+being played.  A hall is where binglink code is executed, on a server.
+Halls are referred to ordinally (e.g. hall_id=32) , by either of two IP
+address (10.4.50.20 or 172.20.22.21), and/or by name (PalaceStation).
+
+Prohibited - A hall that is barred from joining or continuing to
+participate in the progressive link.  It is possible that a hall is
+prohibited and enabled at the same time, resulting in being prohibited.
+
+Enabled - A hall that is allowed to participate in the progressive
+link.  If a hall is not enabled, the result is the same as being
+prohibited.  If a hall is enabled and not prohibited, that hall is a
+participant.
+
+Master - The hall identified as responsible for calling balls in a
+progressive game which is enabled and not prohibited.
+
+Participant - Any hall participating in the progressive game which is
+*not* the master, is enabled, and is not prohibited.
+
+Delegated_Master - When "bingo" is called by a player in a
+participant's hall, delegated_master can be designated for video of
+that hall to be shown across the progressive link.
+
+Flashboard - a physical electronic device that displays bingo ball
+numbers after they have been called.
+
+BData Controller - a physical electronic unit that connects to the
+hall's flashboard and Network A ( usually 10.).
+
+
+
+
+heading:  Overview:
+
+
+The Jumbo Progressive BingoLink (binglink) is a Linux-based server
+system with a Windows-based front-end.  The casino employee sitting in
+front of "the caller" uses the Windows-based GUI to become "master" and
+all other halls recognize this event.  All participating halls launch
+video software to recieve broadcasted video from the master, and BData
+Controllers are fed ball data from the master's video software, who has
+a direct connection to its own BData controller.  A ball is "called",
+displayed in front of the "ball camera" which is shown together with
+the employee "calling the balls".  This video signal is broadcast via
+UDP to all participating halls.  The game is played until someone
+declares "BINGO!", at which time video may switch for verification to
+the hall in which the prospective winner was playing.  This is known as
+the "delegate master" hall.  The prospective winner is verified, and
+video may then switch back to the master, and the game continues to its
+logical conclusion (the coverall).
+
+Integration of video, audio, and ball data is comprehensive.
+
+
+
+heading: Discussion
+
+"What is it made of?"  
+
+Every hall playing as part
+of the progressive game is made up of hardware and software.  Each hall
+must have the following components:
+
+
+heading: The Hardware 
+
+*) A flashboard, camera, microphone and a
+monitor, and a caller system properly installed, configured, and
+tested.
+
+*) A BData Controller connected to network A (usually 10.)
+and connected to its flashboard.
+
+*) A multiplexor (if needed) for picture-in-picture (PIP) connected to
+the server's serial port.
+
+* ) A Linux-based server with one network card connected to network A
+(usually 10.) and another network card connected to network B ( usually
+172.), a video card capable of camera capture, a sound card, and a
+serial port (to drive the multiplexor). 
+
+
+
+
+heading: The MySQL Database 
+
+There are three tables that are required for binglink to operate.  They
+are:  link_state, link_hall_state, and location.
+
+
+The location table
+
+The location table is crucial.  Only from the location table do all
+parts of the progressive link know where to find the others and how
+they are identified throughout the system.   The following fields are
+used in the location table of the database:
+
+
+id
+The location.id field is an auto-incremented, primary-keyed field
+that identifies the hall in every part of the system thereafter.  In
+effect, it is like a hall's serial number or social security number.
+
+name 
+The location.name field can be just about anything, including
+multiple words separated by spaces.  This field is primarily for user
+identification.
+
+packed_name
+The location.packed_name contains the ordinated, normalized data found
+in the location.name field and is used extensively to programatically
+refer to the hall identified by the location.id field.
+
+address_bdata
+Contains the bdata.myhallnamehere address which is used to communicate
+to the BData controller through network A (usually 10.).
+
+address_video
+Contains the vsrvr.myhallnamehere address which is used to communicate
+to the video server (the server) through network A (usually 10.) or B
+(usually 172.).
+
+
+
+The link_state table
+
+The link_state table maintains the current state of link and is how
+each hall's server knows who is master or delegated_master or
+controller.   All halls use the same record, depending exclusively
+on the bingoday.  The following fields are used in the link_state
+table of the database: 
+
+id
+An auto-increment, primary-keyed id number.
+
+master_hall_id 
+All parts of binglink depend on the contents of this field.  Changes in
+the contents trigger decisions within the software.  The hall
+identified as "master" is represented in this field.
+
+delegate_master_hall_id
+All parts of binglink depend on the contents of this field.  Changes in
+the contents trigger decisions within the software.  This field is
+usually zero, except when a "delegated_master" condition exists, in
+which case this field contains the value of the hall that is
+"delegate".
+
+
+controller_hall_id
+Not implemented at this time, generally.
+
+bingoday
+All parts of binglink depend on the contents of this field.  Queries
+depend on the correct bingoday record.
+
+
+
+
+
+The link_hall_state table
+
+The link_hall_state table tracks the state of the halls within the
+link and is how each hall's server reports and tracks its status and
+the status of its peers. Each hall has one record in the
+link_hall_state table.  The following fields are used in the
+link_hall_state table of the database:
+
+
+
+id
+An auto-increment, primary-keyed id number.
+
+hall_id
+Identified from location.id.
+
+enabled
+All parts of binglink depend on the contents of this field.  Changes in
+the contents trigger decisions within the software. This field is
+controlled by the GUI software.  Enabled = 0 effectively shuts the
+server software off for this hall.
+
+prohibited
+All parts of binglink depend on the contents of this field.  Changes in
+the contents trigger decisions within the software.  This field is
+controlled by the GUI software.   Prohibited = 1 effectively shuts the
+server software off for this hall.
+
+controller
+Not implemented to a large extent. This field is
+controlled by the GUI software.
+
+timestamp
+Not implemented to a large extent, but the timestamp is written when
+any part of the record is changed.
+
+master_ready
+All parts of binglink depend on the contents of this field.  Changes in
+the contents trigger decisions within the software.  master_ready is
+set when a link_state.master_hall_id identifies a hall, and that hall
+completes the required initialization to assume the role of master. 
+Only then is the field set to a value of one by the server software.
+
+delegate_ready
+All parts of binglink depend on the contents of this field.  Changes in
+the contents trigger decisions within the software. Just as
+master_ready, delegate_ready is set when a hall is identified by
+link_state.delegate_hall_id and that hall completes the required
+initialization to assume the role of delegated_master.  Only then is
+the fiend set to a value of one by the server software.
+
+
+participating
+This is a reflective status field. participating is set to zero during
+initialization and reset conditions, and set to one upon successful
+completion of initialization as long as 
+
+a) the hall is link_hall_state.enabled and 
+
+b) not link_hall_state.prohibited and 
+
+c) not link_state.master_hall_id
+
+
+task_launched
+This is a reflective status field.  This field is controlled by the
+server software, and is set to a value of one during a variety of tasks
+indicating that work is in progress.  A script resets this bit after
+successful completion of the specific task.  Examples include launching
+video or audio.
+
+
+
+announcement
+and/or 
+announcing  
+Under certain implementations of server software,
+this field is set to a value of one while an announcement is being
+played, and reset to zero by a script after the sound has finished. 
+Under other implementations, the sound is controlled by the GUI and
+this field is irrelevant.
+
+
+reset_state
+All parts of binglink depend on the contents of this field.  Changes in
+the contents trigger decisions within the software.  Under certain
+conditions, the server software might need to be reset to a quiescent
+(or "freshly instantiated") condition.  reset_state is sometimes set
+within the server software, resulting in complete initialization
+achieving a quiescent condition.
+
+
+
+
+heading: The Software
+
+Several executables and scripts are used to broadcast and recieve
+audio, video and BData.  These projects are comprised of several source
+files maintained in source control in the com.fortunet.binglink branch.
+
+
+alpha2server
+
+
+Its primary responsibility of alpha2server is to monitor the database
+for state change and respond appropriately.  alpha2server calls a
+script , which in turn calls other scripts and creates the change in
+video, bdata, or audio.  alpha2server is effectively commander in
+chief.
+
+stateserver.c
+
+statebuttons.c
+
+db.c
+
+bdata_state_server.c
+
+
+bdata_control
+
+The primary responsibility of bdata_control is to pass the bdata
+controller commands. This executable is called by scripts during state
+change.
+
+bdata.c
+
+
+video_event_relay
+
+The simple helper application called video_event_relay serves the
+purpose to recognize changes in the video state and relay the state
+change to other halls.  Think of video_event_relay as a paparrazzi
+photographer scooping the dish on a celebrity (the video state).  This
+dramatically cuts the inherent and necessary latency of alpha2server.
+
+video_event_relay.c
+
+
+heading: scripts
+
+The entire system is dependant on certain scripts to effect change or
+monitor for change.
+
+ianson
+The ianson script is "executive assistant" to alpha2server.  The chain
+of events that leads to change in video, audio, or bdata starts with
+ianson being called by alpha2server.
+
+mark_ready2
+The mark_ready2 script is called by ianson, and primarily changes table
+information in the database in response to change in video, audio, or
+bdata.
+
+videoctrl
+Controls via serial communication the multiplexor for
+picture-in-picture (PIP) video where the master hall is displaying the
+ball in the lower right corner superimposed against the person sitting
+at the caller station.  This video stream is broadcast to all other
+halls.
+
+watch_task
+A supervisor script responsible for restarting its assigned program
+upon exit. 
+
+
+mk*
+There are a variety of other scripts that change system-level
+initialization files or similar.  For example, mkxinit creates a
+standardized .xinit file.  
+
+
+
+---END overview.txt ---CUT HERE---Cut Here---cut here---

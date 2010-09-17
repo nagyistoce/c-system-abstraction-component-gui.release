@@ -1,0 +1,61 @@
+#!/bin/bash
+
+echo '- these settings should have already been set - FINALDEST, COMPILER!'
+FINALDEST=~/work/testbed
+COMPILER=lnx64
+
+
+DEST_BASE_PATH=.
+DESTINATION=$DEST_BASE_PATH/alpha2
+PROGRAM_SOURCE=$FINALDEST/bin/debug-$COMPILER
+BINGLINK_BASE=~/work/binglink
+
+if [[ ! -e $DESTINATION ]] ; then mkdir $DESTINATION; fi
+cp $PROGRAM_SOURCE/launchpads 			$DEST_BASE_PATH
+cp $PROGRAM_SOURCE/launchcmds 			$DEST_BASE_PATH
+cp $PROGRAM_SOURCE/msgsvrs 			$DESTINATION/msgsvr
+cp $PROGRAM_SOURCE/bardservices 		$DESTINATION/bardservice
+cp $PROGRAM_SOURCE/bardsends 			$DESTINATION/bardsend
+cp $PROGRAM_SOURCE/bdata_controls 		$DESTINATION/bdata_control
+cp $PROGRAM_SOURCE/alpha2servers 		$DESTINATION/alpha2server
+cp $PROGRAM_SOURCE/video_event_relays 		$DESTINATION/video_event_relay
+cp $PROGRAM_SOURCE/altanik.core.static 		$DESTINATION
+cp $PROGRAM_SOURCE/launchpads 			$DESTINATION
+cp $PROGRAM_SOURCE/launchcmds 			$DESTINATION
+cp $PROGRAM_SOURCE/bag.msg.core.service.static 	$DESTINATION
+#cp $PROGRAM_SOURCE/bag.display.plugin.static 	$DESTINATION
+
+cp $BINGLINK_BASE/scripts/ipc.fix.sems 		$DESTINATION
+cp $BINGLINK_BASE/scripts/interface.conf.static	$DESTINATION
+cp $PROGRAM_SOURCE/interface.conf	$DESTINATION
+cp $BINGLINK_BASE/scripts/asound.state* 	$DEST_BASE_PATH
+cp $BINGLINK_BASE/scripts/mkxinit 		$DEST_BASE_PATH
+cp $BINGLINK_BASE/resource/serverbak.ini 	$DESTINATION/server.ini
+cp $BINGLINK_BASE/bdtat_box_control/host.address.conf $DESTINATION
+cp $BINGLINK_BASE/scripts/set_current_db 	$DESTINATION
+cp $BINGLINK_BASE/scripts/ianson 		$DESTINATION
+cp $BINGLINK_BASE/scripts/blctrl 		$DESTINATION
+cp $BINGLINK_BASE/scripts/videoctrl 		$DESTINATION
+cp $BINGLINK_BASE/scripts/watchnetstat.new 	$DESTINATION
+cp $BINGLINK_BASE/scripts/mark_ready2 		$DESTINATION/mark_ready2
+cp $BINGLINK_BASE/scripts/sound_end_filter 	$DESTINATION
+cp $BINGLINK_BASE/scripts/setdb  		$DESTINATION/setdb
+cp $BINGLINK_BASE/scripts/sound_end_filter 	$DESTINATION
+cp $BINGLINK_BASE/scripts/watch_task 		$DESTINATION
+
+#cp $PROGRAM_SOURCE/bag.msg.core.service 	$DESTINATION
+# no such thing?  if linked statically will reference this lib directly?
+#cp $PROGRAM_SOURCE/altanik.core.static 		$DESTINATION
+
+#statically linked project now has __NO_GUI__ flag set, so this is not available.
+cp $PROGRAM_SOURCE/bag.display.plugin.static 	$DESTINATION
+#cp $PROGRAM_SOURCE/*.plugin                     $DESTINATION
+
+if [[ ! -e $DESTINATION/sounds ]] ; then mkdir 			    $DESTINATION/sounds; fi
+cp $BINGLINK_BASE/sounds/*  $DESTINATION/sounds
+rm dist.tgz
+tar -czf dist.tgz *
+
+#chmod 755 alpha2/mark_ready2 alpha2/watchnetstat.new alpha2/ianson alpha2/setdb mkxinit
+#cp $BINGLINK_BASE/resources/*.ogg alpha2/sounds/. -fr --reply=yes
+#cp $BINGLINK_BASE/binglink.milk.config alpha2

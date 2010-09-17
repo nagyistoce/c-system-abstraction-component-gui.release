@@ -1,0 +1,20 @@
+#!/bin/sh
+#
+# This script will be executed *after* all the other init scripts.
+# You can put your own initialization stuff in here if you don't
+# want to do the full Sys V style init stuff.
+
+touch /var/lock/subsys/local
+
+route add -net 239.0.0.0/8 eth0
+route add 255.255.255.255 eth0
+
+# cleanup .shared memory regions....
+rm /tmp/.shared*
+
+# start firewall for database proxy operations...
+/etc/rc.d/firewall.sh
+
+# start launchpad which is a general utility to mass spawn commands...
+/usr/src/FortuNet/launchpads > /var/log/launchpad.log &
+

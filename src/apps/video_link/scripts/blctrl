@@ -1,0 +1,46 @@
+#!/bin/bash
+
+CAMERA_BALL=1
+CAMERA_HALL=3
+CAMERA_CALL=2
+CAMERA_FVL=4
+
+PATH=$PATH:.
+
+case "$1" in
+    "setup")
+        $SCRIPT_PATH/videoctrl init
+
+        ;;
+    "local")
+        echo "Starting Local mode..."
+        $SCRIPT_PATH/videoctrl display $CAMERA_BALL
+
+        ;;
+    "host")
+        echo "Starting Host mode..."
+        $SCRIPT_PATH/videoctrl pip $CAMERA_CALL $CAMERA_BALL
+
+        ;;
+    "guest")
+        echo "Starting Guest mode..."
+        $SCRIPT_PATH/videoctrl display $CAMERA_FVL
+
+        ;;
+    "guestverify")
+        echo "Starting GuestVerify mode..."
+        $SCRIPT_PATH/videoctrl pip $CAMERA_HALL $CAMERA_BALL
+
+        ;;
+    *)
+        echo "USAGE:  ${0} CMD"
+        echo
+        echo "Where CMD is:"
+        echo "        setup - Setup the connection to the video switchbox."
+        echo "                Run this once before using the video switchbox."
+        echo "        local - Only show the current bingo hall."
+        echo "         host - Host a bingo-link game."
+        echo "        guest - Become a participant in a bingo-link game."
+        echo "  guestverify - Switch to remote hall for BINGO verification."
+esac
+
