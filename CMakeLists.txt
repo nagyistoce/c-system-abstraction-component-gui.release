@@ -53,7 +53,7 @@ else()
    endif()
 endif()
 
-SET(VLC_PATH "c:/tools/vlc-1.0.5" CACHE STRING "Base Path of VLC Installation 1.0.0 and less than 1.1.0" )
+SET(VLC_PATH "c:/tools/vlc-1.1.4" CACHE STRING "Base Path of VLC Installation 1.1.0 and more" )
 
 if ( UNIX )
         set( USE_INTERNAL_STANDARDLIBS 0 )
@@ -533,7 +533,8 @@ add_library( ${SACK_BAG_PLUSPLUS} SHARED
 )
 SET_TARGET_PROPERTIES(${SACK_BAG_PLUSPLUS} PROPERTIES
                   DEFINE_SYMBOL SACK_BAG_EXPORTS
-                  COMPILE_FLAGS  "-DTARGET_LABEL=sack_bag_plusplus -DTARGETNAME=\"\\\"${CMAKE_SHARED_LIBRARY_PREFIX}sack_bag${CMAKE_SHARED_LIBRARY_SUFFIX}\\\"\" ${ExtraFlags} ${ExtraRenderFlags}"
+                  COMPILE_FLAGS  "${ExtraFlags} ${ExtraRenderFlags}"
+                  COMPILE_DEFINITIONS "TARGET_LABEL=sack_bag_plusplus;TARGETNAME=\"${CMAKE_SHARED_LIBRARY_PREFIX}sack_bag${CMAKE_SHARED_LIBRARY_SUFFIX}\""
 		  SOLUTION_FOLDER "${SACK_BAG_PLUSPLUS}" 
 )
 
@@ -668,7 +669,8 @@ add_library( bag.psi SHARED
       )
 SET_TARGET_PROPERTIES(bag.psi PROPERTIES
                   DEFINE_SYMBOL PSI_SOURCE
-                  COMPILE_FLAGS  "-DTARGET_LABEL=bag_psi ${ExtraFlags} -DSOURCE_PSI2 -DSYSTRAY_LIBRARAY -DFORCE_NO_INTERFACE"
+                  COMPILE_FLAGS  "${ExtraFlags}"
+                  COMPILE_DEFINTIIONS  "TARGET_LABEL=bag_psi;SOURCE_PSI2;SYSTRAY_LIBRARAY;FORCE_NO_INTERFACE"
 )
 target_link_libraries( bag.psi bag.video bag.image bag )
 set( SACK_PSI_LIBRARY bag.psi )
@@ -691,7 +693,6 @@ endif( BUILD_MONOLITHIC )
 
 # this SACK_CORE_BUILD is for building before we get 'installed' some of the header locations get moved.
 add_definitions( -DSACK_CORE_BUILD )
-
 add_definitions( -D__OBSCURE_STREAM_INTERNALS )
 
 
