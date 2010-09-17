@@ -195,7 +195,9 @@ void RegisterPriorityStartupProc( void (*proc)(void), CTEXTSTR func,int priority
 	if( bInitialDone && !bSuspend )
 	{
 #define ONE_MACRO(a,b) a,b
-      _xlprintf(LOG_NOISE,file,line)( "Initial done, not suspended, dispatch immediate." );
+#ifdef _DEBUG
+		_xlprintf(LOG_NOISE,file,line)( "Initial done, not suspended, dispatch immediate." );
+#endif
       InvokeDeadstart();
 	}
    //lprintf( WIDE("Total procs %d"), nProcs );
