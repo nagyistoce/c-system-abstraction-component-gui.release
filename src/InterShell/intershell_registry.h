@@ -5,7 +5,11 @@
 #define TASK_PREFIX WIDE("intershell")
 #include <psi.h>
 #include <configscript.h>
+#ifdef SACK_CORE_BUILD
 #include "widgets/include/buttons.h"
+#else
+#include <widgets/buttons.h>
+#endif
 #ifndef POSTFIX
 #define POSTFIX WIDE("")
 #endif
