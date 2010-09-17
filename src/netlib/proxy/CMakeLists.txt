@@ -96,6 +96,8 @@ add_executable( ${PROJECT_NAME} ${FIRST_GCC_PROGRAM_SOURCE}
     ../../filesyslib/pathops.c
     ../../filesyslib/winfiles.c
     ../../utils/service/service_stub.c
+    ../../systemlib/args.c
+    ../../systemlib/spawntask.c
 ${LAST_GCC_PROGRAM_SOURCE} 
     ../../deadstart/deadstart_core.c
 )
@@ -109,11 +111,12 @@ set( CORE_SOURCE_FLAGS
    -DSYSLOG_SOURCE
    -DCONFIGLIB_SOURCE
    )
-target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} )
+target_link_libraries( ${PROJECT_NAME} wsock32 ws2_32 winmm )
 
 string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   COMPILE_FLAGS  "${my_add_definitions} -DTARGET_LABEL=${TARGET_LABEL} ${CORE_SOURCE_FLAGS}"
+                  COMPILE_DEFINITIONS "BUILD_SERVICE"
                   FOLDER "Network examples"
 )
 install_default_dest( ${PROJECT_NAME} )
