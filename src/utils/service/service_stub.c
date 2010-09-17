@@ -1,17 +1,13 @@
 #include <stdhdrs.h>
 
 static struct {
-   CTEXTSTR next_service_name;
+	CTEXTSTR next_service_name;
+   void (CPROC*Start)(void);
 } local_service_info;
 #define l local_service_info
 
 SERVICE_STATUS ServiceStatus;
 SERVICE_STATUS_HANDLE hStatus;
-
-int InitService()
-{
-   return 1;
-}
 
 void ControlHandler( DWORD request )
 {
@@ -64,7 +60,8 @@ void APIENTRY ServiceMain( _32 argc, char **argv )
    ServiceStatus.dwServiceSpecificExitCode = 0; 
    ServiceStatus.dwCheckPoint = 0; 
    ServiceStatus.dwWaitHint = 0; 
- 
+
+	lprintf( "Register service handler..." );
    hStatus = RegisterServiceCtrlHandler(
       l.next_service_name,
       (LPHANDLER_FUNCTION)ControlHandler); 
@@ -74,7 +71,10 @@ void APIENTRY ServiceMain( _32 argc, char **argv )
       return; 
 	}
 
-   // Initialize Service 
+	// Initialize Service
+	if( l.Start )
+      l.Start();
+
    error = 0;//InitService();
    if (error) 
    {
@@ -100,13 +100,15 @@ void APIENTRY ServiceMain( _32 argc, char **argv )
 }
 
 
-void SetupService( CTEXTSTR name )
+void SetupService( CTEXTSTR name, void (CPROC*Start)( void ) )
 {
 	SERVICE_TABLE_ENTRY ServiceTable[2];
+   l.Start = Start;
    l.next_service_name = name;
 	ServiceTable[0].lpServiceName = name;
 	ServiceTable[0].lpServiceProc = ServiceMain;
 	ServiceTable[1].lpServiceName = NULL;
 	ServiceTable[1].lpServiceProc = NULL;
+   lprintf( "Send to startup monitor.." );
    StartServiceCtrlDispatcher( ServiceTable );
 }
