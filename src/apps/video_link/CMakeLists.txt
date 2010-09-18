@@ -115,6 +115,13 @@ else( WIN32 )
   install( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION bin/InterShell/plugins 
   	)
 endif()
+INSTALL( 
+  FILES
+    frames/Edit_Link_Button.isFrame
+  DESTINATION
+    ${DATA_INSTALL_PREFIX}/frames
+)
+
 
 
 ########################################################################################

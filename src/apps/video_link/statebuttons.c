@@ -107,6 +107,8 @@ static struct {
 PRELOAD( RegsisterLocalIDs )
 {
    l.pDSN = StrDup( "vsrvr" );
+   SimpleRegisterResource( LST_HALL, "Listbox" );
+   SimpleRegisterResource( LST_BUTTON_MODES, "Listbox" );
    SimpleRegisterResource( COLOR_NO_MASTER, "Color Well" );
    SimpleRegisterResource( COLOR_MASTER, "Color Well" );
    SimpleRegisterResource( COLOR_PARTICIPANT, "Color Well" );
@@ -1240,11 +1242,11 @@ OnEditControl( "Enable Participant" )( PTRSZVAL psv, PSI_CONTROL parent )
 	PSI_CONTROL list = NULL;
 	PSI_CONTROL list2 = NULL;
 
-   PBUTTON_INFO button = (PBUTTON_INFO)psv;
-	frame = LoadXMLFrame( "Edit_Link_Button.Frame" );
+	PBUTTON_INFO button = (PBUTTON_INFO)psv;
+	frame = LoadXMLFrame( "Edit_Link_Button.isFrame" );
 	if( !frame )
 	{
-      // popuplate default, editing was canceled
+		// popuplate default, editing was canceled
 	}
 	if( frame )
 	{
