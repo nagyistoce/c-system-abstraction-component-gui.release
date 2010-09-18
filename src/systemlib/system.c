@@ -264,22 +264,26 @@ PRELOAD( SetupSystemOptions )
 
 #ifdef WIN32
 #ifndef _M_CEE_PURE
-BOOL CALLBACK CheckWindow( HWND hWnd, LPARAM lParam )
+static BOOL CALLBACK CheckWindowAndSendKill( HWND hWnd, LPARAM lParam )
 {
 	_32 idThread, idProcess;
 	PTASK_INFO task = (PTASK_INFO)lParam;
 	idThread = GetWindowThreadProcessId( hWnd, (LPDWORD)&idProcess );
 	if( task->pi.dwProcessId == idProcess )
+	{
+      // found the window to kill...
 		PostThreadMessage( idThread, WM_QUIT, 0xD1E, 0 );
+      return FALSE;
+	}
 	return TRUE;
 }
 #endif
 
 //--------------------------------------------------------------------------
 
-void CPROC EndTaskWindow( PTASK_INFO task )
+int CPROC EndTaskWindow( PTASK_INFO task )
 {
-	EnumWindows( CheckWindow, (LPARAM)task );
+	return EnumWindows( CheckWindowAndSendKill, (LPARAM)task );
 }
 #endif
 
@@ -289,19 +293,23 @@ LOGICAL CPROC StopProgram( PTASK_INFO task )
 {
 #ifdef __WINDOWS__
 #ifndef UNDER_CE
+   int error;
 	if( !GenerateConsoleCtrlEvent( CTRL_C_EVENT, task->pi.dwProcessId ) )
 	{
-      lprintf( "Failed to send CTRL_C_EVENT %d", GetLastError() );
+      error = GetLastError();
+      lprintf( "Failed to send CTRL_C_EVENT %d", error );
 		if( !GenerateConsoleCtrlEvent( CTRL_BREAK_EVENT, task->pi.dwProcessId ) )
 		{
-			lprintf( "Failed to send CTRL_BREAK_EVENT %d", GetLastError() );
-         	return FALSE;
+         error = GetLastError();
+			lprintf( "Failed to send CTRL_BREAK_EVENT %d", error );
 		}
 	}
 #endif
 #else
         // kill( ) ?
 #endif
+
+
     return TRUE;
 }
 
@@ -314,6 +322,7 @@ PTRSZVAL CPROC TerminateProgram( PTASK_INFO task )
 #endif
 		if( !task->flags.closed )
 		{
+         int nowait = 0;
 			task->flags.closed = 1;
 #if defined( WIN32 )
 			if( WaitForSingleObject( task->pi.hProcess, 0 ) != WAIT_OBJECT_0 )
@@ -322,17 +331,19 @@ PTRSZVAL CPROC TerminateProgram( PTASK_INFO task )
 				if( !StopProgram( task ) )
 				{
 					// if ctrl-c fails, try finding the window, and sending exit (systray close)
-					EndTaskWindow( task );
-				}
-				if( WaitForSingleObject( task->pi.hProcess, 500 ) != WAIT_OBJECT_0 )
-				{
-					if( WaitForSingleObject( task->pi.hProcess, 500 ) != WAIT_OBJECT_0 )
+					if( EndTaskWindow( task ) )
 					{
-						bDontCloseProcess = 1;
-						if( !TerminateProcess( task->pi.hProcess, 0xD1E ) )
-						{
-							lprintf( WIDE("Failed to terminate process...") );
-						}
+						// didn't find the window - result was continue_enum with no more (1)
+                  // so didn't find the window - nothing to wait for, fall through
+						nowait = 1;
+					}
+				}
+				if( nowait || ( WaitForSingleObject( task->pi.hProcess, 500 ) != WAIT_OBJECT_0 ) )
+				{
+					bDontCloseProcess = 1;
+					if( !TerminateProcess( task->pi.hProcess, 0xD1E ) )
+					{
+						lprintf( WIDE("Failed to terminate process...") );
 					}
 				}
 			}
@@ -347,8 +358,8 @@ PTRSZVAL CPROC TerminateProgram( PTASK_INFO task )
 					task->pi.hProcess = 0;
 				}
 			}
-			else
-            lprintf( WIDE( "Would have close handles rudely." ) );
+//			else
+//				lprintf( WIDE( "Would have close handles rudely." ) );
 #else
          kill( task->pid, SIGTERM );
 			// wait a moment for it to die...
