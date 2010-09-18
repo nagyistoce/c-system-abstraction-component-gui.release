@@ -15,9 +15,9 @@ int SetRegistryItem( HKEY hRoot, char *pPrefix,
    HKEY hTemp;
 
    if( pProduct )
-      snprintf( pszString, sizeof( pszString ),"%s%s", pPrefix, pProduct );
+      snprintf( szString, sizeof( szString ),"%s%s", pPrefix, pProduct );
    else
-      snprintf( pszString, sizeof( pszString ),"%s", pPrefix );
+      snprintf( szString, sizeof( szString ),"%s", pPrefix );
 
    dwStatus = RegOpenKeyEx( hRoot,
                             pszString, 0, 
