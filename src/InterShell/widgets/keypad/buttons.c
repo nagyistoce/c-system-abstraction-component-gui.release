@@ -1396,7 +1396,7 @@ void DestroyKey( PKEY_BUTTON *key )
 	if( key && *key )
 	{
 		DestroyCommon( &(*key)->button );
-      Release( (*key) );
+      // Key itelf was the allocated space of the control, not a seperate allocation.
 		(*key) = NULL;
 	}
 }
