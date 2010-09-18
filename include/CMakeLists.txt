@@ -54,6 +54,7 @@ sqlgetoption.h
 sqloptint.h
 stdhdrs.h
 final_types.h
+sackcomm.h
 strlib.hpp
 symbits.h
 system.h
