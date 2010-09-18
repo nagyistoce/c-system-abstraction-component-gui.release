@@ -1273,6 +1273,7 @@ SQLSTUB_PROC( void, RegisterResponceHandler )( result_responder );
 
 SQLSTUB_PROC( void, SetSQLThreadProtect )( PODBC odbc, LOGICAL bEnable );
 
+SQLSTUB_PROC( CTEXTSTR, GetSQLOffsetDate )( PODBC odbc, CTEXTSTR BeginOfDayType );
 
 SQL_NAMESPACE_END
 #ifdef __cplusplus
