@@ -29,6 +29,7 @@
 #include <sqlgetoption.h>
 #include <configscript.h>
 #include <procreg.h>
+#include <sqlgetoption.h>
 // please remove this reference ASAP
 //#include <controls.h> // temp graphic interface for debugging....
 #include <systray.h>
@@ -971,7 +972,7 @@ int OpenSQLConnection( PODBC odbc )
 void CPROC CommitTimer( PTRSZVAL psv )
 {
 	PODBC odbc = (PODBC)psv;
-   lprintf( "Commit timer tick" );
+   //lprintf( "Commit timer tick" );
    if( odbc->last_command_tick )
 		if( odbc->last_command_tick < ( GetTickCount() - 5000 ) )
 		{
@@ -3761,6 +3762,31 @@ PTRSZVAL SQLGetUserData( PODBC odbc )
 {
    return odbc->psvUser;
 }
+
+CTEXTSTR GetSQLOffsetDate( PODBC odbc, CTEXTSTR BeginOfDayType )
+{
+	TEXTCHAR result[80];
+	TEXTCHAR offset[25];
+	int hours, minutes;
+#ifndef __NO_OPTIONS__
+	SACK_GetProfileString( "SACK/Day Offset", BeginOfDayType, "5:00", offset, sizeof( offset ) );	
+#else
+	strcpy( offset, "5:00" );
+#endif
+	if( StrChr( offset, ':' ) )
+	{
+		sscanf( offset, "%d:%d", &hours, &minutes );
+	}
+	else
+	{
+		minutes = 0;
+		sscanf( offset, "%d", &hours );
+	}
+
+	snprintf( result, sizeof( result ), "cast(date_add(now(),interval -%d minute) as date)", hours*60+minutes );
+	return StrDup( result );
+}
+
 
 SQL_NAMESPACE_END
 
