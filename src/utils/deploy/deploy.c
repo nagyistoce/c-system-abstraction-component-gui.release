@@ -140,7 +140,10 @@ int main( int argc, char **argv )
       fprintf( out, "\n" );
 		fprintf( out, "if( ${MSVC}${WATCOM} )\n" );
       fprintf( out, "  SET( LAST_GCC_PROGRAM_SOURCE ${SACK_BASE}/src/sack/deadstart_prog.c )\n" );
-      fprintf( out, "endif()\n" );
+		fprintf( out, "endif()\n" );
+      fprintf( out, "\n" );
+      fprintf( out, "SET( DATA_INSTALL_PREFIX resources )\n" );
+
       fclose( out );
 	}
    return 0;
