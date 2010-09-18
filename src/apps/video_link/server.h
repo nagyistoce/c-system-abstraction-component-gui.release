@@ -1,8 +1,8 @@
 /*
  *  server.h
- *  Copyright: FortuNet, Inc.  2006
- *  Product:  BingLink      Project: alpha2server   Version: Alpha2
- *  Contributors:    Jim Buckeyne, Christopher Green
+ *  Copyright: 
+ *  Product:  BingLink      Project: something   Version: Alpha2
+ *  Contributors:    Jim Buckeyne
  *  Main header file for alpha2server
  *
  */

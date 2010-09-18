@@ -12,15 +12,15 @@ static struct local_task_info
    PTASK_INFO bdata_task;
 
 } local_task;
-#define l local_task;
+#define l local_task
 
 PRELOAD( LoadBdataTasks )
 {
 	{
 		TEXTCHAR tmp[256];
-      FutGetPrivateProfileInt( "config", "Bdata Local Server", "172.17.2.153", tmp, sizeof( tmp ), "vserver.ini" );
+      SACK_GetPrivateProfileInt( "config", "Bdata Local Server", "172.17.2.153", tmp, sizeof( tmp ), "vserver.ini" );
 		l.local_hall_bdata_service = StrDup( tmp );
-      l.bdata_port = FutGetPrivateProfileInt( "config", "Bdata Service Port", 6594, tmp, sizeof( tmp ), "vserver.ini" );
+      l.bdata_port = SACK_GetPrivateProfileInt( "config", "Bdata Service Port", 6594, tmp, sizeof( tmp ), "vserver.ini" );
 	}
 
 }
@@ -29,9 +29,9 @@ static void WriteProxyConfig( CTEXTSTR type, CTEXTSTR host, int port )
 {
 	FILE *output;
 	TEXTCHAR tmp_name[256];
-   snprintf( tmp_name, "%s/proxy_%s.conf", GetProgramPath(), type );
+   snprintf( tmp_name, sizeof( tmp_name ), "%s/proxy_%s.conf", GetProgramPath(), type );
 	output = fopen( tmp_name, "wt" );
-	fprintf( "Proxy Service: %d %s:%d\n", port, host, port );
+	fprintf( output, "Proxy Service: %d %s:%d\n", port, host, port );
    fclose( output );
 }
 
@@ -62,7 +62,7 @@ static void RestartBData( void )
          TerminateProgram( l.bdata_task );
 		}
 	}
-   l.bdata_task = LaunchPeerProgram( "proxy_bdata.exe", GetProgramPath(), NULL, BdataOutput, BdataEnded, 0 );
+   l.bdata_task = LaunchPeerProgram( "proxy_bdata.exe", GetProgramPath(), NULL, BDataOutput, BDataEnded, 0 );
 }
 
 void UpdateBdataHost( CTEXTSTR new_host )
@@ -80,5 +80,5 @@ void UpdateBdataHost( CTEXTSTR new_host )
 
 ATEXIT( closebdata )
 {
-   StopProgram( bdata_task );
+   StopProgram( l.bdata_task );
 }

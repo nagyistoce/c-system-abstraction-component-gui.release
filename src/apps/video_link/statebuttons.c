@@ -19,14 +19,13 @@
 #include <pssql.h>
 #include <psi.h>
 #include <configscript.h>
-#include <milk_registry.h>
-#include <milk_button.h>
-#include <milk_export.h>
+#define USES_INTERSHELL_INTERFACE
+#define DEFINES_INTERSHELL_INTERFACE
+#include <InterShell/InterShell_registry.h>
+#include <InterShell/InterShell_button.h>
+#include <InterShell/InterShell_export.h>
 #include <widgets/banner.h>
-#include <sqlstub.h>
-#include <bard.h>
-
-#include <resource.h>
+#include <pssql.h>
 
 #include "statebuttons.h"
 #include "db.h"
@@ -41,7 +40,9 @@ enum Local_control_ids{
                       , COLOR_PARTICIPANT
 							 , COLOR_DELEGATE
 							 , BUTTON_CREATE_HALL
-                      , TEXT_DSN
+							 , TEXT_DSN
+							 , LST_HALL
+                      , LST_BUTTON_MODES
 };
 
 enum button_type { UNINITIALIZED
@@ -86,6 +87,7 @@ static struct {
 	struct {
 		_32 bCheckedState : 1;
 		_32 bOpenedDatabase : 1;
+		_32 bUseDate : 1;
 	} flags;
 	PTHREAD hall_state_monitor;
    INDEX master_hall_id, delegated_master_hall_id;
@@ -266,7 +268,7 @@ void OpenDatabase( void )
 	}
 	else
 	{
-		BannerMessage( "Failed to open Link State ODBC!\n"
+		Banner2Message( "Failed to open Link State ODBC!\n"
 						  "Check Link State ODBC DSN setting in config\n" );
 	}
    l.flags.bOpenedDatabase = 1;
@@ -321,7 +323,10 @@ PTRSZVAL CPROC CheckStateThread( PTHREAD thread )
       EnterCriticalSec( &l.cs_sql );
 		changed_states = 0;
 		changed_master_state = 0;
-		if( SQLRecordQueryf( l.odbc, NULL, &results, NULL, "select master_hall_id,delegated_master_hall_id from link_state where bingoday=%s", GetSQLBingoDate() ) && results )
+		if( SQLRecordQueryf( l.odbc, NULL, &results, NULL, l.flags.bUseDate
+								  ?"select master_hall_id,delegated_master_hall_id from link_state where bingoday=%s"
+								  :"select master_hall_id,delegated_master_hall_id from link_state"
+								 , GetSQLOffsetDate( l.odbc, "Video Server" ) ) && results )
 		{
 			l.master_hall_id = atoi( results[0] );
 			l.delegated_master_hall_id = atoi( results[1] );
@@ -408,12 +413,14 @@ PTRSZVAL CPROC CheckStateThread( PTHREAD thread )
 				if( hall->flags.bDVDActive != hall->flags._bDVDActive )
 				{
 					hall->flags._bDVDActive = hall->flags.bDVDActive;
-					DVDActiveStateChangedEach( hall->hall_id , hall->flags.bDVDActive );
+               lprintf( "Need to fire an event here - but isn't this for the server to dispatch?" );
+					//DVDActiveStateChangedEach( hall->hall_id , hall->flags.bDVDActive );
 				}
 				if( hall->flags.bMediaActive != hall->flags._bMediaActive )
 				{
 					hall->flags._bMediaActive = hall->flags.bMediaActive;
-					MediaActiveStateChangedEach( hall->hall_id , hall->flags.bMediaActive );
+               lprintf( "Need to fire an event here - but isn't this for the server to dispatch?" );
+					//MediaActiveStateChangedEach( hall->hall_id , hall->flags.bMediaActive );
 				}
 #ifdef USE_RESETGUARD
 				if( g.resetguard.pressed )
@@ -710,14 +717,14 @@ OnShowControl( "Enable Participant" )( PTRSZVAL psv )
 		lprintf("DISABLE_MASTER_HOST g.resetguard.pressed  is %lu", g.resetguard.pressed  );
 		if( !g.resetguard.pressed )
 		{
-			MILK_SetButtonColor( button_info->button
+			InterShell_SetButtonColor( button_info->button
 								 , 0xFF77967C
 								 , 0xFF005700
 									 );
 		}
 		else
 		{
-			MILK_SetButtonColor( button_info->button
+			InterShell_SetButtonColor( button_info->button
 								 , 0xFFDFA0B0
 								 , 0xFF555555
 									 );
@@ -732,20 +739,20 @@ OnShowControl( "Enable Participant" )( PTRSZVAL psv )
 		if( !l.master_hall_id )
 		{
          if( button_info->hall->flags.bDisabled )
-				MILK_SetButtonColor( button_info->button, AColor( 0, 0, 0, 32 ), AColor( 0, 0, 0, 255 ) );
+				InterShell_SetButtonColor( button_info->button, AColor( 0, 0, 0, 32 ), AColor( 0, 0, 0, 255 ) );
 			else if( button_info->hall->flags.bEnabled )
             // something like brown color
-				MILK_SetButtonColor( button_info->button, foreground, 0xFFA6753A );
+				InterShell_SetButtonColor( button_info->button, foreground, 0xFFA6753A );
          else
-				MILK_SetButtonColor( button_info->button, foreground, BASE_COLOR_BLACK );
+				InterShell_SetButtonColor( button_info->button, foreground, BASE_COLOR_BLACK );
 		}
  		else if( !button_info->hall )
-         MILK_SetButtonColor( button_info->button, foreground, BASE_COLOR_PURPLE );
+         InterShell_SetButtonColor( button_info->button, foreground, BASE_COLOR_PURPLE );
 
 		else if( button_info->hall->hall_id == l.master_hall_id )
 		{
          if( button_info->hall->flags.bEnabled )
-				MILK_SetButtonColor( button_info->button, foreground, AColor( 0, 0, 255, 120 ) );
+				InterShell_SetButtonColor( button_info->button, foreground, AColor( 0, 0, 255, 120 ) );
 		}
 		else
 		*/
@@ -765,15 +772,15 @@ OnShowControl( "Enable Participant" )( PTRSZVAL psv )
 #endif
 			if( button_info->hall->flags.bDisabled )
 			{
-				MILK_SetButtonColor( button_info->button, AColor( 0, 0, 0, 32 ), AColor( 0, 0, 0, 255 ) );
+				InterShell_SetButtonColor( button_info->button, AColor( 0, 0, 0, 32 ), AColor( 0, 0, 0, 255 ) );
 			}
 			else if( button_info->hall->flags.bLaunching )
 			{
-				MILK_SetButtonColor( button_info->button, foreground, Color( 210, 210, 0 ) );
+				InterShell_SetButtonColor( button_info->button, foreground, Color( 210, 210, 0 ) );
 			}
 			else if( button_info->hall->flags.bParticipating )
 			{
-				MILK_SetButtonColor( button_info->button, foreground, BASE_COLOR_LIGHTGREEN );
+				InterShell_SetButtonColor( button_info->button, foreground, BASE_COLOR_LIGHTGREEN );
 #if USE_KEYPRESSGUARD
 				if( g.keypressguard.period )
 					g.keypressguard.pressed = ( GetTickCount() - ( ( g.keypressguard.period - 1 ) * 1000 ) );
@@ -781,7 +788,7 @@ OnShowControl( "Enable Participant" )( PTRSZVAL psv )
 			}
 			else if( button_info->hall->flags.bMaster )
 			{
-				MILK_SetButtonColor( button_info->button, foreground, BASE_COLOR_LIGHTBLUE );
+				InterShell_SetButtonColor( button_info->button, foreground, BASE_COLOR_LIGHTBLUE );
 #if USE_KEYPRESSGUARD
 				if( g.keypressguard.period )
 					g.keypressguard.pressed = ( GetTickCount() - ( ( g.keypressguard.period - 1 ) * 1000 ) );
@@ -790,11 +797,11 @@ OnShowControl( "Enable Participant" )( PTRSZVAL psv )
 			}
                         else if( button_info->hall->flags.bDelegate )
                         {
-                            MILK_SetButtonColor( button_info->button, foreground, BASE_COLOR_MAGENTA );
+                            InterShell_SetButtonColor( button_info->button, foreground, BASE_COLOR_MAGENTA );
                         }
                         else
                         {
-                            MILK_SetButtonColor( button_info->button, foreground, BASE_COLOR_RED );
+                            InterShell_SetButtonColor( button_info->button, foreground, BASE_COLOR_RED );
                         }
 
 		}
@@ -802,101 +809,101 @@ OnShowControl( "Enable Participant" )( PTRSZVAL psv )
 		{
 			if( button_info->hall->flags.bDisabled )
 			{
-				MILK_SetButtonColor( button_info->button, AColor( 0, 0, 0, 32 ), AColor( 0, 0, 0, 255 ) );
+				InterShell_SetButtonColor( button_info->button, AColor( 0, 0, 0, 32 ), AColor( 0, 0, 0, 255 ) );
 			}
 			else if( button_info->hall->flags.bLaunching )
 			{
-				MILK_SetButtonColor( button_info->button, foreground, ColorAverage( BASE_COLOR_BLACK, Color( 210, 210, 0 ), 33, 100 ) );
+				InterShell_SetButtonColor( button_info->button, foreground, ColorAverage( BASE_COLOR_BLACK, Color( 210, 210, 0 ), 33, 100 ) );
 			}
 			else if( button_info->hall->flags.bParticipating )
 			{
-				MILK_SetButtonColor( button_info->button, foreground, ColorAverage( BASE_COLOR_BLACK, BASE_COLOR_LIGHTGREEN, 33, 100 ) );
+				InterShell_SetButtonColor( button_info->button, foreground, ColorAverage( BASE_COLOR_BLACK, BASE_COLOR_LIGHTGREEN, 33, 100 ) );
 			}
 			else if( button_info->hall->flags.bMaster )
 			{
-				MILK_SetButtonColor( button_info->button, foreground, ColorAverage( BASE_COLOR_BLACK, BASE_COLOR_LIGHTBLUE, 33, 100 ) );
+				InterShell_SetButtonColor( button_info->button, foreground, ColorAverage( BASE_COLOR_BLACK, BASE_COLOR_LIGHTBLUE, 33, 100 ) );
 			}
 			else if( button_info->hall->flags.bDelegate )
 			{
-				MILK_SetButtonColor( button_info->button, foreground, ColorAverage( BASE_COLOR_BLACK, BASE_COLOR_MAGENTA, 33, 100 ) );
+				InterShell_SetButtonColor( button_info->button, foreground, ColorAverage( BASE_COLOR_BLACK, BASE_COLOR_MAGENTA, 33, 100 ) );
 			}
 			else
 			{
-				MILK_SetButtonColor( button_info->button, foreground, ColorAverage( BASE_COLOR_BLACK, BASE_COLOR_RED, 33, 100 ) );
+				InterShell_SetButtonColor( button_info->button, foreground, ColorAverage( BASE_COLOR_BLACK, BASE_COLOR_RED, 33, 100 ) );
 			}
-			//MILK_SetButtonColor( button_info->button, foreground, BASE_COLOR_BLACK );
+			//InterShell_SetButtonColor( button_info->button, foreground, BASE_COLOR_BLACK );
 		}
 		break;
 	case ENABLE_DELEGATE:
 		if( l.delegated_master_hall_id )
 		{
 			if( !button_info->hall )
-            MILK_SetButtonColor( button_info->button, foreground, BASE_COLOR_PURPLE );
+            InterShell_SetButtonColor( button_info->button, foreground, BASE_COLOR_PURPLE );
 			else if( l.delegated_master_hall_id == button_info->hall->hall_id )
 			{
 				if( button_info->hall->flags.bDelegate )
-               MILK_SetButtonColor( button_info->button, foreground, BASE_COLOR_LIGHTGREEN );
+               InterShell_SetButtonColor( button_info->button, foreground, BASE_COLOR_LIGHTGREEN );
 				else if( button_info->hall->flags.bLaunching )
-					MILK_SetButtonColor( button_info->button, foreground, Color( 210, 210, 0 ) );
+					InterShell_SetButtonColor( button_info->button, foreground, Color( 210, 210, 0 ) );
 				else
-               MILK_SetButtonColor( button_info->button, foreground, BASE_COLOR_RED );
+               InterShell_SetButtonColor( button_info->button, foreground, BASE_COLOR_RED );
 			}
          else
-				MILK_SetButtonColor( button_info->button, foreground, BASE_COLOR_BLACK );
+				InterShell_SetButtonColor( button_info->button, foreground, BASE_COLOR_BLACK );
 		}
 		else
 		{
-			MILK_SetButtonColor( button_info->button, foreground, BASE_COLOR_BLACK );
+			InterShell_SetButtonColor( button_info->button, foreground, BASE_COLOR_BLACK );
 		}
       break;
 	case SELECT_HOST:
 		if( l.master_hall_id )
 		{
 			if( !button_info->hall )
-            MILK_SetButtonColor( button_info->button, foreground, BASE_COLOR_PURPLE );
+            InterShell_SetButtonColor( button_info->button, foreground, BASE_COLOR_PURPLE );
 			else if( l.master_hall_id == button_info->hall->hall_id )
 			{
 				if( button_info->hall->flags.bMaster )
-					MILK_SetButtonColor( button_info->button, foreground, BASE_COLOR_LIGHTGREEN );
+					InterShell_SetButtonColor( button_info->button, foreground, BASE_COLOR_LIGHTGREEN );
 				else if( button_info->hall->flags.bLaunching )
-					MILK_SetButtonColor( button_info->button, foreground, Color( 210, 210, 0 ) );
+					InterShell_SetButtonColor( button_info->button, foreground, Color( 210, 210, 0 ) );
 				else
-               MILK_SetButtonColor( button_info->button, foreground, BASE_COLOR_RED );
+               InterShell_SetButtonColor( button_info->button, foreground, BASE_COLOR_RED );
 
 			}
 			else
-				MILK_SetButtonColor( button_info->button, foreground, BASE_COLOR_BLACK );
+				InterShell_SetButtonColor( button_info->button, foreground, BASE_COLOR_BLACK );
 
 		}
 		else
 		{
 			if( !button_info->hall )
-            MILK_SetButtonColor( button_info->button, foreground, BASE_COLOR_PURPLE );
+            InterShell_SetButtonColor( button_info->button, foreground, BASE_COLOR_PURPLE );
 			else if( button_info->hall && button_info->hall->flags.bDisabled )
-				MILK_SetButtonColor( button_info->button, foreground, BASE_COLOR_ORANGE );
+				InterShell_SetButtonColor( button_info->button, foreground, BASE_COLOR_ORANGE );
          else
-				MILK_SetButtonColor( button_info->button, foreground, BASE_COLOR_BLACK );
+				InterShell_SetButtonColor( button_info->button, foreground, BASE_COLOR_BLACK );
 		}
       break;
 	case ENABLE_OLDSTYLE:
-		MILK_SetButtonColor( button_info->button, foreground, BASE_COLOR_BLACK );
+		InterShell_SetButtonColor( button_info->button, foreground, BASE_COLOR_BLACK );
       break;
 	case DISCONNECT_OLDSTYLE:
-		MILK_SetButtonColor( button_info->button, foreground, BASE_COLOR_BLACK );
+		InterShell_SetButtonColor( button_info->button, foreground, BASE_COLOR_BLACK );
       break;
 	case PROHIBITED_MODE:
 		if( !button_info->hall )
-			MILK_SetButtonColor( button_info->button, foreground, BASE_COLOR_PURPLE );
+			InterShell_SetButtonColor( button_info->button, foreground, BASE_COLOR_PURPLE );
 		else if( button_info->hall->hall_id != l.master_hall_id )
 		{
 			if( button_info->hall->flags.bDisabled )
-				MILK_SetButtonColor( button_info->button, foreground, BASE_COLOR_LIGHTRED );
+				InterShell_SetButtonColor( button_info->button, foreground, BASE_COLOR_LIGHTRED );
 			else
-				MILK_SetButtonColor( button_info->button, foreground, BASE_COLOR_BLACK );
+				InterShell_SetButtonColor( button_info->button, foreground, BASE_COLOR_BLACK );
 		}
 		else
 		{
-			MILK_SetButtonColor( button_info->button, foreground, BASE_COLOR_ORANGE );
+			InterShell_SetButtonColor( button_info->button, foreground, BASE_COLOR_ORANGE );
 		}
       break;
 	}
@@ -1027,9 +1034,11 @@ OnKeyPressEvent( "Enable Participant" )( PTRSZVAL psv )
          // if prohibited, don't allow this operation.
 			if( !button_info->hall->flags.bDisabled )
 			{
-				SQLCommandf( l.odbc, "replace into link_state (master_hall_id,bingoday) select %ld,%s"
+				SQLCommandf( l.odbc, l.flags.bUseDate
+								?"replace into link_state (master_hall_id,bingoday) select %ld,%s"
+								:"replace into link_state (master_hall_id) select %ld"
 							  , button_info->hall->hall_id
-							  , GetSQLBingoDate()
+							  , GetSQLOffsetDate( l.odbc, "Video Server" )
 							  );
             bEvent = 1;
 			}
@@ -1040,9 +1049,11 @@ OnKeyPressEvent( "Enable Participant" )( PTRSZVAL psv )
 		{
 			if( !button_info->hall->flags.bDisabled )
 			{
-				SQLCommandf( l.odbc, "replace into link_state (master_hall_id,bingoday) select %ld,%s"
+				SQLCommandf( l.odbc, l.flags.bUseDate
+								?"replace into link_state (master_hall_id,bingoday) select %ld,%s"
+								:"replace into link_state (master_hall_id) select %ld"
 							  , button_info->hall->hall_id
-							  , GetSQLBingoDate()
+							  , GetSQLOffsetDate( l.odbc, "Video Server" )
 							 );
 			}
 			SQLCommandf( l.odbc, "update link_hall_state set enabled=1" );
@@ -1050,9 +1061,11 @@ OnKeyPressEvent( "Enable Participant" )( PTRSZVAL psv )
 		}
       break;
 	case DISCONNECT_OLDSTYLE:
-		SQLCommandf( l.odbc, "replace into link_state (master_hall_id,delegated_master_hall_id,bingoday) select 0,0,%s"
-							  , GetSQLBingoDate()
-							  );
+		SQLCommandf( l.odbc, l.flags.bUseDate
+						?"replace into link_state (master_hall_id,delegated_master_hall_id,bingoday) select 0,0,%s"
+						:"replace into link_state (master_hall_id,delegated_master_hall_id) select 0,0"
+					  , GetSQLOffsetDate( l.odbc, "Video Server" )
+					  );
 		SQLCommandf( l.odbc, "replace into link_hall_state(hall_id,enabled,master_ready,delegate_ready,participating,prohibited,task_launched,dvd_active,media_active)"
 						"select hall_id,0,0,0,0,0,0,0,0 from link_hall_state" );
       // this should be safe?
@@ -1061,9 +1074,11 @@ OnKeyPressEvent( "Enable Participant" )( PTRSZVAL psv )
       break;
 	case DISABLE_MASTER_HOST:
 		{
-			SQLCommandf( l.odbc, "replace into link_state (master_hall_id,bingoday) select 0,%s"
-							  , GetSQLBingoDate()
-							  );
+			SQLCommandf( l.odbc, l.flags.bUseDate
+							?"replace into link_state (master_hall_id,bingoday) select 0,%s"
+							:"replace into link_state (master_hall_id) select 0"
+						  , GetSQLOffsetDate( l.odbc, "Video Server" )
+						  );
 #ifdef THE_WAY_IT_USED_TO_BE1
 			SQLCommandf( l.odbc, "update link_hall_state set prohibited=0" );
 #endif
@@ -1100,16 +1115,18 @@ OnKeyPressEvent( "Enable Participant" )( PTRSZVAL psv )
 			}
 			if( hall )
 			{
-            BannerMessage( "Sorry, You must wait for all halls to be disabled.\nPlease try again in a few seconds." );
+            Banner2Message( "Sorry, You must wait for all halls to be disabled.\nPlease try again in a few seconds." );
             break;
 			}
-			SQLCommandf( l.odbc, "replace into link_state (master_hall_id,bingoday) select %ld,%s"
+			SQLCommandf( l.odbc, l.flags.bUseDate
+							?"replace into link_state (master_hall_id,bingoday) select %ld,%s"
+							:"replace into link_state (master_hall_id,bingoday) select %ld"
 						  , button_info->hall->hall_id
-						  , GetSQLBingoDate()
+						  , GetSQLOffsetDate( l.odbc, "Video Server" )
 						  );
 			SQLCommandf( l.odbc, "update link_hall_state set enabled=1 where hall_id=%ld"
 						  , button_info->hall->hall_id
-						  , GetSQLBingoDate()
+						  , GetSQLOffsetDate( l.odbc, "Video Server" )
 						  );
 			bEvent = 1;
 		}
@@ -1130,8 +1147,8 @@ OnKeyPressEvent( "Enable Participant" )( PTRSZVAL psv )
 		if( button_info->hall )
 		{
 			SQLCommandf( l.odbc, "update link_hall_state set enabled=%ld where hall_id=%ld"
-							 , !button_info->hall->flags.bEnabled
-							 , button_info->hall->hall_id );
+						  , !button_info->hall->flags.bEnabled
+						  , button_info->hall->hall_id );
 			bEvent = 1;
 		};
 		break;
@@ -1140,9 +1157,11 @@ OnKeyPressEvent( "Enable Participant" )( PTRSZVAL psv )
 		{
 			if( !button_info->hall->flags.bDisabled )
 			{
-				SQLCommandf( l.odbc, "replace into link_state (delegated_master_hall_id,bingoday) select %ld,%s"
-								 , button_info->hall->hall_id
-							  , GetSQLBingoDate()
+				SQLCommandf( l.odbc, l.flags.bUseDate
+								?"replace into link_state (delegated_master_hall_id,bingoday) select %ld,%s"
+								:"replace into link_state (delegated_master_hall_id) select %ld"
+							  , button_info->hall->hall_id
+							  , GetSQLOffsetDate( l.odbc, "Video Server" )
 							  );
 				bEvent = 1;
 			}
@@ -1150,9 +1169,11 @@ OnKeyPressEvent( "Enable Participant" )( PTRSZVAL psv )
       break;
 	case DISABLE_DELEGATE:
 		{
-			SQLCommandf( l.odbc, "replace into link_state (delegated_master_hall_id,bingoday) select 0,%s"
-							  , GetSQLBingoDate()
-							  );
+			SQLCommandf( l.odbc, l.flags.bUseDate
+							?"replace into link_state (delegated_master_hall_id,bingoday) select 0,%s"
+							:"replace into link_state (delegated_master_hall_id) select 0"
+						  , GetSQLOffsetDate( l.odbc, "Video Server" )
+						  );
 			bEvent = 1;
 		}
       break;
@@ -1178,15 +1199,15 @@ OnKeyPressEvent( "Enable Participant" )( PTRSZVAL psv )
 }
 
 
-OnCreateMenuButton( WIDE("Enable Participant") )( struct menu_button_tag *button )
+OnCreateMenuButton( WIDE("Enable Participant") )( PMENU_BUTTON button )
 {
 	PBUTTON_INFO button_info = Allocate( sizeof( *button_info ) );
 	button_info->type = UNINITIALIZED;
 	button_info->button = button;
 	button_info->hall = NULL;
-	MILK_SetButtonStyle( button, "bicolor square" );
-	MILK_SetButtonColors( button, BASE_COLOR_WHITE, BASE_COLOR_BLUE, BASE_COLOR_GREEN, BASE_COLOR_YELLOW );
-	//MILK_SetButtonText( button, "Button..." );
+	InterShell_SetButtonStyle( button, "bicolor square" );
+	InterShell_SetButtonColors( button, BASE_COLOR_WHITE, BASE_COLOR_BLUE, BASE_COLOR_GREEN, BASE_COLOR_YELLOW );
+	//InterShell_SetButtonText( button, "Button..." );
 	return (PTRSZVAL)button_info;
 }
 
