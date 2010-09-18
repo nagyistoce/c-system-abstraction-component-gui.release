@@ -1122,13 +1122,12 @@ OnKeyPressEvent( "Enable Participant" )( PTRSZVAL psv )
 			}
 			SQLCommandf( l.odbc, l.flags.bUseDate
 							?"replace into link_state (master_hall_id,bingoday) select %ld,%s"
-							:"replace into link_state (master_hall_id,bingoday) select %ld"
+							:"replace into link_state (master_hall_id) select %ld"
 						  , button_info->hall->hall_id
 						  , GetSQLOffsetDate( l.odbc, "Video Server" )
 						  );
 			SQLCommandf( l.odbc, "update link_hall_state set enabled=1 where hall_id=%ld"
 						  , button_info->hall->hall_id
-						  , GetSQLOffsetDate( l.odbc, "Video Server" )
 						  );
 			bEvent = 1;
 		}
