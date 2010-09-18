@@ -39,7 +39,8 @@ add_library( ${PROJECT_NAME} SHARED ${SOURCES} )
 string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   DEFINE_SYMBOL INTERSHELL_SOURCE
-                  COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL} -D__NO_ANIMATION__"
+                  COMPILE_FLAGS  ""
+                  COMPILE_DEFINITIONS "TARGET_LABEL=${TARGET_LABEL};_DEFINE_INTERFACE;__NO_ANIMATION__"
                   SUFFIX ""
                   PREFIX ""
                   FOLDER InterShell
