@@ -1,7 +1,0 @@
-#!/bin/bash
-kill -9 $(cat /tmp/vlc_sound_pid)
-echo "nothing to play" >> /tmp/vlc_sound.log&
-#killall sound_end_filter
-#killall ianson
-
-

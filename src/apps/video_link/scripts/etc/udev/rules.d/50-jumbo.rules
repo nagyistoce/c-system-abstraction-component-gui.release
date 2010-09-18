@@ -1,2 +1,0 @@
-# This rule should match the Bingo/Keno Protocol Converter Box only
-SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="82a2", NAME="bdata%n"
