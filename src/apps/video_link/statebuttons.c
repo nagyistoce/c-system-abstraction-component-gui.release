@@ -114,7 +114,10 @@ PRELOAD( RegsisterLocalIDs )
    SimpleRegisterResource( COLOR_PARTICIPANT, "Color Well" );
 	SimpleRegisterResource( COLOR_DELEGATE, "Color Well" );
 	SimpleRegisterResource( BUTTON_CREATE_HALL, NORMAL_BUTTON_NAME );
-   SimpleRegisterResource( TEXT_DSN, EDIT_FIELD_NAME );
+	SimpleRegisterResource( TEXT_DSN, EDIT_FIELD_NAME );
+	l.flags.bUseDate = SACK_GetProfileInt( GetProgramName(), "Use bingoday for link state (else use 0)", 0 );
+
+
 }
 
 
@@ -238,6 +241,7 @@ void OpenDatabase( void )
 		l.odbc = ConnectToDatabase( "MySQL" );
    else
 		l.odbc = ConnectToDatabase( l.pDSN );
+	SetSQLLoggingDisable( l.odbc, !SACK_GetProfileInt( GetProgramName(), "Log SQL", 0 ) );
 
    if( l.odbc )
 	{
@@ -325,10 +329,8 @@ PTRSZVAL CPROC CheckStateThread( PTHREAD thread )
       EnterCriticalSec( &l.cs_sql );
 		changed_states = 0;
 		changed_master_state = 0;
-		if( SQLRecordQueryf( l.odbc, NULL, &results, NULL, l.flags.bUseDate
-								  ?"select master_hall_id,delegated_master_hall_id from link_state where bingoday=%s"
-								  :"select master_hall_id,delegated_master_hall_id from link_state"
-								 , GetSQLOffsetDate( l.odbc, "Video Server" ) ) && results )
+		if( SQLRecordQueryf( l.odbc, NULL, &results, NULL, "select master_hall_id,delegated_master_hall_id from link_state where bingoday=%s"
+								 , l.flags.bUseDate?GetSQLOffsetDate( l.odbc, "Video Server" ):"0" ) && results )
 		{
 			l.master_hall_id = atoi( results[0] );
 			l.delegated_master_hall_id = atoi( results[1] );
@@ -1036,11 +1038,9 @@ OnKeyPressEvent( "Enable Participant" )( PTRSZVAL psv )
          // if prohibited, don't allow this operation.
 			if( !button_info->hall->flags.bDisabled )
 			{
-				SQLCommandf( l.odbc, l.flags.bUseDate
-								?"replace into link_state (master_hall_id,bingoday) select %ld,%s"
-								:"replace into link_state (master_hall_id) select %ld"
+				SQLCommandf( l.odbc, "replace into link_state (master_hall_id,bingoday) select %ld,%s"
 							  , button_info->hall->hall_id
-							  , GetSQLOffsetDate( l.odbc, "Video Server" )
+							  , l.flags.bUseDate?GetSQLOffsetDate( l.odbc, "Video Server" ):"0"
 							  );
             bEvent = 1;
 			}
@@ -1051,11 +1051,9 @@ OnKeyPressEvent( "Enable Participant" )( PTRSZVAL psv )
 		{
 			if( !button_info->hall->flags.bDisabled )
 			{
-				SQLCommandf( l.odbc, l.flags.bUseDate
-								?"replace into link_state (master_hall_id,bingoday) select %ld,%s"
-								:"replace into link_state (master_hall_id) select %ld"
+				SQLCommandf( l.odbc, "replace into link_state (master_hall_id,bingoday) select %ld,%s"
 							  , button_info->hall->hall_id
-							  , GetSQLOffsetDate( l.odbc, "Video Server" )
+							  , l.flags.bUseDate?GetSQLOffsetDate( l.odbc, "Video Server" ):"0"
 							 );
 			}
 			SQLCommandf( l.odbc, "update link_hall_state set enabled=1" );
@@ -1063,10 +1061,8 @@ OnKeyPressEvent( "Enable Participant" )( PTRSZVAL psv )
 		}
       break;
 	case DISCONNECT_OLDSTYLE:
-		SQLCommandf( l.odbc, l.flags.bUseDate
-						?"replace into link_state (master_hall_id,delegated_master_hall_id,bingoday) select 0,0,%s"
-						:"replace into link_state (master_hall_id,delegated_master_hall_id) select 0,0"
-					  , GetSQLOffsetDate( l.odbc, "Video Server" )
+		SQLCommandf( l.odbc, "replace into link_state (master_hall_id,delegated_master_hall_id,bingoday) select 0,0,%s"
+					  , l.flags.bUseDate?GetSQLOffsetDate( l.odbc, "Video Server" ):"0"
 					  );
 		SQLCommandf( l.odbc, "replace into link_hall_state(hall_id,enabled,master_ready,delegate_ready,participating,prohibited,task_launched,dvd_active,media_active)"
 						"select hall_id,0,0,0,0,0,0,0,0 from link_hall_state" );
@@ -1079,7 +1075,7 @@ OnKeyPressEvent( "Enable Participant" )( PTRSZVAL psv )
 			SQLCommandf( l.odbc, l.flags.bUseDate
 							?"replace into link_state (master_hall_id,bingoday) select 0,%s"
 							:"replace into link_state (master_hall_id) select 0"
-						  , GetSQLOffsetDate( l.odbc, "Video Server" )
+						  , l.flags.bUseDate?GetSQLOffsetDate( l.odbc, "Video Server" ):"0"
 						  );
 #ifdef THE_WAY_IT_USED_TO_BE1
 			SQLCommandf( l.odbc, "update link_hall_state set prohibited=0" );
@@ -1120,11 +1116,9 @@ OnKeyPressEvent( "Enable Participant" )( PTRSZVAL psv )
             Banner2Message( "Sorry, You must wait for all halls to be disabled.\nPlease try again in a few seconds." );
             break;
 			}
-			SQLCommandf( l.odbc, l.flags.bUseDate
-							?"replace into link_state (master_hall_id,bingoday) select %ld,%s"
-							:"replace into link_state (master_hall_id) select %ld"
+			SQLCommandf( l.odbc, "replace into link_state (master_hall_id,bingoday) select %ld,%s"
 						  , button_info->hall->hall_id
-						  , GetSQLOffsetDate( l.odbc, "Video Server" )
+						  , l.flags.bUseDate?GetSQLOffsetDate( l.odbc, "Video Server" ):"0"
 						  );
 			SQLCommandf( l.odbc, "update link_hall_state set enabled=1 where hall_id=%ld"
 						  , button_info->hall->hall_id
@@ -1158,11 +1152,9 @@ OnKeyPressEvent( "Enable Participant" )( PTRSZVAL psv )
 		{
 			if( !button_info->hall->flags.bDisabled )
 			{
-				SQLCommandf( l.odbc, l.flags.bUseDate
-								?"replace into link_state (delegated_master_hall_id,bingoday) select %ld,%s"
-								:"replace into link_state (delegated_master_hall_id) select %ld"
+				SQLCommandf( l.odbc, "replace into link_state (delegated_master_hall_id,bingoday) select %ld,%s"
 							  , button_info->hall->hall_id
-							  , GetSQLOffsetDate( l.odbc, "Video Server" )
+							  , l.flags.bUseDate?GetSQLOffsetDate( l.odbc, "Video Server" ):"0"
 							  );
 				bEvent = 1;
 			}
@@ -1170,10 +1162,8 @@ OnKeyPressEvent( "Enable Participant" )( PTRSZVAL psv )
       break;
 	case DISABLE_DELEGATE:
 		{
-			SQLCommandf( l.odbc, l.flags.bUseDate
-							?"replace into link_state (delegated_master_hall_id,bingoday) select 0,%s"
-							:"replace into link_state (delegated_master_hall_id) select 0"
-						  , GetSQLOffsetDate( l.odbc, "Video Server" )
+			SQLCommandf( l.odbc, "replace into link_state (delegated_master_hall_id,bingoday) select 0,%s"
+						  , l.flags.bUseDate?GetSQLOffsetDate( l.odbc, "Video Server" ):"0"
 						  );
 			bEvent = 1;
 		}
