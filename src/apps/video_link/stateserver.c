@@ -15,6 +15,8 @@
 #define DECLARE_GLOBAL
 #define DECLARE_LOCAL
 #include "server.h"
+#include "link_events.h"
+#include <systray.h>
 //#include <bard.h>
 
 #define USES_INTERSHELL_INTERFACE
@@ -96,35 +98,6 @@ void DogastrophicErrorEx_(int level DBG_PASS )
 	DogastrophicErrorExx( level , "Generic Error", "Error." DBG_RELAY );
 }
 
-int KillAllTasks( void )
-{
-	int retval = 0;
-	PTASK_INFO task;
-	INDEX idx;
-
-	xlprintf(LOG_ADVISORY)("Killing all tasks...");
-
-	LIST_FORALL( g.tasks, idx, PTASK_INFO  , task )
-	{
-		xlprintf(LOG_ADVISORY)( "...%p is terminated. R.I.P", task );
-		TerminateProgram( task );
-		retval++;
-	}
-
-	return retval;
-}
-
-
-
-void CPROC TaskEnded( PTRSZVAL psv, PTASK_INFO task )
-{
-   lprintf( "Task Ended." );
-	DeleteLink( &g.tasks, task );
-	SQLCommandf( g.odbc,"UPDATE link_hall_state SET task_launched=0 WHERE hall_id=%d", l.pMyHall->LinkHallState.hall_id );
-	WakeThread( l.check_state_thread );
-}
-
-
 void CPROC DoTaskOutput( PTRSZVAL psv, PTASK_INFO task, CTEXTSTR text, _32 length )
 {
    lprintf( "%s", text );
@@ -162,6 +135,32 @@ PBINGHALL IsMasterReady( void )
 	}
 	return NULL;
 }
+
+
+static void CPROC MarkTaskStarted( void )
+{
+	if( !g.flags.bReadOnly )
+	{
+      pMyHall->LinkHallState.task_launched = 1;
+		SQLCommandf( g.odbc,"UPDATE link_hall_state SET task_launched=1 WHERE hall_id=%d", l.pMyHall->LinkHallState.hall_id );
+	}
+}
+static void CPROC MarkTaskDone( void )
+{
+	if( !g.flags.bReadOnly )
+	{
+      pMyHall->LinkHallState.task_launched = 0;
+		SQLCommandf( g.odbc,"UPDATE link_hall_state SET task_launched=0 WHERE hall_id=%d", l.pMyHall->LinkHallState.hall_id );
+	}
+}
+
+struct video_server_interface VideoServerInterface = { MarkTaskStarted, MarkTaskDone };
+
+static POINTER CPROC GetVideoServerInterface( void )
+{
+   return (POINTER)&VideoServerInterface;
+}
+
 
 int IsOldMasterReady( void )
 {
@@ -335,24 +334,26 @@ int RudelyInterrupted( void )
 
 }
 
-#define DefineInvokeMethod(name,return,args,i_args,...) return Invoke##name i_args \
+#define DefineInvokeMethod(name,return_type,args,i_args,...) return_type Invoke##name i_args \
 {                                                                     \
 	CTEXTSTR result;                                                    \
 	PCLASSROOT data = NULL;                                                 \
+	lprintf( "Invoking %s", #name );                                        \
 	for( result = GetFirstRegisteredName( WIDE( "video link/server core/Command" #name ), &data ); \
 		 result;                                                                              \
 		  result = GetNextRegisteredName( &data ) )                                            \
 	{                                                                                          \
-		return (CPROC*f)args;                                                                    \
+		return_type (CPROC*f)args;                                                                    \
 		{                                                                                      \
 			PCLASSROOT root = GetClassRootEx( data, result );                                      \
 			CTEXTSTR file = GetRegisteredValue( (CTEXTSTR)root, "Source File" );                  \
 			int line = (int)(PTRSZVAL)GetRegisteredValueEx( (CTEXTSTR)root, "Source Line", TRUE ); \
 			lprintf( "invoking %s handler at %s in %s(%d)", #name, result, file, line );           \
 		}                                                                                          \
-		f = GetRegisteredProcedure2( data, return, result, args );                                \
+		f = GetRegisteredProcedure2( data, return_type, result, args );                                \
 		if( f )                                                                                    \
-			f(__VA_ARGS__);                                                                          \
+	f(__VA_ARGS__);                                                                          \
+   else lprintf( "no function" ); \
 	}                                                                                               \
 }
 
@@ -399,7 +400,7 @@ void PollCurrentState( void )
 							 , &sequelresults
 							 , NULL
 							 , "SELECT master_hall_id,delegated_master_hall_id,controller_hall_id from link_state where bingoday=%s"
-							 , g.flags.bUseBingoDay?"curdate()":"0"
+							 , g.flags.bUseBingoDay?GetSQLOffsetDate( g.odbc, "Video Link" ):"0"
 							 )
 	  )
 	{
@@ -502,15 +503,11 @@ void ReadOnlyReset( void )
 	{
 		lprintf( "no longer pariticpating. (readonly state)" );
 		l.pMyHall->LinkHallState.flags.bParticipating = 0;
-		//FLASHDRIVE_BeLocal(TRUE);
-		//FLASHDRIVE_BeMaster(FALSE, 0);
 	}
 	if( l.pMyHall->LinkHallState.flags.bHosting )
 	{
  		lprintf( "no longer hosting. (readonly state)" );
 		l.pMyHall->LinkHallState.flags.bHosting = 0;
-		//FLASHDRIVE_BeLocal(TRUE);
-		//FLASHDRIVE_BeMaster(FALSE, 0);
 	}
 }
 
@@ -519,7 +516,8 @@ int ForceLocalModeEx( LOGICAL soft_reset DBG_PASS )
 {
 	if( g.flags.bReadOnly )
 	{
-      // these shouldn't reset public state... it's just reading.
+		// these shouldn't reset public state... it's just reading.
+      _lprintf(DBG_RELAY)( "... ");
 		InvokeReset( !soft_reset );
 	}
 	else
@@ -536,11 +534,6 @@ int ForceLocalModeEx( LOGICAL soft_reset DBG_PASS )
 			xlprintf(LOG_NOISE)( "Reset state was set, ForceLocalMode clearing reset.(2)" );
 			l.pMyHall->LinkHallState.reset_state = 0;
 		}
-
-		retval = KillAllTasks();
-		//	xlprintf(LOG_NOISE)("Apparently, %d tasks killed from KillAllTasks"
-		//			  , retval
-		//			  );
 
 		// set these flags immediately for internal reference....
 
@@ -561,6 +554,7 @@ int ForceLocalModeEx( LOGICAL soft_reset DBG_PASS )
 		// this needs to be a force always condition almost...
 		else
 		{
+      _lprintf(DBG_RELAY)( "... ");
 			InvokeReset( forced );
 		}
 	}
@@ -736,7 +730,6 @@ void ProcessBdataConfig( void )
 
 			InvokeDisconnectBData();
 			l.pMyHall->LinkHallState.flags.bConnected = 0;
-			//FLASHDRIVE_ReceiveBDataViaUDP( TRUE);
 			lprintf( "..." );
 
 		}
@@ -1207,7 +1200,8 @@ PTRSZVAL CPROC ServerCheckStateThread( PTHREAD pThread )
 					}
 					else
 					{
-                  InvokeReset( 0 );
+						lprintf( "... ");
+						//InvokeReset( 0 );
 						//xlprintf(LOG_NOISE)("[YRU][WHY ARE YOU] I am %s %s %s and %s."
 						//						 , l.pMyHall->LinkHallState.master_ready ? "MasterReady": "MasterNotReady"
 						//						 , l.pMyHall->LinkHallState.delegate_ready ? "DelegateReady" : "DelegateNotReady"
@@ -1277,8 +1271,7 @@ PTRSZVAL CPROC ServerCheckStateThread( PTHREAD pThread )
 					  )
 					{
 						l.last_state.LinkState.delegated_master_hall_id = l.current_state.LinkState.delegated_master_hall_id;
-						xlprintf(LOG_ALWAYS)( "New delegate master... killing tasks." );
-						KillAllTasks();
+						xlprintf(LOG_ALWAYS)( "New delegate master... killing tasks. (USED TO BE KILL ALL TASKS... NEED LAUNCH CLOSED!)" );
 					}
 
 
@@ -1346,6 +1339,7 @@ void CPROC KickTimerProc( PTRSZVAL psv, char *extradata )
 void CommonInit( void )
 {
 	// the path where the original executable is found. (use this for where scripts go)
+	RegisterInterface( "Video Server", GetVideoServerInterface, NULL );
 	g.poll_delay = 10000;
 	g.flags.bUseBingoDay = SACK_GetProfileInt( GetProgramName(), "Use bingoday for link state (else use 0)", 0 );
 	g.flags.bReadOnly = SACK_GetProfileInt( GetProgramName(), "Readonly state tracking", 1 );
@@ -1358,8 +1352,7 @@ void CommonInit( void )
 		// this will not allow SQL statements to pass against a connectoin that is not open
       // they can still fail syntactically or because data doesn't exist..
 		g.odbc = ConnectToDatabaseEx( dsn, TRUE );
-      if( !SACK_GetProfileInt( GetProgramName(), "Log SQL", 0 ) )
-			SetSQLLoggingDisable( g.odbc, TRUE );
+		SetSQLLoggingDisable( g.odbc, !SACK_GetProfileInt( GetProgramName(), "Log SQL", 0 ) );
 		SACK_GetProfileString( GetProgramName(), "My Hall Name", GetSystemName(), dsn, sizeof( dsn ) );
       l.hall_name = StrDup( dsn );
 		
@@ -1574,7 +1567,7 @@ OnCreateMenuButton( WIDE( "Video Link/Claim Delegate" ) )( PMENU_BUTTON menubutt
 
 static void CPROC LoadAPlugin( PTRSZVAL psv, CTEXTSTR name, int flags )
 {
-	lprintf( "Loading flashdrive plugin : %s", name );
+	lprintf( "Loading Video Server plugin : %s", name );
 	LoadFunction( name, NULL );
 }
 
@@ -1604,6 +1597,7 @@ static void LoadVideoPlugins( void )
 }
 
 
+
 #ifdef INTERSHELL_PLUGIN
 static PTRSZVAL CPROC DoCommonInit( PTHREAD thread )
 {
@@ -1612,6 +1606,11 @@ static PTRSZVAL CPROC DoCommonInit( PTHREAD thread )
    return ServerCheckStateThread( thread );
 }
 #endif
+
+static void CPROC MyDumpNames( void )
+{
+   DumpRegisteredNames();
+}
 
 #ifdef INTERSHELL_PLUGIN
 PRELOAD( MyInitHook )
@@ -1623,13 +1622,16 @@ PRELOAD( MyInitHook )
 int main(int argc, char **argv, char **env)
 {
    CommonInit();
-   LoadVideoPlugins();
+	LoadVideoPlugins();
+	RegisterIcon( NULL );
+   AddSystrayMenuFunction( "Dump Names", MyDumpNames );
 	ThreadTo( ServerCheckStateThread, 0);
 
 	while( !g.flags.bExit )
 	{
-		WakeableSleep(500);
+		WakeableSleep(50000);
 	}
+   UnregisterIcon( );
 	return 0;
 }
 #endif
