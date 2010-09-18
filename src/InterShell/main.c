@@ -4898,28 +4898,8 @@ PTRSZVAL CPROC MenuThread( PTHREAD thread )
 #endif
 PUBLIC( int, Main)( int argc, TEXTCHAR **argv, int bConsole )
 {
-	//TEXTCHAR *argv[] = { NULL };
-	//int argc = 1;
 #endif
 
-	//SetAllocateLogging( TRUE );
-#ifdef __WINDOWS__
-	// LOL - yeah and then all the functionality of this is
-	// ready for use... and it starts itself...
-
-	// race conditions exist for exiting...
-	// this makes this impractical, since dekware tries to
-	// destroy external objects which were created, it doens't know any better
-	// so when InterShell exits, dekware and intershell both try to close the frame
-	//LoadFunction( WIDE("Dekware.core.dll"), NULL );
-	//EditControlBehaviors = (void(CPROC*)(PSI_CONTROL))LoadFunction( WIDE("dialog.nex"), "EditControlBehaviors" );
-#else
-	//LoadFunction( WIDE("libdekware.core.so"), NULL );
-	//EditControlBehaviors = LoadFunction( WIDE("dialog.nex"), "EditControlBehaviors" );
-#endif
-	//SetSystemLoggingLevel( LOG_NOISE) ;
-	//DumpRegisteredNames();
-	//SetAllocateLogging( TRUE );
 #ifndef __NO_OPTIONS__
 	g.flags.bTopmost = SACK_GetProfileIntEx( GetProgramName(), "Intershell Layout/Display Topmost", 0, TRUE );
    g.flags.bTransparent = SACK_GetProfileIntEx( GetProgramName(), "Intershell Layout/Display is transparent", 1, TRUE );
