@@ -2893,6 +2893,8 @@ void RemoveClientExx(PCLIENT lpClient, LOGICAL bBlockNotify, LOGICAL bLinger DBG
 
 CTEXTSTR GetSystemName( void )
 {
+   // start the network with defaults... we're able to reallocate later.
+   NetworkStart();
    return g.system_name;
 }
 
