@@ -1,5 +1,0 @@
-#!/bin/bash
-
-$*
-echo $(date) restarting $* >>/tmp/watch_task.log
-$0 $* &

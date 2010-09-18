@@ -1,2 +1,0 @@
-x=$(ipcs -s  |awk '/0x00000000/ {print $2}'); for i in $x; do ipcrm -s $i;done
-x=$(ipcs -m  |awk '/0x00000000/ {print $2}'); for i in $x; do ipcrm -m $i;done

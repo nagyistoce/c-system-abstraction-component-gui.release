@@ -1,2 +1,0 @@
-#!/bin/bash
-/usr/src/FortuNet/launchcmds /usr/src/FortuNet/real.killsound $*
