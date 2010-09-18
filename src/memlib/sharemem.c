@@ -2179,6 +2179,10 @@ POINTER ReleaseEx ( POINTER pData DBG_PASS )
 				free( pc );
 				return NULL;
 			}
+			else
+				if( g.bLogAllocate )
+					_lprintf(DBG_RELAY)( "Release(holding) %p(%p)", pc, pc->byData );
+
 			return pc;
 		}
 	}
