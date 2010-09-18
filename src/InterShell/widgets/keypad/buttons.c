@@ -1395,8 +1395,11 @@ void DestroyKey( PKEY_BUTTON *key )
 {
 	if( key && *key )
 	{
-		DestroyCommon( &(*key)->button );
-      // Key itelf was the allocated space of the control, not a seperate allocation.
+		PSI_CONTROL pc = (*key)->button;
+		// if I pass &(*key)->button, the pointer in the controls' user space
+		// is updated after it is freed.  This address passed should not be
+		// IN the same control that is being deleted.
+		DestroyCommon( &pc );
 		(*key) = NULL;
 	}
 }
