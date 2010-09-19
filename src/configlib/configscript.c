@@ -1525,7 +1525,7 @@ int IsMultiWordVar( PCONFIG_ELEMENT pce, PTEXT *start )
 		 {
 			 LineRelease( pWords );
 			 pWords = NULL;
-			 lprintf( WIDE( "Ended multi word badly." ) );
+          // multiword ended - end of line, and no match on the next tag...
           return FALSE;
 		 }
 #ifdef FULL_TRACE
