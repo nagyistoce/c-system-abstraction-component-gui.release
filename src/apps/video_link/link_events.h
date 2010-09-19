@@ -32,6 +32,10 @@
 #define VideoLinkCommandDisconnectBData( name ) \
 	__DefineRegistryMethod( WIDE( "video link" ), CommandDisconnectBData, WIDE("server core/CommandDisconnectBData"), ,name,void,( ), __LINE__)
 
+#define VideoLinkCommandStateChanged( name ) \
+	__DefineRegistryMethod( WIDE( "video link" ), CommandServeMaster, WIDE("server core/CommandStateChanged"), ,name,void,( void ), __LINE__)
+
+
 
 #define VIDEO_SERVER_PROC_PTR(type,name)  type (CPROC* name)
 
@@ -43,7 +47,8 @@ struct video_server_interface {
    VIDEO_SERVER_PROC_PTR( void, MarkParticipating )( void );
    VIDEO_SERVER_PROC_PTR( void, MarkMasterEnded )( void );
    VIDEO_SERVER_PROC_PTR( void, MarkDelegateEnded )( void );
-   VIDEO_SERVER_PROC_PTR( void, MarkParticipantEnded )( void );
+	VIDEO_SERVER_PROC_PTR( void, MarkParticipantEnded )( void );
+   VIDEO_SERVER_PROC_PTR( void, StateChanged )( void );
 };
 #ifdef USES_VIDEO_SERVER_INTERFACE
 //#define Mark()   if(VideoServerInterface) VideoServerInterface->Mark()
@@ -56,7 +61,7 @@ struct video_server_interface {
 #define MarkMasterEnded()   if(VideoServerInterface) VideoServerInterface->MarkMasterEnded()
 #define MarkDelegateEnded()   if(VideoServerInterface) VideoServerInterface->MarkDelegateEnded()
 #define MarkParticipantEnded()   if(VideoServerInterface) VideoServerInterface->MarkParticipantEnded()
-
+#define StateChanged()     if(VideoServerInterface) VideoServerInterface->StateChanged()
 
 #  ifndef DEFINES_VIDEO_SERVER_INTERFACE
 extern 

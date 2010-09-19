@@ -133,28 +133,26 @@ PBINGHALL IsMasterReady( void )
 	return NULL;
 }
 
-#define Mark(name,flag_name,sql_col_name,state) \
+#define Mark(name,flag_name,sql_col_name,state,important) \
 static void CPROC Mark##name( void )            \
 {                                               \
 	l.pMyHall->LinkHallState.flag_name = state;      \
 	if( !g.flags.bReadOnly )                     \
 	{                                            \
 	SQLCommandf( g.odbc,"UPDATE link_hall_state SET "sql_col_name"="#state" WHERE hall_id=%d", l.pMyHall->LinkHallState.hall_id ); \
+   if( important ) InvokeStateChanged();                                                                                     \
 	}                                                                                                                         \
 }
 
-Mark( MasterServing, master_ready, "master_ready", 1 );
-Mark( DelegateServing, delegate_ready, "delegate_ready", 1 );
-Mark( Participating, participating, "participating", 1 );
-Mark( MasterEnded, master_ready, "master_ready", 0 );
-Mark( DelegateEnded, delegate_ready, "delegate_ready", 0 );
-Mark( ParticipantEnded, participating, "participating", 0 );
-Mark( TaskStarting, task_launched, "task_launched", 1 );
-Mark( TaskDone, task_launched, "task_launched", 0 );
+Mark( MasterServing, master_ready, "master_ready", 1, 1 );
+Mark( DelegateServing, delegate_ready, "delegate_ready", 1, 1 );
+Mark( Participating, participating, "participating", 1, 0 );
+Mark( MasterEnded, master_ready, "master_ready", 0, 1 );
+Mark( DelegateEnded, delegate_ready, "delegate_ready", 0, 1 );
+Mark( ParticipantEnded, participating, "participating", 0, 0 );
+Mark( TaskStarting, task_launched, "task_launched", 1, 0 );
+Mark( TaskDone, task_launched, "task_launched", 0, 0 );
 
-static void CPROC PostEvent( void )
-{
-}
 
 static void CPROC StateChanged( void )
 {
@@ -166,7 +164,8 @@ struct video_server_interface VideoServerInterface = { MarkTaskStarting, MarkTas
 																	  , MarkMasterServing, MarkDelegateServing
 																	  , MarkParticipating
 																	  , MarkMasterEnded, MarkDelegateEnded
-                                                     , MarkParticipantEnded
+																	  , MarkParticipantEnded
+                                                     , StateChanged
 
  };
 

@@ -162,6 +162,40 @@ endif()
 ########################################################################################
 ########################################################################################
 
+PROJECT( video_event_notices.vplug )
+ADD_LIBRARY( ${PROJECT_NAME} SHARED
+${FIRST_GCC_LIBRARY_SOURCE} 
+  network_events.c
+${LAST_GCC_LIBRARY_SOURCE} 
+)
+TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${SACK_LIBRARIES} )
+
+string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
+SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
+                  COMPILE_FLAGS  ""
+                  COMPILE_DEFINITIONS "TARGET_LABEL=${TARGET_LABEL};TARGETNAME=\"${PROJECT_NAME}\""
+                  PREFIX ""
+                  SUFFIX ""
+                  FOLDER "Video Link/Plugins"
+)
+if( WIN32 )
+  install( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin/InterShell/plugins 
+  	)
+else( WIN32 )
+  install( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION bin/InterShell/plugins 
+  	)
+endif()
+if( WIN32 )
+  install( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin
+  	)
+else( WIN32 )
+  install( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION bin
+  	)
+endif()
+
+########################################################################################
+########################################################################################
+
 PROJECT( video_mux.vplug )
 ADD_LIBRARY( ${PROJECT_NAME} SHARED
 ${FIRST_GCC_LIBRARY_SOURCE} 
@@ -192,6 +226,9 @@ else( WIN32 )
   install( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION bin
   	)
 endif()
+
+########################################################################################
+########################################################################################
 
 
 PROJECT( bdata.proxy.vplug )
@@ -224,17 +261,5 @@ else( WIN32 )
   install( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION bin
   	)
 endif()
-
-
-
-
-
-
-IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-message( "default once." )
-  SET(CMAKE_INSTALL_PREFIX
-    ${SACK_BASE} CACHE PATH "Project install prefix; defaults to sack installation" FORCE
-    )
-ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
 
