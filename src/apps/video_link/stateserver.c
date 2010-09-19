@@ -1157,6 +1157,8 @@ PTRSZVAL CPROC ServerCheckStateThread( PTHREAD pThread )
 						! ( l.pMyHall->LinkHallState.task_launched )
 					  )
 					{
+						if( l.pMyHall->LinkHallState.master_ready )
+
 						l.last_state.LinkState.delegated_master_hall_id = l.current_state.LinkState.delegated_master_hall_id;
 						xlprintf(LOG_ALWAYS)( "New delegate master... killing tasks. (USED TO BE KILL ALL TASKS... NEED LAUNCH CLOSED!)" );
 
@@ -1183,6 +1185,23 @@ PTRSZVAL CPROC ServerCheckStateThread( PTHREAD pThread )
 						{
 							lprintf( "-------This is the good one.---------------" );
 							InvokeServeMaster();
+						}
+					}// else if
+					// Am I (l.hall_id) the master? Has "master_ready" been set?
+					else if( ( l.current_state.LinkState.delegated_master_hall_id )  &&
+							  ( l.current_state.LinkState.delegated_master_hall_id != l.pMyHall->LinkHallState.hall_id ) &&
+							  ( l.pMyHall->LinkHallState.delegate_ready  )&&
+							  ! ( l.pMyHall->LinkHallState.participating )
+							 )
+					{
+						if( !l.pMyHall->LinkHallState.task_launched ) //guard
+						{
+							PBINGHALL pMasterHall;
+							lprintf( "-------This is the good one.---------------" );
+							if( ( pMasterHall = IsMasterReady() ) )
+							{
+								InvokeConnectToDelegate( pMasterHall->stIdentity.szVideoAddr );
+							}
 						}
 					}// else if
 
