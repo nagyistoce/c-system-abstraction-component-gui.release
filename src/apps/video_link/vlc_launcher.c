@@ -14,9 +14,14 @@ static struct vlc_launcher_local
 		BIT_FIELD bMaster : 1;
 		BIT_FIELD bDelegate : 1;
 		BIT_FIELD bParticipant : 1;
+		BIT_FIELD bWantMaster : 1;
+		BIT_FIELD bWantDelegate : 1;
+		BIT_FIELD bWantParticipant : 1;
 		BIT_FIELD bLaunching : 1;
+		BIT_FIELD terminate_okay : 1;
 	} flags;
 	PLIST tasks;
+   CTEXTSTR default_stream;
    int display; // number of the display to show vlc on when showing videos.
 	PTASK_INFO vlc_task;
    PCONFIG_HANDLER pch;
@@ -25,13 +30,18 @@ static struct vlc_launcher_local
 
 PRELOAD( InitVLCLauncher )
 {
+	TEXTCHAR tmp[256];
+	SACK_GetProfileString( GetProgramName(), "vlc_launcher/Default input device", "dshow://", tmp, sizeof( tmp ) );
+   l.default_stream = StrDup( tmp );
    l.display = SACK_GetProfileInt( GetProgramName(), "vlc_launcher/Default Display", 2 );
 }
 
 PTRSZVAL EventPlaying CPROC( PTRSZVAL psv, arg_list args )
 {
-	if( l.flags.bMaster )
+	if( l.flags.bWantMaster )
 	{
+		l.flags.bMaster = 1;
+      l.flags.bWantMaster = 0;
 		lprintf( "Gotcha - really playing." );
 		MarkMasterServing();
 		l.flags.bLaunching = 0;
@@ -39,6 +49,8 @@ PTRSZVAL EventPlaying CPROC( PTRSZVAL psv, arg_list args )
 	}
 	if( l.flags.bDelegate )
 	{
+		l.flags.bDelegate = 1;
+      l.flags.bWantDelegate = 0;
 		lprintf( "Gotcha - really playing." );
 		MarkDelegateServing();
 		l.flags.bLaunching = 0;
@@ -46,6 +58,8 @@ PTRSZVAL EventPlaying CPROC( PTRSZVAL psv, arg_list args )
 	}
 	if( l.flags.bParticipant )
 	{
+		l.flags.bParticipant = 1;
+      l.flags.bWantParticipant = 0;
 		lprintf( "Gotcha - really playing." );
 		MarkParticipating();
 		l.flags.bLaunching = 0;
@@ -73,41 +87,45 @@ static void CPROC MyTaskEnd( PTRSZVAL psv, PTASK_INFO task )
 {
    lprintf( "Task %p ended.", task );
 	DeleteLink( &l.tasks, task );
+	if( l.vlc_task == task )
+      l.vlc_task = NULL;
 	if( l.flags.bMaster )
 	{
       l.flags.bMaster = 0;
 		MarkMasterEnded();
 	}
-	else
-      lprintf( "not master" );
 	if( l.flags.bDelegate )
 	{
       l.flags.bDelegate = 0;
 		MarkDelegateEnded();
 	}
-	else
-      lprintf( "not delegate" );
 	if( l.flags.bParticipant )
 	{
       l.flags.bParticipant = 0;
 		MarkParticipantEnded();
 	}
-	else
-      lprintf( "not participant" );
+	if( l.flags.terminate_okay )
+	{
+		l.flags.terminate_okay = 0;
+      return;
+	}
 	if( l.flags.bLaunching )
 	{
 		l.flags.bLaunching = 0;
       MarkTaskDone();
 	}
-	else
-      lprintf( "not loading" );
 }
 
 static void LaunchVLC( PVARTEXT pvt_command, CTEXTSTR program )
 {
 	if( l.vlc_task )
 	{
+      l.flags.terminate_okay = 1;
 		TerminateProgram( l.vlc_task );
+		while( !l.vlc_task )
+		{
+         WakeableSleep( 100 );
+		}
 	}
 	{
 		TEXTCHAR **args;
@@ -125,8 +143,8 @@ static void VideoLinkCommandServeMaster( "VLC Process" )( void )
 	PVARTEXT pvt_cmd = VarTextCreate();
 	l.flags.bLaunching = 1;
    MarkTaskStarting();
-	l.flags.bMaster = 1;
-	vtprintf( pvt_cmd, "(unused_program_name) -stream H:\\videos\\*.avi" );
+	l.flags.bWantMaster = 1;
+	vtprintf( pvt_cmd, "(unused_program_name) -stream %s", l.default_stream );
    LaunchVLC( pvt_cmd, "vlc_test.exe" );
    VarTextDestroy( &pvt_cmd );
 }
@@ -136,8 +154,8 @@ static void VideoLinkCommandServeDelegate( "VLC Process" )( void )
 	PVARTEXT pvt_cmd = VarTextCreate();
 	l.flags.bLaunching = 1;
    MarkTaskStarting();
-	l.flags.bDelegate = 1;
-	vtprintf( pvt_cmd, "(unused_program_name) -stream dshow://" );
+	l.flags.bWantDelegate = 1;
+	vtprintf( pvt_cmd, "(unused_program_name) -stream %s", l.default_stream );
    LaunchVLC( pvt_cmd, "vlc_test.exe" );
    VarTextDestroy( &pvt_cmd );
 }
@@ -147,7 +165,7 @@ static void VideoLinkCommandConnectToMaster( "VLC Process" )( CTEXTSTR address )
 	PVARTEXT pvt_cmd = VarTextCreate();
 	l.flags.bLaunching = 1;
    MarkTaskStarting();
-	l.flags.bParticipant = 1;
+	l.flags.bWantParticipant = 1;
 	vtprintf( pvt_cmd, "(unused_program_name) -display %d http://%s:1234", l.display, address );
    LaunchVLC( pvt_cmd, "vlc_test.exe" );
    VarTextDestroy( &pvt_cmd );
@@ -158,7 +176,7 @@ static void VideoLinkCommandConnectToDelegate( "VLC Process" )( CTEXTSTR address
 	PVARTEXT pvt_cmd = VarTextCreate();
 	l.flags.bLaunching = 1;
    MarkTaskStarting();
-	l.flags.bParticipant = 1;
+	l.flags.bWantParticipant = 1;
 	vtprintf( pvt_cmd, "(unused_program_name) -display %d http://%s:1234", l.display, address );
 	LaunchVLC( pvt_cmd, "vlc_test.exe" );
    VarTextDestroy( &pvt_cmd );
