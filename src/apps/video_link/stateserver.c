@@ -136,25 +136,47 @@ PBINGHALL IsMasterReady( void )
 	return NULL;
 }
 
+#define Mark(name,flag_name,sql_col_name,state) \
+static void CPROC Mark##name( void )            \
+{                                               \
+	l.pMyHall->LinkHallState.flag_name = state;      \
+	if( !g.flags.bReadOnly )                     \
+	{                                            \
+	SQLCommandf( g.odbc,"UPDATE link_hall_state SET "sql_col_name"="#state" WHERE hall_id=%d", l.pMyHall->LinkHallState.hall_id ); \
+	}                                                                                                                         \
+}
+
+Mark( MasterServing, master_ready, "master_ready", 1 );
+Mark( DelegateServing, delegate_ready, "delegate_ready", 1 );
+Mark( Participating, participating, "participating", 1 );
+Mark( MasterEnded, master_ready, "master_ready", 0 );
+Mark( DelegateEnded, delegate_ready, "delegate_ready", 0 );
+Mark( ParticipantEnded, participating, "participating", 0 );
 
 static void CPROC MarkTaskStarted( void )
 {
+	l.pMyHall->LinkHallState.task_launched = 1;
 	if( !g.flags.bReadOnly )
 	{
-      pMyHall->LinkHallState.task_launched = 1;
 		SQLCommandf( g.odbc,"UPDATE link_hall_state SET task_launched=1 WHERE hall_id=%d", l.pMyHall->LinkHallState.hall_id );
 	}
 }
 static void CPROC MarkTaskDone( void )
 {
+	l.pMyHall->LinkHallState.task_launched = 0;
 	if( !g.flags.bReadOnly )
 	{
-      pMyHall->LinkHallState.task_launched = 0;
 		SQLCommandf( g.odbc,"UPDATE link_hall_state SET task_launched=0 WHERE hall_id=%d", l.pMyHall->LinkHallState.hall_id );
 	}
 }
 
-struct video_server_interface VideoServerInterface = { MarkTaskStarted, MarkTaskDone };
+struct video_server_interface VideoServerInterface = { MarkTaskStarted, MarkTaskDone
+																	  , MarkMasterServing, MarkDelegateServing
+																	  , MarkParticipating
+																	  , MarkMasterEnded, MarkDelegateEnded
+                                                     , MarkParticipantEnded
+
+ };
 
 static POINTER CPROC GetVideoServerInterface( void )
 {
@@ -677,9 +699,10 @@ void ProcessBdataConfig( void )
 	//                        , l.pMyHall->LinkHallState.task_launched
 	//  							 );
 	// when the video is ready, configure ports...
-
+#if 0
 	if( l.pMyHall->LinkHallState.task_launched )
 	{
+		// was launched with ianson commands before...
 		if(! noise.bGetOuttaHere )
 		{
 			xlprintf(LOG_ADVISORY)("Hey! YOu can't ProcessBdataConfig when task_(still_)launched! One warning here, pay attention.  Now Get outta here. returning");
@@ -691,6 +714,7 @@ void ProcessBdataConfig( void )
 	{
 		noise.bGetOuttaHere = FALSE;
 	}
+#endif
 
 	if( l.pMyHall->LinkHallState.master_ready )
 	{
@@ -731,11 +755,9 @@ void ProcessBdataConfig( void )
 			InvokeDisconnectBData();
 			l.pMyHall->LinkHallState.flags.bConnected = 0;
 			lprintf( "..." );
-
 		}
 		else
 		{
-
 			if( ! noise.bBeingGreen )
 			{
 				xlprintf(LOG_NOISE)("It ain't easy being green. l.pMyHall->LinkHallState.master_ready is %u l.pMyHall->LinkHallState.flags.bConnected is %d, l.current_state.LinkState.master_hall_id is %u  l.pMyHall->LinkHallState.hall_id is %u  so doing nothing here."
@@ -956,6 +978,43 @@ void ProcessMedia( void )
 					//lprintf("l.current_state.LinkHallState.dvd_active is already inactive, so not calling ScriptCommunication killpromo");
 				}
 			}
+
+					//---Checking for Announcements ---//
+#ifdef __LINUX__
+					// ok, the result value of strncasecmp is zero ONLY if the two strings are equal, otherwise it's a non-zero number.
+					if( ( strncasecmp( l.pMyHall->LinkHallState.announcement, "NONE", 4 ) ) == 0)
+#else
+						if(  strnicmp( l.pMyHall->LinkHallState.announcement, "NONE", 4 ) == 0)
+#endif  // stupid little windows compiler fix.  i guess wcc version < 1.5 doesn't support strncasecmp.
+						{
+						}
+						else
+						{
+							//  oops, the comparison came back nonzero (announcement is NONE or none), resulting in an else condition.
+							if( !l.pMyHall->LinkHallState.task_launched
+								&& !l.pMyHall->LinkHallState.bSoundPlaying
+							  )
+							{
+								char buf[100];
+
+								xlprintf(LOG_ADVISORY)("Yay! Got a sound %s to be played."
+															 , l.pMyHall->LinkHallState.announcement
+															 );
+								snprintf( buf, (sizeof(buf)), "%s/sounds/%s"
+										  ,  g.MyLoadPath
+										  , l.pMyHall->LinkHallState.announcement
+										  );
+								InvokeAnnouncement( buf );
+								SQLCommandf( g.odbc,"UPDATE link_hall_state SET announcement='NONE' WHERE hall_id=%d"
+											  , l.pMyHall->LinkHallState.hall_id // ;-) that's me!
+											  );
+							}
+							else
+							{
+								xlprintf(LOG_ALWAYS)("Hey! Sound is already playing!");
+							}
+						}//end of sounds rountine
+					//---End of Checking for Announcements ---//
 }
 
 /*  void CPROC ServerCheckStateThread( PTHREAD pThread )
@@ -1015,19 +1074,18 @@ PTRSZVAL CPROC ServerCheckStateThread( PTHREAD pThread )
 
 			// The most important state is "enabled".
 			// Either I am *not* enabled or I am prohibited.  Same difference for now.
-			else if( ( !l.pMyHall->LinkHallState.enabled ) || ( l.pMyHall->LinkHallState.prohibited )
-					 )
+			else if( ( !l.pMyHall->LinkHallState.enabled ) || ( l.pMyHall->LinkHallState.prohibited ) )
 			{
 				// since all fo these get cleared when doing a force local mode,
 				// a second pass through here will not retrigger the script.
 				if(   ( l.pMyHall->LinkHallState.master_ready   )
 					|| ( l.pMyHall->LinkHallState.delegate_ready )
 					|| ( l.pMyHall->LinkHallState.participating )
-					|| ( l.pMyHall->LinkHallState.flags.bHosting )
 					|| ( l.pMyHall->LinkHallState.flags.bParticipating )
 				  )
 				{
-					if(  ! ( l.pMyHall->LinkHallState.task_launched ) )
+               lprintf( "Exisitng state needs to be cleared, we're no longer enabled." );
+					if(  !( l.pMyHall->LinkHallState.task_launched ) )
 					{
 						xlprintf(LOG_ADVISORY)( "Forcing local mode because not enabled or prohibited... one time.");
 						ForceLocalMode(TRUE);
@@ -1061,164 +1119,15 @@ PTRSZVAL CPROC ServerCheckStateThread( PTHREAD pThread )
 					bVerySensitive = FALSE;
 				}
 
-				if( 1 )
 				{
-					//---Checking for Announcements ---//
-#ifdef __LINUX__
-					// ok, the result value of strncasecmp is zero ONLY if the two strings are equal, otherwise it's a non-zero number.
-					if( ( strncasecmp( l.pMyHall->LinkHallState.announcement, "NONE", 4 ) ) == 0)
-#else
-						if(  strnicmp( l.pMyHall->LinkHallState.announcement, "NONE", 4 ) == 0)
-#endif  // stupid little windows compiler fix.  i guess wcc version < 1.5 doesn't support strncasecmp.
-						{
-						}
-						else
-						{
-							//  oops, the comparison came back nonzero (announcement is NONE or none), resulting in an else condition.
-							if( !l.pMyHall->LinkHallState.task_launched
-								&& !l.pMyHall->LinkHallState.bSoundPlaying
-							  )
-							{
-								char buf[100];
-
-								xlprintf(LOG_ADVISORY)("Yay! Got a sound %s to be played."
-															 , l.pMyHall->LinkHallState.announcement
-															 );
-								snprintf( buf, (sizeof(buf)), "%s/sounds/%s"
-										  ,  g.MyLoadPath
-										  , l.pMyHall->LinkHallState.announcement
-										  );
-								InvokeAnnouncement( buf );
-								SQLCommandf( g.odbc,"UPDATE link_hall_state SET announcement='NONE' WHERE hall_id=%d"
-											  , l.pMyHall->LinkHallState.hall_id // ;-) that's me!
-											  );
-							}
-							else
-							{
-								xlprintf(LOG_ALWAYS)("Hey! Sound is already playing!");
-							}
-						}//end of sounds rountine
-					//---End of Checking for Announcements ---//
-
-					//"Am I Master...or Participant?"
-					//let's just check something
-					// let's say my current state is (delegated)master_ready or participating, but
-					// I have no vlc clients running (tasks) ... whoops.
-					// set my states to zero...
-
-					if( ( ( l.pMyHall->LinkHallState.master_ready )
-						  || ( l.pMyHall->LinkHallState.delegate_ready )
-						  || ( l.pMyHall->LinkHallState.participating )
-						 ) &&
-						! l.pMyHall->LinkHallState.task_launched )
-					{
-						PTASK_INFO task;
-						INDEX idx;
-
-						LIST_FORALL( g.tasks, idx, PTASK_INFO  , task )
-						{
-							break;
-						}
-						if( !task )
-						{
-							if( ( !l.current_state.LinkState.delegated_master_hall_id ) &&
-								( !l.current_state.LinkState.master_hall_id )
-							  )
-							{
-								{
-									_32 master_was_ready = l.pMyHall->LinkHallState.master_ready
-										|| l.pMyHall->LinkHallState.delegate_ready;
-									// no tasks in list
-
-									l.pMyHall->LinkHallState.participating =
-										l.pMyHall->LinkHallState.master_ready =
-										l.pMyHall->LinkHallState.delegate_ready = 0;
-
-									if( !( SQLCommandf(g.odbc,"UPDATE link_hall_state SET master_ready=0,delegate_ready=0,participating=0 WHERE hall_id=%d"
-															  , l.pMyHall->LinkHallState.hall_id
-															  ) ) )
-									{
-										DogastrophicError(1, "Update Failed" );
-									}
-									// previously, there was not a check for master_hall_id changing, but now,
-									// if that field changes in link_state, then tasks are killed, and we restart.
-									// this was a safe guard cause my tasks died, and I was master_ready, but am not anymore
-									if( master_was_ready )
-									{
-										xlprintf(LOG_NOISE)( "[YRU][WHY ARE YOU] Forcing reset of everybody else, something very bad happend!" );
-										// everybody else update here, not myself, therefore
-										// I should not touch my internal variables reflecting state.
-										if( !( SQLCommandf(g.odbc,"UPDATE link_hall_state SET reset_state=1 WHERE hall_id<>%d"
-																  , l.pMyHall->LinkHallState.hall_id
-																  ) ) )
-										{
-											DogastrophicError(1, "Update Failed");
-										}
-									}
-								}
-							}
-							else
-							{
-								PBINGHALL pMasterHall;
-
-								if( ( pMasterHall = IsMasterReady() ) )
-								{
-									if( l.current_state.LinkState.delegated_master_hall_id )
-									{
-										InvokeServeDelegate();
-									}
-									else if( l.current_state.LinkState.master_hall_id )
-									{
-										if( l.current_state.LinkState.master_hall_id == l.pMyHall->LinkHallState.hall_id )
-										{
-											InvokeServeMaster();
-											l.pMyHall->LinkHallState.flags.bHosting = 1;
-										}
-										else
-										{
-											InvokeConnectToMaster( pMasterHall->stIdentity.szVideoAddr );
-											l.pMyHall->LinkHallState.flags.bParticipating = 1;
-										}
-										l.last_state.LinkState.master_hall_id = l.current_state.LinkState.master_hall_id;
-									}
-								}
-								else
-								{
-									xlprintf(LOG_NOISE)("Fubar.  NULL from IsMasterReady in the *WRONG* place at the *WRONG* time");
-								}
-							}
-						}
-						else
-						{
-							//xlprintf(LOG_NOISE)("[YRU][WHY ARE YOU] I am %s %s %s but there was a task %p."
-							//						 , l.pMyHall->LinkHallState.master_ready ? "MasterReady": "MasterNotReady"
-							//						 , l.pMyHall->LinkHallState.delegate_ready ? "DelegateReady" : "DelegateNotReady"
-							//						 , l.pMyHall->LinkHallState.participating ? "Participating" : "NotParticipating"
-							//						 , task
-							//						 );
-						}
-					}
-					else
-					{
-						lprintf( "... ");
-						//InvokeReset( 0 );
-						//xlprintf(LOG_NOISE)("[YRU][WHY ARE YOU] I am %s %s %s and %s."
-						//						 , l.pMyHall->LinkHallState.master_ready ? "MasterReady": "MasterNotReady"
-						//						 , l.pMyHall->LinkHallState.delegate_ready ? "DelegateReady" : "DelegateNotReady"
-						//						 , l.pMyHall->LinkHallState.participating ? "Participating" : "NotParticipating"
-						//						 ,l.pMyHall->LinkHallState.task_launched? "TaskLaunched":"TaskNotLaunched"
-						//						 );
-					}
-
 					// Well, well, what have we here?  Once in a great while, usually at the beginning of
 					// the application, master_hall_id is set to zero.  When the master takes over and
 					// starts to broadcast, it transitions so that current != last.  But what happens
 					// during that rare instance when someone changes master?  Bad, real bad. What now?
 
-					if( ( l.current_state.LinkState.master_hall_id != l.last_state.LinkState.master_hall_id ) &&
-						! ( l.pMyHall->LinkHallState.task_launched )
-					  )
-					{  //"Changes In Master"
+					if( ( l.current_state.LinkState.master_hall_id != l.last_state.LinkState.master_hall_id ) )
+					{
+						//"Changes In Master"
 						// new master, reset myself.
 						//lprintf("new master, reset myself.");
 						if( ForceLocalMode( TRUE ) )
@@ -1236,28 +1145,6 @@ PTRSZVAL CPROC ServerCheckStateThread( PTHREAD pThread )
 							xlprintf(LOG_ALWAYS)("[GRU][GEE ARE YOU] Uh, oh.  Why did ForceLocalMode(TRUE) return FALSE???");
 						}
 					}
-					else
-						l.last_state.LinkState.master_hall_id = l.current_state.LinkState.master_hall_id;
-
-					if( ( l.current_state.LinkState.master_hall_id )  &&
-						! ( l.pMyHall->LinkHallState.task_launched )
-					  )
-					{
-						if( l.current_state.LinkState.master_hall_id != l.pMyHall->LinkHallState.hall_id )
-						{
-							//  							xlprintf(LOG_NOISE)("I %s participating because  l.pMyHall->LinkHallState.participating is %u"
-							//  													 , ( l.pMyHall->LinkHallState.participating ? "AM" : "AM NOT" )
-							//  													 , l.pMyHall->LinkHallState.participating
-							//  													 );
-
-						}
-						else
-						{
-							//  							xlprintf(LOG_NOISE)("I am the master_hall_id ( %u )"
-							//  													 , l.pMyHall->LinkHallState.hall_id
-							//  													 );
-						}
-					}
 
 					// Ok, what happens when the delegated_master_hall_id changes?  Supposed to be set to zero
 					// especially at the beginning of the application, and when delegated_master relinquishes back
@@ -1272,16 +1159,19 @@ PTRSZVAL CPROC ServerCheckStateThread( PTHREAD pThread )
 					{
 						l.last_state.LinkState.delegated_master_hall_id = l.current_state.LinkState.delegated_master_hall_id;
 						xlprintf(LOG_ALWAYS)( "New delegate master... killing tasks. (USED TO BE KILL ALL TASKS... NEED LAUNCH CLOSED!)" );
+
 					}
 
 
 					// What happens when the delegated_master_id is me all of a sudden?  I'm not ready, so let's get it done.
 					if( ( l.current_state.LinkState.delegated_master_hall_id == l.pMyHall->LinkHallState.hall_id ) &&
-						( ! (l.pMyHall->LinkHallState.delegate_ready  ) )  &&
-						! ( l.pMyHall->LinkHallState.task_launched )
+						( !(l.pMyHall->LinkHallState.delegate_ready  ) )
 					  )
 					{
-						InvokeServeDelegate();
+						if( !l.pMyHall->LinkHallState.task_launched ) //guard
+						{
+							InvokeServeDelegate();
+						}
 					}
 					// Am I (l.hall_id) the master? Has "master_ready" been set?
 					else if( (! l.current_state.LinkState.delegated_master_hall_id )  &&
@@ -1289,8 +1179,11 @@ PTRSZVAL CPROC ServerCheckStateThread( PTHREAD pThread )
 							  ! ( l.pMyHall->LinkHallState.master_ready  )
 							 )
 					{
-						InvokeServeMaster();
-						l.pMyHall->LinkHallState.flags.bHosting = 1;
+						if( !l.pMyHall->LinkHallState.task_launched ) //guard
+						{
+							lprintf( "-------This is the good one.---------------" );
+							InvokeServeMaster();
+						}
 					}// else if
 
 					//"Where did everybody go?"
@@ -1304,16 +1197,9 @@ PTRSZVAL CPROC ServerCheckStateThread( PTHREAD pThread )
 						PBINGHALL pMasterHall;
 						if( ( pMasterHall = IsMasterReady() ) )
 						{
-							InvokeConnectToMaster( pMasterHall->stIdentity.szVideoAddr );
-							l.pMyHall->LinkHallState.flags.bParticipating = 1;
-						}
-						else
-						{
-							if( !noise.bHolyCow )
+							if( !l.pMyHall->LinkHallState.task_launched ) //guard
 							{
-								xlprintf(LOG_ALWAYS)("[GRU][GEE ARE YOU] Holy cow..  NULL IsMasterReady"
-														  );
-								noise.bHolyCow = TRUE;
+								InvokeConnectToMaster( pMasterHall->stIdentity.szVideoAddr );
 							}
 						}
 					}//yet another else if
