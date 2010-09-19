@@ -43,6 +43,7 @@
 #include <filesys.h>
 // okay this brings TIGHT integration.... but standardization for core levels.
 #include <filesys.h>
+#include <procreg.h>
 #include <system.h>
 #ifndef __NO_OPTIONS__
 #include <sqlgetoption.h>
@@ -51,11 +52,13 @@
 LOGGING_NAMESPACE
 #endif
 
-
+struct syslog_local_data {
 int cannot_log;
-static _64 cpu_tick_freq;
+#define cannot_log l.cannot_log
+_64 cpu_tick_freq;
+#define cpu_tick_freq l.cpu_tick_freq
 // flags that control the operation of system logging....
-static struct state_flags{
+struct state_flags{
 	_32 bInitialized : 1;
 	_32 bUseDay : 1;
 	_32 bUseDeltaTime : 1;
@@ -72,36 +75,48 @@ static struct state_flags{
 //} flags = { 0,0,1,1,0,1,1,1,1}; // delta cpu time, threadID, process name, protect logged filenames(slower)
 
 // deadstart with localtime conversion(to get timeofday) sucks.
-// okay it's alright... as long as we don't log TOOOO early
+	// okay it's alright... as long as we don't log TOOOO early
+} flags
+#if 0
 #ifdef _MSC_VER
 #define _LOG_FULL_FILE_NAMES
-} flags = { 0,0,0,0,0,0,0,0,0}; // normal time protect logged filenames(slower)
+} flags = { 0,0,0,0,0,0,0,0,0} // normal time protect logged filenames(slower)
 // log CPU time....
-//} flags = { 0,0,1,1,0,1,0,0,0,0,0}; // normal time protect logged filenames(slower)
+//} flags = { 0,0,1,1,0,1,0,0,0,0,0} // normal time protect logged filenames(slower)
 #else
-} flags = { 0,0,1,1,1,0,1,1,1,0,0}; // cpu time delta protect logged filenames(slower)
-//} flags = { 0,0,0,0,0,0,1,1,0,0,0}; // normal time protect logged filenames(slower)
+} flags = { 0,0,1,1,1,0,1,1,1,0,0} // cpu time delta protect logged filenames(slower)
+//} flags = { 0,0,0,0,0,0,1,1,0,0,0} // normal time protect logged filenames(slower)
 #endif
+#endif
+;
+#define flags l.flags
 
 // a conserviative minimalistic configuration...
 //} flags = { 0,0,1,0,1,0,1,1,0};
 
-static TEXTCHAR *pProgramName;
-static UserLoggingCallback UserCallback;
+ TEXTCHAR *pProgramName;
+#define pProgramName l.pProgramName
+ UserLoggingCallback UserCallback;
+#define UserCallback l.UserCallback
 
-static enum syslog_types logtype = SYSLOG_AUTO_FILE;
+ enum syslog_types logtype;
+#define logtype l.logtype
 
-#ifdef _DEBUG
-static _32 nLogLevel = LOG_NOISE + 1000; // default log EVERYTHING
-#else
-static _32 nLogLevel = LOG_NOISE-1; // default log EVERYTHING
-#endif
-static _32 nLogCustom = 0; // bits enabled and disabled for custom mesasges...
-static CTEXTSTR gFilename;// = "LOG";
-static FILE *file;
-static SOCKET   hSock = INVALID_SOCKET;
-static int bCPUTickWorks = 1; // assume this works, until it fails
-static _64 tick_bias;
+ _32 nLogLevel; // default log EVERYTHING
+#define nLogLevel l.nLogLevel
+ _32 nLogCustom; // bits enabled and disabled for custom mesasges...
+#define nLogCustom l.nLogCustom
+ CTEXTSTR gFilename;// = "LOG";
+#define gFilename l.gFilename
+ FILE *file;
+ SOCKET   hSock;
+#define hSock l.hSock
+ int bCPUTickWorks; // assume this works, until it fails
+#define bCPUTickWorks l.bCPUTickWorks
+ _64 tick_bias;
+#define tick_bias l.tick_bias
+} *syslog_local;
+#define l (*syslog_local)
 
 
 static void DoSystemLog( const TEXTCHAR *buffer );
@@ -111,18 +126,18 @@ static void DoSystemLog( const TEXTCHAR *buffer );
 PRIORITY_ATEXIT( CleanSyslog, ATEXIT_PRIORITY_SYSLOG )
 {
 	enum syslog_types _logtype = logtype;
-	if( ( _logtype == SYSLOG_AUTO_FILE && file ) || ( _logtype != SYSLOG_AUTO_FILE && _logtype == SYSLOG_NONE ) )
+	if( ( _logtype == SYSLOG_AUTO_FILE && l.file ) || ( _logtype != SYSLOG_AUTO_FILE && _logtype == SYSLOG_NONE ) )
 		lprintf( WIDE( "Final log - syslog closed." ) );
 	return;
 	pProgramName = NULL; // this was dynamic allocated memory, and it is now gone.
-	if( ( _logtype == SYSLOG_AUTO_FILE && file ) || ( _logtype != SYSLOG_AUTO_FILE && _logtype == SYSLOG_NONE ) )
+	if( ( _logtype == SYSLOG_AUTO_FILE && l.file ) || ( _logtype != SYSLOG_AUTO_FILE && _logtype == SYSLOG_NONE ) )
 		lprintf( WIDE( "Final log - syslog closed." ) );
 	logtype = SYSLOG_NONE;
 	switch( _logtype )
 	{
 	case SYSLOG_FILE:
 	case SYSLOG_FILENAME:
-		fclose( file );
+		fclose( l.file );
 		break;
 	case SYSLOG_UDP:
 	case SYSLOG_UDPBROADCAST:
@@ -400,12 +415,21 @@ static void LoadOptions( char *filename )
 #endif
 
 
-static int init_complete;
+//static int init_complete;
 void InitSyslog( void )
 {
-	if( init_complete )
+	if( syslog_local )
 		return;
-	init_complete =1 ;
+	//init_complete =1 ;
+	SimpleRegisterAndCreateGlobal( syslog_local );
+	logtype = SYSLOG_AUTO_FILE;
+	hSock = INVALID_SOCKET;
+   bCPUTickWorks = 1;
+#ifdef _DEBUG
+	nLogLevel = LOG_NOISE + 1000; // default log EVERYTHING
+#else
+	nLogLevel = LOG_NOISE-1; // default log EVERYTHING
+#endif
 
 #ifdef _DEBUG
 	// this is just a quick way to stub this out... based on compiler switches.
@@ -426,7 +450,7 @@ void InitSyslog( void )
 #else
     // stderr?
 	logtype = SYSLOG_NONE;
-   file = NULL;
+   l.file = NULL;
 #endif
 
 #ifndef __NO_OPTIONS__
@@ -434,7 +458,6 @@ void InitSyslog( void )
 #else
 	SetDefaultName( NULL, NULL, NULL );
 #endif
-
 	flags.bInitialized = 1;
 }
 
@@ -842,11 +865,11 @@ LOGICAL IsBadReadPtr( CPOINTER pointer, PTRSZVAL len )
 
 static void FileSystemLog( CTEXTSTR message )
 {
-	if( file )
+	if( l.file )
 	{
-		fputs( message, file );
-		fprintf( file, WIDE("\n") );
-		fflush( file );
+		fputs( message, l.file );
+		fprintf( l.file, WIDE("\n") );
+		fflush( l.file );
 	}
 }
 
@@ -880,9 +903,10 @@ static void BackupFile( const TEXTCHAR *source, int source_name_len, int n )
 
 void DoSystemLog( const TEXTCHAR *buffer )
 {
-	if( !init_complete )
+	if( !syslog_local )
 	{
-		if( logtype == SYSLOG_AUTO_FILE && !file )
+      InitSyslog();
+		if( logtype == SYSLOG_AUTO_FILE && !l.file )
 		{
 			// cannot log until system log is complete
 			return;
@@ -897,7 +921,7 @@ void DoSystemLog( const TEXTCHAR *buffer )
 	{
 		if( logtype == SYSLOG_AUTO_FILE )
 		{
-			if( !file && gFilename )
+			if( !l.file && gFilename )
 			{
 				int n_retry = 0;
 			retry_again:
@@ -907,14 +931,14 @@ void DoSystemLog( const TEXTCHAR *buffer )
 					BackupFile( gFilename, (int)strlen( gFilename ), 1 );
 				}
 				else if( flags.bLogOpenAppend )
-					file = sack_fopen( GetFileGroup( "system.logs", GetProgramPath() ), gFilename, WIDE("at+") );
-				if( file )
-					fseek( file, 0, SEEK_END );
+					l.file = sack_fopen( GetFileGroup( "system.logs", GetProgramPath() ), gFilename, WIDE("at+") );
+				if( l.file )
+					fseek( l.file, 0, SEEK_END );
 				else
-					file = sack_fopen( GetFileGroup( "system.logs", GetProgramPath() ), gFilename, WIDE("wt") );
+					l.file = sack_fopen( GetFileGroup( "system.logs", GetProgramPath() ), gFilename, WIDE("wt") );
 				logtype = SYSLOG_AUTO_FILE;
 
-				if( !file )
+				if( !l.file )
 				{
 					if( n_retry < 5 )
 					{
@@ -956,7 +980,7 @@ void SystemLogFL( const TEXTCHAR *message FILELINE_PASS )
 	static TEXTCHAR sourcefile[256];
 	CTEXTSTR logtime;
 	static _32 lock;
-	if( !init_complete )
+	if( !syslog_local )
 	{
 		InvokeDeadstart();
 	}
@@ -1088,24 +1112,24 @@ void SystemLogEx ( const TEXTCHAR *message DBG_PASS )
 
 void  SetSystemLog ( enum syslog_types type, const void *data )
 {
-	if( file )
+	if( l.file )
 	{
-		fclose( file );
-		file = NULL;
+		fclose( l.file );
+		l.file = NULL;
 	}
 	if( type == SYSLOG_FILE )
 	{
 		if( data )
 		{
 			logtype = type;
-			file = (FILE*)data;
+			l.file = (FILE*)data;
 		}
 	}
 	else if( type == SYSLOG_FILENAME )
 	{
 		FILE *log;
 		log = sack_fopen( GetFileGroup( "system.logs", GetProgramPath() ), (CTEXTSTR)data, WIDE("wt") );
-		file = log;
+		l.file = log;
 		logtype = SYSLOG_FILE;
 	}
 	else if( type == SYSLOG_CALLBACK )
@@ -1162,16 +1186,16 @@ static INDEX CPROC _real_vlprintf ( CTEXTSTR format, va_list args )
 {
 #if 1
    // this can be used to force logging early to stdout
-	if( !init_complete )
+	if( !syslog_local )
 	{
+      InitSyslog();
 		logtype = SYSLOG_FILE;
 #ifdef __WINDOWS__
 		// if there is a console, use stdout?"
 #endif
-		file = fopen( "default.log", "wt" );
+		l.file = fopen( "default.log", "wt" );
 		SystemLogTime( SYSLOG_TIME_CPU|SYSLOG_TIME_DELTA );
 
-      init_complete = 1;
 		flags.bLogSourceFile = 1;
 	}
 #endif
@@ -1279,10 +1303,10 @@ static INDEX CPROC _null_lprintf( CTEXTSTR f, ... )
 }
 
 
- RealVLogFunction  _vxlprintf ( _32 level DBG_PASS )
+RealVLogFunction  _vxlprintf ( _32 level DBG_PASS )
 {
 	//EnterCriticalSec( &next_lprintf.cs );
-	if( !init_complete )
+	if( !syslog_local )
 	{
 		return _null_vlprintf;
 	}
