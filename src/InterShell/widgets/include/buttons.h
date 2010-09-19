@@ -201,5 +201,7 @@ KEYPAD_PROC( LOGICAL, GetKeyHighlight )( PKEY_BUTTON key );
 KEYPAD_PROC( PRENDERER, GetButtonAnimationLayer )( PSI_CONTROL pc_key_button );
 
 KEYPAD_NAMESPACE_END
-
+#ifdef __cplusplus
+	using namespace sack::widgets::buttons;
+#endif
 #endif
