@@ -11,7 +11,7 @@ struct network_notifier
 {
 	PCLIENT pc;
    PLIST peer_addresses;
-}
+};
 
 static struct video_network_events
 {
@@ -38,12 +38,15 @@ PRELOAD( InitNetworkService )
 {
 	TEXTCHAR tmp[256];
 	TEXTCHAR tmp2[256];
+	TEXTCHAR tmp3[256];
    PCLIENT pc_host;
 	int iface = 1;
 	int default_port = SACK_GetProfileInt( GetProgramName(), "Video Server/Service Events/Default Port", 5722 );
 	do
 	{
-      SOCKADDR *host;
+		SOCKADDR *host;
+		struct network_notifier *notifier = New( struct network_notifier );
+      notifier->peer_addresses = NULL;
 		snprintf( tmp, sizeof( tmp ), "Video Server/Service Events/interface %d", iface );
 		SACK_GetProfileString( GetProgramName(), tmp, "", tmp2, sizeof( tmp2 ) );
 		host = CreateSockAddress( tmp2, default_port );
@@ -51,15 +54,15 @@ PRELOAD( InitNetworkService )
 			lprintf( "Failed to convert [%s] at %s to a interface address", tmp2, tmp );
 		else
 		{
-			pc_host = ServeUDPAddr( host, PacketInput, NULL );
+			notifier->pc = ServeUDPAddr( host, PacketInput, NULL );
 			if( !pc_host )
 				lprintf( "Failed to bind to [%s] default port %d at %s", tmp2, default_port, tmp );
 			else
 			{
-				int isend;
+				int isend = 1;
 				do
 				{
-               SOCK_ADDR *remote;
+               SOCKADDR *remote;
 					snprintf( tmp, sizeof( tmp ), "Video Server/Service Events/interface %d/Send To %d", iface, isend );
 					SACK_GetProfileString( GetProgramName(), tmp, "", tmp3, sizeof( tmp3 ) );
 					remote = CreateSockAddress( tmp2, default_port );
@@ -68,14 +71,14 @@ PRELOAD( InitNetworkService )
                   lprintf( "Failed to convert [%s] to an address (%s)", tmp3, tmp );
 					}
 					else
-                  AddLink( &l.
-
+                  AddLink( &notifier->peer_addresses, remote );
+               isend++;
 				}
-            while( tmp3[0] );
-				AddLink( &l.sockets, pc_host );
+				while( tmp3[0] );
+				AddLink( &l.hosts, notifier );
 			}
 		}
-      isend++;
+      iface++;
 	}
 	while( tmp2[0] );
 }
@@ -83,10 +86,15 @@ PRELOAD( InitNetworkService )
 static void VideoLinkCommandStateChanged( "network_event" )( void )
 {
 	INDEX idx;
+	INDEX idx2;
+   struct network_notifier *notifier;
 	SOCKADDR *addr;
-	LIST_FORALL( l.peer_address_list, idx, SOCKADDR*, addr )
+	LIST_FORALL( l.hosts, idx2, struct network_notifier *, notifier )
 	{
-      SendUDP( l.pc_listen, "STATE CHANGE", 12, addr );
+		LIST_FORALL( notifier->peer_addresses, idx, SOCKADDR*, addr )
+		{
+			SendUDPEx( notifier->pc, "STATE CHANGE", 12, addr );
+		}
 	}
 }
 

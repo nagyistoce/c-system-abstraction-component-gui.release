@@ -133,6 +133,29 @@ PBINGHALL IsMasterReady( void )
 	return NULL;
 }
 
+#define DefineInvokeMethod(name,return_type,args,i_args,...) return_type Invoke##name i_args \
+{                                                                     \
+	CTEXTSTR result;                                                    \
+	PCLASSROOT data = NULL;                                                 \
+	lprintf( "Invoking %s", #name );                                        \
+	for( result = GetFirstRegisteredName( WIDE( "video link/server core/Command" #name ), &data ); \
+		 result;                                                                              \
+		  result = GetNextRegisteredName( &data ) )                                            \
+	{                                                                                          \
+		return_type (CPROC*f)args;                                                                    \
+		{                                                                                      \
+			PCLASSROOT root = GetClassRootEx( data, result );                                      \
+			CTEXTSTR file = GetRegisteredValue( (CTEXTSTR)root, "Source File" );                  \
+			int line = (int)(PTRSZVAL)GetRegisteredValueEx( (CTEXTSTR)root, "Source Line", TRUE ); \
+			lprintf( "invoking %s handler at %s in %s(%d)", #name, result, file, line );           \
+		}                                                                                          \
+		f = GetRegisteredProcedure2( data, return_type, result, args );                                \
+		if( f )                                                                                    \
+	f(__VA_ARGS__);                                                                          \
+   else lprintf( "no function" ); \
+	}                                                                                               \
+}
+
 #define Mark(name,flag_name,sql_col_name,state,important) \
 static void CPROC Mark##name( void )            \
 {                                               \
@@ -143,6 +166,10 @@ static void CPROC Mark##name( void )            \
    if( important ) InvokeStateChanged();                                                                                     \
 	}                                                                                                                         \
 }
+
+// event specific for event-peer-notification module
+DefineInvokeMethod( StateChanged, void, (void), (void) );
+
 
 Mark( MasterServing, master_ready, "master_ready", 1, 1 );
 Mark( DelegateServing, delegate_ready, "delegate_ready", 1, 1 );
@@ -347,29 +374,6 @@ int RudelyInterrupted( void )
 
 }
 
-#define DefineInvokeMethod(name,return_type,args,i_args,...) return_type Invoke##name i_args \
-{                                                                     \
-	CTEXTSTR result;                                                    \
-	PCLASSROOT data = NULL;                                                 \
-	lprintf( "Invoking %s", #name );                                        \
-	for( result = GetFirstRegisteredName( WIDE( "video link/server core/Command" #name ), &data ); \
-		 result;                                                                              \
-		  result = GetNextRegisteredName( &data ) )                                            \
-	{                                                                                          \
-		return_type (CPROC*f)args;                                                                    \
-		{                                                                                      \
-			PCLASSROOT root = GetClassRootEx( data, result );                                      \
-			CTEXTSTR file = GetRegisteredValue( (CTEXTSTR)root, "Source File" );                  \
-			int line = (int)(PTRSZVAL)GetRegisteredValueEx( (CTEXTSTR)root, "Source Line", TRUE ); \
-			lprintf( "invoking %s handler at %s in %s(%d)", #name, result, file, line );           \
-		}                                                                                          \
-		f = GetRegisteredProcedure2( data, return_type, result, args );                                \
-		if( f )                                                                                    \
-	f(__VA_ARGS__);                                                                          \
-   else lprintf( "no function" ); \
-	}                                                                                               \
-}
-
 // this method should enable hosting bdata as available.
 
 DefineInvokeMethod( StartMedia, void, (void), (void) );
@@ -392,8 +396,6 @@ DefineInvokeMethod( ConnectToMaster, void, (CTEXTSTR), (CTEXTSTR host_address), 
 // directed connect - connect display to delegate
 DefineInvokeMethod( ConnectToDelegate, void, (CTEXTSTR), (CTEXTSTR host_address), host_address );
 
-// event specific for event-peer-notification module
-DefineInvokeMethod( StateChanged, void, (void), (void) );
 // reconfigures the input camera mux.
 DefineInvokeMethod( SetInput, void, (int), (int mode), mode );
 
