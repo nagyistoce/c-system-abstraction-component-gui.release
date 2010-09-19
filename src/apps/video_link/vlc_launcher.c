@@ -78,21 +78,29 @@ static void CPROC MyTaskEnd( PTRSZVAL psv, PTASK_INFO task )
       l.flags.bMaster = 0;
 		MarkMasterEnded();
 	}
+	else
+      lprintf( "not master" );
 	if( l.flags.bDelegate )
 	{
       l.flags.bDelegate = 0;
 		MarkDelegateEnded();
 	}
+	else
+      lprintf( "not delegate" );
 	if( l.flags.bParticipant )
 	{
       l.flags.bParticipant = 0;
 		MarkParticipantEnded();
 	}
+	else
+      lprintf( "not participant" );
 	if( l.flags.bLaunching )
 	{
 		l.flags.bLaunching = 0;
       MarkTaskDone();
 	}
+	else
+      lprintf( "not loading" );
 }
 
 static void LaunchVLC( PVARTEXT pvt_command, CTEXTSTR program )
