@@ -36,13 +36,26 @@
 #define VIDEO_SERVER_PROC_PTR(type,name)  type (CPROC* name)
 
 struct video_server_interface {
-   VIDEO_SERVER_PROC_PTR( void, MarkTaskStarted )( void );
+   VIDEO_SERVER_PROC_PTR( void, MarkTaskStarting )( void );
    VIDEO_SERVER_PROC_PTR( void, MarkTaskDone )( void );
+   VIDEO_SERVER_PROC_PTR( void, MarkMasterServing )( void );
+	VIDEO_SERVER_PROC_PTR( void, MarkDelegateServing )( void );
+   VIDEO_SERVER_PROC_PTR( void, MarkParticipating )( void );
+   VIDEO_SERVER_PROC_PTR( void, MarkMasterEnded )( void );
+   VIDEO_SERVER_PROC_PTR( void, MarkDelegateEnded )( void );
+   VIDEO_SERVER_PROC_PTR( void, MarkParticipantEnded )( void );
 };
 #ifdef USES_VIDEO_SERVER_INTERFACE
+//#define Mark()   if(VideoServerInterface) VideoServerInterface->Mark()
 
-#define MarkTaskStarted()   if(VideoServerInterface) VideoServerInterface->MarkTaskStarted()
+#define MarkTaskStarting()   if(VideoServerInterface) VideoServerInterface->MarkTaskStarting()
 #define MarkTaskDone()   if(VideoServerInterface) VideoServerInterface->MarkTaskDone()
+#define MarkMasterServing()   if(VideoServerInterface) VideoServerInterface->MarkMasterServing()
+#define MarkParticipating()   if(VideoServerInterface) VideoServerInterface->MarkParticipating()
+#define MarkDelegateServing()   if(VideoServerInterface) VideoServerInterface->MarkDelegateServing()
+#define MarkMasterEnded()   if(VideoServerInterface) VideoServerInterface->MarkMasterEnded()
+#define MarkDelegateEnded()   if(VideoServerInterface) VideoServerInterface->MarkDelegateEnded()
+#define MarkParticipantEnded()   if(VideoServerInterface) VideoServerInterface->MarkParticipantEnded()
 
 
 #  ifndef DEFINES_VIDEO_SERVER_INTERFACE
