@@ -167,17 +167,17 @@ struct config_file_tag
 	CONFIG_TEST ConfigTestRoot;
 	PDATASTACK ConfigStateStack;
 
-    FILE *file;
+	FILE *file;
 	//gcroot<System::IO::StreamReader^> sr;
 	//gcroot<System::IO::FileStream^> fs;
-
+   PTEXT blocks;
 
 	// this should be more than one...
 	// and each will be called in order that it was
 	// added, very importatn first in first process
-	 PLIST filters;
-    PLIST filter_data; // a scratch pointer addrss passd to each filter ... (per config handler)
-    //PTRSZVAL (CPROC *filter)(PTRSZVAL,int *,char**);
+	PLIST filters;
+	PLIST filter_data; // a scratch pointer addrss passd to each filter ... (per config handler)
+	//PTRSZVAL (CPROC *filter)(PTRSZVAL,int *,char**);
 
 	PTRSZVAL psvUser;
 	PTRSZVAL (CPROC *EndProcess)( PTRSZVAL );
@@ -185,8 +185,8 @@ struct config_file_tag
 
 	PCONFIG_ELEMENTSET elements;
 	PCONFIG_TESTSET test_elements;
-   LOGICAL config_recovered;
-   CTEXTSTR save_config_as;
+	LOGICAL config_recovered;
+	CTEXTSTR save_config_as;
 	PLIST states; // history of saved coniguration states...
 };
 
@@ -614,14 +614,15 @@ static PTEXT CPROC FilterEscapesAndComments( POINTER *scratch, PTEXT pText )
 
 //---------------------------------------------------------------------
 
-static PTEXT get_line(FILE *source /*FOLD00*/
-							, PLIST *filters
-							, PLIST *filter_data
+static PTEXT get_line(PCONFIG_HANDLER pch /*FOLD00*/
 							, int bReturnBlank )
 {
 #define WORKSPACE 1024  // character for workspace
+	FILE *source = pch->file;
+	PLIST *filters = &pch->filters;
+   PLIST *filter_data = &pch->filter_data;
 	PTEXT newline = NULL;
-	if( !source )
+	if( !source && !pch->blocks )
 		return NULL;
 	// create a workspace to read input from the file.
 	// read a line of input from the file.
@@ -639,7 +640,7 @@ static PTEXT get_line(FILE *source /*FOLD00*/
 				didone = FALSE;
 				LIST_FORALL( filters[0], idx, PTEXT (CPROC *)(POINTER*,PTEXT), filter )
 				{
-				// request any existing data without adding more...
+					// request any existing data without adding more...
 					newline = filter( GetLinkAddress( filter_data, idx ), newline );
 					//lprintf( WIDE( "Process line: %s" ), GetText( newline ) );
                //lprintf( WIDE("after filter %d line = %s"), idx, GetText( newline ) );
@@ -660,17 +661,25 @@ static PTEXT get_line(FILE *source /*FOLD00*/
 			while( !newline && didone );
 			if( !newline )
 			{
-				newline = SegCreate( WORKSPACE );
-				readlen = fread( GetText(newline), 1, WORKSPACE, source );
-				if( !readlen )
+				if( source )
 				{
-					LineRelease( newline );
-					newline = NULL;
+					newline = SegCreate( WORKSPACE );
+					readlen = fread( GetText(newline), 1, WORKSPACE, source );
+					if( !readlen )
+					{
+						LineRelease( newline );
+						newline = NULL;
+					}
+					else
+					{
+						SetTextSize( newline, (_32)readlen );
+						//lprintf( WIDE( "Process line: %s" ), GetText( newline ) );
+					}
 				}
 				else
 				{
-					SetTextSize( newline, (_32)readlen );
-					//lprintf( WIDE( "Process line: %s" ), GetText( newline ) );
+					newline = pch->blocks;
+               pch->blocks = NULL; // received block.
 				}
 
 				LIST_FORALL( filters[0], idx, PTEXT (CPROC *)(POINTER*,PTEXT), filter )
@@ -689,19 +698,17 @@ static PTEXT get_line(FILE *source /*FOLD00*/
 
 //---------------------------------------------------------------------
 
-PTEXT GetConfigurationLine( PCONFIG_HANDLER pConfigHandler )
+static PTEXT GetConfigurationLine( PCONFIG_HANDLER pConfigHandler )
 {
-    PTEXT line, p;
-   while( ( line = get_line( pConfigHandler->file
-									, &pConfigHandler->filters
-									, &pConfigHandler->filter_data
+	PTEXT line, p;
+	while( ( line = get_line( pConfigHandler
 									, pConfigHandler->Unhandled?TRUE:FALSE ) ) )
-   {
+	{
 #if defined( LOG_LINES_READ )
 		lprintf( WIDE( "Process line: %s" ), GetText( line ) );
 #endif
-      p = burst( line );
-      LineRelease( line );
+		p = burst( line );
+		LineRelease( line );
 #if defined( FULL_TRACE ) || defined( LOG_LINES_READ )
 		{
 			PTEXT x = p;
@@ -711,12 +718,12 @@ PTEXT GetConfigurationLine( PCONFIG_HANDLER pConfigHandler )
 				x = NEXTLINE( x );
 			}
 		}
-      {
-         char byLogBuffer[256];
-         PTEXT tmp = BuildLine( p );
+		{
+			char byLogBuffer[256];
+			PTEXT tmp = BuildLine( p );
 			Log1( WIDE("input: %s"), GetText( tmp ) );
-             LineRelease( tmp );
-      }
+			LineRelease( tmp );
+		}
 #endif
 		if( p &&
 			GetTextSize( p ) )
@@ -725,7 +732,7 @@ PTEXT GetConfigurationLine( PCONFIG_HANDLER pConfigHandler )
 		}
 		else // drop and consume blank lines.
 		{
-         //lprintf( WIDE("Okay got a blank line... might handle it with 'unhandled'") );
+			//lprintf( WIDE("Okay got a blank line... might handle it with 'unhandled'") );
 			if( pConfigHandler->Unhandled )
 				pConfigHandler->Unhandled( pConfigHandler->psvUser, NULL );
 			LineRelease(p);
@@ -733,6 +740,8 @@ PTEXT GetConfigurationLine( PCONFIG_HANDLER pConfigHandler )
 	}
 	return NULL;
 }
+
+//---------------------------------------------------------------------
 
 //---------------------------------------------------------------------
 // Is____Var results in true/false, plus the config element is filled
@@ -1807,50 +1816,7 @@ void DoProcedure( PTRSZVAL *ppsvUser, PCONFIG_TEST Check )
 	}
 }
 
-//---------------------------------------------------------------------
-
-CONFIGSCR_PROC( int, ProcessConfigurationFile )( PCONFIG_HANDLER pch, CTEXTSTR name, PTRSZVAL psv )
-{
-	PTEXT line;
-	Fopen( pch->file, name, WIDE("rb") );
-#ifndef UNDER_CE
-	if( !pch->file )
-	{
-		CTEXTSTR workpath = OSALOT_GetEnvironmentVariable( WIDE( "MY_WORK_PATH" ) );
-		TEXTCHAR pathname[255];
-		snprintf( pathname, sizeof( pathname ), WIDE("%s/%s"), workpath, name );
-		Fopen( pch->file, pathname, WIDE("rb") );
-	}
-	if( !pch->file )
-	{
-		CTEXTSTR workpath = OSALOT_GetEnvironmentVariable( WIDE( "MY_LOAD_PATH" ) );
-		TEXTCHAR pathname[255];
-		snprintf( pathname, sizeof( pathname ), WIDE("%s/%s"), workpath, name );
-		Fopen( pch->file, pathname, WIDE("rb") );
-	}
-#endif
-	if( !pch->file )
-	{
-		TEXTCHAR pathname[255];
-		snprintf( pathname, sizeof( pathname ), WIDE("/etc/%s"), name );
-		Fopen( pch->file, pathname, WIDE("rb") );
-	}
-	if( !pch->file )
-	{
-		TEXTCHAR pathname[255];
-		snprintf( pathname, sizeof( pathname ), WIDE("\\ftn3000\\working\\%s"), name );
-		Fopen( pch->file, pathname, WIDE("rb") );
-	}
-	if( !pch->file )
-	{
-		TEXTCHAR pathname[255];
-		snprintf( pathname, sizeof( pathname ), WIDE("C:\\ftn3000\\working\\%s"), name );
-		Fopen( pch->file, pathname, WIDE("rb") );
-	}
-	pch->psvUser = psv;
-	if( pch->file )
-	{
-		while( ( line = GetConfigurationLine( pch ) ) )
+void ProcessConfigurationLine( PCONFIG_HANDLER pch, PTEXT line )
 		{
 			PCONFIG_TEST Check = &pch->ConfigTestRoot;
 			PTEXT word = line;
@@ -1920,7 +1886,6 @@ CONFIGSCR_PROC( int, ProcessConfigurationFile )( PCONFIG_HANDLER pch, CTEXTSTR n
 										xlprintf(LOG_NOISE)( WIDE("Unknown Configuration Line(No unhandled proc): %s"), GetText( pLine ) );
 								}
 
-								LineRelease( pLine );
 								break;
 							}
 						}
@@ -1939,7 +1904,6 @@ CONFIGSCR_PROC( int, ProcessConfigurationFile )( PCONFIG_HANDLER pch, CTEXTSTR n
 						// but ahh well, it's noisy and it works.
 						//Log1( WIDE("Unknown Configuration Line: %s"), GetText( pLine ) );
 					}
-					LineRelease( pLine );
 				}
 			}
 			else if( !word )    // otherwise we may have bailed early.
@@ -1963,14 +1927,61 @@ CONFIGSCR_PROC( int, ProcessConfigurationFile )( PCONFIG_HANDLER pch, CTEXTSTR n
 						// but ahh well, it's noisy and it works.
 						//Log1( WIDE("Unknown Configuration Line: %s"), GetText( pLine ) );
 					}
-					LineRelease( pLine );
 				}
 			}
 #endif
+		}
+
+//---------------------------------------------------------------------
+
+CONFIGSCR_PROC( int, ProcessConfigurationFile )( PCONFIG_HANDLER pch, CTEXTSTR name, PTRSZVAL psv )
+{
+	PTEXT line;
+	Fopen( pch->file, name, WIDE("rb") );
+#ifndef UNDER_CE
+	if( !pch->file )
+	{
+		CTEXTSTR workpath = OSALOT_GetEnvironmentVariable( WIDE( "MY_WORK_PATH" ) );
+		TEXTCHAR pathname[255];
+		snprintf( pathname, sizeof( pathname ), WIDE("%s/%s"), workpath, name );
+		Fopen( pch->file, pathname, WIDE("rb") );
+	}
+	if( !pch->file )
+	{
+		CTEXTSTR workpath = OSALOT_GetEnvironmentVariable( WIDE( "MY_LOAD_PATH" ) );
+		TEXTCHAR pathname[255];
+		snprintf( pathname, sizeof( pathname ), WIDE("%s/%s"), workpath, name );
+		Fopen( pch->file, pathname, WIDE("rb") );
+	}
+#endif
+	if( !pch->file )
+	{
+		TEXTCHAR pathname[255];
+		snprintf( pathname, sizeof( pathname ), WIDE("/etc/%s"), name );
+		Fopen( pch->file, pathname, WIDE("rb") );
+	}
+	if( !pch->file )
+	{
+		TEXTCHAR pathname[255];
+		snprintf( pathname, sizeof( pathname ), WIDE("\\ftn3000\\working\\%s"), name );
+		Fopen( pch->file, pathname, WIDE("rb") );
+	}
+	if( !pch->file )
+	{
+		TEXTCHAR pathname[255];
+		snprintf( pathname, sizeof( pathname ), WIDE("C:\\ftn3000\\working\\%s"), name );
+		Fopen( pch->file, pathname, WIDE("rb") );
+	}
+	pch->psvUser = psv;
+	if( pch->file )
+	{
+		while( ( line = GetConfigurationLine( pch ) ) )
+		{
+         ProcessConfigurationLine( pch, line );
 			LineRelease( line );
-        }
-        fclose( pch->file );
-        if( pch->EndProcess )
+		}
+		fclose( pch->file );
+		if( pch->EndProcess )
 			pch->EndProcess( pch->psvUser );
 		pch->file = NULL;
 		return TRUE;
@@ -1980,6 +1991,27 @@ CONFIGSCR_PROC( int, ProcessConfigurationFile )( PCONFIG_HANDLER pch, CTEXTSTR n
 		 //Log1( WIDE("Failed to open config file: %s"), name );
        return FALSE;
     }
+}
+
+//---------------------------------------------------------------------
+
+CONFIGSCR_PROC( PTRSZVAL, ProcessConfigurationInput )( PCONFIG_HANDLER pch, CTEXTSTR data, int size, PTRSZVAL psv )
+{
+	pch->psvUser = psv;
+	{
+      PTEXT line;
+		PTEXT block = SegCreate( size );
+		MemCpy( GetText( block ), data, size );
+      pch->blocks = block;
+		while( ( line = GetConfigurationLine( pch ) ) )
+		{
+         ProcessConfigurationLine( pch, line );
+			LineRelease( line );
+		}
+      // this block will have been moved into internal accumulators.
+      //LineRelease( block );
+	}
+	return pch->psvUser;
 }
 
 //---------------------------------------------------------------------
