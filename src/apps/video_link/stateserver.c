@@ -632,7 +632,7 @@ void PostLoadInit( void )
 				}
 
 				{
-					hallid = GetLastInsertID( "location", "id" );
+					hallid = FetchLastInsertID( g.odbc, "location", "id" );
 					xlprintf(LOG_ALWAYS)("Warning.  Could not find %s in location table.  Inserted as record %d, and wrote the ini file."
 											  , pszHost
                                     , hallid
@@ -663,7 +663,7 @@ void PostLoadInit( void )
 				}
 				else
 				{
-               hallid = GetLastInsertID( "link_hall_state", "id" );
+               hallid = FetchLastInsertID( g.odbc, "link_hall_state", "id" );
 					xlprintf(LOG_ALWAYS)("Warning.  Could not find %s in link_hall_state table.  Inserted as record %d"
 											  , pszHost
 											  , hallid
@@ -1289,7 +1289,7 @@ void CommonInit( void )
 						}
 
 						{
-							hallid = GetLastInsertID( "location", "id" );
+							hallid = FetchLastInsertID( g.odbc, "location", "id" );
 							xlprintf(LOG_ALWAYS)("Warning.  Could not find %s in location table.  Inserted as record %d, and wrote the ini file."
 													  , pszHost
 													  , hallid
@@ -1320,7 +1320,6 @@ void CommonInit( void )
 						}
 						else
 						{
-							//hallid = GetLastInsertID( "link_hall_state", "id" );
 							xlprintf(LOG_ALWAYS)("Warning.  Could not find %s in link_hall_state table.  Inserted as record %d"
 													  , pszHost
 													  , hallid

@@ -140,7 +140,7 @@ static void VideoLinkCommandConnectToMaster( "VLC Process" )( CTEXTSTR address )
 	l.flags.bLaunching = 1;
    MarkTaskStarting();
 	l.flags.bParticipant = 1;
-	vtprintf( pvt_cmd, "(unused_program_name) -display %d http://%s", l.display, address );
+	vtprintf( pvt_cmd, "(unused_program_name) -display %d http://%s:1234", l.display, address );
    LaunchVLC( pvt_cmd, "vlc_test.exe" );
    VarTextDestroy( &pvt_cmd );
 }
@@ -151,7 +151,7 @@ static void VideoLinkCommandConnectToDelegate( "VLC Process" )( CTEXTSTR address
 	l.flags.bLaunching = 1;
    MarkTaskStarting();
 	l.flags.bParticipant = 1;
-	vtprintf( pvt_cmd, "(unused_program_name) -display %d http://%s", l.display, address );
+	vtprintf( pvt_cmd, "(unused_program_name) -display %d http://%s:1234", l.display, address );
 	LaunchVLC( pvt_cmd, "vlc_test.exe" );
    VarTextDestroy( &pvt_cmd );
 }
