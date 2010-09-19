@@ -2,19 +2,15 @@
  *  stateserver.c
  *  Copyright:   2006
  *  Product:  BingLink      Project: alpha2server   Version: Alpha2
- *  Contributors:    Jim Buckeyne
+ *  Contributors:    Jim Buckeyne, Christopher Green
  *  Checks the state of the database and responds appropriately.
  *
  */
 
-// if a linker error regarding FHAL_CAN_WRITE_LIST occurs in this project
-// go to the FHAL source code and ./configure with no parameters (not even --prefix=/usr")
-// calling find / -name *fhal* then ensuring /etc/ld.so.conf contains
-// the right path to the right library then calling ldconfig and recompliling.
-//#define NO_LOGGING
 #define DECLARE_GLOBAL
 #define DECLARE_LOCAL
 #include "server.h"
+
 #include "link_events.h"
 #include <systray.h>
 //#include <bard.h>
@@ -24,6 +20,7 @@
 #include <InterShell/intershell_export.h>
 #include <InterShell/intershell_registry.h>
 #include "db.h"
+
 #define VIDEOADDRFIELD "address"
 #define VIDEOADDRTABLE "systems"
 
@@ -152,25 +149,20 @@ Mark( Participating, participating, "participating", 1 );
 Mark( MasterEnded, master_ready, "master_ready", 0 );
 Mark( DelegateEnded, delegate_ready, "delegate_ready", 0 );
 Mark( ParticipantEnded, participating, "participating", 0 );
+Mark( TaskStarting, task_launched, "task_launched", 1 );
+Mark( TaskDone, task_launched, "task_launched", 0 );
 
-static void CPROC MarkTaskStarted( void )
+static void CPROC PostEvent( void )
 {
-	l.pMyHall->LinkHallState.task_launched = 1;
-	if( !g.flags.bReadOnly )
-	{
-		SQLCommandf( g.odbc,"UPDATE link_hall_state SET task_launched=1 WHERE hall_id=%d", l.pMyHall->LinkHallState.hall_id );
-	}
-}
-static void CPROC MarkTaskDone( void )
-{
-	l.pMyHall->LinkHallState.task_launched = 0;
-	if( !g.flags.bReadOnly )
-	{
-		SQLCommandf( g.odbc,"UPDATE link_hall_state SET task_launched=0 WHERE hall_id=%d", l.pMyHall->LinkHallState.hall_id );
-	}
 }
 
-struct video_server_interface VideoServerInterface = { MarkTaskStarted, MarkTaskDone
+static void CPROC StateChanged( void )
+{
+   WakeThread( l.check_state_thread );
+}
+
+
+struct video_server_interface VideoServerInterface = { MarkTaskStarting, MarkTaskDone
 																	  , MarkMasterServing, MarkDelegateServing
 																	  , MarkParticipating
 																	  , MarkMasterEnded, MarkDelegateEnded
@@ -386,15 +378,28 @@ DefineInvokeMethod( StopMedia, void, (void), (void) );
 DefineInvokeMethod( Announcement, void, (CTEXTSTR), (CTEXTSTR filename), filename );
 DefineInvokeMethod( StopPromotions, void, (void), (void) );
 DefineInvokeMethod( PlayPromotions, void, (void), (void) );
+
+// bdata tracks only master events... begin service proxy for bdata
 DefineInvokeMethod( ServeBData, void, (void), (void) );
+// disconnect event to bdata links
 DefineInvokeMethod( DisconnectBData, void, (void), (void) );
+
+// begin serving master steram
 DefineInvokeMethod( ServeMaster, void, (void), (void) );
+// begin serving delegate stream
 DefineInvokeMethod( ServeDelegate, void, (void), (void) );
+// directed connect - connect display to master
 DefineInvokeMethod( ConnectToMaster, void, (CTEXTSTR), (CTEXTSTR host_address), host_address );
+// directed connect - connect display to delegate
 DefineInvokeMethod( ConnectToDelegate, void, (CTEXTSTR), (CTEXTSTR host_address), host_address );
 
+// event specific for event-peer-notification module
+DefineInvokeMethod( StateChanged, void, (void), (void) );
 // reconfigures the input camera mux.
 DefineInvokeMethod( SetInput, void, (int), (int mode), mode );
+
+// passed variable is 'forced' or 'initial state' it is issued once when the program start
+// and then again for disconnect states.
 DefineInvokeMethod( Reset, void, (LOGICAL), (LOGICAL forced), forced );
 
 
