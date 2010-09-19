@@ -144,6 +144,7 @@ CONFIGSCR_PROC( int, ProcessConfigurationFile )( PCONFIG_HANDLER pch
 															  , CTEXTSTR name
 															  , PTRSZVAL psv
 															  );
+CONFIGSCR_PROC( PTRSZVAL, ProcessConfigurationInput )( PCONFIG_HANDLER pch, CTEXTSTR block, int size, PTRSZVAL psv );
 
 /*
  * TO BE IMPLEMENTED
