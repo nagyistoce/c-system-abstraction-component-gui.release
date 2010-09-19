@@ -39,6 +39,7 @@ static struct {
 		BIT_FIELD bUpdating : 1; // set while an update is happening...
 	} flags;
 	PLIST interfaces;
+   int verbosity;
 }l;
 
 void ReleaseInstance( struct my_vlc_interface *pmyi );
@@ -63,8 +64,10 @@ PRELOAD( InitInterfaces )
 	snprintf( vlc_path, sizeof( vlc_path ), "%s/vlc", OSALOT_GetEnvironmentVariable( "MY_LOAD_PATH" ) );
 #ifndef __NO_OPTIONS__
 	SACK_GetPrivateProfileString( "vlc/config", "vlc path", vlc_path, vlc_path, sizeof( vlc_path ), "video.ini" );
+	l.verbosity = SACK_GetPrivateProfileInt( "vlc/config", "log verbosity", 0, "video.ini" );
 	l.vlc_path = StrDup( vlc_path );
 #else
+   l.verbosity = 0;
    l.vlc_path = "vlc";
 #endif
 	l.vlc_config = "c:\\ftn3000\\etc\\vlc.cfg";
@@ -299,11 +302,11 @@ static void CPROC PlayerEvent( const libvlc_event_t *event, void *user )
 		pmyi->flags.bPlaying = 1;
       break;
 	case libvlc_MediaPlayerLengthChanged:
-		lprintf( "mangle the format(a)" );
+		//lprintf( "mangle the format(a)" );
 		if(0)
 		{
 	case libvlc_MediaPlayerPositionChanged:
-		lprintf( "mangle the format(b)" );
+		   ;//lprintf( "mangle the format(b)" );
 		}
 #if 0
 		{
@@ -889,7 +892,7 @@ struct my_vlc_interface *CreateInstanceInEx( PSI_CONTROL pc, CTEXTSTR url, CTEXT
 #endif
 
 			pvt = VarTextCreate();
-			vtprintf( pvt, "--verbose=2"
+			vtprintf( pvt, "--verbose=%d"
 						//" --file-logging"
 						" -I dummy --config=%s"
 						" --no-osd"
@@ -897,6 +900,7 @@ struct my_vlc_interface *CreateInstanceInEx( PSI_CONTROL pc, CTEXTSTR url, CTEXT
 						" --plugin-path=%s\\plugins"
                   " %s"
 						//, OSALOT_GetEnvironmentVariable( "MY_LOAD_PATH" )
+                  , l.verbosity
 					  , l.vlc_config
 					  , l.vlc_path
 					  , extra_opts?extra_opts:""
@@ -970,7 +974,7 @@ struct my_vlc_interface *CreateInstanceOn( PRENDERER renderer, CTEXTSTR name, LO
 #error blah.
 #endif
 
-		vtprintf( pvt, "--verbose=2"
+		vtprintf( pvt, "--verbose=%d"
 					//" --file-logging"
 					" -I dummy --config=c:\\ftn3000\\etc\\vlc.cfg"
 					" --no-osd"
@@ -979,6 +983,7 @@ struct my_vlc_interface *CreateInstanceOn( PRENDERER renderer, CTEXTSTR name, LO
                //" --drop-late-frames"
                //" --file-caching=0"
                " %s"
+                  , l.verbosity
 				  , l.vlc_path
                , ""//extra_opts
 				  );
@@ -1035,7 +1040,7 @@ struct my_vlc_interface *CreateInstanceAt( CTEXTSTR address, CTEXTSTR instance_n
 
 		pvt = VarTextCreate();
 
-		vtprintf( pvt, "--verbose=2"
+		vtprintf( pvt, "--verbose=%d"
 					//" --file-logging"
 					" -I dummy --config=c:\\ftn3000\\etc\\vlc.cfg"
 					" --no-osd"
@@ -1050,6 +1055,7 @@ struct my_vlc_interface *CreateInstanceAt( CTEXTSTR address, CTEXTSTR instance_n
                //" --drop-late-frames"
                //" --file-caching=0"
                " %s"
+                  , l.verbosity
 				  , l.vlc_path
 				  , ""//extra_opts
 				  );
@@ -1176,7 +1182,7 @@ void BindAllEvents( struct my_vlc_interface *pmyi )
 		  )
 		{
          // these are noisy events.
-			//continue;
+			continue;
 		}
 		vlc.libvlc_event_attach( pmyi->mpev, n
 									  , PlayerEvent, pmyi PASS_EXCEPT_PARAM );
@@ -1412,7 +1418,8 @@ PTRSZVAL CPROC PlayItemOnThread( PTHREAD thread )
 #endif
 
 		pmyi->mpev = vlc.libvlc_media_player_event_manager( pmyi->mp PASS_EXCEPT_PARAM );
-		vlc.libvlc_event_attach( pmyi->mpev, libvlc_MediaPlayerEndReached, PlayerEvent, pmyi PASS_EXCEPT_PARAM );
+      BindAllEvents( pmyi );
+		//vlc.libvlc_event_attach( pmyi->mpev, libvlc_MediaPlayerEndReached, PlayerEvent, pmyi PASS_EXCEPT_PARAM );
 
 
 		vlc.libvlc_media_release (pmyi->m);
@@ -1528,7 +1535,8 @@ PTRSZVAL CPROC PlayItemAtThread( PTHREAD thread )
 		parms->done = 1;
 
 		pmyi->mpev = vlc.libvlc_media_player_event_manager( pmyi->mp PASS_EXCEPT_PARAM );
-		vlc.libvlc_event_attach( pmyi->mpev, libvlc_MediaPlayerEndReached, PlayerEvent, pmyi PASS_EXCEPT_PARAM );
+      BindAllEvents( pmyi );
+		//vlc.libvlc_event_attach( pmyi->mpev, libvlc_MediaPlayerEndReached, PlayerEvent, pmyi PASS_EXCEPT_PARAM );
 
 
 		vlc.libvlc_media_release (pmyi->m);
