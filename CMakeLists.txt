@@ -569,6 +569,7 @@ endif( __WINDOWS__ )
 
 install_default_dest( sack_bag )
 install_default_dest( ${SACK_BAG_PLUSPLUS} )
+install( FILES makefiles/cmake/DefaultInstall.cmake DESTINATION . )
 
 if( NOT NEED_PNG ) 
   target_link_libraries( sack_bag png )
