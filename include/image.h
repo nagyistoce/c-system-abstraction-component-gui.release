@@ -924,7 +924,7 @@ ALPHA_TRANSPARENT_MAX = 0x2FF
    IMAGE_PROC  void IMAGE_API PutCharacterFont              ( Image pImage
                                                   , S_32 x, S_32 y
                                                   , CDATA color, CDATA background,
-                                                   TEXTCHAR c, Font font );
+                                                   _32 c, Font font );
    /* Outputs a string in the specified font, from the specified
       point, text is drawn from the point up, with the characters
       aligned with the top to the left; it goes up from the point.
@@ -938,7 +938,7 @@ ALPHA_TRANSPARENT_MAX = 0x2FF
       c :           the character to output
       font :        the font to use. NULL use an internal default
                     font.                                          */
-   IMAGE_PROC  void IMAGE_API PutCharacterVerticalFont      ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, TEXTCHAR c, Font font );
+   IMAGE_PROC  void IMAGE_API PutCharacterVerticalFont      ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, _32 c, Font font );
    /* Outputs a string in the specified font, from the specified
       point, text is drawn from the point to the left, with the
       characters aligned with the top to the left; it goes up from
@@ -954,14 +954,14 @@ ALPHA_TRANSPARENT_MAX = 0x2FF
       nLen :        length of text to output
       font :        the font to use. NULL use an internal default
                     font.                                           */
-   IMAGE_PROC  void IMAGE_API PutCharacterInvertFont        ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, TEXTCHAR c, Font font );
+   IMAGE_PROC  void IMAGE_API PutCharacterInvertFont        ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, _32 c, Font font );
    /* Outputs a character in the specified font, from the specified
       point, text is drawn from the point up, with the characters
       aligned with the top to the left; it goes up from the point. the
       point becomes the bottom left of the rectangle output.
       Parameters
                                                                        */
-   IMAGE_PROC  void IMAGE_API PutCharacterVerticalInvertFont( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, TEXTCHAR c, Font font );
+   IMAGE_PROC  void IMAGE_API PutCharacterVerticalInvertFont( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, _32 c, Font font );
 
    /* Outputs a string in the specified font, from the specified
       point, text is drawn right side up and godes from left to
@@ -1416,19 +1416,19 @@ typedef struct image_interface_tag
 /* <combine sack::image::PutCharacterFont@Image@S_32@S_32@CDATA@CDATA@TEXTCHAR@Font>
    
    Internal
-   Interface index 33                                                                                */   IMAGE_PROC_PTR( void,PutCharacterFont)              ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, TEXTCHAR c, Font font );
+   Interface index 33                                                                                */   IMAGE_PROC_PTR( void,PutCharacterFont)              ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, _32 c, Font font );
 /* <combine sack::image::PutCharacterVerticalFont@Image@S_32@S_32@CDATA@CDATA@TEXTCHAR@Font>
    
    Internal
-   Interface index 34                                                                                        */   IMAGE_PROC_PTR( void,PutCharacterVerticalFont)      ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, TEXTCHAR c, Font font );
+   Interface index 34                                                                                        */   IMAGE_PROC_PTR( void,PutCharacterVerticalFont)      ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, _32 c, Font font );
 /* <combine sack::image::PutCharacterInvertFont@Image@S_32@S_32@CDATA@CDATA@TEXTCHAR@Font>
    
    Internal
-   Interface index 35                                                                                      */   IMAGE_PROC_PTR( void,PutCharacterInvertFont)        ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, TEXTCHAR c, Font font );
+   Interface index 35                                                                                      */   IMAGE_PROC_PTR( void,PutCharacterInvertFont)        ( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, _32 c, Font font );
 /* <combine sack::image::PutCharacterVerticalInvertFont@Image@S_32@S_32@CDATA@CDATA@TEXTCHAR@Font>
    
    Internal
-   Interface index 36                                                                                              */   IMAGE_PROC_PTR( void,PutCharacterVerticalInvertFont)( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, TEXTCHAR c, Font font );
+   Interface index 36                                                                                              */   IMAGE_PROC_PTR( void,PutCharacterVerticalInvertFont)( Image pImage, S_32 x, S_32 y, CDATA color, CDATA background, _32 c, Font font );
 
 /* <combine sack::image::PutStringFontEx@Image@S_32@S_32@CDATA@CDATA@CTEXTSTR@_32@Font>
    

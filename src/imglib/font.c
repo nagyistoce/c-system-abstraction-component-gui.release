@@ -134,7 +134,7 @@ S_32 StepYInvertVertical(S_32 base1,S_32 delta1,S_32 delta2)
 static _32 PutCharacterFontX ( ImageFile *pImage
                              , S_32 x, S_32 y
                              , CDATA color, CDATA background
-                             , TEXTCHAR c, PFONT UseFont
+                             , _32 c, PFONT UseFont
                              , S_32 (*StepX)(S_32 base1,S_32 delta1,S_32 delta2)
                              , S_32 (*StepY)(S_32 base1,S_32 delta1,S_32 delta2)
                              )
@@ -232,7 +232,7 @@ static _32 PutCharacterFontX ( ImageFile *pImage
 static _32 _PutCharacterFont( ImageFile *pImage
                                    , S_32 x, S_32 y
                                    , CDATA color, CDATA background
-                                   , TEXTCHAR c, PFONT UseFont )
+                                   , _32 c, PFONT UseFont )
 {
    return PutCharacterFontX( pImage, x, y, color, background, c, UseFont
                             , StepXNormal, StepYNormal );
@@ -241,7 +241,7 @@ static _32 _PutCharacterFont( ImageFile *pImage
 static _32 _PutCharacterVerticalFont( ImageFile *pImage
                                            , S_32 x, S_32 y
                                            , CDATA color, CDATA background
-                                           , TEXTCHAR c, PFONT UseFont )
+                                           , _32 c, PFONT UseFont )
 {
 	return PutCharacterFontX( pImage, x, y, color, background, c, UseFont
                             , StepXVertical, StepYVertical );
@@ -251,7 +251,7 @@ static _32 _PutCharacterVerticalFont( ImageFile *pImage
 static _32 _PutCharacterInvertFont( ImageFile *pImage
                                            , S_32 x, S_32 y
                                            , CDATA color, CDATA background
-                                           , TEXTCHAR c, PFONT UseFont )
+                                           , _32 c, PFONT UseFont )
 {
 	return PutCharacterFontX( pImage, x, y, color, background, c, UseFont
 									, StepXInvert, StepYInvert );
@@ -260,7 +260,7 @@ static _32 _PutCharacterInvertFont( ImageFile *pImage
 static _32 _PutCharacterVerticalInvertFont( ImageFile *pImage
                                            , S_32 x, S_32 y
                                            , CDATA color, CDATA background
-                                                 , TEXTCHAR c, PFONT UseFont )
+                                                 , _32 c, PFONT UseFont )
 {
    PCHARACTER pchar;
    if( !UseFont )
@@ -277,7 +277,7 @@ static _32 _PutCharacterVerticalInvertFont( ImageFile *pImage
 void PutCharacterFont( ImageFile *pImage
                                    , S_32 x, S_32 y
                                    , CDATA color, CDATA background
-                                   , TEXTCHAR c, PFONT UseFont )
+                                   , _32 c, PFONT UseFont )
 {
    PutCharacterFontX( pImage, x, y, color, background, c, UseFont
                             , StepXNormal, StepYNormal );
@@ -286,7 +286,7 @@ void PutCharacterFont( ImageFile *pImage
 void PutCharacterVerticalFont( ImageFile *pImage
                                            , S_32 x, S_32 y
                                            , CDATA color, CDATA background
-                                           , TEXTCHAR c, PFONT UseFont )
+                                           , _32 c, PFONT UseFont )
 {
 	//return
 		PutCharacterFontX( pImage, x, y, color, background, c, UseFont
@@ -297,7 +297,7 @@ void PutCharacterVerticalFont( ImageFile *pImage
 void PutCharacterInvertFont( ImageFile *pImage
                                            , S_32 x, S_32 y
                                            , CDATA color, CDATA background
-                                           , TEXTCHAR c, PFONT UseFont )
+                                           , _32 c, PFONT UseFont )
 {
 	//return
 		PutCharacterFontX( pImage, x, y, color, background, c, UseFont
@@ -307,7 +307,7 @@ void PutCharacterInvertFont( ImageFile *pImage
 void PutCharacterVerticalInvertFont( ImageFile *pImage
                                            , S_32 x, S_32 y
                                            , CDATA color, CDATA background
-                                                 , TEXTCHAR c, PFONT UseFont )
+                                                 , _32 c, PFONT UseFont )
 {
    PCHARACTER pchar;
    if( !UseFont )
