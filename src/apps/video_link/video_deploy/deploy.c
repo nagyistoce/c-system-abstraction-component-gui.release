@@ -2,6 +2,7 @@
 #include <configscript.h>
 #include <network.h>
 #include <controls.h>
+
 enum {
 	LISTBOX_ITEMS,
 
@@ -16,7 +17,7 @@ struct site_info
 	CTEXTSTR mysql_server;
 
    CTEXTSTR address;
-   CTEXTSTR location_address;
+   CTEXTSTR local_address;
 
 };
 

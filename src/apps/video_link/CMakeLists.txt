@@ -262,5 +262,8 @@ else( WIN32 )
   	)
 endif()
 
+
 add_subdirectory( video_deploy )
 add_subdirectory( video_map_editor )
+
+install( FILES install/CMakeLists.txt DESTINATION install/video_link )
