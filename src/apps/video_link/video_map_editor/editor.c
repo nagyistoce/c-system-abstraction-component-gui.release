@@ -100,7 +100,7 @@ void SelectMap( void )
    TEXTCHAR tmp[256];
 	while( ScanFiles( GetFileGroupText( GetFileGroup( "Configuration Maps", "../resources" ), tmp, sizeof( tmp ) ), "*.Map", &info, FoundMap, 0, 0 ) );
 
-   if( l.nMaps > 1 )
+   //if( l.nMaps > 1 )
 	{
 		int okay = 0;
       int done = 0;
@@ -134,8 +134,8 @@ void SelectMap( void )
 		}
       DestroyFrame( &frame );
 	}
-	else
-      l.selected_map = (struct map_file*)GetLink( &l.maps, 0 );
+	//else
+	//	l.selected_map = (struct map_file*)GetLink( &l.maps, 0 );
 }
 
 void EditSite( PLISTITEM pli )
