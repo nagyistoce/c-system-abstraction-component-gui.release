@@ -1,0 +1,23 @@
+
+site Texas
+Hostname TexasStation
+serves MySQL yes
+address dhcp
+
+
+site Boulder
+hostname BoulderStation
+address dhcp
+
+site Palace
+hostname PalaceStation
+address dhcp
+
+site Sunset
+hostname SunsetStation
+address dhcp
+
+site Redrock
+hostname Redrock
+address dhcp
+

@@ -1,0 +1,1222 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files">
+      <UniqueIdentifier>{c9bfc309-1962-4cbd-abb5-2775d466edad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\Configuration Callback Conglomeration">
+      <UniqueIdentifier>{fa1e402f-8baa-4acf-ac6a-68af65850bdd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\Event Based Networking">
+      <UniqueIdentifier>{808a8a83-d010-42aa-83e2-a87357210bb7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\Event Based Networking\Headers">
+      <UniqueIdentifier>{687b0b81-0465-4dd4-aa9e-5671f5f55de0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\Event Based Networking\Private Includes">
+      <UniqueIdentifier>{3aa9d506-6d34-40dc-8e98-4918b322de98}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\File System Utilitarian Garbage">
+      <UniqueIdentifier>{46ca53f0-8f5e-4e22-be9c-5f0c3fee9064}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\File System Utilitarian Garbage\File System Monitoring Utility">
+      <UniqueIdentifier>{897bf65f-7b40-4a4c-9b64-5ff8ca833fe8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\File System Utilitarian Garbage\File System Monitoring Utility\Private Includes">
+      <UniqueIdentifier>{014da14f-9647-495f-9bed-46548860b148}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\Freetype Library">
+      <UniqueIdentifier>{309e50a7-aa72-48c1-bca6-e45368659b1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\General Task based System Utilities %28processes/tasks%29">
+      <UniqueIdentifier>{d4692734-9eeb-470a-a845-04dc90874f64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\GENX Library">
+      <UniqueIdentifier>{c9372ede-fa11-4e92-b80e-2f17e799b65c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\Global Constructor Hack">
+      <UniqueIdentifier>{7b80e84b-f184-4c65-9336-e9d572f7d0b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\Integer Fraction Library">
+      <UniqueIdentifier>{1af751df-2875-48c0-bfb7-f24e5de62326}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\JPEG Library">
+      <UniqueIdentifier>{019bf136-2604-4874-af85-fdb69e439d75}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\JPEG Library\Headers">
+      <UniqueIdentifier>{5c4e6efc-dc7a-45f8-a8e9-a30612bbbf5e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\Memory Allocation">
+      <UniqueIdentifier>{4c07b43a-06a9-4d4b-8b0b-6c7f0a910030}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\Memory Allocation\headers">
+      <UniqueIdentifier>{cac5d42a-864d-4e4f-9e84-21cc115520bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\Memory Allocation\Private Headers">
+      <UniqueIdentifier>{b6ccba39-a870-4309-99b2-87d4147bf351}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\Message Service">
+      <UniqueIdentifier>{37b69e50-a383-433f-94cd-a0f13a5b3831}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\Message Service\Headers">
+      <UniqueIdentifier>{9b0f28ce-9fa9-43ba-ab5d-56db7c4f7cf0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\MNG library">
+      <UniqueIdentifier>{e964338d-2671-4dfd-a30d-25cc1ee7443b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\Network Service Discovery">
+      <UniqueIdentifier>{faad3d97-600e-4a92-90e0-959808924478}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\Option Library">
+      <UniqueIdentifier>{62c69ea8-eba7-449e-bfd6-06c17de80512}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\Option Library\Headers">
+      <UniqueIdentifier>{88800d36-bd11-46c4-b3a7-aa61e777407b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\Option Library\Headers\private">
+      <UniqueIdentifier>{4e5b1238-5f7c-445b-a2a7-96673d554a51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\PNG Library">
+      <UniqueIdentifier>{738a5641-8efb-4848-bfe7-7533c8ad941b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\PNG Library\Headers">
+      <UniqueIdentifier>{19fbb5a2-f3d4-4fe7-a86e-d30ac0ea77c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\Process, Procedure and Type Registration">
+      <UniqueIdentifier>{0ea3ca7f-c65b-49d4-a058-775c870b8d38}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\Process, Procedure and Type Registration\Headers">
+      <UniqueIdentifier>{61313010-0ccc-49e9-9f27-090569787a34}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\Program Logging Facility">
+      <UniqueIdentifier>{0985a7b6-43a6-46b2-96e3-5d3c4d03d453}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\SEXPAT Library">
+      <UniqueIdentifier>{46390edc-0da6-41c4-8011-382b4d649c9f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\SEXPAT Library\headers">
+      <UniqueIdentifier>{9ae831a9-721d-448b-aa20-f557056dea08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\SHA1 Library">
+      <UniqueIdentifier>{584d4b9b-e665-491a-baf2-6008e0022585}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\SNMP Library">
+      <UniqueIdentifier>{86b89cf7-0316-49e2-91b0-7304c8101601}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\SQL Library">
+      <UniqueIdentifier>{9d8f2407-344d-4fd9-9383-ab97aed3f461}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\SQL Library\headers">
+      <UniqueIdentifier>{a837d4ab-87d6-40c7-bd54-305a6852f467}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\SQL Library\SQLite">
+      <UniqueIdentifier>{299fa784-f0a6-4b5a-9df4-068f04c867e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\SQL Library\SQLite\NewFilter1">
+      <UniqueIdentifier>{801a6ee2-15c4-4072-96f7-722374a28c5d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\Timers and Threads">
+      <UniqueIdentifier>{410e82c9-a73b-4319-ab76-60963c4554e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\Timers and Threads\Idle Support%28Thread sharing%29">
+      <UniqueIdentifier>{a2465a2d-08c4-42ab-840a-74a167c70000}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\Types and Containers">
+      <UniqueIdentifier>{eca49b77-7b63-447f-ad44-a65e0c528dc1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\Types and Containers\headers">
+      <UniqueIdentifier>{cbd4a8e4-19bb-47c8-93dd-e3861cd3f56f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\Vector Math Library">
+      <UniqueIdentifier>{a1793396-1754-4e50-9942-92f5bcc3be6a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\Vector Math Library\headers">
+      <UniqueIdentifier>{5624891f-d5fa-481b-a511-40b9523da209}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\Z lib - standard">
+      <UniqueIdentifier>{f57b2ce3-2366-47c6-ba60-d12a04c449ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\Z lib - standard\Headers">
+      <UniqueIdentifier>{959fe072-d1c2-4ae0-b25b-f5f3e249a056}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\zzip">
+      <UniqueIdentifier>{10aefaef-aa88-45b3-a8be-e1502d0b2fcb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\zzip\Headers">
+      <UniqueIdentifier>{b0ceec47-dc1f-498d-82c2-8d0a1b14e851}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\zzip\Sources">
+      <UniqueIdentifier>{560e98b2-de15-4403-aa8c-4a41653c8d03}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG.image Source Files">
+      <UniqueIdentifier>{48090b70-bce5-4555-a3dc-ab5443faded9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG.image Source Files\Assembly">
+      <UniqueIdentifier>{bfe77d89-d665-4d96-ac51-7b9c9bfda834}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG.image Source Files\Assembly\Utility Assembly %28Headers%29">
+      <UniqueIdentifier>{f3547aa5-805c-42b3-bcd9-59896724f304}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG.image Source Files\Headers">
+      <UniqueIdentifier>{89f5c92b-99fd-48b2-b8b7-a13a5d1a9f9e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG.image Source Files\Headers\Private">
+      <UniqueIdentifier>{eb4d4bfe-3aa2-4f80-9017-4e82759a1ffa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG.PSI Source Files">
+      <UniqueIdentifier>{7f6ed4e0-0b21-4b1f-b644-391fe595b318}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG.PSI Source Files\Headers">
+      <UniqueIdentifier>{ef1589ed-84f9-4989-902c-406ae212d99f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG.PSI Source Files\PSI.Console">
+      <UniqueIdentifier>{4506ab54-3229-4f97-8bd3-9d40c1e068b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG.PSI Source Files\PSI.Console\headers">
+      <UniqueIdentifier>{bd3bf0d1-e916-4018-8095-f672bea1fc93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG.video Source Files">
+      <UniqueIdentifier>{8e69d44a-cea5-4c64-8e00-c785a2345fad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG.video Source Files\Headers">
+      <UniqueIdentifier>{b1d03307-fcd0-4870-9a16-b6cef45c7933}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BAG Source Files\SNMP Library\Headers">
+      <UniqueIdentifier>{dd739fc8-7ca7-48e8-b738-9f96de1ee65c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\configlib\configscript.c">
+      <Filter>Source Files\BAG Source Files\Configuration Callback Conglomeration</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deadstart\deadlib.c">
+      <Filter>Source Files\BAG Source Files\Global Constructor Hack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deadstart\deadstart.c">
+      <Filter>Source Files\BAG Source Files\Global Constructor Hack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deadstart\deadstart_core.c">
+      <Filter>Source Files\BAG Source Files\Global Constructor Hack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deadstart\deadstart_lib.c">
+      <Filter>Source Files\BAG Source Files\Global Constructor Hack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deadstart\deadstop.c">
+      <Filter>Source Files\BAG Source Files\Global Constructor Hack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\DotNetCompat\file.c">
+      <Filter>Source Files\BAG Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\filesyslib\filemon\allfiles.c">
+      <Filter>Source Files\BAG Source Files\File System Utilitarian Garbage\File System Monitoring Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\filesyslib\filemon\windowsfiles.c">
+      <Filter>Source Files\BAG Source Files\File System Utilitarian Garbage\File System Monitoring Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\filesyslib\filescan.c">
+      <Filter>Source Files\BAG Source Files\File System Utilitarian Garbage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\filesyslib\pathops.c">
+      <Filter>Source Files\BAG Source Files\File System Utilitarian Garbage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\fractionlib\fractions.c">
+      <Filter>Source Files\BAG Source Files\Integer Fraction Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\autofit\autofit.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\base\ftbase.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\base\ftbitmap.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\base\ftgasp.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\base\ftglyph.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\base\ftgxval.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\base\ftinit.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\base\ftmm.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\base\ftotval.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\base\ftpfr.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\base\ftstroke.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\base\ftsynth.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\base\ftsystem.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\base\fttype1.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\base\ftwinfnt.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\base\ftxf86.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\bdf\bdf.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\cache\ftcache.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\cff\cff.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\cid\type1cid.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\gxvalid\gxvalid.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\gzip\ftgzip.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\lzw\ftlzw.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\otvalid\otvalid.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\pcf\pcf.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\pfr\pfr.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\psaux\psaux.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\pshinter\pshinter.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\psnames\psmodule.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\raster\raster.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\sfnt\sfnt.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\smooth\smooth.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\truetype\truetype.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\type1\type1.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\type42\type42.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\freetype-2.3.7\src\winfonts\winfnt.c">
+      <Filter>Source Files\BAG Source Files\Freetype Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\genx\charProps.c">
+      <Filter>Source Files\BAG Source Files\GENX Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\genx\genx.c">
+      <Filter>Source Files\BAG Source Files\GENX Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\idlelib\idle.c">
+      <Filter>Source Files\BAG Source Files\Timers and Threads\Idle Support%28Thread sharing%29</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imglib\alphastab.c">
+      <Filter>Source Files\BAG.image Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imglib\alphatab.c">
+      <Filter>Source Files\BAG.image Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imglib\blotdirect.c">
+      <Filter>Source Files\BAG.image Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imglib\blotscaled.c">
+      <Filter>Source Files\BAG.image Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imglib\bmpimage.c">
+      <Filter>Source Files\BAG.image Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imglib\fntcache.c">
+      <Filter>Source Files\BAG.image Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imglib\fntrender.c">
+      <Filter>Source Files\BAG.image Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imglib\font.c">
+      <Filter>Source Files\BAG.image Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imglib\gifimage.c">
+      <Filter>Source Files\BAG.image Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imglib\image.c">
+      <Filter>Source Files\BAG.image Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imglib\image_client.c">
+      <Filter>Source Files\BAG.image Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imglib\interface.c">
+      <Filter>Source Files\BAG.image Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imglib\jpgimage.c">
+      <Filter>Source Files\BAG.image Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imglib\line.c">
+      <Filter>Source Files\BAG.image Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imglib\lucidaconsole.c">
+      <Filter>Source Files\BAG.image Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imglib\math.c">
+      <Filter>Source Files\BAG.image Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imglib\pngimage.c">
+      <Filter>Source Files\BAG.image Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imglib\smooth_sprite.c">
+      <Filter>Source Files\BAG.image Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imglib\sprite.c">
+      <Filter>Source Files\BAG.image Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imglib\sprite_common.c">
+      <Filter>Source Files\BAG.image Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jcapimin.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jcapistd.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jccoefct.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jccolor.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jcdctmgr.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jchuff.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jcinit.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jcmainct.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jcmarker.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jcmaster.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jcomapi.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jcparam.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jcphuff.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jcprepct.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jcsample.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jctrans.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jdapimin.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jdapistd.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jdatadst.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jdatasrc.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jdcoefct.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jdcolor.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jddctmgr.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jdhuff.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jdinput.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jdmainct.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jdmarker.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jdmaster.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jdmerge.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jdphuff.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jdpostct.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jdsample.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jdtrans.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jerror.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jfdctflt.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jfdctfst.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jfdctint.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jidctflt.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jidctfst.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jidctint.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jidctred.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jmemmgr.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jmemnobs.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jquant1.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jquant2.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\jpeg-6b\jutils.c">
+      <Filter>Source Files\BAG Source Files\JPEG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_callback_xs.c">
+      <Filter>Source Files\BAG Source Files\MNG library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_chunk_descr.c">
+      <Filter>Source Files\BAG Source Files\MNG library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_chunk_io.c">
+      <Filter>Source Files\BAG Source Files\MNG library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_chunk_prc.c">
+      <Filter>Source Files\BAG Source Files\MNG library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_chunk_xs.c">
+      <Filter>Source Files\BAG Source Files\MNG library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_cms.c">
+      <Filter>Source Files\BAG Source Files\MNG library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_display.c">
+      <Filter>Source Files\BAG Source Files\MNG library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_dither.c">
+      <Filter>Source Files\BAG Source Files\MNG library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_error.c">
+      <Filter>Source Files\BAG Source Files\MNG library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_filter.c">
+      <Filter>Source Files\BAG Source Files\MNG library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_hlapi.c">
+      <Filter>Source Files\BAG Source Files\MNG library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_jpeg.c">
+      <Filter>Source Files\BAG Source Files\MNG library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_object_prc.c">
+      <Filter>Source Files\BAG Source Files\MNG library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_pixels.c">
+      <Filter>Source Files\BAG Source Files\MNG library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_prop_xs.c">
+      <Filter>Source Files\BAG Source Files\MNG library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_read.c">
+      <Filter>Source Files\BAG Source Files\MNG library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_trace.c">
+      <Filter>Source Files\BAG Source Files\MNG library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_write.c">
+      <Filter>Source Files\BAG Source Files\MNG library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libmng\libmng_zlib.c">
+      <Filter>Source Files\BAG Source Files\MNG library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libpng-1.2.40\png.c">
+      <Filter>Source Files\BAG Source Files\PNG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libpng-1.2.40\pngerror.c">
+      <Filter>Source Files\BAG Source Files\PNG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libpng-1.2.40\pnggccrd.c">
+      <Filter>Source Files\BAG Source Files\PNG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libpng-1.2.40\pngget.c">
+      <Filter>Source Files\BAG Source Files\PNG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libpng-1.2.40\pngmem.c">
+      <Filter>Source Files\BAG Source Files\PNG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libpng-1.2.40\pngpread.c">
+      <Filter>Source Files\BAG Source Files\PNG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libpng-1.2.40\pngread.c">
+      <Filter>Source Files\BAG Source Files\PNG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libpng-1.2.40\pngrio.c">
+      <Filter>Source Files\BAG Source Files\PNG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libpng-1.2.40\pngrtran.c">
+      <Filter>Source Files\BAG Source Files\PNG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libpng-1.2.40\pngrutil.c">
+      <Filter>Source Files\BAG Source Files\PNG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libpng-1.2.40\pngset.c">
+      <Filter>Source Files\BAG Source Files\PNG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libpng-1.2.40\pngtrans.c">
+      <Filter>Source Files\BAG Source Files\PNG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libpng-1.2.40\pngvcrd.c">
+      <Filter>Source Files\BAG Source Files\PNG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libpng-1.2.40\pngwio.c">
+      <Filter>Source Files\BAG Source Files\PNG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libpng-1.2.40\pngwrite.c">
+      <Filter>Source Files\BAG Source Files\PNG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libpng-1.2.40\pngwtran.c">
+      <Filter>Source Files\BAG Source Files\PNG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libpng-1.2.40\pngwutil.c">
+      <Filter>Source Files\BAG Source Files\PNG Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\memlib\sharemem.c">
+      <Filter>Source Files\BAG Source Files\Memory Allocation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\msgsvr\client\client.c">
+      <Filter>Source Files\BAG Source Files\Message Service</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\msgsvr\summoner\construct.c">
+      <Filter>Source Files\BAG Source Files\Global Constructor Hack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\netlib\network.c">
+      <Filter>Source Files\BAG Source Files\Event Based Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\netlib\net_winsock2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\netlib\ping.c">
+      <Filter>Source Files\BAG Source Files\Event Based Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\netlib\tcpnetwork.c">
+      <Filter>Source Files\BAG Source Files\Event Based Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\netlib\udpnetwork.c">
+      <Filter>Source Files\BAG Source Files\Event Based Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\netlib\whois.c">
+      <Filter>Source Files\BAG Source Files\Event Based Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\netservicelib\udprequest.c">
+      <Filter>Source Files\BAG Source Files\Network Service Discovery</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\netservicelib\udpresp.c">
+      <Filter>Source Files\BAG Source Files\Network Service Discovery</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\procreglib\names.c">
+      <Filter>Source Files\BAG Source Files\Process, Procedure and Type Registration</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\psilib\borders.c">
+      <Filter>Source Files\BAG.PSI Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\psilib\calctl\analog.c">
+      <Filter>Source Files\BAG.PSI Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\psilib\calctl\calender.c">
+      <Filter>Source Files\BAG.PSI Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\psilib\calctl\clock.c">
+      <Filter>Source Files\BAG.PSI Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\psilib\console\console_keydefs.c">
+      <Filter>Source Files\BAG.PSI Source Files\PSI.Console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\psilib\console\history.c">
+      <Filter>Source Files\BAG.PSI Source Files\PSI.Console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\psilib\console\paste.c">
+      <Filter>Source Files\BAG.PSI Source Files\PSI.Console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\psilib\console\psicon.c">
+      <Filter>Source Files\BAG.PSI Source Files\PSI.Console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\psilib\console\psicon_interface.c">
+      <Filter>Source Files\BAG.PSI Source Files\PSI.Console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\psilib\console\regaccess.c">
+      <Filter>Source Files\BAG.PSI Source Files\PSI.Console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\psilib\console\WinLogic.c">
+      <Filter>Source Files\BAG.PSI Source Files\PSI.Console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\psilib\controls.c">
+      <Filter>Source Files\BAG.PSI Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\psilib\ctlbutton.c">
+      <Filter>Source Files\BAG.PSI Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\psilib\ctledit.c">
+      <Filter>Source Files\BAG.PSI Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\psilib\ctllistbox.c">
+      <Filter>Source Files\BAG.PSI Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\psilib\ctlmisc.c">
+      <Filter>Source Files\BAG.PSI Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\psilib\ctlprop.c">
+      <Filter>Source Files\BAG.PSI Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\psilib\ctlscroll.c">
+      <Filter>Source Files\BAG.PSI Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\psilib\ctlsheet.c">
+      <Filter>Source Files\BAG.PSI Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\psilib\ctlslider.c">
+      <Filter>Source Files\BAG.PSI Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\psilib\ctltext.c">
+      <Filter>Source Files\BAG.PSI Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\psilib\fileopen.c">
+      <Filter>Source Files\BAG.PSI Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\psilib\fntdlg.c">
+      <Filter>Source Files\BAG.PSI Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\psilib\loadsave.c">
+      <Filter>Source Files\BAG.PSI Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\psilib\mouse.c">
+      <Filter>Source Files\BAG.PSI Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\psilib\option_frame.c">
+      <Filter>Source Files\BAG Source Files\Option Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\psilib\palette.c">
+      <Filter>Source Files\BAG.PSI Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\psilib\popups.c">
+      <Filter>Source Files\BAG.PSI Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\psilib\xml_load.c">
+      <Filter>Source Files\BAG.PSI Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\psilib\xml_save.c">
+      <Filter>Source Files\BAG.PSI Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\sexpat\xmlparse.c">
+      <Filter>Source Files\BAG Source Files\SEXPAT Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\sexpat\xmlrole.c">
+      <Filter>Source Files\BAG Source Files\SEXPAT Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\sexpat\xmltok.c">
+      <Filter>Source Files\BAG Source Files\SEXPAT Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\sha1lib\sha1.c">
+      <Filter>Source Files\BAG Source Files\SHA1 Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\asn1.c">
+      <Filter>Source Files\BAG Source Files\SNMP Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\coexistance.c">
+      <Filter>Source Files\BAG Source Files\SNMP Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\mib.c">
+      <Filter>Source Files\BAG Source Files\SNMP Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\mibii.c">
+      <Filter>Source Files\BAG Source Files\SNMP Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\mini-client.c">
+      <Filter>Source Files\BAG Source Files\SNMP Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\new-parse.c">
+      <Filter>Source Files\BAG Source Files\SNMP Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\parse.c">
+      <Filter>Source Files\BAG Source Files\SNMP Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\snmp_api.c">
+      <Filter>Source Files\BAG Source Files\SNMP Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\snmp_api_error.c">
+      <Filter>Source Files\BAG Source Files\SNMP Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\snmp_api_util.c">
+      <Filter>Source Files\BAG Source Files\SNMP Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\snmp_client.c">
+      <Filter>Source Files\BAG Source Files\SNMP Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\snmp_dump.c">
+      <Filter>Source Files\BAG Source Files\SNMP Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\snmp_error.c">
+      <Filter>Source Files\BAG Source Files\SNMP Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\snmp_extra.c">
+      <Filter>Source Files\BAG Source Files\SNMP Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\snmp_msg.c">
+      <Filter>Source Files\BAG Source Files\SNMP Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\snmp_pdu.c">
+      <Filter>Source Files\BAG Source Files\SNMP Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\snmp_vars.c">
+      <Filter>Source Files\BAG Source Files\SNMP Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\snmplib\version.c">
+      <Filter>Source Files\BAG Source Files\SNMP Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\sqlite\sqlite3.c">
+      <Filter>Source Files\BAG Source Files\SQL Library\SQLite</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\SQLlib\optlib\getoption.c">
+      <Filter>Source Files\BAG Source Files\Option Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\SQLlib\optlib\getoption_new.c">
+      <Filter>Source Files\BAG Source Files\Option Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\SQLlib\optlib\optionutil.c">
+      <Filter>Source Files\BAG Source Files\Option Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\SQLlib\optlib\optionutil_new.c">
+      <Filter>Source Files\BAG Source Files\Option Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\SQLlib\sqlparse.c">
+      <Filter>Source Files\BAG Source Files\SQL Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\SQLlib\sqlparse3.c">
+      <Filter>Source Files\BAG Source Files\SQL Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\SQLlib\sqlstub.c">
+      <Filter>Source Files\BAG Source Files\SQL Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\SQLlib\sqlutil.c">
+      <Filter>Source Files\BAG Source Files\SQL Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\SQLlib\sqlwrap.c">
+      <Filter>Source Files\BAG Source Files\SQL Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\SQLlib\sql_ref_class.cpp">
+      <Filter>Source Files\BAG Source Files\SQL Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\sysloglib\syslog.c">
+      <Filter>Source Files\BAG Source Files\Program Logging Facility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\systemlib\args.c">
+      <Filter>Source Files\BAG Source Files\General Task based System Utilities %28processes/tasks%29</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\systemlib\spawntask.c">
+      <Filter>Source Files\BAG Source Files\General Task based System Utilities %28processes/tasks%29</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\systemlib\system.c">
+      <Filter>Source Files\BAG Source Files\General Task based System Utilities %28processes/tasks%29</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\systraylib\systray.c">
+      <Filter>Source Files\BAG.PSI Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\timerlib\timers.c">
+      <Filter>Source Files\BAG Source Files\Timers and Threads</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\typelib\binarylist.c">
+      <Filter>Source Files\BAG Source Files\Types and Containers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\typelib\familytree.c">
+      <Filter>Source Files\BAG Source Files\Types and Containers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\typelib\input.c">
+      <Filter>Source Files\BAG Source Files\Types and Containers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\typelib\msgqueue.c">
+      <Filter>Source Files\BAG Source Files\Types and Containers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\typelib\sets.c">
+      <Filter>Source Files\BAG Source Files\Types and Containers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\typelib\text.c">
+      <Filter>Source Files\BAG Source Files\Types and Containers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\typelib\typecode.c">
+      <Filter>Source Files\BAG Source Files\Types and Containers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\vectlib\vectlib.c">
+      <Filter>Source Files\BAG Source Files\Vector Math Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\vidlib\key.c">
+      <Filter>Source Files\BAG.video Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\vidlib\keydefs.c">
+      <Filter>Source Files\BAG.video Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\vidlib\opengl.c">
+      <Filter>Source Files\BAG.video Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\vidlib\viddll.c">
+      <Filter>Source Files\BAG.video Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\vidlib\vidlib.c">
+      <Filter>Source Files\BAG.video Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\zlib-1.2.3\adler32.c">
+      <Filter>Source Files\BAG Source Files\Z lib - standard\Headers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\zlib-1.2.3\compress.c">
+      <Filter>Source Files\BAG Source Files\Z lib - standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\zlib-1.2.3\crc32.c">
+      <Filter>Source Files\BAG Source Files\Z lib - standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\zlib-1.2.3\deflate.c">
+      <Filter>Source Files\BAG Source Files\Z lib - standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\zlib-1.2.3\gzio.c">
+      <Filter>Source Files\BAG Source Files\Z lib - standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\zlib-1.2.3\infback.c">
+      <Filter>Source Files\BAG Source Files\Z lib - standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\zlib-1.2.3\inffast.c">
+      <Filter>Source Files\BAG Source Files\Z lib - standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\zlib-1.2.3\inflate.c">
+      <Filter>Source Files\BAG Source Files\Z lib - standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\zlib-1.2.3\inftrees.c">
+      <Filter>Source Files\BAG Source Files\Z lib - standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\zlib-1.2.3\trees.c">
+      <Filter>Source Files\BAG Source Files\Z lib - standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\zlib-1.2.3\uncompr.c">
+      <Filter>Source Files\BAG Source Files\Z lib - standard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\zlib-1.2.3\zutil.c">
+      <Filter>Source Files\BAG Source Files\Z lib - standard</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\controls.h">
+      <Filter>Source Files\BAG.PSI Source Files\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\deadstart.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\imglib\fontstruct.h">
+      <Filter>Source Files\BAG.image Source Files\Headers\Private</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\keybrd.h">
+      <Filter>Source Files\BAG.video Source Files\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\loadsock.h">
+      <Filter>Source Files\BAG Source Files\Event Based Networking\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\msgclient.h">
+      <Filter>Source Files\BAG Source Files\Message Service\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\msgprotocol.h">
+      <Filter>Source Files\BAG Source Files\Message Service\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\msgserver.h">
+      <Filter>Source Files\BAG Source Files\Message Service\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\network.h">
+      <Filter>Source Files\BAG Source Files\Event Based Networking\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\procreg.h">
+      <Filter>Source Files\BAG Source Files\Process, Procedure and Type Registration\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\psi.h">
+      <Filter>Source Files\BAG.PSI Source Files\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\render.h">
+      <Filter>Source Files\BAG.video Source Files\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\sack_types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\sharemem.h">
+      <Filter>Source Files\BAG Source Files\Memory Allocation\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\sqlgetoption.h">
+      <Filter>Source Files\BAG Source Files\Option Library\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\sqloptint.h">
+      <Filter>Source Files\BAG Source Files\Option Library\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\stdhdrs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\typelib.h">
+      <Filter>Source Files\BAG Source Files\Types and Containers\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\vectlib.h">
+      <Filter>Source Files\BAG Source Files\Vector Math Library\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\vectypes.h">
+      <Filter>Source Files\BAG Source Files\Vector Math Library\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\filesyslib\filemon\monitor.h">
+      <Filter>Source Files\BAG Source Files\File System Utilitarian Garbage\File System Monitoring Utility\Private Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\imglib\blotproto.h">
+      <Filter>Source Files\BAG.image Source Files\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\imglib\fntglobal.h">
+      <Filter>Source Files\BAG.image Source Files\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\imglib\gifimage.h">
+      <Filter>Source Files\BAG.image Source Files\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\imglib\jpgimage.h">
+      <Filter>Source Files\BAG.image Source Files\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\imglib\pngimage.h">
+      <Filter>Source Files\BAG.image Source Files\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\memlib\sharestruc.h">
+      <Filter>Source Files\BAG Source Files\Memory Allocation\Private Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\netlib\netstruc.h">
+      <Filter>Source Files\BAG Source Files\Event Based Networking\Private Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\netlib\ping.h">
+      <Filter>Source Files\BAG Source Files\Event Based Networking\Private Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\psilib\console\consolestruc.h">
+      <Filter>Source Files\BAG.PSI Source Files\PSI.Console\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\psilib\console\history.h">
+      <Filter>Source Files\BAG.PSI Source Files\PSI.Console\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\psilib\console\histstruct.h">
+      <Filter>Source Files\BAG.PSI Source Files\PSI.Console\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\psilib\console\keydefs.h">
+      <Filter>Source Files\BAG.PSI Source Files\PSI.Console\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\psilib\console\mydatapath.h">
+      <Filter>Source Files\BAG.PSI Source Files\PSI.Console\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\psilib\console\regaccess.h">
+      <Filter>Source Files\BAG.PSI Source Files\PSI.Console\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\psilib\console\resource.h">
+      <Filter>Source Files\BAG.PSI Source Files\PSI.Console\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\psilib\console\WinLogic.h">
+      <Filter>Source Files\BAG.PSI Source Files\PSI.Console\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\psilib\controlstruc.h">
+      <Filter>Source Files\BAG.PSI Source Files\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\psilib\global.h">
+      <Filter>Source Files\BAG.PSI Source Files\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\SQLlib\optlib\optlib.h">
+      <Filter>Source Files\BAG Source Files\Option Library\Headers\private</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\SQLlib\sqlstruc.h">
+      <Filter>Source Files\BAG Source Files\SQL Library\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\vidlib\local.h">
+      <Filter>Source Files\BAG.video Source Files\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\zlib-1.2.3\crc32.h">
+      <Filter>Source Files\BAG Source Files\Z lib - standard\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\zlib-1.2.3\deflate.h">
+      <Filter>Source Files\BAG Source Files\Z lib - standard\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\zlib-1.2.3\inffast.h">
+      <Filter>Source Files\BAG Source Files\Z lib - standard\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\zlib-1.2.3\inffixed.h">
+      <Filter>Source Files\BAG Source Files\Z lib - standard\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\zlib-1.2.3\inflate.h">
+      <Filter>Source Files\BAG Source Files\Z lib - standard\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\zlib-1.2.3\inftrees.h">
+      <Filter>Source Files\BAG Source Files\Z lib - standard\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\zlib-1.2.3\trees.h">
+      <Filter>Source Files\BAG Source Files\Z lib - standard\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\zlib-1.2.3\zconf.in.h">
+      <Filter>Source Files\BAG Source Files\Z lib - standard\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\zlib-1.2.3\zutil.h">
+      <Filter>Source Files\BAG Source Files\Z lib - standard\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\snmp\libsnmp.h">
+      <Filter>Source Files\BAG Source Files\SNMP Library\Headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\all_resources.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+    <ResourceCompile Include="..\src\SQLlib\sqlstub.rc">
+      <Filter>Source Files\BAG Source Files\SQL Library</Filter>
+    </ResourceCompile>
+    <ResourceCompile Include="..\src\systraylib\systray.rc">
+      <Filter>Source Files\BAG.PSI Source Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\src\genx\genx.h">
+      <Filter>Source Files\BAG Source Files\GENX Library</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\imglib\alphamac.asm">
+      <Filter>Source Files\BAG.image Source Files\Assembly\Utility Assembly %28Headers%29</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\imglib\blatcolor.asm">
+      <Filter>Source Files\BAG.image Source Files\Assembly</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\imglib\blotdirasm.asm">
+      <Filter>Source Files\BAG.image Source Files\Assembly</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\imglib\blotdirmac.asm">
+      <Filter>Source Files\BAG.image Source Files\Assembly\Utility Assembly %28Headers%29</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\imglib\blotdirmshadeasm.asm">
+      <Filter>Source Files\BAG.image Source Files\Assembly</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\imglib\blotdirshadeasm.asm">
+      <Filter>Source Files\BAG.image Source Files\Assembly</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\imglib\blotscaasm.asm">
+      <Filter>Source Files\BAG.image Source Files\Assembly</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\imglib\blotscamac.asm">
+      <Filter>Source Files\BAG.image Source Files\Assembly\Utility Assembly %28Headers%29</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\imglib\blotscamshadeasm.asm">
+      <Filter>Source Files\BAG.image Source Files\Assembly</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\imglib\blotscashadeasm.asm">
+      <Filter>Source Files\BAG.image Source Files\Assembly</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\imglib\blotshademac.asm">
+      <Filter>Source Files\BAG.image Source Files\Assembly\Utility Assembly %28Headers%29</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\imglib\ImageFile.asm">
+      <Filter>Source Files\BAG.image Source Files\Assembly\Utility Assembly %28Headers%29</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\imglib\lineasm.asm">
+      <Filter>Source Files\BAG.image Source Files\Assembly</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\imglib\mmx.asm">
+      <Filter>Source Files\BAG.image Source Files\Assembly\Utility Assembly %28Headers%29</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\imglib\plotasm.asm">
+      <Filter>Source Files\BAG.image Source Files\Assembly</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\libpng-1.2.40\png.h">
+      <Filter>Source Files\BAG Source Files\PNG Library\Headers</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\libpng-1.2.40\pngconf.h">
+      <Filter>Source Files\BAG Source Files\PNG Library\Headers</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\procreglib\interface.conf">
+      <Filter>Source Files\BAG Source Files\Process, Procedure and Type Registration</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\sexpat\expat.h">
+      <Filter>Source Files\BAG Source Files\SEXPAT Library\headers</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\sexpat\expat_external.h">
+      <Filter>Source Files\BAG Source Files\SEXPAT Library\headers</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\zlib-1.2.3\zconf.h">
+      <Filter>Source Files\BAG Source Files\Z lib - standard\Headers</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\zlib-1.2.3\zlib.h">
+      <Filter>Source Files\BAG Source Files\Z lib - standard\Headers</Filter>
+    </CustomBuild>
+  </ItemGroup>
+</Project>
