@@ -34,7 +34,8 @@ static struct {
 	PLIST sites; // list of struct site_info
 
 	struct map_file *selected_map;
-   struct site_info *selected_site;
+	struct site_info *selected_site;
+   int bingoday;
 } l;
 
 
@@ -113,7 +114,12 @@ void SelectSite( void )
 			INDEX idx;
 			LIST_FORALL( l.sites, idx, struct site_info *, site )
 			{
-            SetItemData( AddListItem( listbox, site->name ), (PTRSZVAL)site );
+				PLISTITEM pli = SetItemData( AddListItem( listbox, site->name ), (PTRSZVAL)site );
+				if( ( StrCaseCmp( site->name, GetSystemName() ) == 0 )
+               || ( StrCaseCmp( site->hostname, GetSystemName() ) == 0 ) )
+				{
+               SetSelectedItem( listbox, pli );
+				}
 			}
 		}
 		DisplayFrame( frame );
@@ -178,6 +184,14 @@ PTRSZVAL CPROC SetSiteSQL( PTRSZVAL psv, arg_list args )
    return psv;
 }
 
+PTRSZVAL CPROC SetBingodayOption( PTRSZVAL psv, arg_list args )
+{
+	PARAM( args, LOGICAL, yes_no );
+	struct site_info *site = (struct site_info*)psv;
+   l.bingoday = yes_no;
+   return psv;
+}
+
 
 void ReadMap( void )
 {
@@ -187,7 +201,8 @@ void ReadMap( void )
    AddConfigurationMethod( pch, "serves Mysql?%b", SetSiteSQL );
 	AddConfigurationMethod( pch, "Mysql Server %m", SetSiteSQLServer );
    AddConfigurationMethod( pch, "address %m", SetSiteAddress );
-   AddConfigurationMethod( pch, "local address %m", SetSiteLocalAddress );
+	AddConfigurationMethod( pch, "local address %m", SetSiteLocalAddress );
+   AddConfigurationMethod( pch, "Uses Bingoday?%b", SetBingodayOption );
 	ProcessConfigurationFile( pch, l.selected_map->filename, 0 );
    DestroyConfigurationHandler( pch );
 }
@@ -196,7 +211,8 @@ void UpdateHostsFile( void )
 {
 	CTEXTSTR root = OSALOT_GetEnvironmentVariable( "SystemRoot" );
 	TEXTCHAR tmp[256];
-   FILE *file;
+	FILE *file;
+	struct site_info *sql_site = NULL;
 	snprintf( tmp, sizeof( tmp ), "%s/system32/drivers/etc/hosts", root );
 	file = fopen( tmp, "wt" );
 	fprintf( file, "# Copyright (c) 1993-2009 Microsoft Corp.\n" );
@@ -226,12 +242,48 @@ void UpdateHostsFile( void )
 		struct site_info *site;
 		LIST_FORALL( l.sites, idx, struct site_info *, site )
 		{
-			fprintf( file, "%s %s vsrvr.%s bdata.%s\n"
-					 , l.selected_site->host_address
-					 , l.selected_site->hostname
-					 , l.selected_site->hostname
-					 , l.selected_site->hostname
+			if( site->hosts_sql || ( site->mysql_server && site->mysql_server[0] ) )
+            sql_site = site;
+			fprintf( file, "%s %s %s vsrvr.%s bdata.%s\n"
+					 , site->host_address
+					 , site->name
+					 , site->hostname
+					 , site->hostname
+					 , site->hostname
 					 );
+		}
+	}
+	fclose( file );
+
+	SACK_WriteProfileInt( "video_link_server", "Use bingoday for link state (else use 0)", l.bingoday );
+	SACK_WriteProfileString( "video_link_server", "My Hall Name", l.selected_site->name );
+
+	system( "mysql.proxy.service uninstall" );
+	if( l.selected_site != sql_site )
+	{
+		file = fopen( "mysql.proxy.service.conf", "wt" );
+		if( file )
+		{
+			fprintf( file, "MySQL: 3306 %s:3306\n", sql_site->address );
+		}
+      fclose( file );\
+		system( "mysql.proxy.service install" );
+	}
+	if( l.selected_site == sql_site )
+	{
+		if( !sql_site->hosts_sql )
+		{
+			file = fopen( "mysql.proxy.service.conf", "wt" );
+			if( file )
+			{
+				fprintf( file, "MySQL: 3306 %s:3306\n", sql_site->mysql_server );
+			}
+			fclose( file );
+         system( "mysql.proxy.service install" );
+		}
+		else
+		{
+         lprintf( "Should try and setup and start mysql?  This server should have a mysql service" );
 		}
 	}
 }
