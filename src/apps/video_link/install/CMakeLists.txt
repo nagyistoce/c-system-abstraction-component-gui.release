@@ -12,13 +12,20 @@ set( bin
 ../../bin/vlc_test.exe
 ../../bin/${CMAKE_SHARED_LIBRARY_PREFIX}vlc_interface.dll
 ../../bin/ClearShell.exe
+../../bin/interface.conf
+../../bin/bag.sqlite3.external
 )
 
 set( frames
    ../../resources/frames/edit_video_link_site.Frame
 )
 
-install( FILES ${bin} DESTINATION video_link_server/bin )
-install( FILES ${bin} DESTINATION video_link_server/resources/frames )
+set( maps 
+../../resources/Stations.Map 
+)
 
+install( FILES ${bin} DESTINATION video_link_server/bin )
+install( FILES ${frames} DESTINATION video_link_server/bin/frames )
+install( FILES ${maps} DESTINATION video_link_server/resources )
+install( FILES ../../bin/proxy.service.exe DESTINATION video_link_server/bin RENAME mysql.proxy.service.exe )
 
