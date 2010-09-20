@@ -9,7 +9,8 @@ enum {
 	EDIT_SYSTEM_ADDRESS,
 	EDIT_MYSQL_SERVER,
    EDIT_SYSTEM_LOCAL_ADDRESS,
-	CHECKBOX_IS_MYSQL_SERVER
+	CHECKBOX_IS_MYSQL_SERVER,
+	CHECKBOX_USES_BINGODAY
 
 };
 
@@ -37,7 +38,9 @@ static struct {
 	PLIST sites; // list of struct site_info
 
 	struct map_file *selected_map;
-   struct site_info *selected_site;
+	struct site_info *selected_site;
+
+   int bingoday;
 } l;
 
 PRELOAD( RegisterResources )
@@ -49,6 +52,7 @@ PRELOAD( RegisterResources )
    EasyRegisterResource( "Video Server/Editor", EDIT_MYSQL_SERVER, EDIT_FIELD_NAME );
    EasyRegisterResource( "Video Server/Editor", LISTBOX_ITEMS, LISTBOX_CONTROL_NAME );
 	EasyRegisterResource( "Video Server/Editor", CHECKBOX_IS_MYSQL_SERVER, RADIO_BUTTON_NAME );
+	EasyRegisterResource( "Video Server/Editor", CHECKBOX_USES_BINGODAY, RADIO_BUTTON_NAME );
 
 }
 
@@ -158,6 +162,7 @@ void EditSite( PLISTITEM pli )
 				SetControlText( GetControl( frame, EDIT_SYSTEM_LOCAL_ADDRESS ), site->local_address );
 				SetControlText( GetControl( frame, EDIT_MYSQL_SERVER ), site->mysql_server );
             SetCheckState( GetControl( frame, CHECKBOX_IS_MYSQL_SERVER ), site->hosts_sql );
+            SetCheckState( GetControl( frame, CHECKBOX_USES_BINGODAY ), l.bingoday );
 
 			}
 
@@ -176,6 +181,7 @@ void EditSite( PLISTITEM pli )
 				GetControlText( GetControl( frame, EDIT_MYSQL_SERVER ), tmp, sizeof( tmp )  );
             site->mysql_server = StrDup( tmp );
             site->hosts_sql = GetCheckState( GetControl( frame, CHECKBOX_IS_MYSQL_SERVER ) );
+            l.bingoday = GetCheckState( GetControl( frame, CHECKBOX_USES_BINGODAY ) );
 
 			}
 			DestroyFrame( &frame );
@@ -315,7 +321,13 @@ PTRSZVAL CPROC SetSiteSQL( PTRSZVAL psv, arg_list args )
    return psv;
 }
 
-
+PTRSZVAL CPROC SetSiteSQL( PTRSZVAL psv, arg_list args )
+{
+	PARAM( args, LOGICAL, yes_no );
+	struct site_info *site = (struct site_info*)psv;
+   l.bingoday = yes_no;
+   return psv;
+}
 void ReadMap( void )
 {
 	PCONFIG_HANDLER pch = CreateConfigurationHandler();
@@ -324,7 +336,8 @@ void ReadMap( void )
    AddConfigurationMethod( pch, "serves Mysql?%b", SetSiteSQL );
 	AddConfigurationMethod( pch, "Mysql Server %m", SetSiteSQLServer );
 	AddConfigurationMethod( pch, "address %m", SetSiteAddress );
-   AddConfigurationMethod( pch, "local address %m", SetSiteLocalAddress );
+	AddConfigurationMethod( pch, "local address %m", SetSiteLocalAddress );
+   AddConfigurationMethod( pch, "Uses Bingoday?%b", SetBingodayOption );
 	ProcessConfigurationFile( pch, l.selected_map->filename, 0 );
    DestroyConfigurationHandler( pch );
 }
@@ -343,7 +356,9 @@ void UpdateConfiguration( void )
 		fprintf( file, "#   address <ip> - defines the IP address of the system\n" );
 		fprintf( file, "#   serves MySQL <yes/no> - if the sql server runs on this node... then others know where also\n" );
 		fprintf( file, "#   MySQL Server - if not running the server, this may indicate an external server from here - implies services for others\n" );
-      fprintf( file, "\n\n" );
+		fprintf( file, "\n\n" );
+		fprintf( file, "Uses Bingoday?%s", l.bingoday?"Yes":"No" );
+		fprintf( file, "\n\n" );
 		LIST_FORALL( l.sites, idx, struct site_info *, site )
 		{
 			fprintf( file, "site %s\n", site->name );
