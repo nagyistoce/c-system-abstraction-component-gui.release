@@ -16,6 +16,7 @@ struct site_info
 	CTEXTSTR mysql_server;
 
    CTEXTSTR address;
+   CTEXTSTR location_address;
 
 };
 
@@ -160,6 +161,14 @@ PTRSZVAL CPROC SetSiteAddress( PTRSZVAL psv, arg_list args )
    return psv;
 }
 
+PTRSZVAL CPROC SetSiteLocalAddress( PTRSZVAL psv, arg_list args )
+{
+	PARAM( args, CTEXTSTR, name );
+	struct site_info *site = (struct site_info*)psv;
+   site->local_address = StrDup( name );
+   return psv;
+}
+
 PTRSZVAL CPROC SetSiteSQL( PTRSZVAL psv, arg_list args )
 {
 	PARAM( args, LOGICAL, yes_no );
@@ -177,6 +186,7 @@ void ReadMap( void )
    AddConfigurationMethod( pch, "serves Mysql?%b", SetSiteSQL );
 	AddConfigurationMethod( pch, "Mysql Server %m", SetSiteSQLServer );
    AddConfigurationMethod( pch, "address %m", SetSiteAddress );
+   AddConfigurationMethod( pch, "local address %m", SetSiteLocalAddress );
 	ProcessConfigurationFile( pch, l.selected_map->filename, 0 );
    DestroyConfigurationHandler( pch );
 }
