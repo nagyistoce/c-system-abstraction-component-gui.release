@@ -321,7 +321,7 @@ PTRSZVAL CPROC SetSiteSQL( PTRSZVAL psv, arg_list args )
    return psv;
 }
 
-PTRSZVAL CPROC SetSiteSQL( PTRSZVAL psv, arg_list args )
+PTRSZVAL CPROC SetBingodayOption( PTRSZVAL psv, arg_list args )
 {
 	PARAM( args, LOGICAL, yes_no );
 	struct site_info *site = (struct site_info*)psv;
