@@ -33,7 +33,7 @@
 	__DefineRegistryMethod( WIDE( "video link" ), CommandDisconnectBData, WIDE("server core/CommandDisconnectBData"), ,name,void,( ), __LINE__)
 
 #define VideoLinkCommandStateChanged( name ) \
-	__DefineRegistryMethod( WIDE( "video link" ), CommandServeMaster, WIDE("server core/CommandStateChanged"), ,name,void,( void ), __LINE__)
+	__DefineRegistryMethod( WIDE( "video link" ), CommandServeMaster, WIDE("server core/CommandStateChanged"), ,name,void,( CTEXTSTR ), __LINE__)
 
 
 
@@ -61,7 +61,7 @@ struct video_server_interface {
 #define MarkMasterEnded()   if(VideoServerInterface) VideoServerInterface->MarkMasterEnded()
 #define MarkDelegateEnded()   if(VideoServerInterface) VideoServerInterface->MarkDelegateEnded()
 #define MarkParticipantEnded()   if(VideoServerInterface) VideoServerInterface->MarkParticipantEnded()
-#define StateChanged()     if(VideoServerInterface) VideoServerInterface->StateChanged()
+#define StateChanged(message)     if(VideoServerInterface) VideoServerInterface->StateChanged(message)
 
 #  ifndef DEFINES_VIDEO_SERVER_INTERFACE
 extern 

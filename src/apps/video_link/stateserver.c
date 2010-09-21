@@ -163,20 +163,20 @@ static void CPROC Mark##name( void )            \
 	if( !g.flags.bReadOnly )                     \
 	{                                            \
 	SQLCommandf( g.odbc,"UPDATE link_hall_state SET "sql_col_name"="#state" WHERE hall_id=%d", l.pMyHall->LinkHallState.hall_id ); \
-   if( important ) InvokeStateChanged();                                                                                     \
+   if( important ) InvokeStateChanged(important);                                                                              \
 	}                                                                                                                         \
 }
 
 // event specific for event-peer-notification module
-DefineInvokeMethod( StateChanged, void, (void), (void) );
+DefineInvokeMethod( StateChanged, void, (CTEXTSTR), (CTEXTSTR message), message );
 
 
-Mark( MasterServing, master_ready, "master_ready", 1, 1 );
-Mark( DelegateServing, delegate_ready, "delegate_ready", 1, 1 );
-Mark( Participating, participating, "participating", 1, 0 );
-Mark( MasterEnded, master_ready, "master_ready", 0, 1 );
-Mark( DelegateEnded, delegate_ready, "delegate_ready", 0, 1 );
-Mark( ParticipantEnded, participating, "participating", 0, 0 );
+Mark( MasterServing, master_ready, "master_ready", 1, "MASTER_READY" );
+Mark( DelegateServing, delegate_ready, "delegate_ready", 1, "DELEGATE_READY" );
+Mark( Participating, participating, "participating", 1, "PARTICIPANT_READY" );
+Mark( MasterEnded, master_ready, "master_ready", 0, "MASTER_DONE" );
+Mark( DelegateEnded, delegate_ready, "delegate_ready", 0, "DELEGATE_DONE" );
+Mark( ParticipantEnded, participating, "participating", 0, "PARTICIPANT_DONE" );
 Mark( TaskStarting, task_launched, "task_launched", 1, 0 );
 Mark( TaskDone, task_launched, "task_launched", 0, 0 );
 
