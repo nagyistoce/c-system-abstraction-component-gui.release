@@ -83,17 +83,18 @@ PRELOAD( InitNetworkService )
 	while( tmp2[0] );
 }
 
-static void VideoLinkCommandStateChanged( "network_event" )( void )
+static void VideoLinkCommandStateChanged( "network_event" )( CTEXTSTR event )
 {
 	INDEX idx;
 	INDEX idx2;
    struct network_notifier *notifier;
 	SOCKADDR *addr;
+   int length = StrLen( event );
 	LIST_FORALL( l.hosts, idx2, struct network_notifier *, notifier )
 	{
 		LIST_FORALL( notifier->peer_addresses, idx, SOCKADDR*, addr )
 		{
-			SendUDPEx( notifier->pc, "STATE CHANGE", 12, addr );
+			SendUDPEx( notifier->pc, event, length, addr );
 		}
 	}
 }
