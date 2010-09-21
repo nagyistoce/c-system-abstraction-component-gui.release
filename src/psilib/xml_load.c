@@ -303,7 +303,7 @@ PSI_CONTROL LoadXMLFrameOverEx( PSI_CONTROL parent, CTEXTSTR file DBG_PASS )
 																	  , file )
 									 , 0, 0
 									 , 420, 250, 0, NULL );
-			frame->save_name = tmp;
+			frame->save_name = StrDup( tmp );
 			if( tmp )
 			{
 				Release( tmp );
