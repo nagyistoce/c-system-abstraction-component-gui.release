@@ -36,6 +36,9 @@ static struct {
 	struct map_file *selected_map;
 	struct site_info *selected_site;
    int bingoday;
+
+	struct site_info *sql_site;
+
 } l;
 
 
@@ -212,7 +215,6 @@ void UpdateHostsFile( void )
 	CTEXTSTR root = OSALOT_GetEnvironmentVariable( "SystemRoot" );
 	TEXTCHAR tmp[256];
 	FILE *file;
-	struct site_info *sql_site = NULL;
 	snprintf( tmp, sizeof( tmp ), "%s/system32/drivers/etc/hosts", root );
 	file = fopen( tmp, "wt" );
 	fprintf( file, "# Copyright (c) 1993-2009 Microsoft Corp.\n" );
@@ -240,10 +242,16 @@ void UpdateHostsFile( void )
 	{
 		INDEX idx;
 		struct site_info *site;
+
+      l.sql_site = NULL;
 		LIST_FORALL( l.sites, idx, struct site_info *, site )
 		{
 			if( site->hosts_sql || ( site->mysql_server && site->mysql_server[0] ) )
-            sql_site = site;
+			{
+				if( l.sql_site )
+               ; // misconfiguration
+				l.sql_site = site;
+			}
 			fprintf( file, "%s %s %s vsrvr.%s bdata.%s\n"
 					 , site->host_address
 					 , site->name
@@ -255,37 +263,79 @@ void UpdateHostsFile( void )
 	}
 	fclose( file );
 
-	SACK_WriteProfileInt( "video_link_server", "Use bingoday for link state (else use 0)", l.bingoday );
-	SACK_WriteProfileString( "video_link_server", "My Hall Name", l.selected_site->name );
+}
 
+void UpdateMySQL( void )
+{
+   FILE *file;
 	system( "mysql.proxy.service uninstall" );
-	if( l.selected_site != sql_site )
+	if( l.selected_site != l.sql_site )
 	{
 		file = fopen( "mysql.proxy.service.conf", "wt" );
 		if( file )
 		{
-			fprintf( file, "MySQL: 3306 %s:3306\n", sql_site->address );
+			fprintf( file, "MySQL: 3306 %s:3306\n", l.sql_site->address );
 		}
       fclose( file );\
 		system( "mysql.proxy.service install" );
 	}
-	if( l.selected_site == sql_site )
+	if( l.selected_site == l.sql_site )
 	{
-		if( !sql_site->hosts_sql )
+		if( !l.sql_site->hosts_sql )
 		{
 			file = fopen( "mysql.proxy.service.conf", "wt" );
 			if( file )
 			{
-				fprintf( file, "MySQL: 3306 %s:3306\n", sql_site->mysql_server );
+				fprintf( file, "MySQL: 3306 %s:3306\n", l.sql_site->mysql_server );
 			}
 			fclose( file );
          system( "mysql.proxy.service install" );
 		}
 		else
 		{
-         lprintf( "Should try and setup and start mysql?  This server should have a mysql service" );
+			lprintf( "Should try and setup and start mysql?  This server should have a mysql service" );
+         system( "mysql/bin/mysqld install" );
+         system( "net start MySQL" );
 		}
 	}
+
+}
+
+void UpdateEventMap( void)
+{
+	INDEX idx;
+	INDEX idx2;
+	int iSend;
+	struct site_info *site;
+
+   TEXTCHAR tmp_iface[256];
+	TEXTCHAR tmp_send[256];
+
+
+	//LIST_FORALL( l.sites, idx, struct site_info *, site )
+	{
+		SACK_WriteProfileString( "video_link_server", "Video Server/Service Events/interface 1", l.selected_site->address );
+		SACK_WriteProfileString( "video_link_server", "Video Server/Service Events/interface 2", l.selected_site->local_address );
+	}
+   iSend = 1;
+	LIST_FORALL( l.sites, idx, struct site_info *, site )
+	{
+		if( site != l.selected_site )
+		{
+			snprintf( tmp_send, sizeof( tmp_send ), "Video Server/Service Events/interface 1/Send To %d", iSend );
+         iSend++;
+			SACK_WriteProfileString( "video_link_server", tmp_send, site->address );
+
+		}
+	}
+	snprintf( tmp_send, sizeof( tmp_send ), "Video Server/Service Events/interface 1/Send To %d", iSend );
+	SACK_WriteProfileString( "video_link_server", tmp_send, "" );
+
+	snprintf( tmp_send, sizeof( tmp_send ), "Video Server/Service Events/interface 2/Send To 1" );
+	SACK_WriteProfileString( "video_link_server", tmp_send, "172.17.255.255" );
+	snprintf( tmp_send, sizeof( tmp_send ), "Video Server/Service Events/interface 2/Send To 2" );
+	SACK_WriteProfileString( "video_link_server", tmp_send, "" );
+
 }
 
 void UpdateConfiguration( void )
@@ -298,7 +348,13 @@ void UpdateConfiguration( void )
 
    UpdateHostsFile();
 
+	SACK_WriteProfileInt( "video_link_server", "Use bingoday for link state (else use 0)", l.bingoday );
+	SACK_WriteProfileString( "video_link_server", "My Hall Name", l.selected_site->name );
 
+
+	UpdateMySQL();
+
+   UpdateEventMap();
 
 }
 
