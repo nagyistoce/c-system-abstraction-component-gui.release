@@ -1331,6 +1331,8 @@ RealVLogFunction  _vxlprintf ( _32 level DBG_PASS )
 RealLogFunction _xlprintf( _32 level DBG_PASS )
 {
 	//EnterCriticalSec( &next_lprintf.cs );
+	if( !syslog_local )
+		return _null_lprintf;
 #if _DEBUG
 	next_lprintf.pFile = pFile;
 	next_lprintf.nLine = nLine;
