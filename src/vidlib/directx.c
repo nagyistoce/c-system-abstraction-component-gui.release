@@ -1,3 +1,4 @@
+#if 0
 #include <stdhdrs.h>
 #include <vidlib/vidstruc.h>
 #include <render.h>
@@ -119,4 +120,5 @@ void EnableDirectX( PRENDERER render )
 
 }
 
+#endif
 #endif
