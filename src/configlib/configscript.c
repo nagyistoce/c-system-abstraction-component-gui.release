@@ -356,8 +356,15 @@ static PTEXT CPROC FilterLines( POINTER *scratch, PTEXT buffer )
       data->lastread = FALSE;
 		data->linebuf = SegAppend( data->linebuf, buffer );
 	}
+#if 0
+	// this routine is a low level raw data input, line result routine.
+   // it would be the sort of thing that produces zerosegs.
+   // this will NEVER run - the above condition catches it.
 	else if( buffer && !GetTextSize( buffer ) )
 	{
+		// if the buffer is a zeroseg, then it's a end of line marker.
+		// assuming other things filter before this.... in reality
+      // burst returns newlines I think?
       PTEXT text = data->linebuf;
 		data->lastread = FALSE;
 		Release( scratch[0] );
@@ -374,6 +381,7 @@ static PTEXT CPROC FilterLines( POINTER *scratch, PTEXT buffer )
 			return buffer; // pass it on to others - end of stream..
 		}
 	}
+#endif
 	else if( !buffer )
 	{
 		if( data->lastread )
