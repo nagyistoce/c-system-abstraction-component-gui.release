@@ -185,7 +185,11 @@ SYSLOG_PROC  void SYSLOG_API  SetSystemLoggingLevel ( _32 nLevel );
 
 // int result is useless... but allows this to be
 // within expressions, which with this method should be easy.
-typedef INDEX (CPROC*RealVLogFunction)(CTEXTSTR format, va_list args );
+typedef INDEX (CPROC*RealVLogFunction)(CTEXTSTR format, va_list args )
+#ifdef GCC
+	__attribute__ ((__format__ (__printf__, 1, 2)))
+#endif
+	;
 typedef INDEX (CPROC*RealLogFunction)(CTEXTSTR format,...)
 #ifdef GCC
 	__attribute__ ((__format__ (__printf__, 1, 2)))
@@ -338,12 +342,6 @@ enum {
 	// of messages with the 1 bit set.
 #define LOG_CUSTOM_BITS 0xFFFFFF  // mask of bits which may be used to enable and disable custom logging
 };
-//#  error "Unsupported compiler - No or broken __VA_ARGS__ (notes within)"
-// even if one figured out how to do lprintf some other way
-// __VA_ARGS__ are used in PSIlib.... and are not possible
-// to construct the macros without.  (well longhand expansion I suppose)
-#if 0 // just delete this line... endif remains.
-#endif
 
  // this is a flag set consisting of 0 or more or'ed symbols
 enum SyslogTimeSpecifications {
@@ -354,36 +352,15 @@ enum SyslogTimeSpecifications {
  SYSLOG_TIME_DELTA   = 8, // log the difference in time instead of the absolute time
  SYSLOG_TIME_CPU     =16 // logs cpu ticks... implied delta
 };
+
 /* Specify how time is logged. */
 SYSLOG_PROC void SYSLOG_API SystemLogTime( _32 enable );
-
-#if !defined( DO_LOGGING ) || defined( NO_LOGGING )
-// any kinda semi decent compiler will optimize this gone...
-#define OutputLogString(s) //do{}while(0)
-#define Log(s) //do{}while(0)
-#define Log1(s,p1) //do{}while(0)
-#define Log2(s,p1,p2) //do{}while(0)
-#define Log3(s,p1,p2,p3) //do{}while(0)
-#define Log4(s,p1,p2,p3,p4) //do{}while(0)
-#define Log5(s,p1,p2,p3,p4,p5) //do{}while(0)
-#define Log6(s,p1,p2,p3,p4,p5,p6) //do{}while(0)
-#define Log7(s,p1,p2,p3,p4,p5,p6,p7) //do{}while(0)
-#define Log8(s,p1,p2,p3,p4,p5,p6,p7,p8) //do{}while(0)
-#define Log9(s,p1,p2,p3,p4,p5,p6,p7,p8,p9) //do{}while(0)
-#define Log10(s,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10) //do{}while(0)
-#else
-#ifdef __cplusplus
-//namespace std {
-#endif
-#ifdef __cplusplus
-//};
-#endif
 
 #define OutputLogString(s) SystemLog(s)
 /* Depricated. Logs a format string that takes 0 parameters.
    See Also
    <link sack::logging::lprintf, lprintf>                    */
-#define Log(s)                                   lprintf( WIDE("%s"), s )
+#define Log(s)                                   SystemLog( s )
 /* Depricated. Logs a format string that takes 1 parameter.
    See Also
    <link sack::logging::lprintf, lprintf>                    */
@@ -424,8 +401,6 @@ SYSLOG_PROC void SYSLOG_API SystemLogTime( _32 enable );
    See Also
    <link sack::logging::lprintf, lprintf>                    */
 #define Log10(s,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10)  lprintf( s, p1, p2, p3,p4,p5,p6,p7,p8,p9,p10 )
-
-#endif
 
 LOGGING_NAMESPACE_END
 #ifdef __cplusplus
