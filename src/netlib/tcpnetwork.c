@@ -1310,7 +1310,7 @@ NETWORK_PROC( void, SetTCPNoDelay)( PCLIENT pClient, int bEnable )
                    TCP_NODELAY,
                    (const char *)&bEnable, sizeof(bEnable) ) == SOCKET_ERROR )
    {
-   	Log1( WIDE("Error setting Delay to : %d"), bEnable );
+   	lprintf( WIDE("Error(%d) setting Delay to : %d"), WSAGetLastError(), bEnable );
       // log some sort of error... and ignore...
    }
 }
@@ -1323,7 +1323,7 @@ NETWORK_PROC( void, SetClientKeepAlive)( PCLIENT pClient, int bEnable )
                    SO_KEEPALIVE,
                    (const char *)&bEnable, sizeof(bEnable) ) == SOCKET_ERROR )
    {
-   	Log1( WIDE("Error setting KeepAlive to : %d"), bEnable );
+   	lprintf( WIDE("Error(%d) setting KeepAlive to : %d"), WSAGetLastError(), bEnable );
       // log some sort of error... and ignore...
    }
 }
