@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
 
-#set( CMAKE_VERBOSE_MAKEFILE  1 )
-#message( ${CMAKE_GENERATOR} )
-
 set(CMAKE_BUILD_TYPE "Debug" CACHE STRING
       "Set build type")
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
