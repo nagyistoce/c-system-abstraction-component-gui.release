@@ -1,0 +1,9 @@
+#include <windows.h>
+#include "resource.h"
+
+ICO_RELAY ICON "relay.ico"
+
+
+// Checked in by: $Author$
+// $Revision$
+// $Log$
