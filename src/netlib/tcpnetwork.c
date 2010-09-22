@@ -1323,7 +1323,7 @@ NETWORK_PROC( void, SetClientKeepAlive)( PCLIENT pClient, int bEnable )
                    SO_KEEPALIVE,
                    (const char *)&bEnable, sizeof(bEnable) ) == SOCKET_ERROR )
    {
-   	Log1( WIDE("Error setting Delay to : %d"), bEnable );
+   	Log1( WIDE("Error setting KeepAlive to : %d"), bEnable );
       // log some sort of error... and ignore...
    }
 }
