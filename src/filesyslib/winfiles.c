@@ -18,7 +18,7 @@ struct file{
 	int fullname_size;
 
 	PLIST handles; // HANDLE 's
-   PLIST files; // FILE *'s
+	PLIST files; // FILE *'s
 };
 
 struct Group {
@@ -30,15 +30,36 @@ static struct winfile_local_tag {
 	PLIST files;
 	PLIST groups;
 	PLIST handles;
-   LOGICAL have_default;
+	LOGICAL have_default;
 } winfile_local;
 
 #define l winfile_local
 
+static void InitGroups( void )
+{
+	struct Group *group;
+	TEXTCHAR tmp[256];
+	// known handle '0' is 'default' which is CurrentWorkingDirectory at load.
+	group = New( struct Group );
+	group->base_path = StrDup( GetCurrentPath( tmp, sizeof( tmp ) ) );
+	group->name = StrDup( "Default" );
+	AddLink( &l.groups, group );
+	// known handle '1' is the program's load path.
+	group = New( struct Group );
+	group->base_path = StrDup( GetProgramPath() );
+	group->name = StrDup( "Program Path" );
+	AddLink( &l.groups, group );
+	l.have_default = TRUE;
+}
+
 static struct Group *GetGroupFilePath( CTEXTSTR group )
 {
 	struct Group *filegroup;
-   INDEX idx;
+	INDEX idx;
+	if( !l.groups )
+	{
+		InitGroups();
+	}
 	LIST_FORALL( l.groups, idx, struct Group *, filegroup )
 	{
 		if( StrCaseCmp( filegroup->name, group ) == 0 )
@@ -46,7 +67,7 @@ static struct Group *GetGroupFilePath( CTEXTSTR group )
          break;
 		}
 	}
-   return filegroup;
+	return filegroup;
 }
 
 int  GetFileGroup ( CTEXTSTR groupname, CTEXTSTR default_path )
@@ -60,9 +81,9 @@ int  GetFileGroup ( CTEXTSTR groupname, CTEXTSTR default_path )
 			snprintf( tmp_ent, sizeof( tmp_ent ), "file group/%s", groupname );
 			//lprintf( "option to save is %s", tmp );
 #ifdef __NO_OPTIONS__
-         tmp[0] = 0;
+			tmp[0] = 0;
 #else
-			SACK_GetProfileString( GetProgramName(), tmp_ent, default_path?default_path:"", tmp, sizeof( tmp ) );
+			if( l.have_default ) SACK_GetProfileString( GetProgramName(), tmp_ent, default_path?default_path:"", tmp, sizeof( tmp ) );
 #endif
 			if( tmp[0] )
 				default_path = tmp;
@@ -75,13 +96,13 @@ int  GetFileGroup ( CTEXTSTR groupname, CTEXTSTR default_path )
 		}
 		filegroup = New( struct Group );
 		filegroup->name = StrDup( groupname );
-      if( default_path )
+		if( default_path )
 			filegroup->base_path = StrDup( default_path );
 		else
-         filegroup->base_path = StrDup( "." );
+			filegroup->base_path = StrDup( "." );
 		AddLink( &l.groups, filegroup );
 	}
-   return FindLink( &l.groups, filegroup );
+	return FindLink( &l.groups, filegroup );
 }
 
 TEXTSTR GetFileGroupText ( int group, TEXTSTR path, int path_chars )
@@ -127,7 +148,7 @@ int  SetGroupFilePath ( CTEXTSTR group, CTEXTSTR path )
 
 void SetDefaultFilePath( CTEXTSTR path )
 {
-   TEXTSTR tmp_path = NULL;
+	TEXTSTR tmp_path = NULL;
 	struct Group *filegroup;
 	filegroup = (struct Group *)GetLink( &l.groups, 0 );
 #ifndef UNDER_CE
@@ -137,7 +158,7 @@ void SetDefaultFilePath( CTEXTSTR path )
 		int len;
 		GetCurrentPath( here, sizeof( here ) );
 		tmp_path = NewArray( TEXTCHAR, len = ( StrLen( here ) + StrLen( path ) ) );
-      snprintf( tmp_path, len, "%s/%s", here, path + 2 );
+		snprintf( tmp_path, len, "%s/%s", here, path + 2 );
 	}
 #endif
 	if( l.groups && filegroup )
@@ -274,13 +295,14 @@ HANDLE sack_open( int group, CTEXTSTR filename, int opts, ... )
 #endif
 		return INVALID_HANDLE_VALUE;
 	}
-   if( handle != INVALID_HANDLE_VALUE )
+	if( handle != INVALID_HANDLE_VALUE )
 		AddLink( &file->handles, handle );
 	return handle;
 }
 
 HANDLE sack_openfile( int group,CTEXTSTR filename, OFSTRUCT *of, int flags )
 {
+#undef OpenFile
    return (HANDLE)OpenFile(filename,of,flags);
 }
 
@@ -288,20 +310,20 @@ HANDLE sack_openfile( int group,CTEXTSTR filename, OFSTRUCT *of, int flags )
 struct file *FindFileByHandle( HANDLE file_file )
 {
 	struct file *file;
-   INDEX idx;
+	INDEX idx;
 	LIST_FORALL( l.files, idx, struct file *, file )
 	{
 		INDEX idx2;
-      HANDLE check;
+		HANDLE check;
 		LIST_FORALL( file->handles, idx2, HANDLE, check )
 		{
 			if( check == file_file )
 				break;
 		}
 		if( check )
-         break;
+			break;
 	}
-   return file;
+	return file;
 }
 
 
@@ -314,7 +336,7 @@ int sack_icreat( int group, CTEXTSTR file, int opts, ... )
 {
 	HANDLE h = sack_open( group, file, opts | O_CREAT );
 	AddLink( &l.handles, h );
-   return FindLink( &l.handles, h );
+	return FindLink( &l.handles, h );
 }
 
 int sack_close( HANDLE file_handle )

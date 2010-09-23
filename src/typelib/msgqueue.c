@@ -197,7 +197,7 @@ typedef struct MsgDataHandle
 	// so if the second open results before the create
 	// always increment this - otherwise the create open will
 	// obliterate the second opener's presense.
-	strncpy( pmq->name, name?name:WIDE("Anonymous"),127 );
+	StrCpyEx( pmq->name, name?name:WIDE("Anonymous"),127 );
 	pmq->name[127] = 0;
 	pmq->Cnt++;
 	if( bCreated )
@@ -246,7 +246,7 @@ typedef struct MsgDataHandle
 	// so if the second open results before the create
 	// always increment this - otherwise the create open will
 	// obliterate the second opener's presense.
-	StrCpy( pmq->name, name?name:WIDE("Anonymous") );
+	StrCpyEx( pmq->name, name?name:WIDE("Anonymous"), sizeof( pmq->name ) );
 	pmq->Cnt++;
 	if( bCreated )
 	{

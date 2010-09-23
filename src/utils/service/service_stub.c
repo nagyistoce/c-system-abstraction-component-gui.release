@@ -1,4 +1,7 @@
 #include <stdhdrs.h>
+#ifdef _MSC_VER
+#include <WinSvc.h>
+#endif
 
 static struct {
 	CTEXTSTR next_service_name;

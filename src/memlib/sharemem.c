@@ -357,11 +357,21 @@ inline _32 DoXchg( PV_32 p, _32 val ){  __asm__( WIDE("lock xchg (%2),%0"):"=a"(
 	if( sz & 1 )
 		(*(_8*)( ((PTRSZVAL)p) + sz - (sz&1) ) ) = n;
 #else
+#ifdef __64__
+	__stosq( (_64*)p, n, sz / 4 );
+	if( sz & 4 )
+		(*(_32*)( ((PTRSZVAL)p) + sz - (sz&7) ) ) = (_32)n;
+	if( sz & 2 )
+		(*(_16*)( ((PTRSZVAL)p) + sz - (sz&3) ) ) = (_16)n;
+	if( sz & 1 )
+		(*(_8*)( ((PTRSZVAL)p) + sz - (sz&1) ) ) = (_8)n;
+#else
 	__stosd( (_32*)p, n, sz / 4 );
 	if( sz & 2 )
-		(*(_16*)( ((PTRSZVAL)p) + sz - (sz&3) ) ) = n;
+		(*(_16*)( ((PTRSZVAL)p) + sz - (sz&3) ) ) = (_16)n;
 	if( sz & 1 )
-		(*(_8*)( ((PTRSZVAL)p) + sz - (sz&1) ) ) = n;
+		(*(_8*)( ((PTRSZVAL)p) + sz - (sz&1) ) ) = (_8)n;
+#endif
 #endif
 #else
    memset( p, n, sz );
@@ -1529,7 +1539,7 @@ PTRSZVAL GetFileSize( int fd )
 #ifdef DEBUG_OPEN_SPACE
 					lprintf( WIDE("Setting size to size of file (which was larger..") );
 #endif
-					(*dwSize) = lSize.QuadPart;
+					(*dwSize) = (PTRSZVAL)lSize.QuadPart;
 				}
 				if( bCreated )
 					(*bCreated) = 1;

@@ -822,11 +822,11 @@ void InvokeCallbacks( PTRANSFORM pt )
 	// (application of this matrix)
 	if( pt && pt->motion )
 	{
-	VECTOR v;
-	RCOORD speed_step;
-   RCOORD rotation_step;
-	if( !pt ) 
-		return;
+		//VECTOR v;
+		RCOORD speed_step;
+		RCOORD rotation_step;
+		if( !pt ) 
+			return;
 #ifdef _MSC_VER
 	if( _isnan( pt->m[0][0] ) )
 	{

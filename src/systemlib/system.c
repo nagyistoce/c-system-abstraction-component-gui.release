@@ -75,17 +75,18 @@ void OSALOT_AppendEnvironmentVariable(CTEXTSTR name, CTEXTSTR value)
 {
 #if defined( __WINDOWS__ ) || defined( __CYGWIN__ )
 	TEXTCHAR *oldpath;
-   TEXTCHAR *newpath;
+	TEXTCHAR *newpath;
+	_32 length;
 	{
 		int oldlen;
 		oldpath = NewArray( TEXTCHAR, oldlen = ( GetEnvironmentVariable( name, NULL, 0 ) + 1 ) );
 		GetEnvironmentVariable( name, oldpath, oldlen );
 	}
-	newpath = NewArray( TEXTCHAR, (_32)(strlen( oldpath ) + 2 + strlen(value)) );
-	sprintf( newpath, WIDE("%s;%s"), oldpath, value );
+	newpath = NewArray( TEXTCHAR, length = (_32)(strlen( oldpath ) + 2 + strlen(value)) );
+	snprintf( newpath, length, WIDE("%s;%s"), oldpath, value );
 	SetEnvironmentVariable( name, newpath );
 	Release( newpath );
-   Release( oldpath );
+	Release( oldpath );
 #else
 	TEXTCHAR *oldpath = getenv( name );
 	TEXTCHAR *newpath;
@@ -101,17 +102,18 @@ void OSALOT_PrependEnvironmentVariable(CTEXTSTR name, CTEXTSTR value)
 {
 #if defined( __WINDOWS__ )|| defined( __CYGWIN__ )
 	TEXTCHAR *oldpath;
-   TEXTCHAR *newpath;
+	TEXTCHAR *newpath;
+	int length;
 	{
 		int oldlen;
 		oldpath = NewArray( TEXTCHAR, oldlen = ( GetEnvironmentVariable( name, NULL, 0 ) + 1 ) );
 		GetEnvironmentVariable( name, oldpath, oldlen );
 	}
-	newpath = NewArray( TEXTCHAR, (_32)(strlen( oldpath ) + 2 + strlen(value)) );
-	sprintf( newpath, WIDE("%s;%s"), value, oldpath );
+	newpath = NewArray( TEXTCHAR, length = (_32)(strlen( oldpath ) + 2 + strlen(value)) );
+	snprintf( newpath, length, WIDE("%s;%s"), value, oldpath );
 	SetEnvironmentVariable( name, newpath );
 	Release( newpath );
-   Release( oldpath );
+	Release( oldpath );
 #else
 	TEXTCHAR *oldpath = getenv( name );
 	TEXTCHAR *newpath;
@@ -132,12 +134,12 @@ static void SetupSystemServices( void )
 		int length;
 #endif
 		TEXTCHAR filepath[256];
-		TEXTCHAR *ext, *e1, *e2;//, *filename;
+		TEXTCHAR *ext, *e1;
 		GetModuleFileName( NULL, filepath, sizeof( filepath ) );
 		ext = (TEXTSTR)StrRChr( (CTEXTSTR)filepath, '.' );
 		if( ext )
 			ext[0] = 0;
-      e1 = (TEXTSTR)pathrchr( filepath );
+		e1 = (TEXTSTR)pathrchr( filepath );
 		if( e1 )
 		{
 			e1[0] = 0;
@@ -146,7 +148,7 @@ static void SetupSystemServices( void )
 		}
 		else
 		{
-         l.filename = StrDup( filepath );
+			l.filename = StrDup( filepath );
 			l.load_path = StrDup( "" );
 		}
 

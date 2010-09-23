@@ -450,8 +450,8 @@ void RenderMonoChar( PFONT font
 		charright ++; // add one back in... so we have a delta between left and right
 		//Log2( WIDE("Reduced char right size %d to %d"), charright, charright - charleft );
 
-		character->offset = charleft;
-		character->size = charright - charleft;
+		character->offset = (_8)charleft;
+		character->size = (_8)(charright - charleft);
 
 		//Log7( WIDE("(%d(%c)) Character parameters: %d %d %d %d %d")
 		//	 , idx, idx< 32 ? ' ':idx
@@ -662,8 +662,8 @@ void RenderGreyChar( PFONT font
 		charright ++; // add one back in... so we have a delta between left and right
 		//Log2( WIDE("Reduced char right size %d to %d"), charright, charright - charleft );
 
-		character->offset = charleft;
-		character->size = charright - charleft;
+		character->offset = (_8)charleft;
+		character->size = (_8)(charright - charleft);
 
 		{
 			unsigned char *outdata;

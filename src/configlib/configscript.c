@@ -1581,8 +1581,9 @@ int IsPathVar( PCONFIG_ELEMENT pce, PTEXT *start )
 		pWords->format.position.spaces = 0;
 		{
 			PTEXT out = BuildLine( pWords );
-			TEXTSTR buf = NewArray( TEXTCHAR, GetTextSize( out ) + 1 );
-			StrCpy( buf, GetText( out ) );
+			_32 length;
+			TEXTSTR buf = NewArray( TEXTCHAR, length = GetTextSize( out ) + 1 );
+			StrCpyEx( buf, GetText( out ), length * sizeof( TEXTCHAR ) );
 			LineRelease( out );
 			LineRelease( pWords );
 			pce->data[0].multiword.pWords = buf;
@@ -1615,8 +1616,9 @@ int IsFileVar( PCONFIG_ELEMENT pce, PTEXT *start )
 		pWords->format.position.spaces = 0;
 		{
 			PTEXT out = BuildLine( pWords );
-			TEXTSTR buf = NewArray( TEXTCHAR, GetTextSize( out ) + 1 );
-			StrCpy( buf, GetText( out ) );
+			_32 length;
+			TEXTSTR buf = NewArray( TEXTCHAR, length = GetTextSize( out ) + 1 );
+			StrCpyEx( buf, GetText( out ), length * sizeof( TEXTCHAR ) );
 			LineRelease( out );
 			LineRelease( pWords );
 			pce->data[0].multiword.pWords = buf;
@@ -1649,8 +1651,9 @@ int IsFilePathVar( PCONFIG_ELEMENT pce, PTEXT *start )
 		 pWords->format.position.spaces = 0;
 		 {
 			 PTEXT out = BuildLine( pWords );
-			 TEXTSTR buf = NewArray( TEXTCHAR, GetTextSize( out ) + 1 );
-			 StrCpy( buf, GetText( out ) );
+			 _32 length;
+			 TEXTSTR buf = NewArray( TEXTCHAR, length = GetTextSize( out ) + 1 );
+			 StrCpyEx( buf, GetText( out ), length * sizeof( TEXTCHAR ) );
 			 LineRelease( out );
 			 LineRelease( pWords );
 			 pce->data[0].multiword.pWords = buf;

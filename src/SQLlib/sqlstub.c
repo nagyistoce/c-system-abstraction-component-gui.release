@@ -516,7 +516,7 @@ PTRSZVAL CPROC SetUser( PTRSZVAL psv, arg_list args )
 PTRSZVAL CPROC SetPassword( PTRSZVAL psv, arg_list args )
 {
 	PARAM( args, CTEXTSTR, pPassword );
-	StrCpy( g.Primary.info.pPASSWORD, pPassword );
+	StrCpyEx( g.Primary.info.pPASSWORD, pPassword, sizeof( g.Primary.info.pPASSWORD ) );
 	return psv;
 }
 
@@ -555,7 +555,7 @@ PTRSZVAL CPROC SetRequireBackupConnection( PTRSZVAL psv, arg_list args )
 PTRSZVAL CPROC SetBackupUser( PTRSZVAL psv, arg_list args )
 {
 	PARAM( args, CTEXTSTR, pUser );
-	StrCpy( g.Backup.info.pID, pUser );
+	StrCpyEx( g.Backup.info.pID, pUser, sizeof( g.Primary.info.pID ) );
 	return psv;
 }
 
@@ -563,7 +563,7 @@ PTRSZVAL CPROC SetBackupUser( PTRSZVAL psv, arg_list args )
 PTRSZVAL CPROC SetBackupPassword( PTRSZVAL psv, arg_list args )
 {
 	PARAM( args, CTEXTSTR, pPassword );
-	StrCpy( g.Backup.info.pPASSWORD, pPassword );
+	StrCpyEx( g.Backup.info.pPASSWORD, pPassword, sizeof( g.Backup.info.pPASSWORD ) );
 	return psv;
 }
 
@@ -613,7 +613,7 @@ LOGICAL EnsureLogOpen( PODBC odbc )
 				if( attempt )
 					snprintf( logname, sizeof( logname ), "sql%d.log", attempt );
 				else
-					StrCpy( logname, WIDE("sql.log") );
+					StrCpyEx( logname, WIDE("sql.log"), sizeof( logname ) );
 				attempt++;
 				// this is going to be more hassle to conserve
 				// than benefit merits.
@@ -3548,7 +3548,7 @@ static void LoadTasks( void )
       {
          PUPDATE_TASK task = (PUPDATE_TASK)Allocate( sizeof( UPDATE_TASK ) );
          lprintf( WIDE("Task: \'%s\'"), updatetask );
-         StrCpy( task->name, updatetask );
+		 StrCpyEx( task->name, updatetask, sizeof( task->name ) );
          task->PrimaryRecovered = (void(CPROC *)(PODBC,PODBC))LoadFunction( task->name, WIDE("_PrimaryRecovered") );
          // it better never be  a post _ which implies register convention
          //if( !task->PrimaryRecovered )
@@ -3771,7 +3771,7 @@ CTEXTSTR GetSQLOffsetDate( PODBC odbc, CTEXTSTR BeginOfDayType )
 #ifndef __NO_OPTIONS__
 	SACK_GetProfileString( "SACK/Day Offset", BeginOfDayType, "5:00", offset, sizeof( offset ) );	
 #else
-	strcpy( offset, "5:00" );
+	StrCpyEx( offset, "5:00", sizeof( offset ) );
 #endif
 	if( StrChr( offset, ':' ) )
 	{

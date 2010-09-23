@@ -1193,7 +1193,7 @@ static INDEX CPROC _real_vlprintf ( CTEXTSTR format, va_list args )
 #ifdef __WINDOWS__
 		// if there is a console, use stdout?"
 #endif
-		l.file = fopen( "default.log", "wt" );
+		l.file = sack_fopen( 1, "default.log", "wt" );
 		SystemLogTime( SYSLOG_TIME_CPU|SYSLOG_TIME_DELTA );
 
 		flags.bLogSourceFile = 1;

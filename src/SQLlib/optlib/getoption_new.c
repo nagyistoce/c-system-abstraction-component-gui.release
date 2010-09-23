@@ -58,58 +58,58 @@ extern OPTION_GLOBAL og;
 INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const char *pBranch, const char *pValue, int bCreate DBG_PASS )
 //#define GetOptionIndex( f,b,v ) GetOptionIndexEx( OPTION_ROOT_VALUE, f, b, v, FALSE )
 {
-   const char **start = NULL;
-   char namebuf[256];
-   char query[256];
+	const char **start = NULL;
+	char namebuf[256];
+	char query[256];
 	const char *p;
-   static const char *_program = NULL;
-   const char *program = NULL;
-   static const char *_system = NULL;
-   const char *system = NULL;
-   CTEXTSTR *result = NULL;
-   INDEX ID;
+	static const char *_program = NULL;
+	const char *program = NULL;
+	static const char *_system = NULL;
+	const char *system = NULL;
+	CTEXTSTR *result = NULL;
+	INDEX ID;
 	//, IDName; // Name to lookup
 	if( og.flags.bUseProgramDefault )
 	{
 		if( !_program )
 			_program = GetProgramName();
-      program = _program;
+		program = _program;
 	}
 	if( og.flags.bUseSystemDefault )
 	{
 		if( !_system )
 			_system = GetSystemName();
-      system = _system;
+		system = _system;
 	}
 	InitMachine();
-   // resets the search/browse cursor... not empty...
+	// resets the search/browse cursor... not empty...
 	FamilyTreeReset( GetOptionTree( odbc ) );
-   while( system || program || file || pBranch || pValue || start )
-   {
+	while( system || program || file || pBranch || pValue || start )
+	{
 #ifdef DETAILED_LOGGING
       lprintf( WIDE("Top of option loop") );
 #endif
-      if( !start || !(*start) )
+		if( !start || !(*start) )
 		{
 			if( program )
 				start = &program;
 			if( !start && system )
 				start = &system;
 
-         if( !start && file )
-         {
+			if( !start && file )
+			{
 #ifdef DETAILED_LOGGING
-            lprintf( WIDE("Token parsing at FILE") );
+				lprintf( WIDE("Token parsing at FILE") );
 #endif
-            start = &file;
-         }
-         if( !start && pBranch )
-         {
+				start = &file;
+			}
+			if( !start && pBranch )
+			{
 #ifdef DETAILED_LOGGING
             lprintf( WIDE("Token parsing at branch") );
 #endif
             start = &pBranch;
-         }
+			}
          if( !start && pValue )
          {
 #ifdef DETAILED_LOGGING
@@ -136,10 +136,10 @@ INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const ch
       }
       else
 		{
-         strncpy( namebuf, (*start), sizeof( namebuf )-1 );
+			StrCpyEx( namebuf, (*start), sizeof( namebuf )-1 );
          (*start) = NULL;
          start = NULL;
-      }
+	  }
 
       // remove references of 'here' during parsing.
 		if( strcmp( namebuf, "." ) == 0 )
@@ -262,7 +262,7 @@ _32 NewGetOptionStringValue( PODBC odbc, INDEX optval, char *buffer, _32 len DBG
 		if( result )
 		{
 			result_len = StrLen( result );
-			strncpy( buffer, result, min(len,result_len) );
+			StrCpyEx( buffer, result, min(len,result_len) );
 			buffer[min(len,result_len)] = 0;
 		}
 		else
