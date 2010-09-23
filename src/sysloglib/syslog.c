@@ -802,7 +802,7 @@ static void UDPSystemLog( const TEXTCHAR *message )
 		INDEX nSent;
 		int nSend;
 		static TEXTCHAR realmsg[1024];
-		nSend = snprintf( realmsg, sizeof( realmsg ) / sizeof( realmsg[0] ), /*"[%s]"*/ WIDE("%s")
+		nSend = snprintf( realmsg, sizeof( realmsg ), /*"[%s]"*/ WIDE("%s")
 				  //, pProgramName
 				  , message );
 		message = realmsg;

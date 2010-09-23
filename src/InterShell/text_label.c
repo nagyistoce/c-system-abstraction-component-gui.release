@@ -230,43 +230,43 @@ CTEXTSTR InterShell_GetControlLabelText( PMENU_BUTTON button, PPAGE_LABEL label,
 			{
 				if( var->flags.bString )
 				{
-					nOutput += snprintf( output + nOutput, sizeof( output ) - nOutput - 1
+					nOutput += snprintf( output + nOutput, sizeof( output ) - (nOutput - 1)*sizeof(TEXTCHAR)
 									 , WIDE("%s"), (*var->data.string_value) );
 				}
 				else if( var->flags.bConstString )
 				{
-					nOutput += snprintf( output + nOutput, sizeof( output ) - nOutput - 1
+					nOutput += snprintf( output + nOutput, sizeof( output ) - (nOutput - 1)*sizeof(TEXTCHAR)
 											 , WIDE("%s"), (var->data.string_const_value?var->data.string_const_value:WIDE("")) );
 				}
 				else if( var->flags.bInt )
 				{
-					nOutput += snprintf( output + nOutput, sizeof( output ) - nOutput - 1
+					nOutput += snprintf( output + nOutput, sizeof( output ) - (nOutput - 1)*sizeof(TEXTCHAR)
 									 , WIDE("%ld"), (*var->data.int_value) );
 				}
 				else if( var->flags.bProc )
 				{
 					//lprintf( "Calling external function to get value..." );
-					nOutput += snprintf( output + nOutput, sizeof( output ) - nOutput - 1
+					nOutput += snprintf( output + nOutput, sizeof( output ) - (nOutput - 1)*sizeof(TEXTCHAR)
 											 , WIDE("%s"), var->data.proc() );
 					//lprintf( "New output is [%s]", output );
 				}
 				else if( var->flags.bProcControlEx )
 				{
 					//lprintf( "Calling external function to get value..." );
-					nOutput += snprintf( output + nOutput, sizeof( output ) - nOutput - 1
+					nOutput += snprintf( output + nOutput, sizeof( output ) - (nOutput - 1)*sizeof(TEXTCHAR)
 											 , WIDE("%s"), var->data.proc_control_ex(var->psvUserData,button) );
 					//lprintf( "New output is [%s]", output );
 				}
 				else if( var->flags.bProcEx )
 				{
 					//lprintf( "Calling external extended function to get value..." );
-					nOutput += snprintf( output + nOutput, sizeof( output ) - nOutput - 1
+					nOutput += snprintf( output + nOutput, sizeof( output ) - (nOutput - 1)*sizeof(TEXTCHAR)
 											 , WIDE("%s"), var->data.proc_ex( var->psvUserData ) );
 					//lprintf( "New output is [%s]", output );
 				}
 				else
 				{
-					nOutput += snprintf( output + nOutput, sizeof( output ) - nOutput - 1
+					nOutput += snprintf( output + nOutput, sizeof( output ) - (nOutput - 1)*sizeof(TEXTCHAR)
 									 , WIDE("%%%s"), var->name );
 				}
 				if( label )
@@ -280,7 +280,7 @@ CTEXTSTR InterShell_GetControlLabelText( PMENU_BUTTON button, PPAGE_LABEL label,
 			{
 				static int n;
             n++;
-				nOutput += snprintf( output + nOutput, sizeof( output ) - nOutput - 1
+				nOutput += snprintf( output + nOutput, sizeof( output ) - (nOutput - 1)*sizeof(TEXTCHAR)
 								 , WIDE("[bad variable(%d)]"), n );
 			}
 		}
@@ -312,29 +312,29 @@ CTEXTSTR InterShell_TranslateLabelTextEx( PMENU_BUTTON button, PPAGE_LABEL label
 				{
 					if( var->flags.bString )
 					{
-						nOutput += snprintf( output + nOutput, buffer_len - nOutput - 1
+						nOutput += snprintf( output + nOutput, buffer_len - (nOutput - 1)*sizeof(TEXTCHAR)
 										 , WIDE("%s"), (*var->data.string_value) );
 					}
 					else if( var->flags.bConstString )
 					{
-						nOutput += snprintf( output + nOutput, buffer_len - nOutput - 1
+						nOutput += snprintf( output + nOutput, buffer_len - (nOutput - 1)*sizeof(TEXTCHAR)
 										 , WIDE("%s"), (var->data.string_const_value?var->data.string_const_value:WIDE("")) );
 					}
 					else if( var->flags.bInt )
 					{
-						nOutput += snprintf( output + nOutput, buffer_len - nOutput - 1
+						nOutput += snprintf( output + nOutput, buffer_len - (nOutput - 1)*sizeof(TEXTCHAR)
 										 , WIDE("%ld"), (*var->data.int_value) );
 					}
 					else if( var->flags.bProc )
 					{
                   //lprintf( "Calling external function to get value..." );
-                  nOutput += snprintf( output + nOutput, buffer_len - nOutput - 1
+                  nOutput += snprintf( output + nOutput, buffer_len - (nOutput - 1)*sizeof(TEXTCHAR)
 												 , WIDE("%s"), var->data.proc() );
 						//lprintf( "New output is [%s]", output );
 					}
 					else
 					{
-						nOutput += snprintf( output + nOutput, buffer_len - nOutput - 1
+						nOutput += snprintf( output + nOutput, buffer_len - (nOutput - 1)*sizeof(TEXTCHAR)
 										 , WIDE("%%%s"), var->name );
 					}
 					if( label )
@@ -358,17 +358,17 @@ CTEXTSTR InterShell_TranslateLabelTextEx( PMENU_BUTTON button, PPAGE_LABEL label
 					env_var = OSALOT_GetEnvironmentVariable( tmp );
 					if( env_var )
 					{
-						nOutput += snprintf( output + nOutput, buffer_len - nOutput - 1
+						nOutput += snprintf( output + nOutput, buffer_len - (nOutput - 1)*sizeof(TEXTCHAR)
 												 , WIDE( "%s" ), env_var );
 						variable += (env-variable);
 					}
 					else
 #endif
-						nOutput += snprintf( output + nOutput, buffer_len - nOutput - 1
+						nOutput += snprintf( output + nOutput, buffer_len - (nOutput - 1)*sizeof(TEXTCHAR)
 												 , WIDE("[bad variable]") );
 				}
 				else
-					nOutput += snprintf( output + nOutput, buffer_len - nOutput - 1
+					nOutput += snprintf( output + nOutput, buffer_len - (nOutput - 1)*sizeof(TEXTCHAR)
 											 , WIDE("[bad variable]") );
 			}
 		}
