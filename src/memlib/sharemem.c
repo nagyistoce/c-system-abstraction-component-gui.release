@@ -422,7 +422,8 @@ TEXTSTR StrCpyEx( TEXTSTR s1, CTEXTSTR s2, int n )
 {
 	int x;
 	for( x = 0; x < n && (s1[x]=s2[x]); x++ );
-	s1[n-1] = 0;
+	if( n )
+		s1[n-1] = 0;
 	return s1;
 }
 
