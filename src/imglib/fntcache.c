@@ -437,6 +437,8 @@ static _32 fonts_checked;
 void CPROC ListFontFile( PTRSZVAL psv, CTEXTSTR name, int flags )
 {
 	FT_Face face;
+	int face_idx;
+	int num_faces;
 	int error;
 	PDICT_ENTRY ppe;
 	PFONT_ENTRY pfe;
@@ -447,6 +449,9 @@ void CPROC ListFontFile( PTRSZVAL psv, CTEXTSTR name, int flags )
 	//	return;
 	lprintf( WIDE("Try font: %s"), name );
 //#ifdef IMAGE_LIBRARY_SOURCE
+	face_idx = 0;
+	do
+	{
 #ifdef __cplusplus_cli
 	char *name2 = CStrDup( name );
 	{
@@ -454,7 +459,7 @@ void CPROC ListFontFile( PTRSZVAL psv, CTEXTSTR name, int flags )
 #endif
 	error = FT_New_Face( fg.library
 							 , name
-							 , 0, &face );
+							 , face_idx, &face );
 #ifdef __cplusplus_cli
 	}
 #endif
@@ -466,11 +471,10 @@ void CPROC ListFontFile( PTRSZVAL psv, CTEXTSTR name, int flags )
 	else if( error )
 	{
 		Log2( WIDE("Error loading font: %s(%d)"), name, error );
-      return;
+		return;
 	}
-//#else
-//   return;
-//#endif
+
+	num_faces = face->num_faces;
 	ppe = AddPath( name, &pFileName );
 
 	{
@@ -509,16 +513,16 @@ void CPROC ListFontFile( PTRSZVAL psv, CTEXTSTR name, int flags )
 		pfs->files = NULL;
 		if( face->face_flags & FT_FACE_FLAG_FIXED_WIDTH )
 			pfs->flags.mono = 1;
-      else
+		else
 			pfs->flags.mono = 0;
 		LIST_FORALL( pfe->styles, idx, PFONT_STYLE, pfsCheck )
 		{
 			if( pfsCheck->name == pfs->name &&
 				pfsCheck->flags.mono == pfs->flags.mono )
 			{
-            Release( pfs );
+				Release( pfs );
 				pfs = pfsCheck;
-            break;
+				break;
 			}
 		}
 		if( !pfsCheck )
@@ -599,6 +603,8 @@ void CPROC ListFontFile( PTRSZVAL psv, CTEXTSTR name, int flags )
 //#ifdef IMAGE_LIBRARY_SOURCE
    FT_Done_Face( face );
 //#endif
+   face_idx++;
+   } while( face_idx < num_faces );
    return;
 }
 
@@ -1100,12 +1106,12 @@ void BuildFontCache( void )
 	MakeTextControl( status, 5, 45, 240, 19, TXT_COUNT_STATUS, WIDE(""), 0 );
 #endif
 //#endif
-   lprintf( WIDE("Building cache...") );
+	lprintf( WIDE("Building cache...") );
 	StartTime = 0;
 //#if 0 // erm? (images... no gui... ? )
 #ifdef __CAN_USE_CACHE_DIALOG__
 	DisplayFrame( status );
-   MakeTopmost( GetFrameRenderer( status ) );
+	MakeTopmost( GetFrameRenderer( status ) );
 #endif
 	timer = AddTimer( 100, UpdateStatus, (PTRSZVAL)status );
 //#endif
