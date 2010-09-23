@@ -355,7 +355,9 @@ void InvokeDeadstart( void )
 #endif
 #endif
 			  )
+			{
 				proc->proc();
+			}
 			proc->bUsed = 0;
 			bDispatched = 0;
 			if( proc_schedule )
