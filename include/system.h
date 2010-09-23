@@ -91,6 +91,7 @@ SYSTEM_PROC( _32, GetTaskExitCode )( PTASK_INFO task );
 
 SYSTEM_PROC( CTEXTSTR, GetProgramName )( void );
 SYSTEM_PROC( CTEXTSTR, GetProgramPath )( void );
+SYSTEM_PROC( CTEXTSTR, GetStartupPath )( void );
 
 // HandlePeerOutput is called whenever a peer task has generated output on stdout or stderr
 //   - someday evolution may require processing stdout and stderr with different event handlers

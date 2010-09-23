@@ -40,7 +40,7 @@ static struct {
 		BIT_FIELD bLog : 1;
 	} flags;
 	CTEXTSTR filename;  // pointer to just filename part...
-
+	TEXTCHAR *work_path;
 } local_systemlib;
 
 #define l local_systemlib
@@ -174,6 +174,7 @@ static void SetupSystemServices( void )
 			Release( oldpath );
 
 			GetCurrentPath( filepath, sizeof( filepath ) );
+			l.work_path = StrDup( filepath );
 			SetEnvironmentVariable( WIDE( "MY_WORK_PATH" ), filepath );
 		}
 #endif
@@ -938,6 +939,19 @@ CTEXTSTR GetProgramPath( void )
    return l.load_path;
 }
 
+CTEXTSTR GetStartupPath( void )
+{
+	if( !l.work_path )
+	{
+		SetupSystemServices();
+		if( !l.work_path )
+		{
+			DebugBreak();
+			return NULL;
+		}
+	}
+	return l.work_path;
+}
 
 
 SACK_SYSTEM_NAMESPACE_END
