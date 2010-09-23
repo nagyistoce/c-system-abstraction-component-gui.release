@@ -843,7 +843,7 @@ void DumpFontCache( void )
 			}
 		}
 		fprintf( out, WIDE("\n") );
-      linelen = 0;
+		linelen = 0;
 	}
 	sack_fclose( out );
 }
@@ -878,11 +878,11 @@ void DumpLoadedFontCache( void )
 
 	{
 		INDEX fontidx, styleidx, idx;
-      PFONT_ENTRY pfe;
+		PFONT_ENTRY pfe;
 		_32 nStyles = 0;
-      _32 nSizeFiles = 0;
+		_32 nSizeFiles = 0;
 		_32 nAltFiles = 0;
-      _32 nSizes = 0;
+		_32 nSizes = 0;
 		for( fontidx = 0; pfe = fg.pFontCache + fontidx, fontidx < fg.nFonts; fontidx++ )
 		{
 			PAPP_SIZE_FILE psf;
@@ -890,7 +890,7 @@ void DumpLoadedFontCache( void )
 			nStyles += pfe->nStyles;
 			for( styleidx = 0; pfs = ((PFONT_STYLE)pfe->styles) + styleidx, styleidx < pfe->nStyles; styleidx++ )
 			{
-            nSizeFiles += pfs->nFiles;
+				nSizeFiles += pfs->nFiles;
 				for( idx = 0; psf = pfs->appfiles + idx, idx < pfs->nFiles; idx++ )
 				{
 					nSizes    += psf->nSizes;
@@ -975,13 +975,13 @@ void DumpLoadedFontCache( void )
 					}
 					else
 						linelen += newlen;
-               fwrite( outbuf, 1, newlen, out );
+					fwrite( outbuf, 1, newlen, out );
 				}
 
 				{
 					PALT_SIZE_FILE pasf;
 					INDEX idx;
-               for( idx = 0; pasf = ((PALT_SIZE_FILE)psf->pAlternate) + idx, idx < psf->nAlternate; idx++ )
+					for( idx = 0; pasf = ((PALT_SIZE_FILE)psf->pAlternate) + idx, idx < psf->nAlternate; idx++ )
 					{
 						newlen = snprintf( outbuf, sizeof( outbuf ), WIDE("^%") _32f WIDE(":%") _32f 
 											 , IndexOf( build.pPathList, build.nPaths, pasf->path )
