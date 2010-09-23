@@ -972,7 +972,7 @@ static void TranslatePoints( Image dest, PSPRITE sprite )
 	x2 = (int)result[0]; // + sprite->curx;
 	if( x2 > sprite->maxx ) sprite->maxx = x2;
 	if( x2 < sprite->minx ) sprite->minx = x2;
-	y2 = result[1]; // + sprite->cury;
+	y2 = (int)result[1]; // + sprite->cury;
 	if( y2 > sprite->maxy ) sprite->maxy = y2;
 	if( y2 < sprite->miny ) sprite->miny = y2;
 	tmp[0] = (sprite->image->real_width) - sprite->hotx;
@@ -1098,7 +1098,7 @@ void UnmakeSprite( PSPRITE sprite, int bForceImageAlso )
 #ifdef DEBUG_TIMING
 	//lprintf( WIDE("input angle = %ld"), angle );
 #endif
-	sprite->angle = ( ( 2 * 3.14159268 ) * angle ) / 0x100000000LL;
+	sprite->angle = (float)(( ( 2 * 3.14159268 ) * angle ) / 0x100000000LL);
 #ifdef DEBUG_TIMING
 	//lprintf( WIDE("output angle si %g"), sprite->angle );
 #endif

@@ -1528,7 +1528,7 @@ int TextLike( PTEXT pText, CTEXTSTR string )
 {
 	CTEXTSTR data = GetText( pText );
 	if( data )
-		return !stricmp( data, string );
+		return !StrCaseCmp( data, string );
    return 0;
 }
 
@@ -1539,7 +1539,7 @@ int SameText( PTEXT l1, PTEXT l2 )
 	CTEXTSTR d1 = GetText( l1 );
 	CTEXTSTR d2 = GetText( l2 );
 	if( d1 && d2 )
-		return strcmp( d1, d2 );
+		return StrCmp( d1, d2 );
 	else if( d1 )
 		return 1;
 	else if( d2 )
@@ -1556,7 +1556,7 @@ int LikeText( PTEXT l1, PTEXT l2 )
 	size_t len2 = d2 ? strlen( d2 ) : 0;
 
 	if( d1 && d2 )
-		return strnicmp( d1, d2, textmin( len1, len2 ) );
+		return StrCaseCmpEx( d1, d2, textmin( len1, len2 ) );
 	else if( d1 )
 		return 1;
 	else if( d2 )

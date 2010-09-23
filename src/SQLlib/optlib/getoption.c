@@ -468,7 +468,7 @@ INDEX GetOptionValueIndexEx( PODBC odbc, INDEX ID )
 {
 	POPTION_TREE tree = GetOptionTreeEx( odbc );
 	if( tree->flags.bNewVersion )
-      return ID;
+		return ID;
 	{
 		char query[256];
 		CTEXTSTR result = NULL;
@@ -602,7 +602,7 @@ _32 GetOptionStringValueEx( PODBC odbc, INDEX optval, char *buffer, _32 len DBG_
 		if( result )
 		{
 			result_len = StrLen( result );
-			strncpy( buffer, result, min(len,result_len) );
+			StrCpyEx( buffer, result, min(len,result_len) );
 			buffer[min(len,result_len)] = 0;
 		}
 		else
@@ -766,7 +766,7 @@ INDEX SetOptionStringValue( INDEX optval, CTEXTSTR pValue )
 					  , tree->flags.bNewVersion?OPTION_VALUES:"option_values"
 					  , tree->flags.bNewVersion?"option_id":"value_id"
 					  , IDValue );
-		strncpy( value, pValue, sizeof( value )-1 );
+		StrCpyEx( value, pValue, sizeof( value )-1 );
 		newval = EscapeSQLBinary( og.Option, pValue, strlen( pValue ) );
 		if( IDValue && SQLQuery( og.Option, update, &result ) && result )
 		{
@@ -875,7 +875,7 @@ int SQLPromptINIValue(
       return strlen( lpszReturnBuffer );
 	}
 #endif
-	strncpy( lpszReturnBuffer, lpszDefault, cbReturnBuffer );
+	StrCpyEx( lpszReturnBuffer, lpszDefault, cbReturnBuffer );
 	lpszReturnBuffer[cbReturnBuffer-1] = 0;
 	return strlen( lpszReturnBuffer );
 }
@@ -908,16 +908,16 @@ SQLGETOPTION_PROC( int, SACK_GetPrivateProfileStringExx )( CTEXTSTR pSection
 				}
 				else
 				{
-               if( pDefaultbuf )
-						strncpy( pBuffer, pDefaultbuf, nBuffer );
+					if( pDefaultbuf )
+						StrCpyEx( pBuffer, pDefaultbuf, nBuffer );
 					else
-                  pBuffer[0] = 0;
+						pBuffer[0] = 0;
 				}
 			}
 			else
 			{
 				if( pDefaultbuf )
-					strncpy( pBuffer, pDefaultbuf, nBuffer );
+					StrCpyEx( pBuffer, pDefaultbuf, nBuffer );
 				else
 					pBuffer[0] = 0;
 			}

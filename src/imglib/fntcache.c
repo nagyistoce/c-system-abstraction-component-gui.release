@@ -1058,7 +1058,7 @@ void CPROC UpdateStatus( PTRSZVAL psvFrame )
    // in the positiion of image library, there is no controls to do...
 	SetCommonText( GetControl( (PCOMMON)psvFrame, TXT_TIME_STATUS ), msg );
 #endif
-	sprintf( msg, WIDE("Checked Fonts: %d")
+	snprintf( msg, sizeof( msg ), WIDE("Checked Fonts: %d")
 			 , fonts_checked
 			 );
 	lprintf( msg );

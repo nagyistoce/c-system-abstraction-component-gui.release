@@ -227,7 +227,7 @@ PTRSZVAL CPROC ScanFile( PTRSZVAL psv, INDEX idx, POINTER *item )
 #ifdef __cplusplus_cli
 	_64 dwSize, dwBigSize;
 #else
-	_32 dwSize, dwBigSize;
+	_32 dwSize;
 #ifdef WIN32
 #else
 	struct stat statbuf;

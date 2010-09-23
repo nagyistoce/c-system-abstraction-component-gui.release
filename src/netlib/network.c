@@ -217,7 +217,9 @@ NETWORK_PROC( int, GetMacAddress)(PCLIENT pc )//int get_mac_addr (char *device, 
 
 	return 0;
 #endif
+#else
 	return 0;
+
 #endif
 }
 

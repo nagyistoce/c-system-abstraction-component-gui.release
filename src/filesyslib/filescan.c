@@ -228,7 +228,7 @@ static void CPROC MatchFile( PTRSZVAL psvUser, CTEXTSTR name, int flags )
 typedef struct myfinddata {
 # ifdef _MSC_VER
 #define HANDLECAST (HANDLE)
-	HANDLE
+	intptr_t
 # else
 #define HANDLECAST
 	int 
@@ -272,8 +272,8 @@ typedef struct myfinddata {
 
 		if( base )
 		{
-			StrCpy( findbasename(pInfo), base );
-			StrCpyEx( findmask(pInfo), mask, MAX_PATH_NAME );
+			StrCpyEx( findbasename(pInfo), base, sizeof( findbasename(pInfo)) );
+			StrCpyEx( findmask(pInfo), mask, sizeof( findmask(pInfo)) );
 		}
 		else
 		{
@@ -281,7 +281,7 @@ typedef struct myfinddata {
 			if( p )
 			{
 				StrCpyEx( findbasename(pInfo), mask, p - mask + 1 );
-            StrCpyEx( findmask(pInfo), p + 1, MAX_PATH_NAME );
+				StrCpyEx( findmask(pInfo), p + 1, MAX_PATH_NAME );
 				//mask = p + 1;
 			}
 			else
@@ -292,7 +292,7 @@ typedef struct myfinddata {
 		}
 		snprintf( findmask, sizeof(findmask), WIDE("%s/*"), findbasename(pInfo) );
 		findhandle(pInfo) = findfirst( findmask, finddata(pInfo) );
-		if( findhandle(pInfo) == HANDLECAST -1 )
+		if( findhandle(pInfo) == -1 )
 		{
 			findclose( findhandle(pInfo) );
 			Release( *pInfo );

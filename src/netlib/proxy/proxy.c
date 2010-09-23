@@ -40,7 +40,7 @@ typedef struct route_tag {
 static struct local_proxy_tag
 {
 	struct proxy_flags{
-		BIT_FIELD not_first_run : 1
+		BIT_FIELD not_first_run : 1;
 	} flags;
 	PLIST pPendingList;
 
@@ -185,17 +185,15 @@ PPATH MakeNewPath( PROUTE pRoute, PCLIENT in, PCLIENT out )
 void CPROC TCPConnected( PCLIENT pc, int error )
 {
 	// delay connect finished...
-   Log( WIDE("Connection finished...") );
+	Log( WIDE("Connection finished...") );
 	{
-		PCLIENT pending;
-		INDEX idx;
 		// make sure we've set all data, and added it
 		// it IS possible that this routine will be called
 		// before the creator has finished initializing
 		// this secondary thing...
 		while( !GetNetworkLong( pc, NL_CONNECT_START ) )
 			Relinquish();
-      DeleteLink( &l.pPendingList, pc );
+		DeleteLink( &l.pPendingList, pc );
 	}
 	if( !error )
 	{
@@ -294,11 +292,11 @@ void AddRoute( int set_ip_transmit
 					, src_name?src_name:"0.0.0.0", src_port
 					, dest_name?dest_name:"0.0.0.0", dest_port );
 	if( route_name )
-		strcpy( route->name, route_name );
+		StrCpyEx( route->name, route_name, sizeof( route->name ) );
 	else
-		strcpy( route->name, WIDE("unnamed") );
+		StrCpyEx( route->name, WIDE("unnamed"), sizeof( route->name ) );
 	route->flags.ip_transmit = set_ip_transmit;
-   route->flags.ip_route = set_ip_route;
+	route->flags.ip_route = set_ip_route;
 	route->in = CreateSockAddress( src_name, src_port );
 	route->out = CreateSockAddress( dest_name, dest_port );
  	route->paths = NULL;
@@ -543,16 +541,9 @@ static char *filename;
 static void CPROC Start( void )
 {
 	FILE *file;
-   // should clear all routes here, and reload them.
-   file = fopen( filename, WIDE("rb") );
+	// should clear all routes here, and reload them.
+	file = sack_fopen( 0, filename, WIDE("rb") );
 	lprintf( "config would be [%s]", filename );
-#ifndef BUILD_SERVICE
-	SetSystemLog( SYSLOG_FILE, stdout );
-   SystemLogTime( SYSLOG_TIME_HIGH|SYSLOG_TIME_DELTA );
-	//SetAllocateLogging( TRUE );
-	// true to disable...
-	SetAllocateDebug( TRUE );
-#endif
 
 	if( !l.flags.not_first_run )
 	{

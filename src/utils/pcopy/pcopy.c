@@ -232,10 +232,10 @@ int ScanFile( PFILESOURCE pfs )
 	//printf("Attempt to scan: %s\n", pfs->name );
 	{
 		INDEX idx;
-      CTEXTSTR exclude;
+		CTEXTSTR exclude;
 		//LIST_FORALL( g.excludes, idx, CTEXTSTR, exclude )
 		{
-         /*
+			/*
 			if( stristr( pfs->name, exclude ) )
 			{
 				return 0;
@@ -250,7 +250,7 @@ int ScanFile( PFILESOURCE pfs )
          pfs->flags.bSystem = 1;
 			return 0;
 		}
-		file = fopen( pfs->name, WIDE("rb") );
+		file = sack_fopen( 0, pfs->name, WIDE("rb") );
 		if( file )
 		{
 			pfs->flags.bScanned = 1;
@@ -399,7 +399,7 @@ int ScanFile( PFILESOURCE pfs )
 			{
 				TEXTSTR path = (TEXTSTR)OSALOT_GetEnvironmentVariable( "PATH" );
 				TEXTSTR tmp;
-            static TEXTCHAR tmpfile[256 + 64];
+				static TEXTCHAR tmpfile[256 + 64];
 				while( tmp = strchr( path, ';' ) )
 				{
 					tmp[0] = 0;
@@ -418,15 +418,15 @@ int ScanFile( PFILESOURCE pfs )
 					}
 					else
 					{
-						FILE *file = fopen( tmpfile, "rb" );
+						FILE *file = sack_fopen( 0, tmpfile, "rb" );
 						if( file )
 						{
 							AddDependCopy( pfs, tmpfile )->flags.bExternal = 1;
-                     fclose( file );
+							fclose( file );
 							return 0;
 						}
 					}
-               path = tmp+1;
+					path = tmp+1;
 				}
 
 			}
@@ -454,7 +454,7 @@ int main( int argc, CTEXTSTR *argv )
 			printf( WIDE("EROR: Final argument is not a directory\n") );
 		return 1;
 	}
-	strcpy( g.SystemRoot, getenv( WIDE("SystemRoot") ) );
+	StrCpy( g.SystemRoot, getenv( WIDE("SystemRoot") ) );
 	{
 		int c;
 		for( c = 1; c < argc-1; c++ )
@@ -475,14 +475,14 @@ int main( int argc, CTEXTSTR *argv )
 					case 'X':
 						if( argv[c][ch+1] )
 						{
-							AddLink( &g.excludes, strdup( argv[c] + ch + 1 ) );
+							AddLink( &g.excludes, StrDup( argv[c] + ch + 1 ) );
 							done = 1; // skip remaining characters in parameter
 						}
 						else
 						{
 							if( ( c + 1 ) < (argc-1) )
 							{
-								AddLink( &g.excludes, strdup( argv[c+1] ) );
+								AddLink( &g.excludes, StrDup( argv[c+1] ) );
 								c++; // skip one word...
 								done = 1; // skip remining characters, go to next parameter (c++)
 							}
@@ -492,12 +492,12 @@ int main( int argc, CTEXTSTR *argv )
 								exit(1);
 							}
 						}
-                  break;
+						break;
 					}
 					ch++;
 				}
 			}
-         else
+			else
 				AddFileCopy( argv[c ]);
 		}
 	}

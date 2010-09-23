@@ -18,7 +18,7 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL}"
                   PREFIX ""
                   SUFFIX ""
-                  FOLDER "Intershell/plugins" 
+                  FOLDER "InterShell/plugins" 
                   )
 target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} ${VLC_INTERFACE} sack_widgets)
 install_literal_product( ${PROJECT_NAME} InterShell/plugins ) 
