@@ -364,9 +364,9 @@ static void LoadOptions( char *filename )
 		flags.bLogOpenBackup = 1;
 		flags.bLogProgram = 0;
 	}
-   // set all default parts of the name.
-   SetDefaultName( NULL, NULL, NULL );
-   // this overrides options with options available from SQL database.
+	// set all default parts of the name.
+	SetDefaultName( NULL, NULL, NULL );
+	// this overrides options with options available from SQL database.
 	if( SACK_GetProfileIntEx( GetProgramName(), WIDE("SACK/Logging/Default Log Location is current directory"), 0, TRUE ) )
 	{
 		// override filepath, if log exception.
