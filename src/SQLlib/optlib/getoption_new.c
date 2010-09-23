@@ -226,23 +226,23 @@ INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const ch
 
 _32 NewGetOptionStringValue( PODBC odbc, INDEX optval, char *buffer, _32 len DBG_PASS )
 {
-   char query[256];
-   CTEXTSTR result = NULL;
-   int last_was_session, last_was_system;
+	char query[256];
+	CTEXTSTR result = NULL;
+	int last_was_session, last_was_system;
 	INDEX _optval;
-   _32 result_len = 0;
-   len--;
+	_32 result_len = 0;
+	len--;
 
-   snprintf( query, sizeof( query ), "select override_value_id from "OPTION_EXCEPTION" "
+	snprintf( query, sizeof( query ), "select override_value_id from "OPTION_EXCEPTION" "
             "where ( apply_from<=now() or apply_from=0 )"
             "and ( apply_until>now() or apply_until=0 )"
             "and ( system_id=%d or system_id=0 )"
             "and option_id=%d "
            , og.SystemID
            , optval );
-   last_was_session = 0;
-   last_was_system = 0;
-   PushSQLQueryEx( odbc );
+	last_was_session = 0;
+	last_was_system = 0;
+	PushSQLQueryEx( odbc );
 	for( SQLQuery( odbc, query, &result ); result; FetchSQLResult( odbc, &result ) )
 	{
 		_optval = optval;
@@ -252,7 +252,7 @@ _32 NewGetOptionStringValue( PODBC odbc, INDEX optval, char *buffer, _32 len DBG
 	}
 	snprintf( query, sizeof( query ), "select string from "OPTION_VALUES" where option_id=%ld", optval );
 	// have to push here, the result of the prior is kept outstanding
-   // if this was not pushed, the prior result would evaporate.
+	// if this was not pushed, the prior result would evaporate.
 	PushSQLQueryEx( odbc );
 	buffer[0] = 0;
 	//lprintf( WIDE("do query for value string...") );
@@ -262,7 +262,7 @@ _32 NewGetOptionStringValue( PODBC odbc, INDEX optval, char *buffer, _32 len DBG
 		if( result )
 		{
 			result_len = StrLen( result );
-			StrCpyEx( buffer, result, min(len,result_len) );
+			StrCpyEx( buffer, result, min(len,result_len+1)*sizeof(TEXTCHAR) );
 			buffer[min(len,result_len)] = 0;
 		}
 		else
@@ -271,14 +271,14 @@ _32 NewGetOptionStringValue( PODBC odbc, INDEX optval, char *buffer, _32 len DBG
 		}
 	}
 	PopODBCEx( odbc );
-   PopODBCEx( odbc );
-   return result_len;
+	PopODBCEx( odbc );
+	return result_len;
 }
 
 
 int NewGetOptionBlobValueOdbc( PODBC odbc, INDEX optval, char **buffer, _32 *len )
 {
-   CTEXTSTR *result = NULL;
+	CTEXTSTR *result = NULL;
 	_32 tmplen;
 	if( !len )
       len = &tmplen;

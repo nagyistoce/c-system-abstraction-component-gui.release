@@ -1124,12 +1124,12 @@ void BuildFontCache( void )
 	{
 #ifdef HAVE_ENVIRONMENT
 		CTEXTSTR name = OSALOT_GetEnvironmentVariable( "windir" );
-      int len;
+		int len;
 		TEXTSTR tmp = NewArray( TEXTCHAR, len = strlen( name ) + 10 );
-      snprintf( tmp, len * sizeof( TEXTCHAR ), "%s\\fonts", name );
+		snprintf( tmp, len * sizeof( TEXTCHAR ), "%s\\fonts", name );
 		while( ScanFiles( tmp, WIDE("*.ttf\t*.fon\t*.TTF\t*.pcf.gz\t*.pf?\t*.fnt\t*.psf.gz"), &data
 							 , ListFontFile, SFF_SUBCURSE, 0 ) );
-      Release( tmp );
+		Release( tmp );
 #endif
 	}
 #ifdef __LINUX__	                     	
