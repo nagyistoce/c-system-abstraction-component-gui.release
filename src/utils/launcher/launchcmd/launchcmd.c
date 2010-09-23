@@ -109,10 +109,10 @@ static PTRSZVAL CPROC SendConsoleInput( PTHREAD thread )
 
 static void CPROC Connected( PCLIENT pc_server, PCLIENT pc_new )
 {
-   clients++;
+	clients++;
 	SetNetworkReadComplete( pc_new, Received );
 	SetNetworkCloseCallback( pc_new, Closed );
-   ThreadTo( SendConsoleInput, (PTRSZVAL)pc_new );
+	ThreadTo( SendConsoleInput, (PTRSZVAL)pc_new );
 #ifdef CONSOLE
 	//lprintf( "Sending back status 'connect ok'" );
 	printf( "~CONNECT OK\n" );
@@ -153,12 +153,12 @@ int main( int argc, char **argv )
 	}
 	if( BeginNetwork() )
 	{
-		static char lpCmd[4096];
+		static TEXTCHAR lpCmd[4096];
 		int ofs = 0;
 		int n;
 		int want_restart = 0;
-      int want_hide = 0;
-      int listen_output = 0;
+		int want_hide = 0;
+		int listen_output = 0;
 		int arg_ofs;
 		_32 sequence = GetTickCount(); // this should be fairly unique...
 #ifdef CONSOLE
@@ -166,7 +166,7 @@ int main( int argc, char **argv )
 		fflush( stdout );
 #endif
 		{
-         int done = 0;
+			int done = 0;
 			for( arg_ofs = 1; !done && arg_ofs < argc; arg_ofs++ )
 			{
 				if( argv[arg_ofs][0] == '-' )
@@ -205,17 +205,17 @@ int main( int argc, char **argv )
 
 						break;
 					case 'r':
-                  want_restart = 1;
-                  break;
+						want_restart = 1;
+						break;
 					case 'h':
-                  want_hide = 1;
+						want_hide = 1;
 						break;
 					case 's':
-                  if( argv[arg_ofs][2] )
+						if( argv[arg_ofs][2] )
 							send_to = CreateSockAddress( argv[arg_ofs]+2, 3006 );
 						else
 						{
-                     arg_ofs++;
+							arg_ofs++;
 							send_to = CreateSockAddress( argv[arg_ofs], 3006 );
 						}
                   break;
@@ -239,17 +239,17 @@ int main( int argc, char **argv )
 		}
 		ofs = 0;
 		if( listen_output )
-			ofs += snprintf( lpCmd + ofs, sizeof( lpCmd ) - ofs, "~capture%d", track_port );
+			ofs += snprintf( lpCmd + ofs, sizeof( lpCmd ) - ofs * sizeof(TEXTCHAR), "~capture%d", track_port );
 
 		if( want_hide )
-         ofs += snprintf( lpCmd + ofs, sizeof( lpCmd ) - ofs, "~hide" );
+			ofs += snprintf( lpCmd + ofs, sizeof( lpCmd ) - ofs * sizeof(TEXTCHAR), "~hide" );
 
 		if( class_name )
-			ofs += snprintf( lpCmd + ofs, sizeof( lpCmd ) - ofs, "$%s", class_name );
-		ofs += snprintf( lpCmd + ofs, sizeof( lpCmd ) - ofs, "^%ld%c", sequence, want_restart?'@':'#' );
+			ofs += snprintf( lpCmd + ofs, sizeof( lpCmd ) - ofs * sizeof(TEXTCHAR), "$%s", class_name );
+		ofs += snprintf( lpCmd + ofs, sizeof( lpCmd ) - ofs * sizeof(TEXTCHAR), "^%ld%c", sequence, want_restart?'@':'#' );
 		for( n = arg_ofs; n < argc; n++ )
 		{
-			ofs += snprintf( lpCmd + ofs, sizeof( lpCmd ) - ofs
+			ofs += snprintf( lpCmd + ofs, sizeof( lpCmd ) - ofs * sizeof(TEXTCHAR)
 								, "%s"
 								, argv[n] );
          ofs++; // include '\0' in buffer so we can recover exact parameters...
@@ -276,7 +276,7 @@ int main( int argc, char **argv )
 			_32 tick_start = GetTickCount();
 			while( !clients && ( ( GetTickCount() - tick_start ) < 6000 ) )
 			{
-            //lprintf( "waiting a second for reverse connect..." );
+				//lprintf( "waiting a second for reverse connect..." );
 				WakeableSleep( 100 );
 			}
 			if( !clients )

@@ -157,7 +157,7 @@ void LogSHA1Ex( char *leader, PSIZE_FILE file DBG_PASS)
 	int n;
 	ofs = snprintf( msg, sizeof( msg ), WIDE("%s: "), leader );
 	for( n = 0; n < SHA1HashSize; n++ )
-		ofs += snprintf( msg + ofs, sizeof(msg)-ofs, WIDE("%02X "), ((unsigned char *)file->SHA1)[n] );
+		ofs += snprintf( msg + ofs, sizeof(msg)-ofs*sizeof(TEXTCHAR), WIDE("%02X "), ((unsigned char *)file->SHA1)[n] );
 	SystemLogEx( msg DBG_RELAY );
 }
 
@@ -661,9 +661,9 @@ void DumpFontCache( void )
    // write out total styles, alt files, and sizes...
 	{
 		_32 nStyles = 0;
-      _32 nSizeFiles = 0;
+		_32 nSizeFiles = 0;
 		_32 nAltFiles = 0;
-      _32 nSizes = 0;
+		_32 nSizes = 0;
 		for( pfe = (PFONT_ENTRY)GetLeastNode( build.pFontCache );
 			  pfe;
 			  pfe = (PFONT_ENTRY)GetGreaterNode( build.pFontCache ) )
@@ -674,14 +674,14 @@ void DumpFontCache( void )
 				continue;
 			LIST_FORALL( pfe->styles, idx, PFONT_STYLE, pfs )
 			{
-            INDEX idx;
+				INDEX idx;
 				PSIZE_FILE psf;
-            nStyles++;
+				nStyles++;
 				LIST_FORALL(pfs->files, idx, PSIZE_FILE, psf )
 				{
 					if( psf->flags.unusable )
 						continue;
-               nSizeFiles++;
+					nSizeFiles++;
 					{
 						INDEX idx;
 						PSIZES size;

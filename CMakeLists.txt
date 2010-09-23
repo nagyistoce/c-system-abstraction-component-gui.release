@@ -445,6 +445,10 @@ add_custom_command( OUTPUT ${PROJECT_BINARY_DIR}/all_resources.res
 endif()
 endif( WIN32 ) 
 
+set_source_files_properties( ${FREETYPE_SOURCE} PROPERTIES SOURCE_FOLER Freetype )
+set_source_files_properties( ${JPEG_SOURCE} PROPERTIES SOURCE_FOLER Jpeg )
+set_source_files_properties( ${ZLIB_SOURCE} PROPERTIES SOURCE_FOLER zlib )
+
 if( BUILD_MONOLITHIC )
 
 add_definitions( -DSACK_MONOLITHIC_BUILD )

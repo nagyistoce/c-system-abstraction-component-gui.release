@@ -1079,44 +1079,44 @@ void XML_DumpCommonButton( genxWriter w, PMENU_BUTTON button )
 		if( button )
 		{
 			if( button->color )
-				offset += snprintf( buffer + offset, sizeof( buffer ) - offset, WIDE("color=$%02lX%02lX%02lX%02lX\n")
+				offset += snprintf( buffer + offset, sizeof( buffer ) - offset*sizeof(TEXTCHAR), WIDE("color=$%02lX%02lX%02lX%02lX\n")
 						 , AlphaVal( button->color )
 						 , RedVal( button->color )
 						 , GreenVal( button->color )
 						 , BlueVal( button->color )
 						 );
 			if( button->secondary_color )
-				offset += snprintf( buffer + offset, sizeof( buffer ) - offset, WIDE("secondary color=$%02lX%02lX%02lX%02lX\n")
+				offset += snprintf( buffer + offset, sizeof( buffer ) - offset*sizeof(TEXTCHAR), WIDE("secondary color=$%02lX%02lX%02lX%02lX\n")
 						 , AlphaVal( button->secondary_color )
 						 , RedVal( button->secondary_color )
 						 , GreenVal( button->secondary_color )
 						 , BlueVal( button->secondary_color )
 						 );
 			if( button->highlight_color )
-				offset += snprintf( buffer + offset, sizeof( buffer ) - offset, WIDE("highlight color=$%02lX%02lX%02lX%02lX\n")
+				offset += snprintf( buffer + offset, sizeof( buffer ) - offset*sizeof(TEXTCHAR), WIDE("highlight color=$%02lX%02lX%02lX%02lX\n")
 						 , AlphaVal( button->highlight_color )
 						 , RedVal( button->highlight_color )
 						 , GreenVal( button->highlight_color )
 						 , BlueVal( button->highlight_color )
 						 );
 			if( button->textcolor )
-				offset += snprintf( buffer + offset, sizeof( buffer ) - offset, WIDE("text color=$%02lX%02lX%02lX%02lX\n")
+				offset += snprintf( buffer + offset, sizeof( buffer ) - offset*sizeof(TEXTCHAR), WIDE("text color=$%02lX%02lX%02lX%02lX\n")
 						 , AlphaVal( button->textcolor )
 						 , RedVal( button->textcolor )
 						 , GreenVal( button->textcolor )
 						 , BlueVal( button->textcolor )
 						 );
          if( button->text )
-				offset += snprintf( buffer + offset, sizeof( buffer ) - offset, WIDE("text=%s\n"), button->text );
-			offset += snprintf( buffer + offset, sizeof( buffer ) - offset, WIDE("button is %s\n"), button->glare_set->name );
+				offset += snprintf( buffer + offset, sizeof( buffer ) - offset*sizeof(TEXTCHAR), WIDE("text=%s\n"), button->text );
+			offset += snprintf( buffer + offset, sizeof( buffer ) - offset*sizeof(TEXTCHAR), WIDE("button is %s\n"), button->glare_set->name );
 			if( button->flags.bNoPress )
-            offset += snprintf( buffer + offset, sizeof( buffer ) - offset, WIDE("button is unpressable\n") );
+            offset += snprintf( buffer + offset, sizeof( buffer ) - offset*sizeof(TEXTCHAR), WIDE("button is unpressable\n") );
 			if( button->pImage && button->pImage[0] )
-				offset += snprintf( buffer + offset, sizeof( buffer ) - offset, WIDE("image=%s\n"), EscapeMenuString( button->pImage ) );
+				offset += snprintf( buffer + offset, sizeof( buffer ) - offset*sizeof(TEXTCHAR), WIDE("image=%s\n"), EscapeMenuString( button->pImage ) );
          if( button->pPageName )
-				offset += snprintf( buffer + offset, sizeof( buffer ) - offset, WIDE("next page=%s\n"), button->pPageName );
+				offset += snprintf( buffer + offset, sizeof( buffer ) - offset*sizeof(TEXTCHAR), WIDE("next page=%s\n"), button->pPageName );
 			if( button->font_preset_name )
-            offset += snprintf( buffer + offset, sizeof( buffer ) - offset, WIDE("font name=%s\n"), button->font_preset_name );
+            offset += snprintf( buffer + offset, sizeof( buffer ) - offset*sizeof(TEXTCHAR), WIDE("font name=%s\n"), button->font_preset_name );
 		}
 		AddAttr( generic_xx, "%s", buffer );
 }

@@ -498,15 +498,15 @@ char *GetTaskArgs( PLOAD_TASK pTask )
 	static char args[4096];
 	int len = 0, n;
 	args[0] = 0;
-   // arg[0] should be the same as program name...
+	// arg[0] should be the same as program name...
 	for( n = 1; pTask->pArgs && pTask->pArgs[n]; n++ )
 	{
 		if( StrChr( pTask->pArgs[n], ' ' ) )
-			len += snprintf( args + len, sizeof( args ) - len , WIDE("%s\"%s\""), n>1?WIDE(" "):WIDE(""), pTask->pArgs[n] );
+			len += snprintf( args + len, sizeof( args ) - len * sizeof( TEXTCHAR ), WIDE("%s\"%s\""), n>1?WIDE(" "):WIDE(""), pTask->pArgs[n] );
 		else
-			len += snprintf( args + len, sizeof( args ) - len , WIDE("%s%s"), n>1?WIDE(" "):WIDE(""), pTask->pArgs[n] );
+			len += snprintf( args + len, sizeof( args ) - len * sizeof( TEXTCHAR ), WIDE("%s%s"), n>1?WIDE(" "):WIDE(""), pTask->pArgs[n] );
 	}
-   return args;
+	return args;
 }
 
 //---------------------------------------------------------------------------

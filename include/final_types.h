@@ -36,12 +36,8 @@
 #    ifndef __cplusplus_cli
 #define fprintf   fwprintf
 #define atoi      _wtoi
-#define vsnprintf StringCbVPrintf
-#define snprintf  StringCbPrintf
 #define printf    wprintf
 // define sprintf here.
-#undef sprintf
-#define sprintf(buf,format,...)  StringCchPrintf( buf, sizeof( buf )/sizeof(TEXTCHAR), format,##__VA_ARGS__ )
 #       endif
 #    endif
 #    ifdef _ARM_
@@ -58,15 +54,12 @@
 #define fprintf   fwprintf
 #endif
 
-// len should be passed as character count.
-#define vsnprintf(buf,len,format,args) StringCchVPrintf( buf, len, format, args )
-#define snprintf(buf,len,format,...)  StringCchPrintf( buf, len, format,##__VA_ARGS__ )
-
-// this is a success condition to redefine this here (for now)
-#define sprintf(buf,format,...)  StringCchPrintf( buf, sizeof( buf )/sizeof(TEXTCHAR), format,##__VA_ARGS__ )
-
 # endif
 #endif
 
+#  ifdef _MSC_VER
+#    define vsnprintf(buf,len,format,args) (SUCCEEDED(StringCbVPrintf( buf, len, format, args ))?StrLen(buf):-1)
+#    define snprintf(buf,len,format,...)  (SUCCEEDED(StringCbPrintf( buf, len, format,##__VA_ARGS__ ))?StrLen(buf):-1)
+#  endif
 
 #endif
