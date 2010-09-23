@@ -44,10 +44,17 @@ static void InitGroups( void )
 	group->base_path = StrDup( GetCurrentPath( tmp, sizeof( tmp ) ) );
 	group->name = StrDup( "Default" );
 	AddLink( &l.groups, group );
+
 	// known handle '1' is the program's load path.
 	group = New( struct Group );
 	group->base_path = StrDup( GetProgramPath() );
 	group->name = StrDup( "Program Path" );
+	AddLink( &l.groups, group );
+
+	// known handle '1' is the program's start path.
+	group = New( struct Group );
+	group->base_path = StrDup( GetStartupPath() );
+	group->name = StrDup( "Startup Path" );
 	AddLink( &l.groups, group );
 	l.have_default = TRUE;
 }
