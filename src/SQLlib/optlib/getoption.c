@@ -562,57 +562,57 @@ _32 GetOptionStringValueEx( PODBC odbc, INDEX optval, char *buffer, _32 len DBG_
 	POPTION_TREE tree = GetOptionTreeEx( odbc );
 	if( tree->flags.bNewVersion )
 	{
-      return NewGetOptionStringValue( odbc, optval, buffer, len DBG_RELAY );
+		return NewGetOptionStringValue( odbc, optval, buffer, len DBG_RELAY );
 	}
 	else
 	{
 		char query[256];
-   CTEXTSTR result = NULL;
-   int last_was_session, last_was_system;
-	INDEX _optval;
-   PTRSZVAL result_len = 0;
-   len--;
+		CTEXTSTR result = NULL;
+		int last_was_session, last_was_system;
+		INDEX _optval;
+		PTRSZVAL result_len = 0;
+		len--;
 
-   snprintf( query, sizeof( query ), "select override_value_id from option_exception "
-            "where ( apply_from<=now() or apply_from=0 )"
-            "and ( apply_until>now() or apply_until=0 )"
-            "and ( system_id=%d or system_id=0 )"
-            "and value_id=%d "
-           , og.SystemID
-           , optval );
-   last_was_session = 0;
-   last_was_system = 0;
-   PushSQLQueryEx( og.Option );
-	for( SQLQuery( og.Option, query, &result ); result; FetchSQLResult( og.Option, &result ) )
-	{
-		_optval = optval;
-		sscanf( result, WIDE("%") _32f, &optval );
-		if( (!optval) || ( optval == INVALID_INDEX ) )
-			optval = _optval;
-	}
-	snprintf( query, sizeof( query ), WIDE("select string from option_values where value_id=%ld"), optval );
-	// have to push here, the result of the prior is kept outstanding
-   // if this was not pushed, the prior result would evaporate.
-	PushSQLQueryEx( og.Option );
-	buffer[0] = 0;
-	//lprintf( WIDE("do query for value string...") );
-	if( SQLQuery( og.Option, query, &result ) )
-	{
-		//lprintf( WIDE(" query succeeded....") );
-		if( result )
+		snprintf( query, sizeof( query ), "select override_value_id from option_exception "
+				"where ( apply_from<=now() or apply_from=0 )"
+				"and ( apply_until>now() or apply_until=0 )"
+				"and ( system_id=%d or system_id=0 )"
+				"and value_id=%d "
+			   , og.SystemID
+			   , optval );
+		last_was_session = 0;
+		last_was_system = 0;
+		PushSQLQueryEx( og.Option );
+		for( SQLQuery( og.Option, query, &result ); result; FetchSQLResult( og.Option, &result ) )
 		{
-			result_len = StrLen( result );
-			StrCpyEx( buffer, result, min(len,result_len) );
-			buffer[min(len,result_len)] = 0;
+			_optval = optval;
+			sscanf( result, WIDE("%") _32f, &optval );
+			if( (!optval) || ( optval == INVALID_INDEX ) )
+				optval = _optval;
 		}
-		else
+		snprintf( query, sizeof( query ), WIDE("select string from option_values where value_id=%ld"), optval );
+		// have to push here, the result of the prior is kept outstanding
+		// if this was not pushed, the prior result would evaporate.
+		PushSQLQueryEx( og.Option );
+		buffer[0] = 0;
+		//lprintf( WIDE("do query for value string...") );
+		if( SQLQuery( og.Option, query, &result ) )
 		{
-			buffer[0] = 0;
+			//lprintf( WIDE(" query succeeded....") );
+			if( result )
+			{
+				result_len = StrLen( result );
+				StrCpyEx( buffer, result, min(len,result_len) );
+				buffer[min(len,result_len)] = 0;
+			}
+			else
+			{
+				buffer[0] = 0;
+			}
 		}
-	}
-	PopODBCEx( og.Option );
-   PopODBCEx( og.Option );
-	return result_len;
+		PopODBCEx( og.Option );
+		PopODBCEx( og.Option );
+		return result_len;
 	}
 }
 
