@@ -1359,11 +1359,11 @@ int CPROC ProcessNetworkMessages( PTRSZVAL quick_check )
 				DWORD dwError = WSAGetLastError();
 				if( dwError == WSA_INVALID_HANDLE )
 				{
-               lprintf( "Rebuild list, have a bad event handle somehow." );
+					lprintf( "Rebuild list, have a bad event handle somehow." );
 					break;
 				}
 				lprintf( WIDE( "error of wait is %d" ), WSAGetLastError() );
-            break;
+				break;
 			}
 #ifndef UNDER_CE
 			else if( result == WSA_WAIT_IO_COMPLETION )
@@ -1375,7 +1375,7 @@ int CPROC ProcessNetworkMessages( PTRSZVAL quick_check )
 			else if( result == WSA_WAIT_TIMEOUT )
 			{
 				if( quick_check )
-               return 1;
+					return 1;
 			}
 			else if( result >= WSA_WAIT_EVENT_0 )
 			{

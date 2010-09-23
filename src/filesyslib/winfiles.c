@@ -451,7 +451,7 @@ struct file *FindFileByFILE( FILE *file_file )
 {
 	FILE *handle;
 	struct file *file;
-   INDEX idx;
+	INDEX idx;
 	LIST_FORALL( l.files, idx, struct file *, file )
 	{
 		if( StrCmp( file->name, filename ) == 0 )
