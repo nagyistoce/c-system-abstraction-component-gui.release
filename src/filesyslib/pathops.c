@@ -219,6 +219,23 @@ int  SetCurrentPath ( CTEXTSTR path )
 	return 1;
 }
 
+int IsAbsolutePath( CTEXTSTR path )
+{
+#ifdef __WINDOWS__
+	if( path[0] && path[1] && path[2] &&
+		( ( path[0] >= 'a' && path[0] <= 'z' )
+		  || ( path[0] >= 'A' && path[0] <= 'Z' ) )
+		&& ( path[1] == ':' )
+		&& ( path[2] == '/' || path[2] == '\\' ) )
+      return TRUE;
+#else
+	if( path[0] == '/' || path[0] == '\\' )
+      return TRUE;
+#endif
+   return FALSE;
+}
+
+
 FILESYS_NAMESPACE_END
 
 
