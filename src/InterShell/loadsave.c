@@ -1074,7 +1074,7 @@ void XML_DumpCommonButton( genxWriter w, PMENU_BUTTON button )
 {
 	static TEXTCHAR buffer[4096];
 	int offset = 0;
-   // this is just a quick hack, it's a lot of typing still to port this...
+	// this is just a quick hack, it's a lot of typing still to port this...
 	MakeAttr( w, generic_xx, "generic" );
 		if( button )
 		{
