@@ -596,7 +596,7 @@ void CPROC ListFontFile( PTRSZVAL psv, CTEXTSTR name, int flags )
 			AddSizeToFile( psf, -1, -1 );
 		else
 		{
-         //Log1( WIDE("(Scaalable only)Alternate font of %s"), pfe->name->word );
+			//Log1( WIDE("(Scaalable only)Alternate font of %s"), pfe->name->word );
 		}
   }
 
