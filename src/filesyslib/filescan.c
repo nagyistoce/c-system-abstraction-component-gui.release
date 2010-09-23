@@ -325,7 +325,7 @@ typedef struct myfinddata {
 #ifdef UNDER_CE
 		strncpy( findbuffer( pInfo ), finddata(pInfo)->cFileName, MAX_PATH_NAME );
 #else
-		strncpy( findbuffer( pInfo ), finddata(pInfo)->name, MAX_PATH_NAME );
+		StrCpyEx( findbuffer( pInfo ), finddata(pInfo)->name, MAX_PATH_NAME * sizeof( TEXTCHAR ) );
 #endif
 	}
 	else
