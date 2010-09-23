@@ -175,6 +175,7 @@ FILESYS_PROC  int FILESYS_API  MakePath ( CTEXTSTR path );
    </code>                                                 */
 FILESYS_PROC  int FILESYS_API  IsPath ( CTEXTSTR path );
 
+FILESYS_PROC int FILESYS_API IsAbsolutePath( CTEXTSTR path );
 
 FILESYS_PROC  _64 FILESYS_API  GetFileWriteTime ( CTEXTSTR name );
 FILESYS_PROC  _64 FILESYS_API  GetTimeAsFileTime ( void );
