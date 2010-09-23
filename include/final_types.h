@@ -58,9 +58,9 @@
 #endif
 
 #  ifdef _MSC_VER
-#    define vsnprintf(buf,len,format,args) _vsnprintf_s(buf,len,len/sizeof(TEXTCHAR),format,args)
+#    define vsnprintf(buf,len,format,args) _vsnprintf_s(buf,len,(len)/sizeof(TEXTCHAR),format,args)
 //(SUCCEEDED(StringCbVPrintf( buf, len, format, args ))?StrLen(buf):-1)
-#    define snprintf(buf,len,format,...) _snprintf_s(buf,len,len/sizeof(TEXTCHAR),format,##__VA_ARGS__)
+#    define snprintf(buf,len,format,...) _snprintf_s(buf,len,(len)/sizeof(TEXTCHAR),format,##__VA_ARGS__)
 //(SUCCEEDED(StringCbPrintf( buf, len, format,##__VA_ARGS__ ))?StrLen(buf):-1)
 #    define sscanf sscanf_s
 #  endif

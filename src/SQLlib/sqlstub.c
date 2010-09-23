@@ -2531,7 +2531,7 @@ int __GetSQLResult( PODBC odbc, PCOLLECT collection, int bMore )
 										, &ResultLen );
 					if( ResultLen > collection->colsizes[idx-1] )
 					{
-                  lprintf( "SQL Result returned more data than the column described! (returned %d expected %d)", ResultLen, collection->colsizes[idx-1] );
+						lprintf( "SQL Result returned more data than the column described! (returned %d expected %d)", ResultLen, collection->colsizes[idx-1] );
 					}
 				}
 				else
