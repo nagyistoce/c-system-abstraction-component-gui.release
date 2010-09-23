@@ -64,7 +64,7 @@ int main( int argc, char ** argv )
 				}
 				else
 				{
-               ofs += snprintf( extra_opts + ofs, 4096 - ofs, "%s", argv[n]+1 );
+					ofs += snprintf( extra_opts + ofs * sizeof( TEXTCHAR ), 4096 - ofs, "%s", argv[n]+1 );
 				}
 			}
 			else

@@ -4,6 +4,8 @@
 
 #ifdef WIN32
 #include <windows.h>
+
+#define StrLen strlen
 int SetRegistryItem( HKEY hRoot, char *pPrefix,
                      char *pProduct, char *pKey, 
                      DWORD dwType,
@@ -86,7 +88,7 @@ int main( int argc, char **argv )
 		for( c = 0; path[c]; c++ )
 			if( path[c] == '\\' ) path[c] = '/';
 #ifdef WIN32
-		SetRegistryItem( HKEY_LOCAL_MACHINE, "SOFTWARE", "\\SACK", "Install_Dir", REG_SZ, path, strlen(path));
+		SetRegistryItem( HKEY_LOCAL_MACHINE, "SOFTWARE", "\\SACK", "Install_Dir", REG_SZ, (BYTE*)path, strlen(path));
 		if(0)
 		{
 			FILE *out2;

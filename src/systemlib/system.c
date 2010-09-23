@@ -899,7 +899,7 @@ TEXTSTR GetArgsString( PCTEXTSTR pArgs )
 	for( n = 1; pArgs && pArgs[n]; n++ )
 	{
 		int space = (strchr( pArgs[n], ' ' )!=NULL);
-		len += snprintf( args + len, sizeof( args ) - len , WIDE("%s%s%s%s")
+		len += snprintf( args + len, sizeof( args ) - len * sizeof( TEXTCHAR ), WIDE("%s%s%s%s")
 							, n>1?WIDE(" "):WIDE("")
 							, space?WIDE("\""):WIDE("")
 							, pArgs[n]
