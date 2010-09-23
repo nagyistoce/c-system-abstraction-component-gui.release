@@ -6,6 +6,10 @@
 #ifdef WIN32
 #include <windows.h>
 
+#ifdef _MSC_VER
+#define strdup _strdup
+#endif
+
 #define StrLen strlen
 int SetRegistryItem( HKEY hRoot, char *pPrefix,
                      char *pProduct, char *pKey, 

@@ -14,7 +14,7 @@
 #include <tchar.h>
 #include <strsafe.h>
 
-#endif
+#  endif
 
 // may consider changing this to P_16 for unicode...
 #ifdef UNICODE
@@ -62,6 +62,7 @@
 //(SUCCEEDED(StringCbVPrintf( buf, len, format, args ))?StrLen(buf):-1)
 #    define snprintf(buf,len,format,...) _snprintf_s(buf,len,len/sizeof(TEXTCHAR),format,##__VA_ARGS__)
 //(SUCCEEDED(StringCbPrintf( buf, len, format,##__VA_ARGS__ ))?StrLen(buf):-1)
+#    define sscanf sscanf_s
 #  endif
 
 #endif

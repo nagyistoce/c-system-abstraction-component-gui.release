@@ -279,7 +279,7 @@ void CPROC UDPRead( PCLIENT pc, POINTER buffer, int size, SOCKADDR *sa )
 			//LogBinary( (P_8)buffer, size );
 			while( inbuf[0] == '~' )
 			{
-				if( strnicmp( inbuf+1, "capture", 7 ) == 0 )
+				if( StrCaseCmpEx( inbuf+1, "capture", 7 ) == 0 )
 				{
 					int port = 0;
 					char c;
@@ -289,15 +289,15 @@ void CPROC UDPRead( PCLIENT pc, POINTER buffer, int size, SOCKADDR *sa )
 					{
 						port *= 10;
 						port += c - '0';
-                  inbuf++;
+						inbuf++;
 					}
 					if( port )
-                  capture_port = port;
+						capture_port = port;
 				}
-				if( strnicmp( inbuf+1, "hide", 4 ) == 0 )
+				if( StrCaseCmpEx( inbuf+1, "hide", 4 ) == 0 )
 				{
 					hide_process = 1;
-               inbuf += 5;
+					inbuf += 5;
 				}
 			}
   			/* check to see if the message has a class assicated, if not, process as normal */
@@ -309,25 +309,25 @@ void CPROC UDPRead( PCLIENT pc, POINTER buffer, int size, SOCKADDR *sa )
 				{
 					LIST_FORALL( class_names, idx, CTEXTSTR, class_name )
 					{
-                  int len;
+						int len;
 						/* has a class name, do we? */
 						// message has class, we have a class, check if it matches
-						if( strnicmp( inbuf + 1, class_name, len = strlen( class_name ) ) == 0 )
+						if( StrCaseCmpEx( inbuf + 1, class_name, len = strlen( class_name ) ) == 0 )
 						{
-                     if( inbuf[1+len] == '^' )
+							if( inbuf[1+len] == '^' )
 								break; // skip down to the ReadUDP, don't process this packet.
 						}
 					}
 					if( !class_name )
-                  break;  // skip over remaining processing...
+						break;  // skip over remaining processing...
 				}
 				else
-               break;
+					break;
 				inbuf = strchr( inbuf, '^' ); /* skip over class to sequence... */
 
 			}
 			if( !inbuf ) // malformed packet.
-            break;
+				break;
 			if( inbuf[0] == '^' )
 			{
 				bNulArgs = 1;

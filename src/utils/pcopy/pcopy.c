@@ -231,8 +231,8 @@ int ScanFile( PFILESOURCE pfs )
 	IMAGE_OPTIONAL_HEADER nt_optional_header;
 	//printf("Attempt to scan: %s\n", pfs->name );
 	{
-		INDEX idx;
-		CTEXTSTR exclude;
+		//INDEX idx;
+		//CTEXTSTR exclude;
 		//LIST_FORALL( g.excludes, idx, CTEXTSTR, exclude )
 		{
 			/*
@@ -454,7 +454,7 @@ int main( int argc, CTEXTSTR *argv )
 			printf( WIDE("EROR: Final argument is not a directory\n") );
 		return 1;
 	}
-	StrCpy( g.SystemRoot, getenv( WIDE("SystemRoot") ) );
+	StrCpyEx( g.SystemRoot, getenv( WIDE("SystemRoot") ), sizeof( g.SystemRoot ) );
 	{
 		int c;
 		for( c = 1; c < argc-1; c++ )

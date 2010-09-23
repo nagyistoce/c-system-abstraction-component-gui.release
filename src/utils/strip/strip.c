@@ -93,7 +93,7 @@ int FBSDMangle( char *line, char length )
 		char *expr1, *expr2;
 		int expr1len, expr2len;
 		int len;
-			char outline[1024];
+		char outline[1024];
 		expr1 = line;
 		while( expr1[0] != '\'' )
 			expr1++;
@@ -108,7 +108,7 @@ int FBSDMangle( char *line, char length )
 		while( expr2[expr2len] != '\'' )
 			expr2len++;
 		expr2len++;
-		sprintf( outline, WIDE(".if %*.*s != %*.*s")
+		snprintf( outline, sizeof( outline ), WIDE(".if %*.*s != %*.*s")
 				, expr1len, expr1len, expr1
 				, expr2len, expr2len, expr2 );
 		len = strlen( line ) - len;
@@ -200,12 +200,12 @@ void CPROC process( PTRSZVAL psv, CTEXTSTR file, int flags )
 	}
 	if( bDoLog )
 		printf( WIDE("Processing file: %s\n"), file );
-	in = fopen( file, WIDE("rb") );
+	in = sack_fopen( 0, file, WIDE("rb") );
 	if( in )
 	{
 		int c;
-		sprintf( outfile, WIDE("%s.new"), file );
-		out = fopen( outfile, WIDE("wb") );
+		snprintf( outfile, sizeof( outfile ), WIDE("%s.new"), file );
+		out = sack_fopen( 0, outfile, WIDE("wb") );
 		if( !out )
 		{
 			fprintf( stderr, WIDE("Could not create %s\n"), outfile );

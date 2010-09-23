@@ -29,8 +29,10 @@ int gbLog;
 #endif
 #endif
 
+
+
 typedef struct callback_tag {
-	void (STDPROC *ReadCallback)( PTRSZVAL psv, int com, POINTER buffer, int size );
+	CommReadCallback func;
 	PTRSZVAL psvUserRead;
 	int iTimer;
 	struct callback_tag *next, **me;
@@ -250,7 +252,7 @@ PCOM_TRACK FindComByName( LPCSTR szPort )
 	while( check )
 	{
 		if( !check->flags.bDestroy )
-			if( strnicmp( szPort, check->portname, sizeof(check->portname) ) == 0 )
+			if( StrCaseCmpEx( szPort, check->portname, sizeof(check->portname) ) == 0 )
 				return check;
 		check = check->next;
 	}
@@ -282,11 +284,11 @@ PCOM_TRACK AddComTracking( LPCSTR szPort, int iCommId )
 	pComTrack->me = &pTracking;
 	pComTrack->iUsers = 1;
 	pTracking = pComTrack;
-	strncpy( pComTrack->portname, szPort, sizeof(pComTrack->portname)  );
+	StrCpyEx( pComTrack->portname, szPort, sizeof(pComTrack->portname)  );
 	pComTrack->portname[sizeof( pComTrack->portname) - 1] = 0;
 	pComTrack->iCommId = iCommId;
 	pComTrack->pReadBuffer = NewArray( char, DEFAULT_READ_BUFFER );
-   pComTrack->nReadTotal = DEFAULT_READ_BUFFER;
+	pComTrack->nReadTotal = DEFAULT_READ_BUFFER;
 	return pComTrack;
 }
 
@@ -535,11 +537,11 @@ static int
   	  {
   	  	  if( (dwBaud != 57600ul) && (dwBaud != 38400ul) )
   	  	  {
-      	 static char buf[64];
-      	 sprintf( buf, WIDE("Invalid Baud rate %08lx"), dwBaud );
-	   	 if ( ppErr )
-   	   	*ppErr = buf;
-          return -15;
+      		 static TEXTCHAR buf[64];
+      		 snprintf( buf, sizeof( buf ), WIDE("Invalid Baud rate %08lx"), dwBaud );
+	   		 if ( ppErr )
+   	   			*ppErr = buf;
+			  return -15;
 		  }
 #ifdef __LINUX__
 		  else
@@ -582,7 +584,7 @@ static int
       if ( HIWORD(dwBaud) )
       {
       	static char buf[64];
-      	sprintf( buf, WIDE("Invalid Baud rate %08lx"), dwBaud );
+      	snprintf( buf, sizeof( buf ), WIDE("Invalid Baud rate %08lx"), dwBaud );
 	   	 if ( ppErr )
    	   	*ppErr = buf;
           return -15;
@@ -660,9 +662,9 @@ issue_callbacks:
 				{
 					pccNext = pcc->next;
 					// THIS pcc may go away, hopefully the NEXT won't...
-					if( pcc->ReadCallback )
+					if( pcc->func )
 					{
-						pcc->ReadCallback( pcc->psvUserRead
+						pcc->func( pcc->psvUserRead
 										, pct->iCommId
 										, pct->pReadBuffer
 										, pct->nReadLen );
@@ -715,7 +717,7 @@ void DumpTermios( struct termios *opts )
 //-----------------------------------------------------------------------
 
  int  SackOpenCommEx(LPCSTR szPort, _32 uiRcvQ, _32 uiSendQ
-              , void (STDPROC *ReadCallback)(PTRSZVAL psv, int nCom, POINTER buf, int size )
+              , CommReadCallback func
               , PTRSZVAL psvRead
                   )
 {
@@ -757,10 +759,10 @@ void DumpTermios( struct termios *opts )
 	  }
 		if( ( pct = FindComByName( szPort ) ) )
 		{
-			if( ReadCallback )
+			if( func )
 			{
 				PCHANNEL_CALLBACK pcc = New( CHANNEL_CALLBACK );
-				pcc->ReadCallback = ReadCallback;
+				pcc->func = func;
 				pcc->psvUserRead = psvRead;
 				if( ( pcc->next = pct->callbacks ) )
 					pct->callbacks->me = &pcc->next;
@@ -776,15 +778,15 @@ void DumpTermios( struct termios *opts )
 		{
 			int iCommId = OpenComm( szPort, uiRcvQ, uiSendQ );
 			if( gbLog )
-				lprintf( WIDE("attempted to open: %s result \%d"), szPort, iCommId );
+				lprintf( WIDE("attempted to open: %s result %d"), szPort, iCommId );
 			if( iCommId >= 0 )
 			{
 				pct = AddComTracking( szPort, iCommId );
-				if( strnicmp( szPort, WIDE("lpt"), 3 ) != 0 )
+				if( StrCaseCmpEx( szPort, WIDE("lpt"), 3 ) != 0 )
 				{
 					pct->flags.bOutputOnly = 0;
-			   SackFlushComm( iCommId, 0 );
-		   	SackFlushComm( iCommId, 1 );
+				   SackFlushComm( iCommId, 0 );
+				   	SackFlushComm( iCommId, 1 );
 #ifndef __LINUX__
 #ifdef BCC16
 		   	pct->dcb.Id          = iCommId;
@@ -870,10 +872,10 @@ void DumpTermios( struct termios *opts )
 				xlprintf(LOG_NOISE)( WIDE("Failed!") );
 			if( iCommId >= 0 )
 			{
-				if( ReadCallback )
+				if( func )
 				{
 					PCHANNEL_CALLBACK pcc = New( CHANNEL_CALLBACK );
-					pcc->ReadCallback = ReadCallback;
+					pcc->func = func;
 					pcc->psvUserRead = psvRead;
 					if( ( pcc->next = pct->callbacks ) )
 						pct->callbacks->me = &pcc->next;
@@ -909,7 +911,7 @@ void DumpTermios( struct termios *opts )
 }
 
  void  SackSetReadCallback ( int iCommId
-                                          , void (STDPROC *ReadCallback)(PTRSZVAL psv, int nCom, POINTER buf, int size )
+                                          , CommReadCallback f
               										, PTRSZVAL psvRead )
 {
 	PCOM_TRACK pct;
@@ -917,7 +919,7 @@ void DumpTermios( struct termios *opts )
 	if( pct )
 	{
 		PCHANNEL_CALLBACK pcc = New( CHANNEL_CALLBACK );
-		pcc->ReadCallback = ReadCallback;
+		pcc->func = f;
 		pcc->psvUserRead = psvRead;
 		if( ( pcc->next = pct->callbacks ) )
 			pct->callbacks->me = &pcc->next;
@@ -931,7 +933,7 @@ void DumpTermios( struct termios *opts )
 }
               
  int  SackClearReadCallback ( int iCommId
-                                          , void (STDPROC *ReadCallback)(PTRSZVAL psv, int nCom, POINTER buf, int size ) )
+                                          ,  CommReadCallback func, PTRSZVAL psv )
 {
 	PCOM_TRACK pct;
 	pct = FindComByNumber( iCommId );
@@ -940,7 +942,7 @@ void DumpTermios( struct termios *opts )
 		PCHANNEL_CALLBACK pcc = pct->callbacks;		
 		while( pcc )
 		{
-			if( pcc->ReadCallback == ReadCallback )
+			if( pcc->func == func )
 			{
 				if( ( *(pcc->me) = pcc->next ) )
 					pcc->next->me = pcc->me;
@@ -1226,17 +1228,17 @@ void DumpTermios( struct termios *opts )
     \*****************************************************************/
     if ( nCharsRead < 0 )
     { 
-      char cOut[128];
+      TEXTCHAR cOut[128];
       int  nCommError;
 
 #ifndef __LINUX__
 			nCommError = SackGetCommError ( iCommId, &pComTrack->cs );
 #endif
-      wsprintf ( cOut, WIDE("SackCommReadBuffer: read %d chars, error=%d")
+      snprintf ( cOut, sizeof( cOut ), WIDE("SackCommReadBuffer: read %d chars, error=%d")
                , nCharsRead, nCommError );
       xlprintf(LOG_NOISE)( cOut );
 #ifndef __LINUX__
-      wsprintf ( cOut, WIDE("    cs.status=%u,0x%02X  cs.in=%u  cs.out=%u")
+      lprintf ( ("    cs.status=%u,0x%02X  cs.in=%u  cs.out=%u")
 #ifdef BCC_16
                , pComTrack->cs.status
 #else
@@ -1245,7 +1247,6 @@ void DumpTermios( struct termios *opts )
                , pComTrack->cs.cbInQue
 					, pComTrack->cs.cbOutQue );
 #endif
-      xlprintf(LOG_NOISE)( cOut ); 
       iResult = SACKCOMM_ERR_COMM;
     }
     else if( GetTickCount() >= pComTrack->current.dwEnd ) // no data, check timeout
