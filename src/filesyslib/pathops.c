@@ -204,19 +204,29 @@ _64 GetTimeAsFileTime ( void )
 
 int  SetCurrentPath ( CTEXTSTR path )
 {
+	int status = 1;
 	if( !path )
 		return 0;
-	lprintf( WIDE( "Set CurrentPath: %s" ), path );
-	SetDefaultFilePath( path );
-
 #ifndef UNDER_CE
-#ifdef _WIN32
-	return SetCurrentDirectory( path );
-#else
-	return !chdir( path );
+#  ifdef _WIN32
+	status = SetCurrentDirectory( path );
+#  else
+	status = !chdir( path );
+#  endif
+	if( status )
+	{
+		TEXTCHAR tmp[256];
+		path = GetCurrentPath( tmp, sizeof( tmp ) );
+		SetDefaultFilePath( path );
+	}
+	else
+	{
+		TEXTCHAR tmp[256];
+		lprintf( "Failed to change to [%s](%d) from %s", path, GetLastError(), GetCurrentPath( tmp, sizeof( tmp ) ) );
+	}
 #endif
-#endif
-	return 1;
+
+	return status;
 }
 
 int IsAbsolutePath( CTEXTSTR path )
