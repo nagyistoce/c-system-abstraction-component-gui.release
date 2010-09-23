@@ -44,22 +44,22 @@ int FBSDMangle( char *line, char length )
 {
 #define INSERT_DOT() {	memmove( line+1, line, length ); line[0] = '.'; return 1; }
 #ifdef __LINUX__
-#define strnicmp strncasecmp
+#define StrCaseCmpEx strncasecmp
 #endif
 	// line incoming points at the first non whitespace character.
 	// the linebuffer should be sufficiently long to handle inserting a .
 	// if nessescary.
 	// length is the length of the line from here to the end of the line
-	if( strnicmp( line, WIDE("include"), 7 ) == 0 )
+	if( StrCaseCmpEx( line, WIDE("include"), 7 ) == 0 )
 		INSERT_DOT()
-	else if( strnicmp( line, WIDE("ifeq"), 4 ) == 0 )
+	else if( StrCaseCmpEx( line, WIDE("ifeq"), 4 ) == 0 )
 	{
 		// ug - gotta find the expressions, and resort them...
 		// and worse - gotta do the same in reverse on the other side
 		//INSERT_DOT()
 		{
 			char *expr1, *expr2;
-			char outline[1024];
+			TEXTCHAR outline[1024];
 			int len;
 			int expr1len, expr2len;
 			expr1 = line;
@@ -80,15 +80,15 @@ int FBSDMangle( char *line, char length )
 				expr2len++;
 			}
 			expr2len++;
-			len = sprintf( outline, WIDE(".if %*.*s = %*.*s")
+			len = snprintf( outline, sizeof( outline ), WIDE(".if %*.*s = %*.*s")
 					, expr1len, expr1len, expr1
 					, expr2len, expr2len, expr2 );
 			len = len - strlen( line );
-			strcpy( line, outline );
+			StrCpyEx( line, outline, length );
 			return len;
 		}
 	}
-	else if( strnicmp( line, WIDE("ifneq"), 5 ) == 0 )
+	else if( StrCaseCmpEx( line, WIDE("ifneq"), 5 ) == 0 )
 	{
 		char *expr1, *expr2;
 		int expr1len, expr2len;
@@ -112,18 +112,18 @@ int FBSDMangle( char *line, char length )
 				, expr1len, expr1len, expr1
 				, expr2len, expr2len, expr2 );
 		len = strlen( line ) - len;
-		strcpy( line, outline );
+		StrCpyEx( line, outline, length );
 		return len;
 	}
-	else if( strnicmp( line, WIDE("ifdef"), 5 ) == 0 )
+	else if( StrCaseCmpEx( line, WIDE("ifdef"), 5 ) == 0 )
 		INSERT_DOT()
-	else if( strnicmp( line, WIDE("ifndef"), 6 ) == 0 )
+	else if( StrCaseCmpEx( line, WIDE("ifndef"), 6 ) == 0 )
 		INSERT_DOT()
-	else if( strnicmp( line, WIDE("if"), 2 ) == 0 )
+	else if( StrCaseCmpEx( line, WIDE("if"), 2 ) == 0 )
 		INSERT_DOT()
-	else if( strnicmp( line, WIDE("else"), 4 ) == 0 )
+	else if( StrCaseCmpEx( line, WIDE("else"), 4 ) == 0 )
 		INSERT_DOT()
-	else if( strnicmp( line, WIDE("endif"), 5 ) == 0 )
+	else if( StrCaseCmpEx( line, WIDE("endif"), 5 ) == 0 )
 		INSERT_DOT()
 	return 0;
 }
@@ -134,20 +134,20 @@ int GNUMangle( char *line, char length )
 	// the linebuffer should be sufficiently long to handle deleting a .
 	// if nessescary.
 	// length is the length of the line from here to the end of the line
-	if( strnicmp( line, WIDE(".include"), 8 ) == 0 )
+	if( StrCaseCmpEx( line, WIDE(".include"), 8 ) == 0 )
 		DELETE_DOT()
-	else if( strnicmp( line, WIDE(".ifdef"), 6 ) == 0 )
+	else if( StrCaseCmpEx( line, WIDE(".ifdef"), 6 ) == 0 )
 		DELETE_DOT()
-	else if( strnicmp( line, WIDE(".ifndef"), 7 ) == 0 )
+	else if( StrCaseCmpEx( line, WIDE(".ifndef"), 7 ) == 0 )
 		DELETE_DOT()
-	else if( strnicmp( line, WIDE(".if"), 3 ) == 0 )
+	else if( StrCaseCmpEx( line, WIDE(".if"), 3 ) == 0 )
 	{
 
 		DELETE_DOT()
 	}
-	else if( strnicmp( line, WIDE(".else"), 5 ) == 0 )
+	else if( StrCaseCmpEx( line, WIDE(".else"), 5 ) == 0 )
 		DELETE_DOT()
-	else if( strnicmp( line, WIDE(".endif"), 6 ) == 0 )
+	else if( StrCaseCmpEx( line, WIDE(".endif"), 6 ) == 0 )
 		DELETE_DOT()
 
 	return 0;

@@ -314,8 +314,8 @@ void ResetResolution( PLOAD_TASK task )
 		return;
 	if( !task || task->flags.bLaunchAt )
 	{
-      DEVMODE oldmode;
-		FILE *file = fopen( WIDE("last.resolution"), WIDE("rb") );
+		DEVMODE oldmode;
+		FILE *file = sack_fopen( 2, WIDE("last.resolution"), WIDE("rb") );
 		if( file )
 		{
 			fread( &oldmode, 1, sizeof( oldmode ), file );
@@ -1161,15 +1161,15 @@ PTRSZVAL CPROC WaitForCallerThread( PTHREAD thread )
    //SetBannerOptions( banner, BANNER_TOP, 0 );
 	while( 1 )
 	{
-      FILE *file;
-		if( ( file = fopen( WIDE("f:\\config.sys"), WIDE("rb") ) ) )
+		FILE *file;
+		if( ( file = sack_fopen( 0, WIDE("f:\\config.sys"), WIDE("rb") ) ) )
 		{
 			fclose( file );
-         lprintf( WIDE("Launching caller auto tasks.") );
+			lprintf( WIDE("Launching caller auto tasks.") );
 			LaunchAutoTasks( 1 );
-         break;
+			break;
 		}
-      WakeableSleep( 1000 );
+		WakeableSleep( 1000 );
 	}
 	if( GetThreadParam( thread ) )
 		RemoveBanner2Ex( &banner DBG_SRC );

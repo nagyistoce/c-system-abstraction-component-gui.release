@@ -408,7 +408,7 @@ typedef struct ControlRegistration_tag *PCONTROL_REGISTRATION;
 	   
 	   /psi/control/\<name\>/rtti/focus_changed=(PSI_CONTROL,LOGICAL)@void@_@focus_changed             */
 #define OnCommonFocus(name) \
-	DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,PSI_ROOT_REGISTRY,FocusChanged,WIDE("control"),name WIDE("/rtti"),WIDE("focus_changed"),int,(PSI_CONTROL,LOGICAL))
+	__DefineRegistryMethodP(PSI_PRELOAD_PRIORITY,PSI_ROOT_REGISTRY,FocusChanged,WIDE("control"),name WIDE("/rtti"),WIDE("focus_changed"),int,(PSI_CONTROL,LOGICAL))
 
 /* The frame edit mode has begun, and controls are given an
    opportunity to make life good for themselves and those around
