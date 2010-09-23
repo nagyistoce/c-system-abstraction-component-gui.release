@@ -10,7 +10,8 @@
 #define strdup _strdup
 #endif
 
-#define StrLen strlen
+#include "cmake_environment.h"
+
 int SetRegistryItem( HKEY hRoot, char *pPrefix,
                      char *pProduct, char *pKey, 
                      DWORD dwType,
@@ -145,6 +146,9 @@ int main( int argc, char **argv )
 		fprintf( out, "\n" );
 		fprintf( out, "SET( DATA_INSTALL_PREFIX resources )\n" );
 		fprintf( out, "include( ${SACK_BASE}/DefaultInstall.cmake )\n" );
+		fprintf( out, "\n" );
+		fprintf( out, "set(CMAKE_BUILD_TYPE \"%s\" CACHE STRING \"Set build type\")\n", build_type );
+		fprintf( out, "\n" );
 
 		fclose( out );
 	}
