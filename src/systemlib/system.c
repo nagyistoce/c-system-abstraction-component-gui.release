@@ -657,14 +657,16 @@ SYSTEM_PROC( generic_function, LoadFunctionExx )( CTEXTSTR libname, CTEXTSTR fun
 		library = (PLIBRARY)Allocate( sizeof( LIBRARY ) + ((maxlen<0xFFFFFF)?(_32)maxlen:0) );
 		library->name = library->full_name
 						  + snprintf( library->full_name, maxlen, WIDE("%s/"), l.load_path );
-		snprintf( library->name, maxlen, WIDE("%s"), libname );
+		snprintf( library->name
+			, maxlen - (library->name-library->full_name)*sizeof(TEXTCHAR)
+			, WIDE("%s"), libname );
 		//strcpy( library->name, libname );
 		library->functions = NULL;
 #ifdef _WIN32
 		SuspendDeadstart();
 		// with deadstart suspended, the library can safely register
 		// all of its preloads.  Then invoke will release suspend
-      // so final initializers in application can run.
+		// so final initializers in application can run.
 		library->library = LoadLibrary( library->name );
 		if( !library->library )
 		{

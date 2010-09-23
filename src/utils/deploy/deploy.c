@@ -86,7 +86,11 @@ int main( int argc, char **argv )
 	else
 		path = ".";
 	snprintf( tmp, sizeof( tmp ), "%s/CMakePackage", path );
+#ifdef _MSC_VER
+	fopen_s( &out, "CMakePackage", "wt" );
+#else
 	out = fopen( "CMakePackage", "wt" );
+#endif
 	if( out )
 	{
 		int c;
@@ -98,7 +102,11 @@ int main( int argc, char **argv )
 		{
 			FILE *out2;
 			snprintf( tmp, sizeof( tmp ), "%s/CMakePackage", path );
+#ifdef _MSC_VER
+			fopen_s( &out2, "%s/MakeShortcut.vbs", "wt" );
+#else
 			out2 = fopen( "%s/MakeShortcut.vbs", "wt" );
+#endif
 			if( out2 )
 			{
 				fprintf( out2, "set WshShell = WScript.CreateObject(\"WScript.Shell\" )\n" );
