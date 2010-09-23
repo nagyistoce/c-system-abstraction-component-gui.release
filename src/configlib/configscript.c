@@ -1948,16 +1948,17 @@ void ProcessConfigurationLine( PCONFIG_HANDLER pch, PTEXT line )
 CONFIGSCR_PROC( int, ProcessConfigurationFile )( PCONFIG_HANDLER pch, CTEXTSTR name, PTRSZVAL psv )
 {
 	PTEXT line;
+	int absolute_path = IsAbsolutePath( name ); // don't prefix with anything.
 	Fopen( pch->file, name, WIDE("rb") );
 #ifndef UNDER_CE
-	if( !pch->file )
+	if( !pch->file && !absolute_path )
 	{
 		CTEXTSTR workpath = OSALOT_GetEnvironmentVariable( WIDE( "MY_WORK_PATH" ) );
 		TEXTCHAR pathname[255];
 		snprintf( pathname, sizeof( pathname ), WIDE("%s/%s"), workpath, name );
 		Fopen( pch->file, pathname, WIDE("rb") );
 	}
-	if( !pch->file )
+	if( !pch->file && !absolute_path )
 	{
 		CTEXTSTR workpath = OSALOT_GetEnvironmentVariable( WIDE( "MY_LOAD_PATH" ) );
 		TEXTCHAR pathname[255];
@@ -1965,30 +1966,30 @@ CONFIGSCR_PROC( int, ProcessConfigurationFile )( PCONFIG_HANDLER pch, CTEXTSTR n
 		Fopen( pch->file, pathname, WIDE("rb") );
 	}
 #endif
-	if( !pch->file )
+	if( !pch->file && !absolute_path )
 	{
 		TEXTCHAR pathname[255];
 		snprintf( pathname, sizeof( pathname ), WIDE("/etc/%s"), name );
 		Fopen( pch->file, pathname, WIDE("rb") );
 	}
-	if( !pch->file )
+	if( !pch->file && !absolute_path )
 	{
 		TEXTCHAR pathname[255];
 		snprintf( pathname, sizeof( pathname ), WIDE("\\ftn3000\\working\\%s"), name );
 		Fopen( pch->file, pathname, WIDE("rb") );
 	}
-	if( !pch->file )
+	if( !pch->file && !absolute_path )
 	{
 		TEXTCHAR pathname[255];
 		snprintf( pathname, sizeof( pathname ), WIDE("C:\\ftn3000\\working\\%s"), name );
 		Fopen( pch->file, pathname, WIDE("rb") );
 	}
 	pch->psvUser = psv;
-	if( pch->file )
+	if( pch->file && !absolute_path )
 	{
 		while( ( line = GetConfigurationLine( pch ) ) )
 		{
-         ProcessConfigurationLine( pch, line );
+			ProcessConfigurationLine( pch, line );
 			LineRelease( line );
 		}
 		fclose( pch->file );
@@ -1999,8 +2000,8 @@ CONFIGSCR_PROC( int, ProcessConfigurationFile )( PCONFIG_HANDLER pch, CTEXTSTR n
     }
     else
     {
-		 //Log1( WIDE("Failed to open config file: %s"), name );
-       return FALSE;
+		//Log1( WIDE("Failed to open config file: %s"), name );
+		return FALSE;
     }
 }
 
@@ -2010,13 +2011,13 @@ CONFIGSCR_PROC( PTRSZVAL, ProcessConfigurationInput )( PCONFIG_HANDLER pch, CTEX
 {
 	pch->psvUser = psv;
 	{
-      PTEXT line;
+		PTEXT line;
 		PTEXT block = SegCreate( size );
 		MemCpy( GetText( block ), data, size );
-      pch->blocks = block;
+		pch->blocks = block;
 		while( ( line = GetConfigurationLine( pch ) ) )
 		{
-         ProcessConfigurationLine( pch, line );
+			ProcessConfigurationLine( pch, line );
 			LineRelease( line );
 		}
       // this block will have been moved into internal accumulators.
