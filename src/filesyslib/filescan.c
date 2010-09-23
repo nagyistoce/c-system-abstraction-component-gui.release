@@ -179,16 +179,16 @@ typedef struct result_buffer
 {
 	TEXTSTR buffer;
 	int len;
-   int result_len;
+	int result_len;
 } RESULT_BUFFER, *PRESULT_BUFFER;
 
 static void CPROC MatchFile( PTRSZVAL psvUser, CTEXTSTR name, int flags )
 {
-   PRESULT_BUFFER buffer = (PRESULT_BUFFER)psvUser;
-   buffer->result_len = snprintf( buffer->buffer, buffer->len, WIDE("%s"), name );
+	PRESULT_BUFFER buffer = (PRESULT_BUFFER)psvUser;
+	buffer->result_len = snprintf( buffer->buffer, buffer->len*sizeof(TEXTCHAR), WIDE("%s"), name );
 }
 
- int  GetMatchingFileName ( CTEXTSTR filemask, int flags, TEXTSTR pResult, int nResult )
+int  GetMatchingFileName ( CTEXTSTR filemask, int flags, TEXTSTR pResult, int nResult )
 {
 	void *info = NULL;
 	RESULT_BUFFER result_buf;
@@ -196,9 +196,9 @@ static void CPROC MatchFile( PTRSZVAL psvUser, CTEXTSTR name, int flags )
 	result_buf.len = nResult;
 	result_buf.result_len = 0;
 	// may need a while loop here...
-   // but I'm just going to result the first matching anyhow.
-   while( ScanFiles( NULL, filemask, &info, MatchFile, flags, (PTRSZVAL)&result_buf ) );
-   return result_buf.result_len;
+	// but I'm just going to result the first matching anyhow.
+	while( ScanFiles( NULL, filemask, &info, MatchFile, flags, (PTRSZVAL)&result_buf ) );
+	return result_buf.result_len;
 }
 
 //---------------------------------------------------------------------------

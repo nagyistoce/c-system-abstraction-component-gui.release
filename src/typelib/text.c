@@ -271,7 +271,7 @@ PTEXT SegCreateFromIntEx( int value DBG_PASS )
 {
 	PTEXT pResult;
 	pResult = SegCreateEx( 12 DBG_RELAY);
-	pResult->data.size = snprintf( pResult->data.data, 12, WIDE("%d"), value );
+	pResult->data.size = snprintf( pResult->data.data, 12*sizeof(TEXTCHAR), WIDE("%d"), value );
 	return pResult;
 }
 
@@ -281,7 +281,7 @@ PTEXT SegCreateFrom_64Ex( S_64 value DBG_PASS )
 {
    PTEXT pResult;
    pResult = SegCreateEx( 32 DBG_RELAY);
-	pResult->data.size = snprintf( pResult->data.data, 32, WIDE("%")_64f, value );
+	pResult->data.size = snprintf( pResult->data.data, 32*sizeof(TEXTCHAR), WIDE("%")_64f, value );
    return pResult;
 }
 
@@ -291,7 +291,7 @@ PTEXT SegCreateFromFloatEx( float value DBG_PASS )
 {
    PTEXT pResult;
    pResult = SegCreateEx( 32 DBG_RELAY);
-   pResult->data.size = snprintf( pResult->data.data, 32, WIDE("%f"), value );
+   pResult->data.size = snprintf( pResult->data.data, 32*sizeof(TEXTCHAR), WIDE("%f"), value );
    return pResult;
 }
 
@@ -335,7 +335,7 @@ PTEXT SegBreak(PTEXT segment)  // remove leading segments.
 					total += tabs[n]-position;
 					position = tabs[n];
 				}
-         lprintf( WIDE("Adding %d spaces"), segment->format.position.spaces );
+			lprintf( WIDE("Adding %d spaces"), segment->format.position.spaces );
 			total += segment->format.position.spaces;
 		}
 	}

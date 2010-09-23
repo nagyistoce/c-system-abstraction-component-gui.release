@@ -54,11 +54,11 @@ static PTEXT GetTime( PCLOCK_CONTROL clock, int bNewline ) /*FOLD00*/
 		clock->time_data.sc = (_8)st.wSecond;
 		clock->time_data.mn = (_8)st.wMinute;
 		clock->time_data.hr = (_8)st.wHour;
-      //clock->time_data.doy = st.wDayOfWeek;
+		//clock->time_data.doy = st.wDayOfWeek;
 		clock->time_data.dy = (_8)st.wDay;
 		clock->time_data.mo = (_8)st.wMonth;
 		clock->time_data.yr = st.wYear;
-      clock->time_data.ms = st.wMilliseconds;
+		clock->time_data.ms = st.wMilliseconds;
 	/*
 	 n = sprintf( pTime->data.data, WIDE("%s, %s %d, %d, %02d:%02d:%02d"),
 	 Days[st.wDayOfWeek], Months[st.wMonth],
@@ -67,10 +67,10 @@ static PTEXT GetTime( PCLOCK_CONTROL clock, int bNewline ) /*FOLD00*/
 	 */
 		{
 			static int last_second;
-         static int prior_milli;
+			static int prior_milli;
 			if( clock->flags.bHighTime && ( last_second == st.wSecond || ( ( last_second+1)%60 == st.wSecond && prior_milli ) ) )
 			{
-				timenow->data.size = snprintf( timenow->data.data, 80, WIDE("%02d/%02d/%d%c%02d:%02d:%02d.%03d")
+				timenow->data.size = snprintf( timenow->data.data, 80*sizeof(TEXTCHAR), WIDE("%02d/%02d/%d%c%02d:%02d:%02d.%03d")
 													  , st.wMonth, st.wDay, st.wYear
 													  , bNewline?'\n':' '
 													  , st.wHour, st.wMinute, st.wSecond, st.wMilliseconds );
@@ -78,7 +78,7 @@ static PTEXT GetTime( PCLOCK_CONTROL clock, int bNewline ) /*FOLD00*/
 			}
 			else
 			{
-				timenow->data.size = snprintf( timenow->data.data, 80, WIDE("%02d/%02d/%d%c%02d:%02d:%02d")
+				timenow->data.size = snprintf( timenow->data.data, 80*sizeof(TEXTCHAR), WIDE("%02d/%02d/%d%c%02d:%02d:%02d")
 													  , st.wMonth, st.wDay, st.wYear
 													  , bNewline?'\n':' '
 													  , st.wHour, st.wMinute, st.wSecond );
