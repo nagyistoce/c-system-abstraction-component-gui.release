@@ -3,13 +3,11 @@ cmake_minimum_required(VERSION 2.8)
 
 PROJECT( sack_deploy )
 
+configure_file( cmake_environment.h.in ${CMAKE_CURRENT_SOURCE_DIR}/cmake_environment.h )
 ADD_EXECUTABLE( ${PROJECT_NAME} deploy )
-SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
-                  FOLDER install
-)
+SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES FOLDER install )
 
 #TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${SACK_LIBRARIES} )
-
 
 if( WIN32 )
 	# On Windows platforms, the dynamic libs should
