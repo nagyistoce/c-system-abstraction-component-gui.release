@@ -315,7 +315,6 @@
 #if defined(LINUX_BUG_COMPATIBLE) && !defined(LINUX_COMPATIBLE)
 #define LINUX_COMPATIBLE
 #endif
-
 #include <sys/types.h>
 #include <string.h>
 #include <stdlib.h>
@@ -323,6 +322,7 @@
 #include <stdarg.h>
 #include <assert.h>
 #include <errno.h>
+#include <sack_types.h>
 
 #ifdef isdigit
 #undef isdigit
@@ -394,16 +394,16 @@ int vasnprintf (char **ptr, size_t str_m, const char *fmt, va_list ap);
 /* declare our portable vsnprintf routine under name portable_vsnprintf */
 #else
 /* declare our portable routines under names snprintf and vsnprintf */
-#define portable_snprintf snprintf
+//#define portable_snprintf snprintf
 #if !defined(NEED_SNPRINTF_ONLY)
-#define portable_vsnprintf vsnprintf
+//#define portable_vsnprintf vsnprintf
 #endif
 #endif
 
 #if !defined(HAVE_SNPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
-int portable_snprintf(char *str, size_t str_m, const char *fmt, /*args*/ ...);
+EXPORT_METHOD int portable_snprintf(char *str, size_t str_m, const char *fmt, /*args*/ ...);
 #if !defined(NEED_SNPRINTF_ONLY)
-int portable_vsnprintf(char *str, size_t str_m, const char *fmt, va_list ap);
+EXPORT_METHOD int portable_vsnprintf(char *str, size_t str_m, const char *fmt, va_list ap);
 #endif
 #endif
 
