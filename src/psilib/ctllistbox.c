@@ -1318,7 +1318,7 @@ PSI_PROC( void, SetItemContextMenu )( PLISTITEM pli, PMENU pMenu, void (CPROC*Me
 	{
 		pli->psvContextMenu = psv;
 		pli->pPopup = pMenu;
-      pli->MenuProc = MenuProc;
+		pli->MenuProc = MenuProc;
 	}
 }
 
