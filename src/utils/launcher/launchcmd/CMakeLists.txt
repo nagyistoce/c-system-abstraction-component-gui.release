@@ -28,38 +28,45 @@ if( MSVC )
 SET( ExtraSources ../../../systemlib/args.c )
 endif( MSVC )
 
+set( SOURCES_ROOT ../../.. )
+
+if( SNPRINTF_SOURCES )
+set( SNPRINTF_SOURCES    ${SOURCES_ROOT}/../${SNPRINTF_SOURCES} )
+endif(SNPRINTF_SOURCES)
 
 set(BASE_SOURCES
 ${FIRST_GCC_PROGRAM_SOURCE} 
     launchcmd.c
-    ../../../netlib/network.c 
-    ../../../netlib/udpnetwork.c 
-    ../../../netlib/tcpnetwork.c 
+    ${SOURCES_ROOT}/netlib/network.c 
+    ${SOURCES_ROOT}/netlib/udpnetwork.c 
+    ${SOURCES_ROOT}/netlib/tcpnetwork.c 
     ${NET_SOURCES}
-    ../../../memlib/sharemem.c
-    ../../../timerlib/timers.c
-    ../../../idlelib/idle.c
-    ../../../procreglib/names.c
-    ../../../configlib/configscript.c
-    ../../../sysloglib/syslog.c
+    ${SOURCES_ROOT}/memlib/sharemem.c
+    ${SOURCES_ROOT}/timerlib/timers.c
+    ${SOURCES_ROOT}/idlelib/idle.c
+    ${SOURCES_ROOT}/procreglib/names.c
+    ${SOURCES_ROOT}/configlib/configscript.c
+    ${SOURCES_ROOT}/sysloglib/syslog.c
     ${ExtraSources}
-    ../../../systemlib/system.c
-#    ../../../systemlib/spawntask.c
-    ../../../typelib/typecode.c
-    ../../../typelib/text.c
-    ../../../typelib/sets.c
-    ../../../typelib/binarylist.c
-    ../../../filesyslib/filescan.c
-    ../../../filesyslib/pathops.c
-    ../../../filesyslib/winfiles.c
+    ${SOURCES_ROOT}/systemlib/system.c
+#    ${SOURCES_ROOT}/systemlib/spawntask.c
+    ${SOURCES_ROOT}/typelib/typecode.c
+    ${SOURCES_ROOT}/typelib/text.c
+    ${SOURCES_ROOT}/typelib/sets.c
+    ${SOURCES_ROOT}/typelib/binarylist.c
+    ${SOURCES_ROOT}/filesyslib/filescan.c
+    ${SOURCES_ROOT}/filesyslib/pathops.c
+    ${SOURCES_ROOT}/filesyslib/winfiles.c
+    ${SNPRINTF_SOURCES}
 ${LAST_GCC_PROGRAM_SOURCE}
-    ../../../deadstart/deadstart_core.c 
+    ${SOURCES_ROOT}/deadstart/deadstart_core.c 
 )
 
 add_executable(${PROJECT_NAME} ${BASE_SOURCES} )
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
-COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL} -DNETWORK_SOURCE -DMEM_LIBRARY_SOURCE -DSYSLOG_SOURCE -D_TYPELIBRARY_SOURCE -DSYSTEM_SOURCE -DFILESYSTEM_LIBRARY_SOURCE -DTIMER_SOURCE -DIDLE_SOURCE -DPROCREG_SOURCE -DCONFIGURATION_LIBRARY_SOURCE -DSACK_BAG_CORE_EXPORTS -D__NO_OPTIONS__" 
+COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL} " 
+COMPILE_DEFINITIONS "__STATIC__;SACK_BAG_EXPORTS;__NO_OPTIONS__;__NO_NETWORK__"
                   FOLDER utils/launcher
 )
 if( __WINDOWS__ )

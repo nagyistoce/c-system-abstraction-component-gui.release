@@ -313,6 +313,15 @@ else( __WINDOWS__ )
   
 endif( __WINDOWS__ )
 
+if( MSVC )
+  SET( SNPRINTF_SOURCES src/snprintf_2.2/snprintf.c )
+  set_source_files_properties( ${SNPRINTF_SOURCES} 
+  				PROPERTIES
+                                COMPILE_DEFINITIONS "SNPRINTF_LONGLONG_SUPPORT;PREFER_PORTABLE_SNPRINTF"
+  			)
+  install( FILES src/snprintf-2.2/snprintf.h DESTINATION include/snprintf-2.2 )
+endif( MSVC )
+
 
 if( NOT BUILD_MONOLITHIC )
 set( PSI_SOURCES ${PSI_SOURCES} 
@@ -471,6 +480,7 @@ set( C_SOURCES
 set( SACK_SOURCES 
   ${FIRST_GCC_LIBRARY_SOURCE} 
     ${BASE_SOURCES} 
+    ${SNPRINTF_SOURCES}
     ${ODBC_SOURCES}
     ${BAG_SQLITE_SOURCES}
     ${C_SOURCES}
@@ -481,6 +491,7 @@ set( SACK_SOURCES
 set( SACK_PLUSPLUS_SOURCES 
   ${FIRST_GCC_LIBRARY_SOURCE} 
     ${BASE_SOURCES} 
+    ${SNPRINTF_SOURCES}
     ${ODBC_SOURCES}
     ${BAG_SQLITE_SOURCES}
     ${GENX_SOURCES}
