@@ -431,8 +431,6 @@ typedef int pid_t;
 //#define NEAR
 //#endif
 #define _fastcall
-//#define DYNAMIC_EXPORT EXPORT_METHOD
-//#define DYNAMIC_IMPORT __declspec(dllimport)
 #ifdef __cplusplus
 #ifdef __cplusplus_cli
 #define PUBLIC(type,name) extern "C"  LITERAL_LIB_EXPORT_METHOD type CPROC name
@@ -493,8 +491,6 @@ typedef int pid_t;
 #endif
 #define WINPROC(type,name)   type WINAPI name
 #define CALLBACKPROC( type, name ) type name
-//#define DYNAMIC_EXPORT
-//#define DYNAMIC_IMPORT extern
 #define PUBLIC(type,name) EXPORT_METHOD type CPROC name
 #define LIBMAIN() static int LibraryEntrance( void ) __attribute__((constructor)); static int LibraryEntrance( void ) { HINSTANCE hInstance = GetModuleHandle( NULL );
 #define LIBEXIT() } static int LibraryExit( void )    __attribute__((destructor)); static int LibraryExit( void )
