@@ -1,4 +1,5 @@
 #include <sack_types.h>
+#define SUFFER_WITH_NO_SNPRINTF
 #include <final_types.h>
 #include <stdio.h>
 #include <string.h>
