@@ -1137,8 +1137,8 @@ IMAGE_PROC  PSPRITE IMAGE_API  SetSpritePosition ( PSPRITE sprite, S_32 x, S_32 
    nHeight :  desired height in pixels to render the font.
    flags :    0 = render mono. 2=render 2 bits, 3=render 8 bit.  */
 IMAGE_PROC  Font IMAGE_API  InternalRenderFontFile ( CTEXTSTR file
-										, S_16 nWidth
-										, S_16 nHeight
+										, S_32 nWidth
+										, S_32 nHeight
 										, _32 flags 
 										);
 /* Creates a font based on indexes from the internal font cache.
@@ -1160,12 +1160,12 @@ IMAGE_PROC  Font IMAGE_API  InternalRenderFontFile ( CTEXTSTR file
    A Font which can be used to output. If the file exists. NULL
    on failure.
    Example
-   Used internally for FontPicker dialog, see <link sack::image::InternalRenderFontFile@CTEXTSTR@S_16@S_16@_32, InternalRenderFontFile> */
+   Used internally for FontPicker dialog, see <link sack::image::InternalRenderFontFile@CTEXTSTR@S_32@S_32@_32, InternalRenderFontFile> */
 IMAGE_PROC  Font IMAGE_API  InternalRenderFont ( _32 nFamily
 								  , _32 nStyle
 								  , _32 nFile
-								  , S_16 nWidth
-								  , S_16 nHeight
+								  , S_32 nWidth
+								  , S_32 nHeight
                           , _32 flags
 												  );
 /* Releases all resources for a Font.  */
@@ -1543,22 +1543,22 @@ typedef struct image_interface_tag
        \ \                                                */
     IMAGE_PROC_PTR( Image, DecodeMemoryToImage )( P_8 buf, _32 size );
 
-   /* <combine sack::image::InternalRenderFontFile@CTEXTSTR@S_16@S_16@_32>
+   /* <combine sack::image::InternalRenderFontFile@CTEXTSTR@S_32@S_32@_32>
       
       \returns a Font                                                      */
 	IMAGE_PROC_PTR( Font, InternalRenderFontFile )( CTEXTSTR file
-																 , S_16 nWidth
-																 , S_16 nHeight
-																 , _32 flags // whether to render 1(0/1), 2(2), 8(3) bits, ...
+																 , S_32 nWidth
+																 , S_32 nHeight
+																 , _32 flags 
 																 );
-   /* <combine sack::image::InternalRenderFont@_32@_32@_32@S_16@S_16@_32>
+   /* <combine sack::image::InternalRenderFont@_32@_32@_32@S_32@S_32@_32>
       
       requires knowing the font cache....                                 */
 	IMAGE_PROC_PTR( Font, InternalRenderFont )( _32 nFamily
 															, _32 nStyle
 															, _32 nFile
-															, S_16 nWidth
-															, S_16 nHeight
+															, S_32 nWidth
+															, S_32 nHeight
 															, _32 flags
 															);
 /* <combine sack::image::RenderScaledFontData@PFONTDATA@PFRACTION@PFRACTION>
