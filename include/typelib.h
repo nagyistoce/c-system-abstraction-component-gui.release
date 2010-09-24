@@ -2310,6 +2310,7 @@ TYPELIB_PROC  void TYPELIB_CALLTYPE  FamilyTreeAddChild ( PFAMILYTREE *root, POI
 }; // namespace sack
 using namespace sack::containers::link_stack;
 using namespace sack::containers::data_stack;
+using namespace sack::containers::data_list;
 using namespace sack::containers::data_queue;
 using namespace sack::containers::queue;
 using namespace sack::containers::BinaryTree;
