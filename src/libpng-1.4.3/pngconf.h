@@ -1460,9 +1460,9 @@ typedef char            FAR * FAR * FAR * png_charppp;
 #    define png_memset  memset
 #    define png_sprintf wsprintfA
 #      ifdef _MSC_VER
-#        define png_snprintf _snprintf   /* Added to v 1.2.19 */
-#        define png_snprintf2 _snprintf
-#        define png_snprintf6 _snprintf
+#        define png_snprintf(s,sz,f,...)    _snprintf_s(s,sz,sz,f,##__VA_ARGS__)   /* Added to v 1.2.19 */
+#        define png_snprintf2(s,sz,f,...)   _snprintf_s(s,sz,sz,f,##__VA_ARGS__)
+#        define png_snprintf6(s,sz,f,...)  _snprintf_s(s,sz,sz,f,##__VA_ARGS__)
 #      else
 #        define png_snprintf snprintf   /* Added to v 1.2.19 */
 #        define png_snprintf2 snprintf

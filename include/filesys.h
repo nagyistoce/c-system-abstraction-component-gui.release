@@ -296,7 +296,7 @@ FILESYS_PROC  int FILESYS_API  sack_fseek ( FILE *file_file, int pos, int whence
 FILESYS_PROC  int FILESYS_API  sack_fread ( CPOINTER buffer, int size, int count,FILE *file_file );
 FILESYS_PROC  int FILESYS_API  sack_fwrite ( CPOINTER buffer, int size, int count,FILE *file_file );
 
-FILESYS_PROC  int FILESYS_API  sack_unlink ( CTEXTSTR filename );
+FILESYS_PROC  int FILESYS_API  sack_unlink ( int group, CTEXTSTR filename );
 FILESYS_PROC  int FILESYS_API  sack_rename ( CTEXTSTR file_source, CTEXTSTR new_name );
 
 #ifdef __WINDOWS__
@@ -320,8 +320,8 @@ FILESYS_PROC  int FILESYS_API  sack_rename ( CTEXTSTR file_source, CTEXTSTR new_
 # define _lwrite(a,b,c) sack_write(a,b,c)
 # define _lcreat(a,b) sack_creat(0,a,b)
 
-# define remove(a)   sack_unlink(a)
-# define unlink(a)   sack_unlink(a)
+# define remove(a)   sack_unlink(0,a)
+# define unlink(a)   sack_unlink(0,a)
 #endif
 #endif
 

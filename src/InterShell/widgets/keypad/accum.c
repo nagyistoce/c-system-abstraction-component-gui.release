@@ -191,7 +191,7 @@ int GetAccumulatorText( PACCUMULATOR accum, TEXTCHAR *text, int nLen )
 		PTEXT result = VarTextPeek( accum->pvt_text );
 		if( result )
 		{
-			strncpy( text, GetText( result ), nLen );
+			StrCpyEx( text, GetText( result ), nLen );
 			len = GetTextSize( result );
 		}
 	}

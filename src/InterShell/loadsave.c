@@ -340,7 +340,7 @@ PTRSZVAL CPROC CreateNewControl( PTRSZVAL psv, arg_list args )
 				lprintf( "(push)create a: %s", control_type_name );
 #endif
 				PushLink( &l.current_button
-						  , button = CreateSomeControl( pc_canvas, col, row, width, height, control_type_name ) );
+						  , button = CreateSomeControl( pc_canvas, (int)col, (int)row, (int)width, (int)height, control_type_name ) );
 				if( button )
 				{
 					bRecovered = BeginSubConfiguration( control_type_name, WIDE("control done") );
@@ -462,8 +462,8 @@ PTRSZVAL CPROC SetMenuButtonImageMargin( PTRSZVAL psv, arg_list args )
 	PMENU_BUTTON   current_button = (PMENU_BUTTON)PeekLink( &l.current_button );
 	if( current_button )
 	{
-		current_button->decal_horiz_margin = hMargin;
-      current_button->decal_vert_margin = vMargin;
+		current_button->decal_horiz_margin = (_32)hMargin;
+		current_button->decal_vert_margin = (_32)vMargin;
 		SetKeyImageMargin( current_button->control.key, hMargin, vMargin );
 	}
 
@@ -1409,7 +1409,8 @@ void SaveSQLButtonConfig( void )
 void RenameConfig( TEXTCHAR *config_filename, TEXTCHAR *source, int source_name_len, int n )
 {
 	FILE *file;
-	file = sack_fopen( GetFileGroup( "Resources", NULL ), source, WIDE("rt") );
+	int group;
+	file = sack_fopen( group = GetFileGroup( "Resources", NULL ), source, WIDE("rt") );
 	if( file )
 	{
 		TEXTCHAR backup[256];
@@ -1426,7 +1427,7 @@ void RenameConfig( TEXTCHAR *config_filename, TEXTCHAR *source, int source_name_
 							, n+1 );
 		}
 		else
-			sack_unlink( source );
+			sack_unlink( group, source );
 		sack_rename( source, backup );
 	}
 }

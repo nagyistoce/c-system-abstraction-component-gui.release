@@ -193,7 +193,7 @@ PRELOAD( PreconfigureVariables )
 CTEXTSTR GetPageTitle( void )
 {
 	PPAGE_DATA page = ShellGetCurrentPage();
-   return page->title?page->title:WIDE( "DEFAULT PAGE" );
+	return page->title?page->title:WIDE( "DEFAULT PAGE" );
 }
 
 PVARIABLE FindVariableByName( CTEXTSTR variable )
@@ -201,20 +201,20 @@ PVARIABLE FindVariableByName( CTEXTSTR variable )
 	PVARIABLE var;
 	INDEX nVar;
 	if( !variable )
-      return NULL; // can't have a NULL variable.
+		return NULL; // can't have a NULL variable.
 	LIST_FORALL( extern_variables, nVar, PVARIABLE, var )
 	{
 		//for( nVar = 0; nVar < NUM_VARIABLES; nVar++ )
 		if( var->name )
 		{
 			int varnamelen = strlen( var->name );
-			if( strnicmp( variable, var->name, varnamelen ) == 0 )
+			if( StrCaseCmpEx( variable, var->name, varnamelen ) == 0 )
 			{
 				break;
 			}
 		}
 	}
-   return var;
+	return var;
 }
 
 CTEXTSTR InterShell_GetControlLabelText( PMENU_BUTTON button, PPAGE_LABEL label, CTEXTSTR variable )
@@ -226,7 +226,7 @@ CTEXTSTR InterShell_GetControlLabelText( PMENU_BUTTON button, PPAGE_LABEL label,
 		if( variable[0] == '%' )
 		{
 			PVARIABLE var = FindVariableByName( variable + 1);
-         if( var )
+			if( var )
 			{
 				if( var->flags.bString )
 				{

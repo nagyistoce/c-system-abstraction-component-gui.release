@@ -112,7 +112,7 @@ int FillControlIDList( CTEXTSTR root, PSI_CONTROL listbox, PSI_CONTROL pc, int l
 	{
 		{
 			TEXTCHAR rootname[256];
-			if( stricmp( name, pc->pTypeName ) == 0 )
+			if( StrCaseCmp( name, pc->pTypeName ) == 0 )
 			{
 				// this is of the type we want.
 				{

@@ -227,7 +227,7 @@ static PTRSZVAL CPROC ConfigSetBannerTimeout( PTRSZVAL psvBanner, arg_list args 
 	if( delay < 0 )
 		banner->delay = 0;
 	else
-		banner->delay = delay;
+		banner->delay = (_32)delay;
 
 	return psvBanner;
 }

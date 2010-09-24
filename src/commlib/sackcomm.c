@@ -933,7 +933,7 @@ void DumpTermios( struct termios *opts )
 }
               
  int  SackClearReadCallback ( int iCommId
-                                          ,  CommReadCallback func, PTRSZVAL psv )
+                                          ,  CommReadCallback func )
 {
 	PCOM_TRACK pct;
 	pct = FindComByNumber( iCommId );

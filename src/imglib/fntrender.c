@@ -863,8 +863,8 @@ void InternalRenderFontCharacter( PFONT_RENDERER renderer, PFONT font, INDEX idx
 
 
 Font InternalRenderFontFile( CTEXTSTR file
-										, S_16 nWidth
-										, S_16 nHeight
+										, S_32 nWidth
+										, S_32 nHeight
 										, _32 flags // whether to render 1(0/1), 2(2), 8(3) bits, ...
 										)
 {
@@ -922,8 +922,8 @@ try_another_default:
 		{
 			renderer = (PFONT_RENDERER)Allocate( sizeof( FONT_RENDERER ) );
 			MemSet( renderer, 0, sizeof( FONT_RENDERER ) );
-			renderer->nWidth = nWidth;
-			renderer->nHeight = nHeight;
+			renderer->nWidth = (S_16)nWidth;
+			renderer->nHeight = (S_16)nHeight;
 			renderer->flags = flags;
 			renderer->file = sack_prepend_path( 0, file );
 			AddLink( &fonts, renderer );
@@ -1161,8 +1161,8 @@ Font RenderScaledFontData( PFONTDATA pfd, PFRACTION width_scale, PFRACTION heigh
 Font InternalRenderFont( _32 nFamily
 								  , _32 nStyle
 								  , _32 nFile
-								  , S_16 nWidth
-								  , S_16 nHeight
+								  , S_32 nWidth
+								  , S_32 nHeight
                           , _32 flags
 								  )
 {

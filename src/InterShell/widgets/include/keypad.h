@@ -66,7 +66,7 @@ KEYPAD_PROC( PSI_CONTROL, MakeKeypadHotkey )( PSI_CONTROL frame
 														  , _32 h
 														  , char *keypad
 														  );
-KEYPAD_PROC( void, KeyIntoKeypad )( PSI_CONTROL keypad, _64 value );
+KEYPAD_PROC( void, KeyIntoKeypad )( PSI_CONTROL keypad, S_64 value );
 KEYPAD_PROC( void, KeypadInvertValue )( PSI_CONTROL keypad );
 
 KEYPAD_NAMESPACE_END

@@ -776,13 +776,13 @@ static void CPROC KeyPressed( PTRSZVAL psv, PKEY_BUTTON key )
 	}
 }
 
-KEYPAD_PROC( void, KeyIntoKeypad )( PSI_CONTROL pc, _64 value )
+KEYPAD_PROC( void, KeyIntoKeypad )( PSI_CONTROL pc, S_64 value )
 {
 	ValidatedControlData( PKEYPAD, keypad_control.TypeID, pKeyPad, pc );
 	if( pKeyPad )
 	{
-      ClearAccumulator( pKeyPad->accum );
-		KeyIntoAccumulator( pKeyPad->accum, value, 10 );
+		ClearAccumulator( pKeyPad->accum );
+		KeyIntoAccumulator( pKeyPad->accum, (S_32)value, 10 );
 		InvokeEnterEvent( pc );
 	}
 }

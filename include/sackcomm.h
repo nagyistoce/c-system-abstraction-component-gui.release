@@ -46,7 +46,7 @@ SACKCOMM_PROC( int, SackOpenCommEx)(CTEXTSTR szPort, _32 uiRcvQ, _32 uiSendQ
                   					, PTRSZVAL psv );
 #define SackOpenComm( szport, rq, sq ) SackOpenCommEx( szport, rq, sq, NULL, 0 )
 
-typedef void (*CPROC CommReadCallback)( PTRSZVAL psv, int nCommId, POINTER buffer, int len );
+typedef void (CPROC* CommReadCallback)( PTRSZVAL psv, int nCommId, POINTER buffer, int len );
 SACKCOMM_PROC( void, SackSetReadCallback )( int nCommId
                                           , CommReadCallback Callback
                                           , PTRSZVAL psvRead );

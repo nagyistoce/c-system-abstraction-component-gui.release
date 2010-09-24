@@ -877,7 +877,8 @@ static void FileSystemLog( CTEXTSTR message )
 static void BackupFile( const TEXTCHAR *source, int source_name_len, int n )
 {
 	FILE *testfile;
-	testfile = sack_fopen( GetFileGroup( "system.logs", GetProgramPath() ), source, WIDE("rt") );
+	int group;
+	testfile = sack_fopen( group = GetFileGroup( "system.logs", GetProgramPath() ), source, WIDE("rt") );
 	if( testfile )
 	{
 		TEXTCHAR backup[256];
@@ -894,8 +895,8 @@ static void BackupFile( const TEXTCHAR *source, int source_name_len, int n )
 							, n+1 );
 		}
 		else
-			sack_unlink( source );
-      //lprintf( WIDE( "%s->%s" ), source, backup );
+			sack_unlink( group, source );
+		//lprintf( WIDE( "%s->%s" ), source, backup );
 		sack_rename( source, backup );
 	}
 }
