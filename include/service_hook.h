@@ -1,4 +1,4 @@
 
 
-void SetupService( CTEXTSTR name, void (CPROC*)(void) );
+void SetupService( TEXTSTR name, void (CPROC*)(void) );
 

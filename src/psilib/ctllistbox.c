@@ -1227,10 +1227,10 @@ PLISTITEM AddListItemEx( PSI_CONTROL pc, int nLevel, const TEXTCHAR *text )
 
 //---------------------------------------------------------------------------
 
-PLISTITEM AddListItem( PSI_CONTROL pc, const TEXTCHAR *text )
+PLISTITEM AddListItem( PSI_CONTROL pc, CTEXTSTR text )
 {
 	PLISTITEM pli = AddListItemEx( pc, 0, text );
-   return pli;
+	return pli;
 }
 
 //---------------------------------------------------------------------------

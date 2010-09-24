@@ -130,7 +130,7 @@ int  SetGroupFilePath ( CTEXTSTR group, CTEXTSTR path )
 	struct Group *filegroup = GetGroupFilePath( group );
 	if( !filegroup )
 	{
-      TEXTCHAR tmp[256];
+		TEXTCHAR tmp[256];
 		filegroup = New( struct Group );
 		filegroup->name = StrDup( group );
 		filegroup->base_path = StrDup( path );
@@ -142,14 +142,14 @@ int  SetGroupFilePath ( CTEXTSTR group, CTEXTSTR path )
 		}
 #endif
 		AddLink( &l.groups, filegroup );
-      l.have_default = TRUE;
+		l.have_default = TRUE;
 	}
 	else
 	{
 		Release( (POINTER)filegroup->base_path );
 		filegroup->base_path = StrDup( path );
 	}
-   return FindLink( &l.groups, filegroup );
+	return FindLink( &l.groups, filegroup );
 }
 
 
@@ -178,7 +178,7 @@ void SetDefaultFilePath( CTEXTSTR path )
 		SetGroupFilePath( WIDE( "Default" ), tmp_path?tmp_path:path );
 	}
 	if( tmp_path )
-      Release( tmp_path );
+		Release( tmp_path );
 }
 
 static TEXTSTR PrependBasePath( int groupid, struct Group *group, CTEXTSTR filename )
@@ -192,13 +192,14 @@ static TEXTSTR PrependBasePath( int groupid, struct Group *group, CTEXTSTR filen
 		SetDefaultFilePath( OSALOT_GetEnvironmentVariable( "MY_WORK_PATH" ) );
 #endif
 
-		if( !groupid )
+		if( !group )
 		{
-			group = (struct Group *)GetLink( &l.groups, groupid );
+			if( group >= 0 )
+				group = (struct Group *)GetLink( &l.groups, groupid );
 		}
 	}
-	if( !group || ( filename && ( filename[0] == '/' || filename[0] == '\\' || filename[1] == ':' ) ) )
-      return StrDup( filename );
+	if( !group || ( filename && ( IsAbsolutePath( filename ) ) ) )
+		return StrDup( filename );
 	{
 		int len;
 		if( groupid && group->base_path[0] == '.' && ( group->base_path[1] == '/' || group->base_path[1] == '\\' ) )
@@ -225,7 +226,7 @@ static TEXTSTR PrependBasePath( int groupid, struct Group *group, CTEXTSTR filen
 		static int aa;
 		if( aa > 2 )
 		{
-         aa++;
+			aa++;
 			lprintf( "%s", fullname );
 		}
 	}
@@ -243,12 +244,12 @@ HANDLE sack_open( int group, CTEXTSTR filename, int opts, ... )
 {
 	HANDLE handle;
 	struct file *file;
-   INDEX idx;
+	INDEX idx;
 	LIST_FORALL( l.files, idx, struct file *, file )
 	{
 		if( StrCmp( file->name, filename ) == 0 )
 		{
-         break;
+			break;
 		}
 	}
 	if( !file )
@@ -256,9 +257,9 @@ HANDLE sack_open( int group, CTEXTSTR filename, int opts, ... )
 		struct Group *filegroup = (struct Group *)GetLink( &l.groups, group );
 		file = New( struct file );
 		file->name = StrDup( filename );
-      file->fullname = PrependBasePath( group, filegroup, filename );
+		file->fullname = PrependBasePath( group, filegroup, filename );
 		file->handles = NULL;
-      file->files = NULL;
+		file->files = NULL;
 		AddLink( &l.files,file );
 	}
 	switch( opts & 3 )
@@ -421,14 +422,17 @@ int sack_write( HANDLE file_handle, CPOINTER buffer, int size )
 }
 #endif //defined( __WINDOWS__ )
 
-int sack_unlink( CTEXTSTR filename )
+int sack_unlink( int group, CTEXTSTR filename )
 {
 #ifdef __LINUX__
-   return unlink( filename );
+	int okay;
+	TEXTSTR tmp = PrependBasePath( group, filegroup, filename );
+	okay = unlink( filename );
+	Release( tmp );
+	return !okay; // unlink returns TRUE is 0, else error...
 #else
 	int okay;
-	struct Group *filegroup = (struct Group *)GetLink( &l.groups, 0 );
-	TEXTSTR tmp = PrependBasePath( 0, filegroup, filename );
+	TEXTSTR tmp = PrependBasePath( group, NULL, filename );
 	okay = DeleteFile(tmp);
 	Release( tmp );
 	return !okay; // unlink returns TRUE is 0, else error...

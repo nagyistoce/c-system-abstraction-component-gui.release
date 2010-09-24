@@ -618,7 +618,7 @@ int CPROC DrawButtonText( PSI_CONTROL pc, Image surface, PKEY_BUTTON key )
 						{
 							//lprintf( WIDE("text %s =%s?"), text
 							//		 , color_defs[n].name );
-							if( strnicmp( text
+							if( StrCaseCmpEx( text
 											, color_defs[n].name
 											, len = strlen( color_defs[n].name ) ) == 0 )
 							{
@@ -1250,26 +1250,25 @@ PKEY_BUTTON MakeKeyExx( PCOMMON frame
 							 , CTEXTSTR value
 							 )
 {
-	PKEY_BUTTON result;
 
 	int loaded_default = 0;
-   PCONTROL pc;
+	PCONTROL pc;
 	if( !l.pii )
-      l.pii = GetImageInterface();
+		l.pii = GetImageInterface();
 	if( !l.pri )
-      l.pri = GetDisplayInterface();
+		l.pri = GetDisplayInterface();
 	if( !lense && !frame_up && !frame_down && !mask )
 	{
-      //lprintf( WIDE("Loading button theme...") );
-      LoadButtonTheme();
-	  loaded_default = 1;
+		//lprintf( WIDE("Loading button theme...") );
+		LoadButtonTheme();
+		loaded_default = 1;
 		lense = l.default_theme.buttons.iGlare;
 		frame_up = l.default_theme.buttons.iNormal;
 		frame_down = l.default_theme.buttons.iPressed;
 		mask = l.default_theme.buttons.iMask;
 
 	}
-   // make sure everything is zero... (specially with release mode)
+	// make sure everything is zero... (specially with release mode)
 	pc = MakeNamedControl( frame, BUTTON_NAME
 								, x, y, width, height // position?
 								, 0  // ID

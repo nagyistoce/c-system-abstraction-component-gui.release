@@ -2247,7 +2247,7 @@ PSI_PROC_PTR( PLISTITEM, InsertListItem)( PSI_CONTROL pc, PLISTITEM prior, CTEXT
    
    \ \                                                                               */
 PSI_PROC_PTR( PLISTITEM, InsertListItemEx)( PSI_CONTROL pc, PLISTITEM prior, int nLevel, CTEXTSTR text );
-PSI_PROC_PTR( PLISTITEM, AddListItem)( PSI_CONTROL pc, const CTEXTSTR text );
+PSI_PROC_PTR( PLISTITEM, AddListItem)( PSI_CONTROL pc, CTEXTSTR text );
 /* <combine sack::PSI::listbox::AddListItemEx@PSI_CONTROL@int@CTEXTSTR>
    
    \ \                                                                  */

@@ -1075,9 +1075,10 @@ radio_button = { RADIO_BUTTON_NAME
 };
 
 
-OnCommonFocus( NORMAL_BUTTON_NAME )( PSI_CONTROL pc, LOGICAL bFocus )
+static int OnCommonFocus( NORMAL_BUTTON_NAME )( PSI_CONTROL pc, LOGICAL bFocus )
 {
    SmudgeCommon( pc );
+   return 1;
 }
 
 PRIORITY_PRELOAD( register_buttons, PSI_PRELOAD_PRIORITY ) {

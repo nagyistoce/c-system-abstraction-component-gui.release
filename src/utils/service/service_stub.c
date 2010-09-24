@@ -103,7 +103,7 @@ void APIENTRY ServiceMain( _32 argc, char **argv )
 }
 
 
-void SetupService( CTEXTSTR name, void (CPROC*Start)( void ) )
+void SetupService( TEXTSTR name, void (CPROC*Start)( void ) )
 {
 	SERVICE_TABLE_ENTRY ServiceTable[2];
    l.Start = Start;

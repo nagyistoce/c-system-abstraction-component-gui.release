@@ -220,10 +220,11 @@ PSI_CONTROL LoadXMLFrameOverEx( PSI_CONTROL parent, CTEXTSTR file DBG_PASS )
 //PSI_CONTROL  LoadXMLFrame( char *file )
 {
 	POINTER buffer;
-	CTEXTSTR _file; // temp storage for prior value(create frame in place, allow moving later)
 	TEXTSTR tmp = NULL;
 	PTRSZVAL size;
-   _32 zz;
+#ifdef UNDER_CE
+	_32 zz;
+#endif
 	PSI_CONTROL frame;
 #  ifdef USE_INTERFACES
 	if( !g.MyImageInterface )
@@ -250,7 +251,7 @@ PSI_CONTROL LoadXMLFrameOverEx( PSI_CONTROL parent, CTEXTSTR file DBG_PASS )
 			buffer = Allocate( zz );
 			fread( buffer, 1, zz, file );
 			sack_fclose( file_read );
-         lprintf( "loaded font blob %s %d %p", file, zz, buffer );
+			lprintf( "loaded font blob %s %d %p", file, zz, buffer );
 		}
 	}
 #else
@@ -259,7 +260,9 @@ PSI_CONTROL LoadXMLFrameOverEx( PSI_CONTROL parent, CTEXTSTR file DBG_PASS )
 	if( !buffer || !size )
 	{
 		// attempt secondary open within frames/*
+#ifdef UNDER_CE
 		int len;
+#endif
 		size = 0;
 #ifdef UNDER_CE
 		{
