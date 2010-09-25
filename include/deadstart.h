@@ -712,12 +712,13 @@ void name( void) \
 #define pastejunk(a,b) pastejunk_(a,b)
 
 #define PRIORITY_PRELOAD(name,priority) static void name(void); \
+   static int schedule_##name(void);   \
+	static __declspec(allocate(_STARTSEG_)) void (CPROC*pastejunk(TARGET_LABEL,pastejunk( x_##name,__LINE__)))(void) = (void(CPROC*)(void))schedule_##name; \
 	static int schedule_##name(void) {                 \
-	RegisterPriorityStartupProc( name,WIDE(#name),priority,0/*chance to use label to reference*/,WIDE__FILE__,__LINE__ );\
+	RegisterPriorityStartupProc( name,WIDE(#name),priority,pastejunk(TARGET_LABEL,pastejunk( x_##name,__LINE__)),WIDE__FILE__,__LINE__ );\
 	return 0; \
 	}                                       \
 	/*static __declspec(allocate(_STARTSEG_)) void (CPROC*pointer_##name)(void) = schedule_##name;*/ \
-	/*static */__declspec(allocate(_STARTSEG_)) void (CPROC*pastejunk(unique_name,pastejunk( x_##name,__LINE__)))(void) = (void(CPROC*)(void))schedule_##name; \
 	static void name(void)
 
 /*
