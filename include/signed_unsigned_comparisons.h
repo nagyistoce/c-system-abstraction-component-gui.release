@@ -19,15 +19,15 @@
 
 
 #else
-#define SUS_GT(a,b)   ((a)>(b))
-#define USS_GT(a,b)   ((a)>(b))
+#define SUS_GT(a,at,b,bt)   ((a)>(b))
+#define USS_GT(a,at,b,bt)   ((a)>(b))
 
-#define SUS_LT(a,b)   ((a)<(b))
-#define USS_LT(a,b)   ((a)<(b))
+#define SUS_LT(a,at,b,bt)   ((a)<(b))
+#define USS_LT(a,at,b,bt)   ((a)<(b))
 
-#define SUS_GTE(a,b)  ((a)>=(b))
-#define USS_GTE(a,b)  ((a)>=(b))
+#define SUS_GTE(a,at,b,bt)  ((a)>=(b))
+#define USS_GTE(a,at,b,bt)  ((a)>=(b))
 
-#define SUS_LTE(a,b)  ((a)<=(b))
-#define USS_LTE(a,b)  ((a)<=(b))
+#define SUS_LTE(a,at,b,bt)  ((a)<=(b))
+#define USS_LTE(a,at,b,bt)  ((a)<=(b))
 #endif
