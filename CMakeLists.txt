@@ -13,7 +13,7 @@ if( ${CMAKE_GENERATOR} MATCHES "Watcom WMake" )
 SET( CMAKE_RC_COMPILER "rc" )
 #SET(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> /fo<OBJECT> <SOURCE>  -i${SACK_SOURCE_DIR}")
 
- set( ExtraFlags "${ExtraFlags} -DSEXPAT_SOURCE -DXML_MIN_SIZE /fp5 /fpi87" )
+ set( ExtraFlags "${ExtraFlags} -DXML_MIN_SIZE /fp5 /fpi87" )
  # this flag is for build dll?  emit DllRuntime startup link 
  #set( LibraryExtraFlags "-bd" )
  set( ConsoleProgramExtraFlags "-bc" )
@@ -233,7 +233,7 @@ set ( EXPAT_SOURCES
   src/sexpat/xmlrole.c
   src/sexpat/xmltok.c
 )
-set( ExtraFlags "${ExtraFlags} -DSEXPAT_SOURCE -DXML_MIN_SIZE" )
+set( ExtraFlags "${ExtraFlags} -DXML_MIN_SIZE" )
 
 # genx is searchable by looking for 'genx xml'
 set( GENX_SOURCES
