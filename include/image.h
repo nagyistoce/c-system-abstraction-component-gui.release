@@ -126,7 +126,7 @@ SACK_NAMESPACE
 	_IMAGE_NAMESPACE
 
 /* A fixed point decimal number (for freetype font rendering) */
-typedef S_32 fixed;
+typedef S_64 fixed;
 //#ifndef IMAGE_STRUCTURE_DEFINED
 //#define IMAGE_STRUCTURE_DEFINED
 // consider minimal size - +/- 32000 should be enough for display purposes.

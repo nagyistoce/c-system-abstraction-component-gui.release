@@ -1617,7 +1617,7 @@ SACK_NAMESPACE_END // namespace sack {
 // this should become common to all libraries and programs...
 #include <construct.h> // pronounced 'kahn-struct'
 #include <logging.h>
-
+#include <signed_unsigned_comparisons.h>
 
 #ifdef __cplusplus
 using namespace sack;
