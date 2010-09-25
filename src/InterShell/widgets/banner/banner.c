@@ -53,7 +53,7 @@ typedef struct banner_tag
 } BANNER;
 
 
-typedef struct banner_local_tag {
+struct banner_local_tag {
 	struct {
 		BIT_FIELD bInited : 1;
 	} flags;

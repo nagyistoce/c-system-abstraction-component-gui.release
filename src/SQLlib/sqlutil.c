@@ -858,7 +858,7 @@ LOGICAL CheckAccessODBCTable( PODBC odbc, PTABLE table, _32 options )
 	CTEXTSTR *fields;
 	int columns;
 	PVARTEXT pvtCreate = NULL;
-	TEXTCHAR *cmd = WIDE("select top 1 * from [%s]");
+	CTEXTSTR cmd = WIDE("select top 1 * from [%s]");
 	int retry = 0;
 retry:
 	if( SQLRecordQueryf( odbc, &columns, NULL, &_fields, cmd, table->name ) )
@@ -945,7 +945,7 @@ retry:
 			if( m == columns )
 			{
 				// did not find this defined column in the table, add it.
-				PTEXT cmd;
+				PTEXT pt_cmd;
 				if( !pvtCreate )
 					pvtCreate = VarTextCreate();
 				vtprintf( pvtCreate, WIDE("alter table [%s] add column [%s] %s%s%s")
@@ -955,12 +955,12 @@ retry:
 						  , table->fields.field[n].extra?WIDE(" "):WIDE("")
 						  , table->fields.field[n].extra?table->fields.field[n].extra:WIDE("")
 						  );
-				cmd = VarTextGet( pvtCreate );
+				pt_cmd = VarTextGet( pvtCreate );
 				// close all prior statement handles so it's not locked
 				// especially my own.
 	            PopODBCEx( odbc ); // release so that the alter statement may be done.
-				SQLCommand( odbc, GetText( cmd ) );
-				LineRelease( cmd );
+				SQLCommand( odbc, GetText( pt_cmd ) );
+				LineRelease( pt_cmd );
 			}
 		}
 		// release the duplicated fields...
@@ -988,7 +988,7 @@ retry:
 		}
 		if( StrCmpEx( error, WIDE("(S0002)"), 7 ) == 0 )
 		{
-         PTEXT cmd;
+         PTEXT pt_cmd;
 			int n;
          int first = 1;
 			if( !pvtCreate )
@@ -1040,9 +1040,9 @@ retry:
             // for implementation see Check MYSQL
 			//}
 			vtprintf( pvtCreate, WIDE(")") );
-			cmd = VarTextGet( pvtCreate );
-			SQLCommand( odbc, GetText( cmd ) );
-			LineRelease( cmd );
+			pt_cmd = VarTextGet( pvtCreate );
+			SQLCommand( odbc, GetText( pt_cmd ) );
+			LineRelease( pt_cmd );
 		}
 		else
 		{
@@ -1069,7 +1069,6 @@ LOGICAL CPROC CheckMySQLODBCTable( PODBC odbc, PTABLE table, _32 options )
 	int success;
 	int buflen;
 	PVARTEXT pvtCreate = NULL;
-							 //char *cmd = "select * from %s limit 1";
 	TEXTCHAR *cmd;
 	if( options & CTO_LOG_CHANGES )
 	{
