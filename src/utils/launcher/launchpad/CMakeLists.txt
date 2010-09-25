@@ -30,20 +30,20 @@ install_default_dest_binary( ${PROJECT_NAME} )
 
 project( launchpad.portable )
 
-if( __WINDOWS__ )
-set( NET_SOURCES     ../../../netlib/net_winsock2.c  )
-endif( __WINDOWS__ )
-
-if( MSVC ) 
-SET( ExtraSources ../../../systemlib/args.c )
-endif( MSVC )
-
 
 set( SOURCES_ROOT ../../.. )
 
 if( SNPRINTF_SOURCES )
 set( SNPRINTF_SOURCES    ${SOURCES_ROOT}/../${SNPRINTF_SOURCES} )
 endif(SNPRINTF_SOURCES)
+
+if( __WINDOWS__ )
+set( NET_SOURCES     ${SOURCES_ROOT}/netlib/net_winsock2.c  )
+endif( __WINDOWS__ )
+
+if( MSVC ) 
+SET( ExtraSources ${SOURCES_ROOT}/systemlib/args.c )
+endif( MSVC )
 
 
 set(BASE_SOURCES
@@ -88,8 +88,8 @@ endif()
 
 
 add_executable(${PROJECT_NAME} WIN32 ${BASE_SOURCES} )
-SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
+SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL}"
                   COMPILE_DEFINITIONS "SACK_BAG_EXPORTS;__NO_OPTIONS__;__STATIC__"
                   FOLDER utils/launcher
