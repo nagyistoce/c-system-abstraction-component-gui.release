@@ -319,7 +319,7 @@ if( MSVC )
   				PROPERTIES
                                 COMPILE_DEFINITIONS "SNPRINTF_LONGLONG_SUPPORT;PREFER_PORTABLE_SNPRINTF"
   			)
-  install( FILES src/snprintf-2.2/snprintf.h DESTINATION include/snprintf-2.2 )
+  install( FILES src/snprintf_2.2/snprintf.h DESTINATION include/SACK/snprintf-2.2 )
 endif( MSVC )
 
 
