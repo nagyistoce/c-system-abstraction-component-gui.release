@@ -17,8 +17,8 @@ namespace sack {
 struct idle_proc_tag
 {
 	struct {
-		_32 bDispatched : 1;
-		_32 bRemove : 1;
+		BIT_FIELD bDispatched : 1;
+		BIT_FIELD bRemove : 1;
 	} flags;
 	// return -1 if not the correct thread
 	// to handle this callback
