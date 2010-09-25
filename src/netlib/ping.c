@@ -479,12 +479,12 @@ int SendEchoRequest(PVARTEXT pvtResult, SOCKET s,SOCKADDR_IN *lpstToAddr)
 	echoReq.icmpHdr.Type		= ICMP_ECHOREQ;
 	echoReq.icmpHdr.Code		= 0;
 	echoReq.icmpHdr.Checksum	= 0;
-	echoReq.icmpHdr.ID			= nId++;
-	echoReq.icmpHdr.Seq			= nSeq++;
+	echoReq.icmpHdr.ID			= (u_short)(nId++);
+	echoReq.icmpHdr.Seq			= (u_short)(nSeq++);
 
 	// Fill in some data to send
 	for (nRet = 0; nRet < REQ_DATASIZE; nRet++)
-		echoReq.cData[nRet] = ' '+nRet;
+		echoReq.cData[nRet] = (char)(' '+nRet);
 
 	// Save tick count when sent
 	echoReq.dwTime				= GetCPUTick();
@@ -557,8 +557,8 @@ int WaitForEchoReply(SOCKET s, _32 dwTime)
 {
 	struct timeval Timeout;
 	fd_set readfds;
-   FD_ZERO( &readfds );
-   FD_SET( s, &readfds );
+	FD_ZERO( &readfds );
+	FD_SET( s, &readfds );
 	Timeout.tv_sec = dwTime / 1000; // longer than a second is too long
     Timeout.tv_usec = ( dwTime % 1000 ) * 1000;
 
@@ -613,7 +613,7 @@ u_short in_cksum(u_short *addr, int len)
 	 */
 	sum = (sum >> 16) + (sum & 0xffff);	/* add hi 16 to low 16 */
 	sum += (sum >> 16);			/* add carry */
-	answer = ~sum;				/* truncate to 16 bits */
+	answer = (u_short)(~sum);				/* truncate to 16 bits */
 	return (answer);
 }
 SACK_NETWORK_NAMESPACE_END

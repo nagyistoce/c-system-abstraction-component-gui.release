@@ -236,9 +236,9 @@ struct required_key_def
 	   \ \                                            */
 	struct {
 		/* this defines the primary key for the table */
-		_32 bPrimary : 1;
+		BIT_FIELD bPrimary : 1;
 		/* the key is meant to be unique. */
-		_32 bUnique : 1;
+		BIT_FIELD bUnique : 1;
 	} flags;
 	/* Name of the key column. Can be NULL if primary. */
 	CTEXTSTR name;
@@ -1253,9 +1253,9 @@ SQLSTUB_PROC( void, SQLSetUserData )( PODBC odbc, PTRSZVAL );
 typedef struct responce_tag
 {
 	struct {
-		_32 bSingleLine : 1;
-		_32 bMultiLine : 1;
-		_32 bFields : 1;
+		BIT_FIELD bSingleLine : 1;
+		BIT_FIELD bMultiLine : 1;
+		BIT_FIELD bFields : 1;
 	} flags;
 	PVARTEXT result_single_line;
    int nLines;

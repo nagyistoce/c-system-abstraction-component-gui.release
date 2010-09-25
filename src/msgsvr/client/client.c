@@ -81,13 +81,13 @@ struct ServiceEventHandler_tag
 {
 	DeclareLink( EVENTHANDLER );
 	struct {
-		_32 dispatched : 1;
-		_32 notify_if_dispatched : 1;
-		_32 destroyed : 1;
-		_32 local_service : 1;
-		_32 waiting_for_responce : 1;
-		_32 responce_received : 1;
-		_32 bCheckedResponce : 1;
+		BIT_FIELD dispatched : 1;
+		BIT_FIELD notify_if_dispatched : 1;
+		BIT_FIELD destroyed : 1;
+		BIT_FIELD local_service : 1;
+		BIT_FIELD waiting_for_responce : 1;
+		BIT_FIELD responce_received : 1;
+		BIT_FIELD bCheckedResponce : 1;
 	} flags;
 	// when receiving messages from the application...
 	// this is the event base which it will give me...
@@ -105,7 +105,7 @@ struct ServiceEventHandler_tag
 	EventHandlerFunction Handler;
 	EventHandlerFunctionEx HandlerEx;
 	EventHandlerFunctionExx HandlerExx;
-   PTRSZVAL psv;
+	PTRSZVAL psv;
 	// this handler's events come from this queue.
 	MSGQ_TYPE msgq_events;
 	CRITICALSECTION csMsgTransact;
@@ -335,7 +335,7 @@ int SendInMultiMessageEx( _32 routeID, _32 MsgID, _32 parts, BUFFER_LENGTH_PAIR 
 #else
 			errno = E2BIG;
 #endif
-			lprintf( WIDE("Length of message is too big to transport...%") _32f WIDE(" (len %") _32f WIDE(" ofs %") _32f WIDE(")"), len + ofs, len, ofs );
+			_lprintf(DBG_RELAY)( WIDE("Length of message is too big to transport...%") _32f WIDE(" (len %") _32f WIDE(" ofs %") _32f WIDE(")"), len + ofs, len, ofs );
 			LeaveCriticalSec( &g.csMsgTransact );
 			return FALSE;
 		}
@@ -400,7 +400,7 @@ static int PrivateSendDirectedServerMultiMessageEx( _32 DestID
 	_32 len, ofs, param;
 	if( g.flags.disconnected )
 	{
-		lprintf( WIDE("Have already disconnected from server... no further communication possible.") );
+		_lprintf(DBG_RELAY)( WIDE("Have already disconnected from server... no further communication possible.") );
 		return TRUE;
 	}
 	g.MessageOut.msgid = DestID;
@@ -428,7 +428,7 @@ static int PrivateSendDirectedServerMultiMessageEx( _32 DestID
 #else
 			errno = E2BIG;
 #endif
-			lprintf( WIDE("Length of message is too big to transport...%") _32f WIDE(" (len %") _32f WIDE(" ofs %") _32f WIDE(")"), len + ofs, len, ofs );
+			_lprintf(DBG_RELAY)( WIDE("Length of message is too big to transport...%") _32f WIDE(" (len %") _32f WIDE(" ofs %") _32f WIDE(")"), len + ofs, len, ofs );
 			return FALSE;
 		}
 		if( msg && len )

@@ -81,7 +81,7 @@ struct timer_tag
 		struct timer_tag *prior;
 	};
 	struct {
-		_32 bRescheduled : 1;
+		BIT_FIELD bRescheduled : 1;
 	} flags;
 	_32 frequency;
 	S_32 delta;

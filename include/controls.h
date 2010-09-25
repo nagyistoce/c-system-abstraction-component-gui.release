@@ -617,9 +617,9 @@ typedef struct draw_popup_item_tag
        \ \                                                        */
     struct {
         /* Menu item is in a selected state. (Mouse Over) */
-        _32 selected : 1;
+        BIT_FIELD selected : 1;
         /* Menu item has a checkmark on it. */
-        _32 checked  : 1;
+        BIT_FIELD checked  : 1;
     } flags;
     /* Define options which may be passed to measure an item or to
        have an item drawn.                                         */
