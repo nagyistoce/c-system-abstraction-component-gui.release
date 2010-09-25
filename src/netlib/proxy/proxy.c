@@ -657,7 +657,8 @@ int main( int argc, char **argv )
 		snprintf( tmp, sizeof( tmp ), "%s/%s.conf", GetProgramPath(), GetProgramName() );
 		filename = tmp;
 	}
-	SetupService( GetProgramName(), Start );
+   // for some reason service registration requires a non-const string.  pretty sure it doesn't get modified....
+	SetupService( (TEXTSTR)GetProgramName(), Start );
 #else
 	if( argc < 2 )
 	{

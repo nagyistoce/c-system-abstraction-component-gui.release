@@ -11,7 +11,7 @@
 
 extern PLIST class_names;
 
-typedef struct system_class_tag
+struct system_class_tag
 {
 	CTEXTSTR classname;
    CTEXTSTR system;
