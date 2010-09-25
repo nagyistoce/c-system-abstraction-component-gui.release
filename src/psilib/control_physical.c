@@ -27,8 +27,8 @@ static void CPROC FileDroppedOnFrame( PTRSZVAL psvControl, CTEXTSTR filename, S_
 			{
 				if( ( x < current->original_rect.x ) || 
 					( y < current->original_rect.y ) || 
-					( x > ( current->original_rect.x + current->original_rect.width ) ) || 
-					( y > ( current->original_rect.y + current->original_rect.height ) ) )
+					( SUS_GT( x, S_32, ( current->original_rect.x + current->original_rect.width ) , _32 ) ) || 
+					( SUS_GT( y, S_32, ( current->original_rect.y + current->original_rect.height ), _32 ) ) )
 				{
 					continue;
 				}

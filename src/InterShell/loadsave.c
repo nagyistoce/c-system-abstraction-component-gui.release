@@ -457,17 +457,17 @@ PTRSZVAL CPROC SetMenuBackground( PTRSZVAL psv, arg_list args )
 
 PTRSZVAL CPROC SetMenuButtonImageMargin( PTRSZVAL psv, arg_list args )
 {
-   PARAM( args, S_64, hMargin );
+	PARAM( args, S_64, hMargin );
 	PARAM( args, S_64, vMargin );
 	PMENU_BUTTON   current_button = (PMENU_BUTTON)PeekLink( &l.current_button );
 	if( current_button )
 	{
 		current_button->decal_horiz_margin = (_32)hMargin;
 		current_button->decal_vert_margin = (_32)vMargin;
-		SetKeyImageMargin( current_button->control.key, hMargin, vMargin );
+		SetKeyImageMargin( current_button->control.key, (_32)hMargin, (_32)vMargin );
 	}
 
-   return psv;
+	return psv;
 }
 PTRSZVAL CPROC SetMenuButtonImage( PTRSZVAL psv, arg_list args )
 {
@@ -637,8 +637,8 @@ PTRSZVAL CPROC SetButtonNoPress( PTRSZVAL psv, arg_list args )
 
 PTRSZVAL CPROC SetMenuRowCols( PTRSZVAL psv, arg_list args )
 {
-	PARAM( args, _64, cols );
-	PARAM( args, _64, rows );
+	PARAM( args, S_64, cols );
+	PARAM( args, S_64, rows );
 	_32 button_rows, button_cols, button_space;
 	// 25 PART_RESOLUTION's?
 	PCanvasData canvas = GetCanvas( (PSI_CONTROL)PeekLink( &l.current_canvas ) );
@@ -654,8 +654,8 @@ PTRSZVAL CPROC SetMenuRowCols( PTRSZVAL psv, arg_list args )
 		}
 	}
 	button_space = 0;
-	button_rows = rows;
-	button_cols = cols;
+	button_rows = (_32)rows;
+	button_cols = (_32)cols;
 
 	if( button_cols == 0 )
 	      button_cols = 5;

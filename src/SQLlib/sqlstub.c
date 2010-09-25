@@ -2312,7 +2312,7 @@ int __GetSQLResult( PODBC odbc, PCOLLECT collection, int bMore )
 		TEXTCHAR *byResult;
 #endif
 		TEXTCHAR *tmpResult = NULL;
-      int byTmpResultLen = 0;
+		PTRSZVAL byTmpResultLen = 0;
 		// SQLPrepare
 		// includes the table to list... therefore list the fields in the table.
 
@@ -2540,7 +2540,7 @@ int __GetSQLResult( PODBC odbc, PCOLLECT collection, int bMore )
 										, byResult
 										, colsize
 										, &ResultLen );
-					if( ResultLen > collection->colsizes[idx-1] )
+					if( SUS_GT( ResultLen,SQLINTEGER,collection->colsizes[idx-1],SQLUINTEGER) )
 					{
 						lprintf( "SQL Result returned more data than the column described! (returned %d expected %d)", ResultLen, collection->colsizes[idx-1] );
 					}
