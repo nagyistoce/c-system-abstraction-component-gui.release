@@ -165,8 +165,8 @@ static int CPROC DrawClock( PCOMMON pc )
 					BlatColorAlpha( surface, 0, 0, surface->width, surface->height, pClk->backcolor );
 				//DebugBreak();
 				PutStringFontEx( surface
-									, (surface->width>w)?(( surface->width - w ) / 2):0
-									, ((surface->height>h)?(( surface->height - ( h * lines ) ) / 2):0) + ( line_count * h )
+									, (SUS_GT(surface->width,S_32,w,_32)?(( surface->width - w ) / 2):0)
+									, (SUS_GT(surface->height,S_32,h,_32)?(( surface->height - ( h * lines ) ) / 2):0) + ( line_count * h )
 									, pClk->textcolor, 0
 									, line, strlen( line )
 									, GetCommonFont( pc ) );
@@ -348,6 +348,6 @@ PRELOAD( DoRegisterClockControl )
    DoRegisterControl( &clock_control );
 }
 
-PUBLIC( _32, LinkClockPlease );
+//PUBLIC( _32, LinkClockPlease );
 
 PSI_CLOCK_NAMESPACE_END

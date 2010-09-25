@@ -636,7 +636,7 @@ _32 PutMenuStringFontEx( ImageFile *pImage, S_32 x, S_32 y, CDATA color, CDATA b
 			if( chars[(int)*pString] )
 			{
 				*width += chars[*pString]->width;
-				if( (UseFont->baseline - chars[*pString]->descent ) > maxheight )
+				if( SUS_GT( (UseFont->baseline - chars[*pString]->descent ),S_32,maxheight,_32) )
 					maxheight = UseFont->baseline - chars[*pString]->descent;
 			}
 			pString++;

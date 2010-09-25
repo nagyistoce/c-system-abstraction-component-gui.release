@@ -44,16 +44,16 @@ void DrawClock( Image surface, PANALOG_CLOCK analog )
 	{
 		if( analog )
 		{
-         int remake = 0;
+			int remake = 0;
 			if( analog->flags.bLocked )
 				return;
 			analog->flags.bLocked = 1;
-			if( surface->height > analog->h )
+			if( SUS_GT(surface->height,S_32,analog->h,_32) )
 			{
 				remake = 1;
 				analog->h = surface->height;
 			}
-			if( surface->width > analog->w )
+			if( SUS_GT(surface->width ,S_32,analog->w,_32) )
 			{
 				remake = 1;
 				analog->w = surface->width;
@@ -61,9 +61,9 @@ void DrawClock( Image surface, PANALOG_CLOCK analog )
 			if( remake )
 			{
 				UnmakeImageFile( analog->composite );
-            analog->composite = MakeImageFile( analog->w, analog->h );
+				analog->composite = MakeImageFile( analog->w, analog->h );
 			}
-         ClearImageTo( analog->composite, 0 );
+			ClearImageTo( analog->composite, 0 );
 			//BlotScaledImageAlpha( surface, analog->composite, ALPHA_TRANSPARENT );
 			BlotScaledImageSizedToAlpha( analog->composite, analog->face
 												, 0, 0

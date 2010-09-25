@@ -186,10 +186,10 @@ static CDATA CPROC cColorAverage( CDATA c1, CDATA c2
       bound->y = pImage->eff_x;
    }
 
-   if( ( bound->width + bound->x - 1 ) > pImage->eff_maxx )
+   if( USS_GT( ( bound->width + bound->x - 1 ),IMAGE_SIZE_COORDINATE,pImage->eff_maxx,int) )
       bound->width = ( pImage->eff_maxx - bound->x ) + 1;
 
-   if( ( bound->height + bound->y - 1 ) > pImage->eff_maxy )
+   if( USS_GT( ( bound->height + bound->y - 1 ),IMAGE_SIZE_COORDINATE,pImage->eff_maxy,int) )
       bound->height = ( pImage->eff_maxy - bound->y ) + 1;
 
    //Log4( WIDE("Setting image bound to (%d,%d)-(%d,%d)"),
@@ -930,7 +930,7 @@ IMAGE_NAMESPACE
    // start at origin on destination....
 #ifdef _INVERT_IMAGE
    //y += h-1; // least address in memory.
-	oo = 4*( - w - pifDest->pwidth);     // w is how much we can copy...
+	oo = 4*( (-(S_32)w) - pifDest->pwidth);     // w is how much we can copy...
 #else
 	oo = 4*(pifDest->pwidth - w);     // w is how much we can copy...
 #endif
