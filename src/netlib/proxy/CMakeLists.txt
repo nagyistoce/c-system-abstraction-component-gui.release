@@ -46,6 +46,7 @@ add_executable( ${PROJECT_NAME} ${FIRST_GCC_PROGRAM_SOURCE}
     ${SOURCES_ROOT}/filesyslib/filescan.c
     ${SOURCES_ROOT}/filesyslib/pathops.c
     ${SOURCES_ROOT}/filesyslib/winfiles.c
+    ${SNPRINTF_SOURCES}
 ${LAST_GCC_PROGRAM_SOURCE} 
     ${SOURCES_ROOT}/deadstart/deadstart_core.c
 )
@@ -65,12 +66,6 @@ PROJECT( proxy.service )
 if( __WINDOWS__ )
 set( NET_SOURCES     ../net_winsock2.c  ) 
 endif( __WINDOWS__ )
-
-set( SOURCES_ROOT ../.. )
-
-if( SNPRINTF_SOURCES )
-set( SNPRINTF_SOURCES    ${SOURCES_ROOT}/../${SNPRINTF_SOURCES} )
-endif(SNPRINTF_SOURCES)
 
 if( MSVC ) 
 SET( ExtraSources ${SOURCES_ROOT}/systemlib/args.c )
