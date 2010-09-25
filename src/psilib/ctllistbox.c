@@ -238,7 +238,7 @@ static void AdjustItemsIntoBox( PSI_CONTROL pc )
 		// current will still fit integrally on the listbox
 		// back up firstshown....
 		while( plb->firstshown->prior && 
-		       ( y < (pc->surface_rect.height - (h-1))) )
+		       ( SUS_LT( y, int, (pc->surface_rect.height - (h-1)),_32) ) )
 		{
 			y += h;
 			plb->firstshown = plb->firstshown->prior;
@@ -434,13 +434,13 @@ static int CPROC RenderListBox( PSI_CONTROL pc )
 		pli = pli->next;
 	}
 	//pli = plb->firstshown;
-	while( pli && y < pc->surface_rect.height )
+	while( pli && SUS_LT( y, int, pc->surface_rect.height, IMAGE_SIZE_COORDINATE ) )
 	{
 		TEXTCHAR *start = pli->text;
 		TEXTCHAR *end;
-      int tab = 0;
+		int tab = 0;
 		pli->top = y;
-      pli->height = h;
+		pli->height = h;
 		if( plb->flags.bTree )
 		{
 			x = RenderItemKnob( pc, pli );
@@ -451,15 +451,15 @@ static int CPROC RenderListBox( PSI_CONTROL pc )
 		}
 		while( start )
 		{
-         _32 width = 0;
-         int bRight = 0;
+			_32 width = 0;
+			int bRight = 0;
 			S_32 column = plb->nTabstop[tab];
 			if( plb->nTabstop[tab] < 0 )
 			{
-            bRight = 1;
+				bRight = 1;
 				column = plb->nTabstop[tab+1];
 				if( column < 0 )
-               column = -column;
+					column = -column;
 			}
 			ScaleCoords( pc, &column, NULL );
 			end = strchr( start, '\t' );
@@ -481,8 +481,8 @@ static int CPROC RenderListBox( PSI_CONTROL pc )
 			}
 			tab++;
 			if( tab >= plb->nTabstops )
-            tab = plb->nTabstops-1;
-         if( end[0] )
+				tab = plb->nTabstops-1;
+			if( end[0] )
 				start = end+1;
 			else
             start = NULL;

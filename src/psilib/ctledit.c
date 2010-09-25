@@ -25,8 +25,8 @@ typedef struct edit {
 	TEXTCHAR *content; // our quick and dirty buffer...
 	int nCaptionSize, nCaptionUsed;
 	int top_side_pad;
-	int Start; // first character in edit control
-	int cursor_pos; // cursor position
+	_32 Start; // first character in edit control
+	_32 cursor_pos; // cursor position
 	_32 MaxShowLen;
 	int select_anchor, select_start, select_end;
 } EDIT, *PEDIT;

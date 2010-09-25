@@ -468,7 +468,7 @@ void RenderMonoChar( PFONT font
 				outdata = character->data +
 					((line - linetop) * ((character->size + 7)/8));
 				data = (char*)bitmap->buffer + (line) * bitmap->pitch;
-				for( bit = 0; bit < ((character->size + 7)/8); bit++)
+				for( bit = 0; bit < ((character->size + 7U)/8U); bit++)
 					outdata[bit] = 0;
 				for( bit = 0; bit < character->size; bit++ )
 				{
