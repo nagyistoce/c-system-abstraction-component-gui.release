@@ -29,8 +29,8 @@ namespace sack {
 // consider slab allocation... 32 bytes even.
 struct treenode_tag {
 	struct {
-		_32 bUsed:1;
-		_32 bRoot:1;
+		BIT_FIELD bUsed:1;
+		BIT_FIELD bRoot:1;
 	} flags;
 	_32 children;
 
@@ -48,10 +48,10 @@ DeclareSet( TREENODE );
 
 typedef struct treeroot_tag {
 	struct {
-		_32 bUsed:1;
-		_32 bRoot:1;
-		_32 bShadow:1; // tree points to the real TREEROOT (not a node)
-		_32 bNoDuplicate : 1;
+		BIT_FIELD bUsed:1;
+		BIT_FIELD bRoot:1;
+		BIT_FIELD bShadow:1; // tree points to the real TREEROOT (not a node)
+		BIT_FIELD bNoDuplicate : 1;
 	} flags;
 	_32 children;
 

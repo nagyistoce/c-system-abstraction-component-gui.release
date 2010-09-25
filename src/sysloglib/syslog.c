@@ -59,18 +59,18 @@ _64 cpu_tick_freq;
 #define cpu_tick_freq l.cpu_tick_freq
 // flags that control the operation of system logging....
 struct state_flags{
-	_32 bInitialized : 1;
-	_32 bUseDay : 1;
-	_32 bUseDeltaTime : 1;
-	_32 bLogTime : 1;
-	_32 bLogHighTime : 1;
-	_32 bLogCPUTime : 1;
-	_32 bProtectLoggedFilenames : 1;
-	_32 bLogProgram : 1;
-	_32 bLogThreadID : 1;
-	_32 bLogOpenAppend : 1;
-	_32 bLogOpenBackup : 1;
-	_32 bLogSourceFile : 1;
+	BIT_FIELD bInitialized : 1;
+	BIT_FIELD bUseDay : 1;
+	BIT_FIELD bUseDeltaTime : 1;
+	BIT_FIELD bLogTime : 1;
+	BIT_FIELD bLogHighTime : 1;
+	BIT_FIELD bLogCPUTime : 1;
+	BIT_FIELD bProtectLoggedFilenames : 1;
+	BIT_FIELD bLogProgram : 1;
+	BIT_FIELD bLogThreadID : 1;
+	BIT_FIELD bLogOpenAppend : 1;
+	BIT_FIELD bLogOpenBackup : 1;
+	BIT_FIELD bLogSourceFile : 1;
 //} flags = { 0,0,1,1,0,1,0,0,0}; // log delta cpu time.(no protect), log program too
 //} flags = { 0,0,1,1,0,1,1,1,1}; // delta cpu time, threadID, process name, protect logged filenames(slower)
 
