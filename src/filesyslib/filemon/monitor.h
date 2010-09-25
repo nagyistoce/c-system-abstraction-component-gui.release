@@ -18,11 +18,11 @@ typedef struct filemonitor_tag {
     TEXTCHAR   name[320]; // MAX_PATH is inconsistantly defined
 	TEXTSTR  filename; // just the filename in the name
 	struct {
-		_32   bDirectory : 1;
-		_32   bToDelete : 1;
-		_32   bScanned : 1; // if set - don't requeue, set when added to the changed queue, and cleared when done...
-		_32   bCreated : 1;
-		_32   bPending : 1; // set when enqueued in pending list, and cleared after event dispatched.
+		BIT_FIELD   bDirectory : 1;
+		BIT_FIELD   bToDelete : 1;
+		BIT_FIELD   bScanned : 1; // if set - don't requeue, set when added to the changed queue, and cleared when done...
+		BIT_FIELD   bCreated : 1;
+		BIT_FIELD   bPending : 1; // set when enqueued in pending list, and cleared after event dispatched.
 	} flags;
 	 // if GetTickCount() - ScannedAt > monitor->scan_delay queue for change
 	_32 ScannedAt; // time this file was scanned
@@ -55,8 +55,8 @@ typedef struct filechangecallback_tag
 	PLINKQUEUE PendingChanges;
 	PTREEROOT filelist;
 	struct {
-		_32 bExtended : 1;
-		_32 bInitial : 1; // first time files are scanned, they are not created.
+		BIT_FIELD bExtended : 1;
+		BIT_FIELD bInitial : 1; // first time files are scanned, they are not created.
 	} flags;
 	struct monitor_tag *monitor;
 	union {
@@ -72,12 +72,12 @@ typedef struct monitor_tag
 	CRITICALSECTION cs;
 	PTHREAD pThread;
 	struct {
-		_32 bDispatched : 1;
-		_32 bEnd : 1;
-		_32 bClosing : 1;
-		_32 bUserInterruptedChanges : 1;
-		_32 bScanning : 1;
-		_32 bLogFilesFound : 1;
+		BIT_FIELD bDispatched : 1;
+		BIT_FIELD bEnd : 1;
+		BIT_FIELD bClosing : 1;
+		BIT_FIELD bUserInterruptedChanges : 1;
+		BIT_FIELD bScanning : 1;
+		BIT_FIELD bLogFilesFound : 1;
 	} flags;
 #ifdef _WIN32
     HANDLE hChange;

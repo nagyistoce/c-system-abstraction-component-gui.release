@@ -152,9 +152,9 @@ PTRSZVAL CPROC MonitorFileThread( PTHREAD pThread )
            // what's being watched...
         //}
         // and we'll never have dwResult == WAIT_TIMEOUT
-	 } while( 1 );
+	} while( 1 );
     if( l.flags.bLog ) Log( WIDE("Leaving the thread...") );
-	 EndMonitor( monitor );
+		EndMonitor( monitor );
     monitor->pThread = NULL;
     return 0; // something....
 }

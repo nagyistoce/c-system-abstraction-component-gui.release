@@ -69,10 +69,7 @@ typedef struct option_interface_tag
 #define DEFAULT_OPTION_INTERFACE ((!pOptionInterface)?(pOptionInterface=GetOptionInterface()):pOptionInterface)
 
 static POPTION_INTERFACE pOptionInterface;
-static void UseInterface( void )
-{
-   pOptionInterface = (POPTION_INTERFACE)UseInterface;
-}
+
 #endif
    _INTERFACE_NAMESPACE_END
 #ifdef __cplusplus

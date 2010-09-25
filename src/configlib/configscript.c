@@ -97,18 +97,18 @@ enum config_types {
 typedef struct config_element_tag CONFIG_ELEMENT, *PCONFIG_ELEMENT;
 struct config_element_tag
 {
-    enum config_types type;
-    struct config_test_tag *next;// if a match is found, follow this to next.
-	 struct config_element_tag *prior;
-	 struct config_element_tag **ppMe; // this is where we came from
-    struct {
-        _32 vector : 1;
-		  _32 multiword_terminator : 1; // prior == actual segment...
-		  _32 singleword_terminator : 1; // prior == actual segment...
-		  // careful - assembly here requires absolute known
-		  // posisitioning - -fpack-struct will short-change
+	enum config_types type;
+	struct config_test_tag *next;// if a match is found, follow this to next.
+	struct config_element_tag *prior;
+	struct config_element_tag **ppMe; // this is where we came from
+	struct {
+		BIT_FIELD vector : 1;
+		BIT_FIELD multiword_terminator : 1; // prior == actual segment...
+		BIT_FIELD singleword_terminator : 1; // prior == actual segment...
+		// careful - assembly here requires absolute known
+		// posisitioning - -fpack-struct will short-change
         // this structure to the minimal number of bits.
-		  _32 filler:29;
+		BIT_FIELD filler:29;
     } flags;
     _32 element_count; // used with vector fields.
     union {
@@ -722,7 +722,7 @@ static PTEXT GetConfigurationLine( PCONFIG_HANDLER pConfigHandler )
 			PTEXT x = p;
 			while( x )
 			{
-				lprintf( WIDE("Word is: %s (%d,%d)"), GetText( x ), GetTextSize( x ), x->format.position.spaces );
+				lprintf( WIDE("Word is: %s (%d,%d)"), GetText( x ), GetTextSize( x ), x->format.position.offset.spaces );
 				x = NEXTLINE( x );
 			}
 		}
@@ -791,6 +791,10 @@ typedef union bintobase{
 	struct {
       _8 bytes[3];
 	} bin;
+
+	// these need to be unsigned.
+	// the warning is 'nonstandard extension used : bit field types other than int'
+	// but 'int' will NOT work, because it's signed.
 	struct {
 		_32 data1 : 6;
 		_32 data2 : 6;
@@ -1472,13 +1476,13 @@ int IsSingleWordVar( PCONFIG_ELEMENT pce, PTEXT *start )
             *start = _start; // restore start..
 				break;
 			}
-			if( (*start)->format.position.spaces )
+			if( (*start)->format.position.offset.spaces )
 			{
 				//if( pWords )
 				//	LineRelease( pWords );
 #ifdef FULL_TRACE
             // so at a space, stop appending.
-				lprintf( WIDE("next word has spaces... [%s](%d)"), GetText(*start), (*start)->format.position.spaces );
+				lprintf( WIDE("next word has spaces... [%s](%d)"), GetText(*start), (*start)->format.position.offset.spaces );
 #endif
             break;
             //*start = _start;
@@ -1494,7 +1498,7 @@ int IsSingleWordVar( PCONFIG_ELEMENT pce, PTEXT *start )
 	if( pWords )
 	{
 		PTEXT pText;
-      pWords->format.position.spaces= 0;
+      pWords->format.position.offset.spaces= 0;
 		pText = BuildLine( pWords );
 		LineRelease( pWords );
 
@@ -1545,7 +1549,7 @@ int IsMultiWordVar( PCONFIG_ELEMENT pce, PTEXT *start )
     //   pWords = SegCreate(0);
     if( pWords )
 	 {
-		 pWords->format.position.spaces = 0;
+		 pWords->format.position.offset.spaces = 0;
 		 {
 			 PTEXT out = BuildLine( pWords );
 			 TEXTSTR buf = StrDup( GetText( out ) );
@@ -1578,7 +1582,7 @@ int IsPathVar( PCONFIG_ELEMENT pce, PTEXT *start )
 	}
 	if( pWords )
 	{
-		pWords->format.position.spaces = 0;
+		pWords->format.position.offset.spaces = 0;
 		{
 			PTEXT out = BuildLine( pWords );
 			_32 length;
@@ -1613,7 +1617,7 @@ int IsFileVar( PCONFIG_ELEMENT pce, PTEXT *start )
 	}
 	if( pWords )
 	{
-		pWords->format.position.spaces = 0;
+		pWords->format.position.offset.spaces = 0;
 		{
 			PTEXT out = BuildLine( pWords );
 			_32 length;
@@ -1648,7 +1652,7 @@ int IsFilePathVar( PCONFIG_ELEMENT pce, PTEXT *start )
 	 }
 	 if( pWords )
 	 {
-		 pWords->format.position.spaces = 0;
+		 pWords->format.position.offset.spaces = 0;
 		 {
 			 PTEXT out = BuildLine( pWords );
 			 _32 length;
@@ -1675,14 +1679,14 @@ int IsAddressVar( PCONFIG_ELEMENT pce, PTEXT *start )
 		ReleaseAddress( pce->data[0].psaSockaddr );
 		pce->data[0].psaSockaddr = NULL;
 	}
-	while( *start && !(*start)->format.position.spaces )
+	while( *start && !(*start)->format.position.offset.spaces )
 	{
 		pWords = SegAppend( pWords, SegDuplicate( *start ) );
 		*start = NEXTLINE( *start );
 	}
    if( pWords )
 	{
-		pWords->format.position.spaces = 0;
+		pWords->format.position.offset.spaces = 0;
 		{
 			PTEXT pText = BuildLine( pWords );
 			LineRelease( pWords );

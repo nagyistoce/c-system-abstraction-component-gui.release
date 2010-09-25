@@ -960,39 +960,39 @@ typedef struct format_info_tag
 		// if many more are needed, one might consider
       // adding FONT!
      /* this segment uses the prior foreground, not its own. */
-		_32 prior_foreground : 1;
+		BIT_FIELD prior_foreground : 1;
      /* this segment uses the prior background, not its own. */
-		_32 prior_background : 1;
+		BIT_FIELD prior_background : 1;
      /* this segment uses the default foreground, not its own. */
-		_32 default_foreground : 1;
+		BIT_FIELD default_foreground : 1;
       /* this segment uses the default background, not its own. */
-		_32 default_background : 1;
+		BIT_FIELD default_background : 1;
       /* the foreground color of this segment (0-16 standard console text [ANSI text]) */
-		_32 foreground : 4;
+		BIT_FIELD foreground : 4;
       /* the background color of this segment (0-16 standard console text [ANSI text]) */
-		_32 background : 4;
+		BIT_FIELD background : 4;
       /* a bit indicating the text should blink if supported */
-		_32 blink : 1;
+		BIT_FIELD blink : 1;
       /* a bit indicating the foreground and background color should be reversed */
-		_32 reverse : 1;
+		BIT_FIELD reverse : 1;
 		// usually highly is bolder, perhaps it's
       // a highlighter effect and changes the background
-		_32 highlight : 1;
+		BIT_FIELD highlight : 1;
 		// this is double height modifications to the font...
-		_32 tall : 1; 
+		BIT_FIELD tall : 1; 
       // this is thicker characters...
-		_32 bold : 1;
+		BIT_FIELD bold : 1;
       // draw a line under the text...
-		_32 underline : 1;
+		BIT_FIELD underline : 1;
 		// strike through - if able, draw a line right
 		// through the middle of the text... maybe
 		// it's a wiggly scribble line?  maybe that
       // could be extended again?
-		_32 strike : 1;
+		BIT_FIELD strike : 1;
       // text is drawn wide (printer kinda font?)
-		_32 wide : 1;
+		BIT_FIELD wide : 1;
        // this is pretty common......
-		_32 italic : 1;
+		BIT_FIELD italic : 1;
 		// --
 		// these flags are free, but since we already have text segments
 		// and I'm bringing in consoles, perhaps we should consider using
@@ -1003,18 +1003,18 @@ typedef struct format_info_tag
 		// first character... (unless center, then
 		// the position specifies the middle of the text
 		// draw vertical instead of horizontal
-		_32 bVertical:1;
+		BIT_FIELD bVertical:1;
 		// draw opposite/upside down from normal
 		// vertical/down, right/left upside down if not centered
 		// if centered, the text pivots around position.
-		_32 bInvert:1;
+		BIT_FIELD bInvert:1;
 		// 0 = default alignment 1 = left, 2 = center 3 = right
 		// 0 is not set, the flag set in the lower 32 bit flags
 		// is not needed any longer.... anything non zero
 		// is that operation to apply.
-		_32 bAlign:2;
+		BIT_FIELD bAlign:2;
       /* format op indicates one of the enum FORMAT_OPS applies to this segment */
-		_32 format_op : 7;
+		BIT_FIELD format_op : 7;
 
 	} flags;
 	// if x,y are valid segment will have TF_POSFORMAT set...
@@ -1040,9 +1040,9 @@ typedef struct format_info_tag
 		/* Defines the distance from the prior segment in count of tabs
 		   and spaces (mostly count of spaces).                         */
 		struct {
-         _16 tabs;   // tabs preceed spaces....
+			_16 tabs;   // tabs preceed spaces....
 			_16 spaces; // not sure what else to put with this...
-		};
+		} offset;
 	} position;
 } FORMAT, *PFORMAT;
 

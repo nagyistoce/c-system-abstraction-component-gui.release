@@ -330,13 +330,13 @@ PTEXT SegBreak(PTEXT segment)  // remove leading segments.
 			for( n = 0; n < nTabs && (INDEX)position > tabs[n]; n++ );
 			if( n < nTabs )
 				// now position is before the first tab... such that
-				for( ; n < nTabs && n < segment->format.position.tabs; n++ )
+				for( ; n < nTabs && n < segment->format.position.offset.tabs; n++ )
 				{
 					total += tabs[n]-position;
 					position = tabs[n];
 				}
-			lprintf( WIDE("Adding %d spaces"), segment->format.position.spaces );
-			total += segment->format.position.spaces;
+			lprintf( WIDE("Adding %d spaces"), segment->format.position.offset.spaces );
+			total += segment->format.position.offset.spaces;
 		}
 	}
 	while( (segment->flags & TF_INDIRECT) && ( segment = GetIndirect( segment ) ) );
@@ -351,7 +351,7 @@ PTEXT SegBreak(PTEXT segment)  // remove leading segments.
 		if( segment && !( segment->flags & TF_FORMATPOS ) )
 		{
 			int n;
-			for( n = 0; n < segment->format.position.tabs; n++ )
+			for( n = 0; n < segment->format.position.offset.tabs; n++ )
 			{
 				if( !total )
 					// I think this is wrong.  need to validate this equation.
@@ -359,7 +359,7 @@ PTEXT SegBreak(PTEXT segment)  // remove leading segments.
 				else
 					total += nTabSize;
 			}
-			total += segment->format.position.spaces;
+			total += segment->format.position.offset.spaces;
 		}
 	}
 	while( (segment->flags & TF_INDIRECT) && ( segment = GetIndirect( segment ) ) );
@@ -571,8 +571,8 @@ PTEXT SegSplitEx( PTEXT *pLine, int nPos  DBG_PASS)
    there = SegCreateEx( (nLen - nPos) DBG_RELAY );
    there->flags  = (*pLine)->flags;
    there->format = (*pLine)->format;
-   there->format.position.spaces = 0; // was two characters presumably...
-	there->format.position.tabs = 0;
+   there->format.position.offset.spaces = 0; // was two characters presumably...
+	there->format.position.offset.tabs = 0;
 
 	MemCpy( GetText( here ), GetText( *pLine ), sizeof(TEXTCHAR)*nPos );
     GetText( here )[nPos] = 0;
@@ -621,8 +621,8 @@ TEXTCHAR NextCharEx( PTEXT input, INDEX idx )
 
 // these are just shortcuts - these bits of code were used repeatedly....
 
-#define SET_SPACES() do {		word->format.position.spaces = (_16)spaces; \
-		word->format.position.tabs = (_16)tabs;                             \
+#define SET_SPACES() do {		word->format.position.offset.spaces = (_16)spaces; \
+		word->format.position.offset.tabs = (_16)tabs;                             \
 		spaces = 0;                                                         \
 		tabs = 0; } while(0)
 
@@ -654,34 +654,34 @@ PTEXT TextParse( PTEXT input, CTEXTSTR punctuation, CTEXTSTR filter_space, int b
 
 	VarTextInitEx( &out DBG_OVERRIDE );
 
-   while (input)  // while there is data to process...
-   {
+	while (input)  // while there is data to process...
+	{
 		if( input->flags & TF_INDIRECT )
 		{
 
-      	word = VarTextGetEx( &out DBG_OVERRIDE );
-      	if( word )
+      		word = VarTextGetEx( &out DBG_OVERRIDE );
+      		if( word )
 			{
-            SET_SPACES();
-      		outdata = SegAppend( outdata, word );
-      	}
+				SET_SPACES();
+      			outdata = SegAppend( outdata, word );
+      		}
 			outdata = SegAppend( outdata, burst( GetIndirect( input ) ) );
 			input = NEXTLINE( input );
 			continue;
 		}
-      tempText = GetText(input);  // point to the data to process...
-      size = GetTextSize(input);
-      if( input->format.position.spaces || input->format.position.tabs )
-      {
-      	word = VarTextGetEx( &out DBG_OVERRIDE );
-      	if( word )
-      	{
-            SET_SPACES();
-      		outdata = SegAppend( outdata, word );
-      	}
-      }
-		spaces += input->format.position.spaces;
-      tabs += input->format.position.tabs;
+		tempText = GetText(input);  // point to the data to process...
+		size = GetTextSize(input);
+		if( input->format.position.offset.spaces || input->format.position.offset.tabs )
+		{
+      		word = VarTextGetEx( &out DBG_OVERRIDE );
+      		if( word )
+      		{
+				SET_SPACES();
+      			outdata = SegAppend( outdata, word );
+      		}
+		}
+		spaces += input->format.position.offset.spaces;
+		tabs += input->format.position.offset.tabs;
       //Log1( WIDE("Assuming %d spaces... "), spaces );
       for (index=0;(character = tempText[index]),
                    (index < size); index++) // while not at the
@@ -911,7 +911,7 @@ PTEXT burstEx( PTEXT input DBG_PASS )
 		}
 		tempText = GetText(input);  // point to the data to process...
 		size = GetTextSize(input);
-		if( input->format.position.spaces || input->format.position.tabs )
+		if( input->format.position.offset.spaces || input->format.position.offset.tabs )
 		{
       		word = VarTextGetEx( &out DBG_OVERRIDE );
       		if( word )
@@ -920,8 +920,8 @@ PTEXT burstEx( PTEXT input DBG_PASS )
       			outdata = SegAppend( outdata, word );
       		}
 		}
-		spaces += input->format.position.spaces;
-		tabs += input->format.position.tabs;
+		spaces += input->format.position.offset.spaces;
+		tabs += input->format.position.offset.tabs;
 		//Log1( WIDE("Assuming %d spaces... "), spaces );
 		for (index=0;(character = tempText[index]),
                    (index < size); index++) // while not at the
@@ -1791,7 +1791,7 @@ int IsSegAnyNumberEx( PTEXT *ppText, double *fNumber, S_64 *iNumber, int *bIntNu
 		}
 
 		if( !begin &&
-			( pText->format.position.spaces || pText->format.position.tabs ) )
+			( pText->format.position.offset.spaces || pText->format.position.offset.tabs ) )
 		{
 			// had to continue with new segment, but it had spaces so stop now
 			break;
@@ -2273,7 +2273,7 @@ static void BuildTextFlags( PVARTEXT vt, PTEXT pSeg )
 				, pSeg->format.position.coords.y  );
 	else
 		vtprintf( vt, WIDE( "%d spaces " )
-				, pSeg->format.position.spaces );
+				, pSeg->format.position.offset.spaces );
 	
 	if( pSeg->flags & TF_FORMATEX )
 		vtprintf( vt, WIDE( "format extended(%s) length:%d" )
