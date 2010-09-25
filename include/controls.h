@@ -1705,7 +1705,7 @@ PSI_PROC( int, GetListboxMultiSelectEx )( PSI_CONTROL, int *multi, int *lazy );
 PSI_PROC( int, GetListboxMultiSelect )( PSI_CONTROL ); // returns only multiselect option, not lazy with multselect
 PSI_PROC( void, ResetList)( PSI_CONTROL pc );
 // put an item at end of list.
-PSI_PROC( PLISTITEM, AddListItem)( PSI_CONTROL pc, const CTEXTSTR text );
+PSI_PROC( PLISTITEM, AddListItem)( PSI_CONTROL pc, CTEXTSTR text );
 PSI_PROC( PLISTITEM, AddListItemEx)( PSI_CONTROL pc, int nLevel, CTEXTSTR text );
 // put an item after a known item... NULL to add at head of list.
 PSI_PROC( PLISTITEM, InsertListItem)( PSI_CONTROL pc, PLISTITEM pAfter, CTEXTSTR text );
@@ -2251,7 +2251,7 @@ PSI_PROC_PTR( PLISTITEM, AddListItem)( PSI_CONTROL pc, CTEXTSTR text );
 /* <combine sack::PSI::listbox::AddListItemEx@PSI_CONTROL@int@CTEXTSTR>
    
    \ \                                                                  */
-PSI_PROC_PTR( PLISTITEM, AddListItemEx)( PSI_CONTROL pc, int nLevel, const CTEXTSTR text );
+PSI_PROC_PTR( PLISTITEM, AddListItemEx)( PSI_CONTROL pc, int nLevel, CTEXTSTR text );
 /* <combine sack::PSI::listbox::DeleteListItem@PSI_CONTROL@PLISTITEM>
    
    \ \                                                                */
