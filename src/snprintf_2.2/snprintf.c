@@ -332,7 +332,7 @@
 #ifdef __cplusplus
 	namespace sack {
 		namespace compat {
-			namespace msvc_sprintf {
+			namespace msvc_snprintf {
 #endif
 
 /* For copying strings longer or equal to 'breakeven_point'
