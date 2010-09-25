@@ -491,12 +491,12 @@ static int CPROC RenderListBox( PSI_CONTROL pc )
 		    plb->current == pli )
 			do_line( pSurface, x + 1, y + h-2, w - 6, y + h - 2, basecolor(pc)[SHADE] );
 		y += h;
-      //xlprintf(LOG_ALWAYS)( "y is %ld and height is %ld", y , pc->surface_rect.height );
-		if( y < pc->surface_rect.height ) // probably is only partially shown...
+		//xlprintf(LOG_ALWAYS)( "y is %ld and height is %ld", y , pc->surface_rect.height );
+		if( SUS_LT( y, int, pc->surface_rect.height, IMAGE_SIZE_COORDINATE )  ) // probably is only partially shown...
 		{
 			plb->lastshown = pli;
 		}
-      if( plb->flags.bTree && pli->flags.bOpen )
+		if( plb->flags.bTree && pli->flags.bOpen )
 			pli = pli->next;
 		else
 		{
@@ -506,7 +506,7 @@ static int CPROC RenderListBox( PSI_CONTROL pc )
 				next->top = -1;
 				next = next->next;
 			}
-         pli = next;
+			pli = next;
 		}
 	}
 
@@ -593,7 +593,7 @@ void MoveListItemEx( PSI_CONTROL pc, PLISTITEM pli, int level_direction, int dir
 			pli->prior = NULL;
          pliLast->next = NULL;
 		}
-		if( ( direction < 0 ) && (-direction >= pliIndex ) )
+		if( ( direction < 0 ) && SUS_GTE( -direction, int, pliIndex, INDEX ) )
 		{
 			if( plb->items )
 				plb->items->prior = pliLast;
@@ -602,9 +602,9 @@ void MoveListItemEx( PSI_CONTROL pc, PLISTITEM pli, int level_direction, int dir
 			pliLast->next = plb->items;
 			if( plb->items == plb->firstshown )
             plb->firstshown = pli;
-         plb->items = pli;
+			plb->items = pli;
 		}
-      else
+		else
 		{
 			PLISTITEM pliInsertAfter = GetNthItem( pc, pliIndex
 															  + direction-1 );
@@ -813,13 +813,13 @@ static int CPROC MouseListBox( PSI_CONTROL pc, S_32 x, S_32 y, _32 b )
 				{
 					if( pli->top >= 0 &&
 						 y >= pli->top &&
-						 y < ( pli->top + pli->height ) )
-                  break;
+						 SUS_LT( y, S_32, ( pli->top + pli->height ), _32 ) )
+						break;
 					pli = pli->next;
 				}
 				if( pli )
 				{
-               LOGICAL bWasSelected = pli->flags.bSelected;
+					LOGICAL bWasSelected = pli->flags.bSelected;
 					if( plb->flags.bTree
 						&& pli->next
 						&& ( pli->next->nLevel > pli->nLevel )
@@ -828,7 +828,7 @@ static int CPROC MouseListBox( PSI_CONTROL pc, S_32 x, S_32 y, _32 b )
 						pli->flags.bOpen = !pli->flags.bOpen;
 						if( plb->ListItemOpenHandler )
 						{
-                     int bDisable = DisableUpdateListBox( pc, TRUE );
+							int bDisable = DisableUpdateListBox( pc, TRUE );
 							plb->ListItemOpenHandler( plb->psvOpenClose
 															, pc
 															, pli
@@ -887,11 +887,11 @@ static int CPROC MouseListBox( PSI_CONTROL pc, S_32 x, S_32 y, _32 b )
 				{
 					if( pli->top >= 0 &&
 						 y >= pli->top &&
-						 y < ( pli->top + pli->height ) )
-                  break;
+						 SUS_LT( y, S_32, ( pli->top + pli->height ), _32 ) )
+						break;
 					pli = pli->next;
 				}
-            plb->mouseon = pli;
+				plb->mouseon = pli;
 			}
 		}
 		else
@@ -905,8 +905,8 @@ static int CPROC MouseListBox( PSI_CONTROL pc, S_32 x, S_32 y, _32 b )
 				{
 					if( pli->top >= 0 &&
 						 y >= pli->top &&
-						 y < ( pli->top + pli->height ) )
-                  break;
+						 SUS_LT( y, S_32, ( pli->top + pli->height ), _32 ) )
+						break;
 					pli = pli->next;
 				}
 				if( pli == plb->mouseon )
