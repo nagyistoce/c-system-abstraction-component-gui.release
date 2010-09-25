@@ -597,6 +597,14 @@ void SetSQLThreadProtect( PODBC odbc, LOGICAL bEnable )
 	}
 }
 
+void SetSQLAutoTransact( PODBC odbc, LOGICAL bEnable )
+{
+	if( odbc )
+	{
+      odbc->flags.bAutoTransact = bEnable;
+	}
+}
+
 LOGICAL EnsureLogOpen( PODBC odbc )
 {
 	if( odbc && odbc->flags.bNoLogging )
@@ -974,7 +982,7 @@ void CPROC CommitTimer( PTRSZVAL psv )
 	PODBC odbc = (PODBC)psv;
    //lprintf( "Commit timer tick" );
    if( odbc->last_command_tick )
-		if( odbc->last_command_tick < ( GetTickCount() - 5000 ) )
+		if( odbc->last_command_tick < ( timeGetTime() - 500 ) )
 		{
          lprintf( "Commit timer fire." );
 			RemoveTimer( odbc->commit_timer );
@@ -1008,7 +1016,7 @@ void BeginTransact( PODBC odbc )
 	// I Only test this for SQLITE, specifically the optiondb.
 	// this transaction phrase is not really as important on server based systems.
    lprintf( "BeginTransact." );
-	if( 0 && odbc->flags.bAutoTransact )
+	if( odbc->flags.bAutoTransact )
 	{
       lprintf( "Allowed." );
 		if( !odbc->last_command_tick )
@@ -1031,7 +1039,7 @@ void BeginTransact( PODBC odbc )
 			}
 			odbc->flags.bAutoTransact = 1;
 		}
-		odbc->last_command_tick = GetTickCount();
+		odbc->last_command_tick = timeGetTime();
 	}
 	else
       lprintf( "No auto transact here." );
@@ -1198,8 +1206,8 @@ int OpenSQL( void )
 	}
 	if( !g.flags.bPrimaryUp )
 	{
-		//if(  g.PrimaryLastConnect < GetTickCount()
-		//	&& ( g.PrimaryLastConnect = GetTickCount() + 1000 ) )
+		//if(  g.PrimaryLastConnect < timeGetTime()
+		//	&& ( g.PrimaryLastConnect = timeGetTime() + 1000 ) )
 		{
 #ifdef LOG_ACTUAL_CONNECTION
 			lprintf( "Begin connection gPrimary=%d", g.Primary.flags.bConnected );
@@ -1219,8 +1227,8 @@ int OpenSQL( void )
 	if( !g.flags.bNoBackup
 		&&(  !g.flags.bBackupUp ) )
 	{
-		//if ( g.BackupLastConnect < GetTickCount()
-		//	&& ( g.BackupLastConnect = GetTickCount() + 1000 ) )
+		//if ( g.BackupLastConnect < timeGetTime()
+		//	&& ( g.BackupLastConnect = timeGetTime() + 1000 ) )
 		{
 #ifdef LOG_ACTUAL_CONNECTION
 			lprintf( "Begin connection &gBackup=%p", g.Backup );
@@ -2423,7 +2431,10 @@ int __GetSQLResult( PODBC odbc, PCOLLECT collection, int bMore )
 
          // end thread protection here - was started in the __DoSQLQuery
 			if( odbc->flags.bThreadProtect )
+			{
+				odbc->nProtect--;
 				LeaveCriticalSec( &odbc->cs );
+			}
 
 			//DestroyCollection( collection );
 			return 0;

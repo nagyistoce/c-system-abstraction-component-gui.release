@@ -212,7 +212,7 @@ SQLGETOPTION_PROC( void, CreateOptionDatabase )( void )
 				//lprintf( "connect to %s", out );
 				og.Option = ConnectToDatabase( out );
 				SetSQLThreadProtect( og.Option, TRUE );
-				og.Option->flags.bAutoTransact = 1;
+            SetSQLAutoTransact( og.Option, TRUE );
 				og.Option->last_command_tick = 0; // just to make sure
 			}
 		}
