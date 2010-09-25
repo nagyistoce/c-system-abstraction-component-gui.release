@@ -329,6 +329,12 @@
 #endif
 #define isdigit(c) ((c) >= '0' && (c) <= '9')
 
+#ifdef __cplusplus
+	namespace sack {
+		namespace compat {
+			namespace msvc_sprintf {
+#endif
+
 /* For copying strings longer or equal to 'breakeven_point'
  * it is more efficient to call memcpy() than to do it inline.
  * The value depends mostly on the processor architecture,
@@ -705,7 +711,7 @@ int portable_vsnprintf(char *str, size_t str_m, const char *fmt, va_list ap) {
           else if (precision == 0) str_arg_l = 0;
           else {
        /* memchr on HP does not like n > 2^31  !!! */
-            const char *q = memchr(str_arg, '\0',
+            const char *q = (const char *)memchr(str_arg, '\0',
                              precision <= 0x7fffffff ? precision : 0x7fffffff);
             str_arg_l = !q ? precision : (q-str_arg);
           }
@@ -1022,4 +1028,10 @@ int portable_vsnprintf(char *str, size_t str_m, const char *fmt, va_list ap) {
    */
   return (int) str_l;
 }
+#endif
+#ifdef __cplusplus
+}//namespace msvc_sprintf {
+}//namespace compat {
+		}//	namespace sack {
+using namespace sack::compat::msvc_snprintf;
 #endif
