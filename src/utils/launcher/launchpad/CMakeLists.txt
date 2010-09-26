@@ -3,10 +3,14 @@ cmake_minimum_required(VERSION 2.8)
 
 project( launchpad )
 
+set( RESOURCES launchpad.rc )
+if( MINGW OR MSVC )
+set( MORE_SOURCES ${RESOURCES} )
+endif( MINGW OR MSVC )
 
 set(BASE_SOURCES
 ${FIRST_GCC_PROGRAM_SOURCE} 
-    launchpad launchpad.rc
+    launchpad ${MORE_SOURCES}
 ${LAST_GCC_PROGRAM_SOURCE}
 )
 
@@ -16,11 +20,27 @@ SET(CMAKE_RC_COMPILER_INIT "windres")
 SET(CMAKE_RC_COMPILER "windres")
 SET(CMAKE_RC_COMPILE_OBJECT "windres <FLAGS> <DEFINES> -O coff -o <OBJECT> <SOURCE>")
 ENABLE_LANGUAGE(RC)
+elseif( WATCOM )
+string( REPLACE ".rc" ".res" WATCOM_RESOURCES ${RESOURCES} )
+SET( CMAKE_RC_COMPILER "rc" )
+string( REPLACE "/" "\\" WATCOM_PROJECT_BINARY_DIR ${PROJECT_BINARY_DIR} )
+string( REPLACE "/" "\\" WATCOM_CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} )
+add_custom_command( OUTPUT ${PROJECT_BINARY_DIR}/${WATCOM_RESOURCES}
+                     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${RESOURCES}
+                     COMMAND ${CMAKE_RC_COMPILER} -i${WATCOM_CMAKE_CURRENT_SOURCE_DIR} -fo${WATCOM_PROJECT_BINARY_DIR}\\${WATCOM_RESOURCES} ${WATCOM_CMAKE_CURRENT_SOURCE_DIR}\\${RESOURCES}
+ )
+ADD_CUSTOM_TARGET( "generate_foo${PROJECT_NAME}" DEPENDS ${PROJECT_BINARY_DIR}/${WATCOM_RESOURCES})
 
 endif()
 
 
 add_executable(${PROJECT_NAME} WIN32 ${BASE_SOURCES} )
+
+if( WATCOM )
+ADD_DEPENDENCIES( ${PROJECT_NAME} "generate_foo${PROJECT_NAME}" )
+SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES LINK_FLAGS "option resource=${WATCOM_RESOURCES}")
+endif( WATCOM )
+
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 COMPILE_FLAGS  "-DTARGET_LABEL=${PROJECT_NAME}" 
                   FOLDER utils/launcher
@@ -48,7 +68,7 @@ endif( MSVC )
 
 set(BASE_SOURCES
 ${FIRST_GCC_PROGRAM_SOURCE} 
-    launchpad launchpad.rc
+    launchpad ${MORE_SOURCES}
     ${SOURCES_ROOT}/netlib/network.c 
     ${SOURCES_ROOT}/netlib/udpnetwork.c 
     ${SOURCES_ROOT}/netlib/tcpnetwork.c 
@@ -94,6 +114,10 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   COMPILE_DEFINITIONS "SACK_BAG_EXPORTS;__NO_OPTIONS__;__STATIC__"
                   FOLDER utils/launcher
 )
+if( WATCOM )
+ADD_DEPENDENCIES( ${PROJECT_NAME} "generate_foo${PROJECT_NAME}" )
+SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES LINK_FLAGS "option resource=${WATCOM_RESOURCES}")
+endif( WATCOM )
 target_link_libraries( ${PROJECT_NAME} ws2_32 wsock32 winmm )
 install_default_dest_binary( ${PROJECT_NAME} )
 
