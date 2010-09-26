@@ -1541,7 +1541,7 @@ extern PNG_EXPORT(jmp_buf*, png_set_longjmp_fn)
    PNGARG((png_structp png_ptr, png_longjmp_ptr longjmp_fn, size_t
        jmp_buf_size));
 #  define png_jmpbuf(png_ptr) \
-   (*png_set_longjmp_fn((png_ptr), longjmp, sizeof (jmp_buf)))
+   (*png_set_longjmp_fn((png_ptr), (png_longjmp_ptr)longjmp, sizeof (jmp_buf)))
 #else
 #  define png_jmpbuf(png_ptr) \
    (LIBPNG_WAS_COMPILED_WITH__PNG_NO_SETJMP)
