@@ -43,3 +43,10 @@ PRIORITY_PRELOAD( RegisterSQLiteInterface, GLOBAL_INIT_PRELOAD_PRIORITY-1 )
 	RegisterInterface( WIDE("sqlite3"), GetSQLiteInterface, DropSQLiteInterface );
 
 }
+
+#ifdef __WATCOMC__
+// watcom requires at least one export
+PUBLIC( void, AtLeastOneExport )( void )
+{
+}
+#endif

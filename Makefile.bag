@@ -353,7 +353,6 @@ CXFLAGS+=-DGENX_SOURCE
 #SEXPAT_DESTINC=$(SACK_BASE)/include/sexpat
 #MORE_TARGETS+=$(SEXPAT_DESTINC)/sexpat.h $(SEXPAT_DESTINC)/sexpat_external.h
 SRCS+=src/sexpat/xmlparse src/sexpat/xmlrole src/sexpat/xmltok
-CXFLAGS+=-DSEXPAT_SOURCE
 CXFLAGS+=-DXML_MIN_SIZE
 
 ######  SNMP #########################
