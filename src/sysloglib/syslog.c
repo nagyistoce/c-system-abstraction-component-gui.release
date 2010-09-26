@@ -187,6 +187,12 @@ void TestCPUTick( void )
 }
 #endif
 
+#ifdef __WATCOMC__
+unsigned __int64 rdtsc( void);
+#pragma aux rdtsc = 0x0F 0x31 value [edx eax] parm nomemory modify exact [edx eax] nomemory;
+//#pragma aux GetCPUTicks3 = "rdtsc"   "mov dword ptr tick, eax"   	"mov dword ptr tick+4, edx "
+#endif
+
 _64 GetCPUTick(void )
 {
 /*
@@ -198,21 +204,16 @@ _64 GetCPUTick(void )
  */
 	if( bCPUTickWorks )
 	{
-      static _64 lasttick;
+		static _64 lasttick;
 #if defined( __LCC__ )
 		return _rdtsc();
 #elif defined( __WATCOMC__ )
-		extern void GetCPUTicks3();
-		_64 tick;
+		_64 tick = rdtsc();
 #ifndef __WATCOMC__
 		// haha a nasty compiler trick to get the variable used
 		// but it's also a 'meaningless expression' so watcom pukes.
 		(1)?(0):(tick = 0);
 #endif
-#pragma aux GetCPUTicks3 = "rdtsc"  \
-	"mov dword ptr tick, eax"     \
-	"mov dword ptr tick+4, edx "
-		GetCPUTicks3();
 		if( !lasttick )
 			lasttick = tick;
 		else if( tick < lasttick )
@@ -220,17 +221,17 @@ _64 GetCPUTick(void )
 			bCPUTickWorks = 0;
 			cpu_tick_freq = 1;
 			tick_bias = lasttick - ( timeGetTime()/*GetTickCount()*/ * 1000 );
-         tick = lasttick + 1; // more than prior, but no longer valid.
+			tick = lasttick + 1; // more than prior, but no longer valid.
 		}
-      lasttick = tick;
+		lasttick = tick;
 		return tick;
-#elif defined( _MSC_VER ) 
+#elif defined( _MSC_VER )
 #ifdef _M_CEE_PURE
-	  //return System::DateTime::now;
-	  return 0;
+		//return System::DateTime::now;
+		return 0;
 #else
 #   if defined( _WIN64 )
-	    _64 tick = __rdtsc();
+		_64 tick = __rdtsc();
 #   else
 		static _64 tick;
 #if _ARM_ 
@@ -248,9 +249,9 @@ _64 GetCPUTick(void )
 			bCPUTickWorks = 0;
 			cpu_tick_freq = 1;
 			tick_bias = lasttick - ( timeGetTime()/*GetTickCount()*/ * 1000 );
-         	tick = lasttick + 1; // more than prior, but no longer valid.
+			tick = lasttick + 1; // more than prior, but no longer valid.
 		}
-      	lasttick = tick;
+		lasttick = tick;
 		return tick;
 		if( !lasttick )
 			lasttick = tick;
@@ -259,9 +260,9 @@ _64 GetCPUTick(void )
 			bCPUTickWorks = 0;
 			cpu_tick_freq = 1;
 			tick_bias = lasttick - ( timeGetTime()/*GetTickCount()*/ * 1000 );
-         	tick = lasttick + 1; // more than prior, but no longer valid.
+			tick = lasttick + 1; // more than prior, but no longer valid.
 		}
-      	lasttick = tick;
+		lasttick = tick;
 		return tick;
 #endif
 #elif defined( __GNUC__ ) && !defined( __arm__ )
@@ -277,9 +278,9 @@ _64 GetCPUTick(void )
 			bCPUTickWorks = 0;
 			cpu_tick_freq = 1;
 			tick_bias = lasttick - ( timeGetTime()/*GetTickCount()*/ * 1000 );
-         tick.tick = lasttick + 1; // more than prior, but no longer valid.
+			tick.tick = lasttick + 1; // more than prior, but no longer valid.
 		}
-      lasttick = tick.tick;
+		lasttick = tick.tick;
 		return tick.tick;
 #else
 		DebugBreak();
