@@ -559,8 +559,8 @@ int WinLogicWriteEx( PCONSOLE_INFO pmdp
          if( pLine->format.position.coords.y != -16384 )
             cursory = pmdp->nLines - pLine->format.position.coords.y;
          SetHistoryCursorPos( pmdp->pCursor, cursorx, cursory );
-         pLine->format.position.spaces = 0;
-         pLine->format.position.tabs = 0;
+         pLine->format.position.offset.spaces = 0;
+         pLine->format.position.offset.tabs = 0;
          pLine->flags &= ~TF_FORMATABS;
       }
       if( pLine->flags & TF_FORMATREL )
@@ -571,8 +571,8 @@ int WinLogicWriteEx( PCONSOLE_INFO pmdp
          cursorx += pLine->format.position.coords.x;
          cursory += pLine->format.position.coords.y;
          SetHistoryCursorPos( pmdp->pCursor, cursorx, cursory );
-         pLine->format.position.spaces = 0;
-         pLine->format.position.tabs = 0;
+         pLine->format.position.offset.spaces = 0;
+         pLine->format.position.offset.tabs = 0;
          pLine->flags &= ~TF_FORMATREL;
          // this should not leave the current region....
       }
@@ -647,12 +647,12 @@ int GetCharFromLine( _32 cols
          // nShown is the amount of the first segment shown.
          nLen = ComputeToShow( cols, pText, GetTextSize( pText ), nOfs, nShown );
          //nLen = GetTextSize( pText );
-         if( nChar < pText->format.position.spaces )
+         if( nChar < pText->format.position.offset.spaces )
          {
             *result = ' ';
             return TRUE;
          }
-         nChar -= pText->format.position.spaces;
+         nChar -= pText->format.position.offset.spaces;
          if( nChar < nLen )
          {
             TEXTCHAR *text = GetText( pText );

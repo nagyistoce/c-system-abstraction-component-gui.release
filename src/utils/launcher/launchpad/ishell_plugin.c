@@ -276,3 +276,8 @@ OnLoadControl( "Launcher Launchpad" )( PCONFIG_HANDLER pch, PTRSZVAL psv )
 
 //-------------------------------------------------------------------------
 
+#ifdef __WATCOMC__
+PUBLIC( void, AtLeastOneExport )( void )
+{
+}
+#endif

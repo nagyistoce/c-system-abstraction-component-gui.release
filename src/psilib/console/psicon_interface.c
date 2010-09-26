@@ -36,8 +36,8 @@ int PSIConsoleOutput( PSI_CONTROL pc, PTEXT lines )
 				if( prior )
 				{
 					SetStart( prior );
-               prior->format.position.spaces += console->pending_spaces;
-               prior->format.position.tabs += console->pending_tabs;
+               prior->format.position.offset.spaces += console->pending_spaces;
+               prior->format.position.offset.tabs += console->pending_tabs;
 					que = BuildLine( prior );
 					if( !console->flags.bNewLine )
                   que->flags |= TF_NORETURN;
@@ -51,8 +51,8 @@ int PSIConsoleOutput( PSI_CONTROL pc, PTEXT lines )
 
             // throw away the blank... don't really need it on the display
 				SegGrab( tmp );
-            console->pending_spaces = tmp->format.position.spaces;
-            console->pending_tabs = tmp->format.position.tabs;
+            console->pending_spaces = tmp->format.position.offset.spaces;
+            console->pending_tabs = tmp->format.position.offset.tabs;
 				LineRelease( tmp );
             remainder = next;
 			}
