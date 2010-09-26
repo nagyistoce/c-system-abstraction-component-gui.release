@@ -427,9 +427,7 @@ LIST(APPEND BASE_SOURCES
 endif(__WINDOWS__)
 
 if( WIN32 )
-message( "Windows... adding all-rsources.rc" )
 LIST(APPEND BASE_SOURCES     all_resources.rc )
-
 if( MINGW )
 
 SET(CMAKE_RC_COMPILER_INIT "windres")
@@ -446,9 +444,12 @@ ENABLE_LANGUAGE(RC)
 # )
 # ADD_CUSTOM_TARGET( generate_foo DEPENDS ${PROJECT_BINARY_DIR}/all_resources.res)
 elseif( WATCOM )
+string( REPLACE "/" "\\" WATCOM_PROJECT_BINARY_DIR ${PROJECT_BINARY_DIR} )
+string( REPLACE "/" "\\" WATCOM_CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} )
 add_custom_command( OUTPUT ${PROJECT_BINARY_DIR}/all_resources.res
-                     DEPENDS ${SACK_BASE}/all_resources.rc
-                     COMMAND ${CMAKE_RC_COMPILER} -i${SACK_BASE} -fo${PROJECT_BINARY_DIR}/all_resources.res ${SACK_BASE}/all_resources.rc
+                     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/all_resources.rc
+                     COMMAND echo ${CMAKE_RC_COMPILER} -i${WATCOM_CMAKE_CURRENT_SOURCE_DIR} -fo${WATCOM_PROJECT_BINARY_DIR}\\all_resources.res ${WATCOM_CMAKE_CURRENT_SOURCE_DIR}\\all_resources.rc
+                     COMMAND ${CMAKE_RC_COMPILER} -i${WATCOM_CMAKE_CURRENT_SOURCE_DIR} -fo${WATCOM_PROJECT_BINARY_DIR}\\all_resources.res ${WATCOM_CMAKE_CURRENT_SOURCE_DIR}\\all_resources.rc
  )
  ADD_CUSTOM_TARGET( generate_foo DEPENDS ${PROJECT_BINARY_DIR}/all_resources.res)
 endif()
@@ -557,6 +558,7 @@ endif()
 if( WATCOM )
 ADD_DEPENDENCIES( sack_bag generate_foo )
 SET_TARGET_PROPERTIES(sack_bag PROPERTIES LINK_FLAGS "option resource=all_resources.res")
+SET_TARGET_PROPERTIES(${SACK_BAG_PLUSPLUS} PROPERTIES LINK_FLAGS "option resource=all_resources.res")
 elseif( MINGW )
 ADD_DEPENDENCIES( sack_bag generate_foo )
 #ADD_DEPENDENCIES( sack_bag all_resources.res )
