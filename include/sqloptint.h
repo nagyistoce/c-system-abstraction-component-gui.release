@@ -69,6 +69,16 @@ typedef struct option_interface_tag
 #define DEFAULT_OPTION_INTERFACE ((!pOptionInterface)?(pOptionInterface=GetOptionInterface()):pOptionInterface)
 
 static POPTION_INTERFACE pOptionInterface;
+#ifdef __WATCOMC__
+static void UseInterface( void )
+{
+	// use the value of this function and set pOptionInterface with it
+	// makes pOptionInterface marked as used so is UseInterface.
+	// Visual Studio pucked on this because converting a function pointer to data pointer
+   // but this function should never be called.
+   pOptionInterface = (POPTION_INTERFACE)UseInterface;
+}
+#endif
 
 #endif
    _INTERFACE_NAMESPACE_END

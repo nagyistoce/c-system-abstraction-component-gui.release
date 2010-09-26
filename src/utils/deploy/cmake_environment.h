@@ -1,5 +1,5 @@
 
 
-TEXTCHAR *build_type="Debug";
+TEXTCHAR *build_type="Release";
 
 

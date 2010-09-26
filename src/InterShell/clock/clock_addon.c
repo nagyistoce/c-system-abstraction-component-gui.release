@@ -295,3 +295,8 @@ OnQueryShowControl( WIDE("Clock") )( PTRSZVAL psv )
 }
 
 //---------------------------------------------------------------------------
+#ifdef __WATCOMC__
+PUBLIC( void, NeedAtLeastOneExport )( void )
+{
+}
+#endif
