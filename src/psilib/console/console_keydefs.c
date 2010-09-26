@@ -21,11 +21,7 @@ static void CPROC _Key_KeystrokePaste( PCONSOLE_INFO pmdp )
       pmdp->KeystrokePaste( pmdp );
 }
 
-#if (defined( GCC ) || defined( __WATCOMC__ )) && defined( __cplusplus )
 DECLTEXT( KeyStroke, "\x7f" ); // DECLTEXT implies 'static'
-#else
-static TEXT KeyStroke = DEFTEXT( WIDE("\x7f") );
-#endif
 
 #if defined( GCC ) || defined( __LINUX__ )
 CORECON_EXPORT( PSIKEYDEFINE, ConsoleKeyDefs[256] ) =
