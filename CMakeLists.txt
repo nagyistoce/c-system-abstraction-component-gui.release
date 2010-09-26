@@ -233,7 +233,7 @@ set ( EXPAT_SOURCES
   src/sexpat/xmlrole.c
   src/sexpat/xmltok.c
 )
-set( ExtraFlags "${ExtraFlags} -DXML_MIN_SIZE" )
+set( MoreDefinitions "${MoreDefinitions};XML_MIN_SIZE" )
 
 # genx is searchable by looking for 'genx xml'
 set( GENX_SOURCES
@@ -250,7 +250,7 @@ set( VIDLIB_SOURCES
 
 if( NOT __ARM__ )
 set( VIDLIB_SOURCES ${VIDLIB_SOURCES} src/vidlib/opengl.c )
-set( ExtraRenderFlags "${ExtraRenderFlags} -D_OPENGL_ENABLED" )
+set( MoreDefinitions "${MoreDefinitions};_OPENGL_ENABLED" )
 endif( NOT __ARM__ )
 
 else( __WINDOWS__ )
@@ -279,6 +279,19 @@ set( IMAGE_SOURCES
   src/imglib/sprite.c
 )
 
+if( NOT __NO_GUI__ )
+set( PSI_MORE_CONTROLS
+  src/psilib/console/history.c
+  src/psilib/console/console_keydefs.c
+  src/psilib/console/paste.c
+  src/psilib/console/psicon.c
+  src/psilib/console/psicon_interface.c
+  src/psilib/console/regaccess.c
+  src/psilib/console/WinLogic.c
+)
+set( MoreDefinitions "${MoreDefinitions};PSI_CONSOLE_SOURCE" )
+endif( NOT __NO_GUI__ )
+
 set( PSI_SOURCES
   src/psilib/borders.c
   src/psilib/calctl/calender.c
@@ -304,13 +317,15 @@ set( PSI_SOURCES
   src/psilib/xml_load.c
   src/psilib/xml_save.c
   src/psilib/option_frame.c
+  ${PSI_MORE_CONTROLS}
 )
+
+SET_SOURCE_FILES_PROPERTIES( ${PSI_SOURCES} PROPERTIES FOLDER PSI )
 
 if( __WINDOWS__ )
   SET( PSI_SOURCES ${PSI_SOURCES}  src/systraylib/systray.c )
 else( __WINDOWS__ )
   SET( PSI_SOURCES ${PSI_SOURCES}  src/systraylib/systray_client.c )
-  
 endif( __WINDOWS__ )
 
 if( MSVC )
@@ -329,7 +344,7 @@ set( PSI_SOURCES ${PSI_SOURCES}
 )
 endif()
 
-set( ExtraFlags "${ExtraFlags} -DGENX_SOURCE" )
+set( MoreDefinitions "${MoreDefinitions};GENX_SOURCE" )
 
 set( SACK_MSG_SERVICES 
   src/msgsvr/client/client.c
@@ -355,8 +370,7 @@ set(BASE_SOURCES ${BASE_SOURCES}
 endif( __LINUX__ )
 
 else()
-set( Extraflags "${ExtraFlags} -D__NO_MSGSVR__" )
-set( CMAKE_C_STANDARD_LIBRARIES_INIT "" )
+set( MoreDefinitions "${MoreDefinitions};__NO_MSGSVR__" )
 endif()
 
 if( __WINDOWS__ )
@@ -396,7 +410,7 @@ set(BASE_SOURCES  ${BASE_SOURCES}
   ${OPTION_SOURCE}
 )
 
-set( ExtraFlags "${ExtraFlags} -DSACKCOMM_SOURCE" )
+set( MoreDefinitions "${MoreDefinitions};SACKCOMM_SOURCE" )
 
 if( __WINDOWS__ )
 set(BASE_SOURCES ${BASE_SOURCES}
@@ -411,16 +425,12 @@ include_directories(
 
 
 if( USING_OLD_MINGW )
-add_definitions( 
-  -DMINGW_SUX
-)
+add_definitions( -DMINGW_SUX )
 endif()
 
 
 if( __WINDOWS__ )
-add_definitions( 
-  -D__WINDOWS__
-)
+add_definitions( -D__WINDOWS__ )
 LIST(APPEND BASE_SOURCES
    src/netlib/net_winsock2.c
 )
@@ -532,7 +542,7 @@ endif(WATCOM)
 SET_TARGET_PROPERTIES(sack_bag PROPERTIES
                   DEFINE_SYMBOL SACK_BAG_EXPORTS
                   COMPILE_FLAGS  "-DTARGET_LABEL=sack_bag ${ExtraFlags} ${TARGETNAME} ${ExtraRenderFlags}"
-		  SOLUTION_FOLDER "MyFolder" 
+                  COMPILE_DEFINITIONS "${MoreDefinitions}"
 )
 
 if( WATCOM )
@@ -547,8 +557,7 @@ add_library( ${SACK_BAG_PLUSPLUS} SHARED
 SET_TARGET_PROPERTIES(${SACK_BAG_PLUSPLUS} PROPERTIES
                   DEFINE_SYMBOL SACK_BAG_EXPORTS
                   COMPILE_FLAGS  "${ExtraFlags} ${ExtraRenderFlags}"
-                  COMPILE_DEFINITIONS "TARGET_LABEL=sack_bag_plusplus;TARGETNAME=\"${CMAKE_SHARED_LIBRARY_PREFIX}sack_bag${CMAKE_SHARED_LIBRARY_SUFFIX}\""
-		  SOLUTION_FOLDER "${SACK_BAG_PLUSPLUS}" 
+                  COMPILE_DEFINITIONS "${MoreDefinitions};TARGET_LABEL=sack_bag_plusplus;TARGETNAME=\"${CMAKE_SHARED_LIBRARY_PREFIX}sack_bag${CMAKE_SHARED_LIBRARY_SUFFIX}\""
 )
 
 if( __WINDOWS_ARM_CE__ )
@@ -782,6 +791,7 @@ add_subdirectory( src/SQLlib/testsql )
 add_subdirectory( src/utils/launcher )
 add_subdirectory( src/utils/deploy )
 add_subdirectory( src/utils/strip )
+add_subdirectory( src/psilib/console/cmdshell )
 if( __WINDOWS__ )
 add_subdirectory( src/utils/pcopy )
 endif( __WINDOWS__ )

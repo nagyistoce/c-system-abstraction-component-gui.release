@@ -5,7 +5,7 @@ project( sack_widgets )
 set(SOURCES 
    banner/banner.c 
    keypad/buttons.c 
-   keypad/keypad.c 
+   keypad/keypad_control.c 
    keypad/accum.c 
 )
 
