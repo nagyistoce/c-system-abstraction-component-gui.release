@@ -232,11 +232,14 @@ int  SetCurrentPath ( CTEXTSTR path )
 int IsAbsolutePath( CTEXTSTR path )
 {
 #ifdef __WINDOWS__
-	if( path[0] && path[1] && path[2] &&
-		( ( path[0] >= 'a' && path[0] <= 'z' )
-		  || ( path[0] >= 'A' && path[0] <= 'Z' ) )
-		&& ( path[1] == ':' )
-		&& ( path[2] == '/' || path[2] == '\\' ) )
+	if( ( path[0] && path[1] && path[2] ) &&
+		 ( ( ( ( path[0] >= 'a' && path[0] <= 'z' )
+			  || ( path[0] >= 'A' && path[0] <= 'Z' ) )
+			&& ( path[1] == ':' )
+			&& ( path[2] == '/' || path[2] == '\\' ) )
+		  || ( path[0] == '/' && path[1] == '/' )
+		  || ( path[0] == '\\' && path[1] == '\\' ) )
+      )
       return TRUE;
 #else
 	if( path[0] == '/' || path[0] == '\\' )
