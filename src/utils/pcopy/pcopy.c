@@ -445,10 +445,12 @@ int ScanFile( PFILESOURCE pfs )
 
 int main( int argc, CTEXTSTR *argv )
 {
-#ifndef NO_COPY
 	if( argc < 3 || !IsPath( argv[argc-1] ) )
 	{
-		printf( WIDE("usage: %s <file...> <destination>\n")
+		printf( WIDE("usage: %s <-xlv> <file...> <destination>\n")
+				 "  -l : list only, do not copy (doesn't require destination)\n"
+				 "  -x <file mask> : exclude this file from copy\n"
+				 "  -v : verbose output?\n"
 				 "  file - .dll or .exe referenced, all referenced DLLs\n"
 				 "         are also copied to the dstination\n"
 				 "  dest - directory name to cpoy to, will fail otherwise.\n"
@@ -458,26 +460,12 @@ int main( int argc, CTEXTSTR *argv )
 			printf( WIDE("EROR: Final argument is not a directory\n") );
 		return 1;
 	}
-#else
-	if( argc < 2 )
-	{
-		printf( WIDE("usage: %s <file...> <destination>\n")
-				 "  file - .dll or .exe referenced, all referenced DLLs are listed.\n"
-				, argv[0]
-				);
-		return 1;
-	}
-#endif
 	StrCpyEx( g.SystemRoot, getenv( WIDE("SystemRoot") ), sizeof( g.SystemRoot ) );
 	{
 		int c;
-  	for( c = 1;
-#ifndef NO_COPY
-		 c < argc-1;
-#else
-		 c < argc;
-#endif
-			  c++ )
+		for( c = 1;
+			 c < ( g.flags.bDoNotCopy?argc:(argc-1) );
+			 c++ )
 		{
 			if( argv[c][0] == '-' )
 			{
@@ -487,6 +475,10 @@ int main( int argc, CTEXTSTR *argv )
 				{
 					switch(argv[c][ch])
 					{
+					case 'l':
+					case 'L':
+						g.flags.bDoNotCopy = 1;
+                  break;
 					case 'v':
 					case 'V':
 						g.flags.bVerbose = 1;
@@ -521,12 +513,15 @@ int main( int argc, CTEXTSTR *argv )
 				AddFileCopy( argv[c ]);
 		}
 	}
-#ifndef NO_COPY
-	CopyFileCopyTree( argv[argc-1] );
-	printf( WIDE("Copied %d file%s\n"), g.copied, g.copied==1?"":"s" );
-#else
-	CopyFileCopyTree( NULL );
-#endif
+	if( !g.flags.bDoNotCopy )
+	{
+		CopyFileCopyTree( argv[argc-1] );
+		printf( WIDE("Copied %d file%s\n"), g.copied, g.copied==1?"":"s" );
+	}
+	else
+	{
+		CopyFileCopyTree( NULL );
+	}
 	return 0;
 
 }

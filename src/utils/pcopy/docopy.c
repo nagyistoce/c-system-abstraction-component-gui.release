@@ -140,36 +140,39 @@ void ScanFileCopyTree( void )
 
 void copy( char *src, char *dst )
 {
-#ifndef NO_COPY
-	static _8 buffer[4096];
-	FILE *in, *out;
-	_64 filetime;
-	_64 filetime_dest;
-
-	filetime = GetFileWriteTime( src );
-	filetime_dest = GetFileWriteTime( dst );
-
-	if( filetime <= filetime_dest )
-      return;
-	in = sack_fopen( 0, src, WIDE("rb") );
-	if( in )
-		out = sack_fopen( 0, dst, WIDE("wb") );
-	else
-		out = NULL;
-	if( in && out )
+	if( g.flags.bDoNotCopy )
 	{
-		int len;
-		while( len = fread( buffer, 1, sizeof( buffer ), in ) )
-			fwrite( buffer, 1, len, out );
+		fprintf( stdout, "%s\n", src );
 	}
-	if( in )
-		fclose( in );
-	if( out )
-		fclose( out );
-	SetFileWriteTime( dst, filetime );
-#else
-   fprintf( stdout, "%s\n", src );
-#endif
+	else
+	{
+		static _8 buffer[4096];
+		FILE *in, *out;
+		_64 filetime;
+		_64 filetime_dest;
+
+		filetime = GetFileWriteTime( src );
+		filetime_dest = GetFileWriteTime( dst );
+
+		if( filetime <= filetime_dest )
+			return;
+		in = sack_fopen( 0, src, WIDE("rb") );
+		if( in )
+			out = sack_fopen( 0, dst, WIDE("wb") );
+		else
+			out = NULL;
+		if( in && out )
+		{
+			int len;
+			while( len = fread( buffer, 1, sizeof( buffer ), in ) )
+				fwrite( buffer, 1, len, out );
+		}
+		if( in )
+			fclose( in );
+		if( out )
+			fclose( out );
+		SetFileWriteTime( dst, filetime );
+	}
 	g.copied++;
 }
 
