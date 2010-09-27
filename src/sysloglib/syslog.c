@@ -146,11 +146,13 @@ PRIORITY_ATEXIT( CleanSyslog, ATEXIT_PRIORITY_SYSLOG )
 	case SYSLOG_FILENAME:
 		fclose( l.file );
 		break;
+#ifndef __DISABLE_UDP_SYSLOG__
 	case SYSLOG_UDP:
 	case SYSLOG_UDPBROADCAST:
 		closesocket( hSock );
 		hSock = INVALID_SOCKET;
 		break;
+#endif
 	default:
       // else... no resources to cleanup
       break;
