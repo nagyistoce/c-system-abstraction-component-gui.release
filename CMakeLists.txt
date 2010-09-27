@@ -130,6 +130,8 @@ set( ODBC_SOURCES
   src/SQLlib/sqlutil.c
   src/SQLlib/sqlwrap.c
 )
+SET_SOURCE_FILES_PROPERTIES( ${ODBC_SOURCES} PROPERTIES 
+		FOLDER "Source Files\\ODBC" )
 
  if( USE_ODBC )
 add_definitions( -DUSE_ODBC )
@@ -197,17 +199,14 @@ endif()
   endif()
 
 
-if( CMAKE_BUILD_TYPE MATCHES "Debug" )
-  add_definitions( -D_DEBUG )
-endif()
-if( CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo" )
-  add_definitions( -D_DEBUG )
+if( ( CMAKE_BUILD_TYPE MATCHES "Debug" ) OR (CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo") )
+  set( MoreDefinitions "${MoreDefinitions};_DEBUG" )
 endif()
 
 if( USE_ASSEMBLY )
 set( ExtraFlags "${ExtraFlags} -DHAS_ASSEMBLY )
 set( ImageExtraFlags "${ExtraFlags} -DHAS_ASSEMBLY )
-set( ASM_SOURCES
+set( IMAGE_ASM_SOURCES
   src/imglib/ImageFile.asm
   src/imglib/alphamac.asm
   src/imglib/blatcolor.asm
@@ -233,6 +232,7 @@ set ( EXPAT_SOURCES
   src/sexpat/xmlrole.c
   src/sexpat/xmltok.c
 )
+SOURCE_GROUP( "Source Files\\XML\\expat" FILES ${EXPAT_SOURCES} )
 set( MoreDefinitions "${MoreDefinitions};XML_MIN_SIZE" )
 
 # genx is searchable by looking for 'genx xml'
@@ -240,6 +240,8 @@ set( GENX_SOURCES
   src/genx/charProps.c
   src/genx/genx.c
 )
+SET_SOURCE_FILES_PROPERTIES( ${GENX_SOURCES} PROPERTIES 
+		FOLDER "Source Files\\XML\\Genx Library" )
 
 if( __WINDOWS__ )
 set( VIDLIB_SOURCES
@@ -247,6 +249,9 @@ set( VIDLIB_SOURCES
   src/vidlib/keydefs.c
   src/vidlib/vidlib.c
 )
+
+SET_SOURCE_FILES_PROPERTIES( ${VIDLIB_SOURCES} PROPERTIES 
+		FOLDER "Source Files\\Image Output Library" )
 
 if( NOT __ARM__ )
 set( VIDLIB_SOURCES ${VIDLIB_SOURCES} src/vidlib/opengl.c )
@@ -278,6 +283,8 @@ set( IMAGE_SOURCES
   src/imglib/sprite_common.c
   src/imglib/sprite.c
 )
+SET_SOURCE_FILES_PROPERTIES( ${IMAGE_SOURCES} PROPERTIES 
+		FOLDER "Source Files\\Image Library" )
 
 if( NOT __NO_GUI__ )
 set( PSI_MORE_CONTROLS
@@ -319,9 +326,10 @@ set( PSI_SOURCES
   src/psilib/option_frame.c
   ${PSI_MORE_CONTROLS}
 )
-
-source_group("Source Files\\PSI Library" FILES ${PSI_SOURCES})
-source_group("Source Files\\PSI Library\\Controls" FILES ${PSI_MORE_SOURCES})
+SET_SOURCE_FILES_PROPERTIES( ${PSI_SOURCES} PROPERTIES 
+		FOLDER "Source Files\\PSI Library" )
+SET_SOURCE_FILES_PROPERTIES( ${PSI_MORE_CONTROLS} PROPERTIES 
+		FOLDER "Source Files\\PSI Library\\Console" )
 
 if( __WINDOWS__ )
   SET( PSI_SOURCES ${PSI_SOURCES}  src/systraylib/systray.c )
@@ -352,24 +360,31 @@ set( SACK_MSG_SERVICES
   src/msgsvr/summoner/construct.c
   )
 
-if( NOT __ARM__ )
-set(BASE_SOURCES ${BASE_SOURCES} ${SACK_MSG_SERVICES}
-  src/netlib/ping.c
-  src/netlib/whois.c
+set( FILESYSTEM_SOURCES
   src/systemlib/spawntask.c
   src/filesyslib/filemon/allfiles.c
   src/filesyslib/winfiles.c
 )
+
 if( __LINUX__ )
-set(BASE_SOURCES ${BASE_SOURCES}
+set(FILESYSTEM_SOURCES ${FILESYSTEM_SOURCES}
   src/filesyslib/filemon/linuxfiles.c
 )
 else( __LINUX__ )
-set(BASE_SOURCES ${BASE_SOURCES}
+set(FILESYSTEM_SOURCES ${FILESYSTEM_SOURCES}
   src/filesyslib/filemon/windowsfiles.c
 )
 endif( __LINUX__ )
 
+
+SET_SOURCE_FILES_PROPERTIES( ${FILESYSTEM_SOURCES} PROPERTIES 
+		FOLDER "Source Files\\File System Utils" )
+
+
+if( NOT __ARM__ )
+set(BASE_SOURCES ${BASE_SOURCES} ${SACK_MSG_SERVICES}
+  ${FILESYSTEM_SOURCES}
+)
 else()
 set( MoreDefinitions "${MoreDefinitions};__NO_MSGSVR__" )
 endif()
@@ -380,10 +395,7 @@ set( MSG_QUEUE_SOURCES
 )
 endif( __WINDOWS__ )
 
-set(BASE_SOURCES  ${BASE_SOURCES}
-  src/sysloglib/syslog.c
-  src/memlib/sharemem.c
-  ${MEM_ASSEMBLY_SOURCES}
+set( TYPE_LIBRARY_SOURCES
   src/typelib/binarylist.c
   src/typelib/familytree.c
   src/typelib/input.c
@@ -391,16 +403,47 @@ set(BASE_SOURCES  ${BASE_SOURCES}
   src/typelib/text.c
   src/typelib/typecode.c
   src/typelib/spacetree.c
+)
+
+SET_SOURCE_FILES_PROPERTIES( ${TYPE_LIBRARY_SOURCES} PROPERTIES 
+		FOLDER "Source Files\\Types" )
+
+if( __WINDOWS__ )
+set(MORE_NETWORK_SOURCES
+  src/netlib/net_winsock2.c
+)
+endif( __WINDOWS__ )
+
+if( NOT __ARM__ )
+set(MORE_NETWORK_SOURCES ${MORE_NETWORK_SOURCES} 
+  src/netlib/ping.c
+  src/netlib/whois.c
+)
+endif( NOT __ARM__ )
+
+set( NETWORK_SOURCES
+  src/netlib/network.c
+  src/netlib/tcpnetwork.c
+  src/netlib/udpnetwork.c
+  ${MORE_NETWORK_SOURCES}
+)
+SET_SOURCE_FILES_PROPERTIES( ${NETWORK_SOURCES} PROPERTIES 
+		FOLDER "Source Files\\Network Library" )
+
+
+set(BASE_SOURCES  ${BASE_SOURCES}
+  src/sysloglib/syslog.c
+  src/memlib/sharemem.c
+  ${MEM_ASSEMBLY_SOURCES}
+  ${TYPE_LIBRARY_SOURCES}
   ${MSG_QUEUE_SOURCES}
   src/timerlib/timers.c
   src/idlelib/idle.c
   src/fractionlib/fractions.c
   src/configlib/configscript.c
   src/procreglib/names.c
-  src/netlib/network.c
-  src/netlib/tcpnetwork.c
-  src/netlib/udpnetwork.c
   src/systemlib/args.c
+  ${NETWORK_SOURCES}
   src/deadstart/deadstart_core.c
   src/vectlib/vectlib.c
   src/sha1lib/sha1.c
@@ -413,11 +456,6 @@ set(BASE_SOURCES  ${BASE_SOURCES}
 
 set( MoreDefinitions "${MoreDefinitions};SACKCOMM_SOURCE" )
 
-if( __WINDOWS__ )
-set(BASE_SOURCES ${BASE_SOURCES}
-  src/netlib/net_winsock2.c
-)
-endif( __WINDOWS__ )
 
 
 include_directories( 
@@ -465,10 +503,6 @@ add_custom_command( OUTPUT ${PROJECT_BINARY_DIR}/all_resources.res
  ADD_CUSTOM_TARGET( generate_foo DEPENDS ${PROJECT_BINARY_DIR}/all_resources.res)
 endif()
 endif( WIN32 ) 
-
-set_source_files_properties( ${FREETYPE_SOURCE} PROPERTIES SOURCE_FOLER Freetype )
-set_source_files_properties( ${JPEG_SOURCE} PROPERTIES SOURCE_FOLER Jpeg )
-set_source_files_properties( ${ZLIB_SOURCE} PROPERTIES SOURCE_FOLER zlib )
 
 if( BUILD_MONOLITHIC )
 
@@ -518,11 +552,23 @@ FOREACH(SOURCE ${SACK_PLUSPLUS_SOURCES})
    if( ${SOURCE} MATCHES "(.*)\\.c" )
      set( BASENAME ${CMAKE_MATCH_1} )
      if( ${SOURCE} MATCHES "^${PROJECT_SOURCE_DIR}.*" )
+       get_source_file_property(SOURCE_FOLDER ${SOURCE} FOLDER)
+       if( NOT ${SOURCE_FOLDER} MATCHES "NOTFOUND" )
+         #message( "err folder : ${SOURCE_FOLDER} " )
+         SOURCE_GROUP( ${SOURCE_FOLDER} FILES ${SOURCE} )
+         SOURCE_GROUP( ${SOURCE_FOLDER} FILES ${BASENAME}.cpp )
+       endif()
        if( ${SOURCE} IS_NEWER_THAN ${BASENAME}.cpp )
           EXECUTE_PROCESS(COMMAND cmake -E copy_if_different ${SOURCE} ${BASENAME}.cpp )
           #message( "LIB2_SOURCE1 : ${BASENAME}  ${SOURCE}" )
         endif()
       else()
+        get_source_file_property(SOURCE_FOLDER ${PROJECT_SOURCE_DIR}/${SOURCE} FOLDER)
+        if( NOT ${SOURCE_FOLDER} MATCHES "NOTFOUND" )
+          #message( "err folder : ${SOURCE_FOLDER} " )
+          SOURCE_GROUP( ${SOURCE_FOLDER} FILES ${PROJECT_SOURCE_DIR}/${SOURCE} )
+          SOURCE_GROUP( ${SOURCE_FOLDER} FILES ${PROJECT_SOURCE_DIR}/${BASENAME}.cpp )
+        endif()
         if( ${PROJECT_SOURCE_DIR}/${SOURCE} IS_NEWER_THAN ${PROJECT_SOURCE_DIR}/${BASENAME}.cpp )
           EXECUTE_PROCESS(COMMAND cmake -E copy_if_different ${PROJECT_SOURCE_DIR}/${SOURCE} ${PROJECT_SOURCE_DIR}/${BASENAME}.cpp )
           #message( "LIB2_SOURCE2 : ${BASENAME}  ${SOURCE}" )
