@@ -5,6 +5,7 @@ typedef struct global_tag
 {
 	struct {
 		_32 bVerbose : 1;
+		_32 bDoNotCopy : 1;
 	} flags;
 	char SystemRoot[256];
 	_32 copied;
