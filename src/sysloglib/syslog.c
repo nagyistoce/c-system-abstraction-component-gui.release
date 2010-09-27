@@ -115,8 +115,15 @@ struct state_flags{
 #define bCPUTickWorks l.bCPUTickWorks
  _64 tick_bias;
 #define tick_bias l.tick_bias
-} *syslog_local;
+};
+
+#ifndef __STATIC_GLOBALS__
+struct syslog_local_data *syslog_local;
 #define l (*syslog_local)
+#else
+struct syslog_local_data syslog_local;
+#define l (syslog_local)
+#endif
 
 
 static void DoSystemLog( const TEXTCHAR *buffer );
@@ -419,10 +426,11 @@ static void LoadOptions( char *filename )
 //static int init_complete;
 void InitSyslog( void )
 {
+#ifndef __STATIC_GLOBALS__
 	if( syslog_local )
 		return;
-	//init_complete =1 ;
 	SimpleRegisterAndCreateGlobal( syslog_local );
+#endif
 	logtype = SYSLOG_AUTO_FILE;
 	hSock = INVALID_SOCKET;
    bCPUTickWorks = 1;
@@ -742,6 +750,8 @@ static CTEXTSTR GetLogTime( void )
 }
 
 //----------------------------------------------------------------------------
+#ifndef __DISABLE_UDP_SYSLOG__
+
 #ifndef FBSD
 static SOCKADDR saLogBroadcast  = { 2, { 0x02, 0x02, (char)0xff, (char)0xff, (char)0xff, (char)0xff } };
 static SOCKADDR saLog  = { 2, { 0x02, 0x02, 0x7f, 0x00, 0x00, 0x01 } };
@@ -823,6 +833,7 @@ static void UDPSystemLog( const TEXTCHAR *message )
 	}
 	bLogging = 0;
 }
+#endif
 
 #ifdef __LINUX__
 //---------------------------------------------------------------------------
@@ -905,6 +916,7 @@ static void BackupFile( const TEXTCHAR *source, int source_name_len, int n )
 
 void DoSystemLog( const TEXTCHAR *buffer )
 {
+#ifndef __STATIC_GLOBALS__
 	if( !syslog_local )
 	{
       InitSyslog();
@@ -916,9 +928,15 @@ void DoSystemLog( const TEXTCHAR *buffer )
 		if( ( logtype == SYSLOG_UDPBROADCAST ) || ( logtype == SYSLOG_UDP ) )
 			return;
 	}
+#endif
+#ifndef __DISABLE_UDP_SYSLOG__
 	if( logtype == SYSLOG_UDP
 		|| logtype == SYSLOG_UDPBROADCAST )
 		UDPSystemLog( buffer );
+#else
+	if( 0 )
+      ;
+#endif
 	else if( ( logtype == SYSLOG_FILE ) || ( logtype == SYSLOG_AUTO_FILE ) )
 	{
 		if( logtype == SYSLOG_AUTO_FILE )
@@ -982,10 +1000,12 @@ void SystemLogFL( const TEXTCHAR *message FILELINE_PASS )
 	static TEXTCHAR sourcefile[256];
 	CTEXTSTR logtime;
 	static _32 lock;
+#ifndef __STATIC_GLOBALS__
 	if( !syslog_local )
 	{
-		InvokeDeadstart();
+      InitSyslog();
 	}
+#endif
 	if( cannot_log )
       return;
 #ifdef __WINDOWS__
@@ -1188,6 +1208,7 @@ static INDEX CPROC _real_vlprintf ( CTEXTSTR format, va_list args )
 {
 #if 1
    // this can be used to force logging early to stdout
+#ifndef __STATIC_GLOBALS__
 	if( !syslog_local )
 	{
       InitSyslog();
@@ -1200,6 +1221,7 @@ static INDEX CPROC _real_vlprintf ( CTEXTSTR format, va_list args )
 
 		flags.bLogSourceFile = 1;
 	}
+#endif
 #endif
 	if( cannot_log )
 		return 0;
@@ -1308,11 +1330,12 @@ static INDEX CPROC _null_lprintf( CTEXTSTR f, ... )
 RealVLogFunction  _vxlprintf ( _32 level DBG_PASS )
 {
 	//EnterCriticalSec( &next_lprintf.cs );
+#ifndef __STATIC_GLOBALS__
 	if( !syslog_local )
 	{
 		return _null_vlprintf;
 	}
-
+#endif
 #if _DEBUG
 	next_lprintf.pFile = pFile;
 	next_lprintf.nLine = nLine;
@@ -1333,8 +1356,10 @@ RealVLogFunction  _vxlprintf ( _32 level DBG_PASS )
 RealLogFunction _xlprintf( _32 level DBG_PASS )
 {
 	//EnterCriticalSec( &next_lprintf.cs );
+#ifndef __STATIC_GLOBALS__
 	if( !syslog_local )
 		return _null_lprintf;
+#endif
 #if _DEBUG
 	next_lprintf.pFile = pFile;
 	next_lprintf.nLine = nLine;
