@@ -61,16 +61,3 @@ target_link_libraries( ${PROJECT_NAME} winmm )
 
 install_default_dest_binary( ${PROJECT_NAME} )
 
-project( pcopy_list.portable )
-
-add_executable(${PROJECT_NAME} ${BASE_SOURCES} )
-string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
-SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
-COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL} " 
-COMPILE_DEFINITIONS "__STATIC__;SACK_BAG_EXPORTS;__NO_OPTIONS__;__STATIC__;__STATIC_GLOBALS__;__DISABLE_UDP_SYSLOG__;NO_COPY"
-                  FOLDER utils
-)
-target_link_libraries( ${PROJECT_NAME} winmm )
-
-install_default_dest_binary( ${PROJECT_NAME} )
-
