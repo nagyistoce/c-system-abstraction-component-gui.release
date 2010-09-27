@@ -445,21 +445,39 @@ int ScanFile( PFILESOURCE pfs )
 
 int main( int argc, CTEXTSTR *argv )
 {
+#ifndef NO_COPY
 	if( argc < 3 || !IsPath( argv[argc-1] ) )
 	{
-		printf( WIDE("usage: pcopy <file...> <destination>\n")
+		printf( WIDE("usage: %s <file...> <destination>\n")
 				 "  file - .dll or .exe referenced, all referenced DLLs\n"
 				 "         are also copied to the dstination\n"
 				 "  dest - directory name to cpoy to, will fail otherwise.\n"
+				, argv[0]
 				);
 		if( argc >= 3 )
 			printf( WIDE("EROR: Final argument is not a directory\n") );
 		return 1;
 	}
+#else
+	if( argc < 2 )
+	{
+		printf( WIDE("usage: %s <file...> <destination>\n")
+				 "  file - .dll or .exe referenced, all referenced DLLs are listed.\n"
+				, argv[0]
+				);
+		return 1;
+	}
+#endif
 	StrCpyEx( g.SystemRoot, getenv( WIDE("SystemRoot") ), sizeof( g.SystemRoot ) );
 	{
 		int c;
-		for( c = 1; c < argc-1; c++ )
+  	for( c = 1;
+#ifndef NO_COPY
+		 c < argc-1;
+#else
+		 c < argc;
+#endif
+			  c++ )
 		{
 			if( argv[c][0] == '-' )
 			{
@@ -503,8 +521,12 @@ int main( int argc, CTEXTSTR *argv )
 				AddFileCopy( argv[c ]);
 		}
 	}
+#ifndef NO_COPY
 	CopyFileCopyTree( argv[argc-1] );
 	printf( WIDE("Copied %d file%s\n"), g.copied, g.copied==1?"":"s" );
+#else
+	CopyFileCopyTree( NULL );
+#endif
 	return 0;
 
 }

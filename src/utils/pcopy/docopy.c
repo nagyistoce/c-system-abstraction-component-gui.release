@@ -140,6 +140,7 @@ void ScanFileCopyTree( void )
 
 void copy( char *src, char *dst )
 {
+#ifndef NO_COPY
 	static _8 buffer[4096];
 	FILE *in, *out;
 	_64 filetime;
@@ -165,8 +166,11 @@ void copy( char *src, char *dst )
 		fclose( in );
 	if( out )
 		fclose( out );
-	g.copied++;
 	SetFileWriteTime( dst, filetime );
+#else
+   fprintf( stdout, "%s\n", src );
+#endif
+	g.copied++;
 }
 
 void DoCopyFileCopyTree( PFILESOURCE pfs, CTEXTSTR dest )
@@ -178,12 +182,15 @@ void DoCopyFileCopyTree( PFILESOURCE pfs, CTEXTSTR dest )
 		name = pathrchr( pfs->name );
 		if( !name )
 			name = pfs->name;
-		snprintf( fname, sizeof( fname ), WIDE("%s/%s"), dest, name );
+      if( dest )
+			snprintf( fname, sizeof( fname ), WIDE("%s/%s"), dest, name );
 		//if( !IsFile( fname ) )
 		{
          // only copy if the file is new...
 			if( pfs->flags.bScanned && !pfs->flags.bSystem )
-				copy( pfs->name, fname );
+			{
+				copy( pfs->name, dest?fname:NULL );
+			}
 		}
 		DoCopyFileCopyTree( pfs->children, dest );
       pfs = pfs->next;
