@@ -207,36 +207,50 @@ typedef struct global_tag {
 	int _disabled_allocate_logging;
 
 	struct {
+		BIT_FIELD bInitialized : 1;
 		BIT_FIELD bDisableMemoryLogging : 1;
 		BIT_FIELD bLogUnhandled : 1;
 	} flags;
 } GLOBAL;
 
 //#ifdef __STATIC__
+#ifndef __STATIC_GLOBALS__
 static GLOBAL *global_config_data;
 #define g (*global_config_data)
 PRIORITY_PRELOAD( InitGlobal, CONFIG_SCRIPT_PRELOAD_PRIORITY )
 {
 	SimpleRegisterAndCreateGlobal( global_config_data );
 }
-
-PRELOAD( InitGlobalConfig2 )
-{
-#ifdef __NO_OPTIONS__
-	g.flags.bDisableMemoryLogging = 1;
-	g.flags.bLogUnhandled = 0;
 #else
-	g.flags.bDisableMemoryLogging = SACK_GetProfileIntEx( GetProgramName(), "SACK/Config Script/Disable Memory Logging", 1, TRUE );
-	g.flags.bLogUnhandled = SACK_GetProfileIntEx( "SACK/Config Script", "Log Unhandled if no application handler", 0, TRUE );
+static GLOBAL global_config_data;
+#define g (global_config_data)
 #endif
-}
 
 void DoInit( void )
 {
+#ifndef __STATIC_GLOBALS__
 	if( !global_config_data )
 		SimpleRegisterAndCreateGlobal( global_config_data );
+#endif
 
+	if( !g.flags.bInitialized )
+	{
+#ifdef __NO_OPTIONS__
+		g.flags.bDisableMemoryLogging = 1;
+		g.flags.bLogUnhandled = 0;
+#else
+		g.flags.bDisableMemoryLogging = SACK_GetProfileIntEx( GetProgramName(), "SACK/Config Script/Disable Memory Logging", 1, TRUE );
+		g.flags.bLogUnhandled = SACK_GetProfileIntEx( "SACK/Config Script", "Log Unhandled if no application handler", 0, TRUE );
+#endif
+	}
 }
+
+PRELOAD( InitGlobalConfig2 )
+{
+   DoInit();
+}
+
+
 //#else
 //#define g global_config_data
 //static GLOBAL g;
