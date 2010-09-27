@@ -320,7 +320,8 @@ set( PSI_SOURCES
   ${PSI_MORE_CONTROLS}
 )
 
-SET_SOURCE_FILES_PROPERTIES( ${PSI_SOURCES} PROPERTIES FOLDER PSI )
+source_group("Source Files\\PSI Library" FILES ${PSI_SOURCES})
+source_group("Source Files\\PSI Library\\Controls" FILES ${PSI_MORE_SOURCES})
 
 if( __WINDOWS__ )
   SET( PSI_SOURCES ${PSI_SOURCES}  src/systraylib/systray.c )
