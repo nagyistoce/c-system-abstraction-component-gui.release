@@ -32,20 +32,28 @@ struct idle_proc_tag
    DeclareLink( struct idle_proc_tag );
 };
 
+#ifndef __STATIC_GLOBALS__
 static PIDLEPROC *registered_idle_procs;
 #define procs (*registered_idle_procs)
+
 PRIORITY_PRELOAD( InitGlobal, OSALOT_PRELOAD_PRIORITY )
 {
-   SimpleRegisterAndCreateGlobal( registered_idle_procs );
+	SimpleRegisterAndCreateGlobal( registered_idle_procs );
 }
+#else
+static PIDLEPROC registered_idle_procs;
+#define procs (registered_idle_procs)
+#endif
 //PLIST pIdleProcs;
 //PLIST pIdleData;
 
 IDLE_PROC( void, AddIdleProc )( int (CPROC*Proc)( PTRSZVAL psv ), PTRSZVAL psvUser )
 {
 	PIDLEPROC proc = NULL;
+#ifndef __STATIC_GLOBALS__
 	if( !registered_idle_procs )
 		SimpleRegisterAndCreateGlobal( registered_idle_procs );
+#endif
 
 	for( proc = procs; proc; proc = proc->next )
 	{
