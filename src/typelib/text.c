@@ -1961,7 +1961,7 @@ void VarTextAddDataEx( PVARTEXT pvt, CTEXTSTR block, _32 length DBG_PASS )
 		_32 n;
 		for( n = 0; n < length; n++ )
 		{
-			int c = block[length];
+			int c = block[n];
 			if( c == '\b' )
 			{
 				if( pvt->collect_used )
