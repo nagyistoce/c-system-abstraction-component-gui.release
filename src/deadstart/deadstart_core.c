@@ -76,7 +76,7 @@ struct deadstart_local_data_
 #define shutdown_procs l.shutdown_procs
 	int bInitialDone;
 #define bInitialDone l.bInitialDone
-	int bInitialStarted;
+	LOGICAL bInitialStarted;
 #define bInitialStarted l.bInitialStarted
    int bSuspend;
 #define bSuspend l.bSuspend
@@ -331,9 +331,9 @@ void InvokeDeadstart( void )
 #endif
 
 #ifdef __64__
-	while( proc = (PSTARTUP_PROC)LockedExchange64( (PVPTRSZVAL)&proc_schedule, NULL ) )
+	while( ( proc = (PSTARTUP_PROC)LockedExchange64( (PVPTRSZVAL)&proc_schedule, NULL ) ) != NULL )
 #else
-		while( proc = (PSTARTUP_PROC)LockedExchange( (PVPTRSZVAL)&proc_schedule, 0 ) )
+		while( ( proc = (PSTARTUP_PROC)LockedExchange( (PVPTRSZVAL)&proc_schedule, 0 ) ) != NULL )
 #endif
 	{
 		if( LOG_ALL ||
@@ -432,11 +432,11 @@ void RegisterStartups( void )
 		{
 			if( !current[0].scheduled )
 			{
-				if( LOG_ALL
+				if( ( LOG_ALL
 #ifndef __STATIC_GLOBALS__
 					|| deadstart_local_data
 #endif
-					&& l.flags.bLog )
+					 )	&& l.flags.bLog )
 					lprintf( WIDE("Register %d %s@%s(%d)"), current->priority, current->funcname, current->file, current->line );
 #  ifdef __CYGWIN__
 #    ifdef DEBUG_CYGWIN_START
