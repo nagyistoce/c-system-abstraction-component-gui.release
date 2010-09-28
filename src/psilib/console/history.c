@@ -1110,15 +1110,15 @@ _32 ComputeNextOffset( PTEXT segment, _32 nShown )
 
 //----------------------------------------------------------------------------
 
-int ComputeToShow( _32 cols, PTEXT segment, _32 nLen, int nOfs, int nShown )
+_32 ComputeToShow( _32 cols, PTEXT segment, _32 nLen, _32 nOfs, _32 nShown )
 {
-	int nShow = cols - nOfs;
+	_32 nShow = cols - nOfs;
 	// if space left to show here is less than
 	// then length to show, compute wrapping point.
 	//lprintf( "Compute to show: %d (%d)%s %d %d", cols, GetTextSize( segment ), GetText( segment ), nOfs, nShown );
 	if( nShow < (nLen-nShown) )
 	{
-		int nSpace = nShow + nShown;
+		_32 nSpace = nShow + nShown;
 		TEXTCHAR *text = GetText( segment );
 
 		// cheap test for a space...
@@ -1323,7 +1323,7 @@ int AlignHistory( PHISTORY_BROWSER phbr, S_32 nOffset )
 		phbr->nLine -= phbr->pBlock->nLinesUsed;
 		phbr->pBlock = phbr->pBlock->next;
 	}
-	if( phbr->nLine > phbr->pBlock->nLinesUsed )
+	if( SUS_GT( phbr->nLine, S_32, phbr->pBlock->nLinesUsed, _32 ) )
 	{
 		phbr->nLine = 0;
 		phbr->pBlock = NULL;
@@ -1405,7 +1405,7 @@ int GetCommandCursor( PHISTORY_BROWSER phbr
 						  )
 {
 	PTEXT pCmd;
-	int tmpx = 0, nLead, tmp_end;
+	_32 tmpx = 0, nLead, tmp_end;
 	PDISPLAYED_LINE pdl;
 
 	if( !CommandInfo )
@@ -1530,7 +1530,8 @@ PDATALIST *GetDisplayInfo( PHISTORY_BROWSER phbr )
 void BuildDisplayInfoLines( PHISTORY_BROWSER phbr )
 //void BuildDisplayInfoLines( PHISTORY_LINE_CURSOR phlc )
 {
-   int nLines, nLinesShown = 0, nChar, nLen;
+   int nLines, nLinesShown = 0, nChar;
+   _32 nLen;
    int nLineCount = phbr->nLines;
    PTEXT pText;
    PDATALIST *CurrentLineInfo = &phbr->DisplayLineInfo;
@@ -1711,7 +1712,7 @@ void BuildDisplayInfoLines( PHISTORY_BROWSER phbr )
 					if( !pLastSetLine )
 					{
 						nLen = GetTextSize( pText );
-						if( (dl.nOfs + nLen) < phbr->nOffset )
+						if( USS_LT( (dl.nOfs + nLen), _32, phbr->nOffset, int ) )
 						{
 							lprintf( WIDE("Skipping segement, it's before the offset...") );
 							dl.nOfs += nLen;

@@ -102,7 +102,7 @@ int MoveHistoryCursor( PHISTORY_BROWSER phbr, int amount );
 
 _32 ComputeNextOffset( PTEXT segment, _32 nShown );
 //int ComputeToShow( _32 cols, PTEXT segment, int nOfs, int nShown );
-int ComputeToShow( _32 cols, PTEXT segment, _32 nLen, int nOfs, int nShown );
+_32 ComputeToShow( _32 cols, PTEXT segment, _32 nLen, _32 nOfs, _32 nShown );
 int CountLinesSpanned( _32 cols, PTEXT countseg );
 
 void BuildDisplayInfoLines( PHISTORY_BROWSER phlc );
