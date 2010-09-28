@@ -55,7 +55,7 @@ typedef struct rect_tag {
 //---------------------------------------------------------------------------
 
 #define ScaleLoopStart int errx, erry; \
-   int x, y;                     \
+   _32 x, y;                     \
    PCDATA _pi = pi;              \
    erry = i_erry;                \
    y = 0;                        \
@@ -72,19 +72,19 @@ typedef struct rect_tag {
 #define ScaleLoopEnd  }             \
          po++;                      \
          x++;                       \
-         errx += dws; /* add source width */\
+         errx += (signed)dws; /* add source width */\
          while( errx >= 0 )               \
          {                                \
-            errx -= dwd; /* fix backwards the width we're copying*/\
+            errx -= (signed)dwd; /* fix backwards the width we're copying*/\
             pi++;                         \
          }                                \
       }                                   \
       po = (CDATA*)(((char*)po) + oo);    \
       y++;                                \
-      erry += dhs;                        \
+      erry += (signed)dhs;                        \
       while( erry >= 0 )                  \
       {                                   \
-         erry -= dhd;                      \
+         erry -= (signed)dhd;                      \
          _pi = (CDATA*)(((char*)_pi) + srcpwidth); /* go to next line start*/\
       }                                   \
    }
@@ -110,7 +110,7 @@ typedef struct rect_tag {
       }
 
 #define IMGINVACOPY  CDATA cin;                    \
-      int alpha;                                   \
+      _32 alpha;                                   \
       if( (cin = *pi) )                              \
       {                                            \
          alpha = ( cin & 0xFF000000 ) >> 24;       \
@@ -146,7 +146,7 @@ void CPROC cBlotScaledT1( SCALED_BLOT_WORK_PARAMS
 //---------------------------------------------------------------------------
 
 void CPROC cBlotScaledTA( SCALED_BLOT_WORK_PARAMS
-                      , int nTransparent )
+                      , _32 nTransparent )
 {
    ScaleLoopStart
       CDATA cin;  
@@ -160,11 +160,11 @@ void CPROC cBlotScaledTA( SCALED_BLOT_WORK_PARAMS
 //---------------------------------------------------------------------------
 
 void CPROC cBlotScaledTImgA(SCALED_BLOT_WORK_PARAMS
-                      , int nTransparent )
+                      , _32 nTransparent )
 {
    ScaleLoopStart
       CDATA cin;                                  
-      int alpha;                                  
+      _32 alpha;                                  
       if( (cin = *pi) )                             
       {                                           
          alpha = ( cin & 0xFF000000 ) >> 24;      
@@ -177,12 +177,12 @@ void CPROC cBlotScaledTImgA(SCALED_BLOT_WORK_PARAMS
 //---------------------------------------------------------------------------
 
 void CPROC cBlotScaledTImgAI( SCALED_BLOT_WORK_PARAMS
-                      , int nTransparent )
+                      , _32 nTransparent )
 {
 
    ScaleLoopStart
       CDATA cin;                             
-      int alpha;                             
+      _32 alpha;                             
       if( (cin = *pi) )                        
       {                                      
          alpha = ( cin & 0xFF000000 ) >> 24; 
@@ -219,7 +219,7 @@ void CPROC cBlotScaledShadedT1( SCALED_BLOT_WORK_PARAMS
 //---------------------------------------------------------------------------
 
 void CPROC cBlotScaledShadedTA( SCALED_BLOT_WORK_PARAMS
-                       , int nTransparent 
+                       , _32 nTransparent 
                        , CDATA shade )
 {
    ScaleLoopStart
@@ -234,12 +234,12 @@ void CPROC cBlotScaledShadedTA( SCALED_BLOT_WORK_PARAMS
 
 //---------------------------------------------------------------------------
 void CPROC cBlotScaledShadedTImgA( SCALED_BLOT_WORK_PARAMS
-                       , int nTransparent 
+                       , _32 nTransparent 
                        , CDATA shade )
 {
    ScaleLoopStart
       CDATA cin;
-      int alpha;
+      _32 alpha;
       if( (cin = *pi) )
       {
          alpha = ( cin & 0xFF000000 ) >> 24;
@@ -252,12 +252,12 @@ void CPROC cBlotScaledShadedTImgA( SCALED_BLOT_WORK_PARAMS
 
 //---------------------------------------------------------------------------
 void CPROC cBlotScaledShadedTImgAI( SCALED_BLOT_WORK_PARAMS
-                       , int nTransparent 
+                       , _32 nTransparent 
                        , CDATA shade )
 {
    ScaleLoopStart
       CDATA cin;
-      int alpha;
+      _32 alpha;
       if( (cin = *pi) )
       {
          alpha = ( cin & 0xFF000000 ) >> 24;
@@ -279,7 +279,7 @@ void CPROC cBlotScaledMultiT0( SCALED_BLOT_WORK_PARAMS
                        , CDATA b )
 {
    ScaleLoopStart
-		int rout, gout, bout;
+		_32 rout, gout, bout;
 	   *(po) = MULTISHADEPIXEL( *pi, r, g, b );
    ScaleLoopEnd
 
@@ -295,7 +295,7 @@ void CPROC cBlotScaledMultiT1(  SCALED_BLOT_WORK_PARAMS
    ScaleLoopStart
       if( *pi )
       {
-         int rout, gout, bout;
+         _32 rout, gout, bout;
          *(po) = MULTISHADEPIXEL( *pi, r, g, b );
       }
    ScaleLoopEnd
@@ -304,7 +304,7 @@ void CPROC cBlotScaledMultiT1(  SCALED_BLOT_WORK_PARAMS
 //---------------------------------------------------------------------------
 
 void CPROC cBlotScaledMultiTA(  SCALED_BLOT_WORK_PARAMS
-                       , int nTransparent 
+                       , _32 nTransparent 
                        , CDATA r
                        , CDATA g
                        , CDATA b )
@@ -313,9 +313,9 @@ void CPROC cBlotScaledMultiTA(  SCALED_BLOT_WORK_PARAMS
       CDATA cin;
       if( (cin = *pi) )
       {
-         int rout, gout, bout;
+         _32 rout, gout, bout;
          cin = MULTISHADEPIXEL( cin, r, g, b );
-         *po = DOALPHA( *po, cin, nTransparent );
+         *po = DOALPHA2( *po, cin, nTransparent );
       }
    ScaleLoopEnd
 
@@ -324,17 +324,17 @@ void CPROC cBlotScaledMultiTA(  SCALED_BLOT_WORK_PARAMS
 //---------------------------------------------------------------------------
 
 void CPROC cBlotScaledMultiTImgA( SCALED_BLOT_WORK_PARAMS
-                       , int nTransparent 
+                       , _32 nTransparent 
                        , CDATA r
                        , CDATA g
                        , CDATA b )
 {
    ScaleLoopStart
       CDATA cin;
-      int alpha;
+      _32 alpha;
       if( (cin = *pi) )
       {
-         int rout, gout, bout;
+         _32 rout, gout, bout;
          cin = MULTISHADEPIXEL( cin, r, g, b );
          alpha = ( cin & 0xFF000000 ) >> 24;
          alpha += nTransparent;
@@ -347,17 +347,17 @@ void CPROC cBlotScaledMultiTImgA( SCALED_BLOT_WORK_PARAMS
 //---------------------------------------------------------------------------
 
 void CPROC cBlotScaledMultiTImgAI( SCALED_BLOT_WORK_PARAMS
-                       , int nTransparent 
+                       , _32 nTransparent 
                        , CDATA r
                        , CDATA g
                        , CDATA b )
 {
    ScaleLoopStart
       CDATA cin;
-      int alpha;
+      _32 alpha;
       if( (cin = *pi) )
       {
-         int rout, gout, bout;
+         _32 rout, gout, bout;
 			cin = MULTISHADEPIXEL( cin, r, g, b );
 			alpha = ( cin & 0xFF000000 ) >> 24;
 			alpha -= nTransparent;
@@ -376,22 +376,20 @@ void CPROC cBlotScaledMultiTImgAI( SCALED_BLOT_WORK_PARAMS
 
  void  BlotScaledImageSizedEx ( ImageFile *pifDest, ImageFile *pifSrc
                                     , S_32 xd, S_32 yd
-                                    , _32 _wd, _32 _hd
+                                    , _32 wd, _32 hd
                                     , S_32 xs, S_32 ys
-                                    , _32 _ws, _32 _hs
+                                    , _32 ws, _32 hs
                                     , _32 nTransparent
                                     , _32 method, ... )
      // integer scalar... 0x10000 = 1
 {
 	CDATA *po, *pi;
    static _32 lock;
-   int  oo;
-   int srcwidth;
+   _32  oo;
+   _32 srcwidth;
    int errx, erry;
-	int dhd, dwd, dhs, dws;
+	_32 dhd, dwd, dhs, dws;
 	va_list colors;
-	S_32 wd = (S_32)_wd, hd = (S_32)_hd;
-	S_32 ws = (S_32)_ws, hs = (S_32)_hs;
 	va_start( colors, method );
 	//lprintf( WIDE("Blot enter (%d,%d)"), _wd, _hd );
 	if( nTransparent > ALPHA_TRANSPARENT_MAX )
@@ -421,17 +419,17 @@ void CPROC cBlotScaledMultiTImgAI( SCALED_BLOT_WORK_PARAMS
    // need to update the position and width to be within the 
 	// the bounds of pifDest....
 //   lprintf(" begin scaled output..." );
-   errx = -dwd;
-   erry = -dhd;
+   errx = -(signed)dwd;
+   erry = -(signed)dhd;
 
    if( xd < pifDest->x )
    {
       while( xd < pifDest->x )
       {
-         errx += dws;
+         errx += (signed)dws;
          while( errx >= 0 )
          {
-            errx -= dwd;
+            errx -= (signed)dwd;
             ws--;
             xs++;
          }
@@ -445,10 +443,10 @@ void CPROC cBlotScaledMultiTImgAI( SCALED_BLOT_WORK_PARAMS
    {
       while( yd < pifDest->y )
       {
-         erry += dhs;
+         erry += (signed)dhs;
          while( erry >= 0 )
          {
-            erry -= dhd;
+            erry -= (signed)dhd;
             hs--;
             ys++;
          }
@@ -462,14 +460,14 @@ void CPROC cBlotScaledMultiTImgAI( SCALED_BLOT_WORK_PARAMS
    {
       //int newwd = TOFIXED(pifDest->width);
       //ws -= ((S_64)( (int)wd - newwd)* (S_64)ws )/(int)wd;
-      wd = ( pifDest->x + pifDest->width ) - xd;
+		wd = ( pifDest->x + pifDest->width ) - xd;
    }
    //Log8( WIDE("Blot scaled params: %d %d %d %d / %d %d %d %d "), 
    //       xs, ys, ws, hs, xd, yd, wd, hd );
    if( ( yd + hd ) > (pifDest->y + pifDest->height) )
    {
-      //int newhd = TOFIXED(pifDest->height);
-	//hs -= ((S_64)( hd - newhd)* hs )/hd;
+		//int newhd = TOFIXED(pifDest->height);
+		//hs -= ((S_64)( hd - newhd)* hs )/hd;
       hd = (pifDest->y + pifDest->height) - yd;
    }
    //Log8( WIDE("Blot scaled params: %d %d %d %d / %d %d %d %d "),

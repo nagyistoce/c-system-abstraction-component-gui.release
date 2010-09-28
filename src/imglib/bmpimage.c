@@ -174,7 +174,7 @@ static ImageFile *Bitmap5ToImageFile( BITMAPV5HEADER *pbm, P_8 data )
    _32 *dwPalette;
    P_8 pColor;
 	int x, y, w, h;
-   DebugBreak();
+   lprintf( "Untested code here..." );
 	if( pbm->bV5Height < 0 )
 		pif = MakeImageFile( w = pbm->bV5Width,
 								  h = -pbm->bV5Height );
