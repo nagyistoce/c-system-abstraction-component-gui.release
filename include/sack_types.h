@@ -76,6 +76,9 @@ using namespace System;
 #define _TYPELIBRARY_SOURCE
 /* Defined when SACK_BAG_EXPORTS is defined. This was an
    individual library module once upon a time.           */
+#define HTTP_SOURCE
+/* Defined when SACK_BAG_EXPORTS is defined. This was an
+   individual library module once upon a time.           */
 #define TIMER_SOURCE
 /* Defined when SACK_BAG_EXPORTS is defined. This was an
    individual library module once upon a time.           */
@@ -253,6 +256,24 @@ using namespace System;
 /* Define the container namespace (when building with C++, the
    wrappers are namespace{} instead of extern"c"{} )           */
 #define _DATALIST_NAMESPACE_END }
+/* Define the container namespace (when building with C++, the
+   wrappers are namespace{} instead of extern"c"{} )           */
+#define _SETS_NAMESPACE namespace sets {
+/* Define the container namespace (when building with C++, the
+   wrappers are namespace{} instead of extern"c"{} )           */
+#define _SETS_NAMESPACE_END }
+/* Define the container namespace (when building with C++, the
+   wrappers are namespace{} instead of extern"c"{} )           */
+#define _TEXT_NAMESPACE namespace text {
+/* Define the container namespace (when building with C++, the
+   wrappers are namespace{} instead of extern"c"{} )           */
+#define _TEXT_NAMESPACE_END }
+/* Define the container namespace (when building with C++, the
+   wrappers are namespace{} instead of extern"c"{} )           */
+#define TEXT_NAMESPACE SACK_NAMESPACE _CONTAINER_NAMESPACE namespace text {
+/* Define the container namespace (when building with C++, the
+   wrappers are namespace{} instead of extern"c"{} )           */
+#define TEXT_NAMESPACE_END  } _CONTAINER_NAMESPACE_END SACK_NAMESPACE_END
 #else
 /* Define the sack namespace (when building with C++, the
    wrappers are namespace{} instead of extern"c"{} )           */
@@ -278,6 +299,24 @@ using namespace System;
 /* Define the container namespace (when building with C++, the
    wrappers are namespace{} instead of extern"c"{} )           */
 #define _DATALIST_NAMESPACE_END
+/* Define the container namespace (when building with C++, the
+   wrappers are namespace{} instead of extern"c"{} )           */
+#define _SETS_NAMESPACE
+/* Define the container namespace (when building with C++, the
+   wrappers are namespace{} instead of extern"c"{} )           */
+#define _SETS_NAMESPACE_END
+/* Define the container namespace (when building with C++, the
+   wrappers are namespace{} instead of extern"c"{} )           */
+#define _TEXT_NAMESPACE
+/* Define the container namespace (when building with C++, the
+   wrappers are namespace{} instead of extern"c"{} )           */
+#define _TEXT_NAMESPACE_END
+/* Define the container namespace (when building with C++, the
+   wrappers are namespace{} instead of extern"c"{} )           */
+#define TEXT_NAMESPACE
+/* Define the container namespace (when building with C++, the
+   wrappers are namespace{} instead of extern"c"{} )           */
+#define TEXT_NAMESPACE_END
 #endif
 
 /* declare composite SACK_CONTAINER namespace to declare sack::container in a single line */
