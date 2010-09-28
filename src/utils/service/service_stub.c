@@ -3,16 +3,19 @@
 #include <WinSvc.h>
 #endif
 
+// so we get the correct import/export attributes on the function
+#include <service_hook.h>
+
 static struct {
 	CTEXTSTR next_service_name;
    void (CPROC*Start)(void);
 } local_service_info;
 #define l local_service_info
 
-SERVICE_STATUS ServiceStatus;
-SERVICE_STATUS_HANDLE hStatus;
+static SERVICE_STATUS ServiceStatus;
+static SERVICE_STATUS_HANDLE hStatus;
 
-void ControlHandler( DWORD request )
+static void ControlHandler( DWORD request )
 {
    switch(request) 
    { 
@@ -46,7 +49,7 @@ void ControlHandler( DWORD request )
 }
 
 
-void APIENTRY ServiceMain( _32 argc, char **argv )
+static void APIENTRY ServiceMain( _32 argc, char **argv )
 {
 
    int error; 

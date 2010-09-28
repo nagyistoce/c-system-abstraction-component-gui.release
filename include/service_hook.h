@@ -1,4 +1,10 @@
 
+#ifdef SERVICE_SOURCE
+#define SERVICE_EXPORT EXPORT_METHOD
+#else
+#define SERVICE_EXPORT IMPORT_METHOD
+#endif
 
-void SetupService( TEXTSTR name, void (CPROC*)(void) );
+
+SERVICE_EXPORT void SetupService( TEXTSTR name, void (CPROC*Start)(void) );
 

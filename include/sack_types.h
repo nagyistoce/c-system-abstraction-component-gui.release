@@ -125,6 +125,9 @@ using namespace System;
 /* Defined when SACK_BAG_EXPORTS is defined. This was an
    individual library module once upon a time.           */
 #define SEXPAT_SOURCE
+/* Defined when SACK_BAG_EXPORTS is defined. This was an
+   individual library module once upon a time.           */
+#define SERVICE_SOURCE
 #  ifndef __NO_SQL__
 #    ifndef __NO_OPTIONS__
 /* Defined when SACK_BAG_EXPORTS is defined. This was an

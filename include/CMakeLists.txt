@@ -66,6 +66,7 @@ typelib.h
 vectlib.h
 vectypes.h
 vidlib.h
+service_hook.h
 )
 
 # sqlite3.h
