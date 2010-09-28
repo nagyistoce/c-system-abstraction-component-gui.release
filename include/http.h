@@ -26,14 +26,15 @@ TEXT_NAMESPACE
 
 
 HTTP_EXPORT struct HttpState * HTTPAPI CreateHttpState( void );
-HTTP_EXPORT void HTTPAPI AddHTTPData( struct HttpState *pHttpState, POINTER buffer, int size );
+HTTP_EXPORT void HTTPAPI DestroyHttpState( struct HttpState *pHttpState );
+HTTP_EXPORT void HTTPAPI AddHttpData( struct HttpState *pHttpState, POINTER buffer, int size );
 // returns TRUE if completed until content-length
 // if content-length is not specified, data is still collected, but the status
 // never results TRUE.
-HTTP_EXPORT int HTTPAPI ProcessHTTP( struct HttpState *pHttpState ); 
-HTTP_EXPORT PTEXT HTTPAPI GetHTTPResponce( struct HttpState *pHttpState );
-HTTP_EXPORT PTEXT HTTPAPI GetHTTPContent( struct HttpState *pHttpState );
-HTTP_EXPORT void HTTPAPI ProcessHTTPFields( struct HttpState *pHttpState, void (CPROC*f)( PTRSZVAL psv, PTEXT name, PTEXT value ), PTRSZVAL psv );
+HTTP_EXPORT int HTTPAPI ProcessHttp( struct HttpState *pHttpState ); 
+HTTP_EXPORT PTEXT HTTPAPI GetHttpResponce( struct HttpState *pHttpState );
+HTTP_EXPORT PTEXT HTTPAPI GetHttpContent( struct HttpState *pHttpState );
+HTTP_EXPORT void HTTPAPI ProcessHttpFields( struct HttpState *pHttpState, void (CPROC*f)( PTRSZVAL psv, PTEXT name, PTEXT value ), PTRSZVAL psv );
 HTTP_EXPORT void HTTPAPI EndHttp( struct HttpState *pHttpState );
 
 	_HTTP_NAMESPACE_END
