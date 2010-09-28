@@ -21,7 +21,6 @@ static struct {
 	PTRSZVAL psv; // psvInitProc
    PSI_CONTROL frame;
 }l;
-XML_Parser xp;
 
 void XMLCALL start_tags( void *UserData
 							  , const XML_Char *name
@@ -191,7 +190,8 @@ static XML_Memory_Handling_Suite XML_memhandler;// = { MyAllocate, MyReallocate,
 // expected character buffer of appropriate size.
 PSI_CONTROL ParseXMLFrameEx( POINTER buffer, _32 size DBG_PASS )
 {
-   POINTER xml_buffer;
+	POINTER xml_buffer;
+	XML_Parser xp;
 	l.frame = NULL;
 #  ifdef USE_INTERFACES
 	if( !g.MyImageInterface )

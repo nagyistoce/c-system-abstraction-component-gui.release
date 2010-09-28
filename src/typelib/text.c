@@ -1958,10 +1958,10 @@ void VarTextAddDataEx( PVARTEXT pvt, CTEXTSTR block, _32 length DBG_PASS )
 	Log1( WIDE("Adding character %c"), c );
 #endif
 	{
-		int n;
-		for( n = 0; n < length )
+		_32 n;
+		for( n = 0; n < length; n++ )
 		{
-			int c = block[legnth];
+			int c = block[length];
 			if( c == '\b' )
 			{
 				if( pvt->collect_used )
