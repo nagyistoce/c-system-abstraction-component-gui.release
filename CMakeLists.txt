@@ -409,6 +409,7 @@ set( TYPE_LIBRARY_SOURCES
   src/typelib/input.c
   src/typelib/sets.c
   src/typelib/text.c
+  src/typelib/http.c
   src/typelib/typecode.c
   src/typelib/spacetree.c
 )
