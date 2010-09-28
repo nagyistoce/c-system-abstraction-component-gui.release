@@ -31,10 +31,9 @@ typedef struct context_tag
 typedef struct local_tag
 {
 	PDATASTACK contexts; // list of PXML_CONTEXTs
-   PXML_CONTEXT current_context;
+	PXML_CONTEXT current_context;
 	//char *file;
-   PVARTEXT current_vt;
-
+	PVARTEXT current_vt;
 } LOCAL;
 
 static LOCAL l;
@@ -70,16 +69,16 @@ void WriteCommonData( PSI_CONTROL pc )
 			genxAddAttribute( l.current_context->aEdit, (constUtf8)buf);
 		}
 
-      if( pc->caption.text )
+		if( pc->caption.text )
 			genxAddAttribute( l.current_context->aCaption, (constUtf8)GetText( pc->caption.text ) );
 
 
-	// call the control's custom data stuff...
-	// which should start another tag within the control?
+		// call the control's custom data stuff...
+		// which should start another tag within the control?
 		{
 			int (CPROC *Save)(PCONTROL,PVARTEXT);
 			TEXTCHAR id[32];
-         PVARTEXT out = VarTextCreate();
+			PVARTEXT out = VarTextCreate();
 			snprintf( id, sizeof( id ), PSI_ROOT_REGISTRY WIDE("/control/%d/rtti"), pc->nType );
 			if( ( Save=GetRegisteredProcedure( id, int, save,(PSI_CONTROL,PVARTEXT)) ) )
 			{
@@ -103,40 +102,40 @@ void WriteCommonData( PSI_CONTROL pc )
 					LineRelease( data );
 				}
 			}
-         VarTextDestroy( &out );
+			VarTextDestroy( &out );
 		}
 		if( l.current_context->nChildren )
 		{
 			l.current_context->pc = pc;
 			snprintf( buf, sizeof( buf ), WIDE("%") _32f WIDE(""), l.current_context->nChildren );
 			genxAddAttribute( l.current_context->aChildren, (constUtf8)buf );
-         l.current_context->nChildren = 0;
+			l.current_context->nChildren = 0;
 		}
 		if( pc->child )
 		{
 			WriteCommonData( pc->child );
 		}
 		genxEndElement( l.current_context->w );
-      //pc = pc->next;
+		//pc = pc->next;
 	}
-   VarTextDestroy( &out );
+	VarTextDestroy( &out );
 }
 
 static genxStatus WriteBuffer( void *UserData, constUtf8 s )
 {
 	vtprintf( l.current_vt, WIDE("%s"), s );
-   return GENX_SUCCESS;
+	return GENX_SUCCESS;
 }
 
 static genxStatus WriteBufferBounded( void *UserData, constUtf8 s, constUtf8 end )
 {
-   vtprintf( l.current_vt, WIDE("%*.*s"), end-s, end-s, s );
-   return GENX_SUCCESS;
+	vtprintf( l.current_vt, WIDE("%*.*s"), end-s, end-s, s );
+	return GENX_SUCCESS;
 }
 
 static genxStatus Flush( void *UserData )
 {
-   return GENX_SUCCESS;
+	return GENX_SUCCESS;
 }
 
 genxSender senderprocs = { WriteBuffer
