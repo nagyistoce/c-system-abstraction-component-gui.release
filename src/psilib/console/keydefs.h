@@ -49,8 +49,8 @@ enum {
 };  
 
 typedef struct KeyDefine {
-   TEXTCHAR *name1;
-   TEXTCHAR *name2;
+   CTEXTSTR name1;
+   CTEXTSTR name2;
    int flags;
    struct {
       int bFunction;  // true if pStroke is pKeyFunc()

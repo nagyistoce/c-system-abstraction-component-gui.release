@@ -1028,7 +1028,7 @@ int KeyAlt( P_32 pKeyState, LOGICAL bDown )
 
 #define NUM_MODS ( sizeof( ModNames ) / sizeof( char * ) )
 
-TEXTCHAR *ModNames[] = { WIDE("shift"), WIDE("ctrl"), WIDE("alt")
+CTEXTSTR ModNames[] = { WIDE("shift"), WIDE("ctrl"), WIDE("alt")
                    , NULL, WIDE("control"), NULL
                    , WIDE("$"), WIDE("^"), WIDE("@") };
 
