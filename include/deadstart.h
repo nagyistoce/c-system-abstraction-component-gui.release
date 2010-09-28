@@ -373,6 +373,7 @@ typedef void(*__type_rtn ) ( void );
 #endif
 struct rt_init // structure placed in XI/YI segment
 {
+#define DEADSTART_RT_LIST_START 0xFF
     __type_rtp  rtn_type; // - near=0/far=1 routine indication
                           //   also used when walking table to flag
                           //   completed entries
@@ -451,6 +452,7 @@ struct rt_init // structure placed in XI/YI segment
 		}
       */
 #endif
+#define DEADSTART_RT_LIST_START 0xFF
     __type_rtp  rtn_type; // - near=0/far=1 routine indication
                           //   also used when walking table to flag
                           //   completed entries
@@ -559,6 +561,7 @@ struct rt_init // structure placed in XI/YI segment
 		}
       */
 #endif
+#define DEADSTART_RT_LIST_START 0xFF
     __type_rtp  rtn_type; // - near=0/far=1 routine indication
                           //   also used when walking table to flag
                           //   completed entries
