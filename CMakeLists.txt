@@ -459,6 +459,8 @@ set(BASE_SOURCES  ${BASE_SOURCES}
   src/filesyslib/pathops.c
   src/filesyslib/filescan.c
   src/systemlib/system.c
+  src/utils/service/service_stub.c
+
   src/commlib/sackcomm.c
   ${OPTION_SOURCE}
 )
