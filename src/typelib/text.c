@@ -1950,6 +1950,43 @@ void VarTextAddCharacterEx( PVARTEXT pvt, TEXTCHAR c DBG_PASS )
 
 //---------------------------------------------------------------------------
 
+void VarTextAddDataEx( PVARTEXT pvt, CTEXTSTR block, _32 length DBG_PASS )
+{
+	if( !pvt->collect )
+		VarTextInitEx( pvt DBG_RELAY );
+#ifdef VERBOSE_DEBUG_VARTEXT
+	Log1( WIDE("Adding character %c"), c );
+#endif
+	{
+		int n;
+		for( n = 0; n < length )
+		{
+			int c = block[legnth];
+			if( c == '\b' )
+			{
+				if( pvt->collect_used )
+				{
+					pvt->collect_used--;
+					pvt->collect_text[pvt->collect_used] = 0;
+				}
+			}
+			else
+			{
+				pvt->collect_text[pvt->collect_used++] = c;
+				if( pvt->collect_used >= pvt->collect_avail )
+				{
+					//lprintf( WIDE("Expanding segment to make sure we have room to extend...(old %d)"), pvt->collect->data.size );
+					pvt->collect = SegExpandEx( pvt->collect, COLLECT_LEN DBG_RELAY );
+					pvt->collect_avail = pvt->collect->data.size;
+					pvt->collect_text = GetText( pvt->collect );
+				}
+			}
+		}
+	}
+}
+
+//---------------------------------------------------------------------------
+
 int VarTextEndEx( PVARTEXT pvt DBG_PASS )
 {
 	if( pvt && pvt->collect_used ) // otherwise ofs will be 0...
