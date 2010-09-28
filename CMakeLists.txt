@@ -36,6 +36,7 @@ add_definitions( -D_WIN32_WINNT=${WIN32_VERSION} )
 
 project( SACK )
 
+
 set( SACK_BASE ${PROJECT_SOURCE_DIR} )
 
 set( CMAKE_MODULE_PATH ${SACK_SOURCE_DIR}/makefiles/cmake )
@@ -89,6 +90,7 @@ OPTION( USE_OPTIONS "Use Option Code all internal option usage (and don't includ
 OPTION( USING_OLD_MINGW "MinGW Has NO UpdateLayeredWindow" ${MINGW} )
 OPTION( USE_SQLITE "Use SQLITE (also links static internal)" 1 )
 OPTION( USE_SQLITE_EXTERNAL "Use SQLITE (build as external module)" 1 )
+OPTION( EXTREME_CODE_DEBUG "Enable extreme warning levels (mingw)" 0 )
 
 OPTION( __NO_GUI__ "No GUI or image parts" 0 )
 OPTION( NEED_JPEG "Build internal jpeg lib (with suitable exports to link against)" ${USE_INTERNAL_STANDARDLIBS} )
@@ -99,6 +101,11 @@ OPTION( __WINDOWS_ARM_CE__ "Build for windows CE 5.0 ARM" 0 )
 OPTION( USE_ASSEMBLY "Use Assembly files as available.  NASM required for this." OFF )
 OPTION( BUILD_MONOLITHIC "Build one giant library" 1 )
 
+if( EXTREME_CODE_DEBUG )
+if(MINGW) 
+add_definitions(-Wall -Wextra -Wconversion -Wsign-conversion -Wsign-compare -Wtype-limits)
+endif()
+endif( EXTREME_CODE_DEBUG )
 
 if( __ARM__ OR __BUILD_ARM_CE__ )
 set( CMAKE_C_COMPILER_WORKS 1 )
@@ -201,6 +208,7 @@ endif()
 
 if( ( CMAKE_BUILD_TYPE MATCHES "Debug" ) OR (CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo") )
   set( MoreDefinitions "${MoreDefinitions};_DEBUG" )
+  add_definitions( -D_DEBUG ) # oops, sub projects need this.  should add it to sack cmakepackage too?
 endif()
 
 if( USE_ASSEMBLY )
