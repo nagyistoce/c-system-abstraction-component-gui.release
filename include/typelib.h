@@ -1797,6 +1797,16 @@ TYPELIB_PROC  void TYPELIB_CALLTYPE  VarTextAddCharacterEx( PVARTEXT pvt, TEXTCH
    VarTextAddCharacter( pvt, 'a' );
    </code>                                          */
 #define VarTextAddCharacter(pvt,c) VarTextAddCharacterEx( (pvt),(c) DBG_SRC )
+TYPELIB_PROC  void TYPELIB_CALLTYPE  VarTextAddDataEx( PVARTEXT pvt, CTEXTSTR block, _32 length DBG_PASS );
+/* Adds a single character to a PVARTEXT collector.
+   
+   
+   Example
+   <code lang="c++">
+   PVARTEXT pvt = VarTextCreate();
+   VarTextAddData( pvt, "test one", 8 );
+   </code>                                          */
+#define VarTextAddData(pvt,block,length) VarTextAddDataEx( (pvt),(block),(length) DBG_SRC )
 /* Commits the currently collected text to segment, and adds the
    segment to the internal line accumulator.                     
 		 returns true if any data was added...
