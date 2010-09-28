@@ -45,6 +45,9 @@
 #include <deadstart.h>
 #include <sharemem.h>
 #include <idle.h>
+#ifndef __NO_OPTIONS__
+#include <sqlgetoption.h>
+#endif
 #define DO_LOGGING
 #include <logging.h>
 
@@ -127,7 +130,7 @@ struct threads_tag
 	} flags;
 	//struct threads_tag *next, **me;
 	CTEXTSTR pFile;
-   int nLine;
+   _32 nLine;
 };
 
 typedef struct threads_tag THREAD;
@@ -156,6 +159,8 @@ static struct {
 		BIT_FIELD insert_while_away : 1;
 		BIT_FIELD set_timer_signal : 1;
 		BIT_FIELD bExited : 1;
+		BIT_FIELD bLogCriticalSections : 1;
+		BIT_FIELD bLogSleeps : 1;
 	} flags;
 	_32 del_timer; // this timer is scheduled to be removed...
 	_32 tick_bias; // should somehow end up equating to sleep overhead...
@@ -201,6 +206,15 @@ static struct {
 #include <signal.h>
 
 #endif
+
+PRELOAD( ConfigureTimers )
+{
+#ifndef __NO_OPTIONS__
+	g.flags.bLogCriticalSections = SACK_GetProfileInt( GetProgramName(), "SACK/Timers/Log Critical Sections", 0 );
+   g.flags.bLogSleeps = SACK_GetProfileInt( GetProgramName(), "SACK/Timers/Log Sleeps", 0 );
+#endif
+
+}
 
 //--------------------------------------------------------------------------
 #ifdef __LINUX__
@@ -265,7 +279,7 @@ static void InitWakeup( PTHREAD thread )
 	if( !thread->hEvent )
 	{
 		TEXTCHAR name[64];
-		snprintf( name, sizeof(name), WIDE("Thread Signal:%08X:%08X"), (_32)(thread->thread_ident >> 32)
+		snprintf( name, sizeof(name), WIDE("Thread Signal:%08lX:%08lX"), (_32)(thread->thread_ident >> 32)
 				 , (_32)(thread->thread_ident & 0xFFFFFFFF) );
 #ifdef LOG_CREATE_EVENT_OBJECT
 		lprintf( WIDE("Thread Event created is: %s everyone should use this..."), name );
@@ -327,8 +341,7 @@ PTRSZVAL CPROC check_thread( POINTER p, PTRSZVAL psv )
    return 0;
 }
 
-static PTHREAD FindThreadEx( THREAD_ID thread DBG_PASS )
-#define FindThread( thread ) FindThreadEx( thread DBG_SRC )
+static PTHREAD FindThread( THREAD_ID thread )
 {
 	PTHREAD check;
 	while( LockedExchange( &g.lock_thread_create, 1 ) )
@@ -457,7 +470,7 @@ TIMER_PROC( void, WakeThreadEx )( PTHREAD thread DBG_PASS )
 		PTHREAD_EVENT event;
 		INDEX idx;
 		TEXTCHAR name[64];
-		snprintf( name, sizeof(name), WIDE("Thread Signal:%08X:%08X"), (_32)(thread->thread_ident >> 32)
+		snprintf( name, sizeof(name), WIDE("Thread Signal:%08lX:%08lX"), (_32)(thread->thread_ident >> 32)
 				 , (_32)(thread->thread_ident & 0xFFFFFFFF));
 		LIST_FORALL( g.thread_events, idx, PTHREAD_EVENT, event )
 		{
@@ -568,19 +581,9 @@ TIMER_PROC( void, WakeableSleepEx )( _32 n DBG_PASS )
 	PTHREAD pThread = FindThread( GetMyThreadID() );
 	if( pThread )
 	{
-		//pThread->flags.bLock = 1;
-		//if( pThread->flags.bWakeWhileRunning )
-		//{
-		//	pThread->flags.bWakeWhileRunning = 0;
-		//	pThread->flags.bLock = 0;
-		//	return;
-		//}
-		//pThread->flags.bSleeping = 1;
-		//pThread->flags.bLock = 0;
 #ifdef _WIN32
-#ifdef LOG_SLEEPS
-		_xlprintf(1 DBG_RELAY )( WIDE("About to sleep on %d Thread event created...%016llx"), pThread->hEvent, pThread->thread_ident );
-#endif
+		if( g.flags.bLogSleeps )
+			_xlprintf(1 DBG_RELAY )( WIDE("About to sleep on %d Thread event created...%016llx"), pThread->hEvent, pThread->thread_ident );
 		if( WaitForSingleObject( pThread->hEvent
 									  , n==SLEEP_FOREVER?INFINITE:(n) ) != WAIT_TIMEOUT )
 		{
@@ -736,13 +739,13 @@ TIMER_PROC( void, WakeableSleep )( _32 n )
 #ifdef __LINUX__
 static void ContinueSignal( int sig )
 {
-lprintf( "Sigusr1" );
+	lprintf( "Sigusr1" );
 }
 
 // network is at GLOBAL_INIT_PRIORITY
 PRIORITY_PRELOAD( IgnoreSignalContinue, GLOBAL_INIT_PRELOAD_PRIORITY-1 )
 {
-lprintf( "register handler for sigusr1" );
+	lprintf( "register handler for sigusr1" );
    signal( SIGUSR1, ContinueSignal );
 }
 
@@ -840,7 +843,7 @@ PTRSZVAL CPROC ThreadProc( PTHREAD pThread );
 
 TIMER_PROC( int, IsThisThreadEx )( PTHREAD pThreadTest DBG_PASS )
 {
-	PTHREAD pThread = FindThreadEx( GetMyThreadID() DBG_RELAY );
+	PTHREAD pThread = FindThread( GetMyThreadID() );
 //   lprintf( WIDE("Found thread; %p is it %p?"), pThread, pThreadTest );
 	if( pThread == pThreadTest )
 		return TRUE;
@@ -1566,7 +1569,7 @@ TIMER_PROC( _32, AddTimerExx )( _32 start, _32 frequency, TimerCallbackProc call
 	{
 		//"Creating one shot timer %d long", start );
 	}
-	timer->delta	 = start; // first time for timer to fire... may be 0
+	timer->delta	 = (S_32)start; // first time for timer to fire... may be 0
 	timer->frequency = frequency;
 	timer->callback = callback;
 	timer->ID = g.timerID++;
@@ -1657,7 +1660,7 @@ static void InternalRescheduleTimerEx( PTIMER timer, _32 delay )
 	{
 		PTIMER bGrabbed = GrabTimer( timer );
       timer->flags.bRescheduled = 1;
-		timer->delta = delay;
+		timer->delta = (S_32)delay;  // should never pass a negative value here, but delta can be negative.
 		if( bGrabbed )
 		{
          //lprintf( WIDE("Rescheduling timer...") );
@@ -1738,9 +1741,8 @@ TIMER_PROC( LOGICAL, EnterCriticalSecEx )( PCRITICALSECTION pcs DBG_PASS )
 #ifdef _DEBUG
    _32 curtick = timeGetTime();//GetTickCount();
 #endif
-#ifdef LOG_DEBUG_CRITICAL_SECTIONS
-	_lprintf( DBG_RELAY )( "Enter critical section %p %"_64fx, pcs, GetMyThreadID() );
-#endif
+	if( g.flags.bLogCriticalSections )
+		_lprintf( DBG_RELAY )( "Enter critical section %p %"_64fx, pcs, GetMyThreadID() );
 	do
 	{
 		d=EnterCriticalSecNoWaitEx( pcs, &prior DBG_RELAY );
@@ -1762,22 +1764,19 @@ TIMER_PROC( LOGICAL, EnterCriticalSecEx )( PCRITICALSECTION pcs DBG_PASS )
 		{
 			if( pcs->dwThreadID )
 			{
-#ifdef LOG_DEBUG_CRITICAL_SECTIONS
-				lprintf( WIDE("Failed to enter section... sleeping...") );
-#endif
+				if( g.flags.bLogCriticalSections )
+					lprintf( WIDE("Failed to enter section... sleeping...") );
 				WakeableSleepEx( SLEEP_FOREVER DBG_RELAY );
-#ifdef LOG_DEBUG_CRITICAL_SECTIONS
-				lprintf( WIDE("Allowed to retry section entry, woken up...") );
-#endif
+				if( g.flags.bLogCriticalSections )
+					lprintf( WIDE("Allowed to retry section entry, woken up...") );
 #ifdef _DEBUG
 				curtick = timeGetTime();//GetTickCount();
 #endif
 			}
 			else
 			{
-#ifdef LOG_DEBUG_CRITICAL_SECTIONS
-				lprintf( WIDE("Lock Released while we logged?") );
-#endif
+				if( g.flags.bLogCriticalSections )
+					lprintf( WIDE("Lock Released while we logged?") );
 			}
 		}
 		// after waking up, this will re-aquire a lock, and
@@ -1795,18 +1794,16 @@ TIMER_PROC( LOGICAL, LeaveCriticalSecEx )( PCRITICALSECTION pcs DBG_PASS )
 #ifdef _DEBUG
    _32 curtick = timeGetTime();//GetTickCount();
 #endif
-#ifdef LOG_DEBUG_CRITICAL_SECTIONS
-   _xlprintf( LOG_NOISE, DBG_VOIDRELAY )( "Begin leave critical section %p %"PRIxFAST64, pcs, GetMyThreadID() );
-#endif
+	if( g.flags.bLogCriticalSections )
+		_xlprintf( LOG_NOISE, DBG_VOIDRELAY )( "Begin leave critical section %p %"PRIxFAST64, pcs, GetMyThreadID() );
 	while( LockedExchange( &pcs->dwUpdating, 1 ) 
 #ifdef _DEBUG
 			&& ( (curtick+2000) > timeGetTime() )//GetTickCount() )
 #endif
 	)
 	{
-#ifdef LOG_DEBUG_CRITICAL_SECTIONS
-		_lprintf( DBG_RELAY )( "On leave - section is updating, wait..." );
-#endif
+		if( g.flags.bLogCriticalSections )
+			_lprintf( DBG_RELAY )( "On leave - section is updating, wait..." );
 		Relinquish();
 	}
 #ifdef _DEBUG
@@ -1819,9 +1816,8 @@ TIMER_PROC( LOGICAL, LeaveCriticalSecEx )( PCRITICALSECTION pcs DBG_PASS )
 #endif
 	if( !( pcs->dwLocks & ~SECTION_LOGGED_WAIT ) )
 	{
-#ifdef LOG_DEBUG_CRITICAL_SECTIONS
-		_lprintf( DBG_RELAY )( "Leaving a blank critical section" );
-#endif
+		if( g.flags.bLogCriticalSections )
+			_lprintf( DBG_RELAY )( "Leaving a blank critical section" );
 		pcs->dwUpdating = 0;
 		return FALSE;
 	}
@@ -1833,9 +1829,8 @@ TIMER_PROC( LOGICAL, LeaveCriticalSecEx )( PCRITICALSECTION pcs DBG_PASS )
 		pcs->nLine = nLine;
 #endif
 		pcs->dwLocks--;
-#ifdef LOG_DEBUG_CRITICAL_SECTIONS
-		lprintf( "Remaining locks... %08" _32fx, pcs->dwLocks );
-#endif
+		if( g.flags.bLogCriticalSections )
+			lprintf( "Remaining locks... %08" _32fx, pcs->dwLocks );
 		if( !( pcs->dwLocks & ~(SECTION_LOGGED_WAIT) ) )
 		{
 			pcs->dwLocks = 0;
@@ -1849,9 +1844,8 @@ TIMER_PROC( LOGICAL, LeaveCriticalSecEx )( PCRITICALSECTION pcs DBG_PASS )
 				THREAD_ID wake = pcs->dwThreadWaiting;
 				//pcs->dwThreadWaiting = 0;
 				pcs->dwUpdating = 0;
-#ifdef LOG_DEBUG_CRITICAL_SECTIONS
-				_lprintf( DBG_RELAY )( "%8LxWaking a thread which is waiting...", wake );
-#endif
+				if( g.flags.bLogCriticalSections )
+					_lprintf( DBG_RELAY )( "%8LxWaking a thread which is waiting...", wake );
 				// don't clear waiting... so the proper thread can
 				// allow itself to claim section...
 				WakeThreadIDEx( wake DBG_RELAY);
@@ -1864,18 +1858,19 @@ TIMER_PROC( LOGICAL, LeaveCriticalSecEx )( PCRITICALSECTION pcs DBG_PASS )
 	}
 	else
 	{
-#ifdef LOG_DEBUG_CRITICAL_SECTIONS
+		if( g.flags.bLogCriticalSections )
 		{
-			char msg[256];
-			sprintf( msg, WIDE("Sorry - you can't leave a section owned by %016Lx locks:%08lx %s(%d)...")
-							, pcs->dwThreadID
-							, pcs->dwLocks
-							, (pcs->pFile)?(pcs->pFile):"Unknown", pcs->nLine );
-			_lprintf( DBG_RELAY )( "%s", msg );
-		}
-#else
-		_lprintf( DBG_RELAY )( WIDE("Sorry - you can't leave a section you don't own... %")_64fx WIDE("%")_64fx, pcs->dwThreadID, dwCurProc );
+			_lprintf( DBG_RELAY )( WIDE("Sorry - you can't leave a section owned by %016Lx locks:%08lx" )
+#ifdef DEBUG_CRITICAL_SECTIONS
+										 WIDE(  "%s(%d)...")
 #endif
+										, pcs->dwThreadID
+										, pcs->dwLocks
+#ifdef DEBUG_CRITICAL_SECTIONS
+										, (pcs->pFile)?(pcs->pFile):"Unknown", pcs->nLine
+#endif
+										);
+		}
 		pcs->dwUpdating = 0;
 		return FALSE;
 	}
@@ -1886,6 +1881,7 @@ TIMER_PROC( LOGICAL, LeaveCriticalSecEx )( PCRITICALSECTION pcs DBG_PASS )
 
 TIMER_PROC( void, DeleteCriticalSec )( PCRITICALSECTION pcs )
 {
+   // ya I don't have anything to do here...
 	return;
 }
 
