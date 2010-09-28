@@ -442,22 +442,24 @@ int ScanFile( PFILESOURCE pfs )
 	return 0;
 }
 
+void Usage( CTEXTSTR *argv )
+{
+	printf( WIDE("usage: %s <-xlv> <file...> <destination>\n")
+			 "  -l : list only, do not copy (doesn't require destination)\n"
+			 "  -x <file mask> : exclude this file from copy\n"
+			 "  -v : verbose output?\n"
+			 "  file - .dll or .exe referenced, all referenced DLLs\n"
+			 "         are also copied to the dstination\n"
+			 "  dest - directory name to cpoy to, will fail otherwise.\n"
+			, argv[0]
+			);
+}
 
 int main( int argc, CTEXTSTR *argv )
 {
-	if( argc < 3 || !IsPath( argv[argc-1] ) )
+	if( argc < 2 )
 	{
-		printf( WIDE("usage: %s <-xlv> <file...> <destination>\n")
-				 "  -l : list only, do not copy (doesn't require destination)\n"
-				 "  -x <file mask> : exclude this file from copy\n"
-				 "  -v : verbose output?\n"
-				 "  file - .dll or .exe referenced, all referenced DLLs\n"
-				 "         are also copied to the dstination\n"
-				 "  dest - directory name to cpoy to, will fail otherwise.\n"
-				, argv[0]
-				);
-		if( argc >= 3 )
-			printf( WIDE("EROR: Final argument is not a directory\n") );
+      Usage( argv );
 		return 1;
 	}
 	StrCpyEx( g.SystemRoot, getenv( WIDE("SystemRoot") ), sizeof( g.SystemRoot ) );
@@ -515,6 +517,13 @@ int main( int argc, CTEXTSTR *argv )
 	}
 	if( !g.flags.bDoNotCopy )
 	{
+		if( !IsPath( argv[argc-1] ) )
+		{
+			printf( WIDE("EROR: Final argument is not a directory\n") );
+         Usage( argv );
+         return 1;
+		}
+
 		CopyFileCopyTree( argv[argc-1] );
 		printf( WIDE("Copied %d file%s\n"), g.copied, g.copied==1?"":"s" );
 	}
