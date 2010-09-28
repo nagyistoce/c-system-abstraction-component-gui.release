@@ -45,6 +45,7 @@ pssql.h
 rcomlib.h
 render.h
 sack_types.h
+http.h
 sha1.h
 sharemem.h
 skelhdr.h
