@@ -55,7 +55,7 @@ void GatherHttpData( struct HttpState *pHttpState )
 	}
 }
 
-int ProcessHTTP( struct HttpState *pHttpState )
+int ProcessHttp( struct HttpState *pHttpState )
 {
 	if( pHttpState->final )
 	{
@@ -213,7 +213,7 @@ int ProcessHTTP( struct HttpState *pHttpState )
 	return pHttpState->final && pHttpState->content;
 }
 
-void AddHTTPData( struct HttpState *pHttpState, POINTER buffer, int size )
+void AddHttpData( struct HttpState *pHttpState, POINTER buffer, int size )
 {
 	VarTextAddData( pHttpState->pvt_collector, (CTEXTSTR)buffer, size );
 }
@@ -259,14 +259,14 @@ void EndHttp( struct HttpState *pHttpState )
 
 }
 
-PTEXT GetHTTPContent( struct HttpState *pHttpState )
+PTEXT GetHttpContent( struct HttpState *pHttpState )
 {
 	if( pHttpState->final )
 		return pHttpState->content;
 	return NULL;
 }
 
-void ProcessHTTPFields( struct HttpState *pHttpState, void (CPROC*f)( PTRSZVAL psv, PTEXT name, PTEXT value ), PTRSZVAL psv )
+void ProcessHttpFields( struct HttpState *pHttpState, void (CPROC*f)( PTRSZVAL psv, PTEXT name, PTEXT value ), PTRSZVAL psv )
 {
 	INDEX idx;
 	struct HttpField *field;
@@ -276,9 +276,18 @@ void ProcessHTTPFields( struct HttpState *pHttpState, void (CPROC*f)( PTRSZVAL p
 	}
 }
 
-PTEXT GetHTTPResponce( struct HttpState *pHttpState )
+PTEXT GetHttpResponce( struct HttpState *pHttpState )
 {
 	return pHttpState->response_status;
 }
+
+void DestroyHttpState( struct HttpState *pHttpState )
+{
+	EndHttp( pHttpState );
+	DeleteList( &pHttpState->fields );
+   VarTextDestroy( &pHttpState->pvt_collector );
+   Release( pHttpState );
+}
+
 
 HTTP_NAMESPACE_END
