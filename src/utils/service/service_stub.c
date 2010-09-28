@@ -118,3 +118,68 @@ void SetupService( TEXTSTR name, void (CPROC*Start)( void ) )
    lprintf( "Send to startup monitor.." );
    StartServiceCtrlDispatcher( ServiceTable );
 }
+
+//---------------------------------------------------------------------------
+
+static int task_done;
+static void CPROC MyTaskEnd( PTRSZVAL psv, PTASK_INFO task )
+{
+   task_done = 1;
+}
+
+static void CPROC GetOutput( PTRSZVAL psv, PTASK_INFO task, CTEXTSTR buffer, _32 length )
+{
+   lprintf( "%s", buffer );
+}
+
+//---------------------------------------------------------------------------
+
+void ServiceInstall( CTEXTSTR ServiceName )
+{
+	TEXTCHAR **args;
+	int nArgs;
+	PVARTEXT pvt_cmd = VarTextCreate();
+	vtprintf( pvt_cmd, "sc create \"%s\" binpath= %s\\%s.exe start= auto"
+			  , ServiceName
+			  , GetProgramPath()
+			  , GetProgramName() );
+	ParseIntoArgs( GetText( VarTextPeek( pvt_cmd ) ), &nArgs, &args );
+	VarTextEmpty( pvt_cmd );
+	LaunchPeerProgram( "sc.exe", NULL, (PCTEXTSTR)args,  GetOutput, MyTaskEnd, 0 );
+	while( !task_done )
+		WakeableSleep( 100 );
+	task_done = 0;
+	vtprintf( pvt_cmd, "sc start \"%s\""
+			  , ServiceName );
+	ParseIntoArgs( GetText( VarTextPeek( pvt_cmd ) ), &nArgs, &args );
+	VarTextEmpty( pvt_cmd );
+	LaunchPeerProgram( "sc.exe", NULL, (PCTEXTSTR)args,  GetOutput, MyTaskEnd, 0 );
+	while( !task_done )
+		WakeableSleep( 100 );
+}
+
+//---------------------------------------------------------------------------
+
+void ServiceUninstall( CTEXTSTR ServiceName )
+{
+	TEXTCHAR **args;
+	int nArgs;
+	PVARTEXT pvt_cmd = VarTextCreate();
+	vtprintf( pvt_cmd, "sc stop \"%s\""
+			  , ServiceName );
+	ParseIntoArgs( GetText( VarTextPeek( pvt_cmd ) ), &nArgs, &args );
+	VarTextEmpty( pvt_cmd );
+	LaunchPeerProgram( "sc", NULL, (PCTEXTSTR)args,  GetOutput, MyTaskEnd, 0 );
+	while( !task_done )
+		WakeableSleep( 100 );
+	task_done = 0;
+	vtprintf( pvt_cmd, "sc delete \"%s\""
+			  , ServiceName );
+	ParseIntoArgs( GetText( VarTextPeek( pvt_cmd ) ), &nArgs, &args );
+	VarTextEmpty( pvt_cmd );
+	LaunchPeerProgram( "sc", NULL, (PCTEXTSTR)args,  GetOutput, MyTaskEnd, 0 );
+	while( !task_done )
+		WakeableSleep( 100 );
+	task_done = 0;
+}
+

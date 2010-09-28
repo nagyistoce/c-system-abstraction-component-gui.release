@@ -7,4 +7,7 @@
 
 
 SERVICE_EXPORT void SetupService( TEXTSTR name, void (CPROC*Start)(void) );
+SERVICE_EXPORT void ServiceInstall( CTEXTSTR ServiceName );
+SERVICE_EXPORT void ServiceUninstall( CTEXTSTR ServiceName );
+
 
