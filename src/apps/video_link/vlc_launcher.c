@@ -36,7 +36,7 @@ PRELOAD( InitVLCLauncher )
    l.display = SACK_GetProfileInt( GetProgramName(), "vlc_launcher/Default Display", 2 );
 }
 
-PTRSZVAL EventPlaying CPROC( PTRSZVAL psv, arg_list args )
+PTRSZVAL CPROC EventPlaying( PTRSZVAL psv, arg_list args )
 {
 	if( l.flags.bWantMaster )
 	{

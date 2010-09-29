@@ -81,19 +81,19 @@ void CPROC FoundMap( PTRSZVAL psv, CTEXTSTR name, int flags )
 
 void CPROC ButtonCreateMap( PTRSZVAL psv, PSI_CONTROL pc )
 {
-   TEXTCHAR tmp[256];
+	TEXTCHAR tmp[256];
 	if( SimpleUserQuery( tmp, sizeof( tmp ), "Enter new video map name", NULL ) )
 	{
 		TEXTCHAR tmp2[256];
-      TEXTCHAR filename[256];
-		GetFileGroupText( GetFileGroup( "Configuration Maps", "../resources" ), tmp2, sizeof( tmp2 ) );
+		TEXTCHAR filename[256];
 		struct map_file *map = New( struct map_file );
-      snprintf( filename, sizeof( filename ), "%s/%s.Map", tmp2, tmp );
+		GetFileGroupText( GetFileGroup( "Configuration Maps", "../resources" ), tmp2, sizeof( tmp2 ) );
+		snprintf( filename, sizeof( filename ), "%s/%s.Map", tmp2, tmp );
 		MemSet( map, 0, sizeof( struct map_file ) );
-      map->filename = StrDup( filename );
+		map->filename = StrDup( filename );
 		map->name = StrDup( tmp );
 		AddLink( &l.maps, map );
-      SetItemData( AddListItem( GetNearControl( pc, LISTBOX_ITEMS ), tmp ), (PTRSZVAL)map );
+		SetItemData( AddListItem( GetNearControl( pc, LISTBOX_ITEMS ), tmp ), (PTRSZVAL)map );
 	}
 }
 
@@ -101,13 +101,13 @@ void CPROC ButtonCreateMap( PTRSZVAL psv, PSI_CONTROL pc )
 void SelectMap( void )
 {
 	void *info = NULL;
-   TEXTCHAR tmp[256];
+	TEXTCHAR tmp[256];
 	while( ScanFiles( GetFileGroupText( GetFileGroup( "Configuration Maps", "../resources" ), tmp, sizeof( tmp ) ), "*.Map", &info, FoundMap, 0, 0 ) );
 
    //if( l.nMaps > 1 )
 	{
 		int okay = 0;
-      int done = 0;
+		int done = 0;
 		PSI_CONTROL frame = CreateFrame( "Select Site Map", 120, 120, 480, 320, BORDER_NORMAL, NULL );
 		PSI_CONTROL listbox = MakeNamedControl( frame, LISTBOX_CONTROL_NAME, 5, 5, 470, 285, LISTBOX_ITEMS );
 		AddCommonButtons( frame, &done, &okay );
@@ -317,36 +317,36 @@ PTRSZVAL CPROC SetSiteSQL( PTRSZVAL psv, arg_list args )
 {
 	PARAM( args, LOGICAL, yes_no );
 	struct site_info *site = (struct site_info*)psv;
-   site->hosts_sql = yes_no;
-   return psv;
+	site->hosts_sql = yes_no;
+	return psv;
 }
 
 PTRSZVAL CPROC SetBingodayOption( PTRSZVAL psv, arg_list args )
 {
 	PARAM( args, LOGICAL, yes_no );
 	struct site_info *site = (struct site_info*)psv;
-   l.bingoday = yes_no;
-   return psv;
+	l.bingoday = yes_no;
+	return psv;
 }
 void ReadMap( void )
 {
 	PCONFIG_HANDLER pch = CreateConfigurationHandler();
-   AddConfigurationMethod( pch, "site %m", AddSite );
-   AddConfigurationMethod( pch, "hostname %m", SetSiteHostname );
-   AddConfigurationMethod( pch, "serves Mysql?%b", SetSiteSQL );
+	AddConfigurationMethod( pch, "site %m", AddSite );
+	AddConfigurationMethod( pch, "hostname %m", SetSiteHostname );
+	AddConfigurationMethod( pch, "serves Mysql?%b", SetSiteSQL );
 	AddConfigurationMethod( pch, "Mysql Server %m", SetSiteSQLServer );
 	AddConfigurationMethod( pch, "address %m", SetSiteAddress );
 	AddConfigurationMethod( pch, "local address %m", SetSiteLocalAddress );
-   AddConfigurationMethod( pch, "Uses Bingoday?%b", SetBingodayOption );
+	AddConfigurationMethod( pch, "Uses Bingoday?%b", SetBingodayOption );
 	ProcessConfigurationFile( pch, l.selected_map->filename, 0 );
-   DestroyConfigurationHandler( pch );
+	DestroyConfigurationHandler( pch );
 }
 
 
 void UpdateConfiguration( void )
 {
 	// based on selected map and site, set hostname, and ODBC connection parameters.
-	FILE *file = fopen( l.selected_map->filename, "wt" );
+	FILE *file = sack_fopen( 0, l.selected_map->filename, "wt" );
 	{
 		INDEX idx;
 		struct site_info *site;
@@ -372,7 +372,11 @@ void UpdateConfiguration( void )
 
 }
 
+#ifdef _MSC_VER
+int APIENTRY WinMain( HINSTANCE a, HINSTANCE b, LPSTR c, int d )
+#else
 int main( void )
+#endif
 {
 
 	SelectMap();
@@ -381,18 +385,18 @@ int main( void )
 	ReadMap();
 	SelectSite();
 
-   if( l.selected_site )
+	if( l.selected_site )
 	{
 		TEXTCHAR filename[256];
-      int n;
+		int n;
 		UpdateConfiguration();
-      for( n = 0; l.selected_map->filename[n]; n++ )
+		for( n = 0; l.selected_map->filename[n]; n++ )
 			if( l.selected_map->filename[n] == '/' )
 				l.selected_map->filename[n] = '\\';
 		snprintf( filename, sizeof( filename ), "Explorer /select,%s", l.selected_map->filename );
-      lprintf( "command [%s]", filename );
+		lprintf( "command [%s]", filename );
 		system( filename );
 	}
-   return 0;
+	return 0;
 }
 

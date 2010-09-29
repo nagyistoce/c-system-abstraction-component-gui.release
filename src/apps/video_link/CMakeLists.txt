@@ -2,12 +2,11 @@ cmake_minimum_required(VERSION 2.8)
 
 GET_FILENAME_COMPONENT(SACK_SDK_ROOT_PATH "[HKEY_LOCAL_MACHINE\\SOFTWARE\\SACK;Install_Dir]" ABSOLUTE CACHE)
 
-set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Set build type")
-set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
-"MinSizeRel" "RelWithDebInfo")
-
-
 PROJECT( video_link )
+
+include( ${SACK_SDK_ROOT_PATH}/CMakePackage )
+set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+
 
 set( PROJECT_OUTPUT video_link_service )
 
@@ -17,7 +16,6 @@ IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     )
 ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
-include( ${SACK_SDK_ROOT_PATH}/CMakePackage )
 
 include_directories( ${SACK_INCLUDE_DIR} )
 LINK_DIRECTORIES( ${SACK_LIBRARY_DIR} )

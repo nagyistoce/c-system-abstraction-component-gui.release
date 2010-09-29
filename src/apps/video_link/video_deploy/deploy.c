@@ -2,6 +2,7 @@
 #include <configscript.h>
 #include <network.h>
 #include <controls.h>
+#include <sqlgetoption.h>
 
 enum {
 	LISTBOX_ITEMS,
@@ -216,7 +217,7 @@ void UpdateHostsFile( void )
 	TEXTCHAR tmp[256];
 	FILE *file;
 	snprintf( tmp, sizeof( tmp ), "%s/system32/drivers/etc/hosts", root );
-	file = fopen( tmp, "wt" );
+	file = sack_fopen( 0, tmp, "wt" );
 	fprintf( file, "# Copyright (c) 1993-2009 Microsoft Corp.\n" );
 	fprintf( file, "#\n" );
 	fprintf( file, "# This is a sample HOSTS file used by Microsoft TCP/IP for Windows.\n" );
@@ -271,25 +272,25 @@ void UpdateMySQL( void )
 	system( "mysql.proxy.service uninstall" );
 	if( l.selected_site != l.sql_site )
 	{
-		file = fopen( "mysql.proxy.service.conf", "wt" );
+		file = sack_fopen( 0, "mysql.proxy.service.conf", "wt" );
 		if( file )
 		{
 			fprintf( file, "MySQL: 3306 %s:3306\n", l.sql_site->address );
 		}
-      fclose( file );\
+		fclose( file );
 		system( "mysql.proxy.service install" );
 	}
 	if( l.selected_site == l.sql_site )
 	{
 		if( !l.sql_site->hosts_sql )
 		{
-			file = fopen( "mysql.proxy.service.conf", "wt" );
+			file = sack_fopen( 0, "mysql.proxy.service.conf", "wt" );
 			if( file )
 			{
 				fprintf( file, "MySQL: 3306 %s:3306\n", l.sql_site->mysql_server );
 			}
 			fclose( file );
-         system( "mysql.proxy.service install" );
+			system( "mysql.proxy.service install" );
 		}
 		else
 		{
@@ -304,11 +305,9 @@ void UpdateMySQL( void )
 void UpdateEventMap( void)
 {
 	INDEX idx;
-	INDEX idx2;
 	int iSend;
 	struct site_info *site;
 
-   TEXTCHAR tmp_iface[256];
 	TEXTCHAR tmp_send[256];
 
 
@@ -317,13 +316,13 @@ void UpdateEventMap( void)
 		SACK_WriteProfileString( "video_link_server", "Video Server/Service Events/interface 1", l.selected_site->address );
 		SACK_WriteProfileString( "video_link_server", "Video Server/Service Events/interface 2", l.selected_site->local_address );
 	}
-   iSend = 1;
+	iSend = 1;
 	LIST_FORALL( l.sites, idx, struct site_info *, site )
 	{
 		if( site != l.selected_site )
 		{
 			snprintf( tmp_send, sizeof( tmp_send ), "Video Server/Service Events/interface 1/Send To %d", iSend );
-         iSend++;
+			iSend++;
 			SACK_WriteProfileString( "video_link_server", tmp_send, site->address );
 
 		}
@@ -346,7 +345,7 @@ void UpdateConfiguration( void )
 		lprintf( "hostname needs update" );
 	}
 
-   UpdateHostsFile();
+	UpdateHostsFile();
 
 	SACK_WriteProfileInt( "video_link_server", "Use bingoday for link state (else use 0)", l.bingoday );
 	SACK_WriteProfileString( "video_link_server", "My Hall Name", l.selected_site->name );
@@ -354,11 +353,15 @@ void UpdateConfiguration( void )
 
 	UpdateMySQL();
 
-   UpdateEventMap();
+	UpdateEventMap();
 
 }
 
+#ifdef _MSC_VER
+int APIENTRY WinMain( HINSTANCE a, HINSTANCE b, LPSTR c, int d )
+#else
 int main( void )
+#endif
 {
 	SelectMap();
 	if( !l.selected_map )
@@ -366,10 +369,10 @@ int main( void )
 	ReadMap();
 	SelectSite();
 
-   if( l.selected_site )
+	if( l.selected_site )
 		UpdateConfiguration();
 	else
-      SimpleMessageBox( NULL, "Configuration Canceled", "System setup may not be complete." );
-   return 0;
+		SimpleMessageBox( NULL, "Configuration Canceled", "System setup may not be complete." );
+	return 0;
 }
 
