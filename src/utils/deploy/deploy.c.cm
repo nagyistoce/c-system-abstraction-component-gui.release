@@ -126,28 +126,28 @@ int main( int argc, char **argv )
 		}
 #endif
 		fprintf( out, "set( SACK_BASE %s )\n", path );
-		fprintf( out, "set( SACK_INCLUDE_DIR ${SACK_BASE}/include/sack )\n" );
+		fprintf( out, "set( SACK_INCLUDE_DIR $""{SACK_BASE}/include/sack )\n" );
                 fprintf( out, "set( SACK_BAG_PLUSPLUS @SACK_BAG_PLUSPLUS@ )\n" );
-		fprintf( out, "set( SACK_LIBRARIES sack_bag ${SACK_BAG_PLUSPLUS} )\n" );
-		fprintf( out, "set( SACK_LIBRARY_DIR ${SACK_BASE}/lib )\n" );
+		fprintf( out, "set( SACK_LIBRARIES sack_bag $""{SACK_BAG_PLUSPLUS} )\n" );
+		fprintf( out, "set( SACK_LIBRARY_DIR $""{SACK_BASE}/lib )\n" );
 #ifdef _DEBUG
 		fprintf( out, "add_definitions( -D_DEBUG )\n" );
 #endif
 		fprintf( out, "\n" );
-		fprintf( out, "  if( ${CMAKE_COMPILER_IS_GNUCC} )\n" );
-		fprintf( out, "  SET( FIRST_GCC_LIBRARY_SOURCE ${SACK_BASE}/src/sack/deadstart_list.c )\n" );
-		fprintf( out, "  SET( FIRST_GCC_PROGRAM_SOURCE ${SACK_BASE}/src/sack/deadstart_list.c )\n" );
-		fprintf( out, "  SET( LAST_GCC_LIBRARY_SOURCE ${SACK_BASE}/src/sack/deadstart_lib.c ${SACK_BASE}/src/sack/deadstart_end.c )\n" );
-		fprintf( out, "  SET( LAST_GCC_PROGRAM_SOURCE ${SACK_BASE}/src/sack/deadstart_lib.c ${SACK_BASE}/src/sack/deadstart_prog.c ${SACK_BASE}/src/sack/deadstart_end.c )\n" );
+		fprintf( out, "  if( $""{CMAKE_COMPILER_IS_GNUCC} )\n" );
+		fprintf( out, "  SET( FIRST_GCC_LIBRARY_SOURCE $""{SACK_BASE}/src/sack/deadstart_list.c )\n" );
+		fprintf( out, "  SET( FIRST_GCC_PROGRAM_SOURCE $""{SACK_BASE}/src/sack/deadstart_list.c )\n" );
+		fprintf( out, "  SET( LAST_GCC_LIBRARY_SOURCE $""{SACK_BASE}/src/sack/deadstart_lib.c $""{SACK_BASE}/src/sack/deadstart_end.c )\n" );
+		fprintf( out, "  SET( LAST_GCC_PROGRAM_SOURCE $""{SACK_BASE}/src/sack/deadstart_lib.c $""{SACK_BASE}/src/sack/deadstart_prog.c $""{SACK_BASE}/src/sack/deadstart_end.c )\n" );
 		fprintf( out, "  endif()\n" );
 		fprintf( out, "\n" );
-		fprintf( out, "if( ${MSVC}${WATCOM} )\n" );
-		fprintf( out, "  SET( LAST_GCC_PROGRAM_SOURCE ${SACK_BASE}/src/sack/deadstart_prog.c )\n" );
+		fprintf( out, "if( $""{MSVC}$""{WATCOM} )\n" );
+		fprintf( out, "  SET( LAST_GCC_PROGRAM_SOURCE $""{SACK_BASE}/src/sack/deadstart_prog.c )\n" );
 		fprintf( out, "endif()\n" );
 		fprintf( out, "\n" );
 		fprintf( out, "SET( DATA_INSTALL_PREFIX resources )\n" );
-		fprintf( out, "include( ${SACK_BASE}/DefaultInstall.cmake )\n" );
-		//fprintf( out, "install( FILES bin/sack_bag.dll DESTINATION ${somewhere} )\n" );
+		fprintf( out, "include( $""{SACK_BASE}/DefaultInstall.cmake )\n" );
+		//fprintf( out, "install( FILES bin/sack_bag.dll DESTINATION $""{somewhere} )\n" );
 		fprintf( out, "\n" );
 		fprintf( out, "set(CMAKE_BUILD_TYPE \"%s\" CACHE STRING \"Set build type\")\n", build_type );
 
