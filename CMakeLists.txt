@@ -51,7 +51,7 @@ else()
    endif()
 endif()
 
-SET(VLC_PATH "c:/tools/vlc-1.1.4" CACHE STRING "Base Path of VLC Installation 1.1.0 and more" )
+#SET(VLC_PATH "c:/tools/vlc-1.1.4" CACHE STRING "Base Path of VLC Installation 1.1.0 and more" )
 
 if ( UNIX )
         set( USE_INTERNAL_STANDARDLIBS 0 )
