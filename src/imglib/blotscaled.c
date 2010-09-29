@@ -405,8 +405,8 @@ void CPROC cBlotScaledMultiTImgAI( SCALED_BLOT_WORK_PARAMS
 
 	if( ( xd > ( pifDest->x + pifDest->width ) )
 	  || ( yd > ( pifDest->y + pifDest->height ) )
-	  || ( ( xd + wd ) < pifDest->x )
-		|| ( ( yd + hd ) < pifDest->y ) )
+	  || ( ( xd + (signed)wd ) < pifDest->x )
+		|| ( ( yd + (signed)hd ) < pifDest->y ) )
 	{
 		return;
 	}
@@ -456,7 +456,7 @@ void CPROC cBlotScaledMultiTImgAI( SCALED_BLOT_WORK_PARAMS
    }
    //Log8( WIDE("Blot scaled params: %d %d %d %d / %d %d %d %d "), 
    //       xs, ys, ws, hs, xd, yd, wd, hd );
-   if( ( xd + wd ) > ( pifDest->x + pifDest->width) )
+   if( ( xd + (signed)wd ) > ( pifDest->x + pifDest->width) )
    {
       //int newwd = TOFIXED(pifDest->width);
       //ws -= ((S_64)( (int)wd - newwd)* (S_64)ws )/(int)wd;
@@ -464,7 +464,7 @@ void CPROC cBlotScaledMultiTImgAI( SCALED_BLOT_WORK_PARAMS
    }
    //Log8( WIDE("Blot scaled params: %d %d %d %d / %d %d %d %d "), 
    //       xs, ys, ws, hs, xd, yd, wd, hd );
-   if( ( yd + hd ) > (pifDest->y + pifDest->height) )
+   if( ( yd + (signed)hd ) > (pifDest->y + pifDest->height) )
    {
 		//int newhd = TOFIXED(pifDest->height);
 		//hs -= ((S_64)( hd - newhd)* hs )/hd;
@@ -532,7 +532,7 @@ void CPROC cBlotScaledMultiTImgAI( SCALED_BLOT_WORK_PARAMS
    // on the last line of the image to be copied 
    pi = IMG_ADDRESS( pifSrc, (xs), (ys) );
    po = IMG_ADDRESS( pifDest, (xd), (yd) );
-   oo = 4*(-(wd) - (pifDest->pwidth) ); // w is how much we can copy...
+   oo = 4*(-((signed)wd) - (pifDest->pwidth) ); // w is how much we can copy...
    // adding in multiple of 4 because it's C...
    srcwidth = -(4* pifSrc->pwidth);
 #else
