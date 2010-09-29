@@ -242,7 +242,7 @@ PBINGHALL CreateAHall( INDEX myid, int hall_id )
 				xlprintf(LOG_ADVISORY)("I am officially %s ( %u )", pBingHall->stIdentity.szSiteName ,pBingHall->LinkHallState.hall_id );
 			lprintf( "I am [%s] [%s] %d %d", l.hall_name, pBingHall->stIdentity.szSiteName, myid, pBingHall->LinkHallState.hall_id );
 			if( (l.hall_name &&
-				  ( ( strcasecmp( pBingHall->stIdentity.szSiteName, l.hall_name ) ) == 0 ) )||
+				  ( ( StrCaseCmp( pBingHall->stIdentity.szSiteName, l.hall_name ) ) == 0 ) )||
 				( ( !l.hall_name) &&
 				 ( myid == pBingHall->LinkHallState.hall_id ) )
 			  )
@@ -1529,19 +1529,23 @@ PRELOAD( MyInitHook )
 }
 #else
 
+#ifdef _MSC_VER
+int APIENTRY WinMain( HINSTANCE a, HINSTANCE b, LPSTR c, int d )
+#else
 int main(int argc, char **argv, char **env)
+#endif
 {
-   CommonInit();
+	CommonInit();
 	LoadVideoPlugins();
 	RegisterIcon( NULL );
-   AddSystrayMenuFunction( "Dump Names", MyDumpNames );
+	AddSystrayMenuFunction( "Dump Names", MyDumpNames );
 	ThreadTo( ServerCheckStateThread, 0);
 
 	while( !g.flags.bExit )
 	{
 		WakeableSleep(50000);
 	}
-   UnregisterIcon( );
+	UnregisterIcon( );
 	return 0;
 }
 #endif

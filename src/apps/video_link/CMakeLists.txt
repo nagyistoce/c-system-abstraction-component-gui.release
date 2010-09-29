@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
-GET_FILENAME_COMPONENT(SACK_SDK_ROOT_PATH "[HKEY_LOCAL_MACHINE\\SOFTWARE\\SACK;Install_Dir]" ABSOLUTE CACHE)
+GET_FILENAME_COMPONENT(SACK_SDK_ROOT_PATH "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Freedom Collective\\SACK;Install_Dir]" ABSOLUTE CACHE)
+
 
 PROJECT( video_link )
 
@@ -8,8 +9,8 @@ include( ${SACK_SDK_ROOT_PATH}/CMakePackage )
 
 INSTALL_SACK( bin )
 
-set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 
+set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 
 set( PROJECT_OUTPUT video_link_service )
 
@@ -276,8 +277,8 @@ endif()
 add_subdirectory( video_deploy )
 add_subdirectory( video_map_editor )
 
-install( FILES install/CMakeLists.txt DESTINATION install/video_link )
-install( FILES vlc/vlc-1.1.4-win32.7z DESTINATION install/video_link )
-install( FILES mysql/mysql-5.4-minimal.zip DESTINATION install/video_link )
-install( FILES tools/pkzip25.exe DESTINATION install/video_link )
-install( FILES tools/7za.exe DESTINATION install/video_link )
+#install( FILES install/CMakeLists.txt DESTINATION install/video_link )
+#install( FILES vlc/vlc-1.1.4-win32.7z DESTINATION install/video_link )
+#install( FILES mysql/mysql-5.4-minimal.zip DESTINATION install/video_link )
+#install( FILES tools/pkzip25.exe DESTINATION install/video_link )
+#install( FILES tools/7za.exe DESTINATION install/video_link )
