@@ -7,7 +7,9 @@ set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
 "MinSizeRel" "RelWithDebInfo")
 
 
-PROJECT( video_link_service )
+PROJECT( video_link )
+
+set( PROJECT_OUTPUT video_link_service )
 
 IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   SET(CMAKE_INSTALL_PREFIX
@@ -32,29 +34,30 @@ endif()
 ########################################################################################
 ########################################################################################
 
-PROJECT( video_link_server )
+#PROJECT( video_link_server )
+set( PROJECT_OUTPUT video_link_server )
 
-ADD_EXECUTABLE( ${PROJECT_NAME} WIN32
+ADD_EXECUTABLE( ${PROJECT_OUTPUT} WIN32
 ${FIRST_GCC_PROGRAM_SOURCE} 
   stateserver.c db.c
 ${LAST_GCC_PROGRAM_SOURCE} 
 )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${SACK_LIBRARIES} winmm.lib )
-string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
-SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
+TARGET_LINK_LIBRARIES( ${PROJECT_OUTPUT} ${SACK_LIBRARIES} winmm.lib )
+string( REPLACE "." "_" TARGET_LABEL ${PROJECT_OUTPUT} )
+SET_TARGET_PROPERTIES(${PROJECT_OUTPUT} PROPERTIES
                   COMPILE_FLAGS  ""
-                  COMPILE_DEFINITIONS "WINDOWS_MODE;TARGET_LABEL=${TARGET_LABEL};TARGETNAME=\"${PROJECT_NAME}${CMAKE_EXECUTABLE_SUFFIX}\""
+                  COMPILE_DEFINITIONS "WINDOWS_MODE;TARGET_LABEL=${TARGET_LABEL};TARGETNAME=\"${PROJECT_OUTPUT}${CMAKE_EXECUTABLE_SUFFIX}\""
                   FOLDER "Video Link"
 )
 if( WIN32 )
 	# On Windows platforms, the dynamic libs should
 	# go in the same dir as the executables.
-	install( TARGETS ${PROJECT_NAME}
+	install( TARGETS ${PROJECT_OUTPUT}
 	        RUNTIME DESTINATION bin                     
         	LIBRARY DESTINATION bin
 	        ARCHIVE DESTINATION lib )
 else( WIN32 )
-	install( TARGETS ${PROJECT_NAME}
+	install( TARGETS ${PROJECT_OUTPUT}
 	        RUNTIME DESTINATION bin 
         	LIBRARY DESTINATION lib
 	        ARCHIVE DESTINATION lib )
@@ -63,56 +66,58 @@ endif( WIN32 )
 ########################################################################################
 ########################################################################################
 
-PROJECT( video_link_server.isp )
+#PROJECT( video_link_server.isp )
+set( PROJECT_OUTPUT video_link_server.isp )
 
-ADD_LIBRARY( ${PROJECT_NAME} SHARED
+ADD_LIBRARY( ${PROJECT_OUTPUT} SHARED
 ${FIRST_GCC_LIBRARY_SOURCE} 
   stateserver.c db.c
 ${LAST_GCC_LIBRARY_SOURCE} 
 )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${SACK_LIBRARIES} winmm.lib )
+TARGET_LINK_LIBRARIES( ${PROJECT_OUTPUT} ${SACK_LIBRARIES} winmm.lib )
 
-string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
-SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
+string( REPLACE "." "_" TARGET_LABEL ${PROJECT_OUTPUT} )
+SET_TARGET_PROPERTIES(${PROJECT_OUTPUT} PROPERTIES
                   COMPILE_FLAGS  ""
-                  COMPILE_DEFINITIONS "TARGET_LABEL=${TARGET_LABEL};TARGETNAME=\"${PROJECT_NAME}\""
+                  COMPILE_DEFINITIONS "TARGET_LABEL=${TARGET_LABEL};TARGETNAME=\"${PROJECT_OUTPUT}\""
                   PREFIX ""
                   SUFFIX ""
                   FOLDER "Video Link/InterShell/plugins"
 )
 if( WIN32 )
-  install( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin/InterShell/plugins 
+  install( TARGETS ${PROJECT_OUTPUT} RUNTIME DESTINATION bin/InterShell/plugins 
   	)
 else( WIN32 )
-  install( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION bin/InterShell/plugins 
+  install( TARGETS ${PROJECT_OUTPUT} LIBRARY DESTINATION bin/InterShell/plugins 
   	)
 endif()
 
 ########################################################################################
 ########################################################################################
 
-PROJECT( video_link_control.isp )
+#PROJECT( video_link_control.isp )
+set( PROJECT_OUTPUT video_link_control.isp )
 
-ADD_LIBRARY( ${PROJECT_NAME} SHARED
+ADD_LIBRARY( ${PROJECT_OUTPUT} SHARED
 ${FIRST_GCC_LIBRARY_SOURCE} 
   statebuttons.c db.c
 ${LAST_GCC_LIBRARY_SOURCE} 
 )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${SACK_LIBRARIES} sack_widgets )
+TARGET_LINK_LIBRARIES( ${PROJECT_OUTPUT} ${SACK_LIBRARIES} sack_widgets )
 
-string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
-SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
+string( REPLACE "." "_" TARGET_LABEL ${PROJECT_OUTPUT} )
+SET_TARGET_PROPERTIES(${PROJECT_OUTPUT} PROPERTIES
                   COMPILE_FLAGS  ""
-                  COMPILE_DEFINITIONS "TARGET_LABEL=${TARGET_LABEL};TARGETNAME=\"${PROJECT_NAME}\""
+                  COMPILE_DEFINITIONS "TARGET_LABEL=${TARGET_LABEL};TARGETNAME=\"${PROJECT_OUTPUT}\""
                   PREFIX ""
                   SUFFIX ""
                   FOLDER "Video Link/InterShell/plugins"
 )
 if( WIN32 )
-  install( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin/InterShell/plugins 
+  install( TARGETS ${PROJECT_OUTPUT} RUNTIME DESTINATION bin/InterShell/plugins 
   	)
 else( WIN32 )
-  install( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION bin/InterShell/plugins 
+  install( TARGETS ${PROJECT_OUTPUT} LIBRARY DESTINATION bin/InterShell/plugins 
   	)
 endif()
 INSTALL( 
@@ -128,102 +133,105 @@ INSTALL(
 ########################################################################################
 
 
-PROJECT( vlc_launcher.vplug )
-ADD_LIBRARY( ${PROJECT_NAME} SHARED
+#PROJECT( vlc_launcher.vplug )
+set( PROJECT_OUTPUT vlc_launcher.vplug )
+ADD_LIBRARY( ${PROJECT_OUTPUT} SHARED
 ${FIRST_GCC_LIBRARY_SOURCE} 
   vlc_launcher.c
 ${LAST_GCC_LIBRARY_SOURCE} 
 )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${SACK_LIBRARIES} )
+TARGET_LINK_LIBRARIES( ${PROJECT_OUTPUT} ${SACK_LIBRARIES} )
 
-string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
-SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
+string( REPLACE "." "_" TARGET_LABEL ${PROJECT_OUTPUT} )
+SET_TARGET_PROPERTIES(${PROJECT_OUTPUT} PROPERTIES
                   COMPILE_FLAGS  ""
-                  COMPILE_DEFINITIONS "TARGET_LABEL=${TARGET_LABEL};TARGETNAME=\"${PROJECT_NAME}\""
+                  COMPILE_DEFINITIONS "TARGET_LABEL=${TARGET_LABEL};TARGETNAME=\"${PROJECT_OUTPUT}\""
                   PREFIX ""
                   SUFFIX ""
                   FOLDER "Video Link/Plugins"
 )
 if( WIN32 )
-  install( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin/InterShell/plugins 
+  install( TARGETS ${PROJECT_OUTPUT} RUNTIME DESTINATION bin/InterShell/plugins 
   	)
 else( WIN32 )
-  install( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION bin/InterShell/plugins 
+  install( TARGETS ${PROJECT_OUTPUT} LIBRARY DESTINATION bin/InterShell/plugins 
   	)
 endif()
 if( WIN32 )
-  install( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin
+  install( TARGETS ${PROJECT_OUTPUT} RUNTIME DESTINATION bin
   	)
 else( WIN32 )
-  install( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION bin
+  install( TARGETS ${PROJECT_OUTPUT} LIBRARY DESTINATION bin
   	)
 endif()
 
 ########################################################################################
 ########################################################################################
 
-PROJECT( video_event_notices.vplug )
-ADD_LIBRARY( ${PROJECT_NAME} SHARED
+#PROJECT( video_event_notices.vplug )
+set( PROJECT_OUTPUT video_event_notices.vplug )
+ADD_LIBRARY( ${PROJECT_OUTPUT} SHARED
 ${FIRST_GCC_LIBRARY_SOURCE} 
   network_events.c
 ${LAST_GCC_LIBRARY_SOURCE} 
 )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${SACK_LIBRARIES} )
+TARGET_LINK_LIBRARIES( ${PROJECT_OUTPUT} ${SACK_LIBRARIES} )
 
-string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
-SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
+string( REPLACE "." "_" TARGET_LABEL ${PROJECT_OUTPUT} )
+SET_TARGET_PROPERTIES(${PROJECT_OUTPUT} PROPERTIES
                   COMPILE_FLAGS  ""
-                  COMPILE_DEFINITIONS "TARGET_LABEL=${TARGET_LABEL};TARGETNAME=\"${PROJECT_NAME}\""
+                  COMPILE_DEFINITIONS "TARGET_LABEL=${TARGET_LABEL};TARGETNAME=\"${PROJECT_OUTPUT}\""
                   PREFIX ""
                   SUFFIX ""
                   FOLDER "Video Link/Plugins"
 )
 if( WIN32 )
-  install( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin/InterShell/plugins 
+  install( TARGETS ${PROJECT_OUTPUT} RUNTIME DESTINATION bin/InterShell/plugins 
   	)
 else( WIN32 )
-  install( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION bin/InterShell/plugins 
+  install( TARGETS ${PROJECT_OUTPUT} LIBRARY DESTINATION bin/InterShell/plugins 
   	)
 endif()
 if( WIN32 )
-  install( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin
+  install( TARGETS ${PROJECT_OUTPUT} RUNTIME DESTINATION bin
   	)
 else( WIN32 )
-  install( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION bin
+  install( TARGETS ${PROJECT_OUTPUT} LIBRARY DESTINATION bin
   	)
 endif()
 
 ########################################################################################
 ########################################################################################
 
-PROJECT( video_mux.vplug )
-ADD_LIBRARY( ${PROJECT_NAME} SHARED
+#PROJECT( video_mux.vplug )
+set( PROJECT_OUTPUT video_mux.vplug )
+ADD_LIBRARY( ${PROJECT_OUTPUT} SHARED
 ${FIRST_GCC_LIBRARY_SOURCE} 
   video_mux.c ianson/video_ctrl.c
 ${LAST_GCC_LIBRARY_SOURCE} 
 )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${SACK_LIBRARIES} )
+TARGET_LINK_LIBRARIES( ${PROJECT_OUTPUT} ${SACK_LIBRARIES} )
 
-string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
-SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
+string( REPLACE "." "_" TARGET_LABEL ${PROJECT_OUTPUT} )
+SET_TARGET_PROPERTIES(${PROJECT_OUTPUT} PROPERTIES
                   COMPILE_FLAGS  ""
-                  COMPILE_DEFINITIONS "TARGET_LABEL=${TARGET_LABEL};TARGETNAME=\"${PROJECT_NAME}\""
+                  COMPILE_DEFINITIONS "TARGET_LABEL=${TARGET_LABEL};TARGETNAME=\"${PROJECT_OUTPUT}\""
                   PREFIX ""
                   SUFFIX ""
                   FOLDER "Video Link/Plugins"
 )
 if( WIN32 )
-  install( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin/InterShell/plugins 
+  install( TARGETS ${PROJECT_OUTPUT} RUNTIME DESTINATION bin/InterShell/plugins 
   	)
 else( WIN32 )
-  install( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION bin/InterShell/plugins 
+  install( TARGETS ${PROJECT_OUTPUT} LIBRARY DESTINATION bin/InterShell/plugins 
   	)
 endif()
 if( WIN32 )
-  install( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin
+  install( TARGETS ${PROJECT_OUTPUT} RUNTIME DESTINATION bin
   	)
 else( WIN32 )
-  install( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION bin
+  install( TARGETS ${PROJECT_OUTPUT} LIBRARY DESTINATION bin
   	)
 endif()
 
@@ -231,34 +239,35 @@ endif()
 ########################################################################################
 
 
-PROJECT( bdata.proxy.vplug )
-ADD_LIBRARY( ${PROJECT_NAME} SHARED
+#PROJECT( bdata.proxy.vplug )
+set( PROJECT_OUTPUT bdata.proxy.vplug )
+ADD_LIBRARY( ${PROJECT_OUTPUT} SHARED
 ${FIRST_GCC_LIBRARY_SOURCE} 
   bdata_proxy_task.c
 ${LAST_GCC_LIBRARY_SOURCE} 
 )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${SACK_LIBRARIES} )
+TARGET_LINK_LIBRARIES( ${PROJECT_OUTPUT} ${SACK_LIBRARIES} )
 
-string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
-SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
+string( REPLACE "." "_" TARGET_LABEL ${PROJECT_OUTPUT} )
+SET_TARGET_PROPERTIES(${PROJECT_OUTPUT} PROPERTIES
                   COMPILE_FLAGS  ""
-                  COMPILE_DEFINITIONS "TARGET_LABEL=${TARGET_LABEL};TARGETNAME=\"${PROJECT_NAME}\""
+                  COMPILE_DEFINITIONS "TARGET_LABEL=${TARGET_LABEL};TARGETNAME=\"${PROJECT_OUTPUT}\""
                   PREFIX ""
                   SUFFIX ""
                   FOLDER ""
 )
 if( WIN32 )
-  install( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin/InterShell/plugins 
+  install( TARGETS ${PROJECT_OUTPUT} RUNTIME DESTINATION bin/InterShell/plugins 
   	)
 else( WIN32 )
-  install( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION bin/InterShell/plugins 
+  install( TARGETS ${PROJECT_OUTPUT} LIBRARY DESTINATION bin/InterShell/plugins 
   	)
 endif()
 if( WIN32 )
-  install( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin
+  install( TARGETS ${PROJECT_OUTPUT} RUNTIME DESTINATION bin
   	)
 else( WIN32 )
-  install( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION bin
+  install( TARGETS ${PROJECT_OUTPUT} LIBRARY DESTINATION bin
   	)
 endif()
 
