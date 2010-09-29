@@ -25,7 +25,7 @@ target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} )
 if( WIN32 )
 target_link_libraries( ${PROJECT_NAME} winmm )
 endif( WIN32 )
-install_literal_product( ${PROJECT_NAME} InterShell/plugins ) 
+install_literal_product( ${PROJECT_NAME} plugins ) 
 
 add_subdirectory( frames )
 
