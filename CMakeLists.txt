@@ -89,7 +89,7 @@ OPTION( USE_ODBC "Use Odbc" 1 )
 OPTION( USE_OPTIONS "Use Option Code all internal option usage (and don't include option code)" 1 )
 OPTION( USING_OLD_MINGW "MinGW Has NO UpdateLayeredWindow" ${MINGW} )
 OPTION( USE_SQLITE "Use SQLITE (also links static internal)" 1 )
-OPTION( USE_SQLITE_EXTERNAL "Use SQLITE (build as external module)" 1 )
+#OPTION( USE_SQLITE_EXTERNAL "Use SQLITE (build as external module)" 1 )
 OPTION( EXTREME_CODE_DEBUG "Enable extreme warning levels (mingw)" 0 )
 
 OPTION( __NO_GUI__ "No GUI or image parts" 0 )
@@ -161,16 +161,16 @@ add_definitions( -D__NO_OPTIONS__ )
  endif( USE_OPTIONS )
 
  if( USE_SQLITE )
-  SET(SQLITE_SOURCES   src/sqlite/sqlite_interface.c )
+  SET(BAG_SQLITE_INTERFACE  src/sqlite/sqlite_interface.c )
 #if( !SQLITE3_FOUND )
   SET( SQLITE_VERSION 3.7.0 ) #3.6.23
-  SET( SQLITE_SOURCES ${SQLITE_SOURCES} src/sqlite/${SQLITE_VERSION}/sqlite3.c  )
+  SET( SQLITE_SOURCES ${BAG_SQLITE_INTERFACE} src/sqlite/${SQLITE_VERSION}/sqlite3.c  )
   include_directories( ${SACK_BASE}/src/sqlite/${SQLITE_VERSION} )
   
   if( NOT USE_SQLITE_EXTERNAL )
    # setup to include sqlite in the core libraries...
    set( BAG_SQLITE_SOURCES ${SQLITE_SOURCES} )
-   set( ExtraFlags "${ExtraFlags} -DSQLITE_SOURCE" )
+   set( ExtraFlags "${ExtraFlags} -DSQLITE_SOURCE -DUSE_SQLITE_INTERFACE" )
   else()
    set( ExtraFlags "${ExtraFlags} -DUSE_SQLITE_INTERFACE" )
   endif()
@@ -550,7 +550,6 @@ set( SACK_PLUSPLUS_SOURCES
     ${BASE_SOURCES} 
     ${SNPRINTF_SOURCES}
     ${ODBC_SOURCES}
-    ${BAG_SQLITE_SOURCES}
     ${GENX_SOURCES}
   ${LAST_GCC_LIBRARY_SOURCE} 
 )

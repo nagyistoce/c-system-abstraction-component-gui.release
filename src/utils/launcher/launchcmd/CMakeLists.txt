@@ -15,14 +15,14 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 COMPILE_FLAGS  "-DTARGET_LABEL=${PROJECT_NAME}" 
                   FOLDER utils/launcher
 )
-target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} )
+target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} )
 install_default_dest( ${PROJECT_NAME} )
 
 project( launchcmd.portable )
 
-if( __WINDOWS__ )
+if( WIN32 )
 set( NET_SOURCES     ../../../netlib/net_winsock2.c  )
-endif( __WINDOWS__ )
+endif( WIN32 )
 
 if( MSVC ) 
 SET( ExtraSources ../../../systemlib/args.c )
@@ -69,9 +69,9 @@ COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL} "
 COMPILE_DEFINITIONS "__STATIC__;SACK_BAG_EXPORTS;__NO_OPTIONS__;__NO_NETWORK__"
                   FOLDER utils/launcher
 )
-if( __WINDOWS__ )
+if( WIN32 )
 target_link_libraries( ${PROJECT_NAME} ws2_32 wsock32 winmm)
-endif( __WINDOWS__ )
+endif( WIN32 )
 install_default_dest( ${PROJECT_NAME} )
 
 
@@ -88,5 +88,5 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 COMPILE_FLAGS  "-DTARGET_LABEL=${PROJECT_NAME} -DWINDOWS_MODE" 
                   FOLDER utils/launcher
 )
-target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} )
+target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} )
 install_default_dest( ${PROJECT_NAME} )

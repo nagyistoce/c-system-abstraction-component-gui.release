@@ -1,7 +1,12 @@
 PROJECT( proxy )
 
 add_executable( ${PROJECT_NAME} ${FIRST_GCC_PROGRAM_SOURCE} proxy.c ${LAST_GCC_PROGRAM_SOURCE} )
-target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} )
+target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} winmm
+)
+if( WIN32 )
+target_link_libraries( ${PROJECT_NAME}  winmm )
+endif( WIN32 )
+
 string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL}"
@@ -11,9 +16,9 @@ install_default_dest( ${PROJECT_NAME} )
 
 
 PROJECT( proxy.portable )
-if( __WINDOWS__ )
+if( WIN32 )
 set( NET_SOURCES     ../net_winsock2.c  ) 
-endif( __WINDOWS__ )
+endif( WIN32 )
 
 set( SOURCES_ROOT ../.. )
 
@@ -50,8 +55,7 @@ add_executable( ${PROJECT_NAME} ${FIRST_GCC_PROGRAM_SOURCE}
 ${LAST_GCC_PROGRAM_SOURCE} 
     ${SOURCES_ROOT}/deadstart/deadstart_core.c
 )
-
-target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} )
+                                                         target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} )
 
 string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
@@ -59,13 +63,14 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   COMPILE_DEFINITIONS "SACK_BAG_EXPORTS;__NO_GUI__;__NO_OPTIONS__;__STATIC__"
                   FOLDER "Network examples"
 )
+target_link_libraries( ${PROJECT_NAME} wsock32 ws2_32 winmm )
 install_default_dest( ${PROJECT_NAME} )
 
 
 PROJECT( proxy.service )
-if( __WINDOWS__ )
+if( WIN32 )
 set( NET_SOURCES     ../net_winsock2.c  ) 
-endif( __WINDOWS__ )
+endif( WIN32 )
 
 if( MSVC ) 
 SET( ExtraSources ${SOURCES_ROOT}/systemlib/args.c )
