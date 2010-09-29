@@ -45,7 +45,7 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 COMPILE_FLAGS  "-DTARGET_LABEL=${PROJECT_NAME}" 
                   FOLDER utils/launcher
 )
-target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} )
+target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} )
 install_default_dest_binary( ${PROJECT_NAME} )
 
 project( launchpad.portable )
@@ -57,9 +57,9 @@ if( SNPRINTF_SOURCES )
 set( SNPRINTF_SOURCES    ${SOURCES_ROOT}/../${SNPRINTF_SOURCES} )
 endif(SNPRINTF_SOURCES)
 
-if( __WINDOWS__ )
+if( WIN32 )
 set( NET_SOURCES     ${SOURCES_ROOT}/netlib/net_winsock2.c  )
-endif( __WINDOWS__ )
+endif( WIN32 )
 
 if( MSVC ) 
 SET( ExtraSources ${SOURCES_ROOT}/systemlib/args.c )
@@ -121,6 +121,7 @@ endif( WATCOM )
 target_link_libraries( ${PROJECT_NAME} ws2_32 wsock32 winmm )
 install_default_dest_binary( ${PROJECT_NAME} )
 
+if( afsdasdfafsd )
 
 project( launchpad.isp ) 
 
@@ -139,9 +140,9 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   SUFFIX ""
                   FOLDER utils/launcher
 )
-target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} )
+target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} )
 install_literal_product( ${PROJECT_NAME} InterShell/plugins ) 
-
+endif()
 
 if( altanik_is_built )
 project( launchpad.isom ) 
@@ -160,7 +161,7 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   SUFFIX ""
                   FOLDER utils/launcher
 )
-target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} )
+target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} )
 install_default_dest( ${PROJECT_NAME} )
                       endif()
 

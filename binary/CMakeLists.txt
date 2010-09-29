@@ -4,45 +4,48 @@ cmake_minimum_required(VERSION 2.8)
 PROJECT( SackBinaries )
 
 GET_FILENAME_COMPONENT(SACK_SDK_ROOT_PATH "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Freedom Collective\\SACK;Install_Dir]" ABSOLUTE CACHE)
+
 include( ${SACK_SDK_ROOT_PATH}/CMakePackage )
 include_directories( ${SACK_INCLUDE_DIR} )
 LINK_DIRECTORIES( ${SACK_LIBRARY_DIR} )
 
+macro( add_subpath base )
+string( REPLACE "." "_" base2 ${base} )
+add_subdirectory( ${base} ${base2} )
+endmacro(add_subpath)
 
-
-add_subdirectory( ../src/psilib/paltst )
+add_subpath( ../src/psilib/paltst )
 
 # includes some testdata in tstdisplay...
 # the test programs do not have install targets, but they will end up building...
  if( NOT __NO_GUI__ )
-  add_subdirectory( ../src/msgsvr/testdisplay )
+  add_subpath( ../src/msgsvr/testdisplay )
  endif( NOT __NO_GUI__ )
-#add_subdirectory( src/bench/mem )
+#add_subpath( ../src/bench/mem )
 
 
  if( NOT __NO_GUI__ )
 if( USE_OPTIONS )
- add_subdirectory( ../src/SQLlib/optlib/editoption )
+ add_subpath( ../src/SQLlib/optlib/editoption )
 endif( USE_OPTIONS )
  endif( NOT __NO_GUI__ )
 
 if( NOT __NO_GUI__ )
-add_subdirectory( ../src/msgsvr/server )
-add_subdirectory( ../src/msgsvr/servicelist )
+add_subpath( ../src/msgsvr/server )
+add_subpath( ../src/msgsvr/servicelist )
 endif( NOT __NO_GUI__ )
 
 
-add_subdirectory( ../src/netlib/user )
-add_subdirectory( ../src/netlib/echo )
-add_subdirectory( ../src/netlib/forward )
-add_subdirectory( ../src/netlib/proxy )
-add_subdirectory( ../src/SQLlib/testsql )
-add_subdirectory( ../src/utils/launcher )
-add_subdirectory( ../src/utils/deploy )
-add_subdirectory( ../src/utils/strip )
-add_subdirectory( ../src/psilib/console/cmdshell )
+add_subpath( ../src/netlib/user )
+add_subpath( ../src/netlib/echo )
+add_subpath( ../src/netlib/forward )
+add_subpath( ../src/netlib/proxy )
+add_subpath( ../src/SQLlib/testsql )
+add_subpath( ../src/utils/launcher )
+add_subpath( ../src/utils/strip )
+add_subpath( ../src/psilib/console/cmdshell )
 if( __WINDOWS__ )
-add_subdirectory( ../src/utils/pcopy )
+add_subpath( ../src/utils/pcopy )
 endif( __WINDOWS__ )
 
 

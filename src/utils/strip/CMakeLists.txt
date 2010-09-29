@@ -15,7 +15,7 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 COMPILE_FLAGS  "-DTARGET_LABEL=${PROJECT_NAME}" 
                   FOLDER utils
 )
-target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} )
+target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} )
 install_default_dest( ${PROJECT_NAME} )
 
 project( lstrip.portable )
@@ -58,12 +58,13 @@ add_executable(${PROJECT_NAME} ${BASE_SOURCES} )
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
 COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL}" 
-COMPILE_DEFINITIONS "__STATIC__;SACK_BAG_EXPORTS;__NO_OPTIONS__;__NO_NETWORK__"
+COMPILE_DEFINITIONS "__STATIC__;SACK_BAG_EXPORTS;__NO_OPTIONS__;__NO_NETWORK__;__DISABLE_UDP_SYSLOG__"
                   FOLDER utils
 )
-if( __WINDOWS__ )
-target_link_libraries( ${PROJECT_NAME} ws2_32 wsock32 winmm)
-endif( __WINDOWS__ )
+if( WIN32 )
+#ws2_32 wsock32 
+target_link_libraries( ${PROJECT_NAME} winmm)
+endif( WIN32 )
 install_default_dest( ${PROJECT_NAME} )
 
 

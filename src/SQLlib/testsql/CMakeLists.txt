@@ -16,7 +16,7 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 COMPILE_FLAGS  "-DTARGET_LABEL=${PROJECT_NAME}" 
                   FOLDER utils
 )
-target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} ${SACK_PSI_LIBRARY} )
+target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} ${SACK_PSI_LIBRARY} )
 install_default_dest( ${PROJECT_NAME} )
 
 
@@ -38,11 +38,11 @@ endif(SNPRINTF_SOURCES)
 set(BASE_SOURCES
 ${FIRST_GCC_PROGRAM_SOURCE} 
     sqlcmd
-    ${SOURCES_ROOT}/netlib/network.c 
-    ${SOURCES_ROOT}/netlib/udpnetwork.c 
-    ${SOURCES_ROOT}/netlib/tcpnetwork.c 
-    ${NET_SOURCES} 
-    ${SOURCES_ROOT}/msgsvr/client/client.c
+#    ${SOURCES_ROOT}/netlib/network.c 
+#    ${SOURCES_ROOT}/netlib/udpnetwork.c 
+#    ${SOURCES_ROOT}/netlib/tcpnetwork.c 
+#    ${NET_SOURCES} 
+#    ${SOURCES_ROOT}/msgsvr/client/client.c
     ${SOURCES_ROOT}/SQLlib/sqlstub.c
     ${SOURCES_ROOT}/SQLlib/sqlutil.c
     ${SOURCES_ROOT}/SQLlib/sqlwrap.c
@@ -72,12 +72,13 @@ add_executable(${PROJECT_NAME} ${BASE_SOURCES} )
 string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
     COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL}" 
-                  COMPILE_DEFINITIONS "SACK_BAG_EXPORTS;__STATIC__;__NO_GUI__;__NO_OPTIONS__"
+                  COMPILE_DEFINITIONS "SACK_BAG_EXPORTS;__STATIC__;__NO_GUI__;__NO_OPTIONS__;USE_ODBC;__DISABLE_UDP_SYSLOG__;__NO_MSGSVR__"
                   FOLDER utils
 )
-if( __WINDOWS__ )
-target_link_libraries( ${PROJECT_NAME} winmm wsock32 ws2_32 )
-endif( __WINDOWS__ )
+if( WIN32 )
+#target_link_libraries( ${PROJECT_NAME} winmm wsock32 ws2_32 )
+target_link_libraries( ${PROJECT_NAME} winmm odbc32 )
+endif( WIN32 )
 install_default_dest_binary( ${PROJECT_NAME} )
 
 
