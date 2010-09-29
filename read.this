@@ -7,7 +7,7 @@ For lack of time and expediency, all sources from this point 'down' (that
 is a recursive directory listin from the directory which contains this file)
 are 
 
-Copyright (C) (look fancy graphics) 1996-2004 to James Buckeyne. 
+Copyright (C) (look fancy graphics) 1996-2010++ to James Buckeyne. 
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -40,6 +40,9 @@ Exceptions:
    zlib
    snmplib 
    freetype2
+   GenX (modified for compilation)
+   expat (modified for compilation)
+   sqlite
    
    These contain their own copyrights - and are publicly available.
    No modifications have been made to these libraries other 
@@ -55,7 +58,13 @@ The following exception also applies:
 If modifications are made, and are not remitted to the core library for 
 inclusion within the LGPL distribution of this library, then all source 
 copyrights are revoked, the source of this library may not be publicized either.
-References to originating source would be appreciated.
+References to originating source would be appreciated.  You may use it
+yourself and in you and your companies projects, just don't release it as source... 
+Meh - someday this will be a dead project and noone will care, so distribute
+source freely - if you attempt to obfuscate original authors, that's pretty rude
+and would be plagurism(spelled bad) or something.
+
+Anyhow, Whatever.
 
 Updates from the LGPL distribution are allowed, however, if additions to these
 libraries, control extensions for example, are not released in source for public 
