@@ -186,7 +186,7 @@ typedef struct required_field_tag
 	CTEXTSTR previous_names[MAX_PREVIOUS_FIELD_NAMES];
 } FIELD, *PFIELD;
 
-#if !define( _MSC_VER ) || ( _MSC_VER >= 800 )
+#if !defined( _MSC_VER ) || ( _MSC_VER >= 800 )
 /* A macro to append a NULL automatically to a list of strings.
    Example
    <code lang="c++">
