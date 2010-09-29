@@ -1363,7 +1363,7 @@ static PTRSZVAL CPROC RestoreButtonType( PTRSZVAL psv, arg_list args )
 		INDEX idx;
 		for( idx = 0; idx < MAX_BUTTON_TYPE; idx++ )
 		{
-			if( strcasecmp( type, button_modes[idx] )== 0 )
+			if( StrCaseCmp( type, button_modes[idx] )== 0 )
             break;
 		}
       if( idx < MAX_BUTTON_TYPE )
