@@ -806,7 +806,9 @@ endif( BUILD_MONOLITHIC )
 
 # this SACK_CORE_BUILD is for building before we get 'installed' some of the header locations get moved.
 add_definitions( -DSACK_CORE_BUILD )
+if( WATCOM )
 add_definitions( -D__OBSCURE_STREAM_INTERNALS )
+endif( WATCOM )
 
 
   if( USE_SQLITE_EXTERNAL )
@@ -825,67 +827,22 @@ add_definitions( -D__OBSCURE_STREAM_INTERNALS )
                   PREFIX ""
                   FOLDER sqlite
    )
+  else(USE_SQLITE_EXTERNAL)
+  
   endif(USE_SQLITE_EXTERNAL)
 
 if( !MSVC )
 add_subdirectory( src/displaylib )
 endif( !MSVC )
 
-#set( SACK_LIBRARY ${SACK_LIBRARY} )
 set( SACK_LIBRARIES ${SACK_LIBRARY} )
 
-
-if( NOT __NO_GUI__ )
-add_subdirectory( src/msgsvr/server )
-add_subdirectory( src/msgsvr/servicelist )
-endif( NOT __NO_GUI__ )
-
-if( NOT SACK_ONLY )
- if( NOT __NO_GUI__ )
-  if( BUILD_INTERSHELL )
-   add_subdirectory( src/InterShell )
-  endif( BUILD_INTERSHELL )
-  
-  add_subdirectory( src/psilib/paltst )
-
- endif( NOT __NO_GUI__ )
 
 # parts of SDK ...
 add_subdirectory( include )
 add_subdirectory( src/utils/runner )
 add_subdirectory( src/deadstart )
 
-add_subdirectory( data )
-# includes some testdata in tstdisplay...
-# the test programs do not have install targets, but they will end up building...
- if( NOT __NO_GUI__ )
-  add_subdirectory( src/msgsvr/testdisplay )
- endif( NOT __NO_GUI__ )
-#add_subdirectory( src/bench/mem )
-
-endif( NOT SACK_ONLY )
-
- if( NOT __NO_GUI__ )
-if( USE_OPTIONS )
- add_subdirectory( src/SQLlib/optlib/editoption )
-endif( USE_OPTIONS )
- endif( NOT __NO_GUI__ )
-
-
-add_subdirectory( src/netlib/user )
-add_subdirectory( src/netlib/echo )
-add_subdirectory( src/netlib/forward )
-add_subdirectory( src/netlib/proxy )
-add_subdirectory( src/SQLlib/testsql )
-add_subdirectory( src/utils/launcher )
-add_subdirectory( src/utils/deploy )
-add_subdirectory( src/utils/strip )
-add_subdirectory( src/psilib/console/cmdshell )
-if( __WINDOWS__ )
-add_subdirectory( src/utils/pcopy )
-endif( __WINDOWS__ )
-
-set( CMAKE_C_STANDARD_LIBRARIES_INIT "" )
 
 
 INCLUDE(InstallRequiredSystemLibraries)
