@@ -5,6 +5,9 @@ GET_FILENAME_COMPONENT(SACK_SDK_ROOT_PATH "[HKEY_LOCAL_MACHINE\\SOFTWARE\\SACK;I
 PROJECT( video_link )
 
 include( ${SACK_SDK_ROOT_PATH}/CMakePackage )
+
+INSTALL_SACK( bin )
+
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 
 
