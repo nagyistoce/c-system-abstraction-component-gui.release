@@ -843,6 +843,8 @@ add_subdirectory( include )
 add_subdirectory( src/utils/runner )
 add_subdirectory( src/deadstart )
 
+add_subdirectory( src/utils/deploy )
+add_subdirectory( src/utils/pcopy )
 
 
 INCLUDE(InstallRequiredSystemLibraries)
