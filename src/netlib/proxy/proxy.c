@@ -601,54 +601,15 @@ int main( int argc, char **argv )
 
    int ofs = 0;
 #ifdef BUILD_SERVICE
-	if( argc > (1+ofs) && StrCaseCmp( argv[1+ofs], "install" ) == 0 )
+	if( argc > (1) && StrCaseCmp( argv[1], "install" ) == 0 )
 	{
-		TEXTCHAR **args;
-		int nArgs;
-      PVARTEXT pvt_cmd = VarTextCreate();
-		ofs++;
-		vtprintf( pvt_cmd, "sc create \"%s\" binpath= %s\\%s.exe start= auto"
-				  , GetProgramName()
-				  , GetProgramPath()
-				  , GetProgramName() );
-      ParseIntoArgs( GetText( VarTextPeek( pvt_cmd ) ), &nArgs, &args );
-		VarTextEmpty( pvt_cmd );
-		LaunchPeerProgram( "sc.exe", NULL, (PCTEXTSTR)args,  GetOutput, MyTaskEnd, 0 );
-		while( !task_done )
-			WakeableSleep( 100 );
-      task_done = 0;
-		vtprintf( pvt_cmd, "sc start \"%s\""
-				  , GetProgramName() );
-      ParseIntoArgs( GetText( VarTextPeek( pvt_cmd ) ), &nArgs, &args );
-		VarTextEmpty( pvt_cmd );
-		LaunchPeerProgram( "sc.exe", NULL, (PCTEXTSTR)args,  GetOutput, MyTaskEnd, 0 );
-		while( !task_done )
-			WakeableSleep( 100 );
-      return 0;
+		ServiceInstall( GetProgramName() );
+		return 0;
 	}
-	if( argc > (1+ofs) && StrCaseCmp( argv[1+ofs], "uninstall" ) == 0 )
+	if( argc > (1) && StrCaseCmp( argv[1], "uninstall" ) == 0 )
 	{
-		TEXTCHAR **args;
-		int nArgs;
-      PVARTEXT pvt_cmd = VarTextCreate();
-		ofs++;
-		vtprintf( pvt_cmd, "sc stop \"%s\""
-				  , GetProgramName() );
-		ParseIntoArgs( GetText( VarTextPeek( pvt_cmd ) ), &nArgs, &args );
-		VarTextEmpty( pvt_cmd );
-		LaunchPeerProgram( "sc", NULL, (PCTEXTSTR)args,  GetOutput, MyTaskEnd, 0 );
-		while( !task_done )
-			WakeableSleep( 100 );
-      task_done = 0;
-		vtprintf( pvt_cmd, "sc delete \"%s\""
-				  , GetProgramName() );
-		ParseIntoArgs( GetText( VarTextPeek( pvt_cmd ) ), &nArgs, &args );
-		VarTextEmpty( pvt_cmd );
-		LaunchPeerProgram( "sc", NULL, (PCTEXTSTR)args,  GetOutput, MyTaskEnd, 0 );
-		while( !task_done )
-			WakeableSleep( 100 );
-      task_done = 0;
-      return 0;
+		ServiceUninstall( GetProgramName() );
+		return 0;
 	}
 #endif
 #ifdef BUILD_SERVICE
@@ -669,7 +630,7 @@ int main( int argc, char **argv )
 	else
 		filename = argv[1];
 
-   Start();
+	Start();
 
 	while( 1 )
 		Sleep( 100000 );

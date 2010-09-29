@@ -475,8 +475,8 @@ TYPELIB_PROC  int TYPELIB_CALLTYPE  IsMsgQueueEmpty ( PMSGHANDLE pmh );
 
 #ifdef __cplusplus
 }; //namespace message {
-namespace sets {
 #endif
+_SETS_NAMESPACE
 
 //---------------------------------------------------------------------------
 // Set type
@@ -882,11 +882,9 @@ TYPELIB_PROC  PTRSZVAL TYPELIB_CALLTYPE  ForEachSetMember ( GENERICSET *pSet, in
 
 //---------------------------------------------------------------------------
 
-#ifdef __cplusplus
-}; // namespace sets
+_SETS_NAMESPACE_END
 
-namespace text {
-#endif
+_TEXT_NAMESPACE
 
 // this defines more esoteric formatting notions...
 // these data blocks will be zero sized, and ahve the TF_FORMATEX 

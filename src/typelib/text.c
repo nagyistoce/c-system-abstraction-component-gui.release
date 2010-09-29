@@ -482,33 +482,33 @@ PTEXT SegConcatEx(PTEXT output,PTEXT input,S_32 offset,S_32 length DBG_PASS )
 
 PTEXT SegUnlink(PTEXT segment)
 {
-   PTEXT temp;
-   if (segment)
-   {
-      if( ( temp = PRIORLINE(segment) ) )
-         SETNEXTLINE(temp,NEXTLINE(segment));
-      if( ( temp = NEXTLINE(segment) ) )
-         SETPRIORLINE(temp,PRIORLINE(segment));
-      SETPRIORLINE(segment, NULL);
-      SETNEXTLINE(segment, NULL);
-   }
-   return segment;
+	PTEXT temp;
+	if (segment)
+	{
+		if( ( temp = PRIORLINE(segment) ) )
+			SETNEXTLINE(temp,NEXTLINE(segment));
+		if( ( temp = NEXTLINE(segment) ) )
+			SETPRIORLINE(temp,PRIORLINE(segment));
+		SETPRIORLINE(segment, NULL);
+		SETNEXTLINE(segment, NULL);
+	}
+	return segment;
 }
 
 //---------------------------------------------------------------------------
 
 PTEXT SegGrab( PTEXT segment )
 {
-   SegUnlink( segment );
-   return segment;
+	SegUnlink( segment );
+	return segment;
 }
 
 //---------------------------------------------------------------------------
 
 PTEXT SegDelete( PTEXT segment )
 {
-   LineReleaseEx( SegGrab( segment ) DBG_SRC );
-   return NULL;
+	LineReleaseEx( SegGrab( segment ) DBG_SRC );
+	return NULL;
 }
 
 //---------------------------------------------------------------------------
@@ -516,38 +516,38 @@ PTEXT SegDelete( PTEXT segment )
 
 PTEXT SegInsert( PTEXT what, PTEXT before )
 {
-   PTEXT that_start = what ,
+	PTEXT that_start = what ,
          that_end= what;
-   SetStart( that_start );
-   SetEnd( that_end );
-   if( before )
-   {
-      if( ( that_start->Prior = before->Prior) )
-         that_start->Prior->Next = that_start;
-      if( ( that_end->Next = before ) )
-         that_end->Next->Prior = that_end;
-   }
-   return what;
+	SetStart( that_start );
+	SetEnd( that_end );
+	if( before )
+	{
+		if( ( that_start->Prior = before->Prior) )
+			that_start->Prior->Next = that_start;
+		if( ( that_end->Next = before ) )
+			that_end->Next->Prior = that_end;
+	}
+	return what;
 }
 
 //---------------------------------------------------------------------------
 
 PTEXT SegSubst( PTEXT _this, PTEXT that )
 {
-   PTEXT that_start = that ,
+	PTEXT that_start = that ,
          that_end= that;
-   SetStart( that_start );
-   SetEnd( that_end );
+	SetStart( that_start );
+	SetEnd( that_end );
 
-   if( ( that_end->Next = _this->Next ) )
-      that_end->Next->Prior = that_end;
+	if( ( that_end->Next = _this->Next ) )
+		that_end->Next->Prior = that_end;
 
-   if( ( that_start->Prior = _this->Prior) )
-      that_start->Prior->Next = that_start;
+	if( ( that_start->Prior = _this->Prior) )
+		that_start->Prior->Next = that_start;
 
-   _this->Next = NULL;
-   _this->Prior = NULL;
-   return _this;
+	_this->Next = NULL;
+	_this->Prior = NULL;
+	return _this;
 }
 
 //---------------------------------------------------------------------------
@@ -556,22 +556,22 @@ PTEXT SegSplitEx( PTEXT *pLine, int nPos  DBG_PASS)
 {
 	// there includes the character at nPos - so all calculations
 	// on there are +1...
-   PTEXT here, there;
-   int nLen;
-   nLen = GetTextSize( *pLine );
-   if( nPos > nLen )
-   {
-      return NULL;
-   }
+	PTEXT here, there;
+	int nLen;
+	nLen = GetTextSize( *pLine );
+	if( nPos > nLen )
+	{
+		return NULL;
+	}
 	if( nPos == nLen )
 		return *pLine;
-   here = SegCreateEx( nPos DBG_RELAY );
-   here->flags  = (*pLine)->flags;
-   here->format = (*pLine)->format;
-   there = SegCreateEx( (nLen - nPos) DBG_RELAY );
-   there->flags  = (*pLine)->flags;
-   there->format = (*pLine)->format;
-   there->format.position.offset.spaces = 0; // was two characters presumably...
+	here = SegCreateEx( nPos DBG_RELAY );
+	here->flags  = (*pLine)->flags;
+	here->format = (*pLine)->format;
+	there = SegCreateEx( (nLen - nPos) DBG_RELAY );
+	there->flags  = (*pLine)->flags;
+	there->format = (*pLine)->format;
+	there->format.position.offset.spaces = 0; // was two characters presumably...
 	there->format.position.offset.tabs = 0;
 
 	MemCpy( GetText( here ), GetText( *pLine ), sizeof(TEXTCHAR)*nPos );
@@ -582,9 +582,9 @@ PTEXT SegSplitEx( PTEXT *pLine, int nPos  DBG_PASS)
         GetText( there )[nLen-nPos] = 0;
 	}
 
-   SETNEXTLINE( PRIORLINE( *pLine ), here );
-   SETPRIORLINE( here, PRIORLINE( *pLine ) );
-   SETNEXTLINE( here, there );
+	SETNEXTLINE( PRIORLINE( *pLine ), here );
+	SETPRIORLINE( here, PRIORLINE( *pLine ) );
+	SETNEXTLINE( here, there );
 	SETPRIORLINE( there, here );
 	SETNEXTLINE( there, NEXTLINE( *pLine ) );
 	SETPRIORLINE( NEXTLINE( *pLine ), there );
@@ -593,8 +593,8 @@ PTEXT SegSplitEx( PTEXT *pLine, int nPos  DBG_PASS)
 	SETPRIORLINE( *pLine, NULL );
 
 	LineReleaseEx( *pLine DBG_RELAY );
-   *pLine = here;
-   return here;
+	*pLine = here;
+	return here;
 }
 
 
@@ -1961,7 +1961,7 @@ void VarTextAddDataEx( PVARTEXT pvt, CTEXTSTR block, _32 length DBG_PASS )
 		_32 n;
 		for( n = 0; n < length; n++ )
 		{
-			int c = block[length];
+			int c = block[n];
 			if( c == '\b' )
 			{
 				if( pvt->collect_used )

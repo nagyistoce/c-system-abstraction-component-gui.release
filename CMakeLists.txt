@@ -409,6 +409,7 @@ set( TYPE_LIBRARY_SOURCES
   src/typelib/input.c
   src/typelib/sets.c
   src/typelib/text.c
+  src/typelib/http.c
   src/typelib/typecode.c
   src/typelib/spacetree.c
 )
@@ -458,6 +459,8 @@ set(BASE_SOURCES  ${BASE_SOURCES}
   src/filesyslib/pathops.c
   src/filesyslib/filescan.c
   src/systemlib/system.c
+  src/utils/service/service_stub.c
+
   src/commlib/sackcomm.c
   ${OPTION_SOURCE}
 )
