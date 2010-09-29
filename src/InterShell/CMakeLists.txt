@@ -11,7 +11,9 @@ INSTALL_SACK( bin )
 include_directories( ${SACK_INCLUDE_DIR} )
 LINK_DIRECTORIES( ${SACK_LIBRARY_DIR} )
 
-add_subdirectory( ../../data )
+SET(VLC_PATH "c:/tools/vlc-1.1.4" CACHE STRING "Base Path of VLC Installation 1.1.0 and more" )
+
+add_subdirectory( ../../data __/__/data )
 add_subdirectory( widgets )
 add_subdirectory( frames )
 add_subdirectory( images )
@@ -52,7 +54,7 @@ SET_TARGET_PROPERTIES(${PROJECT_OUTPUT} PROPERTIES
 
 )
 
-target_link_libraries( ${PROJECT_OUTPUT} sack_widgets ${SACK_LIBRARY} )
+target_link_libraries( ${PROJECT_OUTPUT} sack_widgets ${SACK_LIBRARIES} )
 install_literal_product( ${PROJECT_OUTPUT} InterShell ) 
 
 

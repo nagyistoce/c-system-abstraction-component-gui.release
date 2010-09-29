@@ -15,7 +15,7 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL}"
                   FOLDER InterShell
 )
-target_link_libraries( ${PROJECT_NAME}  ${SACK_LIBRARY} )
+target_link_libraries( ${PROJECT_NAME}  ${SACK_LIBRARIES} )
 install( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin/InterShell ) 
 
 project( InterShell_console.stop )
@@ -33,6 +33,6 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL}"
                   FOLDER InterShell
 )
-target_link_libraries( ${PROJECT_NAME}  ${SACK_LIBRARY} )
+target_link_libraries( ${PROJECT_NAME}  ${SACK_LIBRARIES} )
 install( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin/InterShell ) 
 
