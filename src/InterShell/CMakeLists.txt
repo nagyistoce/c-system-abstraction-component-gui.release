@@ -13,6 +13,8 @@ LINK_DIRECTORIES( ${SACK_LIBRARY_DIR} )
 
 SET(VLC_PATH "c:/tools/vlc-1.1.4" CACHE STRING "Base Path of VLC Installation 1.1.0 and more" )
 
+add_definitions( -DINTERSHELL_CORE_BUILD )
+
 add_subdirectory( ../../data __/__/data )
 add_subdirectory( widgets )
 add_subdirectory( frames )
@@ -55,6 +57,9 @@ SET_TARGET_PROPERTIES(${PROJECT_OUTPUT} PROPERTIES
 )
 
 target_link_libraries( ${PROJECT_OUTPUT} sack_widgets ${SACK_LIBRARIES} )
+if( WIN32 )
+target_link_libraries( ${PROJECT_OUTPUT} winmm )
+endif( WIN32 )
 install_literal_product( ${PROJECT_OUTPUT} InterShell ) 
 
 

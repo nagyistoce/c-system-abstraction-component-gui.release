@@ -10,10 +10,6 @@ ${FIRST_GCC_LIBRARY_SOURCE}
 ${LAST_GCC_LIBRARY_SOURCE} )
 
 
-if( C++ )
-set_source_files_properties( ${SOURCES} PROPERTIES LANGUAGE "CXX" )
-endif()
-
 add_library(${PROJECT_NAME} SHARED ${SOURCES} )
 
 
@@ -24,6 +20,6 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   PREFIX ""
                   FOLDER InterShell/plugins
 )
-target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} )
+target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} )
 install_literal_product( ${PROJECT_NAME} InterShell/plugins ) 
 
