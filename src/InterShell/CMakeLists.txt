@@ -1,15 +1,15 @@
-
-
 cmake_minimum_required(VERSION 2.8)
 
+PROJECT( InterShell )
 
+add_subdirectory( ../../data )
 add_subdirectory( widgets )
 add_subdirectory( frames )
 add_subdirectory( images )
 add_subdirectory( calendar )
 
-project( InterShell.core )
-
+#project( InterShell.core )
+set( PROJECT_OUTPUT InterShell.core )
 
 set(SOURCES 
 ${FIRST_GCC_LIBRARY_SOURCE}
@@ -30,14 +30,10 @@ ${LAST_GCC_LIBRARY_SOURCE}
 )
 
 
-if( C++ )
-set_source_files_properties( ${SOURCES} PROPERTIES LANGUAGE "CXX" )
-endif()
+add_library( ${PROJECT_OUTPUT} SHARED ${SOURCES} )
 
-add_library( ${PROJECT_NAME} SHARED ${SOURCES} )
-
-string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
-SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
+string( REPLACE "." "_" TARGET_LABEL ${PROJECT_OUTPUT} )
+SET_TARGET_PROPERTIES(${PROJECT_OUTPUT} PROPERTIES
                   DEFINE_SYMBOL INTERSHELL_SOURCE
                   COMPILE_FLAGS  ""
                   COMPILE_DEFINITIONS "TARGET_LABEL=${TARGET_LABEL};_DEFINE_INTERFACE;__NO_ANIMATION__"
@@ -47,8 +43,8 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 
 )
 
-target_link_libraries( ${PROJECT_NAME} sack_widgets ${SACK_LIBRARY} )
-install_literal_product( ${PROJECT_NAME} InterShell ) 
+target_link_libraries( ${PROJECT_OUTPUT} sack_widgets ${SACK_LIBRARY} )
+install_literal_product( ${PROJECT_OUTPUT} InterShell ) 
 
 
 include_directories( 
@@ -66,7 +62,7 @@ INSTALL(
   FILES
     ${INTERSHELL_SDK}
   DESTINATION
-    include/${CMAKE_PROJECT_NAME}/InterShell
+    include/${CMAKE_PROJECT_OUTPUT}/InterShell
 )
 
 if( NOT __ARM__ )
