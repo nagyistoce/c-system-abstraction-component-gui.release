@@ -153,10 +153,12 @@ int main( int argc, char **argv )
 		//fprintf( out, "install( FILES bin/sack_bag.dll DESTINATION $""{somewhere} )\n" );
                 fprintf( out, "ENDMACRO( INSTALL_SACK )\n" );
 		fprintf( out, "\n" );
-                fprintf( out, "IF(CMAKE_BUILD_TPYE_INITIALIZED_TO_DEFAULT)\n" );
+                //fprintf( out, "IF(CMAKE_BUILD_TPYE_INITIALIZED_TO_DEFAULT)\n" );
 		
 		fprintf( out, "set(CMAKE_BUILD_TYPE \"%s\" CACHE STRING \"Set build type\")\n", build_type );
-                fprintf( out, "ENDIF(CMAKE_BUILD_TPYE_INITIALIZED_TO_DEFAULT)\n" );
+		fprintf( out, "set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS Debug Release MinSizeRel RelWithDebInfo)\n" );
+                
+                //fprintf( out, "ENDIF(CMAKE_BUILD_TPYE_INITIALIZED_TO_DEFAULT)\n" );
 
 		fprintf( out, "\n" );
 

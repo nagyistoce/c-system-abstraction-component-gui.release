@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 
 PROJECT( sack_deploy )
 
-configure_file( deploy.c.cm ${CMAKE_BINARY_DIR}/deploy.c )
+configure_file( deploy.cm.c ${CMAKE_BINARY_DIR}/deploy.c )
 configure_file( cmake_environment.h.in ${CMAKE_BINARY_DIR}/cmake_environment.h )
 ADD_EXECUTABLE( ${PROJECT_NAME} ${CMAKE_BINARY_DIR}/deploy.c )
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES FOLDER install )
