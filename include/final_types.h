@@ -58,6 +58,7 @@
 #endif
 
 #  ifdef _MSC_VER
+#define SUFFER_WITH_NO_SNPRINTF
 #    ifndef SUFFER_WITH_NO_SNPRINTF
 #      define vnsprintf protable_vsnprintf
 //   this one gives deprication warnings
