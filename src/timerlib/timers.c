@@ -1795,7 +1795,7 @@ TIMER_PROC( LOGICAL, LeaveCriticalSecEx )( PCRITICALSECTION pcs DBG_PASS )
    _32 curtick = timeGetTime();//GetTickCount();
 #endif
 	if( g.flags.bLogCriticalSections )
-		_xlprintf( LOG_NOISE, DBG_VOIDRELAY )( "Begin leave critical section %p %"_64fx, pcs, GetMyThreadID() );
+		_xlprintf( LOG_NOISE DBG_RELAY )( "Begin leave critical section %p %"_64fx, pcs, GetMyThreadID() );
 	while( LockedExchange( &pcs->dwUpdating, 1 ) 
 #ifdef _DEBUG
 			&& ( (curtick+2000) > timeGetTime() )//GetTickCount() )
