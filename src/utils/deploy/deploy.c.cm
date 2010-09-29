@@ -127,11 +127,8 @@ int main( int argc, char **argv )
 #endif
 		fprintf( out, "set( SACK_BASE %s )\n", path );
 		fprintf( out, "set( SACK_INCLUDE_DIR ${SACK_BASE}/include/sack )\n" );
-#ifdef __WATCOMC__
-		fprintf( out, "set( SACK_LIBRARIES sack_bag sack_bag_pp )\n" );
-#else
-		fprintf( out, "set( SACK_LIBRARIES sack_bag sack_bag++ )\n" );
-#endif
+                fprintf( out, "set( SACK_BAG_PLUSPLUS @SACK_BAG_PLUSPLUS@ )\n" );
+		fprintf( out, "set( SACK_LIBRARIES sack_bag ${SACK_BAG_PLUSPLUS} )\n" );
 		fprintf( out, "set( SACK_LIBRARY_DIR ${SACK_BASE}/lib )\n" );
 		fprintf( out, "\n" );
 		fprintf( out, "  if( ${CMAKE_COMPILER_IS_GNUCC} )\n" );
@@ -150,6 +147,7 @@ int main( int argc, char **argv )
 		//fprintf( out, "install( FILES bin/sack_bag.dll DESTINATION ${somewhere} )\n" );
 		fprintf( out, "\n" );
 		fprintf( out, "set(CMAKE_BUILD_TYPE \"%s\" CACHE STRING \"Set build type\")\n", build_type );
+
 		fprintf( out, "\n" );
 
 		fclose( out );
