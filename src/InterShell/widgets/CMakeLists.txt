@@ -13,26 +13,25 @@ add_definitions(
 	-DBANNER_SOURCE  -DKEYPAD_SOURCE
 )
 
-if( C++ )
-set_source_files_properties( ${SOURCES} PROPERTIES LANGUAGE "CXX" )
-endif()
-
 add_library( ${PROJECT_NAME} SHARED 
    ${FIRST_GCC_LIBRARY_SOURCE}
       ${SOURCES} 
    ${LAST_GCC_LIBRARY_SOURCE}
 )
 
-string( REGEX REPLACE "(.*)\\.(.*)" "\\1_\\2" TARGET_LABEL ${PROJECT_NAME} )
+string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL} ${LibraryExtraFlags}"
                   FOLDER InterShell
 )
 
 
-target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} ${SACK_PSI_LIBRARY})
+target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES})
 install_default_dest( ${PROJECT_NAME} )
 
+if( WIN32 )
+target_link_libraries( ${PROJECT_NAME} winmm )
+endif( WIN32 )
 
 SET( WIDGET_SDK
   include/banner.h include/buttons.h include/keypad.h
@@ -45,5 +44,11 @@ INSTALL(
     include/${CMAKE_PROJECT_NAME}/widgets
 )
 
+INSTALL( 
+  FILES
+    ${WIDGET_SDK}
+  DESTINATION
+    ${SACK_BASE}/include/${CMAKE_PROJECT_NAME}/widgets
+)
 
 

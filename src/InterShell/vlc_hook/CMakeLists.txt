@@ -24,7 +24,7 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
         FOLDER "Video Streaming" 
 )
 
-target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} )
+target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} )
 
 install_default_dest( ${PROJECT_NAME} )
 install_literal_product( ${PROJECT_NAME} InterShell/plugins ) 
