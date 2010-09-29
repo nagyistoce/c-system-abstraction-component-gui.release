@@ -53,7 +53,7 @@
 
 #include <timers.h>
 
-#include <../src/memlib/sharestruc.h>
+#include "../memlib/sharestruc.h"
 #ifdef __cplusplus 
 namespace sack {
 	namespace timers {
