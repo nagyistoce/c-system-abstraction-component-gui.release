@@ -557,31 +557,72 @@ set( SACK_PLUSPLUS_SOURCES
 
 add_library( sack_bag SHARED   ${SACK_SOURCES}  )
 
+set( SACK_PLUSPLUS_HEADERS 
+     src/msgsvr/summoner/summoner.h
+     src/systemlib/taskinfo.h
+     src/filesyslib/filemon/monitor.h
+     src/memlib/sharestruc.h
+     src/procreglib/registry.h
+     src/netlib/netstruc.h
+     src/netlib/ping.h
+     src/vectlib/vecstruc.h
+     src/SQLlib/sqlstruc.h
+     src/SQLlib/optlib/optlib.h
+     src/SQLlib/optlib/makeopts.mysql
+     src/imglib/blotproto.h
+    src/imglib/fntglobal.h
+    src/imglib/cache.h
+    src/imglib/gifimage.h
+    src/imglib/pngimage.h
+    src/imglib/jpgimage.h
+        src/imglib/bmpimage.h
+        src/imglib/sprite_local.h
+        src/vidlib/local.h
+        src/vidlib/glext.h
+        src/psilib/controlstruc.h
+        src/psilib/global.h
+        src/psilib/calctl/local.h
+        src/psilib/mouse.h
+        src/psilib/borders.h
+        src/psilib/resource.h
+        src/psilib/CommonEdit.Frame
+        src/psilib/palette.frame
+        src/psilib/menustruc.h
+        src/psilib/console/consolestruc.h
+        src/psilib/console/history.h
+        src/psilib/console/keydefs.h
+        src/psilib/console/histstruct.h
+        src/psilib/console/WinLogic.h
+        src/genx/genx.h
+)
+FOREACH(SOURCE ${SACK_PLUSPLUS_HEADERS})
+       EXECUTE_PROCESS(COMMAND cmake -E copy_if_different ${PROJECT_SOURCE_DIR}/${SOURCE} ${CMAKE_BINARY_DIR}/${SOURCE} )
+ENDFOREACH(SOURCE)
+
 set( cplusplus_sources )
 
 FOREACH(SOURCE ${SACK_PLUSPLUS_SOURCES})
    if( ${SOURCE} MATCHES "(.*)\\.c" )
      set( BASENAME ${CMAKE_MATCH_1} )
-     if( ${SOURCE} MATCHES "^${PROJECT_SOURCE_DIR}.*" )
        get_source_file_property(SOURCE_FOLDER ${SOURCE} FOLDER)
-       if( NOT ${SOURCE_FOLDER} MATCHES "NOTFOUND" )
-         #message( "err folder : ${SOURCE_FOLDER} " )
-         SOURCE_GROUP( ${SOURCE_FOLDER} FILES ${SOURCE} )
-         SOURCE_GROUP( ${SOURCE_FOLDER} FILES ${CMAKE_BINARY_DIR}/${BASENAME}.cpp )
+       if( ${SOURCE} MATCHES "^${PROJECT_SOURCE_DIR}.*" )
+          if( NOT ${SOURCE_FOLDER} MATCHES "NOTFOUND" )
+            #message( "err folder : ${SOURCE_FOLDER} " )
+            SOURCE_GROUP( ${SOURCE_FOLDER} FILES ${SOURCE} )
+            SOURCE_GROUP( ${SOURCE_FOLDER} FILES ${CMAKE_BINARY_DIR}/${BASENAME}.cpp )
+          endif()
+          EXECUTE_PROCESS(COMMAND cmake -E copy_if_different ${SOURCE} ${CMAKE_BINARY_DIR}/${BASENAME}.cpp )
+       
+       else( ${SOURCE} MATCHES "^${PROJECT_SOURCE_DIR}.*" )
+         if( NOT ${SOURCE_FOLDER} MATCHES "NOTFOUND" )
+           #message( "err folder : ${SOURCE_FOLDER} " )
+           SOURCE_GROUP( ${SOURCE_FOLDER} FILES ${PROJECT_SOURCE_DIR}/${SOURCE} )
+           SOURCE_GROUP( ${SOURCE_FOLDER} FILES ${CMAKE_BINARY_DIR}/${BASENAME}.cpp )
+         endif()
+         EXECUTE_PROCESS(COMMAND cmake -E copy_if_different ${PROJECT_SOURCE_DIR}/${SOURCE} ${CMAKE_BINARY_DIR}/${BASENAME}.cpp )
+         #message( "LIB2_SOURCE2 : ${BASENAME}  ${SOURCE}" )
        endif()
-       EXECUTE_PROCESS(COMMAND cmake -E copy_if_different ${SOURCE} ${CMAKE_BINARY_DIR}/${BASENAME}.cpp )
-       #message( "LIB2_SOURCE1 : ${BASENAME}  ${SOURCE}" )
-      else()
-        get_source_file_property(SOURCE_FOLDER ${PROJECT_SOURCE_DIR}/${SOURCE} FOLDER)
-        if( NOT ${SOURCE_FOLDER} MATCHES "NOTFOUND" )
-          #message( "err folder : ${SOURCE_FOLDER} " )
-          SOURCE_GROUP( ${SOURCE_FOLDER} FILES ${PROJECT_SOURCE_DIR}/${SOURCE} )
-          SOURCE_GROUP( ${SOURCE_FOLDER} FILES ${CMAKE_BINARY_DIR}/${BASENAME}.cpp )
-        endif()
-        EXECUTE_PROCESS(COMMAND cmake -E copy_if_different ${PROJECT_SOURCE_DIR}/${SOURCE} ${CMAKE_BINARY_DIR}/${BASENAME}.cpp )
-        #message( "LIB2_SOURCE2 : ${BASENAME}  ${SOURCE}" )
-      endif()
-      set( cplusplus_sources ${cplusplus_sources} ${CMAKE_BINARY_DIR}/${BASENAME}.cpp )
+     set( cplusplus_sources ${cplusplus_sources} ${CMAKE_BINARY_DIR}/${BASENAME}.cpp )
    else()
       #message( "NOT THING ${SOURCE}" )
    endif()
