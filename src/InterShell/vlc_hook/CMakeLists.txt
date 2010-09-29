@@ -25,6 +25,9 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 )
 
 target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} )
+if( WIN32 )
+target_link_libraries( ${PROJECT_NAME} winmm )
+endif( WIN32 )
 
 install_default_dest( ${PROJECT_NAME} )
 install_literal_product( ${PROJECT_NAME} InterShell/plugins ) 
