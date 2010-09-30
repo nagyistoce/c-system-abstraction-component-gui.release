@@ -831,9 +831,9 @@ add_subdirectory( src/deadstart )
 add_subdirectory( src/utils/deploy )
 add_subdirectory( src/utils/pcopy )
 
+SET( CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP 1 )
 
 INCLUDE(InstallRequiredSystemLibraries)
-
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "SACK Layer 1")
 SET(CPACK_PACKAGE_VENDOR "Freedom Collective")
 SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/howto.compile")
