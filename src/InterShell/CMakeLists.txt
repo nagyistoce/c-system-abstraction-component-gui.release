@@ -76,15 +76,14 @@ INSTALL(
   FILES
     ${INTERSHELL_SDK}
   DESTINATION
-    include/${CMAKE_PROJECT_OUTPUT}/InterShell
+    include/InterShell
 )
 
 INSTALL( 
   FILES
     ${INTERSHELL_SDK}
   DESTINATION
-    ${SACK_BASE}/include/${CMAKE_PROJECT_OUTPUT}/InterShell
-)
+    ${SACK_BASE}/include/SACK/InterShell )
 
 if( NOT __ARM__ )
 add_subdirectory( vlc_hook )
