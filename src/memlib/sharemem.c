@@ -231,7 +231,7 @@ inline _32 DoXchg( PV_32 p, _32 val ){  __asm__( WIDE("lock xchg (%2),%0"):"=a"(
 {
 	// Windows only available - for linux platforms please consult
 	// the assembly version should be consulted
-#if defined( _WIN32 ) || defined( __WINDOWS__ ) || defined( WIN32 )
+#if defined( _WIN32 ) || defined( WIN32 ) || defined( WIN32 )
 #  if !defined(_MSC_VER)
 	return InterlockedExchange( (volatile LONG *)p, val );
 #  else
@@ -1079,7 +1079,7 @@ void InitSharedMemory( void )
 //------------------------------------------------------------------------------------------------------
 // private
 static PSPACE AddSpace( PSPACE pAddAfter
-#if defined( __WINDOWS__ ) || defined( __CYGWIN__ )
+#if defined( WIN32 ) || defined( __CYGWIN__ )
 							 , HANDLE hFile
 							 , HANDLE hMem
 #else
