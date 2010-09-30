@@ -1,6 +1,6 @@
 
 cmake_minimum_required(VERSION 2.8)
-project( sack_widgets ) 
+project( sack_widgets ) 
 
 set(SOURCES 
    banner/banner.c 
@@ -25,9 +25,11 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   FOLDER InterShell
 )
 
-
 target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES})
+
 install_default_dest( ${PROJECT_NAME} )
+
+install_sack_sdk_dest( ${PROJECT_NAME} )
 
 if( WIN32 )
 target_link_libraries( ${PROJECT_NAME} winmm )
@@ -49,19 +51,4 @@ INSTALL(
     ${WIDGET_SDK}
   DESTINATION
     ${SACK_BASE}/include/SACK/widgets )
-
-install_default_dest( ${PROJECT_NAME} )
-if( WIN32 )
-	# On Windows platforms, the dynamic libs should
-	# go in the same dir as the executables.
-	install( TARGETS ${PROJECT_NAME}
-	        RUNTIME DESTINATION ${SACK_BASE}/bin                     
-        	LIBRARY DESTINATION ${SACK_BASE}/bin
-	        ARCHIVE DESTINATION ${SACK_BASE}/lib )
-else( WIN32 )
-	install( TARGETS ${PROJECT_NAME}
-	        RUNTIME DESTINATION ${SACK_BASE}/bin 
-        	LIBRARY DESTINATION ${SACK_BASE}/lib
-	        ARCHIVE DESTINATION ${SACK_BASE}/lib )
-endif( WIN32 )
 
