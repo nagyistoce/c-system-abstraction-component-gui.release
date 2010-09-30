@@ -1,9 +1,11 @@
 cmake_minimum_required(VERSION 2.8)
 
-set(CMAKE_BUILD_TYPE "Debug" CACHE STRING
-      "Set build type")
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
-               "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+project( SACK )
+
+set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Set build type")
+set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+            "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+
 
 if( ${CMAKE_GENERATOR} MATCHES "Watcom WMake" )
 
@@ -13,7 +15,7 @@ if( ${CMAKE_GENERATOR} MATCHES "Watcom WMake" )
 SET( CMAKE_RC_COMPILER "rc" )
 #SET(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> /fo<OBJECT> <SOURCE>  -i${SACK_SOURCE_DIR}")
 
- set( ExtraFlags "${ExtraFlags} -DXML_MIN_SIZE /fp5 /fpi87" )
+ set( ExtraFlags "${ExtraFlags} /fp5 /fpi87" )
  # this flag is for build dll?  emit DllRuntime startup link 
  #set( LibraryExtraFlags "-bd" )
  set( ConsoleProgramExtraFlags "-bc" )
@@ -32,9 +34,6 @@ set(WIN32_VERSION "0x0501" CACHE STRING
                "0x501" "0x0500" "0x0400")
 add_definitions( -D_WIN32_WINNT=${WIN32_VERSION} )
 
-#ENABLE_LANGUAGE(RC)
-
-project( SACK )
 
 
 set( SACK_BASE ${PROJECT_SOURCE_DIR} )
@@ -44,7 +43,7 @@ include( DefaultInstall )
 #include( FindSqlite )
 
 if( WIN32 )
-   set( __WINDOWS__ ON )
+   set( WIN32 ON )
 else()
    if( UNIX )
       set( __LINUX__ ON )
@@ -81,10 +80,10 @@ endif ( UNIX )
 
 OPTION( BUILD_INTERSHELL "Build InterShell" ON )
 OPTION( SACK_ONLY "Build only sack library, and include structure?" OFF )
-OPTION( __WINDOWS__ "Enable specific windows features" ${__WINDOWS__} )
-OPTION( __LINUX__ "Enable specific linux features (disable __WINDOWS__)" ${UNIX} )
-OPTION( __LINUX64__ "Enable specific linux features (disable __WINDOWS__)" OFF )
-OPTION( __ARM__ "Enable specific arm-linux features (disable __WINDOWS__)" OFF )
+#OPTION( WIN32 "Enable specific windows features" ${WIN32} ) # used to be __WINDOWS__
+OPTION( __LINUX__ "Enable specific linux features (disable WIN32)" ${UNIX} )
+OPTION( __LINUX64__ "Enable specific linux features (disable WIN32)" OFF )
+OPTION( __ARM__ "Enable specific arm-linux features (disable WIN32)" OFF )
 OPTION( USE_ODBC "Use Odbc" 1 )
 OPTION( USE_OPTIONS "Use Option Code all internal option usage (and don't include option code)" 1 )
 OPTION( USING_OLD_MINGW "MinGW Has NO UpdateLayeredWindow" ${MINGW} )
@@ -118,7 +117,7 @@ else( )
 endif()
 
 
-add_definitions( -DSACK_CORE_BUILD )
+set( ExtraDefinitions ${ExtraDefinitions};SACK_CORE_BUILD )
 
 
 if( __LINUX__ )
@@ -141,7 +140,7 @@ SET_SOURCE_FILES_PROPERTIES( ${ODBC_SOURCES} PROPERTIES
 		FOLDER "Source Files\\ODBC" )
 
  if( USE_ODBC )
-add_definitions( -DUSE_ODBC )
+set( ExtraDefinitions ${ExtraDefinitions};USE_ODBC )
    if( WIN32 )
 LINK_LIBRARIES( odbc32 )
    else()
@@ -157,11 +156,11 @@ SET( OPTION_SOURCE
    src/SQLlib/optlib/optionutil_new.c
    )
  else( USE_OPTIONS )
-add_definitions( -D__NO_OPTIONS__ )
+set( ExtraDefinitions ${ExtraDefinitions};__NO_OPTIONS__ )
  endif( USE_OPTIONS )
 
  if( USE_SQLITE )
-  SET(BAG_SQLITE_INTERFACE  src/sqlite/sqlite_interface.c )
+  SET( BAG_SQLITE_INTERFACE  src/sqlite/sqlite_interface.c )
 #if( !SQLITE3_FOUND )
   SET( SQLITE_VERSION 3.7.0 ) #3.6.23
   SET( SQLITE_SOURCES ${BAG_SQLITE_INTERFACE} src/sqlite/${SQLITE_VERSION}/sqlite3.c  )
@@ -170,23 +169,21 @@ add_definitions( -D__NO_OPTIONS__ )
   if( NOT USE_SQLITE_EXTERNAL )
    # setup to include sqlite in the core libraries...
    set( BAG_SQLITE_SOURCES ${SQLITE_SOURCES} )
-   set( ExtraFlags "${ExtraFlags} -DSQLITE_SOURCE -DUSE_SQLITE_INTERFACE" )
+   set( ExtraDefinitions "${ExtraDefinitions};SQLITE_SOURCE;USE_SQLITE_INTERFACE" )
   else()
-   set( ExtraFlags "${ExtraFlags} -DUSE_SQLITE_INTERFACE" )
+   set( ExtraDefinitions "${ExtraDefinitions};USE_SQLITE_INTERFACE" )
   endif()
 #else( !SQLITE3_FOUND )
-  set( ExtraFlags "${ExtraFlags} -DSYSTEM_SQLITE" )
+  set( ExtraDefinitions "${ExtraDefinitions};SYSTEM_SQLITE" )
 #endif( !SQLITE3_FOUND )
 
-  add_definitions( -DUSE_SQLITE )
+  set( ExtraDefinitions "${ExtraDefinitions};USE_SQLITE" )
     
  endif(USE_SQLITE)
 
 else( USE_ODBC OR USE_SQLITE )
-message( "no options too..." )
-add_definitions( 
-  -D__NO_SQL__ -D__NO_OPTIONS__
-)
+   message( "no options too..." )
+   set( ExtraDefinitions ${ExtraDefinitions};__NO_SQL__;__NO_OPTIONS__ )
 
 endif( USE_ODBC OR USE_SQLITE )
 
@@ -206,14 +203,14 @@ endif()
   endif()
 
 
-if( ( CMAKE_BUILD_TYPE MATCHES "Debug" ) OR (CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo") )
-  set( MoreDefinitions "${MoreDefinitions};_DEBUG" )
-  add_definitions( -D_DEBUG ) # oops, sub projects need this.  should add it to sack cmakepackage too?
-endif()
+set(  CMAKE_CXX_FLAGS_DEBUG -D_DEBUG )
+set(  CMAKE_CXX_FLAGS_RelWithDebInfo -D_DEBUG )
+set(  CMAKE_C_FLAGS_DEBUG -D_DEBUG )
+set(  CMAKE_C_FLAGS_RelWithDebInfo -D_DEBUG )
 
 if( USE_ASSEMBLY )
-set( ExtraFlags "${ExtraFlags} -DHAS_ASSEMBLY )
-set( ImageExtraFlags "${ExtraFlags} -DHAS_ASSEMBLY )
+set( ExtraDefinitions ${ExtraDefinitions};HAS_ASSEMBLY )
+set( ImageExtraFlags "${ImageExtraFlags} -DHAS_ASSEMBLY" )
 set( IMAGE_ASM_SOURCES
   src/imglib/ImageFile.asm
   src/imglib/alphamac.asm
@@ -251,24 +248,23 @@ set( GENX_SOURCES
 SET_SOURCE_FILES_PROPERTIES( ${GENX_SOURCES} PROPERTIES 
 		FOLDER "Source Files\\XML\\Genx Library" )
 
-if( __WINDOWS__ )
-set( VIDLIB_SOURCES
-  src/vidlib/key.c
-  src/vidlib/keydefs.c
-  src/vidlib/vidlib.c
-)
+if( WIN32 )
+	set( VIDLIB_SOURCES
+	  src/vidlib/key.c
+	  src/vidlib/keydefs.c
+	  src/vidlib/vidlib.c
+	)
 
-SET_SOURCE_FILES_PROPERTIES( ${VIDLIB_SOURCES} PROPERTIES 
-		FOLDER "Source Files\\Image Output Library" )
+	SET_SOURCE_FILES_PROPERTIES( ${VIDLIB_SOURCES} PROPERTIES 
+					FOLDER "Source Files\\Image Output Library" )
 
-if( NOT __ARM__ )
-set( VIDLIB_SOURCES ${VIDLIB_SOURCES} src/vidlib/opengl.c )
-set( MoreDefinitions "${MoreDefinitions};_OPENGL_ENABLED" )
-endif( NOT __ARM__ )
+	if( NOT __ARM__ )
+		set( VIDLIB_SOURCES ${VIDLIB_SOURCES} src/vidlib/opengl.c )
+		set( MoreDefinitions "${MoreDefinitions};_OPENGL_ENABLED" )
+	endif( NOT __ARM__ )
+else( WIN32 )
 
-else( __WINDOWS__ )
-
-endif( __WINDOWS__ )
+endif( WIN32 )
 
 set( IMAGE_SOURCES
   src/imglib/alphastab.c
@@ -339,11 +335,11 @@ SET_SOURCE_FILES_PROPERTIES( ${PSI_SOURCES} PROPERTIES
 SET_SOURCE_FILES_PROPERTIES( ${PSI_MORE_CONTROLS} PROPERTIES 
 		FOLDER "Source Files\\PSI Library\\Console" )
 
-if( __WINDOWS__ )
+if( WIN32 )
   SET( PSI_SOURCES ${PSI_SOURCES}  src/systraylib/systray.c )
-else( __WINDOWS__ )
+else( WIN32 )
   SET( PSI_SOURCES ${PSI_SOURCES}  src/systraylib/systray_client.c )
-endif( __WINDOWS__ )
+endif( WIN32 )
 
 if( MSVC )
   SET( SNPRINTF_SOURCES src/snprintf_2.2/snprintf.c )
@@ -351,7 +347,7 @@ if( MSVC )
   				PROPERTIES
                                 COMPILE_DEFINITIONS "SNPRINTF_LONGLONG_SUPPORT;PREFER_PORTABLE_SNPRINTF"
   			)
-  install( FILES src/snprintf_2.2/snprintf.h DESTINATION include/SACK/snprintf-2.2 )
+  install( FILES src/snprintf_2.2/snprintf.h DESTINATION ${CMAKE_BUILD_MODE}/include/SACK/snprintf-2.2 )
 endif( MSVC )
 
 
@@ -397,11 +393,11 @@ else()
 set( MoreDefinitions "${MoreDefinitions};__NO_MSGSVR__" )
 endif()
 
-if( __WINDOWS__ )
+if( WIN32 )
 set( MSG_QUEUE_SOURCES
   src/typelib/msgqueue.c
 )
-endif( __WINDOWS__ )
+endif( WIN32 )
 
 set( TYPE_LIBRARY_SOURCES
   src/typelib/binarylist.c
@@ -417,11 +413,11 @@ set( TYPE_LIBRARY_SOURCES
 SET_SOURCE_FILES_PROPERTIES( ${TYPE_LIBRARY_SOURCES} PROPERTIES 
 		FOLDER "Source Files\\Types" )
 
-if( __WINDOWS__ )
+if( WIN32 )
 set(MORE_NETWORK_SOURCES
   src/netlib/net_winsock2.c
 )
-endif( __WINDOWS__ )
+endif( WIN32 )
 
 if( NOT __ARM__ )
 set(MORE_NETWORK_SOURCES ${MORE_NETWORK_SOURCES} 
@@ -469,9 +465,7 @@ set( MoreDefinitions "${MoreDefinitions};SACKCOMM_SOURCE" )
 
 
 
-include_directories( 
-  ${SACK_BASE}/include
-)
+include_directories(  ${SACK_BASE}/include )
 
 
 if( USING_OLD_MINGW )
@@ -479,12 +473,12 @@ add_definitions( -DMINGW_SUX )
 endif()
 
 
-if( __WINDOWS__ )
-add_definitions( -D__WINDOWS__ )
+if( WIN32 )
+add_definitions( -DWIN32 )
 LIST(APPEND BASE_SOURCES
    src/netlib/net_winsock2.c
 )
-endif(__WINDOWS__)
+endif(WIN32)
 
 if( WIN32 )
 LIST(APPEND BASE_SOURCES     all_resources.rc )
@@ -554,7 +548,6 @@ set( SACK_PLUSPLUS_SOURCES
   ${LAST_GCC_LIBRARY_SOURCE} 
 )
 
-add_library( sack_bag SHARED   ${SACK_SOURCES}  )
 
 set( SACK_PLUSPLUS_HEADERS 
      src/msgsvr/summoner/summoner.h
@@ -627,6 +620,7 @@ FOREACH(SOURCE ${SACK_PLUSPLUS_SOURCES})
    endif()
 ENDFOREACH(SOURCE)
 
+add_library( sack_bag SHARED   ${SACK_SOURCES} ${cplusplus_sources} )
 SET_TARGET_PROPERTIES(sack_bag PROPERTIES
                   DEFINE_SYMBOL SACK_BAG_EXPORTS
                   COMPILE_FLAGS  "-DTARGET_LABEL=sack_bag ${ExtraFlags} ${TARGETNAME} ${ExtraRenderFlags}"
@@ -639,9 +633,7 @@ else(WATCOM)
 set( SACK_BAG_PLUSPLUS sack_bag++ )
 endif(WATCOM)
 
-add_library( ${SACK_BAG_PLUSPLUS} SHARED 
-  ${cplusplus_sources} 
-)
+add_library( ${SACK_BAG_PLUSPLUS} SHARED   ${cplusplus_sources} )
 SET_TARGET_PROPERTIES(${SACK_BAG_PLUSPLUS} PROPERTIES
                   DEFINE_SYMBOL SACK_BAG_EXPORTS
                   COMPILE_FLAGS  "${ExtraFlags} ${ExtraRenderFlags}"
@@ -665,7 +657,7 @@ endif()
 set( SACK_LIBRARY sack_bag )
 set( SACK_LIBRARIES sack_bag )
 
-if( __WINDOWS__ )
+if( WIN32 )
   if( __ARM__ )
     target_link_libraries( sack_bag ws2 mmtimer iphlpapi coredll corelibc.lib)
     target_link_libraries( ${SACK_BAG_PLUSPLUS} sack_bag ws2 mmtimer iphlpapi coredll corelibc.lib)
@@ -673,10 +665,10 @@ if( __WINDOWS__ )
     target_link_libraries( sack_bag wsock32 ws2_32 opengl32 winmm iphlpapi)
     target_link_libraries( ${SACK_BAG_PLUSPLUS} sack_bag wsock32 ws2_32 opengl32 winmm iphlpapi)
   endif()
-else( __WINDOWS__ )
+else( WIN32 )
   target_link_libraries( sack_bag odbc ${SQLITE3_LIBRARIES} ${PNG_LIBRARIES} ${JPEG_LIBRARIES} )
   target_link_libraries( ${SACK_BAG_PLUSPLUS} sack_bag odbc ${SQLITE3_LIBRARIES} ${PNG_LIBRARIES} ${JPEG_LIBRARIES} )
-endif( __WINDOWS__ )
+endif( WIN32 )
 
 install_default_dest( sack_bag )
 install_default_dest( ${SACK_BAG_PLUSPLUS} )
@@ -812,7 +804,7 @@ endif( WATCOM )
 
   if( USE_SQLITE_EXTERNAL )
    set( sqlite_external bag.sqlite3.external )
-   set( ExtraFlags "${ExtraFlags} -DUSE_SQLITE_INTERFACE" )
+   set( ExtraDefinitions "${ExtraDefinitions};USE_SQLITE_INTERFACE" )
    add_library( ${sqlite_external} SHARED 
       ${FIRST_GCC_LIBRARY_SOURCE} 
       ${SQLITE_SOURCES}
