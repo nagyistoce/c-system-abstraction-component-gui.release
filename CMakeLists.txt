@@ -200,9 +200,9 @@ endif()
 
 
 set(  CMAKE_CXX_FLAGS_DEBUG -D_DEBUG )
-set(  CMAKE_CXX_FLAGS_RelWithDebInfo -D_DEBUG )
+set(  CMAKE_CXX_FLAGS_RELWITHDEBINFO -D_DEBUG )
 set(  CMAKE_C_FLAGS_DEBUG -D_DEBUG )
-set(  CMAKE_C_FLAGS_RelWithDebInfo -D_DEBUG )
+set(  CMAKE_C_FLAGS_RELWITHDEBINFO -D_DEBUG )
 
 if( USE_ASSEMBLY )
 set( ExtraDefinitions ${ExtraDefinitions};HAS_ASSEMBLY )
