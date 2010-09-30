@@ -19,7 +19,7 @@ COMPILE_FLAGS  "-DTARGET_LABEL=${PROJECT_NAME}"
 )
 
 target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} )
-install_default_dest_binary( ${PROJECT_NAME} )
+install_mode_dest( ${PROJECT_NAME} )
 
 project( pcopy.portable )
 
@@ -59,5 +59,5 @@ COMPILE_DEFINITIONS "__STATIC__;SACK_BAG_EXPORTS;__NO_OPTIONS__;__STATIC__;__STA
 
 target_link_libraries( ${PROJECT_NAME} winmm )
 
-install_default_dest_binary( ${PROJECT_NAME} )
+install_mode_dest( ${PROJECT_NAME} )
 
