@@ -14,7 +14,7 @@
 
 #include <imglib/imagestruct.h>
 
-#ifdef __WINDOWS__
+#ifdef WIN32
 # ifndef _ARM_
 #  include <gl\gl.h>         // Header File For The OpenGL32 Library
 #  include <gl\glu.h>        // Header File For The GLu32 Library
@@ -51,7 +51,7 @@ typedef struct PBOInfo
    int nextIndex;
 #define PBO_COUNT 2
 #ifndef __NO_OPENGL__
-# ifdef __WINDOWS__
+# ifdef WIN32
 	 GLuint pboIds[PBO_COUNT];           // IDs of PBOs
 # endif
 #endif
@@ -188,12 +188,12 @@ typedef struct HVIDEO_tag
 
 #endif
 	PLIST sprites; // list of methods to draw sprites on this surface.
-#ifdef __WINDOWS__
+#ifdef WIN32
 	HWND hWndContainer;
 #endif
 	struct HVIDEO_tag *under;
 	struct HVIDEO_tag *over;
-#ifdef __WINDOWS__
+#ifdef WIN32
 	HWND hDeferedAfter;
 #endif
    int fade_alpha; // actually only 0-255 value... passed to transparency layered window...

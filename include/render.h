@@ -486,7 +486,7 @@ enum DisplayAttributes {
        height :  new height of the screen.                              */
     RENDER_PROC( void , SetDisplaySize)      ( _32 width, _32 height );
 
-#ifdef __WINDOWS__
+#ifdef WIN32
     /* Enable logging when updates happen to the real display.
        Parameters
        bEnable :  TRUE to enable, FALSE to disable.            */
@@ -1138,7 +1138,7 @@ RENDER_PROC (void, DisableMouseOnIdle) (PRENDERER hVideo, LOGICAL bEnable );
                events to the display.                               */
 RENDER_PROC( void, SetDisplayNoMouse )( PRENDERER hVideo, int bNoMouse );
 
-#ifdef __WINDOWS__
+#ifdef WIN32
 	/* \returns the native handle used to output to. this can be an
 	   SDL_Screen or HWND depending on platform.
 	   Parameters
@@ -1425,7 +1425,7 @@ typedef struct render_interface_tag
 	   
 	   \ \                                                             */
 	RENDER_PROC_PTR(void, PutDisplayIn) (PRENDERER hVideo, PRENDERER hContainer);
-#ifdef __WINDOWS__
+#ifdef WIN32
 	/* <combine sack::image::render::MakeDisplayFrom@HWND>
 	   
 	   \ \                                                 */
@@ -1463,7 +1463,7 @@ typedef struct render_interface_tag
 	   
 	   \ \                                                      */
 	RENDER_PROC_PTR( LOGICAL, IsDisplayHidden )( PRENDERER video );
-#ifdef __WINDOWS__
+#ifdef WIN32
 	/* <combine sack::image::render::GetNativeHandle@PRENDERER>
 	   
 	   \ \                                                      */

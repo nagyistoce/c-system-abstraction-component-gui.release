@@ -73,7 +73,7 @@ CTEXTSTR OSALOT_GetEnvironmentVariable(CTEXTSTR name)
 
 void OSALOT_AppendEnvironmentVariable(CTEXTSTR name, CTEXTSTR value)
 {
-#if defined( __WINDOWS__ ) || defined( __CYGWIN__ )
+#if defined( WIN32 ) || defined( __CYGWIN__ )
 	TEXTCHAR *oldpath;
 	TEXTCHAR *newpath;
 	_32 length;
@@ -100,7 +100,7 @@ void OSALOT_AppendEnvironmentVariable(CTEXTSTR name, CTEXTSTR value)
 
 void OSALOT_PrependEnvironmentVariable(CTEXTSTR name, CTEXTSTR value)
 {
-#if defined( __WINDOWS__ )|| defined( __CYGWIN__ )
+#if defined( WIN32 )|| defined( __CYGWIN__ )
 	TEXTCHAR *oldpath;
 	TEXTCHAR *newpath;
 	int length;
