@@ -147,7 +147,8 @@ using namespace System;
 #ifdef _MSC_VER
 
 #ifndef JPEG_SOURCE
-#error projects were not generated with CMAKE, and JPEG_SORUCE needs to be defined
+//wouldn't matter... the external things wouldn't need to define this
+//#error projects were not generated with CMAKE, and JPEG_SORUCE needs to be defined
 #endif
 //#define JPEG_SOURCE
 //#define __PNG_LIBRARY_SOURCE__
