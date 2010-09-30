@@ -1692,7 +1692,7 @@ static PTRSZVAL CPROC HandleModulePath( PTRSZVAL psv, arg_list args )
 			newpath = (TEXTCHAR*)Allocate( len=(_32)(StrLen( oldpath ) + 1 + StrLen(filepath)) );
 			snprintf( newpath, sizeof(TEXTCHAR)*len, WIDE("%s;%s"), filepath, oldpath );
 #   ifndef UNDER_CE
-#     ifdef __WINDOWS__
+#     ifdef WIN32
 			SetEnvironmentVariable( WIDE("PATH"), newpath );
 #     else
 			setenv( WIDE("PATH"), newpath );
@@ -1933,7 +1933,7 @@ void RegisterAndCreateGlobalWithInit( POINTER *ppGlobal, PTRSZVAL global_size, C
 #ifdef DEBUG_GLOBAL_REGISTRATION
 		lprintf( WIDE("Opening space...") );
 #endif
-#ifdef __WINDOWS__
+#ifdef WIN32
 		snprintf( spacename, sizeof( spacename ), WIDE("%s:%08LX"), name, (GetMyThreadID()) >> 32 );
 #else
 		snprintf( spacename, sizeof( spacename ), WIDE("%s:%08lX"), name, getpid() );

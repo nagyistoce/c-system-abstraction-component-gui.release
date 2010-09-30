@@ -271,7 +271,7 @@ NETWORK_PROC( int, NetworkQuit )(void);
 // VERY RARE!
 NETWORK_PROC( SOCKADDR *, CreateAddress_hton )( _32 dwIP,_16 nHisPort);
 // dwIP would be for 1.2.3.4  (0x04030201 - memory 01 02 03 04) - network order
-#ifndef __WINDOWS__
+#ifndef WIN32
 NETWORK_PROC( SOCKADDR *, CreateUnixAddress )( CTEXTSTR path );
 #endif
 NETWORK_PROC( SOCKADDR *, CreateAddress )( _32 dwIP,_16 nHisPort);

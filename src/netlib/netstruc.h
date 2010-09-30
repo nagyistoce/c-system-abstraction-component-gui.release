@@ -237,7 +237,7 @@ _UDP_NAMESPACE
 int FinishUDPRead( PCLIENT pc );
 _UDP_NAMESPACE_END
 
-#ifdef __WINDOWS__
+#ifdef WIN32
 	// errors started arrising because of faulty driver stacks.
 	// spontaneous 10106 errors in socket require migration to winsock2.
    // socket is opened specifically by protocol descriptor...

@@ -49,7 +49,7 @@ static struct {
 CTEXTSTR OSALOT_GetEnvironmentVariable(CTEXTSTR name)
 {
 
-#ifdef __WINDOWS__
+#ifdef WIN32
 	static int env_size;
 	static TEXTCHAR *env;
 	int size;
@@ -294,7 +294,7 @@ int CPROC EndTaskWindow( PTASK_INFO task )
 
 LOGICAL CPROC StopProgram( PTASK_INFO task )
 {
-#ifdef __WINDOWS__
+#ifdef WIN32
 #ifndef UNDER_CE
    int error;
 	if( !GenerateConsoleCtrlEvent( CTRL_C_EVENT, task->pi.dwProcessId ) )
@@ -615,7 +615,7 @@ typedef struct loaded_function_tag
 	TEXTCHAR name[];
 } FUNCTION, *PFUNCTION;
 
-#ifdef __WINDOWS__
+#ifdef WIN32
 typedef HMODULE HLIBRARY;
 #else
 typedef void* HLIBRARY;

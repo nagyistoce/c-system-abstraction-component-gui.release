@@ -58,7 +58,7 @@
 //*******************8
 
 #endif
-#ifdef __WINDOWS__
+#ifdef WIN32
 #include <windows.h>
 #include <stdio.h>
 #ifdef __CYGWIN__
@@ -198,7 +198,7 @@ NETWORK_PROC( int, GetMacAddress)(PCLIENT pc )//int get_mac_addr (char *device, 
 
 	return 0;
 #endif
-#ifdef __WINDOWS__
+#ifdef WIN32
 
     HRESULT hr;
     ULONG   ulLen;
@@ -587,7 +587,7 @@ static int NetworkStartup( void )
 
 		//--------------------
 		// sorry this is really really ugly to read!
-#ifdef __WINDOWS__
+#ifdef WIN32
 		sockMaster = OpenSocket( TRUE, FALSE, FALSE );
 		if( sockMaster == INVALID_SOCKET )
 		{
@@ -600,7 +600,7 @@ static int NetworkStartup( void )
 
 
 			//--------------------
-#ifdef __WINDOWS__
+#ifdef WIN32
 		}
 #endif
 		//--------------------
@@ -2081,7 +2081,7 @@ NETWORK_PROC( LOGICAL, NetworkWait )(HWND hWndNotify,_16 wClients,int wUserData)
 		if( gethostname( buffer, sizeof( buffer ) ) == 0)
 			g.system_name = DupCStr( buffer );
 	}
-#ifdef __WINDOWS__
+#ifdef WIN32
 	{
 		ADDRINFO *result;
 		ADDRINFO *test;
@@ -2290,7 +2290,7 @@ SOCKADDR *CreateRemote(CTEXTSTR lpName,_16 nHisPort)
 {
 	SOCKADDR_IN *lpsaAddr;
    int conversion_success = FALSE;
-#ifndef __WINDOWS__
+#ifndef WIN32
 	PHOSTENT phe;
 	// a IP type name will never have a / in it, therefore
 	// we can assume it's a unix type address....
@@ -2348,7 +2348,7 @@ SOCKADDR *CreateRemote(CTEXTSTR lpName,_16 nHisPort)
 	{
 		if( lpName )
 		{
-#ifdef __WINDOWS__
+#ifdef WIN32
 			{
 				ADDRINFO *result;
 				ADDRINFO *test;
@@ -2367,7 +2367,7 @@ SOCKADDR *CreateRemote(CTEXTSTR lpName,_16 nHisPort)
 				else
 					lprintf( "Error: %d", error );
 			}
-#else //__WINDOWS__
+#else //WIN32
 
 			char *tmp = CStrDup( lpName );
 			if( 1 )//!(phe=gethostbyname(tmp)))
