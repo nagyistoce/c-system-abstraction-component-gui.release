@@ -78,9 +78,6 @@ endif()
 #        set( SDL_INCLUDE_DIR "c:/tools/unix/mingw/include/SDL" )
 endif ( UNIX )
 
-OPTION( BUILD_INTERSHELL "Build InterShell" ON )
-OPTION( SACK_ONLY "Build only sack library, and include structure?" OFF )
-#OPTION( WIN32 "Enable specific windows features" ${WIN32} ) # used to be __WINDOWS__
 OPTION( __LINUX__ "Enable specific linux features (disable WIN32)" ${UNIX} )
 OPTION( __LINUX64__ "Enable specific linux features (disable WIN32)" OFF )
 OPTION( __ARM__ "Enable specific arm-linux features (disable WIN32)" OFF )
@@ -88,7 +85,7 @@ OPTION( USE_ODBC "Use Odbc" 1 )
 OPTION( USE_OPTIONS "Use Option Code all internal option usage (and don't include option code)" 1 )
 OPTION( USING_OLD_MINGW "MinGW Has NO UpdateLayeredWindow" ${MINGW} )
 OPTION( USE_SQLITE "Use SQLITE (also links static internal)" 1 )
-#OPTION( USE_SQLITE_EXTERNAL "Use SQLITE (build as external module)" 1 )
+OPTION( USE_SQLITE_EXTERNAL "Use SQLITE (build as external module, included when off)" 0 )
 OPTION( EXTREME_CODE_DEBUG "Enable extreme warning levels (mingw)" 0 )
 
 OPTION( __NO_GUI__ "No GUI or image parts" 0 )
@@ -120,6 +117,7 @@ endif()
 set( ExtraDefinitions ${ExtraDefinitions};SACK_CORE_BUILD )
 
 
+
 if( __LINUX__ )
    add_definitions( -D__LINUX__ )
 endif( __LINUX__ )
@@ -138,7 +136,6 @@ set( ODBC_SOURCES
 )
 SET_SOURCE_FILES_PROPERTIES( ${ODBC_SOURCES} PROPERTIES 
 		FOLDER "Source Files\\ODBC" )
-
  if( USE_ODBC )
 set( ExtraDefinitions ${ExtraDefinitions};USE_ODBC )
    if( WIN32 )
@@ -158,7 +155,6 @@ SET( OPTION_SOURCE
  else( USE_OPTIONS )
 set( ExtraDefinitions ${ExtraDefinitions};__NO_OPTIONS__ )
  endif( USE_OPTIONS )
-
  if( USE_SQLITE )
   SET( BAG_SQLITE_INTERFACE  src/sqlite/sqlite_interface.c )
 #if( !SQLITE3_FOUND )
@@ -238,7 +234,7 @@ set ( EXPAT_SOURCES
   src/sexpat/xmltok.c
 )
 SOURCE_GROUP( "Source Files\\XML\\expat" FILES ${EXPAT_SOURCES} )
-set( MoreDefinitions "${MoreDefinitions};XML_MIN_SIZE" )
+set( ExtraDefinitions "${ExtraDefinitions};XML_MIN_SIZE" )
 
 # genx is searchable by looking for 'genx xml'
 set( GENX_SOURCES
@@ -260,7 +256,7 @@ if( WIN32 )
 
 	if( NOT __ARM__ )
 		set( VIDLIB_SOURCES ${VIDLIB_SOURCES} src/vidlib/opengl.c )
-		set( MoreDefinitions "${MoreDefinitions};_OPENGL_ENABLED" )
+		set( ExtraDefinitions "${ExtraDefinitions};_OPENGL_ENABLED" )
 	endif( NOT __ARM__ )
 else( WIN32 )
 
@@ -300,7 +296,7 @@ set( PSI_MORE_CONTROLS
   src/psilib/console/regaccess.c
   src/psilib/console/WinLogic.c
 )
-set( MoreDefinitions "${MoreDefinitions};PSI_CONSOLE_SOURCE" )
+set( ExtraDefinitions "${ExtraDefinitions};PSI_CONSOLE_SOURCE" )
 endif( NOT __NO_GUI__ )
 
 set( PSI_SOURCES
@@ -347,7 +343,7 @@ if( MSVC )
   				PROPERTIES
                                 COMPILE_DEFINITIONS "SNPRINTF_LONGLONG_SUPPORT;PREFER_PORTABLE_SNPRINTF"
   			)
-  install( FILES src/snprintf_2.2/snprintf.h DESTINATION ${CMAKE_BUILD_MODE}/include/SACK/snprintf-2.2 )
+  install( FILES src/snprintf_2.2/snprintf.h DESTINATION include/SACK/snprintf-2.2 )
 endif( MSVC )
 
 
@@ -357,7 +353,7 @@ set( PSI_SOURCES ${PSI_SOURCES}
 )
 endif()
 
-set( MoreDefinitions "${MoreDefinitions};GENX_SOURCE" )
+set( ExtraDefinitions "${ExtraDefinitions};GENX_SOURCE" )
 
 set( SACK_MSG_SERVICES 
   src/msgsvr/client/client.c
@@ -390,7 +386,7 @@ set(BASE_SOURCES ${BASE_SOURCES} ${SACK_MSG_SERVICES}
   ${FILESYSTEM_SOURCES}
 )
 else()
-set( MoreDefinitions "${MoreDefinitions};__NO_MSGSVR__" )
+set( ExtraDefinitions "${ExtraDefinitions};__NO_MSGSVR__" )
 endif()
 
 if( WIN32 )
@@ -461,7 +457,7 @@ set(BASE_SOURCES  ${BASE_SOURCES}
   ${OPTION_SOURCE}
 )
 
-set( MoreDefinitions "${MoreDefinitions};SACKCOMM_SOURCE" )
+set( ExtraDefinitions "${ExtraDefinitions};SACKCOMM_SOURCE" )
 
 
 
@@ -620,11 +616,11 @@ FOREACH(SOURCE ${SACK_PLUSPLUS_SOURCES})
    endif()
 ENDFOREACH(SOURCE)
 
-add_library( sack_bag SHARED   ${SACK_SOURCES} ${cplusplus_sources} )
+add_library( sack_bag SHARED ${SACK_SOURCES} )
 SET_TARGET_PROPERTIES(sack_bag PROPERTIES
                   DEFINE_SYMBOL SACK_BAG_EXPORTS
                   COMPILE_FLAGS  "-DTARGET_LABEL=sack_bag ${ExtraFlags} ${TARGETNAME} ${ExtraRenderFlags}"
-                  COMPILE_DEFINITIONS "${MoreDefinitions}"
+                  COMPILE_DEFINITIONS "${ExtraDefinitions}"
 )
 
 if( WATCOM )
@@ -633,29 +629,29 @@ else(WATCOM)
 set( SACK_BAG_PLUSPLUS sack_bag++ )
 endif(WATCOM)
 
-add_library( ${SACK_BAG_PLUSPLUS} SHARED   ${cplusplus_sources} )
+add_library( ${SACK_BAG_PLUSPLUS} SHARED ${cplusplus_sources} )
 SET_TARGET_PROPERTIES(${SACK_BAG_PLUSPLUS} PROPERTIES
                   DEFINE_SYMBOL SACK_BAG_EXPORTS
                   COMPILE_FLAGS  "${ExtraFlags} ${ExtraRenderFlags}"
-                  COMPILE_DEFINITIONS "${MoreDefinitions};TARGET_LABEL=sack_bag_plusplus;TARGETNAME=\"${CMAKE_SHARED_LIBRARY_PREFIX}sack_bag${CMAKE_SHARED_LIBRARY_SUFFIX}\""
+                  COMPILE_DEFINITIONS "${ExtraDefinitions};TARGET_LABEL=sack_bag_plusplus;TARGETNAME=\"${CMAKE_SHARED_LIBRARY_PREFIX}sack_bag${CMAKE_SHARED_LIBRARY_SUFFIX}\""
 )
 
 if( __WINDOWS_ARM_CE__ )
-SET_TARGET_PROPERTIES( sack_bag PROPERTIES LINK_LIBRARIES "" )
+  SET_TARGET_PROPERTIES( sack_bag PROPERTIES LINK_LIBRARIES "" )
 endif()
 
 if( WATCOM )
-ADD_DEPENDENCIES( sack_bag generate_foo )
-SET_TARGET_PROPERTIES(sack_bag PROPERTIES LINK_FLAGS "option resource=all_resources.res")
-SET_TARGET_PROPERTIES(${SACK_BAG_PLUSPLUS} PROPERTIES LINK_FLAGS "option resource=all_resources.res")
+  ADD_DEPENDENCIES( sack_bag generate_foo )
+  SET_TARGET_PROPERTIES(sack_bag PROPERTIES LINK_FLAGS "option resource=all_resources.res")
+  SET_TARGET_PROPERTIES(${SACK_BAG_PLUSPLUS} PROPERTIES LINK_FLAGS "option resource=all_resources.res")
 elseif( MINGW )
-ADD_DEPENDENCIES( sack_bag generate_foo )
-#ADD_DEPENDENCIES( sack_bag all_resources.res )
-#SET_TARGET_PROPERTIES(sack_bag PROPERTIES LINK_FLAGS "all_resources.res")
+  ADD_DEPENDENCIES( sack_bag generate_foo )
+  #ADD_DEPENDENCIES( sack_bag all_resources.res )
+  #SET_TARGET_PROPERTIES(sack_bag PROPERTIES LINK_FLAGS "all_resources.res")
 endif()
 
 set( SACK_LIBRARY sack_bag )
-set( SACK_LIBRARIES sack_bag )
+set( SACK_LIBRARIES sack_bag ${SACK_BAG_PLUSPLUS} )
 
 if( WIN32 )
   if( __ARM__ )
@@ -670,9 +666,10 @@ else( WIN32 )
   target_link_libraries( ${SACK_BAG_PLUSPLUS} sack_bag odbc ${SQLITE3_LIBRARIES} ${PNG_LIBRARIES} ${JPEG_LIBRARIES} )
 endif( WIN32 )
 
-install_default_dest( sack_bag )
-install_default_dest( ${SACK_BAG_PLUSPLUS} )
-install( FILES makefiles/cmake/DefaultInstall.cmake DESTINATION . )
+install_mode_dest( sack_bag )
+install_mode_dest( ${SACK_BAG_PLUSPLUS} )
+
+install( FILES makefiles/cmake/DefaultInstall.cmake DESTINATION ${CMAKE_BUILD_TYPE} )
 
 if( NOT NEED_PNG ) 
   target_link_libraries( sack_bag png )
@@ -699,6 +696,7 @@ add_library( bag SHARED
     ${BAG_SQLITE_SOURCES}
   ${LAST_GCC_LIBRARY_SOURCE}  
 )
+
 SET_TARGET_PROPERTIES(bag PROPERTIES 
                   DEFINE_SYMBOL SACK_BAG_EXPORTS
                   COMPILE_FLAGS  "-DTARGET_LABEL=bag ${ExtraFlags}"
@@ -717,13 +715,12 @@ target_link_libraries( bag ws2 mmtimer iphlpapi coredll corelibc.lib )
 else()
 target_link_libraries( bag wsock32 ws2_32 opengl32 winmm iphlpapi)
 endif()
-set( SACK_LIBRARY bag bag.psi bag.image bag.video )
+set( SACK_LIBRARIES bag bag.psi bag.image bag.video )
 
 ###########
 
 if( NEED_FREETYPE OR NEED_JPEG OR NEED_PNG )
-set( SACK_LIBRARY ${SACK_LIBRARY} bag.externals )
-set( SACK_LIBRARIES ${SACK_LIBRARY} )
+set( SACK_LIBRARIES ${SACK_LIBRARIES} bag.externals )
 
 add_library( bag.externals SHARED 
     ${JPEG_SOURCE}
@@ -796,9 +793,8 @@ endif( BUILD_MONOLITHIC )
 
 
 # this SACK_CORE_BUILD is for building before we get 'installed' some of the header locations get moved.
-add_definitions( -DSACK_CORE_BUILD )
 if( WATCOM )
-add_definitions( -D__OBSCURE_STREAM_INTERNALS )
+   set( ExtraDefinitions "${ExtraDefinitions};__OBSCURE_STREAM_INTERNALS" )
 endif( WATCOM )
 
 
@@ -810,7 +806,7 @@ endif( WATCOM )
       ${SQLITE_SOURCES}
       ${LAST_GCC_LIBRARY_SOURCE} )
    # required link back to bag for register interface
-   target_link_libraries( ${sqlite_external} ${SACK_LIBRARY} )
+   target_link_libraries( ${sqlite_external} ${SACK_LIBRARIES} )
    install_default_dest( ${sqlite_external} )
    SET_TARGET_PROPERTIES( ${sqlite_external} PROPERTIES 
                   COMPILE_FLAGS  "-DTARGET_LABEL=bag_sqlite3 -DSQLITE_SOURCE"
@@ -825,8 +821,6 @@ endif( WATCOM )
 if( !MSVC )
 add_subdirectory( src/displaylib )
 endif( !MSVC )
-
-set( SACK_LIBRARIES ${SACK_LIBRARY} )
 
 
 # parts of SDK ...

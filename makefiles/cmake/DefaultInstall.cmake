@@ -18,6 +18,22 @@ else( WIN32 )
 endif( WIN32 )
 endmacro( install_default_dest )
 
+macro( install_mode_dest )
+if( WIN32 )
+	# On Windows platforms, the dynamic libs should
+	# go in the same dir as the executables.
+	install( TARGETS ${ARGV}
+	        RUNTIME DESTINATION ${CMAKE_BUILD_TYPE}/bin                     
+        	LIBRARY DESTINATION ${CMAKE_BUILD_TYPE}/bin
+	        ARCHIVE DESTINATION ${CMAKE_BUILD_TYPE}/lib )
+else( WIN32 )
+	install( TARGETS ${ARGV}
+	        RUNTIME DESTINATION bin 
+        	LIBRARY DESTINATION lib
+	        ARCHIVE DESTINATION lib )
+endif( WIN32 )
+endmacro( install_mode_dest )
+
 macro( install_default_dest_binary )
 if( WIN32 )
 	# On Windows platforms, the dynamic libs should
