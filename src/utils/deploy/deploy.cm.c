@@ -11,7 +11,6 @@
 #define strdup _strdup
 #endif
 
-#include "cmake_environment.h"
 
 int SetRegistryItem( HKEY hRoot, char *pPrefix,
                      char *pProduct, char *pKey, 
@@ -155,7 +154,7 @@ int main( int argc, char **argv )
 		fprintf( out, "\n" );
                 //fprintf( out, "IF(CMAKE_BUILD_TPYE_INITIALIZED_TO_DEFAULT)\n" );
 		
-		fprintf( out, "set(CMAKE_BUILD_TYPE \"%s\" CACHE STRING \"Set build type\")\n", build_type );
+		fprintf( out, "set(CMAKE_BUILD_TYPE \"${CMAKE_BUILD_TYPE}\" CACHE STRING \"Set build type\")\n" );
 		fprintf( out, "set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS Debug Release MinSizeRel RelWithDebInfo)\n" );
                 
                 //fprintf( out, "ENDIF(CMAKE_BUILD_TPYE_INITIALIZED_TO_DEFAULT)\n" );
