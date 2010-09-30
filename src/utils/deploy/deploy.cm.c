@@ -88,9 +88,9 @@ int main( int argc, char **argv )
 		path = ".";
 	snprintf( tmp, sizeof( tmp ), "%s/CMakePackage", path );
 #ifdef _MSC_VER
-	fopen_s( &out, "CMakePackage", "wt" );
+	fopen_s( &out, tmp, "wt" );
 #else
-	out = fopen( "CMakePackage", "wt" );
+	out = fopen( tmp, "wt" );
 #endif
 	if( out )
 	{
@@ -124,11 +124,34 @@ int main( int argc, char **argv )
 			}
 		}
 #endif
+		{
+			char *last1 = strrchr( path, '/' );
+			char *last2 = strrchr( path, '\\' );
+			char *last;
+			if( last1 )
+				if( last2 )
+					if( last1 > last2 )
+						last = last1;
+					else
+						last = last2;
+				else
+					last = last1;
+			else
+				if( last2 )
+					last = last2;
+				else
+					last = NULL;
+			if( last )
+				last[0] = 0;
+			else
+				path = ".";
+		}
+
 		fprintf( out, "set( SACK_BASE %s )\n", path );
 		fprintf( out, "set( SACK_INCLUDE_DIR $""{SACK_BASE}/include/sack )\n" );
                 fprintf( out, "set( SACK_BAG_PLUSPLUS @SACK_BAG_PLUSPLUS@ )\n" );
 		fprintf( out, "set( SACK_LIBRARIES sack_bag $""{SACK_BAG_PLUSPLUS} )\n" );
-		fprintf( out, "set( SACK_LIBRARY_DIR $""{SACK_BASE}/lib )\n" );
+		fprintf( out, "set( SACK_LIBRARY_DIR $""{SACK_BASE}/${CMAKE_BUILD_TYPE}/lib )\n" );
 #ifdef _DEBUG
 		fprintf( out, "add_definitions( -D_DEBUG )\n" );
 #endif
@@ -147,8 +170,8 @@ int main( int argc, char **argv )
 		fprintf( out, "SET( DATA_INSTALL_PREFIX resources )\n" );
 		fprintf( out, "include( $""{SACK_BASE}/${CMAKE_BUILD_TYPE}/DefaultInstall.cmake )\n" );
                 fprintf( out, "macro( INSTALL_SACK dest )\n" );
-		fprintf( out, "install( FILES $""{SACK_BASE}/bin/${CMAKE_SHARED_LIBRARY_PREFIX}${SACK_BAG_PLUSPLUS}${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION $""{dest} )\n" );
-		fprintf( out, "install( FILES $""{SACK_BASE}/bin/${CMAKE_SHARED_LIBRARY_PREFIX}sack_bag${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION $""{dest} )\n" );
+		fprintf( out, "install( FILES $""{SACK_BASE}/${CMAKE_BUILD_TYPE}/bin/${CMAKE_SHARED_LIBRARY_PREFIX}${SACK_BAG_PLUSPLUS}${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION $""{dest} )\n" );
+		fprintf( out, "install( FILES $""{SACK_BASE}/${CMAKE_BUILD_TYPE}/bin/${CMAKE_SHARED_LIBRARY_PREFIX}sack_bag${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION $""{dest} )\n" );
 		//fprintf( out, "install( FILES bin/sack_bag.dll DESTINATION $""{somewhere} )\n" );
                 fprintf( out, "ENDMACRO( INSTALL_SACK )\n" );
 		fprintf( out, "\n" );
