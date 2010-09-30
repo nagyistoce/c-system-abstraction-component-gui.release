@@ -201,7 +201,7 @@ LOCATION struct network_global_data{
 	HWND ghWndNetwork;
 #endif
 	CTEXTSTR system_name;
-#ifdef __WINDOWS__
+#ifdef WIN32
    int nProtos;
 	WSAPROTOCOL_INFO *pProtos;
 

@@ -71,7 +71,7 @@ typedef struct vidlib_local_tag
    CRITICALSECTION csList;
 	//HHOOK hKeyHook;
 #ifndef _ARM_
-#ifdef __WINDOWS__
+#ifdef WIN32
 	BOOL (WINAPI *UpdateLayeredWindow)(HWND,HDC,POINT*,SIZE*,HDC,POINT*,COLORREF,BLENDFUNCTION*,DWORD);
 	BOOL (WINAPI *UpdateLayeredWindowIndirect )(HWND hWnd, const UPDATELAYEREDWINDOWINFO *pULWInfo);
 #endif
