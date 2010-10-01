@@ -257,7 +257,7 @@ void InitMachine( void )
 		// og.system = GetSYstemID( WIDE("SYSTEMNAME") );
 		og.SystemID = 0;  // default - any system...
 		og.flags.bInited = 1;
-		og.SystemID = SQLReadNameTable( og.Option, GetSystemName(), WIDE("systems"), WIDE("system_id")  );
+		//og.SystemID = SQLReadNameTable( og.Option, GetSystemName(), WIDE("systems"), WIDE("system_id")  );
 	}
 }
 
@@ -455,8 +455,13 @@ INDEX GetSystemIndex( CTEXTSTR pSystemName )
 {
    if( pSystemName )
       return ReadNameTable( pSystemName, WIDE("systems"), WIDE("system_id") );
-   else
-      return og.SystemID;
+	else
+	{
+		if( !og.SystemID )
+			og.SystemID = SQLReadNameTable( og.Option, pSystemName, WIDE("systems"), WIDE("system_id")  );
+
+		return og.SystemID;
+	}
 }
 
 //------------------------------------------------------------------------
