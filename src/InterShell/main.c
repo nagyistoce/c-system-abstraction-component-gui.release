@@ -4905,7 +4905,8 @@ PUBLIC( int, Main)( int argc, TEXTCHAR **argv, int bConsole )
 	g.flags.bTransparent = SACK_GetProfileIntEx( GetProgramName(), "Intershell Layout/Display is transparent", 1, TRUE );
 	g.flags.bSpanDisplay = SACK_GetProfileIntEx( GetProgramName(), "Intershell Layout/Use Both Displays(horizontal)", 0, TRUE );
 #endif
-	//SetSystemLog( SYSLOG_FILE, stderr );
+	if( bConsole )
+		SetSystemLog( SYSLOG_FILE, stderr );
 	//SystemLogTime( SYSLOG_TIME_CPU| SYSLOG_TIME_DELTA );
 
 	g.system_name = GetSystemName(); // Initialized here. Command argument -Sysname= may override.
