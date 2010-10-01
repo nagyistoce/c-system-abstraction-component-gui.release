@@ -152,9 +152,11 @@ int main( int argc, char **argv )
                 fprintf( out, "set( SACK_BAG_PLUSPLUS @SACK_BAG_PLUSPLUS@ )\n" );
 		fprintf( out, "set( SACK_LIBRARIES sack_bag $""{SACK_BAG_PLUSPLUS} )\n" );
 		fprintf( out, "set( SACK_LIBRARY_DIR $""{SACK_BASE}/${CMAKE_BUILD_TYPE}/lib )\n" );
-#ifdef _DEBUG
-		fprintf( out, "add_definitions( -D_DEBUG )\n" );
-#endif
+		fprintf( out, "\n" );
+		fprintf( out, "set(  CMAKE_CXX_FLAGS_DEBUG $""{CMAKE_CXX_FLAGS_DEBUG};-D_DEBUG )\n" );
+		fprintf( out, "set(  CMAKE_CXX_FLAGS_RELWITHDEBINFO $""{CMAKE_CXX_FLAGS_RELWITHDEBINFO};-D_DEBUG )\n" );
+		fprintf( out, "set(  CMAKE_C_FLAGS_DEBUG $""{CMAKE_C_FLAGS_DEBUG};-D_DEBUG )\n" );
+		fprintf( out, "set(  CMAKE_C_FLAGS_RELWITHDEBINFO $""{CMAKE_C_FLAGS_RELWITHDEBINFO};-D_DEBUG )\n" );
 		fprintf( out, "\n" );
 		fprintf( out, "  if( $""{CMAKE_COMPILER_IS_GNUCC} )\n" );
 		fprintf( out, "  SET( FIRST_GCC_LIBRARY_SOURCE $""{SACK_BASE}/src/sack/deadstart_list.c )\n" );
