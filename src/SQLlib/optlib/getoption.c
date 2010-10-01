@@ -165,12 +165,12 @@ SQLGETOPTION_PROC( void, CreateOptionDatabaseEx )( PODBC odbc )
 
 void SetOptionDatabaseOption( PODBC odbc, int bNewVersion )
 {
-   POPTION_TREE node = GetOptionTreeEx( odbc );
+	POPTION_TREE node = GetOptionTreeEx( odbc );
 	if( node )
 	{
 		node->flags.bCreated = FALSE;
 		node->flags.bNewVersion = bNewVersion;
-      CreateOptionDatabaseEx( odbc );
+		CreateOptionDatabaseEx( odbc );
 	}
 }
 
@@ -182,13 +182,13 @@ SQLGETOPTION_PROC( void, CreateOptionDatabase )( void )
 		TEXTCHAR buffer[256];
 		CTEXTSTR loadpath = GetCurrentPath( buffer, sizeof( buffer ) );
 #else
-		CTEXTSTR loadpath = OSALOT_GetEnvironmentVariable( "MY_LOAD_PATH" );
-      //lprintf( "Loadpath is %p", loadpath );
+		CTEXTSTR loadpath = GetProgramPath();
 		if( !loadpath )
-         loadpath = ".";
+			loadpath = ".";
 #endif
 		if( strlen( global_sqlstub_data->Option.info.pDSN ) == 0 )
 			global_sqlstub_data->Option.info.pDSN = "option.db";
+
 		//lprintf( "connect to %s[%s]", global_sqlstub_data->Option.info.pDSN, loadpath );
 
 		//if( !pathchr( global_sqlstub_data->Option.info.pDSN )
@@ -202,7 +202,7 @@ SQLGETOPTION_PROC( void, CreateOptionDatabase )( void )
 			{
 				snprintf( out, len, "%s", global_sqlstub_data->Option.info.pDSN );
 			}
-         else
+			else
 				snprintf( out, len, "%s/%s", loadpath, global_sqlstub_data->Option.info.pDSN );
 #ifdef DETAILED_LOGGING
 			lprintf( "Connecting to default SQLite dabase?" );
@@ -212,7 +212,7 @@ SQLGETOPTION_PROC( void, CreateOptionDatabase )( void )
 				//lprintf( "connect to %s", out );
 				og.Option = ConnectToDatabase( out );
 				SetSQLThreadProtect( og.Option, TRUE );
-            SetSQLAutoTransact( og.Option, TRUE );
+				SetSQLAutoTransact( og.Option, TRUE );
 				og.Option->last_command_tick = 0; // just to make sure
 			}
 		}
@@ -237,14 +237,18 @@ void InitMachine( void )
 {
 	if( !og.flags.bInited )
 	{
+#if 0
 		_32 timeout;
+#endif
 		CreateOptionDatabase();
 		// acutlaly init should be called always ....
+#if 0
 		timeout = GetTickCount() + 1000;
 		while( !IsSQLOpen( og.Option ) && ( timeout > GetTickCount() ) )
 		{
 			Sleep( 100 );
 		}
+#endif
 		if( !IsSQLOpen(og.Option) )
 		{
 			lprintf( WIDE("Get Option init failed... no database...") );
@@ -253,14 +257,7 @@ void InitMachine( void )
 		// og.system = GetSYstemID( WIDE("SYSTEMNAME") );
 		og.SystemID = 0;  // default - any system...
 		og.flags.bInited = 1;
-		{
-#ifdef _WIN32
-			WSADATA ws;
-			WSAStartup( MAKEWORD(1,1), &ws );
-#endif
-			gethostname( og.SystemName, sizeof( og.SystemName ) );
-			og.SystemID = SQLReadNameTable( og.Option, og.SystemName, WIDE("systems"), WIDE("system_id")  );
-		}
+		og.SystemID = SQLReadNameTable( og.Option, GetSystemName(), WIDE("systems"), WIDE("system_id")  );
 	}
 }
 
