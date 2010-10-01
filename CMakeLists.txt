@@ -671,7 +671,11 @@ install_mode_dest( ${SACK_BAG_PLUSPLUS} )
 #install_default_dest( sack_bag )
 #install_default_dest( ${SACK_BAG_PLUSPLUS} )
 
-install( FILES makefiles/cmake/DefaultInstall.cmake DESTINATION ${CMAKE_BUILD_TYPE} )
+if(MSVC)
+install( FILES makefiles/cmake/DefaultInstall.cmake DESTINATION \${CMAKE_INSTALL_CONFIG_NAME} )
+else(MSVC)
+install( FILES makefiles/cmake/DefaultInstall.cmake DESTINATION . )
+endif(MSVC)
 
 if( NOT NEED_PNG ) 
   target_link_libraries( sack_bag png )
