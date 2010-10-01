@@ -91,9 +91,15 @@ PRELOAD( InitNetworkGlobalOptions )
 #endif
 }
 
+void LowLevelInit( void )
+{
+   if( !global_network_data )
+		SimpleRegisterAndCreateGlobal( global_network_data );
+}
+
 PRIORITY_PRELOAD( InitNetworkGlobal, GLOBAL_INIT_PRELOAD_PRIORITY )
 {
-	SimpleRegisterAndCreateGlobal( global_network_data );
+   LowLevelInit();
 	if( !g.system_name )
 	{
   		g.system_name = WIDE("no.network");
@@ -1970,7 +1976,7 @@ void ReallocClients( _16 wClients, int nUserData )
 	P_8 pUserData;
 	PCLIENT_SLAB pClientSlab;
 	if( !global_network_data )
-		InvokeDeadstart();
+      LowLevelInit();
 
 	if( !MAX_NETCLIENTS )
 	{
