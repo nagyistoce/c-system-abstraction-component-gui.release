@@ -668,6 +668,8 @@ endif( WIN32 )
 
 install_mode_dest( sack_bag )
 install_mode_dest( ${SACK_BAG_PLUSPLUS} )
+#install_default_dest( sack_bag )
+#install_default_dest( ${SACK_BAG_PLUSPLUS} )
 
 install( FILES makefiles/cmake/DefaultInstall.cmake DESTINATION ${CMAKE_BUILD_TYPE} )
 
@@ -822,6 +824,7 @@ if( !MSVC )
 add_subdirectory( src/displaylib )
 endif( !MSVC )
 
+#add_subdirectory( src/InterShell )
 
 # parts of SDK ...
 add_subdirectory( include )
