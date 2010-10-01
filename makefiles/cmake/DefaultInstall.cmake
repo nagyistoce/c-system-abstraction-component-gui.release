@@ -34,6 +34,23 @@ else( WIN32 )
 endif( WIN32 )
 endmacro( install_mode_dest )
 
+macro( install_sack_sdk_dest )
+if( WIN32 )
+	# On Windows platforms, the dynamic libs should
+	# go in the same dir as the executables.
+	install( TARGETS ${ARGV}
+	        RUNTIME DESTINATION ${SACK_BASE}/\${CMAKE_INSTALL_CONFIG_NAME}/bin                     
+        	LIBRARY DESTINATION ${SACK_BASE}/\${CMAKE_INSTALL_CONFIG_NAME}/bin
+	        ARCHIVE DESTINATION ${SACK_BASE}/\${CMAKE_INSTALL_CONFIG_NAME}/lib )
+else( WIN32 )
+	install( TARGETS ${ARGV}
+	        RUNTIME DESTINATION ${SACK_BASE}/bin 
+        	LIBRARY DESTINATION ${SACK_BASE}/lib
+	        ARCHIVE DESTINATION ${SACK_BASE}/lib )
+endif( WIN32 )
+endmacro( install_sack_sdk_dest )
+
+
 macro( install_default_dest_binary )
 if( WIN32 )
 	# On Windows platforms, the dynamic libs should
