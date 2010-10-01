@@ -38,7 +38,7 @@ static void CPROC DropSQLiteInterface( POINTER p )
 {
 }
 
-PRIORITY_PRELOAD( RegisterSQLiteInterface, GLOBAL_INIT_PRELOAD_PRIORITY-1 )
+PRIORITY_PRELOAD( RegisterSQLiteInterface, SQL_PRELOAD_PRIORITY-1 )
 {
 	RegisterInterface( WIDE("sqlite3"), GetSQLiteInterface, DropSQLiteInterface );
 
