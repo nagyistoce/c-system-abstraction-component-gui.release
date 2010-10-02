@@ -8,6 +8,12 @@ include( ${SACK_SDK_ROOT_PATH}/CMakePackage )
 
 INSTALL_SACK( bin )
 
+set(WIN32_VERSION "0x0501" CACHE STRING
+      "Set minimum windows build version")
+  set_property(CACHE WIN32_VERSION PROPERTY STRINGS
+               "0x501" "0x0500" "0x0400")
+add_definitions( -D_WIN32_WINNT=${WIN32_VERSION} )
+
 include_directories( ${SACK_INCLUDE_DIR} )
 LINK_DIRECTORIES( ${SACK_LIBRARY_DIR} )
 
@@ -93,7 +99,7 @@ add_subdirectory( stop )
 add_subdirectory( tasks )
 add_subdirectory( clock )
 add_subdirectory( graph )
-
+add_subdirectory( deploy )
 
 # this has to be set before the cmakelists.txt ends... but not before other cmakelists are loaded
 
