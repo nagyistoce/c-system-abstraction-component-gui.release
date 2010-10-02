@@ -157,10 +157,10 @@ int main( int argc, char **argv )
 		fprintf( out, "set( SUPPORTS_PARALLEL_BUILD_TYPE 1 )\n" );
 		fprintf( out, "endif( MSVC )\n" );
 		fprintf( out, "\n" );
-		fprintf( out, "set(  CMAKE_CXX_FLAGS_DEBUG $""{CMAKE_CXX_FLAGS_DEBUG};-D_DEBUG )\n" );
-		fprintf( out, "set(  CMAKE_CXX_FLAGS_RELWITHDEBINFO $""{CMAKE_CXX_FLAGS_RELWITHDEBINFO};-D_DEBUG )\n" );
-		fprintf( out, "set(  CMAKE_C_FLAGS_DEBUG $""{CMAKE_C_FLAGS_DEBUG};-D_DEBUG )\n" );
-		fprintf( out, "set(  CMAKE_C_FLAGS_RELWITHDEBINFO $""{CMAKE_C_FLAGS_RELWITHDEBINFO};-D_DEBUG )\n" );
+		fprintf( out, "set(  CMAKE_CXX_FLAGS_DEBUG \"$""{CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG\" )\n" );
+		fprintf( out, "set(  CMAKE_CXX_FLAGS_RELWITHDEBINFO \"$""{CMAKE_CXX_FLAGS_RELWITHDEBINFO} -D_DEBUG\" )\n" );
+		fprintf( out, "set(  CMAKE_C_FLAGS_DEBUG \"$""{CMAKE_C_FLAGS_DEBUG} -D_DEBUG\" )\n" );
+		fprintf( out, "set(  CMAKE_C_FLAGS_RELWITHDEBINFO \"$""{CMAKE_C_FLAGS_RELWITHDEBINFO} -D_DEBUG\" )\n" );
 		fprintf( out, "\n" );
 		fprintf( out, "  if( $""{CMAKE_COMPILER_IS_GNUCC} )\n" );
 		fprintf( out, "  SET( FIRST_GCC_LIBRARY_SOURCE $""{SACK_BASE}/src/sack/deadstart_list.c )\n" );
