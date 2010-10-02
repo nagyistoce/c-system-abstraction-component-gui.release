@@ -165,9 +165,9 @@ int main( int argc, char **argv )
 		fprintf( out, "  SET( LAST_GCC_PROGRAM_SOURCE $""{SACK_BASE}/src/sack/deadstart_lib.c $""{SACK_BASE}/src/sack/deadstart_prog.c $""{SACK_BASE}/src/sack/deadstart_end.c )\n" );
 		fprintf( out, "  endif()\n" );
 		fprintf( out, "\n" );
-		fprintf( out, "if( $""{MSVC}$""{WATCOM} )\n" );
+		fprintf( out, "if( MSVC OR WATCOM )\n" );
 		fprintf( out, "  SET( LAST_GCC_PROGRAM_SOURCE $""{SACK_BASE}/src/sack/deadstart_prog.c )\n" );
-		fprintf( out, "endif()\n" );
+		fprintf( out, "endif( MSVC OR WATCOM )\n" );
 		fprintf( out, "\n" );
 		fprintf( out, "SET( DATA_INSTALL_PREFIX resources )\n" );
 		fprintf( out, "include( $""{SACK_BASE}/${CMAKE_BUILD_TYPE}/DefaultInstall.cmake )\n" );
