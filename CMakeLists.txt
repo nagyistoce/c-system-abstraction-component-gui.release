@@ -837,7 +837,11 @@ add_subdirectory( src/deadstart )
 
 add_subdirectory( src/utils/deploy )
 add_subdirectory( src/utils/pcopy )
-add_subdirectory( src/SQLlib/optlib/editoption )
+ if( NOT __NO_GUI__ )
+  if( USE_OPTIONS )
+   add_subdirectory( src/SQLlib/optlib/editoption )
+  endif( USE_OPTIONS )
+ endif( NOT __NO_GUI__ )
 
 SET( CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP 1 )
 
