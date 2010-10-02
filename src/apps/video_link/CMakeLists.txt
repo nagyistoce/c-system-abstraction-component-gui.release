@@ -2,13 +2,14 @@ cmake_minimum_required(VERSION 2.8)
 
 GET_FILENAME_COMPONENT(SACK_SDK_ROOT_PATH "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Freedom Collective\\SACK;Install_Dir]" ABSOLUTE CACHE)
 
+GET_FILENAME_COMPONENT(INTERSHELL_SDK_ROOT_PATH "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Freedom Collective\\InterShell;Install_Dir]" ABSOLUTE CACHE)
 
 PROJECT( video_link )
 
 include( ${SACK_SDK_ROOT_PATH}/CMakePackage )
+include( ${INTERSHELL_SDK_ROOT_PATH}/CMakePackage )
 
-INSTALL_SACK( bin )
-
+INSTALL_INTERSHELL( . )
 
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 
@@ -23,14 +24,6 @@ ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
 include_directories( ${SACK_INCLUDE_DIR} )
 LINK_DIRECTORIES( ${SACK_LIBRARY_DIR} )
-
-
-if( CMAKE_BUILD_TYPE MATCHES "Debug" )
-  add_definitions( -D_DEBUG )
-endif()
-if( CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo" )
-  add_definitions( -D_DEBUG )
-endif()
 
 
 ########################################################################################
@@ -87,10 +80,10 @@ SET_TARGET_PROPERTIES(${PROJECT_OUTPUT} PROPERTIES
                   FOLDER "Video Link/InterShell/plugins"
 )
 if( WIN32 )
-  install( TARGETS ${PROJECT_OUTPUT} RUNTIME DESTINATION bin/InterShell/plugins 
+  install( TARGETS ${PROJECT_OUTPUT} RUNTIME DESTINATION bin/plugins 
   	)
 else( WIN32 )
-  install( TARGETS ${PROJECT_OUTPUT} LIBRARY DESTINATION bin/InterShell/plugins 
+  install( TARGETS ${PROJECT_OUTPUT} LIBRARY DESTINATION bin/plugins 
   	)
 endif()
 
@@ -116,10 +109,10 @@ SET_TARGET_PROPERTIES(${PROJECT_OUTPUT} PROPERTIES
                   FOLDER "Video Link/InterShell/plugins"
 )
 if( WIN32 )
-  install( TARGETS ${PROJECT_OUTPUT} RUNTIME DESTINATION bin/InterShell/plugins 
+  install( TARGETS ${PROJECT_OUTPUT} RUNTIME DESTINATION bin/plugins 
   	)
 else( WIN32 )
-  install( TARGETS ${PROJECT_OUTPUT} LIBRARY DESTINATION bin/InterShell/plugins 
+  install( TARGETS ${PROJECT_OUTPUT} LIBRARY DESTINATION bin/plugins 
   	)
 endif()
 INSTALL( 
@@ -153,10 +146,10 @@ SET_TARGET_PROPERTIES(${PROJECT_OUTPUT} PROPERTIES
                   FOLDER "Video Link/Plugins"
 )
 if( WIN32 )
-  install( TARGETS ${PROJECT_OUTPUT} RUNTIME DESTINATION bin/InterShell/plugins 
+  install( TARGETS ${PROJECT_OUTPUT} RUNTIME DESTINATION bin/plugins 
   	)
 else( WIN32 )
-  install( TARGETS ${PROJECT_OUTPUT} LIBRARY DESTINATION bin/InterShell/plugins 
+  install( TARGETS ${PROJECT_OUTPUT} LIBRARY DESTINATION bin/plugins 
   	)
 endif()
 if( WIN32 )
@@ -188,10 +181,10 @@ SET_TARGET_PROPERTIES(${PROJECT_OUTPUT} PROPERTIES
                   FOLDER "Video Link/Plugins"
 )
 if( WIN32 )
-  install( TARGETS ${PROJECT_OUTPUT} RUNTIME DESTINATION bin/InterShell/plugins 
+  install( TARGETS ${PROJECT_OUTPUT} RUNTIME DESTINATION bin/plugins 
   	)
 else( WIN32 )
-  install( TARGETS ${PROJECT_OUTPUT} LIBRARY DESTINATION bin/InterShell/plugins 
+  install( TARGETS ${PROJECT_OUTPUT} LIBRARY DESTINATION bin/plugins 
   	)
 endif()
 if( WIN32 )
@@ -223,10 +216,10 @@ SET_TARGET_PROPERTIES(${PROJECT_OUTPUT} PROPERTIES
                   FOLDER "Video Link/Plugins"
 )
 if( WIN32 )
-  install( TARGETS ${PROJECT_OUTPUT} RUNTIME DESTINATION bin/InterShell/plugins 
+  install( TARGETS ${PROJECT_OUTPUT} RUNTIME DESTINATION bin/plugins 
   	)
 else( WIN32 )
-  install( TARGETS ${PROJECT_OUTPUT} LIBRARY DESTINATION bin/InterShell/plugins 
+  install( TARGETS ${PROJECT_OUTPUT} LIBRARY DESTINATION bin/plugins 
   	)
 endif()
 if( WIN32 )
@@ -259,10 +252,10 @@ SET_TARGET_PROPERTIES(${PROJECT_OUTPUT} PROPERTIES
                   FOLDER ""
 )
 if( WIN32 )
-  install( TARGETS ${PROJECT_OUTPUT} RUNTIME DESTINATION bin/InterShell/plugins 
+  install( TARGETS ${PROJECT_OUTPUT} RUNTIME DESTINATION bin/plugins 
   	)
 else( WIN32 )
-  install( TARGETS ${PROJECT_OUTPUT} LIBRARY DESTINATION bin/InterShell/plugins 
+  install( TARGETS ${PROJECT_OUTPUT} LIBRARY DESTINATION bin/plugins 
   	)
 endif()
 if( WIN32 )
