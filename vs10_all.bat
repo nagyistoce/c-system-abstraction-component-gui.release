@@ -1,13 +1,8 @@
 mkdir Debug
 cd Debug
 cmake -G "Visual Studio 10"  \sack -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=M:/build/vs10_sack_core
-devenv sack.sln /Build debug /Project Install.vcxproj
-cd ..
-
-mkdir Release
-cd Release
-cmake -G "Visual Studio 10"  \sack -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=M:/build/vs10_sack_core
-devenv sack.sln /Build release /Project Install.vcxproj
+start devenv sack.sln /Build debug /Project Install.vcxproj
+start devenv sack.sln /Build release /Project Install.vcxproj
 cd ..
 
 cmd /c "M:\build\vs10_sack_core\Debug\sack_deploy.exe"
@@ -36,5 +31,19 @@ mkdir intershell_Release
 cd intershell_Release
 cmake -G "Visual Studio 10"  \sack\src\InterShell -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=M:/build/vs10_sack_intershell_release -DVLC_PATH="e:/tools/vlc-1.1.4"
 devenv InterShell.sln /Build release /Project Install.vcxproj
+cd ..
+
+cmd /c "M:\build\vs10_sack_core\Debug\sack_deploy.exe"
+mkdir video_link_Debug
+cd video_link_Debug
+cmake -G "Visual Studio 10"  \sack\src\InterShell -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=M:/build/vs10_sack_video_link_debug
+devenv video_link.sln /Build debug /Project Install.vcxproj
+cd ..
+
+cmd /c "M:\build\vs10_sack_core\Release\sack_deploy.exe"
+mkdir video_link_Release
+cd video_link_Release
+cmake -G "Visual Studio 10"  \sack\src\InterShell -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=M:/build/vs10_sack_video_link_release
+devenv video_link.sln /Build release /Project Install.vcxproj
 cd ..
 
