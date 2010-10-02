@@ -1,15 +1,18 @@
 cmake_minimum_required(VERSION 2.8)
 
 GET_FILENAME_COMPONENT(SACK_SDK_ROOT_PATH "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Freedom Collective\\SACK;Install_Dir]" ABSOLUTE CACHE)
+GET_FILENAME_COMPONENT(SACK_BINARY_SDK_ROOT_PATH "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Freedom Collective\\Sack Binaries;Install_Dir]" ABSOLUTE CACHE)
 
 GET_FILENAME_COMPONENT(INTERSHELL_SDK_ROOT_PATH "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Freedom Collective\\InterShell;Install_Dir]" ABSOLUTE CACHE)
 
 PROJECT( video_link )
 
 include( ${SACK_SDK_ROOT_PATH}/CMakePackage )
+include( ${SACK_BINARY_SDK_ROOT_PATH}/CMakePackage )
 include( ${INTERSHELL_SDK_ROOT_PATH}/CMakePackage )
 
 INSTALL_INTERSHELL( . )
+INSTALL_SACK_BINARY( proxy.service bin )
 
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 
