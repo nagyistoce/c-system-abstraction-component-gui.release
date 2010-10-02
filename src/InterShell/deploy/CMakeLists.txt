@@ -2,6 +2,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 PROJECT( intershell_deploy )
+    add_definitions( -D_X86_ )
 
 configure_file( deploy.cm.c ${CMAKE_BINARY_DIR}/deploy.c )
 ADD_EXECUTABLE( ${PROJECT_NAME} ${CMAKE_BINARY_DIR}/deploy.c )

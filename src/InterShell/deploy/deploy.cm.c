@@ -97,34 +97,12 @@ int main( int argc, char **argv )
 		for( c = 0; path[c]; c++ )
 			if( path[c] == '\\' ) path[c] = '/';
 #ifdef WIN32
-		SetRegistryItem( HKEY_LOCAL_MACHINE, "SOFTWARE", "Freedom Collective\\${CMAKE_PROJECT_NAME}", "Install_Dir", REG_SZ, (BYTE*)path, strlen(path));
-		if(0)
-		{
-			FILE *out2;
-			snprintf( tmp, sizeof( tmp ), "%s/CMakePackage", path );
-#ifdef _MSC_VER
-			fopen_s( &out2, "%s/MakeShortcut.vbs", "wt" );
-#else
-			out2 = fopen( "%s/MakeShortcut.vbs", "wt" );
+		SetRegistryItem( HKEY_LOCAL_MACHINE, "SOFTWARE", "\\Freedom Collective\\${CMAKE_PROJECT_NAME}", "Install_Dir", REG_SZ, (BYTE*)path, strlen(path));
 #endif
-			if( out2 )
-			{
-				fprintf( out2, "set WshShell = WScript.CreateObject(\"WScript.Shell\" )\n" );
-				fprintf( out2, "strDesktop = WshShell.SpecialFolders(\"AllUsersDesktop\" )\n" );
-				fprintf( out2, "set oShellLink = WshShell.CreateShortcut(strDesktop & \"\\shortcut name.lnk\" )\n" );
-				fprintf( out2, "oShellLink.TargetPath = \"c:\\application folder\\application.exe\"\n" );
-				fprintf( out2, "oShellLink.WindowStyle = 1\n" );
-				fprintf( out2, "oShellLink.IconLocation = \"c:\\application folder\\application.ico\"\n" );
-				fprintf( out2, "oShellLink.Description = \"Shortcut Script\"\n" );
-				fprintf( out2, "oShellLink.WorkingDirectory = \"c:\\application folder\"\n" );
-				fprintf( out2, "oShellLink.Save\n" );
-				fclose( out2 );
-				system( tmp );
-			}
-		}
-#endif
+		fprintf( out, "GET_FILENAME_COMPONENT(SACK_SDK_ROOT_PATH \"[HKEY_LOCAL_MACHINE\\\\SOFTWARE\\\\Freedom Collective\\\\SACK;Install_Dir]\" ABSOLUTE CACHE)\n" );
+		fprintf( out, "include( $""{SACK_SDK_ROOT_PATH}/CMakePackage)\n" );
 
-      fprintf( out, "GET_FILENAME_COMPONENT(SACK_SDK_ROOT_PATH \"[HKEY_LOCAL_MACHINE\\SOFTWARE\\Freedom Collective\\SACK;Install_Dir]\" ABSOLUTE CACHE)\n" );
+		//fprintf( out, "GET_FILENAME_COMPONENT(INTERSHELL_SDK_ROOT_PATH \"[HKEY_LOCAL_MACHINE\\SOFTWARE\\Freedom Collective\\${CMAKE_PROJECT_NAME};Install_Dir]\" ABSOLUTE CACHE)\n" );
 
 		fprintf( out, "set( INTERSHELL_BASE %s )\n", path );
 		fprintf( out, "set( INTERSHELL_INCLUDE_DIR $""{INTERSHELL_BASE}/include/sack )\n" );
@@ -132,10 +110,18 @@ int main( int argc, char **argv )
 		fprintf( out, "set( INTERSHELL_LIBRARY_DIR $""{INTERSHELL_BASE}/lib )\n" );
 
 		fprintf( out, "\n" );
+		fprintf( out, "FILE(GLOB InterShell_Binaries \"$""{INTERSHELL_BASE}/bin/*.*\" )\n" );
+		fprintf( out, "FILE(GLOB InterShell_Plugins \"$""{INTERSHELL_BASE}/bin/plugins/*\" )\n" );
+		fprintf( out, "FILE(GLOB InterShell_Resources_fonts \"$""{INTERSHELL_BASE}/resources/fonts/*\" )\n" );
+		fprintf( out, "FILE(GLOB InterShell_Resources_frames \"$""{INTERSHELL_BASE}/resources/frames/*\" )\n" );
+		fprintf( out, "FILE(GLOB InterShell_Resources_images \"$""{INTERSHELL_BASE}/resources/images/*\" )\n" );
+		fprintf( out, "\n" );
 		fprintf( out, "macro( INSTALL_INTERSHELL dest )\n" );
-		fprintf( out, "install( FILES $""{INTERSHELL_BASE}/bin/InterShell.core DESTINATION $""{dest} )\n" );
-//		fprintf( out, "install( FILES $""{INTERSHELL_BASE}/bin/InterShell.console DESTINATION $""{dest} )\n" );
-		//fprintf( out, "install( FILES bin/sack_bag.dll DESTINATION $""{somewhere} )\n" );
+		fprintf( out, "install( FILES $""{InterShell_Plugins} DESTINATION $""{dest}/bin )\n" );
+		fprintf( out, "install( FILES $""{InterShell_Binaries} DESTINATION $""{dest}/bin/plugins )\n" );
+		fprintf( out, "install( FILES $""{InterShell_Resources_fonts} DESTINATION $""{dest}/Resources/fonts )\n" );
+		fprintf( out, "install( FILES $""{InterShell_Resources_frames} DESTINATION $""{dest}/Resources/frames )\n" );
+		fprintf( out, "install( FILES $""{InterShell_Resources_images} DESTINATION $""{dest}/Resources/images )\n" );
 		fprintf( out, "ENDMACRO( INSTALL_INTERSHELL )\n" );
 		fprintf( out, "\n" );
 		//fprintf( out, "IF(CMAKE_BUILD_TPYE_INITIALIZED_TO_DEFAULT)\n" );
