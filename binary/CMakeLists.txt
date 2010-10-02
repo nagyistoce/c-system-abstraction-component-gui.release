@@ -27,11 +27,6 @@ add_subpath( ../src/psilib/paltst )
 #add_subpath( ../src/bench/mem )
 
 
- if( NOT __NO_GUI__ )
-if( USE_OPTIONS )
- add_subpath( ../src/SQLlib/optlib/editoption )
-endif( USE_OPTIONS )
- endif( NOT __NO_GUI__ )
 
 if( NOT __NO_GUI__ )
 add_subpath( ../src/msgsvr/server )
