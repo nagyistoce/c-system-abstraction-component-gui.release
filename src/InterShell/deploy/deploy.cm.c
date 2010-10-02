@@ -117,8 +117,8 @@ int main( int argc, char **argv )
 		fprintf( out, "FILE(GLOB InterShell_Resources_images \"$""{INTERSHELL_BASE}/resources/images/*\" )\n" );
 		fprintf( out, "\n" );
 		fprintf( out, "macro( INSTALL_INTERSHELL dest )\n" );
-		fprintf( out, "install( FILES $""{InterShell_Plugins} DESTINATION $""{dest}/bin )\n" );
-		fprintf( out, "install( FILES $""{InterShell_Binaries} DESTINATION $""{dest}/bin/plugins )\n" );
+		fprintf( out, "install( FILES $""{InterShell_Binaries} DESTINATION $""{dest}/bin )\n" );
+		fprintf( out, "install( FILES $""{InterShell_Plugins} DESTINATION $""{dest}/bin/plugins )\n" );
 		fprintf( out, "install( FILES $""{InterShell_Resources_fonts} DESTINATION $""{dest}/Resources/fonts )\n" );
 		fprintf( out, "install( FILES $""{InterShell_Resources_frames} DESTINATION $""{dest}/Resources/frames )\n" );
 		fprintf( out, "install( FILES $""{InterShell_Resources_images} DESTINATION $""{dest}/Resources/images )\n" );
