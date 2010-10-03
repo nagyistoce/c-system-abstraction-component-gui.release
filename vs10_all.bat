@@ -4,21 +4,21 @@ cmake -G "Visual Studio 10"  \sack -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREF
 devenv sack.sln /Build debug /Project Install.vcxproj
 devenv sack.sln /Build release /Project Install.vcxproj
 devenv sack.sln /Build relwithdebinfo /Project Install.vcxproj
-devenv sack.sln /Build relminsize /Project Install.vcxproj
+devenv sack.sln /Build MinSizeRel /Project Install.vcxproj
 cd ..
 
 cmd /c "M:\build\vs10_sack_core\bin\Debug\sack_deploy.exe"
 mkdir binary_Debug
 cd binary_Debug
-cmake -G "Visual Studio 10"  \sack\binary -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=M:/build/vs10_sack_core_binaries_debug
-devenv SackBinaries.sln /Build debug /Project Install.vcxproj
+cmake -G "Visual Studio 10"  \sack\binary -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=M:/build/vs10_sack_binaries_debug
+devenv Sack.Binaries.sln /Build debug /Project Install.vcxproj
 cd ..
 
 cmd /c "M:\build\vs10_sack_core\bin\Release\sack_deploy.exe"
 mkdir binary_Release
 cd binary_Release
 cmake -G "Visual Studio 10"  \sack\binary -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=M:/build/vs10_sack_binaries_release
-devenv SackBinaries.sln /Build release /Project Install.vcxproj
+devenv Sack.Binaries.sln /Build release /Project Install.vcxproj
 cd ..
 
 cmd /c "M:\build\vs10_sack_core\bin\Debug\sack_deploy.exe"
