@@ -27,6 +27,8 @@ ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
 include_directories( ${SACK_INCLUDE_DIR} )
 LINK_DIRECTORIES( ${SACK_LIBRARY_DIR} )
+include_directories( ${INTERSHELL_INCLUDE_DIR} )
+LINK_DIRECTORIES( ${INTERSHELL_LIBRARY_DIR} )
 
 
 ########################################################################################
