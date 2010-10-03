@@ -13,6 +13,7 @@ include( ${INTERSHELL_SDK_ROOT_PATH}/CMakePackage )
 
 INSTALL_INTERSHELL( . )
 INSTALL_SACK_BINARY( proxy.service bin )
+INSTALL_SACK_BINARY( SetOption bin )
 
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 
