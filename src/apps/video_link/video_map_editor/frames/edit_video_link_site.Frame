@@ -1,0 +1,13 @@
+<control border="4400" caption="Edit Video Site" position="150,120" size="452,300" type="Frame">
+<control IDName="Video Server/Editor/EditControl/EDIT_SYSTEM_NAME" border="a1" caption="" position="158,17" size="232,21" type="EditControl"></control>
+<control IDName="Video Server/Editor/EditControl/EDIT_SYSTEM_ADDRESS" border="a1" caption="" position="158,49" size="231,21" type="EditControl"></control>
+<control IDName="Video Server/Editor/EditControl/EDIT_SYSTEM_LOCAL_ADDRESS" border="a1" caption="" position="158,81" size="235,21" type="EditControl"></control>
+<control IDName="Video Server/Editor/EditControl/EDIT_MYSQL_SERVER" border="a1" caption="" position="158,113" size="229,21" type="EditControl"></control>
+<control IDName="Video Server/Editor/CheckButton/CHECKBOX_IS_MYSQL_SERVER" border="23" caption="Is MySQL Server" position="21,181" size="175,21" type="CheckButton"></control>
+<control IDName="Video Server/Editor/CheckButton/CHECKBOX_USES_BINGODAY" border="23" caption="Map uses bingoday" position="21,201" size="175,21" type="CheckButton"></control>
+<control IDName="core/Button/BTN_OKAY" PrivateData="#ff356059" border="21" caption="Okay" position="230,251" size="73,21" type="Button"></control>
+<control IDName="core/Button/BTN_CANCEL" PrivateData="#ff356059" border="21" caption="Cancel" position="325,251" size="73,21" type="Button"></control>
+<control border="3" caption="Hostname" position="19,18" size="73,21" type="TextControl"></control>
+<control border="3" caption="Server Peer IP" position="17,52" size="130,21" type="TextControl"></control>
+<control border="3" caption="MySQL Server" position="20,115" size="123,21" type="TextControl"></control>
+<control border="3" caption="Server Local IP" position="18,85" size="126,21" type="TextControl"></control></control>
