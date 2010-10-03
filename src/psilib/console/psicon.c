@@ -254,7 +254,7 @@ int CPROC KeyEventProc( PCOMMON pc, _32 key )
 
 		if( key & KEY_PRESSED )
 		{
-			KeyPressHandler( console, (_8)(KEY_CODE(key)&0xFF), (_8)KEY_MOD(key), (PTEXT)&stroke );
+			PSI_KeyPressHandler( console, (_8)(KEY_CODE(key)&0xFF), (_8)KEY_MOD(key), (PTEXT)&stroke );
 			//SmudgeCommon( console->psicon.frame );
 		}
 		LeaveCriticalSec( &console->Lock );

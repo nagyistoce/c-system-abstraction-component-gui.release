@@ -1299,7 +1299,7 @@ int KeyList( PSENTIENT ps, PTEXT parameters )
 #endif
 //----------------------------------------------------------------------------
 
-int DoStroke( PCONSOLE_INFO pdp, PTEXT stroke )
+int PSI_DoStroke( PCONSOLE_INFO pdp, PTEXT stroke )
 {
    INDEX i;
    int bOutput = FALSE;
@@ -1392,7 +1392,7 @@ int DoStroke( PCONSOLE_INFO pdp, PTEXT stroke )
 
 //----------------------------------------------------------------------------
 
-void KeyPressHandler( PCONSOLE_INFO pdp
+void PSI_KeyPressHandler( PCONSOLE_INFO pdp
 						  , _8 key_index
 						  , _8 mod
 						  , PTEXT characters
