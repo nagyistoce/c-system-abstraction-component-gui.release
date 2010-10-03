@@ -12,10 +12,10 @@ if( WIN32 )
 	# go in the same dir as the executables.
         if(MSVC) 
 	install( TARGETS ${PROJECT_NAME}
-	        RUNTIME DESTINATION \${CMAKE_INSTALL_CONFIG_NAME} )
+	        RUNTIME DESTINATION bin/\${CMAKE_INSTALL_CONFIG_NAME} )
         else(MSVC)
 	install( TARGETS ${PROJECT_NAME}
-	        RUNTIME DESTINATION ${CMAKE_BUILD_TYPE} )
+	        RUNTIME DESTINATION bin/${CMAKE_BUILD_TYPE} )
         endif(MSVC)
 else( WIN32 )
 # should deploy differently for linux.
