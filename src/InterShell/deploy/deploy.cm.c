@@ -87,9 +87,9 @@ int main( int argc, char **argv )
 		path = ".";
 	snprintf( tmp, sizeof( tmp ), "%s/CMakePackage", path );
 #ifdef _MSC_VER
-	fopen_s( &out, "CMakePackage", "wt" );
+	fopen_s( &out, tmp, "wt" );
 #else
-	out = fopen( "CMakePackage", "wt" );
+	out = fopen( tmp, "wt" );
 #endif
 	if( out )
 	{
