@@ -1231,7 +1231,7 @@ TYPELIB_PROC  PTEXT TYPELIB_CALLTYPE  DumpText ( PTEXT text );
 //--------------------------------------------------------------------------
 
 
-#define HAS_WHITESPACE(pText) ( (pText)->format.position.spaces || (pText)->format.position.tabs )
+#define HAS_WHITESPACE(pText) ( (pText)->format.position.offset.spaces || (pText)->format.position.offset.tabs )
 
 /* A convenient macro to go from one segment in a line of text
    to the next segment.                                        */
