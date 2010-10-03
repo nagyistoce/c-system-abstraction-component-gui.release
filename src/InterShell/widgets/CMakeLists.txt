@@ -29,7 +29,9 @@ target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES})
 
 install_default_dest( ${PROJECT_NAME} )
 
+if( INSTALL_TO_SACK_SDK )
 install_sack_sdk_dest( ${PROJECT_NAME} )
+endif( INSTALL_TO_SACK_SDK )
 
 if( WIN32 )
 target_link_libraries( ${PROJECT_NAME} winmm )
@@ -43,12 +45,14 @@ INSTALL(
   FILES
     ${WIDGET_SDK}
   DESTINATION
-    include/widgets
+    include/SACK/widgets
 )
 
+if( INSTALL_TO_SACK_SDK )
 INSTALL( 
   FILES
     ${WIDGET_SDK}
   DESTINATION
     ${SACK_BASE}/include/SACK/widgets )
+endif( INSTALL_TO_SACK_SDK )
 

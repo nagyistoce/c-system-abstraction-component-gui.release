@@ -105,11 +105,13 @@ int main( int argc, char **argv )
 		//fprintf( out, "GET_FILENAME_COMPONENT(INTERSHELL_SDK_ROOT_PATH \"[HKEY_LOCAL_MACHINE\\SOFTWARE\\Freedom Collective\\${CMAKE_PROJECT_NAME};Install_Dir]\" ABSOLUTE CACHE)\n" );
 
 		fprintf( out, "set( INTERSHELL_BASE %s )\n", path );
-		fprintf( out, "set( INTERSHELL_INCLUDE_DIR $""{INTERSHELL_BASE}/include/sack )\n" );
+		fprintf( out, "set( INTERSHELL_INCLUDE_DIR $""{INTERSHELL_BASE}/include/SACK/widgets $""{INTERSHELL_BASE}/include/SACK/InterShell )\n" );
 		fprintf( out, "set( INTERSHELL_LIBRARIES sack_widgets )\n" );
 		fprintf( out, "set( INTERSHELL_LIBRARY_DIR $""{INTERSHELL_BASE}/lib )\n" );
 
 		fprintf( out, "\n" );
+
+		fprintf( out, "FILE(GLOB InterShell_Includes \"$""{INTERSHELL_INCLUDE_DIR}/*.* )\n" );
 		fprintf( out, "FILE(GLOB InterShell_Binaries \"$""{INTERSHELL_BASE}/bin/*.*\" )\n" );
 		fprintf( out, "FILE(GLOB InterShell_Plugins \"$""{INTERSHELL_BASE}/bin/plugins/*\" )\n" );
 		fprintf( out, "FILE(GLOB InterShell_Resources_fonts \"$""{INTERSHELL_BASE}/resources/fonts/*\" )\n" );
@@ -122,6 +124,7 @@ int main( int argc, char **argv )
 		fprintf( out, "install( FILES $""{InterShell_Resources_fonts} DESTINATION $""{dest}/Resources/fonts )\n" );
 		fprintf( out, "install( FILES $""{InterShell_Resources_frames} DESTINATION $""{dest}/Resources/frames )\n" );
 		fprintf( out, "install( FILES $""{InterShell_Resources_images} DESTINATION $""{dest}/Resources/images )\n" );
+		//fprintf( out, "install( FILES $""{Intershell_Includes} DESTINATION $""{dest}/include )\n" );
 		fprintf( out, "ENDMACRO( INSTALL_INTERSHELL )\n" );
 		fprintf( out, "\n" );
 		//fprintf( out, "IF(CMAKE_BUILD_TPYE_INITIALIZED_TO_DEFAULT)\n" );
