@@ -3,8 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 project( SACK )
 
 set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Set build type")
-set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
-            "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${CMAKE_CONFIGURATION_TYPES} )
 
 
 if( ${CMAKE_GENERATOR} MATCHES "Watcom WMake" )
@@ -671,11 +670,7 @@ install_mode_dest( ${SACK_BAG_PLUSPLUS} )
 #install_default_dest( sack_bag )
 #install_default_dest( ${SACK_BAG_PLUSPLUS} )
 
-if(MSVC)
-install( FILES makefiles/cmake/DefaultInstall.cmake DESTINATION \${CMAKE_INSTALL_CONFIG_NAME} )
-else(MSVC)
 install( FILES makefiles/cmake/DefaultInstall.cmake DESTINATION . )
-endif(MSVC)
 
 if( NOT NEED_PNG ) 
   target_link_libraries( sack_bag png )
