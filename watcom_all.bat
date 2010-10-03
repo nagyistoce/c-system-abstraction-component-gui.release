@@ -1,22 +1,22 @@
 if %1x==videox goto videolink
 mkdir Debug
 cd Debug
-cmake -G "Watcom WMake"  \sack -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=M:/build/watcom_sack_core -DNEED_FREETYPE=1 -DNEED_JPEG=1 -DNEED_PNG=1 -DNEED_ZLIB=1
+cmake -G "Watcom WMake"  \sack -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=M:/build/watcom_sack_core
 wmake install
 cd ..
 mkdir Release
 cd Release
-cmake -G "Watcom WMake"  \sack -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=M:/build/watcom_sack_core -DNEED_FREETYPE=1 -DNEED_JPEG=1 -DNEED_PNG=1 -DNEED_ZLIB=1
+cmake -G "Watcom WMake"  \sack -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=M:/build/watcom_sack_core
 wmake install
 cd ..
 mkdir RelWithDebInfo
 cd RelWithDebInfo
-cmake -G "Watcom WMake"  \sack -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=M:/build/watcom_sack_core -DNEED_FREETYPE=1 -DNEED_JPEG=1 -DNEED_PNG=1 -DNEED_ZLIB=1
+cmake -G "Watcom WMake"  \sack -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=M:/build/watcom_sack_core
 wmake install
 cd ..
 mkdir MinSizeRel
 cd MinSizeRel
-cmake -G "Watcom WMake"  \sack -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_INSTALL_PREFIX=M:/build/watcom_sack_core -DNEED_FREETYPE=1 -DNEED_JPEG=1 -DNEED_PNG=1 -DNEED_ZLIB=1
+cmake -G "Watcom WMake"  \sack -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_INSTALL_PREFIX=M:/build/watcom_sack_core
 wmake install
 cd ..
 
