@@ -2089,8 +2089,8 @@ NETWORK_PROC( LOGICAL, NetworkWait )(HWND hWndNotify,_16 wClients,int wUserData)
 	}
 #ifdef WIN32
 	{
-		ADDRINFO *result;
-		ADDRINFO *test;
+		struct addrinfo *result;
+		struct addrinfo *test;
 		getaddrinfo( g.system_name, NULL, NULL, (struct addrinfo**)&result );
 		for( test = result; test; test = test->ai_next )
 		{
@@ -2356,8 +2356,8 @@ SOCKADDR *CreateRemote(CTEXTSTR lpName,_16 nHisPort)
 		{
 #ifdef WIN32
 			{
-				ADDRINFO *result;
-				ADDRINFO *test;
+				struct addrinfo *result;
+				struct addrinfo *test;
             int error;
 				if( ( error = getaddrinfo( lpName, NULL, NULL, (struct addrinfo**)&result ) ) == 0 )
 				{
