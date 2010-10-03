@@ -110,6 +110,7 @@ int main( int argc, char **argv )
 
 		fprintf( out, "\n" );
 		fprintf( out, "SET( proxy.service_targets $""{SACK_BINARY_BASE}/bin/proxy.service${CMAKE_EXECUTABLE_SUFFIX})\n" );
+		fprintf( out, "SET( SetOption_targets $""{SACK_BINARY_BASE}/bin/SetOption${CMAKE_EXECUTABLE_SUFFIX})\n" );
 		fprintf( out, "\n" );
 		fprintf( out, "\n" );
 
@@ -120,7 +121,7 @@ int main( int argc, char **argv )
 		//fprintf( out, "IF(CMAKE_BUILD_TPYE_INITIALIZED_TO_DEFAULT)\n" );
 
 		fprintf( out, "set(CMAKE_BUILD_TYPE \"${CMAKE_BUILD_TYPE}\" CACHE STRING \"Set build type\")\n" );
-		fprintf( out, "set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS Debug Release MinSizeRel RelWithDebInfo)\n" );
+		fprintf( out, "set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS $""{CMAKE_CONFIGURATION_TYPES} )\n" );
 
 		//fprintf( out, "ENDIF(CMAKE_BUILD_TPYE_INITIALIZED_TO_DEFAULT)\n" );
 
