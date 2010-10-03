@@ -39,9 +39,9 @@ if( WIN32 )
 	# On Windows platforms, the dynamic libs should
 	# go in the same dir as the executables.
 	install( TARGETS ${ARGV}
-	        RUNTIME DESTINATION ${SACK_BASE}/\${CMAKE_INSTALL_CONFIG_NAME}/bin                     
-        	LIBRARY DESTINATION ${SACK_BASE}/\${CMAKE_INSTALL_CONFIG_NAME}/bin
-	        ARCHIVE DESTINATION ${SACK_BASE}/\${CMAKE_INSTALL_CONFIG_NAME}/lib )
+	        RUNTIME DESTINATION ${SACK_BASE}/bin/\${CMAKE_INSTALL_CONFIG_NAME}                     
+        	LIBRARY DESTINATION ${SACK_BASE}/bin/\${CMAKE_INSTALL_CONFIG_NAME}
+	        ARCHIVE DESTINATION ${SACK_BASE}/lib/\${CMAKE_INSTALL_CONFIG_NAME} )
 else( WIN32 )
 	install( TARGETS ${ARGV}
 	        RUNTIME DESTINATION ${SACK_BASE}/bin 
