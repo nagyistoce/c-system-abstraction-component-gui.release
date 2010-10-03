@@ -11,7 +11,9 @@
 //#include <linux/fcntl.h>
 #include <unistd.h>
 #include <fcntl.h>
-#define O_BINARY 0
+#  ifndef O_BINARY
+#    define O_BINARY 0
+#  endif
 //#include <windunce.h>
 #endif
 
