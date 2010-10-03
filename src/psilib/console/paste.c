@@ -46,7 +46,7 @@ int KeystrokePaste( PCONSOLE_INFO pdp )
                 }
                 pStroke->data.size = ofs;
                 pStroke->data.data[ofs] = pStroke->data.data[n];
-                if( DoStroke( pdp, pStroke ) ) 1;
+                if( PSI_DoStroke( pdp, pStroke ) ) 1;
                 //   RenderCommandLine( pdp );
                 //EnqueLink( pdp->ps->Command->ppOutput, SegDuplicate(pStroke) );
                 LineRelease( pStroke );

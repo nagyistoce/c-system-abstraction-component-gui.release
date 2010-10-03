@@ -1105,7 +1105,7 @@ void PSI_WinLogicDoStroke( PCONSOLE_INFO pdp, PTEXT stroke )
 	upd.flags.bHasContent = 0;
 	upd.flags.bTmpRect = 1;
 	EnterCriticalSec( &pdp->Lock );
-	if( DoStroke( pdp, stroke ) )
+	if( PSI_DoStroke( pdp, stroke ) )
 	{
 		PSI_RenderCommandLine( pdp, &upd );
 	}
