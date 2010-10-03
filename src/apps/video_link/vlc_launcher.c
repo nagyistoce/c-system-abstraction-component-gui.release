@@ -3,7 +3,7 @@
 #include <deadstart.h>
 #include <procreg.h>
 #include <configscript.h>
-
+#include <sqlgetoption.h>
 #define USES_VIDEO_SERVER_INTERFACE
 #define DEFINES_VIDEO_SERVER_INTERFACE
 #include "link_events.h"
@@ -205,3 +205,10 @@ ATEXIT( Shutdown )
 		TerminateProgram( l.vlc_task );
 	}
 }
+
+#ifdef __WATCOMC__
+PUBLIC( void, MustExportOneFunction )( void )
+{
+}
+#endif
+
