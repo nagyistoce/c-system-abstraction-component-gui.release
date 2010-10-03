@@ -99,7 +99,7 @@
 #  endif
 
 #  ifdef UNDER_CE
-// just in case windows.h also fails after undef __WINDOWS__
+// just in case windows.h also fails after undef WIN32
 // these will be the correct order for primitives we require.
 #include <excpt.h>
 #include <windef.h>
@@ -109,7 +109,7 @@
 #include <wingdi.h>
 #include <wtypes.h>
 #include <winuser.h>
-#undef __WINDOWS__
+#undef WIN32
 #  endif
 
 #include <windows.h>

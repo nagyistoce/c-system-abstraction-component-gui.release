@@ -4,7 +4,7 @@
 #include <netservice.h>
 #include <msgclient.h>
 #include <configscript.h>
-#ifdef __WINDOWS__
+#ifdef WIN32
 #include <systray.h>
 #endif
 #include <timers.h>
@@ -1245,7 +1245,7 @@ int main( int argc, char **argv )
          return -1;
 		}
 	}
-#ifdef __WINDOWS__
+#ifdef WIN32
    RegisterIcon( NULL );
 #endif
 

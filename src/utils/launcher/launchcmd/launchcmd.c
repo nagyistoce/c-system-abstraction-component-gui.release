@@ -1,13 +1,13 @@
 #define VERSION "2.01"
 #include <stdhdrs.h>
 #include <system.h>
-#ifdef __WINDOWS__
+#ifdef WIN32
 #include <shellapi.h>
 #endif
 #include <sharemem.h>
 #include <network.h>
 #include <logging.h>
-#ifdef __WINDOWS__
+#ifdef WIN32
 HWND ghWndIcon;
 #define WM_USERICONMSG (WM_USER + 212)
 
@@ -132,7 +132,7 @@ int main( int argc, char **argv )
 {
 	if( argc == 1 )
 	{
-#ifdef __WINDOWS__
+#ifdef WIN32
 		MessageBox( NULL,
 #else
           printf(
@@ -143,7 +143,7 @@ int main( int argc, char **argv )
 					  " -h : launch task hidden\n"
 					  " -s : specify target address to send to (instead of local broadcast)\n"
 								 " -c : specify class of launchpads to respond to commands (matches -c arguments on launchpad)\n"
-#ifdef __WINDOWS__
+#ifdef WIN32
 								, "Usage"
 								, MB_OK );
 #else
@@ -186,13 +186,13 @@ int main( int argc, char **argv )
 							if( !pcTrack )
 							{
                         // failed to open TCP listener... forget this.
-#ifdef __WINDOWS__
+#ifdef WIN32
 								MessageBox( NULL,
 #else
 											  printf(
 #endif
 														"Failed to open receiving monitor socket..."
-#ifdef __WINDOWS__
+#ifdef WIN32
 													  , "Abort Launch"
 													  , MB_OK );
 #else
@@ -281,13 +281,13 @@ int main( int argc, char **argv )
 			}
 			if( !clients )
 			{
-#ifdef __WINDOWS__
+#ifdef WIN32
 				MessageBox( NULL,
 #else
 							  printf(
 #endif
                               "No remote launchpads accepted this command.  Request was to monitor output, to guarantee task execution"
-#ifdef __WINDOWS__
+#ifdef WIN32
 									  , "Network Failure"
 									  , MB_OK );
 #else

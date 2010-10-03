@@ -2,7 +2,7 @@
 #include <stdhdrs.h>
 #include <deadstart.h>
 #include <sqlgetoption.h>
-#ifdef __WINDOWS__
+#ifdef WIN32
 //#include <windows.h>
 #include <io.h>
 #include <fcntl.h>
@@ -17,7 +17,7 @@
 //#include <windunce.h>
 #endif
 
-#if defined( __WINDOWS__ ) && !defined( S_IFDIR )
+#if defined( WIN32 ) && !defined( S_IFDIR )
 #include <sys/stat.h>
 #endif
 

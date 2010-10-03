@@ -16,7 +16,7 @@ void CPROC TaskEnded( PTRSZVAL psv, PTASK_INFO task_ended )
 }
 
 
-#ifdef __WINDOWS__
+#ifdef WIN32
 /* Utility routine for SetResolution */
 static void SetWithFindMode( LPDEVMODE mode, int bRestoreOnCrash, char const * const name )
 {
@@ -199,7 +199,7 @@ static void SetWithFindMode( LPDEVMODE mode, int bRestoreOnCrash, char const * c
 
 void SetResolution(  _32 w, _32 h, char const * const name )
 {
-#ifdef __WINDOWS__
+#ifdef WIN32
 	DEVMODE settings;
 	memset(&settings, 0, sizeof(DEVMODE));
 	settings.dmSize = sizeof(DEVMODE);
@@ -286,7 +286,7 @@ int main( int argc, char const *const *argv )
 			bits = atol( argv[arg++] );
 		//program = argv[arg];
       printf( WIDE("Setting %d,%d (%d)\n"), program, width, height, bits );
-#ifdef __WINDOWS__
+#ifdef WIN32
       SetResolution( width, height, argv[arg++] );
 #endif
 	}

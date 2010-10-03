@@ -26,7 +26,7 @@ int main( int argc, char const *const*argv )
    int noinput = 0;
 	if( argc < 2 )
 	{
-#ifdef __WINDOWS__
+#ifdef WIN32
 		const char * const args[] ={ "cmd.exe" };
 #else
 		const char * const args[] ={ "/bin/sh" };

@@ -1,6 +1,6 @@
 #define DO_LOGGING
 #include <stdhdrs.h>
-#ifdef __WINDOWS__
+#ifdef WIN32
 #include <shellapi.h>
 #endif
 #include <sharemem.h>
@@ -549,7 +549,7 @@ PRELOAD( InitLaunchpad )
 	AddTimer( 2500, ExpireSequences, 0 );
 }
 #else
-#ifdef __WINDOWS__
+#ifdef WIN32
 int APIENTRY WinMain( HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmd, int nCmdShow )
 {
 	int argc;
@@ -632,7 +632,7 @@ int APIENTRY WinMain( HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmd, int nCmdSho
 
 		return 0;
 	}
-#ifdef __WINDOWS__
+#ifdef WIN32
 }
 #endif
 #endif

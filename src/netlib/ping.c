@@ -159,7 +159,7 @@ static LOGICAL DoPingExx( CTEXTSTR pstrHost
    nEntry = 0;
    // Create a Raw socket
 
-#ifdef __WINDOWS__
+#ifdef WIN32
 	rawSocket = INVALID_SOCKET;//OpenSocket(TRUE,FALSE, TRUE);
 	if( rawSocket == INVALID_SOCKET )
 	{
@@ -175,7 +175,7 @@ static LOGICAL DoPingExx( CTEXTSTR pstrHost
 			vtprintf( pvtResult, WIDE("Uhmm bad things happened for sockraw!\n") );
 		else
 			lprintf( WIDE("Uhmm bad things happened for sockraw!\n") );
-#ifdef __WINDOWS__
+#ifdef WIN32
 		rawSocket = OpenSocket( TRUE, FALSE, TRUE );
 		if( rawSocket == SOCKET_ERROR )
 		{

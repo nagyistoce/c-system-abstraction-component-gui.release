@@ -2,7 +2,7 @@
 
 #include <stdhdrs.h>
 
-#if defined( __WINDOWS__ ) || defined( _MSC_VER )
+#if defined( WIN32 ) || defined( _MSC_VER )
 #ifndef UNDER_CE
 #include <io.h> // unlink() // also no chsize() (if I can get it to work)
 #endif

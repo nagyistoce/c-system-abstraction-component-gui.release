@@ -1530,7 +1530,7 @@ void InitKeyEquates( void )
    // if this is non zero we've already populated these
 	if( KeyEquates[KEY_LEFT_SHIFT].common_code )
 		return;
-#ifndef __WINDOWS__
+#ifndef WIN32
 #define SETEQUATE(n,code,numcode,alt1,alt2) if( n < 256) { KeyEquates[n].common_code=code;KeyEquates[n].numalts=numcode;KeyEquates[n].base_codes[0]=alt1;KeyEquates[n].base_codes[1]=alt2;}
 
 
@@ -2056,7 +2056,7 @@ void ThreadDoUpdateRect( void )
 											 , thread_messages[thread_head].data.update_rect.height );
 											 //printf( "Update surface - thread message done...\n" );
 # endif
-#else // __WINDOWS__ ?
+#else // WIN32 ?
                   //WriteToWindow();
 						BlotImageSizedTo( g.RealSurface
 											 , g.SoftSurface
@@ -3197,7 +3197,7 @@ RENDER_PROC( int, InitDisplay )( void )
 	}
 	//GetMemStats( NULL, NULL, NULL, NULL );
 	Log2( WIDE("Going to init: %d by %d  32"), g.width, g.height );
-#ifndef __WINDOWS__
+#ifndef WIN32
 #if defined( __RAW_FRAMEBUFFER__ )
 	{
 		struct fb_var_screeninfo var;
@@ -3333,7 +3333,7 @@ RENDER_PROC( int, InitDisplay )( void )
 	g.RenderInterface->_SetKeyboardHandler( (PPANEL)g.hVideo, KeyProcHandler, 0 );
 	g.RenderInterface->_SetLoseFocusHandler( (PPANEL)g.hVideo, LoseFocusHandler, 0 );
 	g.RealSurface = (ImageFile*)g.RenderInterface->_GetDisplayImage( (PPANEL)g.hVideo );
-#endif // #ifndef __WINDOWS__
+#endif // #ifndef WIN32
 
 /* setup our internal soft buffer, if defined to use one...
  * a lot of times, the actual video surface is already

@@ -6,7 +6,7 @@
 #include <stdhdrs.h>
 #include <system.h>
 #include <idle.h>
-#ifdef __WINDOWS__
+#ifdef WIN32
 #ifndef UNDER_CE
 #include <io.h> // unlink
 #endif
@@ -79,7 +79,7 @@ LOGICAL MainCanvasStillHidden( void )
 }
 
 
-#ifdef __WINDOWS__
+#ifdef WIN32
 #ifndef UNDER_CE
 DEVMODE devmode; // the original mode that this as called with
 /* Utility routine for SetResolution */
@@ -254,7 +254,7 @@ static void SetWithFindMode( LPDEVMODE mode, int bRestoreOnCrash )
 void SetResolution( PLOAD_TASK task, _32 w, _32 h )
 {
 #ifndef UNDER_CE
-#ifdef __WINDOWS__
+#ifdef WIN32
 	DEVMODE settings;
 	PPAGE_DATA page;
 	page = ShellGetCurrentPage();
@@ -303,7 +303,7 @@ void ResetResolution( PLOAD_TASK task )
 {
    lprintf( WIDE("RESET RESOLUTION") );
 #ifndef UNDER_CE
-#ifdef __WINDOWS__
+#ifdef WIN32
    if( task )
 	{
 		INDEX idx = FindLink( &l.tasks_that_hid_main_canvas, task );
@@ -1019,7 +1019,7 @@ static void KillSpawnedPrograms( void )
 		{
          LOGICAL closed = FALSE;
 			tasks->flags.bRestart = 0;
-#ifdef __WINDOWS__
+#ifdef WIN32
 			{
 				TEXTCHAR progname[256];
 				TEXTCHAR buffer[256];
@@ -1118,7 +1118,7 @@ int LaunchAutoTasks( int bCaller )
    int launched = 0;
 	INDEX idx;
 	PLOAD_TASK task;
-#ifdef __WINDOWS__
+#ifdef WIN32
 	if( bCaller && !l.flags.wait_for_caller )
 	{
 		FILE *file;
@@ -1848,7 +1848,7 @@ OnGlobalPropertyEdit( WIDE("Tasks") )( PSI_CONTROL parent )
             INDEX idx;
 				char buf[256];
 				SetItemData( AddListItem( list, WIDE("Command Shell") ), (PTRSZVAL)l.shell );
-#ifdef __WINDOWS__
+#ifdef WIN32
 				SetItemData( AddListItem( list, WIDE("Explorer") ), (PTRSZVAL)l.windows_shell );
 				SetItemData( AddListItem( list, WIDE("Power Shell") ), (PTRSZVAL)l.power_shell );
 				SetItemData( AddListItem( list, WIDE("Power Shell ISE") ), (PTRSZVAL)l.power_shell_ise );

@@ -414,7 +414,7 @@ void GetMyInterface( void )
 #endif
 			{
 				DumpRegisteredNames();
-#ifndef __WINDOWS__
+#ifndef WIN32
 				fprintf( stderr, "Failed to get 'image' interface.  PSI interfaces failing execution." );
 #endif
 				lprintf( WIDE("Failed to get 'image' interface.  PSI interfaces failing execution.") );
@@ -434,7 +434,7 @@ void GetMyInterface( void )
 		if( !g.MyDisplayInterface )
 		{
 			{
-#ifndef __WINDOWS__
+#ifndef WIN32
 				fprintf( stderr, "Failed to get 'render' interface.  PSI interfaces failing execution." );
 #endif
 				lprintf( WIDE("Failed to get 'render' interface.  PSI interfaces failing execution.") );

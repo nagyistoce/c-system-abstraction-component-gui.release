@@ -3,7 +3,7 @@
 #include <filesys.h>
 #include <sqlgetoption.h>
 #include <system.h>
-//#define DEBUG_FILEOPEN
+#define DEBUG_FILEOPEN
 
 #ifndef UNDER_CE
 //#include <fcntl.h>
@@ -239,7 +239,7 @@ TEXTSTR sack_prepend_path( int group, CTEXTSTR filename )
 	TEXTSTR result = PrependBasePath( group, filegroup, filename );
 	return result;
 }
-#if defined( __WINDOWS__ )
+#if defined( WIN32 )
 HANDLE sack_open( int group, CTEXTSTR filename, int opts, ... )
 {
 	HANDLE handle;
@@ -420,7 +420,7 @@ int sack_write( HANDLE file_handle, CPOINTER buffer, int size )
    DWORD dwLastWrittenResult;
 	return (WriteFile( (HANDLE)file_handle, (POINTER)buffer, size, &dwLastWrittenResult, NULL )?dwLastWrittenResult:-1 );
 }
-#endif //defined( __WINDOWS__ )
+#endif //defined( WIN32 )
 
 int sack_unlink( int group, CTEXTSTR filename )
 {
@@ -542,7 +542,7 @@ struct file *FindFileByFILE( FILE *file_file )
 
  int  sack_rename ( CTEXTSTR file_source, CTEXTSTR new_name )
 {
-#ifdef __WINDOWS__
+#ifdef WIN32
 	return MoveFile( file_source, new_name );
 #else
 	return rename( file_source, new_name );

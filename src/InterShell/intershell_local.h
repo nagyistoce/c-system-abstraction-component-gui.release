@@ -300,7 +300,7 @@ extern
 #endif
 #endif
 #else
-#ifdef __WINDOWS__
+#ifdef WIN32
 __declspec(dllexport)
 #endif
 #endif

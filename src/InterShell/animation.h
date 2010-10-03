@@ -3,7 +3,7 @@
 
 #ifndef __cplusplus
 
-#ifdef __WINDOWS__
+#ifdef WIN32
 #include <mng/libmng.h>
 #else
 #include <libmng.h>

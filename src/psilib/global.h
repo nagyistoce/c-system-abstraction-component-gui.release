@@ -101,7 +101,7 @@ enum {
 extern
 #endif
 #ifndef __cplusplus_cli
-#  ifdef __WINDOWS__
+#  ifdef WIN32
 #    if !defined( SOURCE_PSI2 )
 #      if !defined( CONTROL_BASE )
 __declspec(dllimport)

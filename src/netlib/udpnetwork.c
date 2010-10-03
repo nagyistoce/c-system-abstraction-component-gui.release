@@ -47,7 +47,7 @@ NETWORK_PROC( PCLIENT, CPPServeUDPAddr )( SOCKADDR *pAddr
      	return NULL;
    }
 
-#ifdef __WINDOWS__
+#ifdef WIN32
 	pc->Socket = OpenSocket(((*(_16*)pAddr) == AF_INET)?TRUE:FALSE,FALSE, FALSE);
 	if( pc->Socket == INVALID_SOCKET )
 #endif

@@ -1,5 +1,5 @@
 //#define DO_LOGGING
-#if defined( __WINDOWS__ ) || defined( SACK_BAG_EXPORTS )
+#if defined( WIN32 ) || defined( SACK_BAG_EXPORTS )
 #define _INCLUDE_CLIPBOARD
 #endif
 //#define NO_LOGGING
@@ -134,7 +134,7 @@ void CPROC RenderSeparator( PCONSOLE_INFO console, int nStart )
 
 void CPROC PSI_Console_KeystrokePaste( PCONSOLE_INFO console )
 {
-#if defined( __WINDOWS__ ) && !defined( __NO_WIN32API__ )
+#if defined( WIN32 ) && !defined( __NO_WIN32API__ )
 	if( OpenClipboard(NULL) )
 	{
 		_32 format;

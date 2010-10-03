@@ -42,7 +42,7 @@
 #include "animation_plugin.h"
 #endif
 #include "fonts.h"
-#ifdef __WINDOWS__
+#ifdef WIN32
 #include <vidlib/vidstruc.h>
 #endif
 
@@ -4289,7 +4289,7 @@ PSI_CONTROL OpenPageFrame( PPAGE_DATA page )
 				BindEventToKey( renderer = GetFrameRenderer( page_frame ), KEY_X, KEY_MOD_ALT, GoodQuitMenu, 0 );
 				BindEventToKey( renderer, KEY_F4, KEY_MOD_ALT, GoodQuitMenu, 0 );
 #ifndef UNDER_CE
-#ifdef __WINDOWS__
+#ifdef WIN32
 				(((PRENDERER)g.mem_lock)[0]) = renderer[0];
 #endif
 #endif
@@ -4616,7 +4616,7 @@ int restart( void )
 				, image->x, image->y );
 			SetRendererTitle( canvas->renderer, WIDE( "Canvas Behind Banner" ) );
 #ifndef UNDER_CE
-#ifdef __WINDOWS__
+#ifdef WIN32
 			(((PRENDERER)g.mem_lock)[0]) = canvas->renderer[0];
 #endif
 #endif
@@ -4726,7 +4726,7 @@ PRIORITY_PRELOAD( LoadingMessage, DEFAULT_PRELOAD_PRIORITY+3 )
 }
 
 #ifndef UNDER_CE
-#if defined( __WINDOWS__ )
+#if defined( WIN32 )
 PRIORITY_PRELOAD( ProgramLock, DEFAULT_PRELOAD_PRIORITY+2 )
 {
 	PTRSZVAL size = 0;
@@ -4782,7 +4782,7 @@ PRIORITY_PRELOAD( ProgramLock, DEFAULT_PRELOAD_PRIORITY+2 )
 		, &size );
 	if( g.mem_lock )
 	{
-#ifdef __WINDOWS__
+#ifdef WIN32
 		PRENDER_INTERFACE pri = GetDisplayInterface();
 		pri->_ForceDisplayFront( (PRENDERER)g.mem_lock );
 #endif

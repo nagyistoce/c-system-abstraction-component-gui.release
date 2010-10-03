@@ -1470,7 +1470,7 @@ void SetCommRTS( int nCommID, int iRTS )
 	PCOM_TRACK pct = FindComByNumber( nCommID );
 	if( pct )
 	{
-#ifdef __WINDOWS__
+#ifdef WIN32
 		//if( iRTS && iRTSFlow )
 		//	pct->dcb.fRtsControl = RTS_CONTROL_TOGGLE;
 		//	else
