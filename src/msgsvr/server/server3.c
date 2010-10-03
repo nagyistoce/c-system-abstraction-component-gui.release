@@ -1,7 +1,7 @@
 #include <stdhdrs.h>
 #include <timers.h>
 #include <system.h>
-#ifdef __WINDOWS__
+#ifdef WIN32
 #include <systray.h>
 #endif
 #include <procreg.h>
@@ -26,7 +26,7 @@ int main( void )
 	if( LoadPrivateFunction( PREFIX "msg.core.service", NULL ) )
 #endif
 	{
-#ifdef __WINDOWS__
+#ifdef WIN32
 #ifndef __NO_GUI__
 		RegisterIcon( NULL );
 #endif

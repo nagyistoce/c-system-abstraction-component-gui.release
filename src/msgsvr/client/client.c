@@ -330,7 +330,7 @@ int SendInMultiMessageEx( _32 routeID, _32 MsgID, _32 parts, BUFFER_LENGTH_PAIR 
 		if( len + ofs > 8192 )
 		{
 		// wow - this is a BIG message - lets see - what can we do?
-#ifdef __WINDOWS__
+#ifdef WIN32
 			SetLastError( E2BIG );
 #else
 			errno = E2BIG;
@@ -423,7 +423,7 @@ static int PrivateSendDirectedServerMultiMessageEx( _32 DestID
 		if( len + ofs > 8192 )
 		{
 		// wow - this is a BIG message - lets see - what can we do?
-#ifdef __WINDOWS__
+#ifdef WIN32
 			SetLastError( E2BIG );
 #else
 			errno = E2BIG;
@@ -518,7 +518,7 @@ static PEVENTHANDLER PrivateSendServerMultiMessageEx( _32 *MessageID, _32 *bias,
 			{
 				DebugBreak();
 				Log( WIDE("Client attempting to send an invalid message ID") );
-#ifdef __WINDOWS__
+#ifdef WIN32
 				SetLastError( EINVAL );
 #else
 				errno = EINVAL;
@@ -1155,7 +1155,7 @@ static int HandleEvents( MSGQ_TYPE msgq, PQMSG MessageEvent, int initial_flags )
 
 //--------------------------------------------------------------------
 
-#ifndef __WINDOWS__
+#ifndef WIN32
 static void ResumeSignal( int signal )
 {
 	//lprintf( WIDE("Got a resume signal.... resuming uhmm some thread.") );

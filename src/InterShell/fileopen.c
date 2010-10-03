@@ -4,7 +4,7 @@
 #include "fileopen.h"
 #include <controls.h>
 #include <vidlib.h>
-//#undef __WINDOWS__
+//#undef WIN32
 
 //#ifdef __LINUX__
 #define COMPAT_MODE
@@ -17,7 +17,7 @@ filter == something like "Bodies\0*.Body\0"
 */
 
 //------------------------------------------
-#ifndef __WINDOWS__
+#ifndef WIN32
 #define HWND int
 #define BOOL int
 #endif
@@ -26,7 +26,7 @@ LOGICAL SelectExistingFile( PSI_CONTROL parent, TEXTCHAR * szFile, _32 buflen, T
 #ifdef COMPAT_MODE
    return PSI_PickFile( parent, WIDE( "." ), filter, szFile, buflen, FALSE );
 #else
-#ifdef __WINDOWS__
+#ifdef WIN32
    OPENFILENAME ofn;       // common dialog box structurechar szFile[260];       // buffer for filenameHWND hwnd;              // owner windowHANDLE hf;              // file handle// Initialize OPENFILENAMEZeroMemory(&ofn, sizeof(OPENFILENAME));
 	char CurPath[256];
    char real_filter[256];
@@ -89,7 +89,7 @@ LOGICAL SelectNewFile( PSI_CONTROL parent, TEXTCHAR * szFile, _32 buflen, TEXTCH
 #ifdef COMPAT_MODE
    return PSI_PickFile( parent, WIDE( "." ), filter, szFile, buflen, TRUE );
 #else
-#ifdef __WINDOWS__
+#ifdef WIN32
    
    OPENFILENAME ofn;       // common dialog box structurechar szFile[260];       // buffer for filenameHWND hwnd;              // owner windowHANDLE hf;              // file handle// Initialize OPENFILENAMEZeroMemory(&ofn, sizeof(OPENFILENAME));
    char CurPath[256];

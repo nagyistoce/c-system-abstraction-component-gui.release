@@ -2,7 +2,7 @@
 #include <sharemem.h>
 #include <timers.h>
 #include <msgclient.h>
-#ifdef __WINDOWS__
+#ifdef WIN32
 #include <systray.h>
 #endif
 #include "ghdr.h"

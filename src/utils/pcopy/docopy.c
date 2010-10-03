@@ -71,7 +71,7 @@ void AddFileCopy( CTEXTSTR name )
 			{
 				TEXTSTR path = (TEXTSTR)OSALOT_GetEnvironmentVariable( "MY_WORK_PATH" );
 				int len;
-#ifdef __WINDOWS__
+#ifdef WIN32
 #define PATHCHAR "\\"
 #else
 #define PATHCHAR "/"
@@ -97,7 +97,7 @@ void AddFileCopy( CTEXTSTR name )
                goto skip_path;
 				}
 			}
-#ifdef __WINDOWS__
+#ifdef WIN32
 			x[0] = ';';
 #else
 			x[0] = ':';

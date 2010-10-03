@@ -1,4 +1,4 @@
-#ifdef __WINDOWS__
+#ifdef WIN32
 #define _INCLUDE_CLIPBOARD
 #endif
 

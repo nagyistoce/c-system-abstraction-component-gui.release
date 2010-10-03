@@ -444,7 +444,7 @@ PPHYSICAL_DEVICE OpenPhysicalDevice( PSI_CONTROL pc, PSI_CONTROL over, PRENDERER
 																  , pc->rect.y
 																  , (over&&over->device)?over->device->pActImg:NULL
 																  , (under&&under->device)?under->device->pActImg:NULL);
-#ifdef __WINDOWS__
+#ifdef WIN32
 			WinShell_AcceptDroppedFiles( device->pActImg, FileDroppedOnFrame, (PTRSZVAL)pc );
 #endif
          AddLink( &g.shown_frames, pc );
@@ -472,7 +472,7 @@ PPHYSICAL_DEVICE OpenPhysicalDevice( PSI_CONTROL pc, PSI_CONTROL over, PRENDERER
 				SizeCommon( pc, width, height );
 			}
 			device->pActImg = pActImg;
-#ifdef __WINDOWS__
+#ifdef WIN32
 			WinShell_AcceptDroppedFiles( device->pActImg, FileDroppedOnFrame, (PTRSZVAL)pc );
 #endif
 			AddLink( &g.shown_frames, pc );

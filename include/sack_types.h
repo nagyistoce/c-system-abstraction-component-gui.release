@@ -22,8 +22,8 @@
 #endif
 
 // force windows on __MSVC
-#  ifndef __WINDOWS__
-#    define __WINDOWS__
+#  ifndef WIN32
+#    define WIN32
 #  endif
 
 
@@ -219,7 +219,7 @@ using namespace System;
 #include <stdlib.h>
 #include <stdarg.h> // typelib requires this
 #include <string.h> // typelib requires this
-#if !defined( __WINDOWS__ ) && !defined( _WIN32 )
+#if !defined( WIN32 ) && !defined( _WIN32 )
 #include <dlfcn.h>
 #endif
 
@@ -372,7 +372,7 @@ using namespace System;
 #  endif
 # endif
 #else
-# if ( !defined( __STATIC__ ) && defined( __WINDOWS__ ) && !defined( __cplusplus_cli) )
+# if ( !defined( __STATIC__ ) && defined( WIN32 ) && !defined( __cplusplus_cli) )
 #  define EXPORT_METHOD __declspec(dllexport)
 #  define IMPORT_METHOD __declspec(dllimport)
 #  define LITERAL_LIB_EXPORT_METHOD __declspec(dllexport)
@@ -1609,7 +1609,7 @@ SACK_NAMESPACE
 #  ifdef __cplusplus
 extern "C"  
 #  endif
-#  if defined( __WINDOWS__ ) && !defined( __STATIC__ )
+#  if defined( WIN32 ) && !defined( __STATIC__ )
 #    ifdef __NO_WIN32API__ 
 // DllImportAttribute ?
 #    else

@@ -30,7 +30,7 @@
 
 #include <stdhdrs.h>
 #include <loadsock.h>
-#ifdef __WINDOWS__
+#ifdef WIN32
 #ifndef _ARM_
 #include <io.h> // unlink
 #endif
@@ -1010,7 +1010,7 @@ void SystemLogFL( const TEXTCHAR *message FILELINE_PASS )
 #endif
 	if( cannot_log )
       return;
-#ifdef __WINDOWS__
+#ifdef WIN32
 	while( InterlockedExchange( (long volatile*)&lock, 1 ) ) Relinquish();
 #else
 	while( LockedExchange( &lock, 1 ) ) Relinquish();
@@ -1215,7 +1215,7 @@ static INDEX CPROC _real_vlprintf ( CTEXTSTR format, va_list args )
 	{
       InitSyslog();
 		logtype = SYSLOG_FILE;
-#ifdef __WINDOWS__
+#ifdef WIN32
 		// if there is a console, use stdout?"
 #endif
 		l.file = sack_fopen( 1, "default.log", "wt" );

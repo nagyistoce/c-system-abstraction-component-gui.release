@@ -261,7 +261,7 @@ void ClearDeadstarts( void )
 #endif
 
 #ifndef UNDER_CE
-#  if defined( __WINDOWS__ )
+#  if defined( WIN32 )
 #    ifndef __cplusplus_cli
 static BOOL WINAPI CtrlC( DWORD dwCtrlType )
 {
@@ -287,7 +287,7 @@ static BOOL WINAPI CtrlC( DWORD dwCtrlType )
 #    endif
 #  endif
 
-#  ifndef __WINDOWS__
+#  ifndef WIN32
 static void CtrlC( int signal )
 {
    exit(3);
@@ -295,7 +295,7 @@ static void CtrlC( int signal )
 #  endif
 #endif
 
-//#ifdef __WINDOWS__
+//#ifdef WIN32
 
 // wow no such thing as static-izing this... it's
 // always retrieved with dynamic function loading, therefore
@@ -310,7 +310,7 @@ void InvokeDeadstart( void )
 	InitLocal();
    bInitialStarted = 1;
 	//bSuspend = 0; // if invoking, no longer suspend.
-#ifdef __WINDOWS__
+#ifdef WIN32
 	if( !bInitialDone && !bDispatched )
 	{
 #  ifndef UNDER_CE

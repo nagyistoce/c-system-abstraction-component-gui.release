@@ -5,7 +5,7 @@
 
 RENDER_NAMESPACE
 
-#if defined( __LINUX__ ) || defined( __WINDOWS__ )
+#if defined( __LINUX__ ) || defined( WIN32 )
 // and probalby #ifdef __SDL__
 
 IMAGE_PROC( void, DisplayBlatColor )( Image image, S_32 x, S_32 y, _32 w, _32 h, CDATA color );

@@ -231,7 +231,7 @@ int  SetCurrentPath ( CTEXTSTR path )
 
 int IsAbsolutePath( CTEXTSTR path )
 {
-#ifdef __WINDOWS__
+#ifdef WIN32
 	if( ( path[0] && path[1] && path[2] ) &&
 		 ( ( ( ( path[0] >= 'a' && path[0] <= 'z' )
 			  || ( path[0] >= 'A' && path[0] <= 'Z' ) )

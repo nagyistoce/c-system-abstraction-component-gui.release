@@ -383,7 +383,7 @@ int ScanFile( PFILESOURCE pfs )
 		}
 		else
 		{
-#ifdef __WINDOWS__
+#ifdef WIN32
 			HMODULE hModule;
 			static TEXTCHAR name[256];
 

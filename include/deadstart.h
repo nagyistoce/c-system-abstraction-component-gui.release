@@ -1,7 +1,7 @@
 #ifndef DEADSTART_DEFINED
 #define DEADSTART_DEFINED
 
-#ifdef __WINDOWS__
+#ifdef WIN32
 //#include <stdhdrs.h>
 #endif
 #include <sack_types.h>

@@ -299,7 +299,7 @@ FILESYS_PROC  int FILESYS_API  sack_fwrite ( CPOINTER buffer, int size, int coun
 FILESYS_PROC  int FILESYS_API  sack_unlink ( int group, CTEXTSTR filename );
 FILESYS_PROC  int FILESYS_API  sack_rename ( CTEXTSTR file_source, CTEXTSTR new_name );
 
-#ifdef __WINDOWS__
+#ifdef WIN32
 #if !defined( SACK_BAG_EXPORTS ) && !defined( BAG_EXTERNALS )
 # define open(a,...) sack_iopen(0,a,##__VA_ARGS__)
 # define _lopen(a,...) sack_open(0,a,##__VA_ARGS__)

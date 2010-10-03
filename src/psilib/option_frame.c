@@ -3,7 +3,7 @@
 #include <controls.h>
 #include <idle.h>
 
-#ifndef __WINDOWS__
+#ifndef WIN32
 #define BTN_OKAY   1
 #endif
 

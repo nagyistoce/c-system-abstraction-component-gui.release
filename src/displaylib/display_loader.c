@@ -1,7 +1,7 @@
 #include <stdhdrs.h>
 #include <system.h>
 #include <timers.h>
-#ifdef __WINDOWS__
+#ifdef WIN32
 // kinda awkward under linux - cause sometimes this thing itself
 // hosts systray...
 #include <systray.h>
@@ -26,7 +26,7 @@ int main( void )
 										 )) &&
 	  f() )
 	{
-#ifdef __WINDOWS__
+#ifdef WIN32
 		RegisterIcon( NULL );
 #endif
       LoadComplete();
