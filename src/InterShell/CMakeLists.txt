@@ -82,14 +82,16 @@ INSTALL(
   FILES
     ${INTERSHELL_SDK}
   DESTINATION
-    include/InterShell
+    include/SACK/InterShell
 )
 
+if( INSTALL_TO_SACK_SDK )
 INSTALL( 
   FILES
     ${INTERSHELL_SDK}
   DESTINATION
     ${SACK_BASE}/include/SACK/InterShell )
+endif( INSTALL_TO_SACK_SDK )
 
 if( NOT __ARM__ )
 add_subdirectory( vlc_hook )
