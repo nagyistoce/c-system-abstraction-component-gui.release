@@ -1,5 +1,6 @@
 #include <stdhdrs.h>
 #include <system.h>
+#include <sqlgetoption.h>
 
 
 static struct local_task_info
