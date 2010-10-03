@@ -26,7 +26,7 @@ cd ..
 cmd /c "M:\build\mingw_sack_core\bin\Debug\sack_deploy.exe"
 mkdir binary_Debug
 cd binary_Debug
-cmake -G "MinGW Makefiles"  \sack\binary -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=M:/build/mingw_sack_core_binaries_debug
+cmake -G "MinGW Makefiles"  \sack\binary -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=M:/build/mingw_sack_binaries_debug
 make install
 
 cd ..
@@ -53,6 +53,7 @@ make install
 cd ..
 
 cmd /c "M:\build\mingw_sack_core\bin\Debug\sack_deploy.exe"
+cmd /c "M:\build\mingw_sack_intershell_debug\intershell.deploy.exe"
 mkdir video_link_Debug
 cd video_link_Debug
 cmake -G "MinGW Makefiles"  \sack\src\apps\video_link -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=M:/build/mingw_sack_video_link_debug
@@ -60,6 +61,7 @@ make install
 cd ..
 
 cmd /c "M:\build\mingw_sack_core\bin\Release\sack_deploy.exe"
+cmd /c "M:\build\mingw_sack_intershell_Release\intershell.deploy.exe"
 mkdir video_link_Release
 cd video_link_Release
 cmake -G "MinGW Makefiles"  \sack\src\apps\video_link -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=M:/build/mingw_sack_video_link_release
