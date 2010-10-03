@@ -1,3 +1,4 @@
+if %1x==videox goto videolink
 mkdir Debug
 cd Debug
 cmake -G "Watcom WMake"  \sack -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=M:/build/watcom_sack_core -DNEED_FREETYPE=1 -DNEED_JPEG=1 -DNEED_PNG=1 -DNEED_ZLIB=1
@@ -19,48 +20,55 @@ cmake -G "Watcom WMake"  \sack -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_INSTALL_PRE
 wmake install
 cd ..
 
-goto END
 
-cmd /c "M:\build\vs10_sack_core\Debug\sack_deploy.exe"
+
+cmd /c "M:\build\watcom_sack_core\bin\Debug\sack_deploy.exe"
 mkdir binary_Debug
 cd binary_Debug
-cmake -G "MinGW Makefiles"  \sack\binary -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=M:/build/vs10_sack_core_binaries_debug
-devenv SackBinaries.sln /Build debug /Project Install.vcxproj
+cmake -G "Watcom WMake"  \sack\binary -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=M:/build/watcom_sack_binaries_debug
+wmake install
+
 cd ..
 
-cmd /c "M:\build\vs10_sack_core\Release\sack_deploy.exe"
+cmd /c "M:\build\watcom_sack_core\bin\Release\sack_deploy.exe"
 mkdir binary_Release
 cd binary_Release
-cmake -G "MinGW Makefiles"  \sack\binary -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=M:/build/vs10_sack_binaries_release
-devenv SackBinaries.sln /Build release /Project Install.vcxproj
+cmake -G "Watcom WMake"  \sack\binary -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=M:/build/watcom_sack_binaries_release
+wmake install
 cd ..
 
-cmd /c "M:\build\vs10_sack_core\Debug\sack_deploy.exe"
+cmd /c "M:\build\watcom_sack_core\bin\Debug\sack_deploy.exe"
 mkdir intershell_Debug
 cd intershell_Debug
-cmake -G "MinGW Makefiles"  \sack\src\InterShell -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=M:/build/vs10_sack_intershell_debug -DVLC_PATH="e:/tools/vlc-1.1.4"
-devenv InterShell.sln /Build debug /Project Install.vcxproj
+cmake -G "Watcom WMake"  \sack\src\InterShell -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=M:/build/watcom_sack_intershell_debug -DVLC_PATH="e:/tools/vlc-1.1.4"
+wmake install
 cd ..
 
-cmd /c "M:\build\vs10_sack_core\Release\sack_deploy.exe"
+cmd /c "M:\build\watcom_sack_core\bin\Release\sack_deploy.exe"
 mkdir intershell_Release
 cd intershell_Release
-cmake -G "MinGW Makefiles"  \sack\src\InterShell -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=M:/build/vs10_sack_intershell_release -DVLC_PATH="e:/tools/vlc-1.1.4"
-devenv InterShell.sln /Build release /Project Install.vcxproj
+cmake -G "Watcom WMake"  \sack\src\InterShell -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=M:/build/watcom_sack_intershell_release -DVLC_PATH="e:/tools/vlc-1.1.4"
+wmake install
 cd ..
 
-cmd /c "M:\build\vs10_sack_core\Debug\sack_deploy.exe"
+:videolink
+
+cmd /c "M:\build\watcom_sack_core\bin\Debug\sack_deploy.exe"
+cmd /c "M:\build\watcom_sack_intershell_debug\intershell_deploy.exe"
+cmd /c "M:\build\watcom_sack_binaries_debug\Sack.Binary.Deploy.exe"
 mkdir video_link_Debug
 cd video_link_Debug
-cmake -G "MinGW Makefiles"  \sack\src\apps\video_link -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=M:/build/vs10_sack_video_link_debug
-devenv video_link.sln /Build debug /Project Install.vcxproj
+cmake -G "Watcom WMake"  \sack\src\apps\video_link -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=M:/build/watcom_sack_video_link_debug
+wmake install
 cd ..
 
-cmd /c "M:\build\vs10_sack_core\Release\sack_deploy.exe"
+cmd /c "M:\build\watcom_sack_core\bin\Release\sack_deploy.exe"
+cmd /c "M:\build\watcom_sack_intershell_Release\intershell_deploy.exe"
+cmd /c "M:\build\watcom_sack_binaries_Release\Sack.Binary.Deploy.exe"
 mkdir video_link_Release
 cd video_link_Release
-cmake -G "MinGW Makefiles"  \sack\src\apps\video_link -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=M:/build/vs10_sack_video_link_release
-devenv video_link.sln /Build release /Project Install.vcxproj
+cmake -G "Watcom WMake"  \sack\src\apps\video_link -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=M:/build/watcom_sack_video_link_release
+wmake install
 cd ..
 
 :end
