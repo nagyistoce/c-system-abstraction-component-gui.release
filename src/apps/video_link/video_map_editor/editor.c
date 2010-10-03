@@ -147,9 +147,9 @@ void EditSite( PLISTITEM pli )
 	TEXTCHAR tmp[256];
    TEXTCHAR frame_file[256];
 	GetFileGroupText( GetFileGroup( "Configuration Maps", "../resources" ), tmp, sizeof( tmp ) );
-	snprintf( frame_file, sizeof( frame_file ), "edit_video_link_site.Frame", tmp );
+	snprintf( frame_file, sizeof( frame_file ), "%s/Frames/edit_video_link_site.Frame", tmp );
 	{
-		PSI_CONTROL frame = LoadXMLFrame( "edit_video_link_site.Frame" );
+		PSI_CONTROL frame = LoadXMLFrame( frame_file );
 		struct site_info *site = (struct site_info *)GetItemData( pli );
 		if( frame )
 		{
