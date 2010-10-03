@@ -1,7 +1,7 @@
 
 cmake_minimum_required(VERSION 2.8)
 
-PROJECT( "Sack Binaries" )
+PROJECT( "Sack.Binary.Deploy" )
 add_definitions( -D_X86_ )
 
 configure_file( deploy.cm.c ${CMAKE_BINARY_DIR}/deploy.c )
