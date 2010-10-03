@@ -68,6 +68,7 @@ INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const ch
 	const char *system = NULL;
 	CTEXTSTR *result = NULL;
 	INDEX ID;
+	POPTION_TREE tree = GetOptionTreeEx( odbc );
 	//, IDName; // Name to lookup
 	if( og.flags.bUseProgramDefault )
 	{
@@ -83,7 +84,7 @@ INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const ch
 	}
 	InitMachine();
 	// resets the search/browse cursor... not empty...
-	FamilyTreeReset( GetOptionTree( odbc ) );
+	FamilyTreeReset( &tree->option_tree );
 	while( system || program || file || pBranch || pValue || start )
 	{
 #ifdef DETAILED_LOGGING
@@ -147,7 +148,7 @@ INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const ch
 
       {
           // double convert 'precistion loss 64bit gcc'
-			INDEX node_id = ((INDEX)(PTRSZVAL)FamilyTreeFindChild( *GetOptionTree( odbc ), (PTRSZVAL)namebuf )) - 1;
+			INDEX node_id = ((INDEX)(PTRSZVAL)FamilyTreeFindChild( tree->option_tree, (PTRSZVAL)namebuf )) - 1;
 			if( node_id != INVALID_INDEX )
 			{
 #ifdef DETAILED_LOGGING
@@ -174,10 +175,11 @@ INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const ch
                // this is the only place where ID must be set explicit...
 					// otherwise our root node creation failes if said root is gone.
                //lprintf( "New entry... create it..." );
-               snprintf( query, sizeof( query ), "Insert into "OPTION_MAP"(`parent_option_id`,`name_id`) values (%ld,%lu)", parent, IDName );
-               if( SQLCommand( odbc, query ) )
+					snprintf( query, sizeof( query ), "Insert into "OPTION_MAP"(`parent_option_id`,`name_id`) values (%ld,%lu)", parent, IDName );
+               OpenWriter( tree );
+               if( SQLCommand( tree->odbc_writer, query ) )
                {
-                  ID = FetchLastInsertID( odbc, OPTION_MAP, WIDE("option_id") );
+                  ID = FetchLastInsertID( tree->odbc_writer, OPTION_MAP, WIDE("option_id") );
                }
                else
 					{
@@ -192,7 +194,7 @@ INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const ch
 #endif
 					parent = ID;
 					//lprintf( WIDE("Adding new option to family tree... ") );
-					FamilyTreeAddChild( GetOptionTree( odbc ), (POINTER)(ID+1), (PTRSZVAL)SaveText( namebuf ) );
+					FamilyTreeAddChild( &tree->option_tree, (POINTER)(ID+1), (PTRSZVAL)SaveText( namebuf ) );
                PopODBCEx( odbc );
                continue; // get out of this loop, continue outer.
             }
@@ -214,7 +216,7 @@ INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const ch
 				//else
             //   value = INVALID_INDEX;
             //sscanf( result, WIDE("%lu"), &parent );
-            FamilyTreeAddChild( GetOptionTree( odbc ), (POINTER)(parent+1), (PTRSZVAL)SaveText( namebuf ) );
+            FamilyTreeAddChild( &tree->option_tree, (POINTER)(parent+1), (PTRSZVAL)SaveText( namebuf ) );
          }
          PopODBCEx( odbc );
       }
@@ -307,11 +309,11 @@ int NewGetOptionBlobValueOdbc( PODBC odbc, INDEX optval, char **buffer, _32 *len
 
 //------------------------------------------------------------------------
 
-INDEX NewCreateValue( PODBC odbc, INDEX value, CTEXTSTR pValue )
+INDEX NewCreateValue( POPTION_TREE tree, INDEX value, CTEXTSTR pValue )
 {
    TEXTCHAR insert[256];
 	CTEXTSTR result=NULL;
-   TEXTSTR newval = EscapeSQLBinary( odbc, pValue, StrLen( pValue ) );
+	TEXTSTR newval = EscapeSQLBinary( tree->odbc_writer, pValue, StrLen( pValue ) );
    int IDValue;
 	if( pValue == NULL )
 		snprintf( insert, sizeof( insert ), "insert into "OPTION_BLOBS " (`option_id`,`blob` ) values (%lu,'')"
@@ -323,13 +325,14 @@ INDEX NewCreateValue( PODBC odbc, INDEX value, CTEXTSTR pValue )
 				  ,pValue?"\'":""
 				  , pValue?newval:"NULL"
 				  ,pValue?"\'":"" );
-	if( SQLCommand( odbc, insert ) )
+   OpenWriter( tree );
+	if( SQLCommand( tree->odbc_writer, insert ) )
    {
       //IDValue = FetchLastInsertID( odbc, WIDE(""OPTION_VALUES""), WIDE("option_id") );
    }
    else
    {
-      FetchSQLError( odbc, &result );
+      FetchSQLError( tree->odbc_writer, &result );
       lprintf( WIDE("Insert value failed: %s"), result );
       IDValue = INVALID_INDEX;
 	}
