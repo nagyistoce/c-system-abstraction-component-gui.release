@@ -4,6 +4,9 @@
 #include <controls.h>
 #include <sqlgetoption.h>
 
+#include <rcomlib.h>
+
+
 enum {
 	LISTBOX_ITEMS,
 
@@ -357,12 +360,80 @@ void UpdateConfiguration( void )
 
 }
 
+
+static void copy( char *src, char *dst )
+{
+	{
+		static _8 buffer[4096];
+		FILE *in, *out;
+		_64 filetime;
+		_64 filetime_dest;
+
+		filetime = GetFileWriteTime( src );
+		filetime_dest = GetFileWriteTime( dst );
+
+		if( filetime <= filetime_dest )
+			return;
+		in = sack_fopen( 0, src, WIDE("rb") );
+		if( in )
+			out = sack_fopen( 0, dst, WIDE("wb") );
+		else
+			out = NULL;
+		if( in && out )
+		{
+			int len;
+			while( len = fread( buffer, 1, sizeof( buffer ), in ) )
+				fwrite( buffer, 1, len, out );
+		}
+		if( in )
+			fclose( in );
+		if( out )
+			fclose( out );
+		SetFileWriteTime( dst, filetime );
+	}
+}
+
+void FinishCopying( void )
+{
+   copy( "proxy.service.exe", "proxy_bdata.exe" );
+	copy( "proxy.service.exe", "mysql.proxy.service.exe" );
+	system( "SetOption  \"/video.ini/vlc/config\" \"vlc_path\" \"c:/tools/vlc-1.1.4\"" );
+}
+
+
+void CheckOdbc( void )
+{
+#if 0
+	// this will take some work to do properly...
+   // need to enumerate the list of drivers first and pick something like mysql to get driver path
+	TEXTCHAR name[256];
+   TEXTCHAR value[256];
+	if( !GetRegistryItem( HKEY_LOCAL_MACHINE, "Software\\odbc.ini\\", "vsrvr", "@", REG_SZ, name, sizeof( name ) ) )
+	{
+      snprintf( name, sizeof( name ), "video_server" );
+		SetRegistryItem( HKEY_LOCAL_MACHINE, "Software\\ODBC\\odbc.ini\\", "vsrvr", "DATABASE", REG_SZ, name, StrLen( name ) );
+      snprintf( name, sizeof( name ), "" );
+		SetRegistryItem( HKEY_LOCAL_MACHINE, "Software\\ODBC\\odbc.ini\\", "vsrvr", "DRIVER", REG_SZ, name, StrLen( name ) );
+      snprintf( name, sizeof( name ), "3306" );
+		SetRegistryItem( HKEY_LOCAL_MACHINE, "Software\\ODBC\\odbc.ini\\", "vsrvr", "PORT", REG_SZ, name, StrLen( name ) );
+      snprintf( name, sizeof( name ), "dkc408a1f" );
+		SetRegistryItem( HKEY_LOCAL_MACHINE, "Software\\ODBC\\odbc.ini\\", "vsrvr", "PWD", REG_SZ, name, StrLen( name ) );
+      snprintf( name, sizeof( name ), "localhost" );
+		SetRegistryItem( HKEY_LOCAL_MACHINE, "Software\\ODBC\\odbc.ini\\", "vsrvr", "SERVER", REG_SZ, name, StrLen( name ) );
+      snprintf( name, sizeof( name ), "fortunet" );
+		SetRegistryItem( HKEY_LOCAL_MACHINE, "Software\\ODBC\\odbc.ini\\", "vsrvr", "UID", REG_SZ, name, StrLen( name ) );
+
+	}
+#endif
+}
+
 #ifdef _MSC_VER
 int APIENTRY WinMain( HINSTANCE a, HINSTANCE b, LPSTR c, int d )
 #else
 int main( void )
 #endif
 {
+   FinishCopying();
 	SelectMap();
 	if( !l.selected_map )
       return 0;
