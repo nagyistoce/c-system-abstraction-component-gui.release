@@ -136,4 +136,9 @@ void CheckMyTables( PODBC odbc )
 	}
 };
 
+#ifdef __WATCOMC__
+PUBLIC( void, MustExportOneFunction )( void )
+{
+}
+#endif
 

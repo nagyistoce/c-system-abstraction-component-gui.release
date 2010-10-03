@@ -30,3 +30,11 @@ static void VideoLinkCommandReset( "MUX Process" )( LOGICAL soft_reset )
 {
    video_ctrl_display( 1 );
 }
+
+#ifdef __WATCOMC__
+PUBLIC( void, MustExportOneFunction )( void )
+{
+}
+#endif
+
+

@@ -13,6 +13,7 @@
 
 #include "link_events.h"
 #include <systray.h>
+#include <sqlgetoption.h>
 //#include <bard.h>
 
 #define USES_INTERSHELL_INTERFACE
