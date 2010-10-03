@@ -1,7 +1,9 @@
 #include <stdhdrs.h>
 #include <procreg.h>
 #include <deadstart.h>
+#ifndef USE_SQLITE_INTERFACE
 #define USE_SQLITE_INTERFACE
+#endif
 #define BUILDS_INTERFACE
 #include "../SQLlib/sqlstruc.h"
 #include "3.7.0/sqlite3.h"
