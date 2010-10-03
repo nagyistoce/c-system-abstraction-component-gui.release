@@ -1,3 +1,4 @@
+set VLC_PATH=c:\tools\vlc-1.1.4
 mkdir Debug
 cd Debug
 cmake -G "MinGW Makefiles"  \sack -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=M:/build/mingw_sack_core -DNEED_FREETYPE=1 -DNEED_JPEG=1 -DNEED_PNG=1 -DNEED_ZLIB=1
@@ -41,14 +42,14 @@ cd ..
 cmd /c "M:\build\mingw_sack_core\bin\Debug\sack_deploy.exe"
 mkdir intershell_Debug
 cd intershell_Debug
-cmake -G "MinGW Makefiles"  \sack\src\InterShell -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=M:/build/mingw_sack_intershell_debug -DVLC_PATH="e:/tools/vlc-1.1.4"
+cmake -G "MinGW Makefiles"  \sack\src\InterShell -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=M:/build/mingw_sack_intershell_debug -DVLC_PATH="%VLC_PATH%"
 make install
 cd ..
 
 cmd /c "M:\build\mingw_sack_core\bin\Release\sack_deploy.exe"
 mkdir intershell_Release
 cd intershell_Release
-cmake -G "MinGW Makefiles"  \sack\src\InterShell -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=M:/build/mingw_sack_intershell_release -DVLC_PATH="e:/tools/vlc-1.1.4"
+cmake -G "MinGW Makefiles"  \sack\src\InterShell -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=M:/build/mingw_sack_intershell_release -DVLC_PATH="%VLC_PATH%"
 make install
 cd ..
 
