@@ -12,6 +12,11 @@ INSTALL_SACK( bin )
 include_directories( ${SACK_INCLUDE_DIR} )
 LINK_DIRECTORIES( ${SACK_LIBRARY_DIR} )
 
+set(WIN32_VERSION "0x0501" CACHE STRING
+      "Set minimum windows build version")
+  set_property(CACHE WIN32_VERSION PROPERTY STRINGS
+               "0x501" "0x0500" "0x0400")
+add_definitions( -D_WIN32_WINNT=${WIN32_VERSION} )
 
 add_subdirectory( deploy )
 
@@ -29,7 +34,6 @@ add_subpath( ../src/psilib/paltst )
   add_subpath( ../src/msgsvr/testdisplay )
  endif( NOT __NO_GUI__ )
 #add_subpath( ../src/bench/mem )
-
 
 
 if( NOT __NO_GUI__ )
