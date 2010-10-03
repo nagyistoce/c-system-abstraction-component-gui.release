@@ -135,15 +135,19 @@ int main( int argc, char **argv )
 		}
 #endif
 
+		fprintf( out, "if( MSVC )\n" );
+		fprintf( out, "set( SUPPORTS_PARALLEL_BUILD_TYPE 1 )\n" );
+		fprintf( out, "endif( MSVC )\n" );
+		fprintf( out, "\n" );
 		fprintf( out, "set( SACK_BASE %s )\n", path );
 		fprintf( out, "set( SACK_INCLUDE_DIR $""{SACK_BASE}/include/SACK )\n" );
 		fprintf( out, "set( SACK_BAG_PLUSPLUS @SACK_BAG_PLUSPLUS@ )\n" );
 		fprintf( out, "set( SACK_LIBRARIES sack_bag $""{SACK_BAG_PLUSPLUS} )\n" );
+		fprintf( out, "if(SUPPORTS_PARALLEL_BUILD_TYPE)\n" );
 		fprintf( out, "set( SACK_LIBRARY_DIR $""{SACK_BASE}/lib )\n" );
-		fprintf( out, "\n" );
-		fprintf( out, "if( MSVC )\n" );
-		fprintf( out, "set( SUPPORTS_PARALLEL_BUILD_TYPE 1 )\n" );
-		fprintf( out, "endif( MSVC )\n" );
+		fprintf( out, "else(SUPPORTS_PARALLEL_BUILD_TYPE)\n" );
+		fprintf( out, "set( SACK_LIBRARY_DIR $""{SACK_BASE}/lib/$""{CMAKE_BUILD_TYPE} )\n" );
+		fprintf( out, "endif(SUPPORTS_PARALLEL_BUILD_TYPE)\n" );
 		fprintf( out, "\n" );
 		fprintf( out, "set(  CMAKE_CXX_FLAGS_DEBUG \"$""{CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG\" )\n" );
 		fprintf( out, "set(  CMAKE_CXX_FLAGS_RELWITHDEBINFO \"$""{CMAKE_CXX_FLAGS_RELWITHDEBINFO} -D_DEBUG\" )\n" );
@@ -170,9 +174,9 @@ int main( int argc, char **argv )
 		fprintf( out, "install( FILES $""{SACK_BASE}/bin/\\$""{CMAKE_INSTALL_CONFIG_NAME}/${CMAKE_SHARED_LIBRARY_PREFIX}sack_bag${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION $""{dest} )\n" );
 		fprintf( out, "install( FILES $""{SACK_BASE}/bin/\\$""{CMAKE_INSTALL_CONFIG_NAME}/EditOptions${CMAKE_EXECUTABLE_SUFFIX} DESTINATION $""{dest} )\n" );
 		fprintf( out, "else(SUPPORTS_PARALLEL_BUILD_TYPE)\n" );
-		fprintf( out, "install( FILES $""{SACK_BASE}/$""{CMAKE_BUILD_TYPE}/bin/${CMAKE_SHARED_LIBRARY_PREFIX}${SACK_BAG_PLUSPLUS}${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION $""{dest} )\n" );
-		fprintf( out, "install( FILES $""{SACK_BASE}/$""{CMAKE_BUILD_TYPE}/bin/${CMAKE_SHARED_LIBRARY_PREFIX}sack_bag${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION $""{dest} )\n" );
-		fprintf( out, "install( FILES $""{SACK_BASE}/$""{CMAKE_BUILD_TYPE}/bin/EditOptions${CMAKE_EXECUTABLE_SUFFIX} DESTINATION $""{dest} )\n" );
+		fprintf( out, "install( FILES $""{SACK_BASE}/bin/$""{CMAKE_BUILD_TYPE}/${CMAKE_SHARED_LIBRARY_PREFIX}${SACK_BAG_PLUSPLUS}${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION $""{dest} )\n" );
+		fprintf( out, "install( FILES $""{SACK_BASE}/bin/$""{CMAKE_BUILD_TYPE}/${CMAKE_SHARED_LIBRARY_PREFIX}sack_bag${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION $""{dest} )\n" );
+		fprintf( out, "install( FILES $""{SACK_BASE}/bin/$""{CMAKE_BUILD_TYPE}/EditOptions${CMAKE_EXECUTABLE_SUFFIX} DESTINATION $""{dest} )\n" );
 		fprintf( out, "endif(SUPPORTS_PARALLEL_BUILD_TYPE)\n" );
 		fprintf( out, "ENDMACRO( INSTALL_SACK )\n" );
 		fprintf( out, "\n" );
