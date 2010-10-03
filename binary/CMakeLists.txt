@@ -37,7 +37,7 @@ add_subpath( ../src/msgsvr/server )
 add_subpath( ../src/msgsvr/servicelist )
 endif( NOT __NO_GUI__ )
 
-
+add_subpath( ../src/SQLlib/optlib/setoptions )
 add_subpath( ../src/netlib/user )
 add_subpath( ../src/netlib/echo )
 add_subpath( ../src/netlib/forward )
