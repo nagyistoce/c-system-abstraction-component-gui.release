@@ -115,7 +115,9 @@ PFAMILYTREE* GetOptionTree( PODBC odbc )
 
 SQLGETOPTION_PROC( void, CreateOptionDatabaseEx )( POPTION_TREE tree )
 {
-	//SetSQLLoggingDisable( odbc, TRUE );
+#ifndef DETAILED_LOGGING
+	SetSQLLoggingDisable( odbc, TRUE );
+#endif
 	{
 		PTABLE table;
 		if( !tree->flags.bCreated )
@@ -179,6 +181,9 @@ void OpenWriter( POPTION_TREE option )
 	if( !option->odbc_writer )
 	{
 		option->odbc_writer = ConnectToDatabase( option->odbc->info.pDSN );
+#ifndef DETAILED_LOGGING
+		SetSQLLoggingDisable( option->odbc_writer, TRUE );
+#endif
 		SetSQLThreadProtect( option->odbc_writer, TRUE );
 		SetSQLAutoTransact( option->odbc_writer, TRUE );
 	}
