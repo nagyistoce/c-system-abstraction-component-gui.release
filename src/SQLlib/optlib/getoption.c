@@ -1292,11 +1292,19 @@ SQLGETOPTION_PROC( void, EndBatchUpdate )( void )
 ATEXIT( CommitOptions )
 {
 	INDEX idx;
-   POPTION_TREE tree;
+	POPTION_TREE tree;
+#ifdef DETAILED_LOGGING
+	lprintf( "Running Option cleanup..." );
+#endif
 	LIST_FORALL( og.trees, idx, POPTION_TREE, tree )
 	{
-      if( tree->odbc_writer )
+		if( tree->odbc_writer )
+		{
+#ifdef DETAILED_LOGGING
+			lprintf( "flushing a write" );
+#endif
 			SQLCommit( tree->odbc_writer );
+		}
 	}
 }
 SACK_OPTION_NAMESPACE_END
