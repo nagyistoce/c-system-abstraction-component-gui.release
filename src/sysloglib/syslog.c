@@ -454,7 +454,7 @@ void InitSyslog( void )
 		flags.bLogSourceFile = 1;
 		flags.bLogThreadID = 1;
 		flags.bLogProgram = 0;
-		SetDefaultName( NULL, "Default", NULL );
+		SetDefaultName( NULL, NULL, NULL );
 		SystemLogTime( SYSLOG_TIME_HIGH );
 		//lprintf( WIDE("Syslog Initializing, debug mode, startup programname.log\n") );
 	}
