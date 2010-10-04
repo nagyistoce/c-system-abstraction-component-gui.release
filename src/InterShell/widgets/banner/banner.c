@@ -378,26 +378,26 @@ static void DrawBannerCaption( PSI_CONTROL pc, PBANNER banner, Image surface, TE
 		if( banner->text_bounds.x < banner->old_bounds.x )
 		{
 			rx = banner->text_bounds.x;
-         rw = rx_right - rx;
+         rw = ( rx_right - rx ) + 1;
 		}
 		else
 		{
 			rx = banner->old_bounds.x;
-         rw = rx_right - rx;
+         rw = ( rx_right - rx ) + 1;
 		}
 
 		if( banner->text_bounds.y < banner->old_bounds.y )
 		{
 			ry = banner->text_bounds.y;
-         rh = ry_bottom - ry;
+         rh = ( ry_bottom - ry ) + 1;
 		}
 		else
 		{
 			ry = banner->old_bounds.y;
-         rh = ry_bottom - ry;
+         rh = ( ry_bottom - ry ) + 1;
 		}
 
-		SetUpdateRegion( pc, rx, ry, rw + 1, rh + 1 );
+		SetUpdateRegion( pc, rx, ry, rw, rh );
 	}
 }
 
