@@ -397,7 +397,7 @@ void FinishCopying( void )
 {
    copy( "proxy.service.exe", "proxy_bdata.exe" );
 	copy( "proxy.service.exe", "mysql.proxy.service.exe" );
-	system( "SetOption  \"/video.ini/vlc/config\" \"vlc_path\" \"c:/tools/vlc-1.1.4\"" );
+	system( "SetOption \"video.ini\" \"/vlc/config\" \"vlc_path\" \"c:/tools/vlc-1.1.4\"" );
 }
 
 
