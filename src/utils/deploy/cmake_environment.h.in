@@ -1,5 +1,0 @@
-
-
-TEXTCHAR *build_type="@CMAKE_BUILD_TYPE@";
-
-
