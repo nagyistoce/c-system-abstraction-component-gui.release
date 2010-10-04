@@ -65,3 +65,5 @@ void OpenWriter( POPTION_TREE option );
 
 INDEX SetOptionValueEx( POPTION_TREE tree, INDEX optval, INDEX iValue );
 
+INDEX ReadOptionNameTable( POPTION_TREE tree, CTEXTSTR name, CTEXTSTR table, CTEXTSTR col, CTEXTSTR namecol, int bCreate DBG_PASS );
+

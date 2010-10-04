@@ -44,7 +44,7 @@ static int CPROC MyStrCmp( PTRSZVAL s1, PTRSZVAL s2 )
 	return StrCaseCmp( (TEXTCHAR*)s1, (TEXTCHAR*)s2 );
 }
 
-static PTREEROOT GetTableCache( PODBC odbc, CTEXTSTR tablename )
+PTREEROOT GetTableCache( PODBC odbc, CTEXTSTR tablename )
 {
 	static PTREEROOT tables;
 	PTREEROOT newcache;

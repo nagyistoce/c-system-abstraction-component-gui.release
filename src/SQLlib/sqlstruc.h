@@ -174,6 +174,11 @@ typedef struct global_tag
    ODBC Option; // a third, well-known DSN used for option library by default.  May be SQLite.
 } GLOBAL;
 #endif
+
+INDEX GetNameIndex(PODBC odbc, CTEXTSTR table,CTEXTSTR name);
+PTREEROOT GetTableCache( PODBC odbc, CTEXTSTR tablename );
+
+
 #ifdef USE_SQLITE_INTERFACE
 struct sqlite_interface
 {
