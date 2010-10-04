@@ -271,7 +271,8 @@ void ExtendConnection( PODBC odbc )
 
 	if( !sqlite3_get_autocommit(odbc->db) )
 	{
-		DebugBreak();
+      lprintf( "auto commit off?" );
+		//DebugBreak();
 	}
 	{
 #if SQLITE_VERSION_NUMBER >= 3006011
@@ -1919,7 +1920,7 @@ int __DoSQLCommandEx( PODBC odbc, PCOLLECT collection DBG_PASS )
 			//odbc->hidden_messages++
 			;
 		else
-			_lprintf(DBG_RElAY)( "Do Command: %s", GetText( cmd ) );
+			_lprintf(DBG_RElAY)( "Do Command[%p]: %s", odbc, GetText( cmd ) );
 	}
 
 #ifdef LOG_EVERYTHING
@@ -1964,7 +1965,8 @@ int __DoSQLCommandEx( PODBC odbc, PCOLLECT collection DBG_PASS )
 			case SQLITE_BUSY:
             // going to retry the statement as a whole anyhow.
 				sqlite3_finalize( collection->stmt );
-				lprintf( "Database busy, waiting..." );
+				if( !odbc->flags.bNoLogging )
+					_lprintf(DBG_RElAY)( "Database Busy, waiting on[%p]: %s", odbc, GetText( cmd ) );
             WakeableSleep( 25 );
 				Relinquish();
 				goto retry;
@@ -2556,7 +2558,10 @@ int __GetSQLResult( PODBC odbc, PCOLLECT collection, int bMore )
 				}
 				//lprintf( "Column %s colsize %d coltype %d coltype %d idx %d", collection->fields[idx-1], colsize, coltype, collection->coltypes[idx-1], idx );
 				if( collection->coltypes && coltype != collection->coltypes[idx-1] )
-               DebugBreak();
+				{
+               lprintf( "Col type mismatch?" );
+					DebugBreak();
+				}
             if( rc == SQL_SUCCESS ||
 					rc == SQL_SUCCESS_WITH_INFO )
 				{
@@ -2809,7 +2814,9 @@ int __DoSQLQueryEx( PODBC odbc, PCOLLECT collection, CTEXTSTR query DBG_PASS )
 		return FALSE;
 	}
 	if( !odbc )
+	{
 		DebugBreak();
+	}
 	if( !IsSQLOpen( odbc ) )
 	{
       return FALSE;
@@ -2888,7 +2895,7 @@ int __DoSQLQueryEx( PODBC odbc, PCOLLECT collection, CTEXTSTR query DBG_PASS )
 			//odbc->hidden_messages++
 			;
       else
-			_lprintf(DBG_RELAY)( "Do Command: %s", query );
+			_lprintf(DBG_RELAY)( "Do Command[%p]: %s", odbc, query );
 	}
 
 	//lprintf( DBG_FILELINEFMT "Query: %s" DBG_RELAY, GetText( query ) );

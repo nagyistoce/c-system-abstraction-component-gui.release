@@ -160,14 +160,14 @@ INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const ch
 		}
 
 		{
-         INDEX IDName = SQLReadNameTable(odbc,namebuf,OPTION_NAME,"name_id" );
+			INDEX IDName = ReadOptionNameTable(tree,namebuf,OPTION_NAME,"name_id","name",1 DBG_RELAY);
 
 			PushSQLQueryExEx(odbc DBG_RELAY );
          snprintf( query, sizeof( query )
                  , "select option_id from "OPTION_MAP" where parent_option_id=%ld and name_id=%d"
                  , parent
 					  , IDName );
-         //lprintf( "doing %s", query );
+         lprintf( "doing %s", query );
          if( !SQLRecordQuery( odbc, query, NULL, &result, NULL ) || !result )
          {
             if( bCreate )
@@ -199,7 +199,7 @@ INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const ch
                continue; // get out of this loop, continue outer.
             }
 #ifdef DETAILED_LOGGING
-            lprintf( WIDE("Option tree corrupt.  No option option_id=%ld"), ID );
+            _lprintf(DBG_RELAY)( WIDE("Option tree corrupt.  No option option_id=%ld"), ID );
 #endif
             PopODBCEx( odbc );
             return INVALID_INDEX;
