@@ -397,7 +397,7 @@ static void DrawBannerCaption( PSI_CONTROL pc, PBANNER banner, Image surface, TE
          rh = ry_bottom - ry;
 		}
 
-		SetUpdateRegion( pc, rx, ry, rw, rh );
+		SetUpdateRegion( pc, rx, ry, rw + 1, rh + 1 );
 	}
 }
 
