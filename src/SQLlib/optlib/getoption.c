@@ -1301,7 +1301,7 @@ ATEXIT( CommitOptions )
 		if( tree->odbc_writer )
 		{
 #ifdef DETAILED_LOGGING
-			lprintf( "flushing a write" );
+			lprintf( "flushing a write on %p", tree->odbc_writer );
 #endif
 			SQLCommit( tree->odbc_writer );
 		}
