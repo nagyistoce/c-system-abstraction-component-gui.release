@@ -116,7 +116,7 @@ PFAMILYTREE* GetOptionTree( PODBC odbc )
 SQLGETOPTION_PROC( void, CreateOptionDatabaseEx )( POPTION_TREE tree )
 {
 #ifndef DETAILED_LOGGING
-	SetSQLLoggingDisable( odbc, TRUE );
+	SetSQLLoggingDisable( tree->odbc, TRUE );
 #endif
 	{
 		PTABLE table;

@@ -167,7 +167,7 @@ INDEX NewGetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, const ch
                  , "select option_id from "OPTION_MAP" where parent_option_id=%ld and name_id=%d"
                  , parent
 					  , IDName );
-         lprintf( "doing %s", query );
+			//lprintf( "doing %s", query );
          if( !SQLRecordQuery( odbc, query, NULL, &result, NULL ) || !result )
          {
             if( bCreate )
