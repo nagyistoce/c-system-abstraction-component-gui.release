@@ -235,7 +235,9 @@ SQLGETOPTION_PROC( void, CreateOptionDatabase )( void )
          // make sure it's created as a tracked option thing...
 			GetOptionTree( og.Option );
 			// set to use new option tables.
-         lprintf( "Setting option database to new database." );
+#ifdef DETAILED_LOGGING
+			lprintf( "Setting option database to new database." );
+#endif
 			SetOptionDatabaseOption( og.Option, TRUE );
 		}
 #ifdef DETAILED_LOGGING
