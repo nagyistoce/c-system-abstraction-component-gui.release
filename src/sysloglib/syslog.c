@@ -375,7 +375,6 @@ static void LoadOptions( char *filename )
 		flags.bLogProgram = 0;
 	}
 	// set all default parts of the name.
-	SetDefaultName( NULL, NULL, NULL );
 	// this overrides options with options available from SQL database.
 	if( SACK_GetProfileIntEx( GetProgramName(), WIDE("SACK/Logging/Default Log Location is current directory"), 0, TRUE ) )
 	{
@@ -451,10 +450,11 @@ void InitSyslog( void )
        */
 		logtype = SYSLOG_AUTO_FILE;
 		flags.bLogOpenAppend = 0;
-		flags.bLogOpenBackup = 1;
+		flags.bLogOpenBackup = 0;
 		flags.bLogSourceFile = 1;
-		flags.bLogThreadID = 0;
+		flags.bLogThreadID = 1;
 		flags.bLogProgram = 0;
+		SetDefaultName( NULL, "Default", NULL );
 		SystemLogTime( SYSLOG_TIME_HIGH );
 		//lprintf( WIDE("Syslog Initializing, debug mode, startup programname.log\n") );
 	}
@@ -948,6 +948,12 @@ void DoSystemLog( const TEXTCHAR *buffer )
 				int n_retry = 0;
 			retry_again:
 				logtype = SYSLOG_NONE;
+				if( !flags.bInitialized )
+				{
+					l.file = sack_fopen( 0, gFilename, WIDE("wt") );
+				}
+				else
+				{
 				if( flags.bLogOpenBackup )
 				{
 					BackupFile( gFilename, (int)strlen( gFilename ), 1 );
@@ -958,6 +964,7 @@ void DoSystemLog( const TEXTCHAR *buffer )
 					fseek( l.file, 0, SEEK_END );
 				else
 					l.file = sack_fopen( GetFileGroup( "system.logs", GetProgramPath() ), gFilename, WIDE("wt") );
+				}
 				logtype = SYSLOG_AUTO_FILE;
 
 				if( !l.file )
