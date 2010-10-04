@@ -981,8 +981,12 @@ int OpenSQLConnection( PODBC odbc )
 void CPROC CommitTimer( PTRSZVAL psv )
 {
 	PODBC odbc = (PODBC)psv;
-   //lprintf( "Commit timer tick" );
-   if( odbc->last_command_tick )
+	//lprintf( "Commit timer tick" );
+
+	EnterCriticalSec( &odbc->cs );
+	// so at this point, we lock into the timer, and finish the commit.
+	// or the time hasn't elapsed, and we'll release the critical section
+	if( odbc->last_command_tick )
 		if( odbc->last_command_tick < ( timeGetTime() - 500 ) )
 		{
 			//lprintf( "Commit timer fire." );
@@ -992,21 +996,32 @@ void CPROC CommitTimer( PTRSZVAL psv )
 			odbc->flags.bAutoTransact = 1;
 			odbc->last_command_tick = 0;
 		}
+	LeaveCriticalSec( &odbc->cs );
+
 }
 
 //----------------------------------------------------------------------
 
 void SQLCommit( PODBC odbc )
 {
-	if( 0 && odbc->flags.bAutoTransact )
+	if( odbc->flags.bAutoTransact )
 	{
-		int n = odbc->flags.bAutoTransact;
-		//lprintf( "manual commit." );
-		odbc->last_command_tick = 0;
-		odbc->flags.bAutoTransact = 0;
-		RemoveTimer( odbc->commit_timer );
-		SQLCommand( odbc, "COMMIT" );
-		odbc->flags.bAutoTransact = n;
+		EnterCriticalSec( &odbc->cs );
+		// we will own the odbc here, so the timer will either block, or
+		// have completed, releasing this.
+
+		// maybe we don't have a pending commit.... (wouldn't if the timer hit just before we ran)
+		if( odbc->last_command_tick ) // otherwise we won't need a commit
+		{
+			int n = odbc->flags.bAutoTransact;
+			//lprintf( "manual commit." );
+			odbc->last_command_tick = 0;
+			odbc->flags.bAutoTransact = 0;
+			RemoveTimer( odbc->commit_timer );
+			SQLCommand( odbc, "COMMIT" );
+			odbc->flags.bAutoTransact = n;
+		}
+		LeaveCriticalSec( &odbc->cs );
 	}
 }
 
