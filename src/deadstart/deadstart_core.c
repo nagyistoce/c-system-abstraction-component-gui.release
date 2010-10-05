@@ -379,12 +379,14 @@ void InvokeDeadstart( void )
 void MarkRootDeadstartComplete( void )
 {
 	bInitialDone = 1;
-#ifndef __NO_OPTIONS__
-	l.flags.bLog = SACK_GetProfileIntEx( "SACK/Deadstart", "Logging Enabled?", 0, TRUE );
-#endif
 }
 
-
+#ifndef __NO_OPTIONS__
+PRIORITY_PRELOAD( InitDeadstartOptions, 100 )
+{
+	l.flags.bLog = SACK_GetProfileIntEx( "SACK/Deadstart", "Logging Enabled?", 0, TRUE );
+}
+#endif
 
 #if defined( __GNUC__ )
 
