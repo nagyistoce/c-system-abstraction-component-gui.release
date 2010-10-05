@@ -407,7 +407,18 @@ typedef struct required_table_tag *PTABLE;
    table :    a table which was created with GetFieldsInSQL, or
               created by filling in a structure.
    options :  Options from CreateTableOptions.                   */
+SQLSTUB_PROC( LOGICAL, CheckODBCTableEx)( PODBC odbc, PTABLE table, _32 options DBG_PASS );
+/* Checks a table in a database to see if it exists, and that
+   all the columns in the table definition passed exist as
+   column in the database. Will generate alter statements to the
+   table as appropriate.
+   Parameters
+   odbc :     connection to check the table on
+   table :    a table which was created with GetFieldsInSQL, or
+              created by filling in a structure.
+   options :  Options from CreateTableOptions.                   */
 SQLSTUB_PROC( LOGICAL, CheckODBCTable)( PODBC odbc, PTABLE table, _32 options );
+#define CheckODBCTable(odbc,t,opt) CheckODBCTableEx(odbc,t,opt DBG_SRC )
 /* Enable or disable logging SQL to the sql.log file and to the
    application's log.
    Parameters
@@ -441,14 +452,18 @@ SQLSTUB_PROC( void, SQLCommit )( PODBC odbc );
 // the last pair's name is NULL, and value does not matter.
 // insert values into said table.
 SQLSTUB_PROC( int, DoSQLInsert )( CTEXTSTR table, ... );
-// attempt to open some sort of odbc handler, the primary or backup
-// available through this interface
-SQLSTUB_PROC( int, OpenSQL )( void );
+
 /* This opens or re-opens a database connection. Mostly an
    \internal function(?)
    Parameters
    odbc :  connection to open.                             */
 SQLSTUB_PROC( int, OpenSQLConnection )( PODBC );
+/* This opens or re-opens a database connection. Mostly an
+   \internal function(?)
+   Parameters
+   odbc :  connection to open.                             */
+SQLSTUB_PROC( int, OpenSQLConnectionEx )( PODBC DBG_PASS );
+#define OpenSQLConnect(o) OpenSQLConnectionEx( o DBG_SRC )
 
 
 // should pass to this a &(CTEXTSTR) which starts as NULL for result.
@@ -996,7 +1011,18 @@ SQLSTUB_PROC( int, FetchSQLError )( PODBC, CTEXTSTR *result );
    
    FALSE if the connection would not work because it is not
    connected.                                               */
+SQLSTUB_PROC( int, IsSQLOpenEx )( PODBC DBG_PASS );
+/* Test if a database connection is open
+   Parameters
+   odbc :  database connection to check
+   
+   Returns
+   TRUE if the connection is open and works.
+   
+   FALSE if the connection would not work because it is not
+   connected.                                               */
 SQLSTUB_PROC( int, IsSQLOpen )( PODBC );
+#define IsSQLOpen(odbc) IsSQLOpenEx(odbc DBG_SRC )
 
 /* An PODBC connection handles commands as a stack, this saves
    the current query state (that you want to still get results
