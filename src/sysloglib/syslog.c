@@ -71,6 +71,7 @@ struct state_flags{
 	BIT_FIELD bLogOpenAppend : 1;
 	BIT_FIELD bLogOpenBackup : 1;
 	BIT_FIELD bLogSourceFile : 1;
+	BIT_FIELD bOptionsLoaded : 1;
 //} flags = { 0,0,1,1,0,1,0,0,0}; // log delta cpu time.(no protect), log program too
 //} flags = { 0,0,1,1,0,1,1,1,1}; // delta cpu time, threadID, process name, protect logged filenames(slower)
 
@@ -355,81 +356,91 @@ void SetDefaultName( CTEXTSTR path, CTEXTSTR name, CTEXTSTR extra )
 }
 
 #ifndef __NO_OPTIONS__
-static void LoadOptions( char *filename )
+static void LoadOptions( void )
 {
-	flags.bLogSourceFile = SACK_GetProfileIntEx( GetProgramName()
-															 , WIDE( "SACK/Logging/Log Source File")
-															 , flags.bLogSourceFile, TRUE );
+	if( !flags.bOptionsLoaded )
+	{
+		flags.bLogSourceFile = SACK_GetProfileIntEx( GetProgramName()
+																 , WIDE( "SACK/Logging/Log Source File")
+																 , flags.bLogSourceFile, TRUE );
 
-	if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Enable File Log" )
+		if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Enable File Log" )
 #ifdef _DEBUG
-                           , 1
+										, 1
 #else
-									, 0
+										, 0
 #endif
-									, TRUE ) )
-	{
-		logtype = SYSLOG_AUTO_FILE;
-		flags.bLogOpenAppend = 0;
-		flags.bLogOpenBackup = 1;
-		flags.bLogProgram = 0;
-	}
-	// set all default parts of the name.
-	// this overrides options with options available from SQL database.
-	if( SACK_GetProfileIntEx( GetProgramName(), WIDE("SACK/Logging/Default Log Location is current directory"), 0, TRUE ) )
-	{
-		// override filepath, if log exception.
-		TEXTCHAR buffer[256];
-		GetCurrentPath( buffer, sizeof( buffer ) );
-		SetDefaultName( buffer, NULL, NULL );
-	}
-	else
-	{
-		TEXTCHAR buffer[256];
-		// if this is blank, then length result from getprofilestring is 0, and default is with the program.
-		// so I'll lave functionality as expected for a default.
-		SACK_GetProfileStringEx( GetProgramName(), WIDE( "SACK/Logging/Default Log Location" ), WIDE( "" ), buffer, sizeof( buffer ), TRUE );
-		if( buffer[0] )
+										, TRUE ) )
 		{
+			logtype = SYSLOG_AUTO_FILE;
+			flags.bLogOpenAppend = 0;
+			flags.bLogOpenBackup = 1;
+			flags.bLogProgram = 0;
+		}
+		// set all default parts of the name.
+		// this overrides options with options available from SQL database.
+		if( SACK_GetProfileIntEx( GetProgramName(), WIDE("SACK/Logging/Default Log Location is current directory"), 0, TRUE ) )
+		{
+			// override filepath, if log exception.
+			TEXTCHAR buffer[256];
+			GetCurrentPath( buffer, sizeof( buffer ) );
 			SetDefaultName( buffer, NULL, NULL );
 		}
-	}
-
-
-	nLogLevel = SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Default Log Level (1001:all, 100:least)" ), nLogLevel, TRUE );
-
-	flags.bLogThreadID = SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Thread ID" ), 0, TRUE );
-	flags.bLogProgram = SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Program" ), 0, TRUE );
-	flags.bLogSourceFile = SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Source File" ), 1, TRUE );
-	if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log CPU Tick Time and Delta" ), 0, TRUE ) )
-	{
-		SystemLogTime( SYSLOG_TIME_CPU|SYSLOG_TIME_DELTA );
-	}
-	else if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Time as Delta" ), 0, TRUE ) )
-	{
-		SystemLogTime( SYSLOG_TIME_HIGH|SYSLOG_TIME_DELTA );
-	}
-	else if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Time" ), 1, TRUE ) )
-	{
-		if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Date" ), 1, TRUE ) )
+		else
 		{
-			SystemLogTime( SYSLOG_TIME_LOG_DAY|SYSLOG_TIME_HIGH );
+			TEXTCHAR buffer[256];
+			// if this is blank, then length result from getprofilestring is 0, and default is with the program.
+			// so I'll lave functionality as expected for a default.
+			SACK_GetProfileStringEx( GetProgramName(), WIDE( "SACK/Logging/Default Log Location" ), WIDE( "" ), buffer, sizeof( buffer ), TRUE );
+			if( buffer[0] )
+			{
+				SetDefaultName( buffer, NULL, NULL );
+			}
+		}
+
+
+		nLogLevel = SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Default Log Level (1001:all, 100:least)" ), nLogLevel, TRUE );
+
+		flags.bLogThreadID = SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Thread ID" ), 0, TRUE );
+		flags.bLogProgram = SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Program" ), 0, TRUE );
+		flags.bLogSourceFile = SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Source File" ), 1, TRUE );
+		if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log CPU Tick Time and Delta" ), 0, TRUE ) )
+		{
+			SystemLogTime( SYSLOG_TIME_CPU|SYSLOG_TIME_DELTA );
+		}
+		else if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Time as Delta" ), 0, TRUE ) )
+		{
+			SystemLogTime( SYSLOG_TIME_HIGH|SYSLOG_TIME_DELTA );
+		}
+		else if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Time" ), 1, TRUE ) )
+		{
+			if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Date" ), 1, TRUE ) )
+			{
+				SystemLogTime( SYSLOG_TIME_LOG_DAY|SYSLOG_TIME_HIGH );
+			}
+			else
+				SystemLogTime( SYSLOG_TIME_HIGH );
 		}
 		else
-			SystemLogTime( SYSLOG_TIME_HIGH );
+			SystemLogTime( 0 );
+		flags.bOptionsLoaded = 1;
 	}
-	else
-		SystemLogTime( 0 );
 }
 #endif
 
 
 //static int init_complete;
-void InitSyslog( void )
+void InitSyslog( int ignore_options )
 {
 #ifndef __STATIC_GLOBALS__
 	if( syslog_local )
+	{
+#ifndef __NO_OPTIONS__
+		if( !ignore_options )
+			LoadOptions();
+#endif
 		return;
+	}
 	SimpleRegisterAndCreateGlobal( syslog_local );
 #endif
 	logtype = SYSLOG_AUTO_FILE;
@@ -452,6 +463,8 @@ void InitSyslog( void )
 		flags.bLogOpenAppend = 0;
 		flags.bLogOpenBackup = 0;
 		flags.bLogSourceFile = 1;
+		flags.bUseDeltaTime = 1;
+      flags.bLogCPUTime = 1;
 		flags.bLogThreadID = 1;
 		flags.bLogProgram = 0;
 		SetDefaultName( NULL, NULL, NULL );
@@ -465,7 +478,8 @@ void InitSyslog( void )
 #endif
 
 #ifndef __NO_OPTIONS__
-	LoadOptions( pProgramName );
+	if( !ignore_options )
+		LoadOptions();
 #else
 	SetDefaultName( NULL, NULL, NULL );
 #endif
@@ -474,7 +488,7 @@ void InitSyslog( void )
 
 PRIORITY_PRELOAD( InitSyslogPreload, SYSLOG_PRELOAD_PRIORITY )
 {
-   InitSyslog();
+   InitSyslog( 0 );
 }
 
 //----------------------------------------------------------------------------
@@ -921,7 +935,7 @@ void DoSystemLog( const TEXTCHAR *buffer )
 #ifndef __STATIC_GLOBALS__
 	if( !syslog_local )
 	{
-      InitSyslog();
+		InitSyslog( 1 );
 		if( logtype == SYSLOG_AUTO_FILE && !l.file )
 		{
 			// cannot log until system log is complete
@@ -948,7 +962,7 @@ void DoSystemLog( const TEXTCHAR *buffer )
 				int n_retry = 0;
 			retry_again:
 				logtype = SYSLOG_NONE;
-				if( !flags.bInitialized )
+				if( !flags.bOptionsLoaded )
 				{
 					l.file = sack_fopen( 0, gFilename, WIDE("wt") );
 				}
@@ -1012,7 +1026,7 @@ void SystemLogFL( const TEXTCHAR *message FILELINE_PASS )
 #ifndef __STATIC_GLOBALS__
 	if( !syslog_local )
 	{
-      InitSyslog();
+		InitSyslog( 1 );
 	}
 #endif
 	if( cannot_log )
@@ -1215,23 +1229,7 @@ static PLINKQUEUE buffers;
 
 static INDEX CPROC _real_vlprintf ( CTEXTSTR format, va_list args )
 {
-#if 1
    // this can be used to force logging early to stdout
-#ifndef __STATIC_GLOBALS__
-	if( !syslog_local )
-	{
-      InitSyslog();
-		logtype = SYSLOG_FILE;
-#ifdef WIN32
-		// if there is a console, use stdout?"
-#endif
-		l.file = sack_fopen( 1, "default.log", "wt" );
-		SystemLogTime( SYSLOG_TIME_CPU|SYSLOG_TIME_DELTA );
-
-		flags.bLogSourceFile = 1;
-	}
-#endif
-#endif
 	if( cannot_log )
 		return 0;
 	if( logtype != SYSLOG_NONE )
@@ -1342,7 +1340,7 @@ RealVLogFunction  _vxlprintf ( _32 level DBG_PASS )
 #ifndef __STATIC_GLOBALS__
 	if( !syslog_local )
 	{
-		return _null_vlprintf;
+		InitSyslog( 1 );
 	}
 #endif
 #if _DEBUG
@@ -1367,7 +1365,9 @@ RealLogFunction _xlprintf( _32 level DBG_PASS )
 	//EnterCriticalSec( &next_lprintf.cs );
 #ifndef __STATIC_GLOBALS__
 	if( !syslog_local )
-		return _null_lprintf;
+	{
+		InitSyslog( 1 );
+	}
 #endif
 #if _DEBUG
 	next_lprintf.pFile = pFile;
