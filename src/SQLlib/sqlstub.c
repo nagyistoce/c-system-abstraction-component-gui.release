@@ -669,8 +669,7 @@ void InitLibrary( void )
 			if( !ProcessConfigurationFile( pch, WIDE("sql.config"), 0 ) )
 			{
 				FILE *file;
-				Fopen( file, WIDE("sql.config"), WIDE("wt") );
-				lprintf( WIDE("Read configuration failed, creating a new one.") );
+				file = sack_fopen( 1, WIDE("sql.config"), WIDE("wt") );
 				if( file )
 				{
                fprintf( file, "Option DSN=option.db\n" );
@@ -714,7 +713,7 @@ void InitLibrary( void )
 //-----------------------------------------------------------------------
 static int bOpening; // expose this so dump info doesn't open on failed open.
 
-int OpenSQLConnection( PODBC odbc )
+int OpenSQLConnectionEx( PODBC odbc DBG_PASS )
 {
 	int state = 0;
 	RETCODE rc;
@@ -869,7 +868,7 @@ int OpenSQLConnection( PODBC odbc )
 							odbc->info.pPASSWORD[0] = 0;
 						}
 					}
-					DumpInfo( odbc, pvt, SQL_HANDLE_DBC, &odbc->hdbc, odbc->flags.bNoLogging );
+					DumpInfoEx( odbc, pvt, SQL_HANDLE_DBC, &odbc->hdbc, odbc->flags.bNoLogging DBG_RELAY );
 				}
 				else
 				{
@@ -976,6 +975,11 @@ int OpenSQLConnection( PODBC odbc )
 	return TRUE;
 }
 
+#undef OpenSQLConnection
+int OpenSQLConnection( PODBC odbc )
+{
+   return OpenSQLConnectionEx( odbc DBG_SRC );
+}
 //----------------------------------------------------------------------
 
 void CPROC CommitTimer( PTRSZVAL psv )
@@ -1204,7 +1208,7 @@ void GenerateResponce( PCOLLECT collection, int responce )
 
 //-----------------------------------------------------------------------
 
-int OpenSQL( void )
+int OpenSQL( DBG_VOIDPASS )
 {
 	static _32 _bOpening;
 	int bPrimaryComingUp = FALSE;
@@ -1228,7 +1232,7 @@ int OpenSQL( void )
 #ifdef LOG_ACTUAL_CONNECTION
 			lprintf( "Begin connection gPrimary=%d", g.Primary.flags.bConnected );
 #endif
-			if( OpenSQLConnection( &g.Primary ) )
+			if( OpenSQLConnectionEx( &g.Primary DBG_RELAY ) )
 				if( !g.flags.bPrimaryUp )
 					bPrimaryComingUp = TRUE;
 #ifdef LOG_ACTUAL_CONNECTION
@@ -1249,7 +1253,7 @@ int OpenSQL( void )
 #ifdef LOG_ACTUAL_CONNECTION
 			lprintf( "Begin connection &gBackup=%p", g.Backup );
 #endif
-			if( OpenSQLConnection( &g.Backup ) )
+			if( OpenSQLConnectionEx( &g.Backup DBG_RELAY ) )
 			{
 				if( !g.flags.bBackupUp )
 					bBackupComingUp = TRUE;
@@ -1444,12 +1448,12 @@ void FailConnection( PODBC odbc )
 	if( is_default )
 	{
       //lprintf( "Default connectionf ailed... open general (backup/primary)" );
-		OpenSQL();
+		OpenSQL( DBG_VOIDSRC );
 	}
 	else
 	{
       //lprintf( "re-open self?" );
-		OpenSQLConnection( odbc );
+		OpenSQLConnectionEx( odbc DBG_SRC );
       //lprintf( "... " );
 	}
 }
@@ -1585,7 +1589,7 @@ PODBC ConnectToDatabaseEx( CTEXTSTR DSN, LOGICAL bRequireConnection )
 	// source ID is not known...
 	// is probably static link to library, rather than proxy operation
 	CreateCollector( 0, pODBC, FALSE );
-	OpenSQLConnection( pODBC );
+	OpenSQLConnectionEx( pODBC DBG_SRC );
 	return pODBC;
 }
 
@@ -1743,19 +1747,6 @@ int DumpInfoEx( PODBC odbc, PVARTEXT pvt, SQLSMALLINT type, SQLHANDLE *handle, L
 					vtprintf( pvt, WIDE("(%5s)[%") _32f WIDE("]:%s"), statecode, native, message );
 				if( !bNoLog && EnsureLogOpen( odbc ) )
 					fprintf( g.pSQLLog, WIDE("#%s\n"), GetText( VarTextPeek( pvt ) ) );
-#if 0
-            /*
-				if( !bOpening )
-				{
-					FailConnection();
-					if( IsSQLOpen( NULL ) )
-					{
-						lprintf( "Connection closed, and re-open worked." );
-						retry = 1;
-					}
-					}
-               */
-#endif
 			}
 		}
 		else
@@ -1876,7 +1867,7 @@ int __DoSQLCommandEx( PODBC odbc, PCOLLECT collection DBG_PASS )
       odbc->nProtect++;
 	}
 
-	if( !OpenSQLConnection( odbc ) )
+	if( !OpenSQLConnectionEx( odbc DBG_SRC ) )
 	{
 		lprintf( WIDE("Fail connect odbc... should already be open?!") );
 		GenerateResponce( collection, WM_SQL_RESULT_ERROR );
@@ -2087,7 +2078,7 @@ int __DoSQLCommandEx( PODBC odbc, PCOLLECT collection DBG_PASS )
 SQLPROXY_PROC( int, SQLCommandEx )( PODBC odbc, CTEXTSTR command DBG_PASS )
 {
 	PODBC use_odbc;
-	if( !IsSQLOpen( odbc ) )
+	if( !IsSQLOpenEx( odbc DBG_RELAY ) )
       return 0;
 	if( !( use_odbc = odbc ) )
 	{
@@ -2174,7 +2165,7 @@ void __GetSQLTypes( PODBC odbc, PCOLLECT collection )
 
 int GetSQLTypes( void )
 {
-   if( !OpenSQL() )
+   if( !OpenSQL( DBG_VOIDSRC ) )
    {
       return FALSE;
    }
@@ -2237,7 +2228,7 @@ SQLPROXY_PROC( int, FetchSQLError )( PODBC odbc, CTEXTSTR *result )
 SQLPROXY_PROC( int, GetSQLError )( CTEXTSTR *result )
 {
 	if( !g.odbc )
-		if( !OpenSQL() )
+		if( !OpenSQL( DBG_VOIDSRC ) )
 		{
          if( result ) (*result) = NULL;
 			return 0;
@@ -2297,7 +2288,7 @@ int __GetSQLResult( PODBC odbc, PCOLLECT collection, int bMore )
 		return 0;
 	}
 #if !defined( SQLPROXY_LIBRARY_SOURCE ) && !defined( SQLPROXY_SOURCE )
-	if( !OpenSQLConnection( odbc ) )
+	if( !OpenSQLConnectionEx( odbc DBG_SRC ) )
 	{
 		GenerateResponce( collection, WM_SQL_RESULT_ERROR );
 		return 0;
@@ -2776,7 +2767,7 @@ int GetSQLRecord( CTEXTSTR **result )
 {
 	if( result )
 	{
-		if( !OpenSQL() )
+		if( !OpenSQL( DBG_VOIDSRC ) )
 		{
 			return FALSE;
 		}
@@ -2789,7 +2780,7 @@ int GetSQLResult( CTEXTSTR *result )
 {
 	if( result )
 	{
-		if( !OpenSQL() )
+		if( !OpenSQL( DBG_VOIDSRC ) )
 		{
 			return FALSE;
 		}
@@ -3128,7 +3119,7 @@ int SQLRecordQueryEx( PODBC odbc
 
 	do
 	{
-		if( !IsSQLOpen( odbc ) )
+		if( !IsSQLOpenEx( odbc DBG_RELAY ) )
 			return FALSE;
 		if( !( use_odbc = odbc ) )
 		{
@@ -3243,7 +3234,7 @@ int DoSQLQueryEx( CTEXTSTR query, CTEXTSTR *result DBG_PASS )
 	(*result) = NULL;
 	if( result )
 	{
-		if( !OpenSQL() )
+		if( !OpenSQL( DBG_VOIDSRC ) )
 		{
 			return FALSE;
 		}
@@ -3253,16 +3244,16 @@ int DoSQLQueryEx( CTEXTSTR query, CTEXTSTR *result DBG_PASS )
 }
 
 //-----------------------------------------------------------------------
-int IsSQLOpen( PODBC odbc )
+int IsSQLOpenEx( PODBC odbc DBG_PASS )
 {
 	if( !odbc )
 	{
       //lprintf( "open default..." );
-		OpenSQL();
+		OpenSQL( DBG_VOIDRELAY );
 		odbc = g.odbc;
 	}
 	else
-      OpenSQLConnection( odbc );
+      OpenSQLConnectionEx( odbc DBG_RELAY );
 #if defined( USE_SQLITE ) || defined( USE_SQLITE_INTERFACE )
 	if( odbc && odbc->flags.bSQLite_native )
 		if( odbc && odbc->db )
@@ -3278,6 +3269,12 @@ int IsSQLOpen( PODBC odbc )
 	// odbc library tends to be sluggish when the database fails connection...
 	// I dunno - this is intended to be used in an Idle() loop which will get the timer to fire eventually.
 	return FALSE;
+}
+
+#undef IsSQLOpen
+int IsSQLOpen( PODBC odbc )
+{
+   return IsSQLOpenEx( odbc DBG_SRC );
 }
 
 //-----------------------------------------------------------------------
@@ -3356,7 +3353,7 @@ SQLSTUB_PROC( int, SQLInsertFlush )( PODBC odbc )
 	PTEXT tmp, tmp2;
 	if( !odbc )
 	{
-		if( !OpenSQL() )
+		if( !OpenSQL( DBG_VOIDSRC ) )
 			return FALSE;
 		odbc = g.odbc;
 	}
@@ -3401,7 +3398,7 @@ SQLSTUB_PROC( int, vSQLInsert )( PODBC odbc, CTEXTSTR table, va_list args )
 	// a MSAccess database...
 	if( !odbc )
 	{
-		if( !OpenSQL() )
+		if( !OpenSQL( DBG_VOIDSRC ) )
 			return FALSE;
 		odbc = g.odbc;
 	}
@@ -3480,7 +3477,7 @@ SQLSTUB_PROC( int, vSQLInsert )( PODBC odbc, CTEXTSTR table, va_list args )
 SQLSTUB_PROC( int, DoSQLInsert )( CTEXTSTR table, ... )
 {
 	va_list args;
-	if( !OpenSQL() )
+	if( !OpenSQL( DBG_VOIDSRC ) )
 	{
 		return FALSE;
 	}
@@ -3543,7 +3540,7 @@ void CPROC Timer( PTRSZVAL psv )
 	// and within this is dispatched the backup/restore/init
 	// tasks.
 	//Log( WIDE("Tick...") );
-	OpenSQL();
+	OpenSQL( DBG_VOIDSRC );
 	if( g.odbc )
 	{
 		//VarTextEmpty( g.TimerCollect.pvt_out );

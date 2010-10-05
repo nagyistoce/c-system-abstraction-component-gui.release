@@ -177,6 +177,7 @@ typedef struct global_tag
 
 INDEX GetNameIndex(PODBC odbc, CTEXTSTR table,CTEXTSTR name);
 PTREEROOT GetTableCache( PODBC odbc, CTEXTSTR tablename );
+int OpenSQL( DBG_VOIDPASS );
 
 
 #ifdef USE_SQLITE_INTERFACE

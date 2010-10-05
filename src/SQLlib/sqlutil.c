@@ -767,7 +767,7 @@ void DumpSQLTable( PTABLE table )
 
 SQLSTUB_PROC( int, CreateTableEx )( CTEXTSTR filename, CTEXTSTR templatename, CTEXTSTR tablename, _32 options )
 {
-   OpenSQL();
+   OpenSQL( DBG_VOIDSRC );
    if( g.odbc )
 		return SQLCreateTableEx( g.odbc, filename, templatename, tablename, options );
    return FALSE;
@@ -1500,11 +1500,11 @@ retry:
 }
 
 
-LOGICAL CheckODBCTable( PODBC odbc, PTABLE table, _32 options )
+LOGICAL CheckODBCTableEx( PODBC odbc, PTABLE table, _32 options DBG_PASS )
 {
 	if( !odbc )
 	{
-		OpenSQL();
+		OpenSQL( DBG_VOIDRELAY );
 		odbc = g.odbc;
 
 	}
@@ -1522,6 +1522,13 @@ LOGICAL CheckODBCTable( PODBC odbc, PTABLE table, _32 options )
 		return CheckMySQLODBCTable( odbc, table, options );
 
 }
+
+#undef CheckODBCTable
+LOGICAL CheckODBCTable( PODBC odbc, PTABLE table, _32 options )
+{
+   return CheckODBCTableEx( odbc, table, options DBG_SRC );
+}
+
 
 static void CreateNameTable( PODBC odbc, CTEXTSTR table_name )
 {
@@ -1661,7 +1668,7 @@ CTEXTSTR FetchSQLName( PODBC odbc, CTEXTSTR table_name, INDEX iName )
 INDEX GetSQLNameID( CTEXTSTR table_name, CTEXTSTR name )
 {
 	if( !g.odbc )
-		OpenSQL();
+		OpenSQL( DBG_VOIDSRC );
 	if( !g.odbc )
       return INVALID_INDEX;
    return FetchSQLNameID( g.odbc, table_name, name );
@@ -1669,7 +1676,7 @@ INDEX GetSQLNameID( CTEXTSTR table_name, CTEXTSTR name )
 CTEXTSTR GetSQLName( CTEXTSTR table_name, INDEX iName )
 {
 	if( !g.odbc )
-		OpenSQL();
+		OpenSQL( DBG_VOIDSRC );
 	if( !g.odbc )
       return NULL;
    return FetchSQLName( g.odbc, table_name, iName );

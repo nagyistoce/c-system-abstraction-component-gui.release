@@ -69,7 +69,7 @@ SQL table create is in 'mkopttabs.sql'
 
 void SetOptionDatabase( PODBC odbc )
 {
-   // maybe, if previously open with private database, close that connection
+	// maybe, if previously open with private database, close that connection
 	og.Option = odbc;
 	og.flags.bInited = FALSE;
    CreateOptionDatabase(); // make sure the option tables exist.
@@ -224,7 +224,6 @@ SQLGETOPTION_PROC( void, CreateOptionDatabase )( void )
 #endif
 			if( !og.Option )
 			{
-				//lprintf( "connect to %s", out );
 				og.Option = ConnectToDatabase( out );
 			}
 		}
@@ -847,15 +846,16 @@ INDEX SetOptionStringValue( INDEX optval, CTEXTSTR pValue )
 					  , tree->flags.bNewVersion?"option_id":"value_id"
 					  , IDValue );
 		StrCpyEx( value, pValue, sizeof( value )-1 );
-		newval = EscapeSQLBinary( og.Option, pValue, strlen( pValue ) );
-		if( IDValue && SQLQuery( og.Option, update, &result ) && result )
+		newval = EscapeSQLBinary( tree->odbc, pValue, strlen( pValue ) );
+		if( IDValue && SQLQuery( tree->odbc, update, &result ) && result )
 		{
 			snprintf( update, sizeof( update ), WIDE("update %s set string='%s' where %s=%ld")
 					  , tree->flags.bNewVersion?OPTION_VALUES:"option_values"
 					  , newval
 					  , tree->flags.bNewVersion?"option_id":"value_id"
 					  , IDValue );
-			SQLEndQuery( og.Option );
+			SQLEndQuery( tree->odbc );
+         OpenWriter( tree );
 			if( !SQLCommand( tree->odbc_writer, update ) )
 			{
 				FetchSQLError( tree->odbc_writer, &result );
@@ -1290,6 +1290,25 @@ SQLGETOPTION_PROC( void, EndBatchUpdate )( void )
 }
 
 ATEXIT( CommitOptions )
+{
+	INDEX idx;
+	POPTION_TREE tree;
+#ifdef DETAILED_LOGGING
+	lprintf( "Running Option cleanup..." );
+#endif
+	LIST_FORALL( og.trees, idx, POPTION_TREE, tree )
+	{
+		if( tree->odbc_writer )
+		{
+#ifdef DETAILED_LOGGING
+			lprintf( "flushing a write on %p", tree->odbc_writer );
+#endif
+			SQLCommit( tree->odbc_writer );
+		}
+	}
+}
+
+PRIORITY_PRELOAD( CommitOptionsLoad, 150 )
 {
 	INDEX idx;
 	POPTION_TREE tree;
