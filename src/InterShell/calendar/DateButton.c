@@ -257,7 +257,7 @@ OnCreateMenuButton( "Calendar/Select Today" )( PMENU_BUTTON button )
 }
 
 
-#ifdef __WATCOMC__
+#if ( __WATCOMC__ < 1290 )
 PUBLIC( void, NeedAtLeastOneExport )( void )
 {
 }
