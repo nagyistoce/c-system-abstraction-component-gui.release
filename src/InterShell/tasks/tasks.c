@@ -2017,7 +2017,7 @@ static LOGICAL OnDropAccept( WIDE("Add Task Button") )( CTEXTSTR file, int x, in
    return 0;
 }
 
-#ifdef __WATCOMC__
+#if ( __WATCOMC__ < 1290 )
 PUBLIC( void, ExportThis )( void )
 {
 }

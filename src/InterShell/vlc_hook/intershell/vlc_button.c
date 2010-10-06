@@ -175,7 +175,7 @@ static void VideoLinkCommandServeMaster( "VLC_Video Link" )( void )
 	}
 }
 */
-#ifdef __WATCOMC__
+#if ( __WATCOMC__ < 1290 )
 PUBLIC( void, ExportThis )( void )
 {
 }
