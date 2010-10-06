@@ -1,3 +1,5 @@
+set VLC_PATH=c:\tools\vlc-1.1.4
+
 if %1x==videox goto videolink
 mkdir Debug
 cd Debug
@@ -40,14 +42,14 @@ cd ..
 cmd /c "M:\build\watcom_sack_core\bin\Debug\sack_deploy.exe"
 mkdir intershell_Debug
 cd intershell_Debug
-cmake -G "Watcom WMake"  \sack\src\InterShell -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=M:/build/watcom_sack_intershell_debug -DVLC_PATH="e:/tools/vlc-1.1.4"
+cmake -G "Watcom WMake"  \sack\src\InterShell -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=M:/build/watcom_sack_intershell_debug -DVLC_PATH=%VLC_PATH%
 wmake install
 cd ..
 
 cmd /c "M:\build\watcom_sack_core\bin\Release\sack_deploy.exe"
 mkdir intershell_Release
 cd intershell_Release
-cmake -G "Watcom WMake"  \sack\src\InterShell -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=M:/build/watcom_sack_intershell_release -DVLC_PATH="e:/tools/vlc-1.1.4"
+cmake -G "Watcom WMake"  \sack\src\InterShell -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=M:/build/watcom_sack_intershell_release -DVLC_PATH=%VLC_PATH%
 wmake install
 cd ..
 
