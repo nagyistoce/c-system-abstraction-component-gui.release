@@ -1987,7 +1987,7 @@ IMAGE_PROC  void IMAGE_API  FlipImageEx ( Image pif DBG_PASS );
    BlotImage( output, source, 100, 100 );
    BlotImageAlpha( output, source, 200, 200 );
    </code>                                                      */
-#define BlotImage( pd, ps, x, y ) BlotImageEx( pd, ps, x, y, TRUE, BLOT_COPY )
+#define BlotImage( pd, ps, x, y ) BlotImageEx( pd, ps, x, y, 0, BLOT_COPY )
 /* Copy one image to another at the specified coordinate in the
    destination.
    Parameters
