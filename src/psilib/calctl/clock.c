@@ -122,17 +122,17 @@ static int CPROC DrawClock( PCOMMON pc )
 	if( pClk )
 	{
 		_32 w, h;
-      int line_count = 0;
-      int lines = 0;
+		int line_count = 0;
+		int lines = 0;
 		PTEXT szNow = pClk->time;
 		static TEXTCHAR *text;
 		TEXTCHAR *line;
 
 		if( pClk->analog_clock )
 		{
-         //lprintf( "Draw." );
+			//lprintf( "Draw." );
 			DrawAnalogClock( pc );
-         return 1;
+			return 1;
 		}
 
 		if( text && StrCmp( text, GetText( szNow ) ) == 0 )
@@ -140,10 +140,10 @@ static int CPROC DrawClock( PCOMMON pc )
 
 		if( text )
 			Release( text );
-      text = StrDup( GetText( szNow ) );
+		text = StrDup( GetText( szNow ) );
 		//else
 		{
-         //lprintf( "Get to draw before being analog?" );
+			//lprintf( "Get to draw before being analog?" );
 			for( line = text; line; line = strchr( line, '\n' ) )
 			{
 				lines++;
@@ -153,15 +153,15 @@ static int CPROC DrawClock( PCOMMON pc )
 			{
 				TEXTCHAR* trunk;
 				if( line != text )
-               line++;
+					line++;
 				trunk = strchr( line, '\n' );
 				if( trunk )
-               trunk[0] = 0;
+					trunk[0] = 0;
 				GetStringSizeFont( line, &w, &h, GetCommonFont( pc ) );
 
 				if( pClk->back_image )
 					BlotScaledImageAlpha( surface, pClk->back_image, ALPHA_TRANSPARENT );
-				else if( pClk->backcolor )
+				else 
 					BlatColorAlpha( surface, 0, 0, surface->width, surface->height, pClk->backcolor );
 				//DebugBreak();
 				PutStringFontEx( surface
@@ -172,7 +172,7 @@ static int CPROC DrawClock( PCOMMON pc )
 									, GetCommonFont( pc ) );
 				if( trunk )
 					trunk[0] = '\n';
-            line_count++;
+				line_count++;
 				/*
 				 if( line )
 				 {
@@ -216,7 +216,6 @@ static void CPROC Update( PTRSZVAL psvPC )
 				else
 					RescheduleTimer( 250 );
 			}
-
 		}
 		//else
         //   lprintf( WIDE("Clock is stopped.") );
