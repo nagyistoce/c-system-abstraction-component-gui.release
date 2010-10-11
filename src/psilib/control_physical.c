@@ -10,6 +10,7 @@
 #include "borders.h"
 #include "resource.h"
 
+//#define DEBUG_UPDAATE_DRAW 4
 
 PSI_NAMESPACE
 
@@ -93,7 +94,7 @@ static void CPROC FrameRedraw( PTRSZVAL psvFrame, PRENDERER psvSelf )
 		{
 			Image OldSurface;
 #ifdef DEBUG_UPDAATE_DRAW
-			lprintf( WIDE( "Saving old image..." ) );
+			lprintf( WIDE( "!!Saving old image... (on frame)" ) );
 #endif
 			if( ( OldSurface = CopyOriginalSurface( pc, pc->OriginalSurface ) ) )
 			{

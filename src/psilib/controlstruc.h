@@ -372,6 +372,8 @@ typedef struct common_control_frame
 			BIT_FIELD bUpdateRegionSet : 1;
          // control was in the process of being cleaned, and received a smudge again... control needs to draw itself AGAIN
 			BIT_FIELD bDirtied : 1;
+			// parent did a draw, and marks this on all his children, then copy originalsurface clears this flag to indicate it got a clean snapshot
+			BIT_FIELD bParentUpdated : 1;
 	} flags;
 
 
