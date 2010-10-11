@@ -183,3 +183,17 @@ void ServiceUninstall( CTEXTSTR ServiceName )
 	task_done = 0;
 }
 
+PTASK_INFO LaunchUserProcess( CTEXTSTR program, CTEXTSTR path, PCTEXTSTR args
+									 , int flags
+									 , TaskOutput OutputHandler
+									 , TaskEnd EndNotice
+									 , PTRSZVAL psv
+									  DBG_PASS
+									 )
+{
+	PTASK_INFO pTask;
+	ImpersonateInteractiveUser();
+	pTask = LaunchPeerProgramexx( program, path, args, flags, OutputHandler, EndNotice, psv DBG_RELAY );
+
+}
+
