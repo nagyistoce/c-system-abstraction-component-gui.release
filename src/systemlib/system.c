@@ -7,6 +7,10 @@
 #include <timers.h>
 #include <filesys.h>
 
+#ifdef WIN32
+#include <tlhelp32.h>
+#endif
+
 #ifdef __LINUX__
 #include <sys/wait.h>
 #include <dlfcn.h>
@@ -435,6 +439,106 @@ static int DumpError( void )
 {
 	lprintf( WIDE("Failed create process:%d"), GetLastError() );
    return 0;
+}
+#endif
+
+#ifdef WIN32
+
+static BOOL CALLBACK EnumDesktopProc( LPTSTR lpszDesktop,
+												  LPARAM lParam
+												)
+{
+	lprintf( "Desktop found [%s]", lpszDesktop );
+   return 1;
+}
+
+
+void EnumDesktop( void )
+{
+   // I'm running on some windows station, right?
+   //HWINSTA GetProcessWindowStation();
+	if( EnumDesktops( NULL, EnumDesktopProc, (LPARAM)(PTRSZVAL)0 ) )
+	{
+      // returned non-zero value from enumdesktopproc?
+      // failed to find?
+	}
+
+}
+
+/*
+ HDESK WINAPI OpenInputDesktop(
+  __in  DWORD dwFlags,
+  __in  BOOL fInherit,
+  __in  ACCESS_MASK dwDesiredAccess
+);
+
+*/
+
+DWORD GetExplorerProcessID()
+{
+	HANDLE hSnapshot;
+	PROCESSENTRY32 pe32;
+	DWORD temp;
+	ZeroMemory(&pe32,sizeof(pe32));
+
+	hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,NULL);
+
+	pe32.dwSize = sizeof(PROCESSENTRY32);
+
+	if(Process32First(hSnapshot,&pe32))
+	{
+		do
+		{
+			if(!strcmp(pe32.szExeFile,"explorer.exe"))
+			{
+				MessageBox(0,pe32.szExeFile,"test",0);
+				temp = pe32.th32ProcessID;
+				break;
+			}
+
+		}while(Process32Next(hSnapshot,&pe32));
+	}
+	return temp;
+}
+
+void ImpersonateInteractiveUser( void )
+{
+	HANDLE hToken = NULL;
+	HANDLE hProcess = NULL;
+
+	DWORD processID = GetExplorerProcessID();
+	if( processID)
+	{
+		hProcess =
+			OpenProcess(
+							PROCESS_ALL_ACCESS,
+							TRUE,
+							processID );
+
+		if( hProcess)
+		{
+			if( OpenProcessToken(
+										hProcess,
+										TOKEN_EXECUTE |
+										TOKEN_READ |
+										TOKEN_QUERY |
+										TOKEN_ASSIGN_PRIMARY |
+										TOKEN_QUERY_SOURCE |
+										TOKEN_WRITE |
+										TOKEN_DUPLICATE,
+										&hToken))
+			{
+				ImpersonateLoggedOnUser( hToken );
+				CloseHandle( hToken );
+			}
+			CloseHandle( hProcess );
+		}
+	}
+}
+
+void EndImpersonation( void )
+{
+	RevertToSelf();
 }
 #endif
 
