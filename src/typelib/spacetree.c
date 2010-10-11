@@ -3,7 +3,6 @@
 //#define FIND_DEBUG
 //#define DIRTY_NODE_DEBUG
 #include <stdhdrs.h>
-#include <sack_types.h>
 #include <stdio.h>
 #include <idle.h>
 #include <sharemem.h>
