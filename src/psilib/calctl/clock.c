@@ -124,9 +124,8 @@ static int CPROC DrawClock( PCOMMON pc )
 		_32 w, h;
 		int line_count = 0;
 		int lines = 0;
-		PTEXT szNow = pClk->time;
-		static TEXTCHAR *text;
-		TEXTCHAR *line;
+		//PTEXT szNow = pClk->time;
+      TEXTSTR line;
 
 		if( pClk->analog_clock )
 		{
@@ -135,24 +134,18 @@ static int CPROC DrawClock( PCOMMON pc )
 			return 1;
 		}
 
-		if( text && StrCmp( text, GetText( szNow ) ) == 0 )
-			return 0;
-
-		if( text )
-			Release( text );
-		text = StrDup( GetText( szNow ) );
 		//else
 		{
 			//lprintf( "Get to draw before being analog?" );
-			for( line = text; line; line = strchr( line, '\n' ) )
+			for( line = GetText( pClk->time ); line; line = strchr( line, '\n' ) )
 			{
 				lines++;
 				line++;
 			}
-			for( line = text; line; line = strchr( line, '\n' ) )
+			for( line = GetText( pClk->time ); line; line = strchr( line, '\n' ) )
 			{
 				TEXTCHAR* trunk;
-				if( line != text )
+				if( line != GetText( pClk->time ) )
 					line++;
 				trunk = strchr( line, '\n' );
 				if( trunk )
@@ -173,19 +166,6 @@ static int CPROC DrawClock( PCOMMON pc )
 				if( trunk )
 					trunk[0] = '\n';
 				line_count++;
-				/*
-				 if( line )
-				 {
-				 GetStringSizeFont( line+1, &w, NULL, GetCommonFont( pc ) );
-				 PutStringFont( surface
-				 , ( surface->width - w ) / 2
-				 , ( surface->height - h + line_count * h  ) / 2
-				 , pClk->textcolor, 0
-				 , line + 1
-				 , GetCommonFont( pc ) );
-
-				 }
-				 */
 			}
 		}
 	}
@@ -200,10 +180,29 @@ static void CPROC Update( PTRSZVAL psvPC )
 	{
 		if( !pClk->flags.bStopped )
 		{
+         int no_update = 0;
 			//( pClk->time )
 			// LineRelease( pClk->time );
 			pClk->time = GetTime(pClk, TRUE);
-			SmudgeCommon( (PCOMMON)psvPC );
+
+			if( !pClk->analog_clock )
+			{
+				static TEXTCHAR *text;
+				if( text && StrCmp( text, GetText( pClk->time ) ) == 0 )
+				{
+               no_update = 1;
+				}
+				else
+				{
+					if( text )
+						Release( text );
+					text = StrDup( GetText( pClk->time ) );
+				}
+			}
+
+         if( !no_update )
+				SmudgeCommon( (PCOMMON)psvPC );
+
 			if( pClk->analog_clock )
 			{
             // +100 from now... (less than 10/sec)
@@ -217,8 +216,6 @@ static void CPROC Update( PTRSZVAL psvPC )
 					RescheduleTimer( 250 );
 			}
 		}
-		//else
-        //   lprintf( WIDE("Clock is stopped.") );
 	}
 }
 
