@@ -30,4 +30,9 @@ PROGNAMEA=test_uuid
 SRCSA=test_uuid
 SYSLIBSA=rpcrt4
 
+PROGNAMEA=test_genx_PI
+SRCSA=test_genx_pi
+SYSLIBSA=
+
+
 include $(SACK_BASE)/makefiles/makefile.many
