@@ -65,6 +65,7 @@ WIN_MORE_PROJECTS=$(if $(__WINDOWS__),$(if $(OPENGL),src/vidlib/opengl/Makefile,
 
 ifndef BUILD_BAG_ONLY
 
+#	$(if $(__WINDOWS__),src/intershell/Makefile,) \
 
 ifndef __NO_GUI__
 MORE_PROJECTS+=src/imglib/Makefile \
@@ -72,7 +73,6 @@ MORE_PROJECTS+=src/imglib/Makefile \
 	$(if $(__WINDOWS__),,src/displaylib/Makefile.display.bag) \
         src/psilib/Makefile.PSI.bag \
         $(if $(__WINDOWS__),,src/displaylib/Makefile.display2.bag) \
-	$(if $(__WINDOWS__),src/intershell/Makefile,) \
         $(if $(__WINDOWS__),src/streamlib/Makefile,) \
         $(if $(__NO_SQL__),,src/SQLlib/optlib/Makefile)
 else
@@ -119,6 +119,7 @@ SRCS= src/deadstart/deadstart_core    \
  src/typelib/input               \
  src/typelib/msgqueue            \
  src/typelib/sets                \
+ src/typelib/http                \
  src/typelib/spacetree           \
  src/typelib/text                \
  src/timerlib/timers             \
