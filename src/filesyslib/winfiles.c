@@ -3,7 +3,6 @@
 #include <filesys.h>
 #include <sqlgetoption.h>
 #include <system.h>
-#define DEBUG_FILEOPEN
 
 #ifndef UNDER_CE
 //#include <fcntl.h>
@@ -31,9 +30,17 @@ static struct winfile_local_tag {
 	PLIST groups;
 	PLIST handles;
 	LOGICAL have_default;
+	struct {
+		BIT_FIELD bLogOpenClose : 1;
+	} flags;
 } winfile_local;
 
 #define l winfile_local
+
+PRELOAD( InitWinFileSys )
+{
+   l.flags.bLogOpenClose = SACK_GetProfileIntEx( "SACK/filesys", "Log open and close", 0, TRUE );
+}
 
 static void InitGroups( void )
 {
@@ -194,7 +201,7 @@ static TEXTSTR PrependBasePath( int groupid, struct Group *group, CTEXTSTR filen
 
 		if( !group )
 		{
-			if( group >= 0 )
+			if( groupid >= 0 )
 				group = (struct Group *)GetLink( &l.groups, groupid );
 		}
 	}
@@ -293,14 +300,12 @@ HANDLE sack_open( int group, CTEXTSTR filename, int opts, ... )
 							 , NULL );
 		break;
 	}
-#ifdef DEBUG_FILEOPEN
-	lprintf( WIDE( "open %s %p %d" ), file->fullname, handle, opts );
-#endif
+	if( l.flags.bLogOpenClose )
+		lprintf( WIDE( "open %s %p %d" ), file->fullname, handle, opts );
 	if( handle == INVALID_HANDLE_VALUE )
 	{
-#ifdef DEBUG_FILEOPEN
-		lprintf( WIDE( "Failed to open file [%s]=[%s]" ), file->name, file->fullname );
-#endif
+		if( l.flags.bLogOpenClose )
+			lprintf( WIDE( "Failed to open file [%s]=[%s]" ), file->name, file->fullname );
 		return INVALID_HANDLE_VALUE;
 	}
 	if( handle != INVALID_HANDLE_VALUE )
@@ -354,9 +359,8 @@ int sack_close( HANDLE file_handle )
 	if( file )
 	{
 		DeleteLink( &file->handles, (POINTER)file_handle );
-#ifdef DEBUG_FILEOPEN
-		lprintf( WIDE("Close %s"), file->fullname );
-#endif
+		if( l.flags.bLogOpenClose )
+			lprintf( WIDE("Close %s"), file->fullname );
 		/*
 		 Release( file->name );
 		 Release( file->fullname );
@@ -492,18 +496,15 @@ struct file *FindFileByFILE( FILE *file_file )
 #endif
 	if( !handle )
 	{
-#ifdef DEBUG_FILEOPEN
-		lprintf( WIDE( "Failed to open file [%s]=[%s]" ), file->name, file->fullname );
-#endif
+		if( l.flags.bLogOpenClose )
+			lprintf( WIDE( "Failed to open file [%s]=[%s]" ), file->name, file->fullname );
 		return NULL;
 	}
-#ifdef DEBUG_FILEOPEN
-	lprintf( WIDE( "sack_open %s (%s)" ), file->fullname, opts );
-#endif
+	if( l.flags.bLogOpenClose )
+		lprintf( WIDE( "sack_open %s (%s)" ), file->fullname, opts );
 	AddLink( &file->files, handle );
-#ifdef DEBUG_FILEOPEN
-   lprintf( "Added FILE* %p and list is %p", handle, file->files );
-#endif
+	if( l.flags.bLogOpenClose )
+		lprintf( "Added FILE* %p and list is %p", handle, file->files );
 	return handle;
 }
  int  sack_fseek ( FILE *file_file, int pos, int whence )
@@ -515,13 +516,11 @@ struct file *FindFileByFILE( FILE *file_file )
 {
 	struct file *file;
 	file = FindFileByFILE( file_file );
-#ifdef DEBUG_FILEOPEN
-	lprintf( WIDE("Closing %s"), file->fullname );
-#endif
+	if( l.flags.bLogOpenClose )
+		lprintf( WIDE("Closing %s"), file->fullname );
 	DeleteLink( &file->files, file_file );
-#ifdef DEBUG_FILEOPEN
-   lprintf( "deleted FILE* %p and list is %p", file_file, file->files );
-#endif
+	if( l.flags.bLogOpenClose )
+		lprintf( "deleted FILE* %p and list is %p", file_file, file->files );
    /*
 	Release( file->name );
    Release( file->fullname );
