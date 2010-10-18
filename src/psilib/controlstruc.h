@@ -341,39 +341,40 @@ typedef struct common_control_frame
 		BIT_FIELD bAdoptedChild : 1;
       // children were cleaned by an internal update... don't draw again.
 		BIT_FIELD children_cleaned : 1;
-      // no extra init, and no save, this is a support control created for a master control
-		BIT_FIELD private_control : 1; 
-		/* control has been temporarily displaced from its parent
-		   control.                                               */
-			BIT_FIELD detached : 1;
-			// edit mode enabled visibility of this window and opened it.
-			BIT_FIELD auto_opened : 1;
-         // first time this is being cleaned (during the course of refresh this could be called many times)
-			BIT_FIELD bFirstCleaning : 1;
-         // frame was loaded from XML, and desires that EditFrame not be enablable.
-		BIT_FIELD bNoEdit : 1; 
-		/* Edit has been enabled on the control. */
-			BIT_FIELD bEditSet : 1;
-         // this came from the XML file.
-			BIT_FIELD bEditLoaded : 1;
-         // an update event is already being done, bail on this and all children?
-			BIT_FIELD bUpdating : 1;
-         // enable only real draw events in video thread.  (post invalidate only)
-			BIT_FIELD bOpenGL : 1;
-         // needs DrawThySelf called... // collect these, so a master level draw can be done down. only if a control or it's child is dirty.
-			BIT_FIELD bChildDirty : 1;
-         // there is a frame caption update (with flush to display) which needs to be locked....
-			BIT_FIELD bRestoring : 1;
-         // got at least one frame redraw event (focus happens before first draw)
-		BIT_FIELD bShown : 1; 
-		/* Set when resized by a mouse drag, causes a dirty state. */
-			BIT_FIELD bResizedDirty : 1;
-         // during control update the effective surface region was set while away.
-			BIT_FIELD bUpdateRegionSet : 1;
-         // control was in the process of being cleaned, and received a smudge again... control needs to draw itself AGAIN
-			BIT_FIELD bDirtied : 1;
-			// parent did a draw, and marks this on all his children, then copy originalsurface clears this flag to indicate it got a clean snapshot
-			BIT_FIELD bParentUpdated : 1;
+		// no extra init, and no save, this is a support control created for a master control
+		BIT_FIELD private_control : 1;
+		// control has been temporarily displaced from its parent control.
+		BIT_FIELD detached : 1;
+		// edit mode enabled visibility of this window and opened it.
+		BIT_FIELD auto_opened : 1;
+		// first time this is being cleaned (during the course of refresh this could be called many times)
+		BIT_FIELD bFirstCleaning : 1;
+		// frame was loaded from XML, and desires that EditFrame not be enablable.
+		BIT_FIELD bNoEdit : 1;
+		// Edit has been enabled on the control.
+		BIT_FIELD bEditSet : 1;
+		// this came from the XML file.
+		BIT_FIELD bEditLoaded : 1;
+		// an update event is already being done, bail on this and all children?
+		BIT_FIELD bUpdating : 1;
+		// enable only real draw events in video thread.  (post invalidate only)
+		BIT_FIELD bOpenGL : 1;
+		// needs DrawThySelf called... // collect these, so a master level draw can be done down. only if a control or it's child is dirty.
+		BIT_FIELD bChildDirty : 1;
+		// there is a frame caption update (with flush to display) which needs to be locked....
+		BIT_FIELD bRestoring : 1;
+		// got at least one frame redraw event (focus happens before first draw)
+		BIT_FIELD bShown : 1;
+		// Set when resized by a mouse drag, causes a dirty state.
+		BIT_FIELD bResizedDirty : 1;
+		// during control update the effective surface region was set while away.
+		BIT_FIELD bUpdateRegionSet : 1;
+		// control was in the process of being cleaned, and received a smudge again... control needs to draw itself AGAIN
+		BIT_FIELD bDirtied : 1;
+		// parent did a draw, and marks this on all his children, then copy originalsurface clears this flag to indicate it got a clean snapshot
+		BIT_FIELD bParentUpdated : 1;
+		// this is set on controls which have completed their redraw after a smudge.
+		BIT_FIELD bCleanedRecently : 1;
 	} flags;
 
 

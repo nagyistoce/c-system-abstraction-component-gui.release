@@ -1608,6 +1608,7 @@ static void DoUpdateCommonEx( PPENDING_RECT upd, PSI_CONTROL pc, int bDraw, int 
 #ifdef DEBUG_UPDAATE_DRAW
 						lprintf( WIDE( "Parent is no longer cleaned...." ) );
 #endif
+                  pc->flags.bCleanedRecently = 1;
 						pc->flags.bParentCleaned = 0; // has now drawn itself, and we must assume that it's not clean.
 						pc->flags.children_cleaned = 0;
 					}
