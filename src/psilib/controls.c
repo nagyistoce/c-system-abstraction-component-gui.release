@@ -1842,6 +1842,9 @@ void SmudgeCommonEx( PSI_CONTROL pc DBG_PASS )
 		else // if( !pc->flags.bDirty )
 		{
 			PSI_CONTROL parent;
+#if DEBUG_UPDAATE_DRAW > 3
+			lprintf( "not dirty, and not cleaning" );
+#endif
 
 			//if( pc->parent && pc->flags.bTransparent )
          //   SmudgeCommon( pc->parent );
