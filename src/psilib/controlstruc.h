@@ -343,7 +343,7 @@ typedef struct common_control_frame
 		BIT_FIELD children_cleaned : 1;
 		// no extra init, and no save, this is a support control created for a master control
 		BIT_FIELD private_control : 1;
-		// control has been temporarily displaced from its parent control.
+		// control has been temporarily displaced from its parent control.
 		BIT_FIELD detached : 1;
 		// edit mode enabled visibility of this window and opened it.
 		BIT_FIELD auto_opened : 1;
