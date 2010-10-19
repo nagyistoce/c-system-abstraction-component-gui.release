@@ -76,6 +76,10 @@ SYSTEM_PROC( PTASK_INFO, LaunchProgram )( CTEXTSTR program, CTEXTSTR path, PCTEX
 SYSTEM_PROC( PTRSZVAL, TerminateProgram )( PTASK_INFO task );
 SYSTEM_PROC( void, SetProgramUserData )( PTASK_INFO task, PTRSZVAL psv );
 
+SYSTEM_PROC( void, ImpersonateInteractiveUser )( void );
+SYSTEM_PROC( void, EndImpersonation )( void );
+
+
 // generate a Ctrl-C to the task.
 // maybe also signal systray icon
 // maybe also signal process.lock region

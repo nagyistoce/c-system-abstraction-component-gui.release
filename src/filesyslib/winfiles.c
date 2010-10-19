@@ -37,10 +37,12 @@ static struct winfile_local_tag {
 
 #define l winfile_local
 
+#ifndef __NO_OPTIONS__
 PRELOAD( InitWinFileSys )
 {
    l.flags.bLogOpenClose = SACK_GetProfileIntEx( "SACK/filesys", "Log open and close", 0, TRUE );
 }
+#endif
 
 static void InitGroups( void )
 {
