@@ -667,6 +667,15 @@ endif( WIN32 )
 
 install_mode_dest( sack_bag )
 install_mode_dest( ${SACK_BAG_PLUSPLUS} )
+INSTALL(
+  FILES
+    data/interface.conf.new
+  DESTINATION
+    # this could also be /etc
+    bin/\${CMAKE_INSTALL_CONFIG_NAME}
+  RENAME interface.conf
+)
+
 #install_default_dest( sack_bag )
 #install_default_dest( ${SACK_BAG_PLUSPLUS} )
 
