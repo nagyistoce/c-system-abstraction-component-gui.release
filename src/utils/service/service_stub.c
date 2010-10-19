@@ -193,7 +193,7 @@ PTASK_INFO LaunchUserProcess( CTEXTSTR program, CTEXTSTR path, PCTEXTSTR args
 {
 	PTASK_INFO pTask;
 	ImpersonateInteractiveUser();
-	pTask = LaunchPeerProgramexx( program, path, args, flags, OutputHandler, EndNotice, psv DBG_RELAY );
+	pTask = LaunchPeerProgramExx( program, path, args, flags, OutputHandler, EndNotice, psv DBG_RELAY );
 
 }
 
