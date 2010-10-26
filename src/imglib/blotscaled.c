@@ -182,7 +182,7 @@ void CPROC cBlotScaledTImgAI( SCALED_BLOT_WORK_PARAMS
 
    ScaleLoopStart
       CDATA cin;                             
-      _32 alpha;                             
+      S_32 alpha;
       if( (cin = *pi) )                        
       {                                      
          alpha = ( cin & 0xFF000000 ) >> 24; 
@@ -514,10 +514,10 @@ void CPROC cBlotScaledMultiTImgAI( SCALED_BLOT_WORK_PARAMS
       */
    //Log8( WIDE("Blot scaled params: %d %d %d %d / %d %d %d %d "), 
    //       xs, ys, ws, hs, xd, yd, wd, hd );
-   if( wd <= 0 ||
-       hd <= 0 ||
-       ws <= 0 ||
-		 hs <= 0 )
+   if( (S_32)wd <= 0 ||
+       (S_32)hd <= 0 ||
+       (S_32)ws <= 0 ||
+		 (S_32)hs <= 0 )
 	{
 		return;
 	}

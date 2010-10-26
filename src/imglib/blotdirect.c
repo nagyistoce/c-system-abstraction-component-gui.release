@@ -121,7 +121,7 @@ namespace image {
                           , _32 nTransparent )
 {
    StartLoop
-            _32 alpha;
+            S_32 alpha;
 
             CDATA cin;
             if( (cin = *pi) )
