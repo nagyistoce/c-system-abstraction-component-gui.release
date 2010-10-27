@@ -1,0 +1,21 @@
+
+
+site Gold
+Hostname Gold
+serves MySQL yes
+address dhcp
+expected address 10.163.226.123
+mac address 00:1f:c6:51:02:f1
+
+site Sun
+hostname Sun
+address dhcp
+expected address 10.162.226.123
+mac address 00:1f:c6:51:02:10
+
+site Sams
+hostname Sams
+address dhcp
+expected address 10.130.226.123
+mac address 00:1e:8c:75:12:fe
+
