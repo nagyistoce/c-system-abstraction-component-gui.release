@@ -2679,7 +2679,7 @@ WM_DROPFILES
 		   l.mouse_last_vid != hVideo ) // this hvideo!= last hvideo?
 		{
 			_32 msg[4];
-			if( !l.flags.mouse_on && !hVideo->flags.bNoMouse)
+			if( (!hVideo->flags.mouse_on || !l.flags.mouse_on ) && !hVideo->flags.bNoMouse)
 			{
 				int x;
 				if (!hCursor)
@@ -2689,10 +2689,11 @@ WM_DROPFILES
 #endif
 				x = ShowCursor( TRUE );
 #ifdef LOG_MOUSE_HIDE_IDLE
-				lprintf( "cursor count %d", x );
+				lprintf( "cursor count %d %d", x, hCursor );
 #endif
 				SetCursor (hCursor);
 				l.flags.mouse_on = 1;
+            hVideo->flags.mouse_on = 1;
 			}
 			if( hVideo->flags.bIdleMouse )
 			{
@@ -2868,7 +2869,9 @@ WM_DROPFILES
 #endif
 				l.flags.mouse_on = 0;
 				//l.last_mouse_update = 0;
-				x = ShowCursor( FALSE );
+				while( x = ShowCursor( FALSE ) )
+				{
+				}
 #ifdef LOG_MOUSE_HIDE_IDLE
 				lprintf( "Show count %d %d", x, GetLastError() );
 #endif
