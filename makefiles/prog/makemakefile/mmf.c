@@ -210,7 +210,7 @@ int main( int argc, char **argv )
                 {
                 	char line[256];
                 	fgets( line, sizeof( line ), in );
-                        if( strstr( line, "3.80" ) || strstr( line, "3.81" ) )
+                        if( strstr( line, "3.80" ) || strstr( line, "3.81" ) || strstr( line, "3.82" ) )
                             _3point80 = 1;
                 	fclose( in );
 	                unlink( "makever" );
