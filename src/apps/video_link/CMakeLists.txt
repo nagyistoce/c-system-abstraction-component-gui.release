@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 2.8)
 
+if( NOT SACK_BASE )
+SET( ENABLE_CPACK 1 )
+endif( NOT SACK_BASE )
+
 GET_FILENAME_COMPONENT(SACK_SDK_ROOT_PATH "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Freedom Collective\\SACK;Install_Dir]" ABSOLUTE CACHE)
 GET_FILENAME_COMPONENT(SACK_BINARY_SDK_ROOT_PATH "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Freedom Collective\\Sack.Binaries;Install_Dir]" ABSOLUTE CACHE)
 
@@ -281,3 +285,36 @@ add_subdirectory( video_map_editor )
 #install( FILES mysql/mysql-5.4-minimal.zip DESTINATION install/video_link )
 #install( FILES tools/pkzip25.exe DESTINATION install/video_link )
 #install( FILES tools/7za.exe DESTINATION install/video_link )
+
+if( ENABLE_CPACK )
+
+INCLUDE(InstallRequiredSystemLibraries)
+
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Video Link 1.0")
+SET(CPACK_PACKAGE_VENDOR "Fortunet")
+SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/release.txt")
+SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/liscense.txt")
+SET(CPACK_PACKAGE_VERSION_MAJOR "1")
+SET(CPACK_PACKAGE_VERSION_MINOR "0")
+SET(CPACK_PACKAGE_VERSION_PATCH "1")
+#SET(CPACK_PACKAGE_INSTALL_DIRECTORY "CMake ${_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
+IF(WIN32 AND NOT UNIX)
+  # There is a bug in NSI that does not handle full unix paths properly. Make
+  # sure there is at least one set of four (4) backlasshes.
+  SET(CPACK_PACKAGE_ICON "${CMAKE_CURRENT_SOURCE_DIR}/resource\\\\junk.ico")
+  SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\sack_bag.dll")
+  SET(CPACK_NSIS_DISPLAY_NAME "Video Link ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+  SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.my-project-home-page.org")
+  SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.my-personal-home-page.com")
+  SET(CPACK_NSIS_CONTACT "me@my-personal-home-page.com")
+  SET(CPACK_NSIS_MODIFY_PATH OFF)
+ELSE(WIN32 AND NOT UNIX)
+  SET(CPACK_STRIP_FILES "bin/MyExecutable")
+  SET(CPACK_SOURCE_STRIP_FILES "")
+ENDIF(WIN32 AND NOT UNIX)
+SET(CPACK_PACKAGE_EXECUTABLES "MyExecutable" "My Executable")
+
+include(CPack)
+endif( ENABLE_CPACK )
+
+
