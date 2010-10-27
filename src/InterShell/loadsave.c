@@ -848,7 +848,7 @@ void LoadButtonConfig( PSI_CONTROL pc_canvas, TEXTSTR filename )
 #ifndef __NO_OPTIONS__
 #ifndef __NO_SQL__
 #ifndef __ARM__
-			if( SACK_GetProfileBlobOdbc( NULL, WIDE("intershell/configuration"), filename, &buffer, &buflen ) )
+			if( SACK_GetProfileBlob( WIDE("intershell/configuration"), filename, &buffer, &buflen ) )
 			{
 				FILE *out = sack_fopen( GetFileGroup( "Resources", NULL ), filename, WIDE("wb") );
 				if( out )
@@ -927,7 +927,7 @@ void LoadButtonConfig( PSI_CONTROL pc_canvas, TEXTSTR filename )
 				}
 #ifndef __NO_OPTIONS__
 #ifndef __ARM__
-				SACK_WriteProfileBlobOdbc( NULL, TASK_PREFIX "/configuration", filename, (TEXTCHAR*)mem, real_file_size );
+				SACK_WriteProfileBlob( TASK_PREFIX "/configuration", filename, (TEXTCHAR*)mem, real_file_size );
 #endif
 #endif
 				g.flags.forceload = 0;
