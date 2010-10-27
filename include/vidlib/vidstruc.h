@@ -171,6 +171,7 @@ typedef struct HVIDEO_tag
 		BIT_FIELD bDeferedPos : 1; // while in defered posisitiongin, windows marked with this.
 		BIT_FIELD bNoAutoFocus : 1; // foreground/setfocus are not called on initial show.
 		BIT_FIELD bForceTopmost : 1; // when removed from very top, put self back at very top.
+		BIT_FIELD mouse_on : 1; // an indicator of whether we have set the mouse for this window yet (may have been set by forces outside)
 	} flags;
 
    struct HVIDEO_tag *pNext, *pPrior;
