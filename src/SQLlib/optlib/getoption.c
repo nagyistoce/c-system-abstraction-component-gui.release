@@ -180,12 +180,15 @@ void OpenWriter( POPTION_TREE option )
 {
 	if( !option->odbc_writer )
 	{
-		option->odbc_writer = ConnectToDatabase( option->odbc->info.pDSN );
+		option->odbc_writer = ConnectToDatabase( option->odbc?option->odbc->info.pDSN:global_sqlstub_data->Primary.info.pDSN );
+		if( option->odbc_writer )
+		{
 #ifndef DETAILED_LOGGING
-		SetSQLLoggingDisable( option->odbc_writer, TRUE );
+			SetSQLLoggingDisable( option->odbc_writer, TRUE );
 #endif
-		SetSQLThreadProtect( option->odbc_writer, TRUE );
-		SetSQLAutoTransact( option->odbc_writer, TRUE );
+			SetSQLThreadProtect( option->odbc_writer, TRUE );
+			SetSQLAutoTransact( option->odbc_writer, TRUE );
+		}
 	}
 }
 
