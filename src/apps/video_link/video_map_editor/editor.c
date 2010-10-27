@@ -10,7 +10,10 @@ enum {
 	EDIT_MYSQL_SERVER,
    EDIT_SYSTEM_LOCAL_ADDRESS,
 	CHECKBOX_IS_MYSQL_SERVER,
-	CHECKBOX_USES_BINGODAY
+	CHECKBOX_USES_BINGODAY,
+	EDIT_CONTROLLER_CONFIG,
+	EDIT_EXPECTED_ADDRESS,
+   EDIT_MAC_ADDRESS
 
 };
 
@@ -22,6 +25,8 @@ struct site_info
 	CTEXTSTR mysql_server;
 
    CTEXTSTR address;
+   CTEXTSTR expected_address;
+   CTEXTSTR mac_address;
    CTEXTSTR local_address;
 };
 
@@ -40,7 +45,8 @@ static struct {
 	struct map_file *selected_map;
 	struct site_info *selected_site;
 
-   int bingoday;
+	int bingoday;
+   CTEXTSTR controller_config_name;
 } l;
 
 PRELOAD( RegisterResources )
@@ -53,7 +59,9 @@ PRELOAD( RegisterResources )
    EasyRegisterResource( "Video Server/Editor", LISTBOX_ITEMS, LISTBOX_CONTROL_NAME );
 	EasyRegisterResource( "Video Server/Editor", CHECKBOX_IS_MYSQL_SERVER, RADIO_BUTTON_NAME );
 	EasyRegisterResource( "Video Server/Editor", CHECKBOX_USES_BINGODAY, RADIO_BUTTON_NAME );
-
+   EasyRegisterResource( "Video Server/Editor", EDIT_CONTROLLER_CONFIG, EDIT_FIELD_NAME );
+   EasyRegisterResource( "Video Server/Editor", EDIT_EXPECTED_ADDRESS, EDIT_FIELD_NAME );
+   EasyRegisterResource( "Video Server/Editor", EDIT_MAC_ADDRESS, EDIT_FIELD_NAME );
 }
 
 
@@ -161,6 +169,11 @@ void EditSite( PLISTITEM pli )
 				SetControlText( GetControl( frame, EDIT_SYSTEM_ADDRESS ), site->address );
 				SetControlText( GetControl( frame, EDIT_SYSTEM_LOCAL_ADDRESS ), site->local_address );
 				SetControlText( GetControl( frame, EDIT_MYSQL_SERVER ), site->mysql_server );
+
+				SetControlText( GetControl( frame, EDIT_EXPECTED_ADDRESS ), site->expected_address );
+				SetControlText( GetControl( frame, EDIT_MAC_ADDRESS ), site->mac_address );
+				SetControlText( GetControl( frame, EDIT_CONTROLLER_CONFIG ), l.controller_config_name );
+
             SetCheckState( GetControl( frame, CHECKBOX_IS_MYSQL_SERVER ), site->hosts_sql );
             SetCheckState( GetControl( frame, CHECKBOX_USES_BINGODAY ), l.bingoday );
 
@@ -177,9 +190,20 @@ void EditSite( PLISTITEM pli )
 				GetControlText( GetControl( frame, EDIT_SYSTEM_ADDRESS ), tmp, sizeof( tmp )  );
 				site->address = StrDup( tmp );
 				GetControlText( GetControl( frame, EDIT_SYSTEM_LOCAL_ADDRESS ), tmp, sizeof( tmp )  );
-				site->local_address = StrDup( tmp );
+            if( tmp[0] )
+					site->local_address = StrDup( tmp );
+				GetControlText( GetControl( frame, EDIT_EXPECTED_ADDRESS ), tmp, sizeof( tmp )  );
+				if( tmp[0] )
+					site->expected_address = StrDup( tmp );
+				GetControlText( GetControl( frame, EDIT_MAC_ADDRESS ), tmp, sizeof( tmp )  );
+				if( tmp[0] )
+					site->mac_address = StrDup( tmp );
+				GetControlText( GetControl( frame, EDIT_CONTROLLER_CONFIG ), tmp, sizeof( tmp )  );
+				if( tmp[0] )
+					l.controller_config_name = StrDup( tmp );
 				GetControlText( GetControl( frame, EDIT_MYSQL_SERVER ), tmp, sizeof( tmp )  );
-            site->mysql_server = StrDup( tmp );
+				if( tmp[0] )
+					site->mysql_server = StrDup( tmp );
             site->hosts_sql = GetCheckState( GetControl( frame, CHECKBOX_IS_MYSQL_SERVER ) );
             l.bingoday = GetCheckState( GetControl( frame, CHECKBOX_USES_BINGODAY ) );
 
@@ -305,11 +329,34 @@ PTRSZVAL CPROC SetSiteAddress( PTRSZVAL psv, arg_list args )
    return psv;
 }
 
+PTRSZVAL CPROC SetSiteExpectedAddress( PTRSZVAL psv, arg_list args )
+{
+	PARAM( args, CTEXTSTR, name );
+	struct site_info *site = (struct site_info*)psv;
+   site->expected_address = StrDup( name );
+   return psv;
+}
+
+PTRSZVAL CPROC SetSiteMacAddress( PTRSZVAL psv, arg_list args )
+{
+	PARAM( args, CTEXTSTR, name );
+	struct site_info *site = (struct site_info*)psv;
+   site->mac_address = StrDup( name );
+   return psv;
+}
+
 PTRSZVAL CPROC SetSiteLocalAddress( PTRSZVAL psv, arg_list args )
 {
 	PARAM( args, CTEXTSTR, name );
 	struct site_info *site = (struct site_info*)psv;
    site->local_address = StrDup( name );
+   return psv;
+}
+
+PTRSZVAL CPROC SetControllerConfigName( PTRSZVAL psv, arg_list args )
+{
+	PARAM( args, CTEXTSTR, name );
+   l.controller_config_name = StrDup( name );
    return psv;
 }
 
@@ -336,8 +383,11 @@ void ReadMap( void )
 	AddConfigurationMethod( pch, "serves Mysql?%b", SetSiteSQL );
 	AddConfigurationMethod( pch, "Mysql Server %m", SetSiteSQLServer );
 	AddConfigurationMethod( pch, "address %m", SetSiteAddress );
+	AddConfigurationMethod( pch, "expected address %m", SetSiteExpectedAddress );
+	AddConfigurationMethod( pch, "mac address %m", SetSiteMacAddress );
 	AddConfigurationMethod( pch, "local address %m", SetSiteLocalAddress );
 	AddConfigurationMethod( pch, "Uses Bingoday?%b", SetBingodayOption );
+   AddConfigurationMethod( pch, "controller config=%m", SetControllerConfigName );
 	ProcessConfigurationFile( pch, l.selected_map->filename, 0 );
 	DestroyConfigurationHandler( pch );
 }
@@ -353,11 +403,15 @@ void UpdateConfiguration( void )
 		fprintf( file, "# site file defines locations of servers\n" );
 		fprintf( file, "#   site <name> \n" );
 		fprintf( file, "#   Hostname <name> - sets the hostname of the system, also maps in 'hosts'\n" );
-		fprintf( file, "#   address <ip> - defines the IP address of the system\n" );
+		fprintf( file, "#   address <ip> - defines the IP address of the system (use 'dhcp' for assigned)\n" );
+		fprintf( file, "#   local address <ip> - specifies the internal address of the server - control programs should use this to connect\n" );
+		fprintf( file, "#   expected address <ip> - defines expected IP address of the system ( most dhcp is a static map, this is what our address SHOULD be)\n" );
+		fprintf( file, "#   mac address <hardware> - defines the hardware address of the system (may be used to override hardware)\n" );
 		fprintf( file, "#   serves MySQL <yes/no> - if the sql server runs on this node... then others know where also\n" );
 		fprintf( file, "#   MySQL Server - if not running the server, this may indicate an external server from here - implies services for others\n" );
 		fprintf( file, "\n\n" );
-		fprintf( file, "Uses Bingoday?%s", l.bingoday?"Yes":"No" );
+		fprintf( file, "Uses Bingoday?%s\n", l.bingoday?"Yes":"No" );
+      if( l.controller_config_name ) fprintf( file, "controller config=%s\n", l.controller_config_name );
 		fprintf( file, "\n\n" );
 		LIST_FORALL( l.sites, idx, struct site_info *, site )
 		{
@@ -366,6 +420,9 @@ void UpdateConfiguration( void )
 			if( site->address ) fprintf( file, "address %s\n", site->address );
 			fprintf( file, "serves MySQL %s\n", site->hosts_sql?"Yes":"No" );
 			if( site->mysql_server ) fprintf( file, "MySQL Server %s\n", site->mysql_server );
+         if( site->mac_address ) fprintf( file, "mac address %s\n", site->mac_address );
+         if( site->expected_address ) fprintf( file, "expected address %s\n", site->expected_address );
+         if( site->local_address ) fprintf( file, "local address %s\n", site->local_address );
          fprintf( file, "\n\n" );
 		}
 	}
