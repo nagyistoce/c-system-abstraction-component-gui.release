@@ -21,6 +21,8 @@ struct site_info
 	CTEXTSTR mysql_server;
 
    CTEXTSTR address;
+   CTEXTSTR expected_address;
+   CTEXTSTR mac_address;
    CTEXTSTR local_address;
 
 };
@@ -175,6 +177,22 @@ PTRSZVAL CPROC SetSiteAddress( PTRSZVAL psv, arg_list args )
    return psv;
 }
 
+PTRSZVAL CPROC SetSiteExpectedAddress( PTRSZVAL psv, arg_list args )
+{
+	PARAM( args, CTEXTSTR, name );
+	struct site_info *site = (struct site_info*)psv;
+   site->expected_address = StrDup( name );
+   return psv;
+}
+
+PTRSZVAL CPROC SetSiteMacAddress( PTRSZVAL psv, arg_list args )
+{
+	PARAM( args, CTEXTSTR, name );
+	struct site_info *site = (struct site_info*)psv;
+   site->mac_address = StrDup( name );
+   return psv;
+}
+
 PTRSZVAL CPROC SetSiteLocalAddress( PTRSZVAL psv, arg_list args )
 {
 	PARAM( args, CTEXTSTR, name );
@@ -208,6 +226,8 @@ void ReadMap( void )
    AddConfigurationMethod( pch, "serves Mysql?%b", SetSiteSQL );
 	AddConfigurationMethod( pch, "Mysql Server %m", SetSiteSQLServer );
    AddConfigurationMethod( pch, "address %m", SetSiteAddress );
+   AddConfigurationMethod( pch, "expected address %m", SetSiteExpectedAddress );
+   AddConfigurationMethod( pch, "mac address %m", SetSiteMacAddress );
 	AddConfigurationMethod( pch, "local address %m", SetSiteLocalAddress );
    AddConfigurationMethod( pch, "Uses Bingoday?%b", SetBingodayOption );
 	ProcessConfigurationFile( pch, l.selected_map->filename, 0 );

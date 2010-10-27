@@ -4,7 +4,6 @@ site Texas
 Hostname TexasStation
 serves MySQL yes
 address dhcp
-expected address 
 mac address 00:11:D8:CF:C0:B8
 
 site Boulder
