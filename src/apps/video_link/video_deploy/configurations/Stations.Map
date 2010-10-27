@@ -1,23 +1,40 @@
 
+
 site Texas
 Hostname TexasStation
 serves MySQL yes
 address dhcp
-
+expected address 
+mac address 00:11:D8:CF:C0:B8
 
 site Boulder
 hostname BoulderStation
 address dhcp
+mac address 00:11:D8:CF:C0:B8
 
 site Palace
 hostname PalaceStation
 address dhcp
+mac address 00:11:D8:EF:7C:B1
 
 site Sunset
 hostname SunsetStation
 address dhcp
+mac address 00:11:D8:CF:C0:B8
 
 site Redrock
 hostname Redrock
 address dhcp
+mac address 00:11:D8:EF:7C:6C
+
+site santafe
+hostname santafestation
+address dhcp
+mac address 00:11:D8:EF:7C:7C
+
+site aliante
+hostname aliante
+address dhcp
+mac address 00:13:D4:D4:33:66
+
 
