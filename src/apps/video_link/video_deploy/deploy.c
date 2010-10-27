@@ -45,6 +45,10 @@ static struct {
 
 	struct site_info *sql_site;
 
+   // this should be copied to the default for the controller.
+	CTEXTSTR controller_config_name;
+   int controller;
+
 } l;
 
 
@@ -99,7 +103,7 @@ void SelectMap( void )
 		{
 			PLISTITEM pli = GetSelectedItem( listbox );
 			PTRSZVAL psv_map = GetItemData( pli );
-         l.selected_map = (struct map_file *)psv_map;
+			l.selected_map = (struct map_file *)psv_map;
 		}
       DestroyFrame( &frame );
 	}
@@ -130,6 +134,7 @@ void SelectSite( void )
                SetSelectedItem( listbox, pli );
 				}
 			}
+         AddListItem( listbox, "Link Controller" );
 		}
 		DisplayFrame( frame );
 		CommonWait( frame );
@@ -138,6 +143,7 @@ void SelectSite( void )
 			PLISTITEM pli = GetSelectedItem( listbox );
 			PTRSZVAL psv_site = GetItemData( pli );
          l.selected_site = (struct site_info *)psv_site;
+         l.controller = (!psv_site);
 		}
       DestroyFrame( &frame );
 	}
@@ -185,6 +191,14 @@ PTRSZVAL CPROC SetSiteExpectedAddress( PTRSZVAL psv, arg_list args )
    return psv;
 }
 
+
+PTRSZVAL CPROC SetControllerConfigName( PTRSZVAL psv, arg_list args )
+{
+	PARAM( args, CTEXTSTR, name );
+   l.controller_config_name = StrDup( name );
+   return psv;
+}
+
 PTRSZVAL CPROC SetSiteMacAddress( PTRSZVAL psv, arg_list args )
 {
 	PARAM( args, CTEXTSTR, name );
@@ -229,7 +243,8 @@ void ReadMap( void )
    AddConfigurationMethod( pch, "expected address %m", SetSiteExpectedAddress );
    AddConfigurationMethod( pch, "mac address %m", SetSiteMacAddress );
 	AddConfigurationMethod( pch, "local address %m", SetSiteLocalAddress );
-   AddConfigurationMethod( pch, "Uses Bingoday?%b", SetBingodayOption );
+	AddConfigurationMethod( pch, "Uses Bingoday?%b", SetBingodayOption );
+   AddConfigurationMethod( pch, "controller config=%m", SetControllerConfigName );
 	ProcessConfigurationFile( pch, l.selected_map->filename, 0 );
    DestroyConfigurationHandler( pch );
 }
@@ -462,6 +477,10 @@ int main( void )
 
 	if( l.selected_site )
 		UpdateConfiguration();
+	else if( l.controller )
+	{
+      // this system is only a controller - setup the link control configuration....
+	}
 	else
 		SimpleMessageBox( NULL, "Configuration Canceled", "System setup may not be complete." );
 	return 0;
