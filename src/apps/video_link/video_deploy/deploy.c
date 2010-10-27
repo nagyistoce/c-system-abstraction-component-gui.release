@@ -49,6 +49,8 @@ static struct {
 	CTEXTSTR controller_config_name;
    int controller;
 
+   CTEXTSTR driver_name;
+
 } l;
 
 
@@ -432,34 +434,72 @@ void FinishCopying( void )
 {
    copy( "proxy.service.exe", "proxy_bdata.exe" );
 	copy( "proxy.service.exe", "mysql.proxy.service.exe" );
-	system( "SetOption \"video.ini\" \"/vlc/config\" \"vlc_path\" \"c:/tools/vlc-1.1.4\"" );
+	{
+		CTEXTSTR args[] = { "video.ini", "/vlc/config", "vlc_path", "c:/tools/vlc-1.1.4", NULL };
+		LaunchProgram( "SetOption", NULL, args );
+	}
 }
 
 
+static int CPROC FindDriver( PTRSZVAL psv, CTEXTSTR key )
+{
+	if( StrCaseStr( key, "mysql" ) )
+	{
+		TEXTCHAR *driver = (TEXTCHAR*)psv;
+      StrCpy( driver, key );
+      return 1;
+	}
+   return 0;
+}
+
+void UpdateODBC( void )
+{
+	TEXTCHAR name[256];
+	snprintf( name, sizeof( name ), "not-set" );
+	SetRegistryItem( HKEY_LOCAL_MACHINE, "Software\\ODBC\\odbc.ini\\", "vsrvr", "SERVER", REG_SZ, name, StrLen( name ) );
+}
+
 void CheckOdbc( void )
 {
-#if 0
 	// this will take some work to do properly...
    // need to enumerate the list of drivers first and pick something like mysql to get driver path
 	TEXTCHAR name[256];
-   TEXTCHAR value[256];
-	if( !GetRegistryItem( HKEY_LOCAL_MACHINE, "Software\\odbc.ini\\", "vsrvr", "@", REG_SZ, name, sizeof( name ) ) )
+	TEXTCHAR value[256];
+   TEXTCHAR driver[256];
+   TEXTCHAR driver_val[256];
+
+   driver[0] = 0;
+	ProcessRegistryKeys( HKEY_LOCAL_MACHINE, "Software\\ODBC\\odbcinst.ini", FindDriver, (PTRSZVAL)driver );
+
+	if( !driver[0] )
 	{
+		MessageBox( NULL, "Failed to locate MySQL ODBC driver - did you install the connector?", "ODBC Failure", MB_OK );
+      return;
+	}
+
+	GetRegistryItem( HKEY_LOCAL_MACHINE, "Software\\ODBC\\odbcinst.ini\\", driver, "Driver", REG_SZ, driver_val, sizeof( driver_val ) );
+
+
+	if( !GetRegistryItem( HKEY_LOCAL_MACHINE, "Software\\ODBC\\odbc.ini\\", "vsrvr", "@", REG_SZ, name, sizeof( name ) ) )
+	{
+      snprintf( name, sizeof( name ), "Video Link Server" );
+		SetRegistryItem( HKEY_LOCAL_MACHINE, "Software\\ODBC\\odbc.ini\\", "vsrvr", "DESCRIPTION", REG_SZ, "Video Link Server", StrLen( name ) );
       snprintf( name, sizeof( name ), "video_server" );
 		SetRegistryItem( HKEY_LOCAL_MACHINE, "Software\\ODBC\\odbc.ini\\", "vsrvr", "DATABASE", REG_SZ, name, StrLen( name ) );
-      snprintf( name, sizeof( name ), "" );
+      snprintf( name, sizeof( name ), driver_val );
 		SetRegistryItem( HKEY_LOCAL_MACHINE, "Software\\ODBC\\odbc.ini\\", "vsrvr", "DRIVER", REG_SZ, name, StrLen( name ) );
       snprintf( name, sizeof( name ), "3306" );
 		SetRegistryItem( HKEY_LOCAL_MACHINE, "Software\\ODBC\\odbc.ini\\", "vsrvr", "PORT", REG_SZ, name, StrLen( name ) );
       snprintf( name, sizeof( name ), "dkc408a1f" );
 		SetRegistryItem( HKEY_LOCAL_MACHINE, "Software\\ODBC\\odbc.ini\\", "vsrvr", "PWD", REG_SZ, name, StrLen( name ) );
-      snprintf( name, sizeof( name ), "localhost" );
+
+      snprintf( name, sizeof( name ), "not-set" );
 		SetRegistryItem( HKEY_LOCAL_MACHINE, "Software\\ODBC\\odbc.ini\\", "vsrvr", "SERVER", REG_SZ, name, StrLen( name ) );
+
       snprintf( name, sizeof( name ), "fortunet" );
 		SetRegistryItem( HKEY_LOCAL_MACHINE, "Software\\ODBC\\odbc.ini\\", "vsrvr", "UID", REG_SZ, name, StrLen( name ) );
-
+      SetRegistryItem( HKEY_LOCAL_MACHINE, "Software\\ODBC\\odbc.ini\\", "ODBC Data Sources", "vsrvr", REG_SZ, driver, StrLen( driver ) );
 	}
-#endif
 }
 
 #ifdef _MSC_VER
@@ -468,6 +508,7 @@ int APIENTRY WinMain( HINSTANCE a, HINSTANCE b, LPSTR c, int d )
 int main( void )
 #endif
 {
+   CheckOdbc();
    FinishCopying();
 	SelectMap();
 	if( !l.selected_map )
