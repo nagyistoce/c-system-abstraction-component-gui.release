@@ -298,6 +298,12 @@ SET(CPACK_PACKAGE_VERSION_MAJOR "1")
 SET(CPACK_PACKAGE_VERSION_MINOR "0")
 SET(CPACK_PACKAGE_VERSION_PATCH "1")
 #SET(CPACK_PACKAGE_INSTALL_DIRECTORY "CMake ${_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
+
+SET(CPACK_NSIS_CREATE_ICONS "CreateShortCut '\$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\Video Map Editor.lnk' '\$INSTDIR\\\\bin\\\\video_map_editor.exe'") 
+SET(CPACK_NSIS_CREATE_ICONS_EXTRA "CreateShortCut '\$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\Video Link Deploy.lnk' '\$INSTDIR\\\\bin\\\\video_link_deploy.exe'
+               CreateShortCut '\$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\Start Video Link Server.lnk' '\$INSTDIR\\\\bin\\\\video_link_server.exe' 
+               CreateShortCut '\$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\Video Link Controller.lnk' '\$INSTDIR\\\\bin\\\\intershell_window.exe' video_control.config") 
+
 IF(WIN32 AND NOT UNIX)
   # There is a bug in NSI that does not handle full unix paths properly. Make
   # sure there is at least one set of four (4) backlasshes.
@@ -312,7 +318,8 @@ ELSE(WIN32 AND NOT UNIX)
   SET(CPACK_STRIP_FILES "bin/MyExecutable")
   SET(CPACK_SOURCE_STRIP_FILES "")
 ENDIF(WIN32 AND NOT UNIX)
-SET(CPACK_PACKAGE_EXECUTABLES "MyExecutable" "My Executable")
+
+#SET(CPACK_PACKAGE_EXECUTABLES "MyExecutable" "My Executable")
 
 include(CPack)
 endif( ENABLE_CPACK )
