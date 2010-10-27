@@ -1,39 +1,71 @@
+# site file defines locations of servers
+#   site <name> 
+#   Hostname <name> - sets the hostname of the system, also maps in 'hosts'
+#   address <ip> - defines the IP address of the system (use 'dhcp' for assigned)
+#   local address <ip> - specifies the internal address of the server - control programs should use this to connect
+#   expected address <ip> - defines expected IP address of the system ( most dhcp is a static map, this is what our address SHOULD be)
+#   mac address <hardware> - defines the hardware address of the system (may be used to override hardware)
+#   serves MySQL <yes/no> - if the sql server runs on this node... then others know where also
+#   MySQL Server - if not running the server, this may indicate an external server from here - implies services for others
+
+
+Uses Bingoday?Yes
+controller config=stations.control.config
 
 
 site Texas
 Hostname TexasStation
-serves MySQL yes
 address dhcp
+serves MySQL Yes
 mac address 00:11:D8:CF:C0:B8
+local address 172.17.2.31
+
 
 site Boulder
-hostname BoulderStation
+Hostname BoulderStation
 address dhcp
+serves MySQL No
 mac address 00:11:D8:CF:C0:B8
+local address 172.17.2.31
+
 
 site Palace
-hostname PalaceStation
+Hostname PalaceStation
 address dhcp
+serves MySQL No
 mac address 00:11:D8:EF:7C:B1
+local address 172.17.2.31
+
 
 site Sunset
-hostname SunsetStation
+Hostname SunsetStation
 address dhcp
+serves MySQL No
 mac address 00:11:D8:CF:C0:B8
+local address 172.17.2.31
+
 
 site Redrock
-hostname Redrock
+Hostname Redrock
 address dhcp
+serves MySQL No
 mac address 00:11:D8:EF:7C:6C
+local address 172.17.2.31
+
 
 site santafe
-hostname santafestation
+Hostname santafestation
 address dhcp
+serves MySQL No
 mac address 00:11:D8:EF:7C:7C
+local address 172.17.2.31
+
 
 site aliante
-hostname aliante
+Hostname aliante
 address dhcp
+serves MySQL No
 mac address 00:13:D4:D4:33:66
+local address 172.17.2.31
 
 

@@ -1,21 +1,42 @@
+# site file defines locations of servers
+#   site <name> 
+#   Hostname <name> - sets the hostname of the system, also maps in 'hosts'
+#   address <ip> - defines the IP address of the system (use 'dhcp' for assigned)
+#   local address <ip> - specifies the internal address of the server - control programs should use this to connect
+#   expected address <ip> - defines expected IP address of the system ( most dhcp is a static map, this is what our address SHOULD be)
+#   mac address <hardware> - defines the hardware address of the system (may be used to override hardware)
+#   serves MySQL <yes/no> - if the sql server runs on this node... then others know where also
+#   MySQL Server - if not running the server, this may indicate an external server from here - implies services for others
+
+
+Uses Bingoday?No
+controller config=coast.control.config
 
 
 site Gold
 Hostname Gold
-serves MySQL yes
 address dhcp
-expected address 10.163.226.123
+serves MySQL Yes
 mac address 00:1f:c6:51:02:f1
+expected address 10.163.226.123
+local address 172.17.2.31
+
 
 site Sun
-hostname Sun
+Hostname Sun
 address dhcp
-expected address 10.162.226.123
+serves MySQL No
 mac address 00:1f:c6:51:02:10
+expected address 10.162.226.123
+local address 172.17.2.31
+
 
 site Sams
-hostname Sams
+Hostname Sams
 address dhcp
-expected address 10.130.226.123
+serves MySQL No
 mac address 00:1e:8c:75:12:fe
+expected address 10.130.226.123
+local address 172.17.2.31
+
 
