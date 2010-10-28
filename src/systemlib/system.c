@@ -581,8 +581,11 @@ SYSTEM_PROC( PTASK_INFO, LaunchProgramEx )( CTEXTSTR program, CTEXTSTR path, PCT
 	VarTextDestroy( &pvt );
 	MemSet( &task->si, 0, sizeof( STARTUPINFO ) );
 	task->si.cb = sizeof( STARTUPINFO );
-	GetCurrentPath( saved_path, sizeof( saved_path ) );
-	SetCurrentPath( path );
+	if( path )
+	{
+		GetCurrentPath( saved_path, sizeof( saved_path ) );
+		SetCurrentPath( path );
+	}
 	if( ( CreateProcess( NULL //program
 						  , GetText( cmdline )
 						  , NULL, NULL, FALSE
@@ -635,7 +638,8 @@ SYSTEM_PROC( PTASK_INFO, LaunchProgramEx )( CTEXTSTR program, CTEXTSTR path, PCT
       task = NULL;
 	}
 	LineRelease( cmdline );
-	SetCurrentPath( saved_path );
+   if( path )
+		SetCurrentPath( saved_path );
 	return task;
 #endif
 #ifdef __LINUX__
