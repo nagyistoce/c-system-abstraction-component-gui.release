@@ -146,8 +146,10 @@ PTRSZVAL CPROC MonitorFileThread( PTHREAD pThread )
                monitor->hChange = INVALID_HANDLE_VALUE;
                break;
 				}
-            if( !monitor->DoScanTime )
-					monitor->DoScanTime = timeGetTime() - 1;
+				// keep pushing this forward for every good scan
+				// if a LOT of files are being scanned over a slow network
+            // we need to keep pushing off the physical scan of changes.
+				monitor->DoScanTime = timeGetTime() - 1;
         }
         //else if( dwResult == WAIT_TIMEOUT )
 		  //{
