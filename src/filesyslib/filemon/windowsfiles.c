@@ -134,9 +134,15 @@ PTRSZVAL CPROC MonitorFileThread( PTHREAD pThread )
         {
             if( !FindNextChangeNotification( monitor->hChange ) )
 				{
-               if( l.flags.bLog ) lprintf( WIDE("Find next change failed...%d %s"), GetLastError(), monitor->directory );
+               DWORD dwError = GetLastError();
+               lprintf( WIDE("Find next change failed...%d %s"), dwError, monitor->directory );
                 // bad things happened
 					//MessageBox( NULL, WIDE("Find change notification failed"), WIDE("Monitor Failed"), MB_OK );
+					if( dwError == ERROR_TOO_MANY_CMDS )
+					{
+                  WakeableSleep( 50 );
+						continue;
+					}
                monitor->hChange = INVALID_HANDLE_VALUE;
                break;
 				}
