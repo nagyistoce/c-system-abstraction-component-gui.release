@@ -526,7 +526,8 @@ static PTRSZVAL CPROC UpdateThread( PTHREAD thread )
 								if( l.flags.bLogTiming )
 									lprintf( "hidden control..." );
 							}
-                     EndUpdate( pc );
+							EndUpdate( pc );
+                     Relinquish(); // Sleep once... allows others to immediately continue
 						}
 					}
 					if( pmyi->panels )
