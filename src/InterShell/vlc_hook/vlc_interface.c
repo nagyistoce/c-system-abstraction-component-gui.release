@@ -503,6 +503,7 @@ static PTRSZVAL CPROC UpdateThread( PTHREAD thread )
 							lprintf( "updating controls..." );
 						LIST_FORALL( pmyi->controls, idx, PSI_CONTROL, pc )
 						{
+                     BeginUpdate( pc );
 							if( !IsControlHidden( pc ) )
 							{
 								Image output = GetControlSurface( pc );
@@ -525,6 +526,7 @@ static PTRSZVAL CPROC UpdateThread( PTHREAD thread )
 								if( l.flags.bLogTiming )
 									lprintf( "hidden control..." );
 							}
+                     EndUpdate( pc );
 						}
 					}
 					if( pmyi->panels )
