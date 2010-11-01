@@ -3095,6 +3095,8 @@ PSI_PROC( void, EnableCommonUpdates )( PSI_CONTROL common, int bEnable )
 {
 	if( common )
 	{
+		while( common->flags.bDirectUpdating )
+         Relinquish( 0 );
 		if( common->flags.bNoUpdate && bEnable )
 		{
 #ifdef DEBUG_UPDAATE_DRAW
@@ -4380,6 +4382,18 @@ CTEXTSTR GetControlTypeName( PSI_CONTROL pc )
 	TEXTCHAR mydef[32];
 	snprintf( mydef, sizeof( mydef ), PSI_ROOT_REGISTRY WIDE("/control/%d"), pc->nType );
 	return GetRegisteredValueExx( mydef, NULL, WIDE("type"), FALSE );
+}
+
+void BeginUpdate( PSI_CONTROL pc )
+{
+	if( pc )
+      pc->flags.bDirectUpdating = 1;
+}
+
+void EndUpdate( PSI_CONTROL pc )
+{
+	if( pc )
+      pc->flags.bDirectUpdating = 0;
 }
 
 void EnableControlOpenGL( PSI_CONTROL pc )
