@@ -3186,8 +3186,12 @@ void GetCommonTextEx( PSI_CONTROL pc, TEXTSTR buffer, int buflen, int bCString )
 
 PSI_PROC( LOGICAL, IsControlHidden )( PSI_CONTROL pc )
 {
-	if( pc->flags.bHidden )
-		return TRUE;
+	PSI_CONTROL parent;
+	for( parent = pc; parent; parent = parent->parent )
+	{
+		if( parent->flags.bNoUpdate || parent->flags.bHidden )
+			return TRUE;
+	}
    return FALSE;
 }
 
