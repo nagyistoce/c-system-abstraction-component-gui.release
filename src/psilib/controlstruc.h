@@ -375,6 +375,8 @@ typedef struct common_control_frame
 		BIT_FIELD bParentUpdated : 1;
 		// this is set on controls which have completed their redraw after a smudge.
 		BIT_FIELD bCleanedRecently : 1;
+		// this is set by BeginUpdate and EndUpdate to prevent hiding/disable update during update
+		BIT_FIELD bDirectUpdating : 1;
 	} flags;
 
 

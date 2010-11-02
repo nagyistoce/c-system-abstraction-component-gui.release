@@ -3095,6 +3095,8 @@ PSI_PROC( void, EnableCommonUpdates )( PSI_CONTROL common, int bEnable )
 {
 	if( common )
 	{
+		while( common->flags.bDirectUpdating )
+         Relinquish();
 		if( common->flags.bNoUpdate && bEnable )
 		{
 #ifdef DEBUG_UPDAATE_DRAW
@@ -3186,8 +3188,12 @@ void GetCommonTextEx( PSI_CONTROL pc, TEXTSTR buffer, int buflen, int bCString )
 
 PSI_PROC( LOGICAL, IsControlHidden )( PSI_CONTROL pc )
 {
-	if( pc->flags.bHidden )
-		return TRUE;
+	PSI_CONTROL parent;
+	for( parent = pc; parent; parent = parent->parent )
+	{
+		if( parent->flags.bNoUpdate || parent->flags.bHidden )
+			return TRUE;
+	}
    return FALSE;
 }
 
@@ -4376,6 +4382,18 @@ CTEXTSTR GetControlTypeName( PSI_CONTROL pc )
 	TEXTCHAR mydef[32];
 	snprintf( mydef, sizeof( mydef ), PSI_ROOT_REGISTRY WIDE("/control/%d"), pc->nType );
 	return GetRegisteredValueExx( mydef, NULL, WIDE("type"), FALSE );
+}
+
+void BeginUpdate( PSI_CONTROL pc )
+{
+	if( pc )
+      pc->flags.bDirectUpdating = 1;
+}
+
+void EndUpdate( PSI_CONTROL pc )
+{
+	if( pc )
+      pc->flags.bDirectUpdating = 0;
 }
 
 void EnableControlOpenGL( PSI_CONTROL pc )
