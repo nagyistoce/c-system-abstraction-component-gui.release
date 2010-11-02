@@ -3096,7 +3096,7 @@ PSI_PROC( void, EnableCommonUpdates )( PSI_CONTROL common, int bEnable )
 	if( common )
 	{
 		while( common->flags.bDirectUpdating )
-         Relinquish( 0 );
+         Relinquish();
 		if( common->flags.bNoUpdate && bEnable )
 		{
 #ifdef DEBUG_UPDAATE_DRAW
