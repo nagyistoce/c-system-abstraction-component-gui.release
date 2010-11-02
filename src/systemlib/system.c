@@ -481,7 +481,7 @@ DWORD GetExplorerProcessID()
 	DWORD temp;
 	ZeroMemory(&pe32,sizeof(pe32));
 
-	hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,NULL);
+	hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 
 	pe32.dwSize = sizeof(PROCESSENTRY32);
 

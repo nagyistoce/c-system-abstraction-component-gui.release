@@ -880,6 +880,10 @@ PSI_PROC( void, SetCommonUserData )( PSI_CONTROL pf, PTRSZVAL psv );
 #define SetFrameUserData(pf,d) SetCommonUserData( (PSI_CONTROL)pf,d )
 
 
+PSI_PROC( void, BeginUpdate )( PSI_CONTROL pc );
+PSI_PROC( void, EndUpdate )( PSI_CONTROL pc );
+
+
 // do the draw to the display...
 PSI_PROC( void, UpdateFrameEx )( PSI_CONTROL pf
                                       , int x, int y
