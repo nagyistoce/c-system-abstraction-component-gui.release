@@ -125,6 +125,8 @@ int IsDirectory( CTEXTSTR name )
 #ifdef WIN32
 	{
 		_32 dwAttr = GetFileAttributes( name );
+		if( dwAttr == -1 ) // uncertainty about what it really is, return ti's not a directory
+         return 0;
 		if( dwAttr & FILE_ATTRIBUTE_DIRECTORY )
 			return 1;
       return 0;
