@@ -1251,6 +1251,9 @@ static void InsertTimer( PTIMER timer )
 			if( g.flags.away_in_timer )
 			{
 				// if the thread is still away - we can add the timer...
+#ifdef LOG_SLEEPS
+				lprintf( "Timer is away, just add this new timer back in.." );
+#endif
 				DoInsertTimer( timer );
 				g.flags.insert_while_away = 0;
 				return;
@@ -1282,9 +1285,15 @@ static void InsertTimer( PTIMER timer )
 #ifdef LOG_INSERTS
 		Log( WIDE("Inserting timer...wake and done") );
 #endif
-						// wake this thread because it's current scheduled delta (ex 1000ms)
-      // may put it's sleep beyond the frequency of this timer (ex 10ms)
-		WakeThread(g.pTimerThread);
+		if( g.timers == timer )
+		{
+#ifdef LOG_SLEEPS
+			lprintf( "Wake timer thread." );
+#endif
+			// wake this thread because it's current scheduled delta (ex 1000ms)
+			// may put it's sleep beyond the frequency of this timer (ex 10ms)
+			WakeThread(g.pTimerThread);
+		}
 	}
 	else
 	{
@@ -1294,7 +1303,16 @@ static void InsertTimer( PTIMER timer )
 		// for this routine to be called and BE the timer thread.
 		// therefore - safe to add it.
 		DoInsertTimer( timer );
-		WakeThread(g.pTimerThread);
+#ifdef LOG_SLEEPS
+		lprintf( "Insert timer not dispatched." );
+#endif
+		if( g.timers == timer )
+		{
+#ifdef LOG_SLEEPS
+			lprintf( "Wake timer thread." );
+#endif
+			WakeThread(g.pTimerThread);
+		}
 		LeaveCriticalSec( &csGrab );
 	}
 }
@@ -1661,10 +1679,20 @@ static void InternalRescheduleTimerEx( PTIMER timer, _32 delay )
 		PTIMER bGrabbed = GrabTimer( timer );
       timer->flags.bRescheduled = 1;
 		timer->delta = (S_32)delay;  // should never pass a negative value here, but delta can be negative.
+#ifdef LOG_SLEEPS
+		lprintf( "Reschedule at %d  %p", timer->delta, bGrabbed );
+#endif
 		if( bGrabbed )
 		{
          //lprintf( WIDE("Rescheduling timer...") );
 			DoInsertTimer( timer );
+			if( timer == g.timers )
+			{
+#ifdef LOG_SLEEPS
+				lprintf( "We cheated to insert - so create a wake." );
+#endif
+				WakeThread( g.pTimerThread );
+			}
 		}
 	}
 }
