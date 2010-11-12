@@ -1,5 +1,0 @@
-#include <windows.h>
-//#include "resource.h"
-
-PadIcon ICON "PAD.ico"
-

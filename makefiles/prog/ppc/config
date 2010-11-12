@@ -1,2 +1,0 @@
-gcc -print-search-dirs >dirs
-

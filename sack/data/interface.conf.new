@@ -1,0 +1,8 @@
+
+# load sqlite interface
+alias service render video
+alias service image real_image
+# set 'options' interface default to sack_sql
+win32 alias service options sack_sql_options
+
+

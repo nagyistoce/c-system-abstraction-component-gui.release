@@ -1,7 +1,0 @@
-
-PROGNAME=palette
-SRCS=palette
-APP_DEFAULT_DATA=Palette.Presets
-
-include $(SACK_BASE)/makefiles/makefile.single
-
