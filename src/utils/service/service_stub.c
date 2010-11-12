@@ -194,6 +194,7 @@ PTASK_INFO LaunchUserProcess( CTEXTSTR program, CTEXTSTR path, PCTEXTSTR args
 	PTASK_INFO pTask;
 	ImpersonateInteractiveUser();
 	pTask = LaunchPeerProgramExx( program, path, args, flags, OutputHandler, EndNotice, psv DBG_RELAY );
-
+   EndImpersonation();
+   return pTask;
 }
 
