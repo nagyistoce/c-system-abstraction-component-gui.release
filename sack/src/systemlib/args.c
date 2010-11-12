@@ -27,7 +27,7 @@ SYSTEM_PROC( void, ParseIntoArgs )( TEXTCHAR *lpCmdLine, int *pArgc, TEXTCHAR **
 		{
 			if( p[0] == quote )
 			{
-            count++;
+				count++;
 				quote = 0;
 				lastchar = ' ';
 			}

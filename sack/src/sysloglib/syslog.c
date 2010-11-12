@@ -30,7 +30,7 @@
 
 #include <stdhdrs.h>
 #include <loadsock.h>
-#ifdef __WINDOWS__
+#ifdef WIN32
 #ifndef _ARM_
 #include <io.h> // unlink
 #endif
@@ -59,18 +59,19 @@ _64 cpu_tick_freq;
 #define cpu_tick_freq l.cpu_tick_freq
 // flags that control the operation of system logging....
 struct state_flags{
-	_32 bInitialized : 1;
-	_32 bUseDay : 1;
-	_32 bUseDeltaTime : 1;
-	_32 bLogTime : 1;
-	_32 bLogHighTime : 1;
-	_32 bLogCPUTime : 1;
-	_32 bProtectLoggedFilenames : 1;
-	_32 bLogProgram : 1;
-	_32 bLogThreadID : 1;
-	_32 bLogOpenAppend : 1;
-	_32 bLogOpenBackup : 1;
-	_32 bLogSourceFile : 1;
+	BIT_FIELD bInitialized : 1;
+	BIT_FIELD bUseDay : 1;
+	BIT_FIELD bUseDeltaTime : 1;
+	BIT_FIELD bLogTime : 1;
+	BIT_FIELD bLogHighTime : 1;
+	BIT_FIELD bLogCPUTime : 1;
+	BIT_FIELD bProtectLoggedFilenames : 1;
+	BIT_FIELD bLogProgram : 1;
+	BIT_FIELD bLogThreadID : 1;
+	BIT_FIELD bLogOpenAppend : 1;
+	BIT_FIELD bLogOpenBackup : 1;
+	BIT_FIELD bLogSourceFile : 1;
+	BIT_FIELD bOptionsLoaded : 1;
 //} flags = { 0,0,1,1,0,1,0,0,0}; // log delta cpu time.(no protect), log program too
 //} flags = { 0,0,1,1,0,1,1,1,1}; // delta cpu time, threadID, process name, protect logged filenames(slower)
 
@@ -115,8 +116,15 @@ struct state_flags{
 #define bCPUTickWorks l.bCPUTickWorks
  _64 tick_bias;
 #define tick_bias l.tick_bias
-} *syslog_local;
+};
+
+#ifndef __STATIC_GLOBALS__
+struct syslog_local_data *syslog_local;
 #define l (*syslog_local)
+#else
+struct syslog_local_data syslog_local;
+#define l (syslog_local)
+#endif
 
 
 static void DoSystemLog( const TEXTCHAR *buffer );
@@ -139,11 +147,13 @@ PRIORITY_ATEXIT( CleanSyslog, ATEXIT_PRIORITY_SYSLOG )
 	case SYSLOG_FILENAME:
 		fclose( l.file );
 		break;
+#ifndef __DISABLE_UDP_SYSLOG__
 	case SYSLOG_UDP:
 	case SYSLOG_UDPBROADCAST:
 		closesocket( hSock );
 		hSock = INVALID_SOCKET;
 		break;
+#endif
 	default:
       // else... no resources to cleanup
       break;
@@ -187,6 +197,12 @@ void TestCPUTick( void )
 }
 #endif
 
+#ifdef __WATCOMC__
+unsigned __int64 rdtsc( void);
+#pragma aux rdtsc = 0x0F 0x31 value [edx eax] parm nomemory modify exact [edx eax] nomemory;
+//#pragma aux GetCPUTicks3 = "rdtsc"   "mov dword ptr tick, eax"   	"mov dword ptr tick+4, edx "
+#endif
+
 _64 GetCPUTick(void )
 {
 /*
@@ -198,21 +214,16 @@ _64 GetCPUTick(void )
  */
 	if( bCPUTickWorks )
 	{
-      static _64 lasttick;
+		static _64 lasttick;
 #if defined( __LCC__ )
 		return _rdtsc();
 #elif defined( __WATCOMC__ )
-		extern void GetCPUTicks3();
-		_64 tick;
+		_64 tick = rdtsc();
 #ifndef __WATCOMC__
 		// haha a nasty compiler trick to get the variable used
 		// but it's also a 'meaningless expression' so watcom pukes.
 		(1)?(0):(tick = 0);
 #endif
-#pragma aux GetCPUTicks3 = "rdtsc"  \
-	"mov dword ptr tick, eax"     \
-	"mov dword ptr tick+4, edx "
-		GetCPUTicks3();
 		if( !lasttick )
 			lasttick = tick;
 		else if( tick < lasttick )
@@ -220,17 +231,17 @@ _64 GetCPUTick(void )
 			bCPUTickWorks = 0;
 			cpu_tick_freq = 1;
 			tick_bias = lasttick - ( timeGetTime()/*GetTickCount()*/ * 1000 );
-         tick = lasttick + 1; // more than prior, but no longer valid.
+			tick = lasttick + 1; // more than prior, but no longer valid.
 		}
-      lasttick = tick;
+		lasttick = tick;
 		return tick;
-#elif defined( _MSC_VER ) 
+#elif defined( _MSC_VER )
 #ifdef _M_CEE_PURE
-	  //return System::DateTime::now;
-	  return 0;
+		//return System::DateTime::now;
+		return 0;
 #else
 #   if defined( _WIN64 )
-	    _64 tick = __rdtsc();
+		_64 tick = __rdtsc();
 #   else
 		static _64 tick;
 #if _ARM_ 
@@ -248,9 +259,9 @@ _64 GetCPUTick(void )
 			bCPUTickWorks = 0;
 			cpu_tick_freq = 1;
 			tick_bias = lasttick - ( timeGetTime()/*GetTickCount()*/ * 1000 );
-         	tick = lasttick + 1; // more than prior, but no longer valid.
+			tick = lasttick + 1; // more than prior, but no longer valid.
 		}
-      	lasttick = tick;
+		lasttick = tick;
 		return tick;
 		if( !lasttick )
 			lasttick = tick;
@@ -259,9 +270,9 @@ _64 GetCPUTick(void )
 			bCPUTickWorks = 0;
 			cpu_tick_freq = 1;
 			tick_bias = lasttick - ( timeGetTime()/*GetTickCount()*/ * 1000 );
-         	tick = lasttick + 1; // more than prior, but no longer valid.
+			tick = lasttick + 1; // more than prior, but no longer valid.
 		}
-      	lasttick = tick;
+		lasttick = tick;
 		return tick;
 #endif
 #elif defined( __GNUC__ ) && !defined( __arm__ )
@@ -277,9 +288,9 @@ _64 GetCPUTick(void )
 			bCPUTickWorks = 0;
 			cpu_tick_freq = 1;
 			tick_bias = lasttick - ( timeGetTime()/*GetTickCount()*/ * 1000 );
-         tick.tick = lasttick + 1; // more than prior, but no longer valid.
+			tick.tick = lasttick + 1; // more than prior, but no longer valid.
 		}
-      lasttick = tick.tick;
+		lasttick = tick.tick;
 		return tick.tick;
 #else
 		DebugBreak();
@@ -345,83 +356,93 @@ void SetDefaultName( CTEXTSTR path, CTEXTSTR name, CTEXTSTR extra )
 }
 
 #ifndef __NO_OPTIONS__
-static void LoadOptions( char *filename )
+static void LoadOptions( void )
 {
-	flags.bLogSourceFile = SACK_GetProfileIntEx( GetProgramName()
-															 , WIDE( "SACK/Logging/Log Source File")
-															 , flags.bLogSourceFile, TRUE );
+	if( !flags.bOptionsLoaded )
+	{
+		flags.bLogSourceFile = SACK_GetProfileIntEx( GetProgramName()
+																 , WIDE( "SACK/Logging/Log Source File")
+																 , flags.bLogSourceFile, TRUE );
 
-	if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Enable File Log" )
+		if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Enable File Log" )
 #ifdef _DEBUG
-                           , 1
+										, 1
 #else
-									, 0
+										, 0
 #endif
-									, TRUE ) )
-	{
-		logtype = SYSLOG_AUTO_FILE;
-		flags.bLogOpenAppend = 0;
-		flags.bLogOpenBackup = 1;
-		flags.bLogProgram = 0;
-	}
-   // set all default parts of the name.
-   SetDefaultName( NULL, NULL, NULL );
-   // this overrides options with options available from SQL database.
-	if( SACK_GetProfileIntEx( GetProgramName(), WIDE("SACK/Logging/Default Log Location is current directory"), 0, TRUE ) )
-	{
-		// override filepath, if log exception.
-		TEXTCHAR buffer[256];
-		GetCurrentPath( buffer, sizeof( buffer ) );
-		SetDefaultName( buffer, NULL, NULL );
-	}
-	else
-	{
-		TEXTCHAR buffer[256];
-		// if this is blank, then length result from getprofilestring is 0, and default is with the program.
-		// so I'll lave functionality as expected for a default.
-		SACK_GetProfileStringEx( GetProgramName(), WIDE( "SACK/Logging/Default Log Location" ), WIDE( "" ), buffer, sizeof( buffer ), TRUE );
-		if( buffer[0] )
+										, TRUE ) )
 		{
+			logtype = SYSLOG_AUTO_FILE;
+			flags.bLogOpenAppend = 0;
+			flags.bLogOpenBackup = 1;
+			flags.bLogProgram = 0;
+		}
+		// set all default parts of the name.
+		// this overrides options with options available from SQL database.
+		if( SACK_GetProfileIntEx( GetProgramName(), WIDE("SACK/Logging/Default Log Location is current directory"), 0, TRUE ) )
+		{
+			// override filepath, if log exception.
+			TEXTCHAR buffer[256];
+			GetCurrentPath( buffer, sizeof( buffer ) );
 			SetDefaultName( buffer, NULL, NULL );
 		}
-	}
-
-
-	nLogLevel = SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Default Log Level (1001:all, 100:least)" ), nLogLevel, TRUE );
-
-	flags.bLogThreadID = SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Thread ID" ), 0, TRUE );
-	flags.bLogProgram = SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Program" ), 0, TRUE );
-	flags.bLogSourceFile = SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Source File" ), 1, TRUE );
-	if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log CPU Tick Time and Delta" ), 0, TRUE ) )
-	{
-		SystemLogTime( SYSLOG_TIME_CPU|SYSLOG_TIME_DELTA );
-	}
-	else if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Time as Delta" ), 0, TRUE ) )
-	{
-		SystemLogTime( SYSLOG_TIME_HIGH|SYSLOG_TIME_DELTA );
-	}
-	else if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Time" ), 1, TRUE ) )
-	{
-		if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Date" ), 1, TRUE ) )
+		else
 		{
-			SystemLogTime( SYSLOG_TIME_LOG_DAY|SYSLOG_TIME_HIGH );
+			TEXTCHAR buffer[256];
+			// if this is blank, then length result from getprofilestring is 0, and default is with the program.
+			// so I'll lave functionality as expected for a default.
+			SACK_GetProfileStringEx( GetProgramName(), WIDE( "SACK/Logging/Default Log Location" ), WIDE( "" ), buffer, sizeof( buffer ), TRUE );
+			if( buffer[0] )
+			{
+				SetDefaultName( buffer, NULL, NULL );
+			}
+		}
+
+
+		nLogLevel = SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Default Log Level (1001:all, 100:least)" ), nLogLevel, TRUE );
+
+		flags.bLogThreadID = SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Thread ID" ), 0, TRUE );
+		flags.bLogProgram = SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Program" ), 0, TRUE );
+		flags.bLogSourceFile = SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Source File" ), 1, TRUE );
+		if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log CPU Tick Time and Delta" ), 0, TRUE ) )
+		{
+			SystemLogTime( SYSLOG_TIME_CPU|SYSLOG_TIME_DELTA );
+		}
+		else if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Time as Delta" ), 0, TRUE ) )
+		{
+			SystemLogTime( SYSLOG_TIME_HIGH|SYSLOG_TIME_DELTA );
+		}
+		else if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Time" ), 1, TRUE ) )
+		{
+			if( SACK_GetProfileIntEx( GetProgramName(), WIDE( "SACK/Logging/Log Date" ), 1, TRUE ) )
+			{
+				SystemLogTime( SYSLOG_TIME_LOG_DAY|SYSLOG_TIME_HIGH );
+			}
+			else
+				SystemLogTime( SYSLOG_TIME_HIGH );
 		}
 		else
-			SystemLogTime( SYSLOG_TIME_HIGH );
+			SystemLogTime( 0 );
+		flags.bOptionsLoaded = 1;
 	}
-	else
-		SystemLogTime( 0 );
 }
 #endif
 
 
 //static int init_complete;
-void InitSyslog( void )
+void InitSyslog( int ignore_options )
 {
+#ifndef __STATIC_GLOBALS__
 	if( syslog_local )
+	{
+#ifndef __NO_OPTIONS__
+		if( !ignore_options )
+			LoadOptions();
+#endif
 		return;
-	//init_complete =1 ;
+	}
 	SimpleRegisterAndCreateGlobal( syslog_local );
+#endif
 	logtype = SYSLOG_AUTO_FILE;
 	hSock = INVALID_SOCKET;
    bCPUTickWorks = 1;
@@ -440,10 +461,13 @@ void InitSyslog( void )
        */
 		logtype = SYSLOG_AUTO_FILE;
 		flags.bLogOpenAppend = 0;
-		flags.bLogOpenBackup = 1;
+		flags.bLogOpenBackup = 0;
 		flags.bLogSourceFile = 1;
-		flags.bLogThreadID = 0;
+		flags.bUseDeltaTime = 1;
+      flags.bLogCPUTime = 1;
+		flags.bLogThreadID = 1;
 		flags.bLogProgram = 0;
+		SetDefaultName( NULL, NULL, NULL );
 		SystemLogTime( SYSLOG_TIME_HIGH );
 		//lprintf( WIDE("Syslog Initializing, debug mode, startup programname.log\n") );
 	}
@@ -454,7 +478,8 @@ void InitSyslog( void )
 #endif
 
 #ifndef __NO_OPTIONS__
-	LoadOptions( pProgramName );
+	if( !ignore_options )
+		LoadOptions();
 #else
 	SetDefaultName( NULL, NULL, NULL );
 #endif
@@ -463,7 +488,7 @@ void InitSyslog( void )
 
 PRIORITY_PRELOAD( InitSyslogPreload, SYSLOG_PRELOAD_PRIORITY )
 {
-   InitSyslog();
+   InitSyslog( 0 );
 }
 
 //----------------------------------------------------------------------------
@@ -741,6 +766,8 @@ static CTEXTSTR GetLogTime( void )
 }
 
 //----------------------------------------------------------------------------
+#ifndef __DISABLE_UDP_SYSLOG__
+
 #ifndef FBSD
 static SOCKADDR saLogBroadcast  = { 2, { 0x02, 0x02, (char)0xff, (char)0xff, (char)0xff, (char)0xff } };
 static SOCKADDR saLog  = { 2, { 0x02, 0x02, 0x7f, 0x00, 0x00, 0x01 } };
@@ -802,7 +829,7 @@ static void UDPSystemLog( const TEXTCHAR *message )
 		INDEX nSent;
 		int nSend;
 		static TEXTCHAR realmsg[1024];
-		nSend = snprintf( realmsg, sizeof( realmsg ) / sizeof( realmsg[0] ), /*"[%s]"*/ WIDE("%s")
+		nSend = snprintf( realmsg, sizeof( realmsg ), /*"[%s]"*/ WIDE("%s")
 				  //, pProgramName
 				  , message );
 		message = realmsg;
@@ -822,6 +849,7 @@ static void UDPSystemLog( const TEXTCHAR *message )
 	}
 	bLogging = 0;
 }
+#endif
 
 #ifdef __LINUX__
 //---------------------------------------------------------------------------
@@ -877,7 +905,8 @@ static void FileSystemLog( CTEXTSTR message )
 static void BackupFile( const TEXTCHAR *source, int source_name_len, int n )
 {
 	FILE *testfile;
-	testfile = sack_fopen( GetFileGroup( "system.logs", GetProgramPath() ), source, WIDE("rt") );
+	int group;
+	testfile = sack_fopen( group = GetFileGroup( "system.logs", GetProgramPath() ), source, WIDE("rt") );
 	if( testfile )
 	{
 		TEXTCHAR backup[256];
@@ -894,8 +923,8 @@ static void BackupFile( const TEXTCHAR *source, int source_name_len, int n )
 							, n+1 );
 		}
 		else
-			sack_unlink( source );
-      //lprintf( WIDE( "%s->%s" ), source, backup );
+			sack_unlink( group, source );
+		//lprintf( WIDE( "%s->%s" ), source, backup );
 		sack_rename( source, backup );
 	}
 }
@@ -903,9 +932,10 @@ static void BackupFile( const TEXTCHAR *source, int source_name_len, int n )
 
 void DoSystemLog( const TEXTCHAR *buffer )
 {
+#ifndef __STATIC_GLOBALS__
 	if( !syslog_local )
 	{
-      InitSyslog();
+		InitSyslog( 1 );
 		if( logtype == SYSLOG_AUTO_FILE && !l.file )
 		{
 			// cannot log until system log is complete
@@ -914,9 +944,15 @@ void DoSystemLog( const TEXTCHAR *buffer )
 		if( ( logtype == SYSLOG_UDPBROADCAST ) || ( logtype == SYSLOG_UDP ) )
 			return;
 	}
+#endif
+#ifndef __DISABLE_UDP_SYSLOG__
 	if( logtype == SYSLOG_UDP
 		|| logtype == SYSLOG_UDPBROADCAST )
 		UDPSystemLog( buffer );
+#else
+	if( 0 )
+      ;
+#endif
 	else if( ( logtype == SYSLOG_FILE ) || ( logtype == SYSLOG_AUTO_FILE ) )
 	{
 		if( logtype == SYSLOG_AUTO_FILE )
@@ -926,6 +962,12 @@ void DoSystemLog( const TEXTCHAR *buffer )
 				int n_retry = 0;
 			retry_again:
 				logtype = SYSLOG_NONE;
+				if( !flags.bOptionsLoaded )
+				{
+					l.file = sack_fopen( 0, gFilename, WIDE("wt") );
+				}
+				else
+				{
 				if( flags.bLogOpenBackup )
 				{
 					BackupFile( gFilename, (int)strlen( gFilename ), 1 );
@@ -936,6 +978,7 @@ void DoSystemLog( const TEXTCHAR *buffer )
 					fseek( l.file, 0, SEEK_END );
 				else
 					l.file = sack_fopen( GetFileGroup( "system.logs", GetProgramPath() ), gFilename, WIDE("wt") );
+				}
 				logtype = SYSLOG_AUTO_FILE;
 
 				if( !l.file )
@@ -980,13 +1023,15 @@ void SystemLogFL( const TEXTCHAR *message FILELINE_PASS )
 	static TEXTCHAR sourcefile[256];
 	CTEXTSTR logtime;
 	static _32 lock;
+#ifndef __STATIC_GLOBALS__
 	if( !syslog_local )
 	{
-		InvokeDeadstart();
+		InitSyslog( 1 );
 	}
+#endif
 	if( cannot_log )
       return;
-#ifdef __WINDOWS__
+#ifdef WIN32
 	while( InterlockedExchange( (long volatile*)&lock, 1 ) ) Relinquish();
 #else
 	while( LockedExchange( &lock, 1 ) ) Relinquish();
@@ -1184,21 +1229,7 @@ static PLINKQUEUE buffers;
 
 static INDEX CPROC _real_vlprintf ( CTEXTSTR format, va_list args )
 {
-#if 1
    // this can be used to force logging early to stdout
-	if( !syslog_local )
-	{
-      InitSyslog();
-		logtype = SYSLOG_FILE;
-#ifdef __WINDOWS__
-		// if there is a console, use stdout?"
-#endif
-		l.file = fopen( "default.log", "wt" );
-		SystemLogTime( SYSLOG_TIME_CPU|SYSLOG_TIME_DELTA );
-
-		flags.bLogSourceFile = 1;
-	}
-#endif
 	if( cannot_log )
 		return 0;
 	if( logtype != SYSLOG_NONE )
@@ -1306,11 +1337,12 @@ static INDEX CPROC _null_lprintf( CTEXTSTR f, ... )
 RealVLogFunction  _vxlprintf ( _32 level DBG_PASS )
 {
 	//EnterCriticalSec( &next_lprintf.cs );
+#ifndef __STATIC_GLOBALS__
 	if( !syslog_local )
 	{
-		return _null_vlprintf;
+		InitSyslog( 1 );
 	}
-
+#endif
 #if _DEBUG
 	next_lprintf.pFile = pFile;
 	next_lprintf.nLine = nLine;
@@ -1331,8 +1363,12 @@ RealVLogFunction  _vxlprintf ( _32 level DBG_PASS )
 RealLogFunction _xlprintf( _32 level DBG_PASS )
 {
 	//EnterCriticalSec( &next_lprintf.cs );
+#ifndef __STATIC_GLOBALS__
 	if( !syslog_local )
-		return _null_lprintf;
+	{
+		InitSyslog( 1 );
+	}
+#endif
 #if _DEBUG
 	next_lprintf.pFile = pFile;
 	next_lprintf.nLine = nLine;

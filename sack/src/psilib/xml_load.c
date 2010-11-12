@@ -21,12 +21,17 @@ static struct {
 	PTRSZVAL psv; // psvInitProc
    PSI_CONTROL frame;
 }l;
-XML_Parser xp;
+
+struct xml_userdata {
+	XML_Parser xp;
+	PSI_CONTROL pc;
+};
 
 void XMLCALL start_tags( void *UserData
 							  , const XML_Char *name
 							  , const XML_Char **atts )
 {
+	struct xml_userdata *userdata = (struct xml_userdata *)UserData;
 	_32 ID = -1;
 	_32 x, y;
 	_32 edit_set = 0;
@@ -117,7 +122,7 @@ void XMLCALL start_tags( void *UserData
 	if( IDName )
 	{
 		//lprintf( WIDE( "Making a control... %s %s %s" ), type?type:WIDE("notype"), caption?caption:WIDE("nocatpion"), IDName );
-		pc = MakeNamedCaptionedControlByName( (PSI_CONTROL)UserData
+		pc = MakeNamedCaptionedControlByName( userdata->pc
 														, type
 														, x, y
 														, width, height
@@ -129,7 +134,7 @@ void XMLCALL start_tags( void *UserData
 	else
 	{
 		//lprintf( WIDE( "Making a control... %s %s" ), type?type:WIDE("notype"), caption?caption:WIDE("nocatpion") );
-		pc = MakeNamedCaptionedControl( (PSI_CONTROL)UserData
+		pc = MakeNamedCaptionedControl( userdata->pc
 														, type
 														, x, y
 														, width, height
@@ -160,16 +165,15 @@ void XMLCALL start_tags( void *UserData
 		Release( control_data );
 	// SetCommonFont()
 	//
-	XML_SetUserData( xp, pc );
+	userdata->pc = pc;
 }
 
 void XMLCALL end_tags( void *UserData
 							, const XML_Char *name )
 {
-	PSI_CONTROL pc = (PSI_CONTROL)UserData;
-	//lprintf( WIDE("Ended a tag %s.."), name );
-	if( pc )
-		XML_SetUserData( xp, pc->parent );
+	struct xml_userdata *userdata = (struct xml_userdata *)UserData;
+	if( userdata->pc )
+		userdata->pc = userdata->pc->parent;
 }
 
 //-------------------------------------------------------------------------
@@ -191,7 +195,8 @@ static XML_Memory_Handling_Suite XML_memhandler;// = { MyAllocate, MyReallocate,
 // expected character buffer of appropriate size.
 PSI_CONTROL ParseXMLFrameEx( POINTER buffer, _32 size DBG_PASS )
 {
-   POINTER xml_buffer;
+	POINTER xml_buffer;
+	struct xml_userdata userdata;
 	l.frame = NULL;
 #  ifdef USE_INTERFACES
 	if( !g.MyImageInterface )
@@ -205,13 +210,15 @@ PSI_CONTROL ParseXMLFrameEx( POINTER buffer, _32 size DBG_PASS )
 	XML_memhandler.malloc_fcn = MyAllocate;
 	XML_memhandler.realloc_fcn = MyReallocate;
 	XML_memhandler.free_fcn = MyRelease;
-	xp = XML_ParserCreate_MM( NULL, &XML_memhandler, NULL );
-	XML_SetElementHandler( xp, start_tags, end_tags );
-	xml_buffer = XML_GetBuffer( xp, size );
+	userdata.xp = XML_ParserCreate_MM( NULL, &XML_memhandler, NULL );
+	userdata.pc = NULL;
+	XML_SetElementHandler( userdata.xp, start_tags, end_tags );
+	XML_SetUserData( userdata.xp, &userdata );
+	xml_buffer = XML_GetBuffer( userdata.xp, size );
 	MemCpy( xml_buffer, buffer, size );
-	XML_ParseBuffer( xp, size, TRUE );
-	XML_ParserFree( xp );
-	xp = 0;
+	XML_ParseBuffer( userdata.xp, size, TRUE );
+	XML_ParserFree( userdata.xp );
+	userdata.xp = 0;
 	//lprintf( WIDE("Parse done...") );
 	return l.frame;
 }
@@ -220,10 +227,11 @@ PSI_CONTROL LoadXMLFrameOverEx( PSI_CONTROL parent, CTEXTSTR file DBG_PASS )
 //PSI_CONTROL  LoadXMLFrame( char *file )
 {
 	POINTER buffer;
-	CTEXTSTR _file; // temp storage for prior value(create frame in place, allow moving later)
 	TEXTSTR tmp = NULL;
 	PTRSZVAL size;
-   _32 zz;
+#ifdef UNDER_CE
+	_32 zz;
+#endif
 	PSI_CONTROL frame;
 #  ifdef USE_INTERFACES
 	if( !g.MyImageInterface )
@@ -250,7 +258,7 @@ PSI_CONTROL LoadXMLFrameOverEx( PSI_CONTROL parent, CTEXTSTR file DBG_PASS )
 			buffer = Allocate( zz );
 			fread( buffer, 1, zz, file );
 			sack_fclose( file_read );
-         lprintf( "loaded font blob %s %d %p", file, zz, buffer );
+			lprintf( "loaded font blob %s %d %p", file, zz, buffer );
 		}
 	}
 #else
@@ -259,7 +267,9 @@ PSI_CONTROL LoadXMLFrameOverEx( PSI_CONTROL parent, CTEXTSTR file DBG_PASS )
 	if( !buffer || !size )
 	{
 		// attempt secondary open within frames/*
+#ifdef UNDER_CE
 		int len;
+#endif
 		size = 0;
 #ifdef UNDER_CE
 		{

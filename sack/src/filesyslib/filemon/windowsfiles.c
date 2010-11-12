@@ -134,14 +134,22 @@ PTRSZVAL CPROC MonitorFileThread( PTHREAD pThread )
         {
             if( !FindNextChangeNotification( monitor->hChange ) )
 				{
-               if( l.flags.bLog ) lprintf( WIDE("Find next change failed...%d %s"), GetLastError(), monitor->directory );
+               DWORD dwError = GetLastError();
+               lprintf( WIDE("Find next change failed...%d %s"), dwError, monitor->directory );
                 // bad things happened
 					//MessageBox( NULL, WIDE("Find change notification failed"), WIDE("Monitor Failed"), MB_OK );
+					if( dwError == ERROR_TOO_MANY_CMDS )
+					{
+                  WakeableSleep( 50 );
+						continue;
+					}
                monitor->hChange = INVALID_HANDLE_VALUE;
                break;
 				}
-            if( !monitor->DoScanTime )
-					monitor->DoScanTime = timeGetTime() - 1;
+				// keep pushing this forward for every good scan
+				// if a LOT of files are being scanned over a slow network
+            // we need to keep pushing off the physical scan of changes.
+				monitor->DoScanTime = timeGetTime() - 1;
         }
         //else if( dwResult == WAIT_TIMEOUT )
 		  //{
@@ -152,9 +160,9 @@ PTRSZVAL CPROC MonitorFileThread( PTHREAD pThread )
            // what's being watched...
         //}
         // and we'll never have dwResult == WAIT_TIMEOUT
-	 } while( 1 );
+	} while( 1 );
     if( l.flags.bLog ) Log( WIDE("Leaving the thread...") );
-	 EndMonitor( monitor );
+		EndMonitor( monitor );
     monitor->pThread = NULL;
     return 0; // something....
 }

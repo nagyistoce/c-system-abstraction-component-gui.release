@@ -41,30 +41,30 @@ int main( int argc, char ** argv )
 				// with subcanvas support, this cannot function, sorry
 				// we get confused about which menu belongs to which frame
 				// some thought will have to be done to figure this one out.
-				if( stricmp( argv[n]+1, WIDE("display") ) == 0 )
+				if( StrCaseCmp( argv[n]+1, WIDE("display") ) == 0 )
 				{
 					display = atoi( argv[n+1] );
 					n++;
 				}
-				else if( stricmp( argv[n]+1, WIDE("transparent") ) == 0 )
+				else if( StrCaseCmp( argv[n]+1, WIDE("transparent") ) == 0 )
 				{
-               is_transparent = 1;
+					is_transparent = 1;
 				}
-				else if( stricmp( argv[n]+1, WIDE("stream") ) == 0 )
+				else if( StrCaseCmp( argv[n]+1, WIDE("stream") ) == 0 )
 				{
-               is_stream = 1;
+					is_stream = 1;
 				}
-				else if( stricmp( argv[n]+1, WIDE("control") ) == 0 )
+				else if( StrCaseCmp( argv[n]+1, WIDE("control") ) == 0 )
 				{
                in_control = 1;
 				}
-				else if( stricmp( argv[n]+1, WIDE("top") ) == 0 )
+				else if( StrCaseCmp( argv[n]+1, WIDE("top") ) == 0 )
 				{
                make_top = 1;
 				}
 				else
 				{
-               ofs += snprintf( extra_opts + ofs, 4096 - ofs, "%s", argv[n]+1 );
+					ofs += snprintf( extra_opts + ofs * sizeof( TEXTCHAR ), 4096 - ofs, "%s", argv[n]+1 );
 				}
 			}
 			else

@@ -97,18 +97,18 @@ enum config_types {
 typedef struct config_element_tag CONFIG_ELEMENT, *PCONFIG_ELEMENT;
 struct config_element_tag
 {
-    enum config_types type;
-    struct config_test_tag *next;// if a match is found, follow this to next.
-	 struct config_element_tag *prior;
-	 struct config_element_tag **ppMe; // this is where we came from
-    struct {
-        _32 vector : 1;
-		  _32 multiword_terminator : 1; // prior == actual segment...
-		  _32 singleword_terminator : 1; // prior == actual segment...
-		  // careful - assembly here requires absolute known
-		  // posisitioning - -fpack-struct will short-change
+	enum config_types type;
+	struct config_test_tag *next;// if a match is found, follow this to next.
+	struct config_element_tag *prior;
+	struct config_element_tag **ppMe; // this is where we came from
+	struct {
+		BIT_FIELD vector : 1;
+		BIT_FIELD multiword_terminator : 1; // prior == actual segment...
+		BIT_FIELD singleword_terminator : 1; // prior == actual segment...
+		// careful - assembly here requires absolute known
+		// posisitioning - -fpack-struct will short-change
         // this structure to the minimal number of bits.
-		  _32 filler:29;
+		BIT_FIELD filler:29;
     } flags;
     _32 element_count; // used with vector fields.
     union {
@@ -207,36 +207,50 @@ typedef struct global_tag {
 	int _disabled_allocate_logging;
 
 	struct {
+		BIT_FIELD bInitialized : 1;
 		BIT_FIELD bDisableMemoryLogging : 1;
 		BIT_FIELD bLogUnhandled : 1;
 	} flags;
 } GLOBAL;
 
 //#ifdef __STATIC__
+#ifndef __STATIC_GLOBALS__
 static GLOBAL *global_config_data;
 #define g (*global_config_data)
 PRIORITY_PRELOAD( InitGlobal, CONFIG_SCRIPT_PRELOAD_PRIORITY )
 {
 	SimpleRegisterAndCreateGlobal( global_config_data );
 }
-
-PRELOAD( InitGlobalConfig2 )
-{
-#ifdef __NO_OPTIONS__
-	g.flags.bDisableMemoryLogging = 1;
-	g.flags.bLogUnhandled = 0;
 #else
-	g.flags.bDisableMemoryLogging = SACK_GetProfileIntEx( GetProgramName(), "SACK/Config Script/Disable Memory Logging", 1, TRUE );
-	g.flags.bLogUnhandled = SACK_GetProfileIntEx( "SACK/Config Script", "Log Unhandled if no application handler", 0, TRUE );
+static GLOBAL global_config_data;
+#define g (global_config_data)
 #endif
-}
 
 void DoInit( void )
 {
+#ifndef __STATIC_GLOBALS__
 	if( !global_config_data )
 		SimpleRegisterAndCreateGlobal( global_config_data );
+#endif
 
+	if( !g.flags.bInitialized )
+	{
+#ifdef __NO_OPTIONS__
+		g.flags.bDisableMemoryLogging = 1;
+		g.flags.bLogUnhandled = 0;
+#else
+		g.flags.bDisableMemoryLogging = SACK_GetProfileIntEx( GetProgramName(), "SACK/Config Script/Disable Memory Logging", 1, TRUE );
+		g.flags.bLogUnhandled = SACK_GetProfileIntEx( "SACK/Config Script", "Log Unhandled if no application handler", 0, TRUE );
+#endif
+	}
 }
+
+PRELOAD( InitGlobalConfig2 )
+{
+   DoInit();
+}
+
+
 //#else
 //#define g global_config_data
 //static GLOBAL g;
@@ -722,7 +736,7 @@ static PTEXT GetConfigurationLine( PCONFIG_HANDLER pConfigHandler )
 			PTEXT x = p;
 			while( x )
 			{
-				lprintf( WIDE("Word is: %s (%d,%d)"), GetText( x ), GetTextSize( x ), x->format.position.spaces );
+				lprintf( WIDE("Word is: %s (%d,%d)"), GetText( x ), GetTextSize( x ), x->format.position.offset.spaces );
 				x = NEXTLINE( x );
 			}
 		}
@@ -791,6 +805,10 @@ typedef union bintobase{
 	struct {
       _8 bytes[3];
 	} bin;
+
+	// these need to be unsigned.
+	// the warning is 'nonstandard extension used : bit field types other than int'
+	// but 'int' will NOT work, because it's signed.
 	struct {
 		_32 data1 : 6;
 		_32 data2 : 6;
@@ -1472,13 +1490,13 @@ int IsSingleWordVar( PCONFIG_ELEMENT pce, PTEXT *start )
             *start = _start; // restore start..
 				break;
 			}
-			if( (*start)->format.position.spaces )
+			if( (*start)->format.position.offset.spaces )
 			{
 				//if( pWords )
 				//	LineRelease( pWords );
 #ifdef FULL_TRACE
             // so at a space, stop appending.
-				lprintf( WIDE("next word has spaces... [%s](%d)"), GetText(*start), (*start)->format.position.spaces );
+				lprintf( WIDE("next word has spaces... [%s](%d)"), GetText(*start), (*start)->format.position.offset.spaces );
 #endif
             break;
             //*start = _start;
@@ -1494,7 +1512,7 @@ int IsSingleWordVar( PCONFIG_ELEMENT pce, PTEXT *start )
 	if( pWords )
 	{
 		PTEXT pText;
-      pWords->format.position.spaces= 0;
+      pWords->format.position.offset.spaces= 0;
 		pText = BuildLine( pWords );
 		LineRelease( pWords );
 
@@ -1545,7 +1563,7 @@ int IsMultiWordVar( PCONFIG_ELEMENT pce, PTEXT *start )
     //   pWords = SegCreate(0);
     if( pWords )
 	 {
-		 pWords->format.position.spaces = 0;
+		 pWords->format.position.offset.spaces = 0;
 		 {
 			 PTEXT out = BuildLine( pWords );
 			 TEXTSTR buf = StrDup( GetText( out ) );
@@ -1578,11 +1596,12 @@ int IsPathVar( PCONFIG_ELEMENT pce, PTEXT *start )
 	}
 	if( pWords )
 	{
-		pWords->format.position.spaces = 0;
+		pWords->format.position.offset.spaces = 0;
 		{
 			PTEXT out = BuildLine( pWords );
-			TEXTSTR buf = NewArray( TEXTCHAR, GetTextSize( out ) + 1 );
-			StrCpy( buf, GetText( out ) );
+			_32 length;
+			TEXTSTR buf = NewArray( TEXTCHAR, length = GetTextSize( out ) + 1 );
+			StrCpyEx( buf, GetText( out ), length * sizeof( TEXTCHAR ) );
 			LineRelease( out );
 			LineRelease( pWords );
 			pce->data[0].multiword.pWords = buf;
@@ -1612,11 +1631,12 @@ int IsFileVar( PCONFIG_ELEMENT pce, PTEXT *start )
 	}
 	if( pWords )
 	{
-		pWords->format.position.spaces = 0;
+		pWords->format.position.offset.spaces = 0;
 		{
 			PTEXT out = BuildLine( pWords );
-			TEXTSTR buf = NewArray( TEXTCHAR, GetTextSize( out ) + 1 );
-			StrCpy( buf, GetText( out ) );
+			_32 length;
+			TEXTSTR buf = NewArray( TEXTCHAR, length = GetTextSize( out ) + 1 );
+			StrCpyEx( buf, GetText( out ), length * sizeof( TEXTCHAR ) );
 			LineRelease( out );
 			LineRelease( pWords );
 			pce->data[0].multiword.pWords = buf;
@@ -1646,11 +1666,12 @@ int IsFilePathVar( PCONFIG_ELEMENT pce, PTEXT *start )
 	 }
 	 if( pWords )
 	 {
-		 pWords->format.position.spaces = 0;
+		 pWords->format.position.offset.spaces = 0;
 		 {
 			 PTEXT out = BuildLine( pWords );
-			 TEXTSTR buf = NewArray( TEXTCHAR, GetTextSize( out ) + 1 );
-			 StrCpy( buf, GetText( out ) );
+			 _32 length;
+			 TEXTSTR buf = NewArray( TEXTCHAR, length = GetTextSize( out ) + 1 );
+			 StrCpyEx( buf, GetText( out ), length * sizeof( TEXTCHAR ) );
 			 LineRelease( out );
 			 LineRelease( pWords );
 			 pce->data[0].multiword.pWords = buf;
@@ -1672,14 +1693,14 @@ int IsAddressVar( PCONFIG_ELEMENT pce, PTEXT *start )
 		ReleaseAddress( pce->data[0].psaSockaddr );
 		pce->data[0].psaSockaddr = NULL;
 	}
-	while( *start && !(*start)->format.position.spaces )
+	while( *start && !(*start)->format.position.offset.spaces )
 	{
 		pWords = SegAppend( pWords, SegDuplicate( *start ) );
 		*start = NEXTLINE( *start );
 	}
    if( pWords )
 	{
-		pWords->format.position.spaces = 0;
+		pWords->format.position.offset.spaces = 0;
 		{
 			PTEXT pText = BuildLine( pWords );
 			LineRelease( pWords );
@@ -1945,16 +1966,17 @@ void ProcessConfigurationLine( PCONFIG_HANDLER pch, PTEXT line )
 CONFIGSCR_PROC( int, ProcessConfigurationFile )( PCONFIG_HANDLER pch, CTEXTSTR name, PTRSZVAL psv )
 {
 	PTEXT line;
+	int absolute_path = IsAbsolutePath( name ); // don't prefix with anything.
 	Fopen( pch->file, name, WIDE("rb") );
 #ifndef UNDER_CE
-	if( !pch->file )
+	if( !pch->file && !absolute_path )
 	{
 		CTEXTSTR workpath = OSALOT_GetEnvironmentVariable( WIDE( "MY_WORK_PATH" ) );
 		TEXTCHAR pathname[255];
 		snprintf( pathname, sizeof( pathname ), WIDE("%s/%s"), workpath, name );
 		Fopen( pch->file, pathname, WIDE("rb") );
 	}
-	if( !pch->file )
+	if( !pch->file && !absolute_path )
 	{
 		CTEXTSTR workpath = OSALOT_GetEnvironmentVariable( WIDE( "MY_LOAD_PATH" ) );
 		TEXTCHAR pathname[255];
@@ -1962,30 +1984,30 @@ CONFIGSCR_PROC( int, ProcessConfigurationFile )( PCONFIG_HANDLER pch, CTEXTSTR n
 		Fopen( pch->file, pathname, WIDE("rb") );
 	}
 #endif
-	if( !pch->file )
+	if( !pch->file && !absolute_path )
 	{
 		TEXTCHAR pathname[255];
 		snprintf( pathname, sizeof( pathname ), WIDE("/etc/%s"), name );
 		Fopen( pch->file, pathname, WIDE("rb") );
 	}
-	if( !pch->file )
+	if( !pch->file && !absolute_path )
 	{
 		TEXTCHAR pathname[255];
 		snprintf( pathname, sizeof( pathname ), WIDE("\\ftn3000\\working\\%s"), name );
 		Fopen( pch->file, pathname, WIDE("rb") );
 	}
-	if( !pch->file )
+	if( !pch->file && !absolute_path )
 	{
 		TEXTCHAR pathname[255];
 		snprintf( pathname, sizeof( pathname ), WIDE("C:\\ftn3000\\working\\%s"), name );
 		Fopen( pch->file, pathname, WIDE("rb") );
 	}
 	pch->psvUser = psv;
-	if( pch->file )
+	if( pch->file && !absolute_path )
 	{
 		while( ( line = GetConfigurationLine( pch ) ) )
 		{
-         ProcessConfigurationLine( pch, line );
+			ProcessConfigurationLine( pch, line );
 			LineRelease( line );
 		}
 		fclose( pch->file );
@@ -1996,8 +2018,8 @@ CONFIGSCR_PROC( int, ProcessConfigurationFile )( PCONFIG_HANDLER pch, CTEXTSTR n
     }
     else
     {
-		 //Log1( WIDE("Failed to open config file: %s"), name );
-       return FALSE;
+		//Log1( WIDE("Failed to open config file: %s"), name );
+		return FALSE;
     }
 }
 
@@ -2007,13 +2029,13 @@ CONFIGSCR_PROC( PTRSZVAL, ProcessConfigurationInput )( PCONFIG_HANDLER pch, CTEX
 {
 	pch->psvUser = psv;
 	{
-      PTEXT line;
+		PTEXT line;
 		PTEXT block = SegCreate( size );
 		MemCpy( GetText( block ), data, size );
-      pch->blocks = block;
+		pch->blocks = block;
 		while( ( line = GetConfigurationLine( pch ) ) )
 		{
-         ProcessConfigurationLine( pch, line );
+			ProcessConfigurationLine( pch, line );
 			LineRelease( line );
 		}
       // this block will have been moved into internal accumulators.

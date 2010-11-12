@@ -430,9 +430,9 @@ void RenderPingMax( PTRSZVAL psv, PDATALIST *points, _32 from, _32 to, _32 resol
 					min_index_set = 1;
 				}
 
-				if( base_value > sample->max )
+				if( USS_GT( base_value, _32, sample->max, S_32 ) )
 					base_value = sample->max;
-				if( max_value < sample->max )
+				if( USS_LT( max_value, _32, sample->max, int ) )
 					max_value = sample->max;
 				tick = sample->tick + 1;  // find next sample
 			}
@@ -440,8 +440,8 @@ void RenderPingMax( PTRSZVAL psv, PDATALIST *points, _32 from, _32 to, _32 resol
 				break; // we're done.
 		}
 		base_value = 1000;
-      max_value = 250000;
-      //lprintf( "Min %d max %d", base_value, max_value );
+		max_value = 250000;
+		//lprintf( "Min %d max %d", base_value, max_value );
 		sample = GetUsedSetMember( PING_RESULT, &ppdc->samples, idx_sample = min_index );
 		for( tick = from; sample && tick < to; )
 		{
@@ -507,9 +507,9 @@ void RenderPingDropped( PTRSZVAL psv, PDATALIST *points, _32 from, _32 to, _32 r
 			}
 			if( sample )
 			{
-				if( base_value > sample->drop )
+				if( USS_GT( base_value,_32, sample->drop, int ) )
 					base_value = sample->drop;
-				if( max_value < sample->drop )
+				if( USS_LT( max_value,_32, sample->drop, int ) )
 					max_value = sample->drop;
 				tick = sample->tick + 1;  // find next sample
 			}
@@ -837,14 +837,14 @@ OnDestroyControl( "Ping Status Graph" )( PTRSZVAL psv )
 
 void DrawLine( Image image, GRAPH graph, GRAPH_LINE line )
 {
-	_32 tick;
+	//_32 tick;
 	_32 max_tick = timeGetTime();
 	_32 min_tick = max_tick - graph->timespan;
-   _32 tick_err, tick_del;
+	_32 tick_err, tick_del;
 	_32 width, height;
-	_32 x, _x;
+	//_32 x, _x;
 	INDEX idx_sample;
-   INDEX nSample;
+	//INDEX nSample;
 	GRAPH_LINE_SAMPLE *sample;
 	GRAPH_LINE_SAMPLE *_sample = NULL;
 	GetImageSize( image, &width, &height );
@@ -925,4 +925,9 @@ PRELOAD( RegisterGraphControl )
    DoRegisterControl( &graph_control_reg );
 }
 
+#if ( __WATCOMC__ < 1290 )
+PUBLIC( void, AtLeastOneExport )( void )
+{
+}
+#endif
 

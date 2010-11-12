@@ -53,7 +53,7 @@ typedef struct banner_tag
 } BANNER;
 
 
-typedef struct banner_local_tag {
+struct banner_local_tag {
 	struct {
 		BIT_FIELD bInited : 1;
 	} flags;
@@ -285,10 +285,12 @@ static void DrawBannerCaption( PSI_CONTROL pc, PBANNER banner, Image surface, TE
 	_32 y = 0;
    S_32 minx = BANNER_WIDTH;
 	_32 w, h, maxw = 0;
+	_32 maxw2 = 0;
 	_32 char_h;
    int had_bounds;
 	CTEXTSTR start = caption;
 	CTEXTSTR end;
+   int skip = 0;
 	if( banner->bit_flags.bounds_set )
 	{
       // be kinda nice to be able to result this to the control to get a partial update to screen...
@@ -309,10 +311,11 @@ static void DrawBannerCaption( PSI_CONTROL pc, PBANNER banner, Image surface, TE
 	}
 	//ClearImageTo( surface, GetBaseColor( NORMAL ) );
 	GetStringRenderSizeFontEx( caption, strlen( caption ), &maxw, &h, &char_h
-							 , banner_local.custom_font?banner_local.custom_font:explorer?banner_local.explorer_font:banner_local.font );
+									 , banner_local.custom_font?banner_local.custom_font:explorer?banner_local.explorer_font:banner_local.font );
+   //lprintf( "h from render size is %d or %d", h, char_h );
 	y = yofs - (h/2);
    banner->text_bounds.y = y - 2;
-	banner->text_bounds.h = h + 4;
+	banner->text_bounds.h = h + 5; // -2 to +2 is 5 ?
 
 	while( start )
 	{
@@ -320,7 +323,15 @@ static void DrawBannerCaption( PSI_CONTROL pc, PBANNER banner, Image surface, TE
 		end = StrChr( start, '\n' );
 		if( !end )
 		{
-			end = start + StrLen(start);
+			end = StrChr( start, '\\' );
+			if( !end || end[1] != 'n' )
+			{
+				end = start + StrLen(start);
+			}
+			else
+			{
+            skip = 1;
+			}
 		}
 		w = GetStringSizeFontEx( start, end-start, NULL, &h
 									  , banner_local.custom_font?banner_local.custom_font:explorer?banner_local.explorer_font:banner_local.font );
@@ -350,7 +361,10 @@ static void DrawBannerCaption( PSI_CONTROL pc, PBANNER banner, Image surface, TE
 							, banner_local.custom_font?banner_local.custom_font:explorer?banner_local.explorer_font:banner_local.font );
 		y += h;
 		if( end[0] )
-			start = end+1;
+		{
+			start = end+1+skip;
+         skip = 0;
+		}
 		else
 			start = NULL;
 	}
@@ -364,13 +378,13 @@ static void DrawBannerCaption( PSI_CONTROL pc, PBANNER banner, Image surface, TE
       S_32 rx_tmp;
 		_32 rw, rh;
 
-      rx_right = banner->text_bounds.x + banner->text_bounds.w;
-		rx_tmp = banner->old_bounds.x + banner->old_bounds.w;
+      rx_right = banner->text_bounds.x + banner->text_bounds.w + 1;
+		rx_tmp = banner->old_bounds.x + banner->old_bounds.w + 1;
 		if( rx_tmp > rx_right )
          rx_right = rx_tmp;
 
-      ry_bottom = banner->text_bounds.y + banner->text_bounds.h;
-		rx_tmp = banner->old_bounds.y + banner->old_bounds.h;
+      ry_bottom = banner->text_bounds.y + banner->text_bounds.h + 1;
+		rx_tmp = banner->old_bounds.y + banner->old_bounds.h + 1;
 		if( rx_tmp > ry_bottom )
          ry_bottom = rx_tmp;
 
@@ -378,25 +392,26 @@ static void DrawBannerCaption( PSI_CONTROL pc, PBANNER banner, Image surface, TE
 		if( banner->text_bounds.x < banner->old_bounds.x )
 		{
 			rx = banner->text_bounds.x;
-         rw = rx_right - rx;
+         rw = ( rx_right - rx );
 		}
 		else
 		{
 			rx = banner->old_bounds.x;
-         rw = rx_right - rx;
+         rw = ( rx_right - rx );
 		}
 
 		if( banner->text_bounds.y < banner->old_bounds.y )
 		{
 			ry = banner->text_bounds.y;
-         rh = ry_bottom - ry;
+         rh = ( ry_bottom - ry );
 		}
 		else
 		{
 			ry = banner->old_bounds.y;
-         rh = ry_bottom - ry;
+         rh = ( ry_bottom - ry );
 		}
 
+      //lprintf( "update %d,%d to %d,%d", rx, ry, rw, rh );
 		SetUpdateRegion( pc, rx, ry, rw, rh );
 	}
 }

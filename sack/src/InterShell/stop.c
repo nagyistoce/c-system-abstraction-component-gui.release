@@ -27,7 +27,7 @@ int main( int argc, char **argv )
 		, &size );
 	if( mem_lock )
 	{
-#ifdef __WINDOWS__
+#ifdef WIN32
 		PRENDER_INTERFACE pri = GetDisplayInterface();
 		PVIDEO video = (PVIDEO)mem_lock;
 		if( video->hWndOutput )

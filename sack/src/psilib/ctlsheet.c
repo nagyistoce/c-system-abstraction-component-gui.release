@@ -77,7 +77,7 @@ static void ComputeHeight( PSI_CONTROL pc )
       // and check their tab image sizes also...
 	}
    if( psc->active )
-		if( TAB_HEIGHT < psc->active->height )
+		if( USS_LT( TAB_HEIGHT, _32, psc->active->height, int ) )
          TAB_HEIGHT = psc->active->height;
 	if( psc->height != TAB_HEIGHT )
 	{
@@ -96,14 +96,14 @@ static void BlotTab( Image surface, Image slices[3], int x, int width, int heigh
 	_32 w1, w2;
 	w1 = slices[0]->width;
 	w2 = slices[2]->width;
-	if( width < (w1+w2) )
+	if( SUS_LT( width, int, (w1+w2), _32 ) )
 	{
 		BlotScaledImageSizedToAlpha( surface, slices[0]
 											, x, 0
 											, width / 2, height
 											, ALPHA_TRANSPARENT );
-      // computation of width - (width/2) accounts for the rounding
-      // error if width is odd...
+		// computation of width - (width/2) accounts for the rounding
+		// error if width is odd...
 		BlotScaledImageSizedToAlpha( surface, slices[2]
 											, x + (width/2), 0
 											, width - (width / 2), height
@@ -125,7 +125,7 @@ static void BlotTab( Image surface, Image slices[3], int x, int width, int heigh
 		//				  , x + (width - w2), 0
 		//				  , ALPHA_TRANSPARENT );
 	// just scale center portion to width of tab
-      if( ( w1+w2 ) < width ) // if equal or less, no reason to do this...
+      if( USS_LT( ( w1+w2 ),_32, width,int) ) // if equal or less, no reason to do this...
 			BlotScaledImageSizedToAlpha( surface, slices[1]
 												, x + w1
 												, 0
@@ -156,9 +156,9 @@ static int CPROC DrawSheetControl( PSI_CONTROL pc )
    //lprintf( WIDE("Get a font") );
 	font = GetFrameFont( pc );
 	{
-		int x = -psc->first_offset;
+		int x = -((int)psc->first_offset);
 		sheet = psc->sheets;
-      psc->first = sheet;
+		psc->first = sheet;
 		ComputeHeight( pc );
 		while( sheet )
 		{
@@ -334,15 +334,15 @@ static int CPROC MouseSheetControl( PSI_CONTROL pc, S_32 x, S_32 y, _32 b )
 	check_x = psc->first_offset;
 	sheet = psc->first;
 	//lprintf( WIDE("mouse: %d,%d "), x, y );
-	if( y >= 0 && y <= psc->height )
+	if( y >= 0 && SUS_LTE( y, S_32, psc->height, _32 ) )
 	{
 		while( sheet )
 		{
 			//lprintf( WIDE("Checking %d vs %d, %d"), x, check_x, check_x + sheet->tab_width );
 			if( !sheet->flags.bDisabled )
 			{
-            //lprintf( WIDE("Okay it's not disabled...") );
-				if( x > check_x && x < ( check_x + sheet->tab_width ) )
+				//lprintf( WIDE("Okay it's not disabled...") );
+				if( x > check_x && SUS_LT( x, S_32, ( check_x + sheet->tab_width ), _32 ) )
 				{
 					if( MAKE_NEWBUTTON( b, psc->_b ) & MK_LBUTTON )
 					{
@@ -352,7 +352,7 @@ static int CPROC MouseSheetControl( PSI_CONTROL pc, S_32 x, S_32 y, _32 b )
 				}
 			}
 			//else
-         //   lprintf( WIDE("Disabled!") );
+			//   lprintf( WIDE("Disabled!") );
 			check_x += sheet->tab_width;
 			sheet = sheet->next;
 		}

@@ -24,11 +24,7 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   FOLDER "Message Service"
 )
 
-target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} )
-install_default_dest_binary( ${PROJECT_NAME} )
-
-#include_directories(  ${CMAKE_CURRENT_SOURCE_DIR} )
-
+target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} )
 install_default_dest_binary( ${PROJECT_NAME} )
 
 
@@ -40,18 +36,15 @@ server3
 ${LAST_GCC_PROGRAM_SOURCE}
 )
 
-if( C++ )
-set_source_files_properties( ${SERVER_SOURCES} PROPERTIES LANGUAGE "CXX" )
-endif()
-
 add_executable( ${PROJECT_NAME} WIN32 ${SERVER_SOURCES} )
-target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} )
 string( REGEX REPLACE "(.*)\\.(.*)" "\\1_\\2" TARGET_LABEL ${PROJECT_NAME} )
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   DEFINE_SYMBOL INTERSHELL_SOURCE
                   COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL} -DSERVERMSG_SOURCE -DBAG"
                   FOLDER "Message Service"
 )
+target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} )
+
 install_default_dest_binary( ${PROJECT_NAME} )
 
 

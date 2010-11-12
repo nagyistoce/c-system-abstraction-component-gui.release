@@ -35,16 +35,16 @@ static int CPROC MyParmCmp( PTRSZVAL s1, PTRSZVAL s2 )
    struct params *p1 = (struct params*)s1;
 	struct params *p2 = (struct params*)s2;
    if( p1->odbc == p2->odbc )
-		return stricmp( p1->name, p2->name );
+		return StrCaseCmp( p1->name, p2->name );
 	else
       return 1;
 }
 static int CPROC MyStrCmp( PTRSZVAL s1, PTRSZVAL s2 )
 {
-	return stricmp( (TEXTCHAR*)s1, (TEXTCHAR*)s2 );
+	return StrCaseCmp( (TEXTCHAR*)s1, (TEXTCHAR*)s2 );
 }
 
-static PTREEROOT GetTableCache( PODBC odbc, CTEXTSTR tablename )
+PTREEROOT GetTableCache( PODBC odbc, CTEXTSTR tablename )
 {
 	static PTREEROOT tables;
 	PTREEROOT newcache;
@@ -111,7 +111,7 @@ SQLSTUB_PROC( INDEX, FetchLastInsertIDEx)( PODBC odbc, CTEXTSTR table, CTEXTSTR 
 	if( odbc->flags.bSQLite_native )
 	{
       // can also be done with 'select last_insert_rowid()'
-		RecordID = sqlite3_last_insert_rowid( odbc->db );
+		RecordID = (INDEX)sqlite3_last_insert_rowid( odbc->db );
 	}
 #endif
 #ifdef USE_ODBC
@@ -121,14 +121,14 @@ SQLSTUB_PROC( INDEX, FetchLastInsertIDEx)( PODBC odbc, CTEXTSTR table, CTEXTSTR 
 		if( SQLQueryEx( odbc, "select @@IDENTITY", &result DBG_RELAY ) && result )
 		//snprintf(sql,256,WIDE("SELECT %s FROM %s ORDER BY %s DESC"), col, table, col);
 		//if( SQLQueryEx( odbc, sql, &result DBG_RELAY ) && result )
-			RecordID=IntCreateFromText( result );
+			RecordID = (INDEX)IntCreateFromText( result );
 	}
 	else if( odbc->flags.bODBC )
 	{
 		if( SQLQueryEx( odbc, WIDE("select LAST_INSERT_ID()"), &result DBG_RELAY ) && result )
 		{
 			//lprintf( WIDE("Result is %s"), result );
-			RecordID=IntCreateFromText( result );
+			RecordID = (INDEX)IntCreateFromText( result );
 			//while( GetSQLResult( &result ) );
 		}
 	}
@@ -432,7 +432,7 @@ SQLSTUB_PROC( INDEX, SQLReadNameTableExEx)( PODBC odbc, CTEXTSTR name, CTEXTSTR 
 			Release( tmp );
 			if( SQLQueryEx( odbc, query, &result DBG_RELAY) && result )
 			{
-				IDName = IntCreateFromText( result );
+				IDName = (INDEX)IntCreateFromText( result );
 			}
 			else if( bCreate )
 			{
@@ -448,7 +448,7 @@ SQLSTUB_PROC( INDEX, SQLReadNameTableExEx)( PODBC odbc, CTEXTSTR name, CTEXTSTR 
 					// all is well.
 					IDName = FetchLastInsertIDEx( odbc, table, col?col:WIDE("id") DBG_RELAY );
 				}
-            Release( newval );
+				Release( newval );
 			}
 			else
 				IDName = INVALID_INDEX;
@@ -613,7 +613,7 @@ SQLSTUB_PROC( int, SQLCreateTableEx )( PODBC odbc, CTEXTSTR filename, CTEXTSTR t
 					}
 					if( !gathering )
 					{
-						if( strnicmp( p, WIDE("CREATE"), 6 ) == 0 )
+						if( StrCaseCmpEx( p, WIDE("CREATE"), 6 ) == 0 )
 						{
 							CTEXTSTR tabname;
 							// cpg29dec2006  c:\work\sack\src\sqllib\sqlutil.c(498) : warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
@@ -767,7 +767,7 @@ void DumpSQLTable( PTABLE table )
 
 SQLSTUB_PROC( int, CreateTableEx )( CTEXTSTR filename, CTEXTSTR templatename, CTEXTSTR tablename, _32 options )
 {
-   OpenSQL();
+   OpenSQL( DBG_VOIDSRC );
    if( g.odbc )
 		return SQLCreateTableEx( g.odbc, filename, templatename, tablename, options );
    return FALSE;
@@ -858,7 +858,7 @@ LOGICAL CheckAccessODBCTable( PODBC odbc, PTABLE table, _32 options )
 	CTEXTSTR *fields;
 	int columns;
 	PVARTEXT pvtCreate = NULL;
-	TEXTCHAR *cmd = WIDE("select top 1 * from [%s]");
+	CTEXTSTR cmd = WIDE("select top 1 * from [%s]");
 	int retry = 0;
 retry:
 	if( SQLRecordQueryf( odbc, &columns, NULL, &_fields, cmd, table->name ) )
@@ -872,7 +872,7 @@ retry:
 			int m;
 			for( m = 0; m < table->fields.count; m++ )
 			{
-				if( stricmp( fields[n], table->fields.field[m].name ) == 0 )
+				if( StrCaseCmp( fields[n], table->fields.field[m].name ) == 0 )
 					break;
 			}
 			if( m == table->fields.count )
@@ -939,13 +939,13 @@ retry:
 			for( m = 0; m < columns; m++ )
 			{
             if( fields[m] )
-					if( stricmp( fields[m], table->fields.field[n].name ) == 0 )
+					if( StrCaseCmp( fields[m], table->fields.field[n].name ) == 0 )
 						break;
 			}
 			if( m == columns )
 			{
 				// did not find this defined column in the table, add it.
-				PTEXT cmd;
+				PTEXT pt_cmd;
 				if( !pvtCreate )
 					pvtCreate = VarTextCreate();
 				vtprintf( pvtCreate, WIDE("alter table [%s] add column [%s] %s%s%s")
@@ -955,18 +955,18 @@ retry:
 						  , table->fields.field[n].extra?WIDE(" "):WIDE("")
 						  , table->fields.field[n].extra?table->fields.field[n].extra:WIDE("")
 						  );
-				cmd = VarTextGet( pvtCreate );
+				pt_cmd = VarTextGet( pvtCreate );
 				// close all prior statement handles so it's not locked
 				// especially my own.
 	            PopODBCEx( odbc ); // release so that the alter statement may be done.
-				SQLCommand( odbc, GetText( cmd ) );
-				LineRelease( cmd );
+				SQLCommand( odbc, GetText( pt_cmd ) );
+				LineRelease( pt_cmd );
 			}
 		}
 		// release the duplicated fields...
 		for( n = 0; n < columns; n++ )
 			Release( (POINTER)fields[n] );
-		Release( fields );
+		Release( (POINTER)fields );
 	}
 	else
 	{
@@ -988,7 +988,7 @@ retry:
 		}
 		if( StrCmpEx( error, WIDE("(S0002)"), 7 ) == 0 )
 		{
-         PTEXT cmd;
+         PTEXT pt_cmd;
 			int n;
          int first = 1;
 			if( !pvtCreate )
@@ -1040,9 +1040,9 @@ retry:
             // for implementation see Check MYSQL
 			//}
 			vtprintf( pvtCreate, WIDE(")") );
-			cmd = VarTextGet( pvtCreate );
-			SQLCommand( odbc, GetText( cmd ) );
-			LineRelease( cmd );
+			pt_cmd = VarTextGet( pvtCreate );
+			SQLCommand( odbc, GetText( pt_cmd ) );
+			LineRelease( pt_cmd );
 		}
 		else
 		{
@@ -1063,32 +1063,31 @@ LOGICAL CPROC CheckMySQLODBCTable( PODBC odbc, PTABLE table, _32 options )
 
 	CTEXTSTR *fields = NULL;
 	CTEXTSTR *result = NULL;
-   FILE *f_odbc = NULL;
+	FILE *f_odbc = NULL;
 	int columns;
 	int retry;
-   int success;
+	int success;
 	int buflen;
 	PVARTEXT pvtCreate = NULL;
-							 //char *cmd = "select * from %s limit 1";
 	TEXTCHAR *cmd;
 	if( options & CTO_LOG_CHANGES )
 	{
-		f_odbc = fopen( "changes.sql", "at+" );
-      if( !f_odbc )
-			f_odbc = fopen( "changes.sql", "wt" );
+		f_odbc = sack_fopen( 0, "changes.sql", "at+" );
+		if( !f_odbc )
+			f_odbc = sack_fopen( 0, "changes.sql", "wt" );
 	}
 	cmd = NewArray( TEXTCHAR, 1024);
 	buflen = 0;
 #ifdef USE_SQLITE
 	if( odbc->flags.bSQLite_native )
-		buflen += snprintf( cmd+buflen , 1024-buflen ,WIDE("select tbl_name,sql from sqlite_master where type='table' and name='%s'")
+		buflen += snprintf( cmd+buflen , 1024-buflen*sizeof(TEXTCHAR),WIDE("select tbl_name,sql from sqlite_master where type='table' and name='%s'")
 								, table->name );
 	else
 #endif
-		buflen += snprintf( cmd+buflen , 1024-buflen ,WIDE("show create table `%s`") ,table->name);
+		buflen += snprintf( cmd+buflen , 1024-buflen*sizeof(TEXTCHAR),WIDE("show create table `%s`") ,table->name);
 	retry = 0;
 retry:
-   PushSQLQueryEx( odbc );
+	PushSQLQueryEx( odbc );
 	if( ( success = SQLRecordQueryf( odbc, &columns, &result, &fields, cmd, table->name ) )
 		&& result )
 			//    if( DoSQLQuery( cmd, &result ) && result )
@@ -1108,7 +1107,7 @@ retry:
 			int m;
 			for( m = 0; m < table->fields.count; m++ )
 			{
-				if( stricmp( pTestTable->fields.field[n].name
+				if( StrCaseCmp( pTestTable->fields.field[n].name
 							  , table->fields.field[m].name ) == 0 )
 					break;
 			}
@@ -1219,7 +1218,7 @@ retry:
 			for( m = 0; m < pTestTable->fields.count; m++ )
 			{
 			//                if( fields[m] )
-				if( stricmp( pTestTable->fields.field[m].name, table->fields.field[n].name ) == 0 )
+				if( StrCaseCmp( pTestTable->fields.field[m].name, table->fields.field[n].name ) == 0 )
 					break;
 			}
 			if( m == pTestTable->fields.count )
@@ -1501,11 +1500,11 @@ retry:
 }
 
 
-LOGICAL CheckODBCTable( PODBC odbc, PTABLE table, _32 options )
+LOGICAL CheckODBCTableEx( PODBC odbc, PTABLE table, _32 options DBG_PASS )
 {
 	if( !odbc )
 	{
-		OpenSQL();
+		OpenSQL( DBG_VOIDRELAY );
 		odbc = g.odbc;
 
 	}
@@ -1523,6 +1522,13 @@ LOGICAL CheckODBCTable( PODBC odbc, PTABLE table, _32 options )
 		return CheckMySQLODBCTable( odbc, table, options );
 
 }
+
+#undef CheckODBCTable
+LOGICAL CheckODBCTable( PODBC odbc, PTABLE table, _32 options )
+{
+   return CheckODBCTableEx( odbc, table, options DBG_SRC );
+}
+
 
 static void CreateNameTable( PODBC odbc, CTEXTSTR table_name )
 {
@@ -1610,11 +1616,11 @@ INDEX FetchSQLNameID( PODBC odbc, CTEXTSTR table_name, CTEXTSTR name )
 			}
 			else
 			{
-				return IntCreateFromText( result );
+				return (INDEX)IntCreateFromText( result );
 			}
 		}
 	}
-   return INVALID_INDEX;
+	return INVALID_INDEX;
 }
 
 CTEXTSTR FetchSQLName( PODBC odbc, CTEXTSTR table_name, INDEX iName )
@@ -1662,7 +1668,7 @@ CTEXTSTR FetchSQLName( PODBC odbc, CTEXTSTR table_name, INDEX iName )
 INDEX GetSQLNameID( CTEXTSTR table_name, CTEXTSTR name )
 {
 	if( !g.odbc )
-		OpenSQL();
+		OpenSQL( DBG_VOIDSRC );
 	if( !g.odbc )
       return INVALID_INDEX;
    return FetchSQLNameID( g.odbc, table_name, name );
@@ -1670,7 +1676,7 @@ INDEX GetSQLNameID( CTEXTSTR table_name, CTEXTSTR name )
 CTEXTSTR GetSQLName( CTEXTSTR table_name, INDEX iName )
 {
 	if( !g.odbc )
-		OpenSQL();
+		OpenSQL( DBG_VOIDSRC );
 	if( !g.odbc )
       return NULL;
    return FetchSQLName( g.odbc, table_name, iName );

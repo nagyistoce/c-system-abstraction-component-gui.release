@@ -157,7 +157,7 @@ void LogSHA1Ex( char *leader, PSIZE_FILE file DBG_PASS)
 	int n;
 	ofs = snprintf( msg, sizeof( msg ), WIDE("%s: "), leader );
 	for( n = 0; n < SHA1HashSize; n++ )
-		ofs += snprintf( msg + ofs, sizeof(msg)-ofs, WIDE("%02X "), ((unsigned char *)file->SHA1)[n] );
+		ofs += snprintf( msg + ofs, sizeof(msg)-ofs*sizeof(TEXTCHAR), WIDE("%02X "), ((unsigned char *)file->SHA1)[n] );
 	SystemLogEx( msg DBG_RELAY );
 }
 
@@ -437,6 +437,8 @@ static _32 fonts_checked;
 void CPROC ListFontFile( PTRSZVAL psv, CTEXTSTR name, int flags )
 {
 	FT_Face face;
+	int face_idx;
+	int num_faces;
 	int error;
 	PDICT_ENTRY ppe;
 	PFONT_ENTRY pfe;
@@ -447,6 +449,9 @@ void CPROC ListFontFile( PTRSZVAL psv, CTEXTSTR name, int flags )
 	//	return;
 	lprintf( WIDE("Try font: %s"), name );
 //#ifdef IMAGE_LIBRARY_SOURCE
+	face_idx = 0;
+	do
+	{
 #ifdef __cplusplus_cli
 	char *name2 = CStrDup( name );
 	{
@@ -454,7 +459,7 @@ void CPROC ListFontFile( PTRSZVAL psv, CTEXTSTR name, int flags )
 #endif
 	error = FT_New_Face( fg.library
 							 , name
-							 , 0, &face );
+							 , face_idx, &face );
 #ifdef __cplusplus_cli
 	}
 #endif
@@ -466,11 +471,10 @@ void CPROC ListFontFile( PTRSZVAL psv, CTEXTSTR name, int flags )
 	else if( error )
 	{
 		Log2( WIDE("Error loading font: %s(%d)"), name, error );
-      return;
+		return;
 	}
-//#else
-//   return;
-//#endif
+
+	num_faces = face->num_faces;
 	ppe = AddPath( name, &pFileName );
 
 	{
@@ -509,16 +513,16 @@ void CPROC ListFontFile( PTRSZVAL psv, CTEXTSTR name, int flags )
 		pfs->files = NULL;
 		if( face->face_flags & FT_FACE_FLAG_FIXED_WIDTH )
 			pfs->flags.mono = 1;
-      else
+		else
 			pfs->flags.mono = 0;
 		LIST_FORALL( pfe->styles, idx, PFONT_STYLE, pfsCheck )
 		{
 			if( pfsCheck->name == pfs->name &&
 				pfsCheck->flags.mono == pfs->flags.mono )
 			{
-            Release( pfs );
+				Release( pfs );
 				pfs = pfsCheck;
-            break;
+				break;
 			}
 		}
 		if( !pfsCheck )
@@ -592,13 +596,15 @@ void CPROC ListFontFile( PTRSZVAL psv, CTEXTSTR name, int flags )
 			AddSizeToFile( psf, -1, -1 );
 		else
 		{
-         //Log1( WIDE("(Scaalable only)Alternate font of %s"), pfe->name->word );
+			//Log1( WIDE("(Scaalable only)Alternate font of %s"), pfe->name->word );
 		}
   }
 
 //#ifdef IMAGE_LIBRARY_SOURCE
    FT_Done_Face( face );
 //#endif
+   face_idx++;
+   } while( face_idx < num_faces );
    return;
 }
 
@@ -655,9 +661,9 @@ void DumpFontCache( void )
    // write out total styles, alt files, and sizes...
 	{
 		_32 nStyles = 0;
-      _32 nSizeFiles = 0;
+		_32 nSizeFiles = 0;
 		_32 nAltFiles = 0;
-      _32 nSizes = 0;
+		_32 nSizes = 0;
 		for( pfe = (PFONT_ENTRY)GetLeastNode( build.pFontCache );
 			  pfe;
 			  pfe = (PFONT_ENTRY)GetGreaterNode( build.pFontCache ) )
@@ -668,14 +674,14 @@ void DumpFontCache( void )
 				continue;
 			LIST_FORALL( pfe->styles, idx, PFONT_STYLE, pfs )
 			{
-            INDEX idx;
+				INDEX idx;
 				PSIZE_FILE psf;
-            nStyles++;
+				nStyles++;
 				LIST_FORALL(pfs->files, idx, PSIZE_FILE, psf )
 				{
 					if( psf->flags.unusable )
 						continue;
-               nSizeFiles++;
+					nSizeFiles++;
 					{
 						INDEX idx;
 						PSIZES size;
@@ -837,7 +843,7 @@ void DumpFontCache( void )
 			}
 		}
 		fprintf( out, WIDE("\n") );
-      linelen = 0;
+		linelen = 0;
 	}
 	sack_fclose( out );
 }
@@ -872,11 +878,11 @@ void DumpLoadedFontCache( void )
 
 	{
 		INDEX fontidx, styleidx, idx;
-      PFONT_ENTRY pfe;
+		PFONT_ENTRY pfe;
 		_32 nStyles = 0;
-      _32 nSizeFiles = 0;
+		_32 nSizeFiles = 0;
 		_32 nAltFiles = 0;
-      _32 nSizes = 0;
+		_32 nSizes = 0;
 		for( fontidx = 0; pfe = fg.pFontCache + fontidx, fontidx < fg.nFonts; fontidx++ )
 		{
 			PAPP_SIZE_FILE psf;
@@ -884,7 +890,7 @@ void DumpLoadedFontCache( void )
 			nStyles += pfe->nStyles;
 			for( styleidx = 0; pfs = ((PFONT_STYLE)pfe->styles) + styleidx, styleidx < pfe->nStyles; styleidx++ )
 			{
-            nSizeFiles += pfs->nFiles;
+				nSizeFiles += pfs->nFiles;
 				for( idx = 0; psf = pfs->appfiles + idx, idx < pfs->nFiles; idx++ )
 				{
 					nSizes    += psf->nSizes;
@@ -969,13 +975,13 @@ void DumpLoadedFontCache( void )
 					}
 					else
 						linelen += newlen;
-               fwrite( outbuf, 1, newlen, out );
+					fwrite( outbuf, 1, newlen, out );
 				}
 
 				{
 					PALT_SIZE_FILE pasf;
 					INDEX idx;
-               for( idx = 0; pasf = ((PALT_SIZE_FILE)psf->pAlternate) + idx, idx < psf->nAlternate; idx++ )
+					for( idx = 0; pasf = ((PALT_SIZE_FILE)psf->pAlternate) + idx, idx < psf->nAlternate; idx++ )
 					{
 						newlen = snprintf( outbuf, sizeof( outbuf ), WIDE("^%") _32f WIDE(":%") _32f 
 											 , IndexOf( build.pPathList, build.nPaths, pasf->path )
@@ -1058,7 +1064,7 @@ void CPROC UpdateStatus( PTRSZVAL psvFrame )
    // in the positiion of image library, there is no controls to do...
 	SetCommonText( GetControl( (PCOMMON)psvFrame, TXT_TIME_STATUS ), msg );
 #endif
-	sprintf( msg, WIDE("Checked Fonts: %d")
+	snprintf( msg, sizeof( msg ), WIDE("Checked Fonts: %d")
 			 , fonts_checked
 			 );
 	lprintf( msg );
@@ -1100,12 +1106,12 @@ void BuildFontCache( void )
 	MakeTextControl( status, 5, 45, 240, 19, TXT_COUNT_STATUS, WIDE(""), 0 );
 #endif
 //#endif
-   lprintf( WIDE("Building cache...") );
+	lprintf( WIDE("Building cache...") );
 	StartTime = 0;
 //#if 0 // erm? (images... no gui... ? )
 #ifdef __CAN_USE_CACHE_DIALOG__
 	DisplayFrame( status );
-   MakeTopmost( GetFrameRenderer( status ) );
+	MakeTopmost( GetFrameRenderer( status ) );
 #endif
 	timer = AddTimer( 100, UpdateStatus, (PTRSZVAL)status );
 //#endif
@@ -1118,12 +1124,12 @@ void BuildFontCache( void )
 	{
 #ifdef HAVE_ENVIRONMENT
 		CTEXTSTR name = OSALOT_GetEnvironmentVariable( "windir" );
-      int len;
+		int len;
 		TEXTSTR tmp = NewArray( TEXTCHAR, len = strlen( name ) + 10 );
-      snprintf( tmp, len * sizeof( TEXTCHAR ), "%s\\fonts", name );
+		snprintf( tmp, len * sizeof( TEXTCHAR ), "%s\\fonts", name );
 		while( ScanFiles( tmp, WIDE("*.ttf\t*.fon\t*.TTF\t*.pcf.gz\t*.pf?\t*.fnt\t*.psf.gz"), &data
 							 , ListFontFile, SFF_SUBCURSE, 0 ) );
-      Release( tmp );
+		Release( tmp );
 #endif
 	}
 #ifdef __LINUX__	                     	

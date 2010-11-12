@@ -6,12 +6,16 @@
 
 int main( int argc, char **argv )
 {
-	int n;
+   int saveas = 0;
 	if( argc < 2 )
 	{
+		printf( "Usage: %s <config filename> [optional - set as config filename]\n", argv[0] );
       return 1;
 
 	}
+	if( argc > 2 )
+		saveas = 1;
+
 	{
       TEXTSTR tmp = (TEXTSTR)StrDup( argv[1] );
 		TEXTSTR extend = (TEXTSTR)strrchr( tmp, '.' );
@@ -28,7 +32,7 @@ int main( int argc, char **argv )
 			if( mem && size )
 			{
 #ifndef __NO_SQL__
-				SACK_WriteProfileBlobOdbc( NULL,  "intershell/configuration", filename, (char*)mem, size );
+				SACK_WriteProfileBlob( "intershell/configuration", saveas?argv[2]:filename, (char*)mem, size );
 #endif
 				CloseSpace( mem );
 			}

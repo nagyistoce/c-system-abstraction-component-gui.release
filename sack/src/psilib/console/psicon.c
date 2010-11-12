@@ -1,5 +1,5 @@
 //#define DO_LOGGING
-#if defined( __WINDOWS__ ) || defined( SACK_BAG_EXPORTS )
+#if defined( WIN32 ) || defined( SACK_BAG_EXPORTS )
 #define _INCLUDE_CLIPBOARD
 #endif
 //#define NO_LOGGING
@@ -134,7 +134,7 @@ void CPROC RenderSeparator( PCONSOLE_INFO console, int nStart )
 
 void CPROC PSI_Console_KeystrokePaste( PCONSOLE_INFO console )
 {
-#if defined( __WINDOWS__ ) && !defined( __NO_WIN32API__ )
+#if defined( WIN32 ) && !defined( __NO_WIN32API__ )
 	if( OpenClipboard(NULL) )
 	{
 		_32 format;
@@ -166,7 +166,7 @@ void CPROC PSI_Console_KeystrokePaste( PCONSOLE_INFO console )
 				}
 				pStroke->data.size = ofs;
 				pStroke->data.data[ofs] = pStroke->data.data[n];
-				WinLogicDoStroke( console, pStroke );
+				PSI_WinLogicDoStroke( console, pStroke );
 				//EnqueLink( console->ps->Command->ppOutput, SegDuplicate(pStroke) );
 				LineRelease( pStroke );
 				break;
@@ -211,10 +211,10 @@ int CPROC RenderChildWindow( PCOMMON pc )
 		console->rArea.top = 0;
 		console->rArea.bottom = console->psicon.image->height;
 		lprintf( WIDE("Updating child propportions...") );
-		ConsoleCalculate( console );
+		PSI_ConsoleCalculate( console );
 	}
 	else
-		RenderConsole( console );
+		PSI_RenderConsole( console );
    return TRUE;
 }
 
@@ -254,7 +254,7 @@ int CPROC KeyEventProc( PCOMMON pc, _32 key )
 
 		if( key & KEY_PRESSED )
 		{
-			KeyPressHandler( console, (_8)(KEY_CODE(key)&0xFF), (_8)KEY_MOD(key), (PTEXT)&stroke );
+			PSI_KeyPressHandler( console, (_8)(KEY_CODE(key)&0xFF), (_8)KEY_MOD(key), (PTEXT)&stroke );
 			//SmudgeCommon( console->psicon.frame );
 		}
 		LeaveCriticalSec( &console->Lock );
@@ -280,7 +280,7 @@ int CPROC MouseHandler( PCOMMON pc, S_32 x, S_32 y, _32 b )
               return 0;
 			  xPos = x; 
 			  yPos = y;
-			  if( ConvertXYToLineCol( console, xPos, yPos
+			  if( PSI_ConvertXYToLineCol( console, xPos, yPos
 											, &row, &col ) )
 			  {
 				  console->mark_start.row = row;
@@ -299,7 +299,7 @@ int CPROC MouseHandler( PCOMMON pc, S_32 x, S_32 y, _32 b )
 				return 0;
 			xPos = x;
 			yPos = y;
-			if( ConvertXYToLineCol( console, xPos, yPos
+			if( PSI_ConvertXYToLineCol( console, xPos, yPos
 										 , &row, &col ) )
 			{
 				if( console->CurrentMarkInfo == console->CurrentLineInfo )
@@ -357,7 +357,7 @@ int CPROC MouseHandler( PCOMMON pc, S_32 x, S_32 y, _32 b )
 						{
 #ifndef __NO_WIN32API__
 #ifdef _WIN32
-							char *data = GetDataFromBlock( console );
+							char *data = PSI_GetDataFromBlock( console );
 							if( data && OpenClipboard(NULL) )
 							{
 								int nLen = strlen( data ) + 1;
@@ -414,12 +414,12 @@ int CPROC MouseHandler( PCOMMON pc, S_32 x, S_32 y, _32 b )
 		if( ( cmd >= MNU_BKBLACK ) &&
 			( cmd <= MNU_BKWHITE ) )
 		{
-         SetHistoryDefaultBackground( console->pCursor, cmd - MNU_BKBLACK );
+			PSI_SetHistoryDefaultBackground( console->pCursor, cmd - MNU_BKBLACK );
 		}
 		else if( ( cmd >= MNU_BLACK ) &&
 				  ( cmd <= MNU_WHITE ) )
 		{
-         SetHistoryDefaultForeground( console->pCursor, cmd - MNU_BKBLACK );
+			PSI_SetHistoryDefaultForeground( console->pCursor, cmd - MNU_BKBLACK );
 		}
 		else switch( cmd )
 		{
@@ -433,11 +433,11 @@ int CPROC MouseHandler( PCOMMON pc, S_32 x, S_32 y, _32 b )
 				 , console->flags.bDirect );
                                           }
                                 */
-                EnterCriticalSec( &console->Lock );
-					 ConsoleCalculate( console );
-					 LeaveCriticalSec( &console->Lock );
+				EnterCriticalSec( &console->Lock );
+				PSI_ConsoleCalculate( console );
+				LeaveCriticalSec( &console->Lock );
 			}
-        break;
+			break;
       case MNU_HISTORYSIZE25:
       case MNU_HISTORYSIZE50:
       case MNU_HISTORYSIZE75:
@@ -447,7 +447,7 @@ int CPROC MouseHandler( PCOMMON pc, S_32 x, S_32 y, _32 b )
 				if( console->flags.bHistoryShow ) // currently showing history
 				{
 					EnterCriticalSec( &console->Lock );
-					ConsoleCalculate( console ); // changed history display...
+					PSI_ConsoleCalculate( console ); // changed history display...
 					LeaveCriticalSec( &console->Lock );
 				}
 			}
@@ -464,7 +464,7 @@ int CPROC MouseHandler( PCOMMON pc, S_32 x, S_32 y, _32 b )
 					SetCommonFont( console->psicon.frame, (Font)font );
 					//GetDefaultFont();
 					GetStringSizeFont( WIDE(" "), &console->nFontWidth, &console->nFontHeight, console->psicon.hFont );
-					ConsoleCalculate( console );
+					PSI_ConsoleCalculate( console );
 				}
 			}
             break;
@@ -844,11 +844,11 @@ int CPROC InitPSIConsole( PSI_CONTROL pc )
 		console->psicon.crMark = Color( 192, 192, 192 );
 		console->psicon.crMarkBackground = Color( 67, 116, 150 );
 
-		console->pHistory = CreateHistoryRegion();
-		console->pCursor = CreateHistoryCursor( console->pHistory );
-		console->pCurrentDisplay = CreateHistoryBrowser( console->pHistory );
-		console->pHistoryDisplay = CreateHistoryBrowser( console->pHistory );
-		SetHistoryBrowserNoPageBreak( console->pHistoryDisplay );
+		console->pHistory = PSI_CreateHistoryRegion();
+		console->pCursor = PSI_CreateHistoryCursor( console->pHistory );
+		console->pCurrentDisplay = PSI_CreateHistoryBrowser( console->pHistory );
+		console->pHistoryDisplay = PSI_CreateHistoryBrowser( console->pHistory );
+		PSI_SetHistoryBrowserNoPageBreak( console->pHistoryDisplay );
 
 		console->nXPad = 5;
 		console->nYPad = 5;

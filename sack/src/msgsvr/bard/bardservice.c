@@ -62,7 +62,7 @@ typedef struct bard_local_tag
 	PCLIENT pcService;  // a UDP socket to send and receive events to other peer BARD services
    SOCKADDR *saBroadcast; // a generally used address for SendUDP
 	SOCKADDR *saMe; // the socket address that I'm sending from
-#ifdef __WINDOWS__
+#ifdef WIN32
 	HWND hWnd;
 #endif
 	PLIST simple_events; // list of PSIMPLE_EVENTs
@@ -468,7 +468,7 @@ void CPROC UDPReceive( PCLIENT pc, POINTER buffer, int size, SOCKADDR *source )
 
 
 //---------------------------------------------------------------
-#ifdef __WINDOWS__
+#ifdef WIN32
 /*
  * handle windows messages - espcially those posted from 16 bit applications...
  * provides a 16 bit to 32 bit proxy bard event service
@@ -552,7 +552,7 @@ void CPROC CheckEventTimer( PTRSZVAL psv )
 //
 //
 //************************************************************************
-#ifdef __WINDOWS__
+#ifdef WIN32
 int APIENTRY WinMain( HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmdLine, int nCmdShow  )
 #else
 int main( int argc, char **argv )
@@ -565,7 +565,7 @@ int main( int argc, char **argv )
    l.flags.bExit=FALSE;
 
 
-#ifdef __WINDOWS__
+#ifdef WIN32
 	RegisterIcon( WIDE("Bard") );
 	{
       ATOM aClass;
@@ -628,7 +628,7 @@ int main( int argc, char **argv )
 
 	while( !l.flags.bExit )
 	{
-#ifdef __WINDOWS__
+#ifdef WIN32
 		MSG msg;
 		if( GetMessage( &msg, NULL, 0, 0 ) )
 			DispatchMessage( &msg );

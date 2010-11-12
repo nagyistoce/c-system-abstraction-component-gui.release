@@ -15,18 +15,22 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 COMPILE_FLAGS  "-DTARGET_LABEL=${PROJECT_NAME}" 
                   FOLDER utils
 )
-target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} )
+target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} )
 install_default_dest( ${PROJECT_NAME} )
 
 project( lstrip.portable )
 
 if( __WINDOWS__ )
-set( NET_SOURCES     ../../../netlib/net_winsock2.c  )
+  set( NET_SOURCES     ../../../netlib/net_winsock2.c  )
 endif( __WINDOWS__ )
 
 
 set( SOURCES_ROOT ../.. )
-add_definitions( -D__NO_NETWORK__ )
+
+if( SNPRINTF_SOURCES )
+set( SNPRINTF_SOURCES    ${SOURCES_ROOT}/../${SNPRINTF_SOURCES} )
+endif(SNPRINTF_SOURCES)
+
 set(BASE_SOURCES
 ${FIRST_GCC_PROGRAM_SOURCE} 
     strip.c
@@ -44,19 +48,23 @@ ${FIRST_GCC_PROGRAM_SOURCE}
     ${SOURCES_ROOT}/filesyslib/filescan.c
     ${SOURCES_ROOT}/filesyslib/pathops.c
     ${SOURCES_ROOT}/filesyslib/winfiles.c
+    ${SNPRINTF_SOURCES}
 ${LAST_GCC_PROGRAM_SOURCE}
     ${SOURCES_ROOT}/deadstart/deadstart_core.c 
 )
 
+
 add_executable(${PROJECT_NAME} ${BASE_SOURCES} )
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
-COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL} -DNETWORK_SOURCE -DMEM_LIBRARY_SOURCE -DSYSLOG_SOURCE -D_TYPELIBRARY_SOURCE -DSYSTEM_SOURCE -DFILESYSTEM_LIBRARY_SOURCE -DTIMER_SOURCE -DIDLE_SOURCE -DPROCREG_SOURCE -DCONFIGURATION_LIBRARY_SOURCE -DSACK_BAG_CORE_EXPORTS -D__NO_OPTIONS__" 
+COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL}" 
+COMPILE_DEFINITIONS "__STATIC__;SACK_BAG_EXPORTS;__NO_OPTIONS__;__NO_NETWORK__;__DISABLE_UDP_SYSLOG__"
                   FOLDER utils
 )
-if( __WINDOWS__ )
-target_link_libraries( ${PROJECT_NAME} ws2_32 wsock32 winmm)
-endif( __WINDOWS__ )
+if( WIN32 )
+#ws2_32 wsock32 
+target_link_libraries( ${PROJECT_NAME} winmm)
+endif( WIN32 )
 install_default_dest( ${PROJECT_NAME} )
 
 

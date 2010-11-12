@@ -7,6 +7,10 @@
 #include <timers.h>
 #include <filesys.h>
 
+#ifdef WIN32
+#include <tlhelp32.h>
+#endif
+
 #ifdef __LINUX__
 #include <sys/wait.h>
 #include <dlfcn.h>
@@ -40,7 +44,7 @@ static struct {
 		BIT_FIELD bLog : 1;
 	} flags;
 	CTEXTSTR filename;  // pointer to just filename part...
-
+	TEXTCHAR *work_path;
 } local_systemlib;
 
 #define l local_systemlib
@@ -49,7 +53,7 @@ static struct {
 CTEXTSTR OSALOT_GetEnvironmentVariable(CTEXTSTR name)
 {
 
-#ifdef __WINDOWS__
+#ifdef WIN32
 	static int env_size;
 	static TEXTCHAR *env;
 	int size;
@@ -73,19 +77,20 @@ CTEXTSTR OSALOT_GetEnvironmentVariable(CTEXTSTR name)
 
 void OSALOT_AppendEnvironmentVariable(CTEXTSTR name, CTEXTSTR value)
 {
-#if defined( __WINDOWS__ ) || defined( __CYGWIN__ )
+#if defined( WIN32 ) || defined( __CYGWIN__ )
 	TEXTCHAR *oldpath;
-   TEXTCHAR *newpath;
+	TEXTCHAR *newpath;
+	_32 length;
 	{
 		int oldlen;
 		oldpath = NewArray( TEXTCHAR, oldlen = ( GetEnvironmentVariable( name, NULL, 0 ) + 1 ) );
 		GetEnvironmentVariable( name, oldpath, oldlen );
 	}
-	newpath = NewArray( TEXTCHAR, (_32)(strlen( oldpath ) + 2 + strlen(value)) );
-	sprintf( newpath, WIDE("%s;%s"), oldpath, value );
+	newpath = NewArray( TEXTCHAR, length = (_32)(strlen( oldpath ) + 2 + strlen(value)) );
+	snprintf( newpath, length, WIDE("%s;%s"), oldpath, value );
 	SetEnvironmentVariable( name, newpath );
 	Release( newpath );
-   Release( oldpath );
+	Release( oldpath );
 #else
 	TEXTCHAR *oldpath = getenv( name );
 	TEXTCHAR *newpath;
@@ -99,19 +104,20 @@ void OSALOT_AppendEnvironmentVariable(CTEXTSTR name, CTEXTSTR value)
 
 void OSALOT_PrependEnvironmentVariable(CTEXTSTR name, CTEXTSTR value)
 {
-#if defined( __WINDOWS__ )|| defined( __CYGWIN__ )
+#if defined( WIN32 )|| defined( __CYGWIN__ )
 	TEXTCHAR *oldpath;
-   TEXTCHAR *newpath;
+	TEXTCHAR *newpath;
+	int length;
 	{
 		int oldlen;
 		oldpath = NewArray( TEXTCHAR, oldlen = ( GetEnvironmentVariable( name, NULL, 0 ) + 1 ) );
 		GetEnvironmentVariable( name, oldpath, oldlen );
 	}
-	newpath = NewArray( TEXTCHAR, (_32)(strlen( oldpath ) + 2 + strlen(value)) );
-	sprintf( newpath, WIDE("%s;%s"), value, oldpath );
+	newpath = NewArray( TEXTCHAR, length = (_32)(strlen( oldpath ) + 2 + strlen(value)) );
+	snprintf( newpath, length, WIDE("%s;%s"), value, oldpath );
 	SetEnvironmentVariable( name, newpath );
 	Release( newpath );
-   Release( oldpath );
+	Release( oldpath );
 #else
 	TEXTCHAR *oldpath = getenv( name );
 	TEXTCHAR *newpath;
@@ -132,12 +138,12 @@ static void SetupSystemServices( void )
 		int length;
 #endif
 		TEXTCHAR filepath[256];
-		TEXTCHAR *ext, *e1, *e2;//, *filename;
+		TEXTCHAR *ext, *e1;
 		GetModuleFileName( NULL, filepath, sizeof( filepath ) );
 		ext = (TEXTSTR)StrRChr( (CTEXTSTR)filepath, '.' );
 		if( ext )
 			ext[0] = 0;
-      e1 = (TEXTSTR)pathrchr( filepath );
+		e1 = (TEXTSTR)pathrchr( filepath );
 		if( e1 )
 		{
 			e1[0] = 0;
@@ -146,7 +152,7 @@ static void SetupSystemServices( void )
 		}
 		else
 		{
-         l.filename = StrDup( filepath );
+			l.filename = StrDup( filepath );
 			l.load_path = StrDup( "" );
 		}
 
@@ -172,6 +178,7 @@ static void SetupSystemServices( void )
 			Release( oldpath );
 
 			GetCurrentPath( filepath, sizeof( filepath ) );
+			l.work_path = StrDup( filepath );
 			SetEnvironmentVariable( WIDE( "MY_WORK_PATH" ), filepath );
 		}
 #endif
@@ -291,7 +298,7 @@ int CPROC EndTaskWindow( PTASK_INFO task )
 
 LOGICAL CPROC StopProgram( PTASK_INFO task )
 {
-#ifdef __WINDOWS__
+#ifdef WIN32
 #ifndef UNDER_CE
    int error;
 	if( !GenerateConsoleCtrlEvent( CTRL_C_EVENT, task->pi.dwProcessId ) )
@@ -435,6 +442,106 @@ static int DumpError( void )
 }
 #endif
 
+#ifdef WIN32
+
+static BOOL CALLBACK EnumDesktopProc( LPTSTR lpszDesktop,
+												  LPARAM lParam
+												)
+{
+	lprintf( "Desktop found [%s]", lpszDesktop );
+   return 1;
+}
+
+
+void EnumDesktop( void )
+{
+   // I'm running on some windows station, right?
+   //HWINSTA GetProcessWindowStation();
+	if( EnumDesktops( NULL, EnumDesktopProc, (LPARAM)(PTRSZVAL)0 ) )
+	{
+      // returned non-zero value from enumdesktopproc?
+      // failed to find?
+	}
+
+}
+
+/*
+ HDESK WINAPI OpenInputDesktop(
+  __in  DWORD dwFlags,
+  __in  BOOL fInherit,
+  __in  ACCESS_MASK dwDesiredAccess
+);
+
+*/
+
+DWORD GetExplorerProcessID()
+{
+	HANDLE hSnapshot;
+	PROCESSENTRY32 pe32;
+	DWORD temp;
+	ZeroMemory(&pe32,sizeof(pe32));
+
+	hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+
+	pe32.dwSize = sizeof(PROCESSENTRY32);
+
+	if(Process32First(hSnapshot,&pe32))
+	{
+		do
+		{
+			if(!strcmp(pe32.szExeFile,"explorer.exe"))
+			{
+				MessageBox(0,pe32.szExeFile,"test",0);
+				temp = pe32.th32ProcessID;
+				break;
+			}
+
+		}while(Process32Next(hSnapshot,&pe32));
+	}
+	return temp;
+}
+
+void ImpersonateInteractiveUser( void )
+{
+	HANDLE hToken = NULL;
+	HANDLE hProcess = NULL;
+
+	DWORD processID = GetExplorerProcessID();
+	if( processID)
+	{
+		hProcess =
+			OpenProcess(
+							PROCESS_ALL_ACCESS,
+							TRUE,
+							processID );
+
+		if( hProcess)
+		{
+			if( OpenProcessToken(
+										hProcess,
+										TOKEN_EXECUTE |
+										TOKEN_READ |
+										TOKEN_QUERY |
+										TOKEN_ASSIGN_PRIMARY |
+										TOKEN_QUERY_SOURCE |
+										TOKEN_WRITE |
+										TOKEN_DUPLICATE,
+										&hToken))
+			{
+				ImpersonateLoggedOnUser( hToken );
+				CloseHandle( hToken );
+			}
+			CloseHandle( hProcess );
+		}
+	}
+}
+
+void EndImpersonation( void )
+{
+	RevertToSelf();
+}
+#endif
+
 //--------------------------------------------------------------------------
 
 // Run a program completely detached from the current process
@@ -474,8 +581,11 @@ SYSTEM_PROC( PTASK_INFO, LaunchProgramEx )( CTEXTSTR program, CTEXTSTR path, PCT
 	VarTextDestroy( &pvt );
 	MemSet( &task->si, 0, sizeof( STARTUPINFO ) );
 	task->si.cb = sizeof( STARTUPINFO );
-	GetCurrentPath( saved_path, sizeof( saved_path ) );
-	SetCurrentPath( path );
+	if( path )
+	{
+		GetCurrentPath( saved_path, sizeof( saved_path ) );
+		SetCurrentPath( path );
+	}
 	if( ( CreateProcess( NULL //program
 						  , GetText( cmdline )
 						  , NULL, NULL, FALSE
@@ -528,7 +638,8 @@ SYSTEM_PROC( PTASK_INFO, LaunchProgramEx )( CTEXTSTR program, CTEXTSTR path, PCT
       task = NULL;
 	}
 	LineRelease( cmdline );
-	SetCurrentPath( saved_path );
+   if( path )
+		SetCurrentPath( saved_path );
 	return task;
 #endif
 #ifdef __LINUX__
@@ -612,7 +723,7 @@ typedef struct loaded_function_tag
 	TEXTCHAR name[];
 } FUNCTION, *PFUNCTION;
 
-#ifdef __WINDOWS__
+#ifdef WIN32
 typedef HMODULE HLIBRARY;
 #else
 typedef void* HLIBRARY;
@@ -654,14 +765,16 @@ SYSTEM_PROC( generic_function, LoadFunctionExx )( CTEXTSTR libname, CTEXTSTR fun
 		library = (PLIBRARY)Allocate( sizeof( LIBRARY ) + ((maxlen<0xFFFFFF)?(_32)maxlen:0) );
 		library->name = library->full_name
 						  + snprintf( library->full_name, maxlen, WIDE("%s/"), l.load_path );
-		snprintf( library->name, maxlen, WIDE("%s"), libname );
+		snprintf( library->name
+			, maxlen - (library->name-library->full_name)*sizeof(TEXTCHAR)
+			, WIDE("%s"), libname );
 		//strcpy( library->name, libname );
 		library->functions = NULL;
 #ifdef _WIN32
 		SuspendDeadstart();
 		// with deadstart suspended, the library can safely register
 		// all of its preloads.  Then invoke will release suspend
-      // so final initializers in application can run.
+		// so final initializers in application can run.
 		library->library = LoadLibrary( library->name );
 		if( !library->library )
 		{
@@ -705,8 +818,8 @@ SYSTEM_PROC( generic_function, LoadFunctionExx )( CTEXTSTR libname, CTEXTSTR fun
 			//DebugBreak();
 			ResumeDeadstart();
 			// actually bInitialDone will not be done sometimes
-         // and we need to force this here.
-         InvokeDeadstart();
+			// and we need to force this here.
+			InvokeDeadstart();
 		}
 		library->nLibrary = ++nLibrary;
 		LinkThing( libraries, library );
@@ -896,7 +1009,7 @@ TEXTSTR GetArgsString( PCTEXTSTR pArgs )
 	for( n = 1; pArgs && pArgs[n]; n++ )
 	{
 		int space = (strchr( pArgs[n], ' ' )!=NULL);
-		len += snprintf( args + len, sizeof( args ) - len , WIDE("%s%s%s%s")
+		len += snprintf( args + len, sizeof( args ) - len * sizeof( TEXTCHAR ), WIDE("%s%s%s%s")
 							, n>1?WIDE(" "):WIDE("")
 							, space?WIDE("\""):WIDE("")
 							, pArgs[n]
@@ -936,6 +1049,19 @@ CTEXTSTR GetProgramPath( void )
    return l.load_path;
 }
 
+CTEXTSTR GetStartupPath( void )
+{
+	if( !l.work_path )
+	{
+		SetupSystemServices();
+		if( !l.work_path )
+		{
+			DebugBreak();
+			return NULL;
+		}
+	}
+	return l.work_path;
+}
 
 
 SACK_SYSTEM_NAMESPACE_END

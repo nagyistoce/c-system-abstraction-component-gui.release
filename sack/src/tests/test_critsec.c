@@ -1,7 +1,7 @@
 #include <stdhdrs.h>
 
 #include <timers.h>
-#ifdef __WINDOWS__
+#ifdef WIN32
 #include <conio.h>
 #endif
 
@@ -30,7 +30,7 @@ PTRSZVAL CPROC TestThread( PTHREAD thread )
 
 void gotoxy( int x, int y )
 {
-#ifdef __WINDOWS__
+#ifdef WIN32
 	COORD p; p.X = x; p.Y=y;
 	SetConsoleCursorPosition( GetStdHandle( STD_OUTPUT_HANDLE ), p );
 #endif

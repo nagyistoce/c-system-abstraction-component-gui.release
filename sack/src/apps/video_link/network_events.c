@@ -1,6 +1,7 @@
 #include <stdhdrs.h>
 #include <network.h>
 #include <deadstart.h>
+#include <sqlgetoption.h>
 #include <procreg.h>
 
 #define USES_VIDEO_SERVER_INTERFACE
@@ -99,5 +100,9 @@ static void VideoLinkCommandStateChanged( "network_event" )( CTEXTSTR event )
 	}
 }
 
-
+#ifdef __WATCOMC__
+PUBLIC( void, MustExportOneFunction )( void )
+{
+}
+#endif
 

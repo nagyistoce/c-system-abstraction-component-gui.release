@@ -191,11 +191,11 @@ void ParseURI( CTEXTSTR string )
 				// this is rude, and should never be done,
 				// however this filter consumes all data anyhow, SO
 				// mangling this will not hurt much...
-				words->format.position.spaces = 0;
+				words->format.position.offset.spaces = 0;
 			}
-			if( TextIs( words, "?" ) || words->format.position.spaces )
+			if( TextIs( words, "?" ) || words->format.position.offset.spaces )
 			{
-				if( !words->format.position.spaces )
+				if( !words->format.position.offset.spaces )
 					state = GET_CGI;
 				else
 					state = GET_HTTP_VERSION;
@@ -213,7 +213,7 @@ void ParseURI( CTEXTSTR string )
 			}
 			break;
 		case GET_CGI:
-			if( words->format.position.spaces )
+			if( words->format.position.offset.spaces )
 			{
 				state = GET_HTTP_VERSION;
 				goto AddCGIVariable;

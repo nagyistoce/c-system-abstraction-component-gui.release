@@ -763,13 +763,13 @@ PSI_PROC( Font, PickScaledFontWithUpdate )( S_32 x, S_32 y
 						pResult->nHeight = fdData.nHeight;
 						offset = 0;
 
-						StrCpy( pResult->names + offset, fdData.pFontEntry->name );
+						StrCpyEx( pResult->names + offset, fdData.pFontEntry->name, l1+1 );
 						offset += l1 + 1;
 
-						StrCpy( pResult->names + offset, fdData.pFontStyle->name );
+						StrCpyEx( pResult->names + offset, fdData.pFontStyle->name, l2+1 );
 						offset += l2 + 1;
 
-						offset += snprintf( pResult->names + offset, l3+l4+2, WIDE("%s/%s")
+						offset += snprintf( pResult->names + offset*sizeof(TEXTCHAR), l3+l4+2, WIDE("%s/%s")
 											  , fdData.pSizeFile->path
 											  , fdData.pSizeFile->file
 											  );

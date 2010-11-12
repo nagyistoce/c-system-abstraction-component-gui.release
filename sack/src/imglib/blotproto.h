@@ -32,11 +32,11 @@ _32 DOALPHA( _32 over, _32 in, _8 a );
 
 #define CLAMP(n) (((n)>255)?(255):(n))
 #ifdef NEED_ALPHA2
-static int _XXr, _XXg, _XXb, aout, atmp, atmp2;
+static _32 _XXr, _XXg, _XXb, aout, atmp, atmp2;
 #endif
 #define DOALPHA2( over, in, a ) (  (atmp=(a)),                                             \
-(!(atmp))?(over):((atmp)>=255)?((in)| 0xFF000000):(               \
-   (atmp2=256-atmp),(atmp++),(aout = AlphaTable[atmp][AlphaVal( over )] << 24),                                \
+(!(atmp))?(over):((atmp)>=255)?((in)| 0xFF000000UL):(               \
+   (atmp2=256U-atmp),(atmp++),(aout = ((_32)AlphaTable[atmp][AlphaVal( over )]) << 24),                                \
    (_XXr = (((RedVal(in))   *(atmp)) + ((RedVal(over))  *((atmp2)))) >> 8 ),         \
    (_XXg = (((GreenVal(in)) *(atmp)) + ((GreenVal(over))*((atmp2)))) >> 8 ),            \
    (_XXb = (((BlueVal(in))  *(atmp)) + ((BlueVal(over)) *((atmp2)))) >> 8 ),         \
@@ -63,8 +63,8 @@ static int _XXr, _XXg, _XXb, aout, atmp, atmp2;
 				       + ( ( ( ( GreenVal(pixel) ) * (BlueVal(g)+1) ) >> 8 ) & 0xFF )\
 				       + ( ( ( ( RedVal(pixel) ) * (BlueVal(r)+1) ) >> 8 ) & 0xFF )),\
   				( ( bout > 255 )?255:bout ) ),                                       \
-	ScalarAlphaTable[AlphaVal(pixel)][                                                                 \
- 	   ScalarAlphaTable[(RedVal(pixel)?AlphaVal(r):255)][ScalarAlphaTable[(( ((pixel)>>16)&0xFF )?AlphaVal(b):255)][(( ((pixel)>>8)&0xFF )?AlphaVal(g):255) ] ] ] )
+	((_32)ScalarAlphaTable[AlphaVal(pixel)][                                                                 \
+ 	   ScalarAlphaTable[(RedVal(pixel)?AlphaVal(r):255)][ScalarAlphaTable[(( ((pixel)>>16)&0xFF )?AlphaVal(b):255)][(( ((pixel)>>8)&0xFF )?AlphaVal(g):255) ] ] ] ) )
 #else
 #define MULTISHADEPIXEL( pixel,r,g,b) 	AColor(             \
 			   ((rout = ( ( ( ( (pixel) & 0xFF ) * ((((b)>>16) & 0xFF)+1) ) >> 8 ) & 0xFF )\
@@ -79,144 +79,144 @@ static int _XXr, _XXg, _XXb, aout, atmp, atmp2;
 				       + ( ( ( ( ((pixel)>>8)&0xFF ) * (( (g) & 0xFF )+1) ) >> 8 ) & 0xFF )\
 				       + ( ( ( ( ((pixel)>>16)&0xFF ) * (( (r) & 0xFF )+1) ) >> 8 ) & 0xFF )),\
   				( ( bout > 255 )?255:bout ) ), \
-	ScalarAlphaTable[AlphaVal(pixel)][                                                                 \
- 	   ScalarAlphaTable[(RedVal(pixel)?AlphaVal(r):255)][ScalarAlphaTable[(BlueVal(pixel)?AlphaVal(b):255)][(GreenVal(pixel)?AlphaVal(g):255) ] ] ] )
+	((_32)ScalarAlphaTable[AlphaVal(pixel)][                                                                 \
+ 	   ScalarAlphaTable[(RedVal(pixel)?AlphaVal(r):255)][ScalarAlphaTable[(BlueVal(pixel)?AlphaVal(b):255)][(GreenVal(pixel)?AlphaVal(g):255) ] ] ]) )
 #endif
 
 //-----------------------------------------------------------
 
 void  CPROC cCopyPixelsT0( PCDATA po, PCDATA  pi       
-								  , int oo, int oi      
-								  , int ws, int hs );   
+								  , _32 oo, _32 oi      
+								  , _32 ws, _32 hs );   
 void  CPROC cCopyPixelsT1( PCDATA po, PCDATA  pi       
-								  , int oo, int oi      
-								  , int ws, int hs );   
+								  , _32 oo, _32 oi      
+								  , _32 ws, _32 hs );   
 void  CPROC cCopyPixelsTA( PCDATA po, PCDATA  pi       
-								  , int oo, int oi      
-								  , int ws, int hs      
-								  , int nTransparent ); 
+								  , _32 oo, _32 oi      
+								  , _32 ws, _32 hs      
+								  , _32 nTransparent ); 
 void  CPROC cCopyPixelsTImgA( PCDATA po, PCDATA  pi    
-								  , int oo, int oi      
-								  , int ws, int hs      
-								  , int nTransparent ); 
+								  , _32 oo, _32 oi      
+								  , _32 ws, _32 hs      
+								  , _32 nTransparent ); 
 void  CPROC cCopyPixelsTImgAI( PCDATA po, PCDATA  pi   
-								  , int oo, int oi      
-								  , int ws, int hs      
-								  , int nTransparent ); 
+								  , _32 oo, _32 oi      
+								  , _32 ws, _32 hs      
+								  , _32 nTransparent ); 
 
 
 void CPROC asmCopyPixelsT0( PCDATA po, PCDATA  pi       
-								  , int oo, int oi      
-								  , int ws, int hs );   
+								  , _32 oo, _32 oi      
+								  , _32 ws, _32 hs );   
 void CPROC asmCopyPixelsT1( PCDATA po, PCDATA  pi       
-								  , int oo, int oi      
-								  , int ws, int hs );   
+								  , _32 oo, _32 oi      
+								  , _32 ws, _32 hs );   
 void CPROC asmCopyPixelsTA( PCDATA po, PCDATA  pi       
-								  , int oo, int oi      
-								  , int ws, int hs      
-								  , int nTransparent ); 
+								  , _32 oo, _32 oi      
+								  , _32 ws, _32 hs      
+								  , _32 nTransparent ); 
 void CPROC asmCopyPixelsTImgA( PCDATA po, PCDATA  pi    
-								  , int oo, int oi      
-								  , int ws, int hs      
-								  , int nTransparent ); 
+								  , _32 oo, _32 oi      
+								  , _32 ws, _32 hs      
+								  , _32 nTransparent ); 
 void CPROC asmCopyPixelsTImgAI( PCDATA po, PCDATA  pi   
-								  , int oo, int oi      
-								  , int ws, int hs      
-								  , int nTransparent ); 
+								  , _32 oo, _32 oi      
+								  , _32 ws, _32 hs      
+								  , _32 nTransparent ); 
 
 void CPROC asmCopyPixelsT0MMX( PCDATA po, PCDATA  pi       
-								  , int oo, int oi         
-								  , int ws, int hs );      
+								  , _32 oo, _32 oi         
+								  , _32 ws, _32 hs );      
 void CPROC asmCopyPixelsT1MMX( PCDATA po, PCDATA  pi       
-								  , int oo, int oi         
-								  , int ws, int hs );      
+								  , _32 oo, _32 oi         
+								  , _32 ws, _32 hs );      
 void CPROC asmCopyPixelsTAMMX( PCDATA po, PCDATA  pi       
-								  , int oo, int oi         
-								  , int ws, int hs         
-								  , int nTransparent );    
+								  , _32 oo, _32 oi         
+								  , _32 ws, _32 hs         
+								  , _32 nTransparent );    
 void CPROC asmCopyPixelsTImgAMMX( PCDATA po, PCDATA  pi    
-								  , int oo, int oi         
-								  , int ws, int hs         
-								  , int nTransparent );    
+								  , _32 oo, _32 oi         
+								  , _32 ws, _32 hs         
+								  , _32 nTransparent );    
 void CPROC asmCopyPixelsTImgAIMMX( PCDATA po, PCDATA  pi   
-								  , int oo, int oi         
-								  , int ws, int hs         
-								  , int nTransparent ); 
+								  , _32 oo, _32 oi         
+								  , _32 ws, _32 hs         
+								  , _32 nTransparent ); 
 
 //-------------------------------------------------------------------------
 //-------------------------------------------------------------------------
 //-------------------------------------------------------------------------
 
 void CPROC cCopyPixelsShadedT0( PCDATA po, PCDATA  pi       
-								  , int oo, int oi      
-								  , int ws, int hs      
+								  , _32 oo, _32 oi      
+								  , _32 ws, _32 hs      
 								  , CDATA shade );   
 void CPROC cCopyPixelsShadedT1( PCDATA po, PCDATA  pi       
-								  , int oo, int oi      
-								  , int ws, int hs      
+								  , _32 oo, _32 oi      
+								  , _32 ws, _32 hs      
 								  , CDATA shade );   
 void CPROC cCopyPixelsShadedTA( PCDATA po, PCDATA  pi       
-								  , int oo, int oi      
-								  , int ws, int hs      
-								  , int nTransparent      
+								  , _32 oo, _32 oi      
+								  , _32 ws, _32 hs      
+								  , _32 nTransparent      
 								  , CDATA shade ); 
 void CPROC cCopyPixelsShadedTImgA( PCDATA po, PCDATA  pi    
-								  , int oo, int oi      
-								  , int ws, int hs      
-								  , int nTransparent      
+								  , _32 oo, _32 oi      
+								  , _32 ws, _32 hs      
+								  , _32 nTransparent      
 								  , CDATA shade ); 
 void CPROC cCopyPixelsShadedTImgAI( PCDATA po, PCDATA  pi   
-								  , int oo, int oi      
-								  , int ws, int hs      
-								  , int nTransparent      
+								  , _32 oo, _32 oi      
+								  , _32 ws, _32 hs      
+								  , _32 nTransparent      
 								  , CDATA shade ); 
 
 void CPROC asmCopyPixelsShadedT0( PCDATA po, PCDATA  pi       
-								  , int oo, int oi      
-								  , int ws, int hs      
+								  , _32 oo, _32 oi      
+								  , _32 ws, _32 hs      
 								  , CDATA shade );   
 void CPROC asmCopyPixelsShadedT1( PCDATA po, PCDATA  pi       
-								  , int oo, int oi      
-								  , int ws, int hs      
+								  , _32 oo, _32 oi      
+								  , _32 ws, _32 hs      
 								  , CDATA shade );   
 void CPROC asmCopyPixelsShadedTA( PCDATA po, PCDATA  pi       
-								  , int oo, int oi      
-								  , int ws, int hs      
-								  , int nTransparent      
+								  , _32 oo, _32 oi      
+								  , _32 ws, _32 hs      
+								  , _32 nTransparent      
 								  , CDATA shade ); 
 void CPROC asmCopyPixelsShadedTImgA( PCDATA po, PCDATA  pi    
-								  , int oo, int oi      
-								  , int ws, int hs      
-								  , int nTransparent      
+								  , _32 oo, _32 oi      
+								  , _32 ws, _32 hs      
+								  , _32 nTransparent      
 								  , CDATA shade ); 
 void CPROC asmCopyPixelsShadedTImgAI( PCDATA po, PCDATA  pi   
-								  , int oo, int oi      
-								  , int ws, int hs      
-								  , int nTransparent      
+								  , _32 oo, _32 oi      
+								  , _32 ws, _32 hs      
+								  , _32 nTransparent      
 								  , CDATA shade ); 
 
 void CPROC asmCopyPixelsShadedT0MMX( PCDATA po, PCDATA  pi       
-								  , int oo, int oi         
-								  , int ws, int hs      
+								  , _32 oo, _32 oi         
+								  , _32 ws, _32 hs      
 								  , CDATA shade );      
 void CPROC asmCopyPixelsShadedT1MMX( PCDATA po, PCDATA  pi       
-								  , int oo, int oi         
-								  , int ws, int hs      
+								  , _32 oo, _32 oi         
+								  , _32 ws, _32 hs      
 								  , CDATA shade );      
 void CPROC asmCopyPixelsShadedTAMMX( PCDATA po, PCDATA  pi       
-								  , int oo, int oi         
-								  , int ws, int hs         
-								  , int nTransparent      
+								  , _32 oo, _32 oi         
+								  , _32 ws, _32 hs         
+								  , _32 nTransparent      
 								  , CDATA shade );    
 void CPROC asmCopyPixelsShadedTImgAMMX( PCDATA po, PCDATA  pi    
-								  , int oo, int oi         
-								  , int ws, int hs         
-								  , int nTransparent      
+								  , _32 oo, _32 oi         
+								  , _32 ws, _32 hs         
+								  , _32 nTransparent      
 								  , CDATA shade );    
 void CPROC asmCopyPixelsShadedTImgAIMMX( PCDATA po, PCDATA  pi   
-								  , int oo, int oi         
-								  , int ws, int hs         
-								  , int nTransparent      
+								  , _32 oo, _32 oi         
+								  , _32 ws, _32 hs         
+								  , _32 nTransparent      
 								  , CDATA shade ); 
 
 //-------------------------------------------------------------------------
@@ -224,76 +224,76 @@ void CPROC asmCopyPixelsShadedTImgAIMMX( PCDATA po, PCDATA  pi
 //-------------------------------------------------------------------------
 
 void CPROC cCopyPixelsMultiT0( PCDATA po, PCDATA  pi       
-								  , int oo, int oi      
-								  , int ws, int hs      
+								  , _32 oo, _32 oi      
+								  , _32 ws, _32 hs      
 								  , CDATA rShade, CDATA gShade, CDATA bShade );   
 void CPROC cCopyPixelsMultiT1( PCDATA po, PCDATA  pi       
-								  , int oo, int oi      
-								  , int ws, int hs      
+								  , _32 oo, _32 oi      
+								  , _32 ws, _32 hs      
 								  , CDATA rShade, CDATA gShade, CDATA bShade );   
 void CPROC cCopyPixelsMultiTA( PCDATA po, PCDATA  pi       
-								  , int oo, int oi      
-								  , int ws, int hs      
-								  , int nTransparent      
+								  , _32 oo, _32 oi      
+								  , _32 ws, _32 hs      
+								  , _32 nTransparent      
 								  , CDATA rShade, CDATA gShade, CDATA bShade ); 
 void CPROC cCopyPixelsMultiTImgA( PCDATA po, PCDATA  pi    
-								  , int oo, int oi      
-								  , int ws, int hs      
-								  , int nTransparent      
+								  , _32 oo, _32 oi      
+								  , _32 ws, _32 hs      
+								  , _32 nTransparent      
 								  , CDATA rShade, CDATA gShade, CDATA bShade ); 
 void CPROC cCopyPixelsMultiTImgAI( PCDATA po, PCDATA  pi   
-								  , int oo, int oi      
-								  , int ws, int hs      
-								  , int nTransparent      
+								  , _32 oo, _32 oi      
+								  , _32 ws, _32 hs      
+								  , _32 nTransparent      
 								  , CDATA rShade, CDATA gShade, CDATA bShade ); 
 
 
 void CPROC asmCopyPixelsMultiT0( PCDATA po, PCDATA  pi       
-								  , int oo, int oi      
-								  , int ws, int hs      
+								  , _32 oo, _32 oi      
+								  , _32 ws, _32 hs      
 								  , CDATA rShade, CDATA gShade, CDATA bShade );   
 void CPROC asmCopyPixelsMultiT1( PCDATA po, PCDATA  pi       
-								  , int oo, int oi      
-								  , int ws, int hs      
+								  , _32 oo, _32 oi      
+								  , _32 ws, _32 hs      
 								  , CDATA rShade, CDATA gShade, CDATA bShade );   
 void CPROC asmCopyPixelsMultiTA( PCDATA po, PCDATA  pi       
-								  , int oo, int oi      
-								  , int ws, int hs      
-								  , int nTransparent      
+								  , _32 oo, _32 oi      
+								  , _32 ws, _32 hs      
+								  , _32 nTransparent      
 								  , CDATA rShade, CDATA gShade, CDATA bShade ); 
 void CPROC asmCopyPixelsMultiTImgA( PCDATA po, PCDATA  pi    
-								  , int oo, int oi      
-								  , int ws, int hs      
-								  , int nTransparent      
+								  , _32 oo, _32 oi      
+								  , _32 ws, _32 hs      
+								  , _32 nTransparent      
 								  , CDATA rShade, CDATA gShade, CDATA bShade ); 
 void CPROC asmCopyPixelsMultiTImgAI( PCDATA po, PCDATA  pi   
-								  , int oo, int oi      
-								  , int ws, int hs      
-								  , int nTransparent      
+								  , _32 oo, _32 oi      
+								  , _32 ws, _32 hs      
+								  , _32 nTransparent      
 								  , CDATA rShade, CDATA gShade, CDATA bShade ); 
 
 void CPROC asmCopyPixelsMultiT0MMX( PCDATA po, PCDATA  pi       
-								  , int oo, int oi         
-								  , int ws, int hs      
+								  , _32 oo, _32 oi         
+								  , _32 ws, _32 hs      
 								  , CDATA rShade, CDATA gShade, CDATA bShade );      
 void CPROC asmCopyPixelsMultiT1MMX( PCDATA po, PCDATA  pi       
-								  , int oo, int oi         
-								  , int ws, int hs      
+								  , _32 oo, _32 oi         
+								  , _32 ws, _32 hs      
 								  , CDATA rShade, CDATA gShade, CDATA bShade );      
 void CPROC asmCopyPixelsMultiTAMMX( PCDATA po, PCDATA  pi       
-								  , int oo, int oi         
-								  , int ws, int hs         
-								  , int nTransparent      
+								  , _32 oo, _32 oi         
+								  , _32 ws, _32 hs         
+								  , _32 nTransparent      
 								  , CDATA rShade, CDATA gShade, CDATA bShade );    
 void CPROC asmCopyPixelsMultiTImgAMMX( PCDATA po, PCDATA  pi    
-								  , int oo, int oi         
-								  , int ws, int hs         
-								  , int nTransparent      
+								  , _32 oo, _32 oi         
+								  , _32 ws, _32 hs         
+								  , _32 nTransparent      
 								  , CDATA rShade, CDATA gShade, CDATA bShade );    
 void CPROC asmCopyPixelsMultiTImgAIMMX( PCDATA po, PCDATA  pi   
-								  , int oo, int oi         
-								  , int ws, int hs         
-								  , int nTransparent      
+								  , _32 oo, _32 oi         
+								  , _32 ws, _32 hs         
+								  , _32 nTransparent      
 								  , CDATA rShade, CDATA gShade, CDATA bShade ); 
 
 
@@ -302,39 +302,39 @@ void CPROC asmCopyPixelsMultiTImgAIMMX( PCDATA po, PCDATA  pi
 //-------------------------------------------------------------------------
 
 BLOT_EXTERN void (CPROC*CopyPixelsT0)( PCDATA po, PCDATA  pi
-								  , int oo, int oi
-								  , int ws, int hs ) 
+								  , _32 oo, _32 oi
+								  , _32 ws, _32 hs ) 
 #ifdef IMAGE_MAIN
 								  = cCopyPixelsT0
 #endif
 								  ;
 BLOT_EXTERN void (CPROC*CopyPixelsT1)( PCDATA po, PCDATA  pi
-								  , int oo, int oi
-								  , int ws, int hs ) 
+								  , _32 oo, _32 oi
+								  , _32 ws, _32 hs ) 
 #ifdef IMAGE_MAIN
 								  = cCopyPixelsT1
 #endif
 								  ;
 BLOT_EXTERN void (CPROC*CopyPixelsTA)( PCDATA po, PCDATA  pi
-								  , int oo, int oi
-								  , int ws, int hs
-								  , int nTransparent ) 
+								  , _32 oo, _32 oi
+								  , _32 ws, _32 hs
+								  , _32 nTransparent ) 
 #ifdef IMAGE_MAIN
 								  = cCopyPixelsTA
 #endif
 								  ;
 BLOT_EXTERN void (CPROC*CopyPixelsTImgA)( PCDATA po, PCDATA  pi
-								  , int oo, int oi
-								  , int ws, int hs
-								  , int nTransparent ) 
+								  , _32 oo, _32 oi
+								  , _32 ws, _32 hs
+								  , _32 nTransparent ) 
 #ifdef IMAGE_MAIN
 								  = cCopyPixelsTImgA
 #endif
 								  ;
 BLOT_EXTERN void (CPROC*CopyPixelsTImgAI)( PCDATA po, PCDATA  pi
-								  , int oo, int oi
-								  , int ws, int hs
-								  , int nTransparent ) 
+								  , _32 oo, _32 oi
+								  , _32 ws, _32 hs
+								  , _32 nTransparent ) 
 #ifdef IMAGE_MAIN
 								  = cCopyPixelsTImgAI
 #endif
@@ -344,43 +344,43 @@ BLOT_EXTERN void (CPROC*CopyPixelsTImgAI)( PCDATA po, PCDATA  pi
 //-----------------------------------------------------------
 
 BLOT_EXTERN void (CPROC*CopyPixelsShadedT0)( PCDATA po, PCDATA  pi
-								  , int oo, int oi
-								  , int ws, int hs
+								  , _32 oo, _32 oi
+								  , _32 ws, _32 hs
 								  , CDATA shade ) 
 #ifdef IMAGE_MAIN
 								  = cCopyPixelsShadedT0
 #endif
 								  ;
 BLOT_EXTERN void (CPROC*CopyPixelsShadedT1)( PCDATA po, PCDATA  pi
-								  , int oo, int oi
-								  , int ws, int hs
+								  , _32 oo, _32 oi
+								  , _32 ws, _32 hs
 								  , CDATA shade ) 
 #ifdef IMAGE_MAIN
 								  = cCopyPixelsShadedT1
 #endif
 								  ;
 BLOT_EXTERN void (CPROC*CopyPixelsShadedTA)( PCDATA po, PCDATA  pi
-								  , int oo, int oi
-								  , int ws, int hs
-								  , int nTransparent
+								  , _32 oo, _32 oi
+								  , _32 ws, _32 hs
+								  , _32 nTransparent
 								  , CDATA shade ) 
 #ifdef IMAGE_MAIN
 								  = cCopyPixelsShadedTA
 #endif
 								  ;
 BLOT_EXTERN void (CPROC*CopyPixelsShadedTImgA)( PCDATA po, PCDATA  pi
-								  , int oo, int oi
-								  , int ws, int hs
-								  , int nTransparent
+								  , _32 oo, _32 oi
+								  , _32 ws, _32 hs
+								  , _32 nTransparent
 								  , CDATA shade ) 
 #ifdef IMAGE_MAIN
 								  = cCopyPixelsShadedTImgA
 #endif
 								  ;
 BLOT_EXTERN void (CPROC*CopyPixelsShadedTImgAI)( PCDATA po, PCDATA  pi
-								  , int oo, int oi
-								  , int ws, int hs
-								  , int nTransparent
+								  , _32 oo, _32 oi
+								  , _32 ws, _32 hs
+								  , _32 nTransparent
 								  , CDATA shade ) 
 #ifdef IMAGE_MAIN
 								  = cCopyPixelsShadedTImgAI
@@ -392,43 +392,43 @@ BLOT_EXTERN void (CPROC*CopyPixelsShadedTImgAI)( PCDATA po, PCDATA  pi
 //-----------------------------------------------------------
 
 BLOT_EXTERN void (CPROC*CopyPixelsMultiT0)( PCDATA po, PCDATA  pi
-								  , int oo, int oi
-								  , int ws, int hs
+								  , _32 oo, _32 oi
+								  , _32 ws, _32 hs
 								  , CDATA rShade, CDATA gShade, CDATA bShade ) 
 #ifdef IMAGE_MAIN
 								  = cCopyPixelsMultiT0
 #endif
 								  ;
 BLOT_EXTERN void (CPROC*CopyPixelsMultiT1)( PCDATA po, PCDATA  pi
-								  , int oo, int oi
-								  , int ws, int hs
+								  , _32 oo, _32 oi
+								  , _32 ws, _32 hs
 								  , CDATA rShade, CDATA gShade, CDATA bShade ) 
 #ifdef IMAGE_MAIN
 								  = cCopyPixelsMultiT1
 #endif
 								  ;
 BLOT_EXTERN void (CPROC*CopyPixelsMultiTA)( PCDATA po, PCDATA  pi
-								  , int oo, int oi
-								  , int ws, int hs
-								  , int nTransparent
+								  , _32 oo, _32 oi
+								  , _32 ws, _32 hs
+								  , _32 nTransparent
 								  , CDATA rShade, CDATA gShade, CDATA bShade ) 
 #ifdef IMAGE_MAIN
 								  = cCopyPixelsMultiTA
 #endif
 								  ;
 BLOT_EXTERN void (CPROC*CopyPixelsMultiTImgA)( PCDATA po, PCDATA  pi
-								  , int oo, int oi
-								  , int ws, int hs
-								  , int nTransparent
+								  , _32 oo, _32 oi
+								  , _32 ws, _32 hs
+								  , _32 nTransparent
 								  , CDATA rShade, CDATA gShade, CDATA bShade ) 
 #ifdef IMAGE_MAIN
 								  = cCopyPixelsMultiTImgA
 #endif
 								  ;
 BLOT_EXTERN void (CPROC*CopyPixelsMultiTImgAI)( PCDATA po, PCDATA  pi
-								  , int oo, int oi
-								  , int ws, int hs
-								  , int nTransparent
+								  , _32 oo, _32 oi
+								  , _32 ws, _32 hs
+								  , _32 nTransparent
 								  , CDATA rShade, CDATA gShade, CDATA bShade ) 
 #ifdef IMAGE_MAIN
 								  = cCopyPixelsMultiTImgAI
@@ -439,29 +439,21 @@ BLOT_EXTERN void (CPROC*CopyPixelsMultiTImgAI)( PCDATA po, PCDATA  pi
 //-----------------------------------------------------------
 //-----------------------------------------------------------
 //-----------------------------------------------------------
-/*
-#define SCALED_BLOT_WORK_PARAMS  PCDATA po, PCDATA  pi       \
-						    , int xbias, int ybias          \
-						    , int wd, int hd        \
-						    , int dwd, int dhd                \
-				          , int dws, int dhs                \
-				          , int oo, int srcpwidth
-*/
 #define SCALED_BLOT_WORK_PARAMS  PCDATA po, PCDATA  pi       \
 						    , int i_errx, int i_erry          \
-						    , int wd, int hd                \
-				          , int dwd, int dhd                \
-				          , int dws, int dhs                \
-				          , int oo, int srcpwidth
+						    , _32 wd, _32 hd                \
+				          , _32 dwd, _32 dhd                \
+				          , _32 dws, _32 dhs                \
+				          , _32 oo, _32 srcpwidth
 
 void CPROC cBlotScaledT0( SCALED_BLOT_WORK_PARAMS );   
 void CPROC cBlotScaledT1( SCALED_BLOT_WORK_PARAMS );   
 void CPROC cBlotScaledTA( SCALED_BLOT_WORK_PARAMS
-								  , int nTransparent ); 
+								  , _32 nTransparent ); 
 void CPROC cBlotScaledTImgA( SCALED_BLOT_WORK_PARAMS
-								  , int nTransparent ); 
+								  , _32 nTransparent ); 
 void CPROC cBlotScaledTImgAI( SCALED_BLOT_WORK_PARAMS
-								  , int nTransparent ); 
+								  , _32 nTransparent ); 
 
 
 void CPROC asmBlotScaledT0( SCALED_BLOT_WORK_PARAMS
@@ -469,22 +461,22 @@ void CPROC asmBlotScaledT0( SCALED_BLOT_WORK_PARAMS
 void CPROC asmBlotScaledT1( SCALED_BLOT_WORK_PARAMS
 								  );   
 void CPROC asmBlotScaledTA( SCALED_BLOT_WORK_PARAMS
-								  , int nTransparent ); 
+								  , _32 nTransparent ); 
 void CPROC asmBlotScaledTImgA( SCALED_BLOT_WORK_PARAMS
-								  , int nTransparent ); 
+								  , _32 nTransparent ); 
 void CPROC asmBlotScaledTImgAI( SCALED_BLOT_WORK_PARAMS
-								  , int nTransparent ); 
+								  , _32 nTransparent ); 
 
 void CPROC asmBlotScaledT0MMX( SCALED_BLOT_WORK_PARAMS
 								  );      
 void CPROC asmBlotScaledT1MMX( SCALED_BLOT_WORK_PARAMS
 								  );      
 void CPROC asmBlotScaledTAMMX( SCALED_BLOT_WORK_PARAMS
-								  , int nTransparent );    
+								  , _32 nTransparent );    
 void CPROC asmBlotScaledTImgAMMX( SCALED_BLOT_WORK_PARAMS
-								  , int nTransparent );    
+								  , _32 nTransparent );    
 void CPROC asmBlotScaledTImgAIMMX( SCALED_BLOT_WORK_PARAMS
-								  , int nTransparent ); 
+								  , _32 nTransparent ); 
 
 
 BLOT_EXTERN void (CPROC*BlotScaledT0)( SCALED_BLOT_WORK_PARAMS )
@@ -499,19 +491,19 @@ BLOT_EXTERN void (CPROC*BlotScaledT1)( SCALED_BLOT_WORK_PARAMS )
 #endif
 				             ;   
 BLOT_EXTERN void (CPROC*BlotScaledTA)( SCALED_BLOT_WORK_PARAMS
-								  , int nTransparent )
+								  , _32 nTransparent )
 #ifdef IMAGE_MAIN
 								  = cBlotScaledTA
 #endif
 								  ; 
 BLOT_EXTERN void (CPROC*BlotScaledTImgA)( SCALED_BLOT_WORK_PARAMS
-								  , int nTransparent )
+								  , _32 nTransparent )
 #ifdef IMAGE_MAIN
 								  = cBlotScaledTImgA
 #endif
 								  ; 
 BLOT_EXTERN void (CPROC*BlotScaledTImgAI)( SCALED_BLOT_WORK_PARAMS
-								  , int nTransparent )
+								  , _32 nTransparent )
 #ifdef IMAGE_MAIN
 								  = cBlotScaledTImgAI
 #endif
@@ -529,15 +521,15 @@ void CPROC cBlotScaledShadedT1( SCALED_BLOT_WORK_PARAMS
 				          , CDATA color 
 				          );   
 void CPROC cBlotScaledShadedTA( SCALED_BLOT_WORK_PARAMS
-							 , int nTransparent
+							 , _32 nTransparent
 				          , CDATA color 
 				          ); 
 void CPROC cBlotScaledShadedTImgA( SCALED_BLOT_WORK_PARAMS
-							 , int nTransparent
+							 , _32 nTransparent
 				          , CDATA color 
 				          ); 
 void CPROC cBlotScaledShadedTImgAI( SCALED_BLOT_WORK_PARAMS
-							 , int nTransparent
+							 , _32 nTransparent
 					       , CDATA color 
 					       ); 
 
@@ -549,15 +541,15 @@ void CPROC asmBlotScaledShadedT1( SCALED_BLOT_WORK_PARAMS
 								  , CDATA color
 								  );   
 void CPROC asmBlotScaledShadedTA( SCALED_BLOT_WORK_PARAMS
-								  , int nTransparent 
+								  , _32 nTransparent 
 								  , CDATA color
 								  ); 
 void CPROC asmBlotScaledShadedTImgA( SCALED_BLOT_WORK_PARAMS
-								  , int nTransparent 
+								  , _32 nTransparent 
 								  , CDATA color
 								  ); 
 void CPROC asmBlotScaledShadedTImgAI( SCALED_BLOT_WORK_PARAMS
-								  , int nTransparent 
+								  , _32 nTransparent 
 								  , CDATA color
 								  ); 
 
@@ -568,15 +560,15 @@ void CPROC asmBlotScaledShadedT1MMX( SCALED_BLOT_WORK_PARAMS
 								  , CDATA color
 								  );      
 void CPROC asmBlotScaledShadedTAMMX( SCALED_BLOT_WORK_PARAMS
-								  , int nTransparent 
+								  , _32 nTransparent 
 								  , CDATA color
 								  );    
 void CPROC asmBlotScaledShadedTImgAMMX( SCALED_BLOT_WORK_PARAMS
-								  , int nTransparent 
+								  , _32 nTransparent 
 								  , CDATA color
 								  );    
 void CPROC asmBlotScaledShadedTImgAIMMX( SCALED_BLOT_WORK_PARAMS
-								  , int nTransparent 
+								  , _32 nTransparent 
 								  , CDATA color
 								  ); 
 
@@ -597,7 +589,7 @@ BLOT_EXTERN void (CPROC*BlotScaledShadedT1)( SCALED_BLOT_WORK_PARAMS
 #endif
 				             ;   
 BLOT_EXTERN void (CPROC*BlotScaledShadedTA)( SCALED_BLOT_WORK_PARAMS
-								  , int nTransparent 
+								  , _32 nTransparent 
 								  , CDATA color
 								  )
 #ifdef IMAGE_MAIN
@@ -605,7 +597,7 @@ BLOT_EXTERN void (CPROC*BlotScaledShadedTA)( SCALED_BLOT_WORK_PARAMS
 #endif
 								  ; 
 BLOT_EXTERN void (CPROC*BlotScaledShadedTImgA)( SCALED_BLOT_WORK_PARAMS
-								  , int nTransparent 
+								  , _32 nTransparent 
 								  , CDATA color
 								  )
 #ifdef IMAGE_MAIN
@@ -613,7 +605,7 @@ BLOT_EXTERN void (CPROC*BlotScaledShadedTImgA)( SCALED_BLOT_WORK_PARAMS
 #endif
 								  ; 
 BLOT_EXTERN void (CPROC*BlotScaledShadedTImgAI)( SCALED_BLOT_WORK_PARAMS
-								  , int nTransparent 
+								  , _32 nTransparent 
 								  , CDATA color
 								  )
 #ifdef IMAGE_MAIN
@@ -633,15 +625,15 @@ void CPROC cBlotScaledMultiT1( SCALED_BLOT_WORK_PARAMS
 				          , CDATA r, CDATA g, CDATA b 
 				          );   
 void CPROC cBlotScaledMultiTA( SCALED_BLOT_WORK_PARAMS
-							 , int nTransparent
+							 , _32 nTransparent
 				          , CDATA r, CDATA g, CDATA b 
 				          ); 
 void CPROC cBlotScaledMultiTImgA( SCALED_BLOT_WORK_PARAMS
-							 , int nTransparent
+							 , _32 nTransparent
 				          , CDATA r, CDATA g, CDATA b 
 				          ); 
 void CPROC cBlotScaledMultiTImgAI( SCALED_BLOT_WORK_PARAMS
-							 , int nTransparent
+							 , _32 nTransparent
 					       , CDATA r, CDATA g, CDATA b 
 					       ); 
 
@@ -654,15 +646,15 @@ void CPROC asmBlotScaledMultiT1( SCALED_BLOT_WORK_PARAMS
 								  , CDATA r, CDATA g, CDATA b
 								  );   
 void CPROC asmBlotScaledMultiTA( SCALED_BLOT_WORK_PARAMS
-								  , int nTransparent 
+								  , _32 nTransparent 
 								  , CDATA r, CDATA g, CDATA b
 								  ); 
 void CPROC asmBlotScaledMultiTImgA( SCALED_BLOT_WORK_PARAMS
-								  , int nTransparent 
+								  , _32 nTransparent 
 								  , CDATA r, CDATA g, CDATA b
 								  ); 
 void CPROC asmBlotScaledMultiTImgAI( SCALED_BLOT_WORK_PARAMS
-								  , int nTransparent 
+								  , _32 nTransparent 
 								  , CDATA r, CDATA g, CDATA b
 								  ); 
 
@@ -673,15 +665,15 @@ void CPROC asmBlotScaledMultiT1MMX( SCALED_BLOT_WORK_PARAMS
 								  , CDATA r, CDATA g, CDATA b
 								  );      
 void CPROC asmBlotScaledMultiTAMMX( SCALED_BLOT_WORK_PARAMS
-								  , int nTransparent 
+								  , _32 nTransparent 
 								  , CDATA r, CDATA g, CDATA b
 								  );    
 void CPROC asmBlotScaledMultiTImgAMMX( SCALED_BLOT_WORK_PARAMS
-								  , int nTransparent 
+								  , _32 nTransparent 
 								  , CDATA r, CDATA g, CDATA b
 								  );    
 void CPROC asmBlotScaledMultiTImgAIMMX( SCALED_BLOT_WORK_PARAMS
-								  , int nTransparent 
+								  , _32 nTransparent 
 								  , CDATA r, CDATA g, CDATA b
 								  ); 
 
@@ -702,7 +694,7 @@ BLOT_EXTERN void (CPROC*BlotScaledMultiT1)( SCALED_BLOT_WORK_PARAMS
 #endif
 				             ;   
 BLOT_EXTERN void (CPROC*BlotScaledMultiTA)( SCALED_BLOT_WORK_PARAMS
-								  , int nTransparent 
+								  , _32 nTransparent 
 								  , CDATA r, CDATA g, CDATA b
 								  )
 #ifdef IMAGE_MAIN
@@ -710,7 +702,7 @@ BLOT_EXTERN void (CPROC*BlotScaledMultiTA)( SCALED_BLOT_WORK_PARAMS
 #endif
 								  ; 
 BLOT_EXTERN void (CPROC*BlotScaledMultiTImgA)( SCALED_BLOT_WORK_PARAMS
-								  , int nTransparent 
+								  , _32 nTransparent 
 								  , CDATA r, CDATA g, CDATA b
 								  )
 #ifdef IMAGE_MAIN
@@ -718,7 +710,7 @@ BLOT_EXTERN void (CPROC*BlotScaledMultiTImgA)( SCALED_BLOT_WORK_PARAMS
 #endif
 								  ; 
 BLOT_EXTERN void (CPROC*BlotScaledMultiTImgAI)( SCALED_BLOT_WORK_PARAMS
-								  , int nTransparent 
+								  , _32 nTransparent 
 								  , CDATA r, CDATA g, CDATA b
 								  )
 #ifdef IMAGE_MAIN

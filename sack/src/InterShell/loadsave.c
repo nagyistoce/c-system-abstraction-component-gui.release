@@ -2,7 +2,7 @@
 
 #include <stdhdrs.h>
 
-#if defined( __WINDOWS__ ) || defined( _MSC_VER )
+#if defined( WIN32 ) || defined( _MSC_VER )
 #ifndef UNDER_CE
 #include <io.h> // unlink() // also no chsize() (if I can get it to work)
 #endif
@@ -340,7 +340,7 @@ PTRSZVAL CPROC CreateNewControl( PTRSZVAL psv, arg_list args )
 				lprintf( "(push)create a: %s", control_type_name );
 #endif
 				PushLink( &l.current_button
-						  , button = CreateSomeControl( pc_canvas, col, row, width, height, control_type_name ) );
+						  , button = CreateSomeControl( pc_canvas, (int)col, (int)row, (int)width, (int)height, control_type_name ) );
 				if( button )
 				{
 					bRecovered = BeginSubConfiguration( control_type_name, WIDE("control done") );
@@ -457,17 +457,17 @@ PTRSZVAL CPROC SetMenuBackground( PTRSZVAL psv, arg_list args )
 
 PTRSZVAL CPROC SetMenuButtonImageMargin( PTRSZVAL psv, arg_list args )
 {
-   PARAM( args, S_64, hMargin );
+	PARAM( args, S_64, hMargin );
 	PARAM( args, S_64, vMargin );
 	PMENU_BUTTON   current_button = (PMENU_BUTTON)PeekLink( &l.current_button );
 	if( current_button )
 	{
-		current_button->decal_horiz_margin = hMargin;
-      current_button->decal_vert_margin = vMargin;
-		SetKeyImageMargin( current_button->control.key, hMargin, vMargin );
+		current_button->decal_horiz_margin = (_32)hMargin;
+		current_button->decal_vert_margin = (_32)vMargin;
+		SetKeyImageMargin( current_button->control.key, (_32)hMargin, (_32)vMargin );
 	}
 
-   return psv;
+	return psv;
 }
 PTRSZVAL CPROC SetMenuButtonImage( PTRSZVAL psv, arg_list args )
 {
@@ -637,8 +637,8 @@ PTRSZVAL CPROC SetButtonNoPress( PTRSZVAL psv, arg_list args )
 
 PTRSZVAL CPROC SetMenuRowCols( PTRSZVAL psv, arg_list args )
 {
-	PARAM( args, _64, cols );
-	PARAM( args, _64, rows );
+	PARAM( args, S_64, cols );
+	PARAM( args, S_64, rows );
 	_32 button_rows, button_cols, button_space;
 	// 25 PART_RESOLUTION's?
 	PCanvasData canvas = GetCanvas( (PSI_CONTROL)PeekLink( &l.current_canvas ) );
@@ -654,8 +654,8 @@ PTRSZVAL CPROC SetMenuRowCols( PTRSZVAL psv, arg_list args )
 		}
 	}
 	button_space = 0;
-	button_rows = rows;
-	button_cols = cols;
+	button_rows = (_32)rows;
+	button_cols = (_32)cols;
 
 	if( button_cols == 0 )
 	      button_cols = 5;
@@ -848,7 +848,7 @@ void LoadButtonConfig( PSI_CONTROL pc_canvas, TEXTSTR filename )
 #ifndef __NO_OPTIONS__
 #ifndef __NO_SQL__
 #ifndef __ARM__
-			if( SACK_GetProfileBlobOdbc( NULL, WIDE("intershell/configuration"), filename, &buffer, &buflen ) )
+			if( SACK_GetProfileBlob( WIDE("intershell/configuration"), filename, &buffer, &buflen ) )
 			{
 				FILE *out = sack_fopen( GetFileGroup( "Resources", NULL ), filename, WIDE("wb") );
 				if( out )
@@ -927,7 +927,7 @@ void LoadButtonConfig( PSI_CONTROL pc_canvas, TEXTSTR filename )
 				}
 #ifndef __NO_OPTIONS__
 #ifndef __ARM__
-				SACK_WriteProfileBlobOdbc( NULL, TASK_PREFIX "/configuration", filename, (TEXTCHAR*)mem, real_file_size );
+				SACK_WriteProfileBlob( TASK_PREFIX "/configuration", filename, (TEXTCHAR*)mem, real_file_size );
 #endif
 #endif
 				g.flags.forceload = 0;
@@ -1074,49 +1074,49 @@ void XML_DumpCommonButton( genxWriter w, PMENU_BUTTON button )
 {
 	static TEXTCHAR buffer[4096];
 	int offset = 0;
-   // this is just a quick hack, it's a lot of typing still to port this...
+	// this is just a quick hack, it's a lot of typing still to port this...
 	MakeAttr( w, generic_xx, "generic" );
 		if( button )
 		{
 			if( button->color )
-				offset += snprintf( buffer + offset, sizeof( buffer ) - offset, WIDE("color=$%02lX%02lX%02lX%02lX\n")
+				offset += snprintf( buffer + offset, sizeof( buffer ) - offset*sizeof(TEXTCHAR), WIDE("color=$%02lX%02lX%02lX%02lX\n")
 						 , AlphaVal( button->color )
 						 , RedVal( button->color )
 						 , GreenVal( button->color )
 						 , BlueVal( button->color )
 						 );
 			if( button->secondary_color )
-				offset += snprintf( buffer + offset, sizeof( buffer ) - offset, WIDE("secondary color=$%02lX%02lX%02lX%02lX\n")
+				offset += snprintf( buffer + offset, sizeof( buffer ) - offset*sizeof(TEXTCHAR), WIDE("secondary color=$%02lX%02lX%02lX%02lX\n")
 						 , AlphaVal( button->secondary_color )
 						 , RedVal( button->secondary_color )
 						 , GreenVal( button->secondary_color )
 						 , BlueVal( button->secondary_color )
 						 );
 			if( button->highlight_color )
-				offset += snprintf( buffer + offset, sizeof( buffer ) - offset, WIDE("highlight color=$%02lX%02lX%02lX%02lX\n")
+				offset += snprintf( buffer + offset, sizeof( buffer ) - offset*sizeof(TEXTCHAR), WIDE("highlight color=$%02lX%02lX%02lX%02lX\n")
 						 , AlphaVal( button->highlight_color )
 						 , RedVal( button->highlight_color )
 						 , GreenVal( button->highlight_color )
 						 , BlueVal( button->highlight_color )
 						 );
 			if( button->textcolor )
-				offset += snprintf( buffer + offset, sizeof( buffer ) - offset, WIDE("text color=$%02lX%02lX%02lX%02lX\n")
+				offset += snprintf( buffer + offset, sizeof( buffer ) - offset*sizeof(TEXTCHAR), WIDE("text color=$%02lX%02lX%02lX%02lX\n")
 						 , AlphaVal( button->textcolor )
 						 , RedVal( button->textcolor )
 						 , GreenVal( button->textcolor )
 						 , BlueVal( button->textcolor )
 						 );
          if( button->text )
-				offset += snprintf( buffer + offset, sizeof( buffer ) - offset, WIDE("text=%s\n"), button->text );
-			offset += snprintf( buffer + offset, sizeof( buffer ) - offset, WIDE("button is %s\n"), button->glare_set->name );
+				offset += snprintf( buffer + offset, sizeof( buffer ) - offset*sizeof(TEXTCHAR), WIDE("text=%s\n"), button->text );
+			offset += snprintf( buffer + offset, sizeof( buffer ) - offset*sizeof(TEXTCHAR), WIDE("button is %s\n"), button->glare_set->name );
 			if( button->flags.bNoPress )
-            offset += snprintf( buffer + offset, sizeof( buffer ) - offset, WIDE("button is unpressable\n") );
+            offset += snprintf( buffer + offset, sizeof( buffer ) - offset*sizeof(TEXTCHAR), WIDE("button is unpressable\n") );
 			if( button->pImage && button->pImage[0] )
-				offset += snprintf( buffer + offset, sizeof( buffer ) - offset, WIDE("image=%s\n"), EscapeMenuString( button->pImage ) );
+				offset += snprintf( buffer + offset, sizeof( buffer ) - offset*sizeof(TEXTCHAR), WIDE("image=%s\n"), EscapeMenuString( button->pImage ) );
          if( button->pPageName )
-				offset += snprintf( buffer + offset, sizeof( buffer ) - offset, WIDE("next page=%s\n"), button->pPageName );
+				offset += snprintf( buffer + offset, sizeof( buffer ) - offset*sizeof(TEXTCHAR), WIDE("next page=%s\n"), button->pPageName );
 			if( button->font_preset_name )
-            offset += snprintf( buffer + offset, sizeof( buffer ) - offset, WIDE("font name=%s\n"), button->font_preset_name );
+            offset += snprintf( buffer + offset, sizeof( buffer ) - offset*sizeof(TEXTCHAR), WIDE("font name=%s\n"), button->font_preset_name );
 		}
 		AddAttr( generic_xx, "%s", buffer );
 }
@@ -1409,7 +1409,8 @@ void SaveSQLButtonConfig( void )
 void RenameConfig( TEXTCHAR *config_filename, TEXTCHAR *source, int source_name_len, int n )
 {
 	FILE *file;
-	file = sack_fopen( GetFileGroup( "Resources", NULL ), source, WIDE("rt") );
+	int group;
+	file = sack_fopen( group = GetFileGroup( "Resources", NULL ), source, WIDE("rt") );
 	if( file )
 	{
 		TEXTCHAR backup[256];
@@ -1426,7 +1427,7 @@ void RenameConfig( TEXTCHAR *config_filename, TEXTCHAR *source, int source_name_
 							, n+1 );
 		}
 		else
-			sack_unlink( source );
+			sack_unlink( group, source );
 		sack_rename( source, backup );
 	}
 }

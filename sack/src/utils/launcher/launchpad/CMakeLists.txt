@@ -3,10 +3,14 @@ cmake_minimum_required(VERSION 2.8)
 
 project( launchpad )
 
+set( RESOURCES launchpad.rc )
+if( MINGW OR MSVC )
+set( MORE_SOURCES ${RESOURCES} )
+endif( MINGW OR MSVC )
 
 set(BASE_SOURCES
 ${FIRST_GCC_PROGRAM_SOURCE} 
-    launchpad launchpad.rc
+    launchpad ${MORE_SOURCES}
 ${LAST_GCC_PROGRAM_SOURCE}
 )
 
@@ -16,56 +20,81 @@ SET(CMAKE_RC_COMPILER_INIT "windres")
 SET(CMAKE_RC_COMPILER "windres")
 SET(CMAKE_RC_COMPILE_OBJECT "windres <FLAGS> <DEFINES> -O coff -o <OBJECT> <SOURCE>")
 ENABLE_LANGUAGE(RC)
+elseif( WATCOM )
+string( REPLACE ".rc" ".res" WATCOM_RESOURCES ${RESOURCES} )
+SET( CMAKE_RC_COMPILER "rc" )
+string( REPLACE "/" "\\" WATCOM_PROJECT_BINARY_DIR ${PROJECT_BINARY_DIR} )
+string( REPLACE "/" "\\" WATCOM_CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} )
+add_custom_command( OUTPUT ${PROJECT_BINARY_DIR}/${WATCOM_RESOURCES}
+                     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${RESOURCES}
+                     COMMAND ${CMAKE_RC_COMPILER} -i${WATCOM_CMAKE_CURRENT_SOURCE_DIR} -fo${WATCOM_PROJECT_BINARY_DIR}\\${WATCOM_RESOURCES} ${WATCOM_CMAKE_CURRENT_SOURCE_DIR}\\${RESOURCES}
+ )
+ADD_CUSTOM_TARGET( "generate_foo${PROJECT_NAME}" DEPENDS ${PROJECT_BINARY_DIR}/${WATCOM_RESOURCES})
 
 endif()
 
 
 add_executable(${PROJECT_NAME} WIN32 ${BASE_SOURCES} )
+
+if( WATCOM )
+ADD_DEPENDENCIES( ${PROJECT_NAME} "generate_foo${PROJECT_NAME}" )
+SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES LINK_FLAGS "option resource=${WATCOM_RESOURCES}")
+endif( WATCOM )
+
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 COMPILE_FLAGS  "-DTARGET_LABEL=${PROJECT_NAME}" 
                   FOLDER utils/launcher
 )
-target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} )
+target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} )
 install_default_dest_binary( ${PROJECT_NAME} )
 
 project( launchpad.portable )
 
-if( __WINDOWS__ )
-set( NET_SOURCES     ../../../netlib/net_winsock2.c  )
-endif( __WINDOWS__ )
+
+set( SOURCES_ROOT ../../.. )
+
+if( SNPRINTF_SOURCES )
+set( SNPRINTF_SOURCES    ${SOURCES_ROOT}/../${SNPRINTF_SOURCES} )
+endif(SNPRINTF_SOURCES)
+
+if( WIN32 )
+set( NET_SOURCES     ${SOURCES_ROOT}/netlib/net_winsock2.c  )
+endif( WIN32 )
 
 if( MSVC ) 
-SET( ExtraSources ../../../systemlib/args.c )
+SET( ExtraSources ${SOURCES_ROOT}/systemlib/args.c )
 endif( MSVC )
+
 
 set(BASE_SOURCES
 ${FIRST_GCC_PROGRAM_SOURCE} 
-    launchpad launchpad.rc
-    ../../../netlib/network.c 
-    ../../../netlib/udpnetwork.c 
-    ../../../netlib/tcpnetwork.c 
+    launchpad ${MORE_SOURCES}
+    ${SOURCES_ROOT}/netlib/network.c 
+    ${SOURCES_ROOT}/netlib/udpnetwork.c 
+    ${SOURCES_ROOT}/netlib/tcpnetwork.c 
     ${NET_SOURCES}
-    ../../../memlib/sharemem.c
-    ../../../timerlib/timers.c
-    ../../../idlelib/idle.c
-    ../../../procreglib/names.c
-    ../../../configlib/configscript.c
-    ../../../sysloglib/syslog.c
+    ${SOURCES_ROOT}/memlib/sharemem.c
+    ${SOURCES_ROOT}/timerlib/timers.c
+    ${SOURCES_ROOT}/idlelib/idle.c
+    ${SOURCES_ROOT}/procreglib/names.c
+    ${SOURCES_ROOT}/configlib/configscript.c
+    ${SOURCES_ROOT}/sysloglib/syslog.c
     ${ExtraSources}
-    ../../../systemlib/system.c
-#    ../../../systemlib/spawntask.c
-    ../../../typelib/typecode.c
-    ../../../typelib/text.c
-    ../../../typelib/sets.c
-    ../../../typelib/binarylist.c
-    ../../../filesyslib/filescan.c
-    ../../../filesyslib/pathops.c
-    ../../../filesyslib/winfiles.c
-    ../../../systemlib/spawntask.c
-    ../../../systemlib/args.c
-    ../../../systraylib/systray.c
+    ${SOURCES_ROOT}/systemlib/system.c
+#    ${SOURCES_ROOT}/systemlib/spawntask.c
+    ${SOURCES_ROOT}/typelib/typecode.c
+    ${SOURCES_ROOT}/typelib/text.c
+    ${SOURCES_ROOT}/typelib/sets.c
+    ${SOURCES_ROOT}/typelib/binarylist.c
+    ${SOURCES_ROOT}/filesyslib/filescan.c
+    ${SOURCES_ROOT}/filesyslib/pathops.c
+    ${SOURCES_ROOT}/filesyslib/winfiles.c
+    ${SOURCES_ROOT}/systemlib/spawntask.c
+    ${SOURCES_ROOT}/systemlib/args.c
+    ${SOURCES_ROOT}/systraylib/systray.c
+    ${SNPRINTF_SOURCES}
 ${LAST_GCC_PROGRAM_SOURCE}
-    ../../../deadstart/deadstart_core.c 
+    ${SOURCES_ROOT}/deadstart/deadstart_core.c 
 )
 
 if( MINGW )
@@ -79,14 +108,20 @@ endif()
 
 
 add_executable(${PROJECT_NAME} WIN32 ${BASE_SOURCES} )
-SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
-COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL} -DNETWORK_SOURCE -DMEM_LIBRARY_SOURCE -DSYSLOG_SOURCE -D_TYPELIBRARY_SOURCE -DSYSTEM_SOURCE -DFILESYSTEM_LIBRARY_SOURCE -DTIMER_SOURCE -DIDLE_SOURCE -DPROCREG_SOURCE -DCONFIGURATION_LIBRARY_SOURCE -DSACK_BAG_CORE_EXPORTS -D__NO_OPTIONS__ -DSYSTRAY_LIBRARAY"
+SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
+                  COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL}"
+                  COMPILE_DEFINITIONS "SACK_BAG_EXPORTS;__NO_OPTIONS__;__STATIC__"
                   FOLDER utils/launcher
 )
+if( WATCOM )
+ADD_DEPENDENCIES( ${PROJECT_NAME} "generate_foo${PROJECT_NAME}" )
+SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES LINK_FLAGS "option resource=${WATCOM_RESOURCES}")
+endif( WATCOM )
 target_link_libraries( ${PROJECT_NAME} ws2_32 wsock32 winmm )
 install_default_dest_binary( ${PROJECT_NAME} )
 
+if( afsdasdfafsd )
 
 project( launchpad.isp ) 
 
@@ -105,9 +140,9 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   SUFFIX ""
                   FOLDER utils/launcher
 )
-target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} )
+target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} )
 install_literal_product( ${PROJECT_NAME} InterShell/plugins ) 
-
+endif()
 
 if( altanik_is_built )
 project( launchpad.isom ) 
@@ -126,7 +161,7 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   SUFFIX ""
                   FOLDER utils/launcher
 )
-target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} )
+target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} )
 install_default_dest( ${PROJECT_NAME} )
                       endif()
 

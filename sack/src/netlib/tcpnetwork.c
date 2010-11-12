@@ -230,7 +230,7 @@ NETWORK_PROC( PCLIENT, CPPOpenTCPListenerAddrEx )(SOCKADDR *pAddr
 		return NULL;
 	}
 	//	pListen->Socket = socket( *(_16*)pAddr, SOCK_STREAM, 0 );
-#ifdef __WINDOWS__
+#ifdef WIN32
 	pListen->Socket = OpenSocket( ((*(_16*)pAddr) == AF_INET)?TRUE:FALSE, TRUE, FALSE );
 	if( pListen->Socket == INVALID_SOCKET )
 #endif
@@ -280,7 +280,7 @@ NETWORK_PROC( PCLIENT, CPPOpenTCPListenerAddrEx )(SOCKADDR *pAddr
 
    if (!pAddr || 
 		 bind(pListen->Socket ,pAddr
-#ifdef __WINDOWS__
+#ifdef WIN32
 			  ,sizeof(SOCKADDR)
 #else
 			  ,(pAddr->sa_family==AF_INET)?sizeof(struct sockaddr):110
@@ -375,7 +375,7 @@ static PCLIENT InternalTCPClientAddrExx(SOCKADDR *lpAddr,
    if( pResult )
 	{
 		// use the sockaddr to switch what type of socket this is.
-#ifdef __WINDOWS__
+#ifdef WIN32
 		pResult->Socket = OpenSocket( ((*(_16*)lpAddr) == AF_INET)?TRUE:FALSE, TRUE, FALSE );
       if( pResult->Socket == INVALID_SOCKET )
 #endif

@@ -5,7 +5,7 @@
 #define TASK_PREFIX WIDE("intershell")
 #include <psi.h>
 #include <configscript.h>
-#ifdef SACK_CORE_BUILD
+#if defined( INTERSHELL_CORE_BUILD ) || defined( LEGACY_MAKE_SYSTEM )
 #include "widgets/include/buttons.h"
 #else
 #include <widgets/buttons.h>

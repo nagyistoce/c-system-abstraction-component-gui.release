@@ -3,7 +3,7 @@
 #include <deadstart.h>
 #include <procreg.h>
 #include <configscript.h>
-
+#include <sqlgetoption.h>
 #define USES_VIDEO_SERVER_INTERFACE
 #define DEFINES_VIDEO_SERVER_INTERFACE
 #include "link_events.h"
@@ -36,7 +36,7 @@ PRELOAD( InitVLCLauncher )
    l.display = SACK_GetProfileInt( GetProgramName(), "vlc_launcher/Default Display", 2 );
 }
 
-PTRSZVAL EventPlaying CPROC( PTRSZVAL psv, arg_list args )
+PTRSZVAL CPROC EventPlaying( PTRSZVAL psv, arg_list args )
 {
 	if( l.flags.bWantMaster )
 	{
@@ -205,3 +205,10 @@ ATEXIT( Shutdown )
 		TerminateProgram( l.vlc_task );
 	}
 }
+
+#ifdef __WATCOMC__
+PUBLIC( void, MustExportOneFunction )( void )
+{
+}
+#endif
+

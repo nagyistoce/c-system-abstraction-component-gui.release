@@ -45,6 +45,7 @@ pssql.h
 rcomlib.h
 render.h
 sack_types.h
+http.h
 sha1.h
 sharemem.h
 skelhdr.h
@@ -54,6 +55,7 @@ sqlgetoption.h
 sqloptint.h
 stdhdrs.h
 final_types.h
+signed_unsigned_comparisons.h
 sackcomm.h
 strlib.hpp
 symbits.h
@@ -64,6 +66,7 @@ typelib.h
 vectlib.h
 vectypes.h
 vidlib.h
+service_hook.h
 )
 
 # sqlite3.h

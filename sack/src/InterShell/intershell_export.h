@@ -26,10 +26,16 @@
 #define InterShell_EXPORT
 #include <sack_types.h>
 #ifdef SACK_CORE_BUILD
+#define INTERSHELL_CORE_BUILD
+#endif
+#ifdef SACK_CORE_BUILD
 #include <../src/genx/genx.h>
-#include "widgets/include/buttons.h"
 #else
 #include <genx/genx.h>
+#endif
+#ifdef INTERSHELL_CORE_BUILD
+#include "widgets/include/buttons.h"
+#else
 #include "widgets/buttons.h"
 #endif
 #include <configscript.h>

@@ -123,11 +123,11 @@ void RenderUDPClient( PTRSZVAL psvRenderWhat // user data to pass to render to g
 					 ( sample.tick - from ) // how much past the from that this is...
 					 * resolution
 					) / (to-from);
-			point.value =
+			point.value = (_32)(
 					(
 					 ( sample.cpu_tick_delta - base_value )
 					 * value_resolution
-					) / ( (max_value - base_value) +1 );
+					) / ( (max_value - base_value) +1 ) );
          lprintf( "Base %Ld max %Ld val %Ld out %ld", base_value, max_value, sample.cpu_tick_delta, point.value );
 			point.tick = sample.tick;
 			tick = sample.tick + 1;
@@ -204,11 +204,11 @@ static void CPROC ClientReceive( PCLIENT pc, POINTER buffer, int size, SOCKADDR 
 {
 	if( buffer )
 	{
-      _64 min_tick_in_packet;
-      _64 tick = GetCPUTick();
+		_64 min_tick_in_packet = 0;
+		_64 tick = GetCPUTick();
 		int dropped = 0;
 		INDEX idx;
-      PUDP_DATA udp_data;
+		PUDP_DATA udp_data;
 		LIST_FORALL( l.line_data, idx, PUDP_DATA, udp_data )
 		{
 			if( CompareAddress( udp_data->target->addr, addr ) )
@@ -221,11 +221,11 @@ static void CPROC ClientReceive( PCLIENT pc, POINTER buffer, int size, SOCKADDR 
 			sample.dropped = dropped;
 			sample.tick = timeGetTime();
 			sample.cpu_tick_delta = tick - l.client_buffer[0];
-         lprintf( "hrm tick %Ld %Ld %Ld", tick, min_tick_in_packet, tick-min_tick_in_packet );
-         EnqueData( &udp_data->queue, &sample );
+			lprintf( "hrm tick %Ld %Ld %Ld", tick, min_tick_in_packet, tick-min_tick_in_packet );
+			EnqueData( &udp_data->queue, &sample );
 		}
 	}
-   ReadUDP( pc, l.client_buffer, 4096 );
+	ReadUDP( pc, l.client_buffer, 4096 );
 
 }
 

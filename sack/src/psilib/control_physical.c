@@ -10,6 +10,7 @@
 #include "borders.h"
 #include "resource.h"
 
+//#define DEBUG_UPDAATE_DRAW 4
 
 PSI_NAMESPACE
 
@@ -27,8 +28,8 @@ static void CPROC FileDroppedOnFrame( PTRSZVAL psvControl, CTEXTSTR filename, S_
 			{
 				if( ( x < current->original_rect.x ) || 
 					( y < current->original_rect.y ) || 
-					( x > ( current->original_rect.x + current->original_rect.width ) ) || 
-					( y > ( current->original_rect.y + current->original_rect.height ) ) )
+					( SUS_GT( x, S_32, ( current->original_rect.x + current->original_rect.width ) , _32 ) ) || 
+					( SUS_GT( y, S_32, ( current->original_rect.y + current->original_rect.height ), _32 ) ) )
 				{
 					continue;
 				}
@@ -93,7 +94,7 @@ static void CPROC FrameRedraw( PTRSZVAL psvFrame, PRENDERER psvSelf )
 		{
 			Image OldSurface;
 #ifdef DEBUG_UPDAATE_DRAW
-			lprintf( WIDE( "Saving old image..." ) );
+			lprintf( WIDE( "!!Saving old image... (on frame)" ) );
 #endif
 			if( ( OldSurface = CopyOriginalSurface( pc, pc->OriginalSurface ) ) )
 			{
@@ -444,7 +445,7 @@ PPHYSICAL_DEVICE OpenPhysicalDevice( PSI_CONTROL pc, PSI_CONTROL over, PRENDERER
 																  , pc->rect.y
 																  , (over&&over->device)?over->device->pActImg:NULL
 																  , (under&&under->device)?under->device->pActImg:NULL);
-#ifdef __WINDOWS__
+#ifdef WIN32
 			WinShell_AcceptDroppedFiles( device->pActImg, FileDroppedOnFrame, (PTRSZVAL)pc );
 #endif
          AddLink( &g.shown_frames, pc );
@@ -472,7 +473,7 @@ PPHYSICAL_DEVICE OpenPhysicalDevice( PSI_CONTROL pc, PSI_CONTROL over, PRENDERER
 				SizeCommon( pc, width, height );
 			}
 			device->pActImg = pActImg;
-#ifdef __WINDOWS__
+#ifdef WIN32
 			WinShell_AcceptDroppedFiles( device->pActImg, FileDroppedOnFrame, (PTRSZVAL)pc );
 #endif
 			AddLink( &g.shown_frames, pc );

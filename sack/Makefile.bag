@@ -71,8 +71,8 @@ MORE_PROJECTS+=src/imglib/Makefile \
         $(WIN_MORE_PROJECTS)   \
 	$(if $(__WINDOWS__),,src/displaylib/Makefile.display.bag) \
         src/psilib/Makefile.PSI.bag \
-        $(if $(__WINDOWS__),,src/displaylib/Makefile.display2.bag) \
 	$(if $(__WINDOWS__),src/intershell/Makefile,) \
+        $(if $(__WINDOWS__),,src/displaylib/Makefile.display2.bag) \
         $(if $(__WINDOWS__),src/streamlib/Makefile,) \
         $(if $(__NO_SQL__),,src/SQLlib/optlib/Makefile)
 else
@@ -119,6 +119,7 @@ SRCS= src/deadstart/deadstart_core    \
  src/typelib/input               \
  src/typelib/msgqueue            \
  src/typelib/sets                \
+ src/typelib/http                \
  src/typelib/spacetree           \
  src/typelib/text                \
  src/timerlib/timers             \
@@ -353,7 +354,6 @@ CXFLAGS+=-DGENX_SOURCE
 #SEXPAT_DESTINC=$(SACK_BASE)/include/sexpat
 #MORE_TARGETS+=$(SEXPAT_DESTINC)/sexpat.h $(SEXPAT_DESTINC)/sexpat_external.h
 SRCS+=src/sexpat/xmlparse src/sexpat/xmlrole src/sexpat/xmltok
-CXFLAGS+=-DSEXPAT_SOURCE
 CXFLAGS+=-DXML_MIN_SIZE
 
 ######  SNMP #########################

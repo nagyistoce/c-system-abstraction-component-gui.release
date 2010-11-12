@@ -128,17 +128,17 @@ typedef  struct service_tag {
 typedef struct proc_name_tag
 {
 	struct {
-		_32 bAlias: 1; // really only important when saving the tree
+		BIT_FIELD bAlias: 1; // really only important when saving the tree
 		// each and every node may reference a tree
 		// if it does, then the tree will be non-NULL
-		_32 bTree : 1; // else it's a proc leef...
-		_32 bValue : 1; // name value points at a name
-		_32 bIntVal : 1; // and value is a PTRSZVAL integer...
-		_32 bStringVal : 1; // and value is a PTRSZVAL integer...
-		_32 bProc : 1; // name points at a function
-		_32 bService : 1;  // this might be fun to register names across msgsvr's
-		_32 bData : 1; // data member defines data..
-		_32 bStdProc : 1; // is a (__stdcall *) instead of a (CPROC *)
+		BIT_FIELD bTree : 1; // else it's a proc leef...
+		BIT_FIELD bValue : 1; // name value points at a name
+		BIT_FIELD bIntVal : 1; // and value is a PTRSZVAL integer...
+		BIT_FIELD bStringVal : 1; // and value is a PTRSZVAL integer...
+		BIT_FIELD bProc : 1; // name points at a function
+		BIT_FIELD bService : 1;  // this might be fun to register names across msgsvr's
+		BIT_FIELD bData : 1; // data member defines data..
+		BIT_FIELD bStdProc : 1; // is a (__stdcall *) instead of a (CPROC *)
 	} flags;
 	CTEXTSTR name;
 	TREEDEF   tree;

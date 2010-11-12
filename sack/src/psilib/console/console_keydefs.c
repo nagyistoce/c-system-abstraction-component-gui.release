@@ -21,11 +21,7 @@ static void CPROC _Key_KeystrokePaste( PCONSOLE_INFO pmdp )
       pmdp->KeystrokePaste( pmdp );
 }
 
-#if (defined( GCC ) || defined( __WATCOMC__ )) && defined( __cplusplus )
 DECLTEXT( KeyStroke, "\x7f" ); // DECLTEXT implies 'static'
-#else
-static TEXT KeyStroke = DEFTEXT( WIDE("\x7f") );
-#endif
 
 #if defined( GCC ) || defined( __LINUX__ )
 CORECON_EXPORT( PSIKEYDEFINE, ConsoleKeyDefs[256] ) =
@@ -1032,7 +1028,7 @@ int KeyAlt( P_32 pKeyState, LOGICAL bDown )
 
 #define NUM_MODS ( sizeof( ModNames ) / sizeof( char * ) )
 
-TEXTCHAR *ModNames[] = { WIDE("shift"), WIDE("ctrl"), WIDE("alt")
+CTEXTSTR ModNames[] = { WIDE("shift"), WIDE("ctrl"), WIDE("alt")
                    , NULL, WIDE("control"), NULL
                    , WIDE("$"), WIDE("^"), WIDE("@") };
 
@@ -1303,7 +1299,7 @@ int KeyList( PSENTIENT ps, PTEXT parameters )
 #endif
 //----------------------------------------------------------------------------
 
-int DoStroke( PCONSOLE_INFO pdp, PTEXT stroke )
+int PSI_DoStroke( PCONSOLE_INFO pdp, PTEXT stroke )
 {
    INDEX i;
    int bOutput = FALSE;
@@ -1369,7 +1365,7 @@ int DoStroke( PCONSOLE_INFO pdp, PTEXT stroke )
                         pEcho = BuildLine( pLine );
                         pEcho->data.size--; // trim the last character (probably cr)
 								pEcho->flags |= TF_NORETURN;
-                        WinLogicWriteEx( pdp, pEcho, 1 );
+                        PSI_WinLogicWriteEx( pdp, pEcho, 1 );
                         lprintf( "Should this local echo be marked somehow?" );
                         //pdp->History.flags.bEnqueuedLocalEcho = 1;
                         //pdp->flags.bLastEnqueCommand = TRUE;
@@ -1396,7 +1392,7 @@ int DoStroke( PCONSOLE_INFO pdp, PTEXT stroke )
 
 //----------------------------------------------------------------------------
 
-void KeyPressHandler( PCONSOLE_INFO pdp
+void PSI_KeyPressHandler( PCONSOLE_INFO pdp
 						  , _8 key_index
 						  , _8 mod
 						  , PTEXT characters
@@ -1420,8 +1416,8 @@ void KeyPressHandler( PCONSOLE_INFO pdp
 	{
 		if( pdp->Keyboard[key_index][mod].flags.bStroke )
 		{
-			extern void CPROC WinLogicDoStroke( PCONSOLE_INFO pdp, PTEXT stroke );
-			WinLogicDoStroke(pdp, pdp->Keyboard[key_index][mod].data.stroke);
+			extern void CPROC PSI_WinLogicDoStroke( PCONSOLE_INFO pdp, PTEXT stroke );
+			PSI_WinLogicDoStroke(pdp, pdp->Keyboard[key_index][mod].data.stroke);
 		}
 #ifdef __DEKWARE_PLUGIN__
 		else if( pdp->Keyboard[key_index][mod].flags.bMacro )
@@ -1442,8 +1438,8 @@ void KeyPressHandler( PCONSOLE_INFO pdp
 		case KEYDATA_DEFINED:
 			//Log( "Key data_defined" );
 			{
-				extern void CPROC WinLogicDoStroke( PCONSOLE_INFO pdp, PTEXT stroke );
-				WinLogicDoStroke( pdp, (PTEXT)&ConsoleKeyDefs[key_index].op[mod].data.pStroke );
+				extern void CPROC PSI_WinLogicDoStroke( PCONSOLE_INFO pdp, PTEXT stroke );
+				PSI_WinLogicDoStroke( pdp, (PTEXT)&ConsoleKeyDefs[key_index].op[mod].data.pStroke );
 			}
 			result = UPDATE_NOTHING; // unsure about this - recently added.
 			// well it would appear that the stroke results in whether to update
@@ -1452,8 +1448,8 @@ void KeyPressHandler( PCONSOLE_INFO pdp
 		case KEYDATA:
 			if( GetTextSize( characters ) )
 			{
-				extern void CPROC WinLogicDoStroke( PCONSOLE_INFO pdp, PTEXT stroke );
-				WinLogicDoStroke( pdp, characters );
+				extern void CPROC PSI_WinLogicDoStroke( PCONSOLE_INFO pdp, PTEXT stroke );
+				PSI_WinLogicDoStroke( pdp, characters );
 			}
 			result = UPDATE_NOTHING; // already taken care of?!
 			break;
@@ -1483,7 +1479,7 @@ void KeyPressHandler( PCONSOLE_INFO pdp
 				//extern void RenderCommandLine( PCONSOLE_INFO pdp, POINTER region );
 				upd.flags.bHasContent = 0;
 				upd.flags.bTmpRect = 1;
-				RenderCommandLine( pdp, &upd );
+				PSI_RenderCommandLine( pdp, &upd );
 				{
 					RECT r;
 					r.left = upd.x;
@@ -1498,18 +1494,18 @@ void KeyPressHandler( PCONSOLE_INFO pdp
 			break;
 		case UPDATE_HISTORY:
 			{
-				extern int CPROC UpdateHistory( PCONSOLE_INFO pdp );
-				if( UpdateHistory( pdp ) )
+				extern int CPROC PSI_UpdateHistory( PCONSOLE_INFO pdp );
+				if( PSI_UpdateHistory( pdp ) )
 				{
-               extern void CPROC RenderConsole( PCONSOLE_INFO pdp );
-					RenderConsole( pdp );
+					extern void CPROC PSI_RenderConsole( PCONSOLE_INFO pdp );
+					PSI_RenderConsole( pdp );
 				}
 			}
 			break;
 		case UPDATE_DISPLAY:
 			{
-            extern void CPROC ConsoleCalculate( PCONSOLE_INFO pdp );
-				ConsoleCalculate( pdp );
+				extern void CPROC PSI_ConsoleCalculate( PCONSOLE_INFO pdp );
+				PSI_ConsoleCalculate( pdp );
 			}
 			break;
 		}

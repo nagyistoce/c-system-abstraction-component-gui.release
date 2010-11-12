@@ -295,3 +295,8 @@ OnQueryShowControl( WIDE("Clock") )( PTRSZVAL psv )
 }
 
 //---------------------------------------------------------------------------
+#if ( __WATCOMC__ < 1290 )
+PUBLIC( void, NeedAtLeastOneExport )( void )
+{
+}
+#endif

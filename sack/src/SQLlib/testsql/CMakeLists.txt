@@ -16,7 +16,7 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 COMPILE_FLAGS  "-DTARGET_LABEL=${PROJECT_NAME}" 
                   FOLDER utils
 )
-target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} ${SACK_PSI_LIBRARY} )
+target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} ${SACK_PSI_LIBRARY} )
 install_default_dest( ${PROJECT_NAME} )
 
 
@@ -28,48 +28,57 @@ set(NET_SOURCES
 )
 endif()
 
+set( SOURCES_ROOT ../.. )
+
+if( SNPRINTF_SOURCES )
+set( SNPRINTF_SOURCES    ${SOURCES_ROOT}/../${SNPRINTF_SOURCES} )
+endif(SNPRINTF_SOURCES)
+
 
 set(BASE_SOURCES
 ${FIRST_GCC_PROGRAM_SOURCE} 
     sqlcmd
-    ../../netlib/network.c 
-    ../../netlib/udpnetwork.c 
-    ../../netlib/tcpnetwork.c 
-    ${NET_SOURCES} 
-    ../../msgsvr/client/client.c
-    ../../SQLlib/sqlstub.c
-    ../../SQLlib/sqlutil.c
-    ../../SQLlib/sqlwrap.c
-    ../../SQLlib/sqlparse3.c
-    ../../sqlite/3.7.0/sqlite3.c
-    ../../memlib/sharemem.c
-    ../../timerlib/timers.c
-    ../../idlelib/idle.c
-    ../../procreglib/names.c
-    ../../configlib/configscript.c
-    ../../sysloglib/syslog.c
-    ../../systemlib/system.c
-    ../../typelib/typecode.c
-    ../../typelib/text.c
-    ../../typelib/sets.c
-    ../../typelib/binarylist.c
-    ../../typelib/msgqueue.c
-    ../../filesyslib/filescan.c
-    ../../filesyslib/pathops.c
-    ../../filesyslib/winfiles.c
+#    ${SOURCES_ROOT}/netlib/network.c 
+#    ${SOURCES_ROOT}/netlib/udpnetwork.c 
+#    ${SOURCES_ROOT}/netlib/tcpnetwork.c 
+#    ${NET_SOURCES} 
+#    ${SOURCES_ROOT}/msgsvr/client/client.c
+    ${SOURCES_ROOT}/SQLlib/sqlstub.c
+    ${SOURCES_ROOT}/SQLlib/sqlutil.c
+    ${SOURCES_ROOT}/SQLlib/sqlwrap.c
+    ${SOURCES_ROOT}/SQLlib/sqlparse3.c
+    ${SOURCES_ROOT}/sqlite/3.7.0/sqlite3.c
+    ${SOURCES_ROOT}/memlib/sharemem.c
+    ${SOURCES_ROOT}/timerlib/timers.c
+    ${SOURCES_ROOT}/idlelib/idle.c
+    ${SOURCES_ROOT}/procreglib/names.c
+    ${SOURCES_ROOT}/configlib/configscript.c
+    ${SOURCES_ROOT}/sysloglib/syslog.c
+    ${SOURCES_ROOT}/systemlib/system.c
+    ${SOURCES_ROOT}/typelib/typecode.c
+    ${SOURCES_ROOT}/typelib/text.c
+    ${SOURCES_ROOT}/typelib/sets.c
+    ${SOURCES_ROOT}/typelib/binarylist.c
+    ${SOURCES_ROOT}/typelib/msgqueue.c
+    ${SOURCES_ROOT}/filesyslib/filescan.c
+    ${SOURCES_ROOT}/filesyslib/pathops.c
+    ${SOURCES_ROOT}/filesyslib/winfiles.c
+    ${SNPRINTF_SOURCES}
 ${LAST_GCC_PROGRAM_SOURCE}
-    ../../deadstart/deadstart_core.c 
+    ${SOURCES_ROOT}/deadstart/deadstart_core.c 
 )
 
 add_executable(${PROJECT_NAME} ${BASE_SOURCES} )
 string( REPLACE "." "_" TARGET_LABEL ${PROJECT_NAME} )
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
-    COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL} -D__STATIC__ -DCLIENTMSG_SOURCE -DNETWORK_SOURCE -DSQLSTUB_SOURCE -DMEM_LIBRARY_SOURCE -DSYSLOG_SOURCE -D_TYPELIBRARY_SOURCE -DSYSTEM_SOURCE -DFILESYSTEM_LIBRARY_SOURCE -DTIMER_SOURCE -DIDLE_SOURCE -DPROCREG_SOURCE -DCONFIGURATION_LIBRARY_SOURCE -DSACK_BAG_CORE_EXPORTS -D__NO_OPTIONS__" 
+    COMPILE_FLAGS  "-DTARGET_LABEL=${TARGET_LABEL}" 
+                  COMPILE_DEFINITIONS "SACK_BAG_EXPORTS;__STATIC__;__NO_GUI__;__NO_OPTIONS__;USE_ODBC;__DISABLE_UDP_SYSLOG__;__NO_MSGSVR__"
                   FOLDER utils
 )
-if( __WINDOWS__ )
-target_link_libraries( ${PROJECT_NAME} winmm wsock32 ws2_32 )
-endif( __WINDOWS__ )
+if( WIN32 )
+#target_link_libraries( ${PROJECT_NAME} winmm wsock32 ws2_32 )
+target_link_libraries( ${PROJECT_NAME} winmm odbc32 )
+endif( WIN32 )
 install_default_dest_binary( ${PROJECT_NAME} )
 
 

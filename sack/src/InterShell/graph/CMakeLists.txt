@@ -10,10 +10,6 @@ global.c linegraph.c connect_stat.c packet_stat.c
 ${LAST_GCC_LIBRARY_SOURCE}
 )
 
-if( C++ )
-set_source_files_properties( ${SOURCES} PROPERTIES LANGUAGE "CXX" )
-endif()
-
 add_library(${PROJECT_NAME} SHARED ${SOURCES} )
 
 
@@ -25,8 +21,11 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   SUFFIX ""
                   FOLDER InterShell/plugins
 )
-target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} )
-install_literal_product( ${PROJECT_NAME} InterShell/plugins ) 
+target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} )
+if( WIN32 )
+target_link_libraries( ${PROJECT_NAME} winmm )
+endif( WIN32 )
+install_literal_product( ${PROJECT_NAME} plugins ) 
 
 add_subdirectory( frames )
 

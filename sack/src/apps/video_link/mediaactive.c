@@ -8,7 +8,7 @@
 
 #include "statebuttons.h"
 
-#ifdef __WINDOWS__
+#ifdef WIN32
 #define MEDIA_ROOT_PATH "c:/ftn3000/etc/images/"
 #else
 #define MEDIA_ROOT_PATH "/storage/media/"

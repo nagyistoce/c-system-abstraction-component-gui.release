@@ -71,7 +71,9 @@ typedef struct MY_IMAGE_IMPORT_BY_NAME {
 } MY_IMAGE_IMPORT_BY_NAME,*PMY_IMAGE_IMPORT_BY_NAME;
 
 #define DUMMYUNIONNAME
+#ifndef _ANONYMOUS_UNION
 #define _ANONYMOUS_UNION
+#endif
 typedef struct MY_IMAGE_IMPORT_DESCRIPTOR {
 	_ANONYMOUS_UNION union {
 		DWORD Characteristics;
@@ -231,11 +233,11 @@ int ScanFile( PFILESOURCE pfs )
 	IMAGE_OPTIONAL_HEADER nt_optional_header;
 	//printf("Attempt to scan: %s\n", pfs->name );
 	{
-		INDEX idx;
-      CTEXTSTR exclude;
+		//INDEX idx;
+		//CTEXTSTR exclude;
 		//LIST_FORALL( g.excludes, idx, CTEXTSTR, exclude )
 		{
-         /*
+			/*
 			if( stristr( pfs->name, exclude ) )
 			{
 				return 0;
@@ -250,7 +252,7 @@ int ScanFile( PFILESOURCE pfs )
          pfs->flags.bSystem = 1;
 			return 0;
 		}
-		file = fopen( pfs->name, WIDE("rb") );
+		file = sack_fopen( 0, pfs->name, WIDE("rb") );
 		if( file )
 		{
 			pfs->flags.bScanned = 1;
@@ -381,7 +383,7 @@ int ScanFile( PFILESOURCE pfs )
 		}
 		else
 		{
-#ifdef __WINDOWS__
+#ifdef WIN32
 			HMODULE hModule;
 			static TEXTCHAR name[256];
 
@@ -399,7 +401,7 @@ int ScanFile( PFILESOURCE pfs )
 			{
 				TEXTSTR path = (TEXTSTR)OSALOT_GetEnvironmentVariable( "PATH" );
 				TEXTSTR tmp;
-            static TEXTCHAR tmpfile[256 + 64];
+				static TEXTCHAR tmpfile[256 + 64];
 				while( tmp = strchr( path, ';' ) )
 				{
 					tmp[0] = 0;
@@ -418,15 +420,15 @@ int ScanFile( PFILESOURCE pfs )
 					}
 					else
 					{
-						FILE *file = fopen( tmpfile, "rb" );
+						FILE *file = sack_fopen( 0, tmpfile, "rb" );
 						if( file )
 						{
 							AddDependCopy( pfs, tmpfile )->flags.bExternal = 1;
-                     fclose( file );
+							fclose( file );
 							return 0;
 						}
 					}
-               path = tmp+1;
+					path = tmp+1;
 				}
 
 			}
@@ -440,24 +442,32 @@ int ScanFile( PFILESOURCE pfs )
 	return 0;
 }
 
+void Usage( CTEXTSTR *argv )
+{
+	printf( WIDE("usage: %s <-xlv> <file...> <destination>\n")
+			 "  -l : list only, do not copy (doesn't require destination)\n"
+			 "  -x <file mask> : exclude this file from copy\n"
+			 "  -v : verbose output?\n"
+			 "  file - .dll or .exe referenced, all referenced DLLs\n"
+			 "         are also copied to the dstination\n"
+			 "  dest - directory name to cpoy to, will fail otherwise.\n"
+			, argv[0]
+			);
+}
 
 int main( int argc, CTEXTSTR *argv )
 {
-	if( argc < 3 || !IsPath( argv[argc-1] ) )
+	if( argc < 2 )
 	{
-		printf( WIDE("usage: pcopy <file...> <destination>\n")
-				 "  file - .dll or .exe referenced, all referenced DLLs\n"
-				 "         are also copied to the dstination\n"
-				 "  dest - directory name to cpoy to, will fail otherwise.\n"
-				);
-		if( argc >= 3 )
-			printf( WIDE("EROR: Final argument is not a directory\n") );
+      Usage( argv );
 		return 1;
 	}
-	strcpy( g.SystemRoot, getenv( WIDE("SystemRoot") ) );
+	StrCpyEx( g.SystemRoot, getenv( WIDE("SystemRoot") ), sizeof( g.SystemRoot ) );
 	{
 		int c;
-		for( c = 1; c < argc-1; c++ )
+		for( c = 1;
+			 c < ( g.flags.bDoNotCopy?argc:(argc-1) );
+			 c++ )
 		{
 			if( argv[c][0] == '-' )
 			{
@@ -467,6 +477,10 @@ int main( int argc, CTEXTSTR *argv )
 				{
 					switch(argv[c][ch])
 					{
+					case 'l':
+					case 'L':
+						g.flags.bDoNotCopy = 1;
+                  break;
 					case 'v':
 					case 'V':
 						g.flags.bVerbose = 1;
@@ -475,14 +489,14 @@ int main( int argc, CTEXTSTR *argv )
 					case 'X':
 						if( argv[c][ch+1] )
 						{
-							AddLink( &g.excludes, strdup( argv[c] + ch + 1 ) );
+							AddLink( &g.excludes, StrDup( argv[c] + ch + 1 ) );
 							done = 1; // skip remaining characters in parameter
 						}
 						else
 						{
 							if( ( c + 1 ) < (argc-1) )
 							{
-								AddLink( &g.excludes, strdup( argv[c+1] ) );
+								AddLink( &g.excludes, StrDup( argv[c+1] ) );
 								c++; // skip one word...
 								done = 1; // skip remining characters, go to next parameter (c++)
 							}
@@ -492,17 +506,31 @@ int main( int argc, CTEXTSTR *argv )
 								exit(1);
 							}
 						}
-                  break;
+						break;
 					}
 					ch++;
 				}
 			}
-         else
+			else
 				AddFileCopy( argv[c ]);
 		}
 	}
-	CopyFileCopyTree( argv[argc-1] );
-	printf( WIDE("Copied %d file%s\n"), g.copied, g.copied==1?"":"s" );
+	if( !g.flags.bDoNotCopy )
+	{
+		if( !IsPath( argv[argc-1] ) )
+		{
+			printf( WIDE("EROR: Final argument is not a directory\n") );
+         Usage( argv );
+         return 1;
+		}
+
+		CopyFileCopyTree( argv[argc-1] );
+		printf( WIDE("Copied %d file%s\n"), g.copied, g.copied==1?"":"s" );
+	}
+	else
+	{
+		CopyFileCopyTree( NULL );
+	}
 	return 0;
 
 }

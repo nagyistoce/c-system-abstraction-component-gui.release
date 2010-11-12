@@ -3,7 +3,6 @@
 //#define FIND_DEBUG
 //#define DIRTY_NODE_DEBUG
 #include <stdhdrs.h>
-#include <sack_types.h>
 #include <stdio.h>
 #include <idle.h>
 #include <sharemem.h>
@@ -22,10 +21,10 @@ struct spacenode {
 	void *data;
 	SPACEPOINT min, max;
 	struct {
-		_32 bDirty : 1;
+		BIT_FIELD bDirty : 1;
 	} flags;
-   int col_span, row_span; // if considered in a table of all top level cells, this is the span of this one.
-   IMAGE_RECTANGLE dirty;
+	int col_span, row_span; // if considered in a table of all top level cells, this is the span of this one.
+	IMAGE_RECTANGLE dirty;
 	//int children; // hmm... this may or may not be usable...
 	struct spacenode *parent; // may have as many parents as it is.
 	// think this will be more space than use... cept THE root.

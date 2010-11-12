@@ -138,7 +138,7 @@ OnCreateMenuButton( WIDE("Windows->Start") )( PMENU_BUTTON button )
 }
 #endif
 
-#ifdef __WATCOMC__
+#if ( __WATCOMC__ < 1290 )
 PUBLIC( void, ExportThis_POINTS_DOWN )()
 {
 }

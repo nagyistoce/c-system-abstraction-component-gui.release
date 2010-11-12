@@ -284,7 +284,7 @@ RENDER_PROC(void, PutDisplayIn) (PRENDERER hVideo, PRENDERER hContainer)
 	// erm...
 }
 
-#ifdef __WINDOWS__
+#ifdef WIN32
 RENDER_PROC (PRENDERER, MakeDisplayFrom) (HWND hWnd)
 {
 	return NULL;
@@ -369,7 +369,7 @@ RENDER_DATA( RENDER_INTERFACE, VideoInterface ) =
 , EnableSpriteMethod
 , WinShell_AcceptDroppedFiles
 , PutDisplayIn
-#ifdef __WINDOWS__
+#ifdef WIN32
 , MakeDisplayFrom
 #endif
 , SetRendererTitle

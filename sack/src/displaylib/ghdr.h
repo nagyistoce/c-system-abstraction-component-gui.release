@@ -8,7 +8,7 @@
 typedef struct panel_tag PANEL, *PPANEL;
 
 
-#if !defined( __ARM__ ) && !defined( __arm__ ) && !defined( __NO_SDL__ ) && !defined( __WINDOWS__ )
+#if !defined( __ARM__ ) && !defined( __arm__ ) && !defined( __NO_SDL__ ) && !defined( WIN32 )
 #  define __SDL__
 #  define PRENDERER PPANEL
 #  include <SDL/SDL.h>
@@ -21,7 +21,7 @@ typedef struct panel_tag PANEL, *PPANEL;
 #     define __RAW_FRAMEBUFFER__
 #     define ALLOW_DIRECT_UPDATE
 #     include <msgclient.h>
-#  elif defined( __WINDOWS__ )
+#  elif defined( WIN32 )
 // under windows we fake using VIDLIB for the render services...
 #    define PRENDERER PPANEL
 #    include <vidlib/vidstruc.h>

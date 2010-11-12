@@ -26,6 +26,7 @@
 #include <InterShell/InterShell_export.h>
 #include <widgets/banner.h>
 #include <pssql.h>
+#include <sqlgetoption.h>
 
 #include "statebuttons.h"
 #include "db.h"
@@ -58,16 +59,23 @@ enum button_type { UNINITIALIZED
 					  , MAX_BUTTON_TYPE
 };
 
-char *button_modes[] = { [UNINITIALIZED]="Undefined"
-							  , [SELECT_HOST]="Select Host(Master)"
-							  , [ENABLE_LINK] = "Enable Link"
-							  , [ENABLE_DELEGATE] = "Enable Delegate Host"
-							  , [DISABLE_LINK] = "Disable Link"
-							  , [DISABLE_MASTER_HOST] = "Disable Host(Master)"
-							  , [PROHIBITED_MODE] = "Prohibited Mode"
-							  , [DISABLE_DELEGATE] = "Disable Delegated Host"
-							  , [ENABLE_OLDSTYLE] = "Enable Old Style"
-                       , [DISCONNECT_OLDSTYLE] = "Disconnect Old Style"
+// yay visual studio is still lacking c99 initializers...
+#ifdef _MSC_VER
+#define ABSOLUTE_EQUATE(n)   
+#else
+#define ABSOLUTE_EQUATE(n)  [n]=
+#endif
+
+char *button_modes[] = { ABSOLUTE_EQUATE( UNINITIALIZED )"Undefined"
+							  , ABSOLUTE_EQUATE( SELECT_HOST )"Select Host(Master)"
+							  , ABSOLUTE_EQUATE( ENABLE_LINK ) "Enable Link"
+							  , ABSOLUTE_EQUATE( ENABLE_DELEGATE ) "Enable Delegate Host"
+							  , ABSOLUTE_EQUATE( DISABLE_LINK ) "Disable Link"
+							  , ABSOLUTE_EQUATE( DISABLE_MASTER_HOST ) "Disable Host(Master)"
+							  , ABSOLUTE_EQUATE( PROHIBITED_MODE ) "Prohibited Mode"
+							  , ABSOLUTE_EQUATE( DISABLE_DELEGATE ) "Disable Delegated Host"
+							  , ABSOLUTE_EQUATE( ENABLE_OLDSTYLE ) "Enable Old Style"
+                       , ABSOLUTE_EQUATE( DISCONNECT_OLDSTYLE ) "Disconnect Old Style"
 };
 
 typedef struct button_info
@@ -251,20 +259,20 @@ void OpenDatabase( void )
 			 results;
 			  FetchSQLRecord( l.odbc, &results ) )
 		{
-         lprintf( "Adding hall %s=%s", results[0], results[1] );
+			lprintf( "Adding hall %s=%s", results[0], results[1] );
 			if( ( results[0]!=NULL ) && ( results[1] !=NULL ) )
 			{
-            char buffer[64];
-				PHALL_INFO hall = Allocate( sizeof( HALL_INFO ) );
-            MemSet( hall, 0, sizeof( HALL_INFO ) );
+				char buffer[64];
+				PHALL_INFO hall = New( HALL_INFO );
+				MemSet( hall, 0, sizeof( HALL_INFO ) );
 				//hall->buttons = NULL;
 				hall->name = StrDup( results[1] );
 				hall->hall_id = atoi( results[0] );
-            snprintf( buffer, sizeof( buffer ), "<Hall State:%s>", hall->name );
+				snprintf( buffer, sizeof( buffer ), "<Hall State:%s>", hall->name );
 				hall->label_var = CreateLabelVariableEx( buffer, LABEL_TYPE_PROC_EX, LinkStateText, (PTRSZVAL)hall );
-            snprintf( buffer, sizeof( buffer ), "<Hall Last Alive:%s>", hall->name );
+				snprintf( buffer, sizeof( buffer ), "<Hall Last Alive:%s>", hall->name );
 				hall->label_alive_var = CreateLabelVariableEx( buffer, LABEL_TYPE_PROC_EX, LinkAliveText, (PTRSZVAL)hall );
-            lprintf("%s for %s", hall->name, buffer );
+				lprintf("%s for %s", hall->name, buffer );
 
 				AddLink( &g.halls, hall );
 			}
@@ -1105,7 +1113,7 @@ OnKeyPressEvent( "Enable Participant" )( PTRSZVAL psv )
 		if( button_info->hall && !l.master_hall_id )
 		{
 			INDEX idx;
-         PHALL_INFO hall;
+			PHALL_INFO hall;
 			LIST_FORALL( g.halls, idx, PHALL_INFO, hall )
 			{
 				if( hall->flags.bMaster )
@@ -1113,8 +1121,8 @@ OnKeyPressEvent( "Enable Participant" )( PTRSZVAL psv )
 			}
 			if( hall )
 			{
-            Banner2Message( "Sorry, You must wait for all halls to be disabled.\nPlease try again in a few seconds." );
-            break;
+				Banner2Message( "Sorry, You must wait for all halls to be disabled.\nPlease try again in a few seconds." );
+				break;
 			}
 			SQLCommandf( l.odbc, "replace into link_state (master_hall_id,bingoday) select %ld,%s"
 						  , button_info->hall->hall_id
@@ -1355,7 +1363,7 @@ static PTRSZVAL CPROC RestoreButtonType( PTRSZVAL psv, arg_list args )
 		INDEX idx;
 		for( idx = 0; idx < MAX_BUTTON_TYPE; idx++ )
 		{
-			if( strcasecmp( type, button_modes[idx] )== 0 )
+			if( StrCaseCmp( type, button_modes[idx] )== 0 )
             break;
 		}
       if( idx < MAX_BUTTON_TYPE )

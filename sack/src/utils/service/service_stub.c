@@ -1,4 +1,10 @@
 #include <stdhdrs.h>
+#ifdef _MSC_VER
+#include <WinSvc.h>
+#endif
+
+// so we get the correct import/export attributes on the function
+#include <service_hook.h>
 
 static struct {
 	CTEXTSTR next_service_name;
@@ -6,10 +12,10 @@ static struct {
 } local_service_info;
 #define l local_service_info
 
-SERVICE_STATUS ServiceStatus;
-SERVICE_STATUS_HANDLE hStatus;
+static SERVICE_STATUS ServiceStatus;
+static SERVICE_STATUS_HANDLE hStatus;
 
-void ControlHandler( DWORD request )
+static void ControlHandler( DWORD request )
 {
    switch(request) 
    { 
@@ -43,7 +49,7 @@ void ControlHandler( DWORD request )
 }
 
 
-void APIENTRY ServiceMain( _32 argc, char **argv )
+static void APIENTRY ServiceMain( _32 argc, char **argv )
 {
 
    int error; 
@@ -100,7 +106,7 @@ void APIENTRY ServiceMain( _32 argc, char **argv )
 }
 
 
-void SetupService( CTEXTSTR name, void (CPROC*Start)( void ) )
+void SetupService( TEXTSTR name, void (CPROC*Start)( void ) )
 {
 	SERVICE_TABLE_ENTRY ServiceTable[2];
    l.Start = Start;
@@ -112,3 +118,82 @@ void SetupService( CTEXTSTR name, void (CPROC*Start)( void ) )
    lprintf( "Send to startup monitor.." );
    StartServiceCtrlDispatcher( ServiceTable );
 }
+
+//---------------------------------------------------------------------------
+
+static int task_done;
+static void CPROC MyTaskEnd( PTRSZVAL psv, PTASK_INFO task )
+{
+   task_done = 1;
+}
+
+static void CPROC GetOutput( PTRSZVAL psv, PTASK_INFO task, CTEXTSTR buffer, _32 length )
+{
+   lprintf( "%s", buffer );
+}
+
+//---------------------------------------------------------------------------
+
+void ServiceInstall( CTEXTSTR ServiceName )
+{
+	TEXTCHAR **args;
+	int nArgs;
+	PVARTEXT pvt_cmd = VarTextCreate();
+	vtprintf( pvt_cmd, "sc create \"%s\" binpath= %s\\%s.exe start= auto"
+			  , ServiceName
+			  , GetProgramPath()
+			  , GetProgramName() );
+	ParseIntoArgs( GetText( VarTextPeek( pvt_cmd ) ), &nArgs, &args );
+	VarTextEmpty( pvt_cmd );
+	LaunchPeerProgram( "sc.exe", NULL, (PCTEXTSTR)args,  GetOutput, MyTaskEnd, 0 );
+	while( !task_done )
+		WakeableSleep( 100 );
+	task_done = 0;
+	vtprintf( pvt_cmd, "sc start \"%s\""
+			  , ServiceName );
+	ParseIntoArgs( GetText( VarTextPeek( pvt_cmd ) ), &nArgs, &args );
+	VarTextEmpty( pvt_cmd );
+	LaunchPeerProgram( "sc.exe", NULL, (PCTEXTSTR)args,  GetOutput, MyTaskEnd, 0 );
+	while( !task_done )
+		WakeableSleep( 100 );
+}
+
+//---------------------------------------------------------------------------
+
+void ServiceUninstall( CTEXTSTR ServiceName )
+{
+	TEXTCHAR **args;
+	int nArgs;
+	PVARTEXT pvt_cmd = VarTextCreate();
+	vtprintf( pvt_cmd, "sc stop \"%s\""
+			  , ServiceName );
+	ParseIntoArgs( GetText( VarTextPeek( pvt_cmd ) ), &nArgs, &args );
+	VarTextEmpty( pvt_cmd );
+	LaunchPeerProgram( "sc", NULL, (PCTEXTSTR)args,  GetOutput, MyTaskEnd, 0 );
+	while( !task_done )
+		WakeableSleep( 100 );
+	task_done = 0;
+	vtprintf( pvt_cmd, "sc delete \"%s\""
+			  , ServiceName );
+	ParseIntoArgs( GetText( VarTextPeek( pvt_cmd ) ), &nArgs, &args );
+	VarTextEmpty( pvt_cmd );
+	LaunchPeerProgram( "sc", NULL, (PCTEXTSTR)args,  GetOutput, MyTaskEnd, 0 );
+	while( !task_done )
+		WakeableSleep( 100 );
+	task_done = 0;
+}
+
+PTASK_INFO LaunchUserProcess( CTEXTSTR program, CTEXTSTR path, PCTEXTSTR args
+									 , int flags
+									 , TaskOutput OutputHandler
+									 , TaskEnd EndNotice
+									 , PTRSZVAL psv
+									  DBG_PASS
+									 )
+{
+	PTASK_INFO pTask;
+	ImpersonateInteractiveUser();
+	pTask = LaunchPeerProgramExx( program, path, args, flags, OutputHandler, EndNotice, psv DBG_RELAY );
+
+}
+

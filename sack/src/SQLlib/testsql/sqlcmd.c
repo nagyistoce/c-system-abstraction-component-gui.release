@@ -40,14 +40,14 @@ int main( int argc, char **argv )
 		Usage( 1 );
 	else
 	{
-      while( argv[1+arg_ofs] && ( argv[1+arg_ofs][0] == '-' ) )
+		while( argv[1+arg_ofs] && ( argv[1+arg_ofs][0] == '-' ) )
 		{
 			switch( argv[1+arg_ofs][1] )
 			{
 			case 'f':
 				arg_ofs++;
-				input = fopen( argv[1+arg_ofs], "rt" );
-            break;
+				input = sack_fopen( 0, argv[1+arg_ofs], "rt" );
+				break;
 			}
 			arg_ofs++;
 		}

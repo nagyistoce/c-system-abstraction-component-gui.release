@@ -1,14 +1,14 @@
 
 
 
-SET( ZLIB_SRCS  adler32 compress crc32  uncompr deflate trees  
-           zutil inflate inftrees  inffast infback 
-#           infblock infcodes infutil
+SET( ZLIB_SRCS  adler32.c compress.c crc32.c  uncompr.c deflate.c trees.c  
+           zutil.c inflate.c inftrees.c  inffast.c infback.c 
+#           infblock.c infcodes.c infutil.c
    )
    
    if( NOT __ARM__ )
    # under arm we don't really NEED direct FILEIO stuffs.
-SET( ZLIB_SRCS ${ZLIB_SRCS}   gzclose gzlib gzread gzwrite )
+SET( ZLIB_SRCS ${ZLIB_SRCS}   gzclose.c gzlib.c gzread.c gzwrite.c )
     endif( NOT __ARM__ )
 
 FOREACH( SRC ${ZLIB_SRCS} )

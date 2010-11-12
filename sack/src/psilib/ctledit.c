@@ -25,8 +25,8 @@ typedef struct edit {
 	TEXTCHAR *content; // our quick and dirty buffer...
 	int nCaptionSize, nCaptionUsed;
 	int top_side_pad;
-	int Start; // first character in edit control
-	int cursor_pos; // cursor position
+	_32 Start; // first character in edit control
+	_32 cursor_pos; // cursor position
 	_32 MaxShowLen;
 	int select_anchor, select_start, select_end;
 } EDIT, *PEDIT;
@@ -87,7 +87,7 @@ CUSTOM_CONTROL_DRAW( DrawEditControl, ( PSI_CONTROL pc ) )
 		}
 		CursX = GetStringSizeFontEx( GetText( pc->caption.text) + pe->Start, pe->cursor_pos, NULL, &height, font );
 	}
-	if( height <= pc->Surface->height )
+	if( USS_LTE( height, _32, pc->Surface->height, int ) )
 		pe->top_side_pad = (pc->Surface->height - height) / 2;
 	else
 		pe->top_side_pad = 0;
@@ -113,9 +113,9 @@ CUSTOM_CONTROL_DRAW( DrawEditControl, ( PSI_CONTROL pc ) )
 			{
 				int nLen;
 				//lprintf( WIDE("%d %d %d"), Start, pe->select_start, pe->select_end );
-				if( Start < pe->select_start )
+				if( USS_LT( Start, _32, pe->select_start, int ) )
 				{
-					if( ( pe->select_start - Start ) < pe->MaxShowLen )
+					if( SUS_LT( ( pe->select_start - Start ), int, pe->MaxShowLen, _32 ) )
 						nLen = pe->select_start - Start;
 					else
 						nLen = pe->MaxShowLen - ofs;
@@ -125,7 +125,7 @@ CUSTOM_CONTROL_DRAW( DrawEditControl, ( PSI_CONTROL pc ) )
 											 , GetString( pe, GetText( pc->caption.text) + Start, nLen ), nLen, font );
 					x += GetStringSizeFontEx( GetString( pe, GetText( pc->caption.text) + Start, nLen ), nLen, NULL, NULL, font );
 				}
-				else if( Start > pe->select_end ) // beyond the end of the display
+				else if( USS_GT( Start, _32, pe->select_end, int ) ) // beyond the end of the display
 				{
 					nLen = pe->MaxShowLen - ofs;
 					//lprintf( WIDE("Showing %d of string in normal color after select..."), nLen );
@@ -150,7 +150,7 @@ CUSTOM_CONTROL_DRAW( DrawEditControl, ( PSI_CONTROL pc ) )
 				}
 				Start += nLen;
 				ofs += nLen;
-			} while( ofs < pe->MaxShowLen );
+			} while( SUS_LT( ofs, int, pe->MaxShowLen, _32 ) );
 		}
 		else
 		{
@@ -213,7 +213,7 @@ static int OnMouseCommon( EDIT_FIELD_NAME )( PSI_CONTROL pc, S_32 x, S_32 y, _32
 		//cx = ( x - LEFT_SIDE_PAD ) / characters...
 		// so given any font - variable size, we have to figure out which
       // character is on this line...
-		for( cx = 1; cx <= ( len - pe->Start ); cx++ )
+		for( cx = 1; SUS_LTE( cx, int, ( len - pe->Start ), _32 ); cx++ )
 		{
 			if( GetStringSizeFontEx( GetText( pc->caption.text) + pe->Start, cx, &width, NULL, font ) )
 			{
@@ -221,13 +221,13 @@ static int OnMouseCommon( EDIT_FIELD_NAME )( PSI_CONTROL pc, S_32 x, S_32 y, _32
 				//		 , cx,cx,GetText(pc->caption.text)
 				//		 , width
 				//		 , x );
-				if( ( width + LEFT_SIDE_PAD ) > x )
+				if( USS_GT(( width + LEFT_SIDE_PAD ),_32, x,S_32) )
 				{
 					// left 1/3 of the currnet character sets the cursor to the left
 					// of the character, otherwise cursor is set on(after) the
 					// current character.
 					// OOP! - previously this test was backwards resulting in seemingly
-               // very erratic cursor behavior..
+					// very erratic cursor behavior..
 					if( ((width+LEFT_SIDE_PAD)-x) > (width - _width)/3 )
 						cx = cx-1;
 					//lprintf( WIDE("Why yes, yes it is.") );
@@ -253,7 +253,7 @@ static int OnMouseCommon( EDIT_FIELD_NAME )( PSI_CONTROL pc, S_32 x, S_32 y, _32
 		{
 			// this updates the current cursor position.
 			// this works very well.... (now)
-			if( pe->cursor_pos > cx )
+			if( USS_GT( pe->cursor_pos,_32, cx,int) )
 				moving_left = 1;
 			else
             moving_right = 1;
@@ -353,7 +353,7 @@ static void InsertAChar( PEDIT pe, PTEXT *caption, TEXTCHAR ch )
 	{
 		int n;
 		pe->nCaptionUsed++;
-		for( n = pe->nCaptionUsed; n > pe->cursor_pos; n-- )
+		for( n = pe->nCaptionUsed; SUS_GT( n, int, pe->cursor_pos, _32 ); n-- )
 		{
 			GetText( *caption )[n] =
 				GetText( *caption )[n-1];
@@ -548,7 +548,7 @@ CUSTOM_CONTROL_KEY( KeyEditControl, ( PSI_CONTROL pc, _32 key ) )
 		case KEY_RIGHT:
 			{
 				int oldpos = pe->cursor_pos;
-				if( pe->cursor_pos < pe->nCaptionUsed )
+				if( USS_LT( pe->cursor_pos, _32, pe->nCaptionUsed, int ) )
 				{
 					pe->cursor_pos++;
 					if( !(key & KEY_SHIFT_DOWN ) )

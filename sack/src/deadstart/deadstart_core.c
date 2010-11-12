@@ -76,7 +76,7 @@ struct deadstart_local_data_
 #define shutdown_procs l.shutdown_procs
 	int bInitialDone;
 #define bInitialDone l.bInitialDone
-	int bInitialStarted;
+	LOGICAL bInitialStarted;
 #define bInitialStarted l.bInitialStarted
    int bSuspend;
 #define bSuspend l.bSuspend
@@ -94,17 +94,23 @@ struct deadstart_local_data_
 #define proc_schedule l.proc_schedule
 	struct
 	{
+		BIT_FIELD bInitialized : 1;
 		BIT_FIELD bLog : 1;
 	} flags;
 };
 
-#ifdef UNDER_CE 
-static struct deadstart_local_data_ deadstart_local_data;
-#define l (deadstart_local_data)
-#else
-//#ifdef __STATIC__
+#ifdef UNDER_CE
+#  ifndef __STATIC_GLOBALS__
+#    define __STATIC_GLOBALS__
+#  endif
+#endif
+
+#ifndef __STATIC_GLOBALS__
 static struct deadstart_local_data_ *deadstart_local_data;
 #define l (*deadstart_local_data)
+#else
+static struct deadstart_local_data_ deadstart_local_data;
+#define l (deadstart_local_data)
 #endif
 
 void RunExits( void )
@@ -114,20 +120,18 @@ void RunExits( void )
 
 static void InitLocal( void )
 {
-#ifndef UNDER_CE 
+#ifndef __STATIC_GLOBALS__
 	if( !deadstart_local_data )
-#endif
 	{
-#ifndef UNDER_CE 
 		SimpleRegisterAndCreateGlobal( deadstart_local_data );
+	}
 #endif
+	if( !l.flags.bInitialized )
+	{
 		atexit( RunExits );
+		l.flags.bInitialized = 1;
 	}
 }
-//#else
-	//static struct deadstart_local_data l;
-//static void InitLocal( void ){};
-//#endif
 
 
 // parameter 4 is just used so the external code is not killed
@@ -135,7 +139,7 @@ static void InitLocal( void )
 void RegisterPriorityStartupProc( void (*proc)(void), CTEXTSTR func,int priority, void *use_label, CTEXTSTR file,int line )
 {
 	if( LOG_ALL ||
-#ifndef UNDER_CE
+#ifndef __STATIC_GLOBALS__
 		 (deadstart_local_data 
 #else 
 		(1
@@ -257,7 +261,7 @@ void ClearDeadstarts( void )
 #endif
 
 #ifndef UNDER_CE
-#  if defined( __WINDOWS__ )
+#  if defined( WIN32 )
 #    ifndef __cplusplus_cli
 static BOOL WINAPI CtrlC( DWORD dwCtrlType )
 {
@@ -283,7 +287,7 @@ static BOOL WINAPI CtrlC( DWORD dwCtrlType )
 #    endif
 #  endif
 
-#  ifndef __WINDOWS__
+#  ifndef WIN32
 static void CtrlC( int signal )
 {
    exit(3);
@@ -291,7 +295,7 @@ static void CtrlC( int signal )
 #  endif
 #endif
 
-//#ifdef __WINDOWS__
+//#ifdef WIN32
 
 // wow no such thing as static-izing this... it's
 // always retrieved with dynamic function loading, therefore
@@ -306,7 +310,7 @@ void InvokeDeadstart( void )
 	InitLocal();
    bInitialStarted = 1;
 	//bSuspend = 0; // if invoking, no longer suspend.
-#ifdef __WINDOWS__
+#ifdef WIN32
 	if( !bInitialDone && !bDispatched )
 	{
 #  ifndef UNDER_CE
@@ -327,13 +331,13 @@ void InvokeDeadstart( void )
 #endif
 
 #ifdef __64__
-	while( proc = (PSTARTUP_PROC)LockedExchange64( (PVPTRSZVAL)&proc_schedule, NULL ) )
+	while( ( proc = (PSTARTUP_PROC)LockedExchange64( (PVPTRSZVAL)&proc_schedule, NULL ) ) != NULL )
 #else
-		while( proc = (PSTARTUP_PROC)LockedExchange( (PVPTRSZVAL)&proc_schedule, 0 ) )
+		while( ( proc = (PSTARTUP_PROC)LockedExchange( (PVPTRSZVAL)&proc_schedule, 0 ) ) != NULL )
 #endif
 	{
 		if( LOG_ALL ||
-#ifndef UNDER_CE
+#ifndef __STATIC_GLOBALS__
 		 (deadstart_local_data 
 #else 
 		(1
@@ -355,7 +359,9 @@ void InvokeDeadstart( void )
 #endif
 #endif
 			  )
+			{
 				proc->proc();
+			}
 			proc->bUsed = 0;
 			bDispatched = 0;
 			if( proc_schedule )
@@ -373,12 +379,14 @@ void InvokeDeadstart( void )
 void MarkRootDeadstartComplete( void )
 {
 	bInitialDone = 1;
-#ifndef __NO_OPTIONS__
-	l.flags.bLog = SACK_GetProfileIntEx( "SACK/Deadstart", "Logging Enabled?", 0, TRUE );
-#endif
 }
 
-
+#ifndef __NO_OPTIONS__
+PRIORITY_PRELOAD( InitDeadstartOptions, 100 )
+{
+	l.flags.bLog = SACK_GetProfileIntEx( "SACK/Deadstart", "Logging Enabled?", 0, TRUE );
+}
+#endif
 
 #if defined( __GNUC__ )
 
@@ -426,9 +434,11 @@ void RegisterStartups( void )
 		{
 			if( !current[0].scheduled )
 			{
-#ifndef UNDER_CE
-				if( LOG_ALL || deadstart_local_data && l.flags.bLog )
+				if( ( LOG_ALL
+#ifndef __STATIC_GLOBALS__
+					|| deadstart_local_data
 #endif
+					 )	&& l.flags.bLog )
 					lprintf( WIDE("Register %d %s@%s(%d)"), current->priority, current->funcname, current->file, current->line );
 #  ifdef __CYGWIN__
 #    ifdef DEBUG_CYGWIN_START
@@ -611,7 +621,7 @@ EXPORT_METHOD	void BAG_Exit( int code )
 int is_deadstart_complete( void )
 {
 	//extern _32 deadstart_complete;
-#ifndef UNDER_CE
+#ifndef __STATIC_GLOBALS__
    if( deadstart_local_data )
 		return bInitialDone;//deadstart_complete;
 #endif
@@ -623,7 +633,7 @@ SACK_DEADSTART_NAMESPACE
 
 LOGICAL IsRootDeadstartStarted( void )
 {
-#ifndef UNDER_CE
+#ifndef __STATIC_GLOBALS__
 	if( deadstart_local_data )
 		return bInitialStarted;
 #endif
