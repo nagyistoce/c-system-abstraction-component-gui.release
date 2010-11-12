@@ -3,7 +3,6 @@
 #include <filesys.h>
 #include <sqlgetoption.h>
 #include <system.h>
-//#define DEBUG_FILEOPEN
 
 #ifndef UNDER_CE
 //#include <fcntl.h>
@@ -18,7 +17,7 @@ struct file{
 	int fullname_size;
 
 	PLIST handles; // HANDLE 's
-   PLIST files; // FILE *'s
+	PLIST files; // FILE *'s
 };
 
 struct Group {
@@ -30,15 +29,53 @@ static struct winfile_local_tag {
 	PLIST files;
 	PLIST groups;
 	PLIST handles;
-   LOGICAL have_default;
+	LOGICAL have_default;
+	struct {
+		BIT_FIELD bLogOpenClose : 1;
+	} flags;
 } winfile_local;
 
 #define l winfile_local
 
+#ifndef __NO_OPTIONS__
+PRELOAD( InitWinFileSys )
+{
+   l.flags.bLogOpenClose = SACK_GetProfileIntEx( "SACK/filesys", "Log open and close", 0, TRUE );
+}
+#endif
+
+static void InitGroups( void )
+{
+	struct Group *group;
+	TEXTCHAR tmp[256];
+	// known handle '0' is 'default' which is CurrentWorkingDirectory at load.
+	group = New( struct Group );
+	group->base_path = StrDup( GetCurrentPath( tmp, sizeof( tmp ) ) );
+	group->name = StrDup( "Default" );
+	AddLink( &l.groups, group );
+
+	// known handle '1' is the program's load path.
+	group = New( struct Group );
+	group->base_path = StrDup( GetProgramPath() );
+	group->name = StrDup( "Program Path" );
+	AddLink( &l.groups, group );
+
+	// known handle '1' is the program's start path.
+	group = New( struct Group );
+	group->base_path = StrDup( GetStartupPath() );
+	group->name = StrDup( "Startup Path" );
+	AddLink( &l.groups, group );
+	l.have_default = TRUE;
+}
+
 static struct Group *GetGroupFilePath( CTEXTSTR group )
 {
 	struct Group *filegroup;
-   INDEX idx;
+	INDEX idx;
+	if( !l.groups )
+	{
+		InitGroups();
+	}
 	LIST_FORALL( l.groups, idx, struct Group *, filegroup )
 	{
 		if( StrCaseCmp( filegroup->name, group ) == 0 )
@@ -46,7 +83,7 @@ static struct Group *GetGroupFilePath( CTEXTSTR group )
          break;
 		}
 	}
-   return filegroup;
+	return filegroup;
 }
 
 int  GetFileGroup ( CTEXTSTR groupname, CTEXTSTR default_path )
@@ -60,9 +97,9 @@ int  GetFileGroup ( CTEXTSTR groupname, CTEXTSTR default_path )
 			snprintf( tmp_ent, sizeof( tmp_ent ), "file group/%s", groupname );
 			//lprintf( "option to save is %s", tmp );
 #ifdef __NO_OPTIONS__
-         tmp[0] = 0;
+			tmp[0] = 0;
 #else
-			SACK_GetProfileString( GetProgramName(), tmp_ent, default_path?default_path:"", tmp, sizeof( tmp ) );
+			if( l.have_default ) SACK_GetProfileString( GetProgramName(), tmp_ent, default_path?default_path:"", tmp, sizeof( tmp ) );
 #endif
 			if( tmp[0] )
 				default_path = tmp;
@@ -75,13 +112,13 @@ int  GetFileGroup ( CTEXTSTR groupname, CTEXTSTR default_path )
 		}
 		filegroup = New( struct Group );
 		filegroup->name = StrDup( groupname );
-      if( default_path )
+		if( default_path )
 			filegroup->base_path = StrDup( default_path );
 		else
-         filegroup->base_path = StrDup( "." );
+			filegroup->base_path = StrDup( "." );
 		AddLink( &l.groups, filegroup );
 	}
-   return FindLink( &l.groups, filegroup );
+	return FindLink( &l.groups, filegroup );
 }
 
 TEXTSTR GetFileGroupText ( int group, TEXTSTR path, int path_chars )
@@ -102,7 +139,7 @@ int  SetGroupFilePath ( CTEXTSTR group, CTEXTSTR path )
 	struct Group *filegroup = GetGroupFilePath( group );
 	if( !filegroup )
 	{
-      TEXTCHAR tmp[256];
+		TEXTCHAR tmp[256];
 		filegroup = New( struct Group );
 		filegroup->name = StrDup( group );
 		filegroup->base_path = StrDup( path );
@@ -114,20 +151,20 @@ int  SetGroupFilePath ( CTEXTSTR group, CTEXTSTR path )
 		}
 #endif
 		AddLink( &l.groups, filegroup );
-      l.have_default = TRUE;
+		l.have_default = TRUE;
 	}
 	else
 	{
 		Release( (POINTER)filegroup->base_path );
 		filegroup->base_path = StrDup( path );
 	}
-   return FindLink( &l.groups, filegroup );
+	return FindLink( &l.groups, filegroup );
 }
 
 
 void SetDefaultFilePath( CTEXTSTR path )
 {
-   TEXTSTR tmp_path = NULL;
+	TEXTSTR tmp_path = NULL;
 	struct Group *filegroup;
 	filegroup = (struct Group *)GetLink( &l.groups, 0 );
 #ifndef UNDER_CE
@@ -137,7 +174,7 @@ void SetDefaultFilePath( CTEXTSTR path )
 		int len;
 		GetCurrentPath( here, sizeof( here ) );
 		tmp_path = NewArray( TEXTCHAR, len = ( StrLen( here ) + StrLen( path ) ) );
-      snprintf( tmp_path, len, "%s/%s", here, path + 2 );
+		snprintf( tmp_path, len, "%s/%s", here, path + 2 );
 	}
 #endif
 	if( l.groups && filegroup )
@@ -150,7 +187,7 @@ void SetDefaultFilePath( CTEXTSTR path )
 		SetGroupFilePath( WIDE( "Default" ), tmp_path?tmp_path:path );
 	}
 	if( tmp_path )
-      Release( tmp_path );
+		Release( tmp_path );
 }
 
 static TEXTSTR PrependBasePath( int groupid, struct Group *group, CTEXTSTR filename )
@@ -164,13 +201,14 @@ static TEXTSTR PrependBasePath( int groupid, struct Group *group, CTEXTSTR filen
 		SetDefaultFilePath( OSALOT_GetEnvironmentVariable( "MY_WORK_PATH" ) );
 #endif
 
-		if( !groupid )
+		if( !group )
 		{
-			group = (struct Group *)GetLink( &l.groups, groupid );
+			if( groupid >= 0 )
+				group = (struct Group *)GetLink( &l.groups, groupid );
 		}
 	}
-	if( !group || ( filename && ( filename[0] == '/' || filename[0] == '\\' || filename[1] == ':' ) ) )
-      return StrDup( filename );
+	if( !group || ( filename && ( IsAbsolutePath( filename ) ) ) )
+		return StrDup( filename );
 	{
 		int len;
 		if( groupid && group->base_path[0] == '.' && ( group->base_path[1] == '/' || group->base_path[1] == '\\' ) )
@@ -197,7 +235,7 @@ static TEXTSTR PrependBasePath( int groupid, struct Group *group, CTEXTSTR filen
 		static int aa;
 		if( aa > 2 )
 		{
-         aa++;
+			aa++;
 			lprintf( "%s", fullname );
 		}
 	}
@@ -210,17 +248,17 @@ TEXTSTR sack_prepend_path( int group, CTEXTSTR filename )
 	TEXTSTR result = PrependBasePath( group, filegroup, filename );
 	return result;
 }
-#if defined( __WINDOWS__ )
+#if defined( WIN32 )
 HANDLE sack_open( int group, CTEXTSTR filename, int opts, ... )
 {
 	HANDLE handle;
 	struct file *file;
-   INDEX idx;
+	INDEX idx;
 	LIST_FORALL( l.files, idx, struct file *, file )
 	{
 		if( StrCmp( file->name, filename ) == 0 )
 		{
-         break;
+			break;
 		}
 	}
 	if( !file )
@@ -228,9 +266,9 @@ HANDLE sack_open( int group, CTEXTSTR filename, int opts, ... )
 		struct Group *filegroup = (struct Group *)GetLink( &l.groups, group );
 		file = New( struct file );
 		file->name = StrDup( filename );
-      file->fullname = PrependBasePath( group, filegroup, filename );
+		file->fullname = PrependBasePath( group, filegroup, filename );
 		file->handles = NULL;
-      file->files = NULL;
+		file->files = NULL;
 		AddLink( &l.files,file );
 	}
 	switch( opts & 3 )
@@ -264,23 +302,22 @@ HANDLE sack_open( int group, CTEXTSTR filename, int opts, ... )
 							 , NULL );
 		break;
 	}
-#ifdef DEBUG_FILEOPEN
-	lprintf( WIDE( "open %s %p %d" ), file->fullname, handle, opts );
-#endif
+	if( l.flags.bLogOpenClose )
+		lprintf( WIDE( "open %s %p %d" ), file->fullname, handle, opts );
 	if( handle == INVALID_HANDLE_VALUE )
 	{
-#ifdef DEBUG_FILEOPEN
-		lprintf( WIDE( "Failed to open file [%s]=[%s]" ), file->name, file->fullname );
-#endif
+		if( l.flags.bLogOpenClose )
+			lprintf( WIDE( "Failed to open file [%s]=[%s]" ), file->name, file->fullname );
 		return INVALID_HANDLE_VALUE;
 	}
-   if( handle != INVALID_HANDLE_VALUE )
+	if( handle != INVALID_HANDLE_VALUE )
 		AddLink( &file->handles, handle );
 	return handle;
 }
 
 HANDLE sack_openfile( int group,CTEXTSTR filename, OFSTRUCT *of, int flags )
 {
+#undef OpenFile
    return (HANDLE)OpenFile(filename,of,flags);
 }
 
@@ -288,20 +325,20 @@ HANDLE sack_openfile( int group,CTEXTSTR filename, OFSTRUCT *of, int flags )
 struct file *FindFileByHandle( HANDLE file_file )
 {
 	struct file *file;
-   INDEX idx;
+	INDEX idx;
 	LIST_FORALL( l.files, idx, struct file *, file )
 	{
 		INDEX idx2;
-      HANDLE check;
+		HANDLE check;
 		LIST_FORALL( file->handles, idx2, HANDLE, check )
 		{
 			if( check == file_file )
 				break;
 		}
 		if( check )
-         break;
+			break;
 	}
-   return file;
+	return file;
 }
 
 
@@ -314,7 +351,7 @@ int sack_icreat( int group, CTEXTSTR file, int opts, ... )
 {
 	HANDLE h = sack_open( group, file, opts | O_CREAT );
 	AddLink( &l.handles, h );
-   return FindLink( &l.handles, h );
+	return FindLink( &l.handles, h );
 }
 
 int sack_close( HANDLE file_handle )
@@ -324,9 +361,8 @@ int sack_close( HANDLE file_handle )
 	if( file )
 	{
 		DeleteLink( &file->handles, (POINTER)file_handle );
-#ifdef DEBUG_FILEOPEN
-		lprintf( WIDE("Close %s"), file->fullname );
-#endif
+		if( l.flags.bLogOpenClose )
+			lprintf( WIDE("Close %s"), file->fullname );
 		/*
 		 Release( file->name );
 		 Release( file->fullname );
@@ -390,16 +426,19 @@ int sack_write( HANDLE file_handle, CPOINTER buffer, int size )
    DWORD dwLastWrittenResult;
 	return (WriteFile( (HANDLE)file_handle, (POINTER)buffer, size, &dwLastWrittenResult, NULL )?dwLastWrittenResult:-1 );
 }
-#endif //defined( __WINDOWS__ )
+#endif //defined( WIN32 )
 
-int sack_unlink( CTEXTSTR filename )
+int sack_unlink( int group, CTEXTSTR filename )
 {
 #ifdef __LINUX__
-   return unlink( filename );
+	int okay;
+	TEXTSTR tmp = PrependBasePath( group, filegroup, filename );
+	okay = unlink( filename );
+	Release( tmp );
+	return !okay; // unlink returns TRUE is 0, else error...
 #else
 	int okay;
-	struct Group *filegroup = (struct Group *)GetLink( &l.groups, 0 );
-	TEXTSTR tmp = PrependBasePath( 0, filegroup, filename );
+	TEXTSTR tmp = PrependBasePath( group, NULL, filename );
 	okay = DeleteFile(tmp);
 	Release( tmp );
 	return !okay; // unlink returns TRUE is 0, else error...
@@ -429,7 +468,7 @@ struct file *FindFileByFILE( FILE *file_file )
 {
 	FILE *handle;
 	struct file *file;
-   INDEX idx;
+	INDEX idx;
 	LIST_FORALL( l.files, idx, struct file *, file )
 	{
 		if( StrCmp( file->name, filename ) == 0 )
@@ -459,18 +498,15 @@ struct file *FindFileByFILE( FILE *file_file )
 #endif
 	if( !handle )
 	{
-#ifdef DEBUG_FILEOPEN
-		lprintf( WIDE( "Failed to open file [%s]=[%s]" ), file->name, file->fullname );
-#endif
+		if( l.flags.bLogOpenClose )
+			lprintf( WIDE( "Failed to open file [%s]=[%s]" ), file->name, file->fullname );
 		return NULL;
 	}
-#ifdef DEBUG_FILEOPEN
-	lprintf( WIDE( "sack_open %s (%s)" ), file->fullname, opts );
-#endif
+	if( l.flags.bLogOpenClose )
+		lprintf( WIDE( "sack_open %s (%s)" ), file->fullname, opts );
 	AddLink( &file->files, handle );
-#ifdef DEBUG_FILEOPEN
-   lprintf( "Added FILE* %p and list is %p", handle, file->files );
-#endif
+	if( l.flags.bLogOpenClose )
+		lprintf( "Added FILE* %p and list is %p", handle, file->files );
 	return handle;
 }
  int  sack_fseek ( FILE *file_file, int pos, int whence )
@@ -482,13 +518,11 @@ struct file *FindFileByFILE( FILE *file_file )
 {
 	struct file *file;
 	file = FindFileByFILE( file_file );
-#ifdef DEBUG_FILEOPEN
-	lprintf( WIDE("Closing %s"), file->fullname );
-#endif
+	if( l.flags.bLogOpenClose )
+		lprintf( WIDE("Closing %s"), file->fullname );
 	DeleteLink( &file->files, file_file );
-#ifdef DEBUG_FILEOPEN
-   lprintf( "deleted FILE* %p and list is %p", file_file, file->files );
-#endif
+	if( l.flags.bLogOpenClose )
+		lprintf( "deleted FILE* %p and list is %p", file_file, file->files );
    /*
 	Release( file->name );
    Release( file->fullname );
@@ -509,7 +543,7 @@ struct file *FindFileByFILE( FILE *file_file )
 
  int  sack_rename ( CTEXTSTR file_source, CTEXTSTR new_name )
 {
-#ifdef __WINDOWS__
+#ifdef WIN32
 	return MoveFile( file_source, new_name );
 #else
 	return rename( file_source, new_name );

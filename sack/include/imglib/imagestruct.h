@@ -136,7 +136,7 @@ struct sprite_tag
 	S_32 hotx, hoty;  // int of bitmap hotspot... centers cur on hot
    Image image;
    // curx,y are kept for moving the sprite independantly
-	int scalex, scaley;
+	fixed scalex, scaley;
    // radians from 0 -> 2*pi.  there is no negative...
    float angle; // radians for now... (used internally, set by blot rotated sprite)
    // should consider keeping the angle of rotation

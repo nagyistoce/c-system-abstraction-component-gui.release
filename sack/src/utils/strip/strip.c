@@ -34,124 +34,10 @@ int tab	 // set to collapse spaces into N spaces per tab
   , type		 // set to know how to comment
   , bDoLog	 // do minor logging
   , subcurse // go into subdirectories...
-  , fbsdmake // mangle makefiles (all files) into bsd command syntax
-  , gnumake	 // unmangle makefiles from fbsd to GNU make syntax
   , strip_linefeed // remove \n and replace with ' '
 ;
 
 
-int FBSDMangle( char *line, char length )
-{
-#define INSERT_DOT() {	memmove( line+1, line, length ); line[0] = '.'; return 1; }
-#ifdef __LINUX__
-#define strnicmp strncasecmp
-#endif
-	// line incoming points at the first non whitespace character.
-	// the linebuffer should be sufficiently long to handle inserting a .
-	// if nessescary.
-	// length is the length of the line from here to the end of the line
-	if( strnicmp( line, WIDE("include"), 7 ) == 0 )
-		INSERT_DOT()
-	else if( strnicmp( line, WIDE("ifeq"), 4 ) == 0 )
-	{
-		// ug - gotta find the expressions, and resort them...
-		// and worse - gotta do the same in reverse on the other side
-		//INSERT_DOT()
-		{
-			char *expr1, *expr2;
-			char outline[1024];
-			int len;
-			int expr1len, expr2len;
-			expr1 = line;
-			while( expr1[0] != '\'' )
-				expr1++;
-			expr1len = 1;
-			while( expr1[expr1len] != '\'' )
-				expr1len++;
-			expr1len++;
-			expr2 = expr1 + expr1len;
-			while( expr2[0] != '\'' )
-			{
-				expr2++;
-			}
-			expr2len = 1;
-			while( expr2[expr2len] != '\'' )
-			{
-				expr2len++;
-			}
-			expr2len++;
-			len = sprintf( outline, WIDE(".if %*.*s = %*.*s")
-					, expr1len, expr1len, expr1
-					, expr2len, expr2len, expr2 );
-			len = len - strlen( line );
-			strcpy( line, outline );
-			return len;
-		}
-	}
-	else if( strnicmp( line, WIDE("ifneq"), 5 ) == 0 )
-	{
-		char *expr1, *expr2;
-		int expr1len, expr2len;
-		int len;
-			char outline[1024];
-		expr1 = line;
-		while( expr1[0] != '\'' )
-			expr1++;
-		expr1len = 1;
-		while( expr1[expr1len] != '\'' )
-			expr1len++;
-		expr1len++;
-		expr2 = expr1 + expr1len;
-		while( expr2[0] != '\'' )
-			expr2++;
-		expr2len = 1;
-		while( expr2[expr2len] != '\'' )
-			expr2len++;
-		expr2len++;
-		sprintf( outline, WIDE(".if %*.*s != %*.*s")
-				, expr1len, expr1len, expr1
-				, expr2len, expr2len, expr2 );
-		len = strlen( line ) - len;
-		strcpy( line, outline );
-		return len;
-	}
-	else if( strnicmp( line, WIDE("ifdef"), 5 ) == 0 )
-		INSERT_DOT()
-	else if( strnicmp( line, WIDE("ifndef"), 6 ) == 0 )
-		INSERT_DOT()
-	else if( strnicmp( line, WIDE("if"), 2 ) == 0 )
-		INSERT_DOT()
-	else if( strnicmp( line, WIDE("else"), 4 ) == 0 )
-		INSERT_DOT()
-	else if( strnicmp( line, WIDE("endif"), 5 ) == 0 )
-		INSERT_DOT()
-	return 0;
-}
-
-int GNUMangle( char *line, char length )
-{
-#define DELETE_DOT()	 { memmove( line, line+1, length - 1 ); return -1; }	// line incoming points at the first non whitespace character.
-	// the linebuffer should be sufficiently long to handle deleting a .
-	// if nessescary.
-	// length is the length of the line from here to the end of the line
-	if( strnicmp( line, WIDE(".include"), 8 ) == 0 )
-		DELETE_DOT()
-	else if( strnicmp( line, WIDE(".ifdef"), 6 ) == 0 )
-		DELETE_DOT()
-	else if( strnicmp( line, WIDE(".ifndef"), 7 ) == 0 )
-		DELETE_DOT()
-	else if( strnicmp( line, WIDE(".if"), 3 ) == 0 )
-	{
-
-		DELETE_DOT()
-	}
-	else if( strnicmp( line, WIDE(".else"), 5 ) == 0 )
-		DELETE_DOT()
-	else if( strnicmp( line, WIDE(".endif"), 6 ) == 0 )
-		DELETE_DOT()
-
-	return 0;
-}
 
 unsigned char linebuffer[1024 * 64];
 
@@ -200,12 +86,12 @@ void CPROC process( PTRSZVAL psv, CTEXTSTR file, int flags )
 	}
 	if( bDoLog )
 		printf( WIDE("Processing file: %s\n"), file );
-	in = fopen( file, WIDE("rb") );
+	in = sack_fopen( 0, file, WIDE("rb") );
 	if( in )
 	{
 		int c;
-		sprintf( outfile, WIDE("%s.new"), file );
-		out = fopen( outfile, WIDE("wb") );
+		snprintf( outfile, sizeof( outfile ), WIDE("%s.new"), file );
+		out = sack_fopen( 0, outfile, WIDE("wb") );
 		if( !out )
 		{
 			fprintf( stderr, WIDE("Could not create %s\n"), outfile );
@@ -341,20 +227,6 @@ void CPROC process( PTRSZVAL psv, CTEXTSTR file, int flags )
 						line_start++;
 						len--;
 					}
-					/*
-					// these won't work anyhow - the other
-					// differences in the make system cause it to fail anyhow...
-					if( line_start[0] )
-					{
-						if( fbsdmake )
-						{
-							idx += FBSDMangle( line_start, len );
-						}
-						else if( gnumake )
-						{
-							idx += GNUMangle( line_start, len );						}
-					}
-					*/
 				}
 
 				{
@@ -401,8 +273,6 @@ int main( int argc, char **argv )
 		fprintf( stderr, WIDE(" -[Ss] - subcurse (recurse) through all sub-directories\n") );
 		fprintf( stderr, WIDE(" -[Rr] - add carriage returns (\\r) to output\n") );
 		fprintf( stderr, WIDE(" -[Vv] - verbose operation - list files processed\n") );
-		//fprintf( stderr, WIDE(" -B - mangles makefiles into FreeBSD ugliness\n") );
-		//fprintf( stderr, WIDE(" -G - unmalged makefiles from FreeBSD to GNU\n") );
 		fprintf( stderr, WIDE(" -D, -T specified together the file is first de-tabbed and then tabbed\n") );
 		fprintf( stderr, WIDE(" <path> is the starting path...\n") );
 		fprintf( stderr, WIDE(" !<file> specifies NOT that mask...\n") );
@@ -420,14 +290,6 @@ int main( int argc, char **argv )
 			{
 			switch( argv[argstart][n] )
 			{
-			case 'B':
-			case 'b':
-				fbsdmake = 1;
-				break;
-			case 'G':
-			case 'g':
-				gnumake = 1;
-				break;
 			case 'a':
 			case 'A':
 				strip_linefeed = 1;

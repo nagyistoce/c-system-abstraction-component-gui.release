@@ -6,7 +6,7 @@
 #include <stdhdrs.h>
 #include <system.h>
 #include <idle.h>
-#ifdef __WINDOWS__
+#ifdef WIN32
 #ifndef UNDER_CE
 #include <io.h> // unlink
 #endif
@@ -79,7 +79,7 @@ LOGICAL MainCanvasStillHidden( void )
 }
 
 
-#ifdef __WINDOWS__
+#ifdef WIN32
 #ifndef UNDER_CE
 DEVMODE devmode; // the original mode that this as called with
 /* Utility routine for SetResolution */
@@ -254,7 +254,7 @@ static void SetWithFindMode( LPDEVMODE mode, int bRestoreOnCrash )
 void SetResolution( PLOAD_TASK task, _32 w, _32 h )
 {
 #ifndef UNDER_CE
-#ifdef __WINDOWS__
+#ifdef WIN32
 	DEVMODE settings;
 	PPAGE_DATA page;
 	page = ShellGetCurrentPage();
@@ -275,11 +275,11 @@ void SetResolution( PLOAD_TASK task, _32 w, _32 h )
       EnumDisplaySettings( NULL, ENUM_CURRENT_SETTINGS, &devmode );
 		//GetDisplaySize( &w, &h );
 		{
-			FILE *file = fopen( WIDE("last.resolution"), WIDE("wb") );
+			FILE *file = sack_fopen( 2, WIDE("last.resolution"), WIDE("wb") );
 			if( file )
 			{
 				fwrite( &devmode, 1, sizeof( devmode ), file );
-            fclose( file );
+				fclose( file );
 			}
 		}
 	}
@@ -303,7 +303,7 @@ void ResetResolution( PLOAD_TASK task )
 {
    lprintf( WIDE("RESET RESOLUTION") );
 #ifndef UNDER_CE
-#ifdef __WINDOWS__
+#ifdef WIN32
    if( task )
 	{
 		INDEX idx = FindLink( &l.tasks_that_hid_main_canvas, task );
@@ -314,15 +314,15 @@ void ResetResolution( PLOAD_TASK task )
 		return;
 	if( !task || task->flags.bLaunchAt )
 	{
-      DEVMODE oldmode;
-		FILE *file = fopen( WIDE("last.resolution"), WIDE("rb") );
+		DEVMODE oldmode;
+		FILE *file = sack_fopen( 2, WIDE("last.resolution"), WIDE("rb") );
 		if( file )
 		{
 			fread( &oldmode, 1, sizeof( oldmode ), file );
 			fclose( file );
 			SetWithFindMode( &oldmode, TRUE );
 #ifndef UNDER_CE
-			unlink( WIDE("last.resolution") );
+			sack_unlink( 2, WIDE("last.resolution") );
 #endif
 		}
 		else
@@ -352,7 +352,7 @@ PRELOAD( RegisterTaskControls )
 	{
 		_32 w, h;
 		{
-			FILE *file = fopen( WIDE("last.resolution"), WIDE("rb") );
+			FILE *file = sack_fopen( 2, WIDE("last.resolution"), WIDE("rb") );
 			if( file )
 			{
 				fread( &w, 1, sizeof( w ), file );
@@ -392,30 +392,30 @@ PRELOAD( RegisterTaskControls )
 	{
 		l.shell = CreateTask( NULL );
 		l.shell->flags.bNonExclusive = 1;
-		StrCpy( l.shell->pName, WIDE("Command Shell") );
-		StrCpy( l.shell->pTask, WIDE("cmd.exe") );
-		StrCpy( l.shell->pPath, WIDE(".") );
+		StrCpyEx( l.shell->pName, WIDE("Command Shell"), sizeof( l.shell->pName ) );
+		StrCpyEx( l.shell->pTask, WIDE("cmd.exe"), sizeof( l.shell->pTask ) );
+		StrCpyEx( l.shell->pPath, WIDE("."), sizeof( l.shell->pPath ) );
 	}
 	{
 		l.power_shell = CreateTask( NULL );
 		l.power_shell->flags.bNonExclusive = 1;
-		StrCpy( l.power_shell->pName, WIDE("Power Shell") );
-		StrCpy( l.power_shell->pTask, WIDE("%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\PowerShell.exe") );
-		StrCpy( l.power_shell->pPath, WIDE(".") );
+		StrCpyEx( l.power_shell->pName, WIDE("Power Shell"), sizeof( l.shell->pName ) );
+		StrCpyEx( l.power_shell->pTask, WIDE("%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\PowerShell.exe"), sizeof( l.shell->pTask ) );
+		StrCpyEx( l.power_shell->pPath, WIDE("."), sizeof( l.shell->pPath ) );
 	}
 	{
 		l.power_shell_ise = CreateTask( NULL );
 		l.power_shell_ise->flags.bNonExclusive = 1;
-		StrCpy( l.power_shell_ise->pName, WIDE("Power Shell ISE") );
-		StrCpy( l.power_shell_ise->pTask, WIDE("%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\PowerShell_ise.exe") );
-		StrCpy( l.power_shell_ise->pPath, WIDE(".") );
+		StrCpyEx( l.power_shell_ise->pName, WIDE("Power Shell ISE"), sizeof( l.shell->pName ) );
+		StrCpyEx( l.power_shell_ise->pTask, WIDE("%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\PowerShell_ise.exe"), sizeof( l.shell->pTask ) );
+		StrCpyEx( l.power_shell_ise->pPath, WIDE("."), sizeof( l.shell->pPath ) );
 	}
 	{
 		l.windows_shell = CreateTask( NULL );
 		l.windows_shell->flags.bNonExclusive = 1;
-		StrCpy( l.windows_shell->pName, WIDE("Explorer") );
-		StrCpy( l.windows_shell->pTask, WIDE("explorer.exe") );
-		StrCpy( l.windows_shell->pPath, WIDE(".") );
+		StrCpyEx( l.windows_shell->pName, WIDE("Explorer"), sizeof( l.shell->pName ) );
+		StrCpyEx( l.windows_shell->pTask, WIDE("explorer.exe"), sizeof( l.shell->pTask ) );
+		StrCpyEx( l.windows_shell->pPath, WIDE("."), sizeof( l.shell->pPath ) );
 	}
 
 
@@ -498,15 +498,15 @@ char *GetTaskArgs( PLOAD_TASK pTask )
 	static char args[4096];
 	int len = 0, n;
 	args[0] = 0;
-   // arg[0] should be the same as program name...
+	// arg[0] should be the same as program name...
 	for( n = 1; pTask->pArgs && pTask->pArgs[n]; n++ )
 	{
 		if( StrChr( pTask->pArgs[n], ' ' ) )
-			len += snprintf( args + len, sizeof( args ) - len , WIDE("%s\"%s\""), n>1?WIDE(" "):WIDE(""), pTask->pArgs[n] );
+			len += snprintf( args + len, sizeof( args ) - len * sizeof( TEXTCHAR ), WIDE("%s\"%s\""), n>1?WIDE(" "):WIDE(""), pTask->pArgs[n] );
 		else
-			len += snprintf( args + len, sizeof( args ) - len , WIDE("%s%s"), n>1?WIDE(" "):WIDE(""), pTask->pArgs[n] );
+			len += snprintf( args + len, sizeof( args ) - len * sizeof( TEXTCHAR ), WIDE("%s%s"), n>1?WIDE(" "):WIDE(""), pTask->pArgs[n] );
 	}
-   return args;
+	return args;
 }
 
 //---------------------------------------------------------------------------
@@ -1019,7 +1019,7 @@ static void KillSpawnedPrograms( void )
 		{
          LOGICAL closed = FALSE;
 			tasks->flags.bRestart = 0;
-#ifdef __WINDOWS__
+#ifdef WIN32
 			{
 				TEXTCHAR progname[256];
 				TEXTCHAR buffer[256];
@@ -1118,15 +1118,15 @@ int LaunchAutoTasks( int bCaller )
    int launched = 0;
 	INDEX idx;
 	PLOAD_TASK task;
-#ifdef __WINDOWS__
+#ifdef WIN32
 	if( bCaller && !l.flags.wait_for_caller )
 	{
 		FILE *file;
 		// we're not waiitng for caller in a banner-type mode...
 	// therefore we need to launch these ourselves...
-		if( ( file = fopen( WIDE("f:/config.sys"), WIDE("rb") ) ) )
+		if( ( file = sack_fopen( -1, WIDE("f:/config.sys"), WIDE("rb") ) ) )
 		{
-         /* is okay. */
+			/* is okay. */
 			fclose( file );
 		}
 		else
@@ -1141,7 +1141,7 @@ int LaunchAutoTasks( int bCaller )
 		if( ( bCaller && ( task->flags.bLaunchWhenCallerUp ) )
 			|| ( !bCaller && !( task->flags.bLaunchWhenCallerUp ) ) )
 		{
-         launched = 1;
+			launched = 1;
 			RunATask( task, !task->flags.bNonExclusive&&!task->flags.bBackground );
 		}
 	}
@@ -1161,15 +1161,15 @@ PTRSZVAL CPROC WaitForCallerThread( PTHREAD thread )
    //SetBannerOptions( banner, BANNER_TOP, 0 );
 	while( 1 )
 	{
-      FILE *file;
-		if( ( file = fopen( WIDE("f:\\config.sys"), WIDE("rb") ) ) )
+		FILE *file;
+		if( ( file = sack_fopen( 0, WIDE("f:\\config.sys"), WIDE("rb") ) ) )
 		{
 			fclose( file );
-         lprintf( WIDE("Launching caller auto tasks.") );
+			lprintf( WIDE("Launching caller auto tasks.") );
 			LaunchAutoTasks( 1 );
-         break;
+			break;
 		}
-      WakeableSleep( 1000 );
+		WakeableSleep( 1000 );
 	}
 	if( GetThreadParam( thread ) )
 		RemoveBanner2Ex( &banner DBG_SRC );
@@ -1429,19 +1429,19 @@ PTRSZVAL CPROC SetTaskOneTime( PTRSZVAL psv, arg_list args )
 
 PTRSZVAL CPROC SetLaunchResolution( PTRSZVAL psv, arg_list args )
 {
-   PARAM( args, S_64, width );
+	PARAM( args, S_64, width );
 	PARAM( args, S_64, height );
-   PSV_PARAM;
+	PSV_PARAM;
 	if( pTask )
 	{
 		if( width && height )
 		{
-			pTask->launch_width = width;
-			pTask->launch_height = height;
+			pTask->launch_width = (int)width;
+			pTask->launch_height = (int)height;
 			pTask->flags.bLaunchAt = 1;
 		}
 	}
-   return psv;
+	return psv;
 }
 
 //---------------------------------------------------------------------------
@@ -1453,7 +1453,7 @@ PTRSZVAL CPROC SetTaskSecurity( PTRSZVAL psv, arg_list args )
 	//  )
 	//{
 	//}
-   return psv;
+	return psv;
 }
 
 PTRSZVAL CPROC SetTaskRunOn( PTRSZVAL psv, arg_list args )
@@ -1848,7 +1848,7 @@ OnGlobalPropertyEdit( WIDE("Tasks") )( PSI_CONTROL parent )
             INDEX idx;
 				char buf[256];
 				SetItemData( AddListItem( list, WIDE("Command Shell") ), (PTRSZVAL)l.shell );
-#ifdef __WINDOWS__
+#ifdef WIN32
 				SetItemData( AddListItem( list, WIDE("Explorer") ), (PTRSZVAL)l.windows_shell );
 				SetItemData( AddListItem( list, WIDE("Power Shell") ), (PTRSZVAL)l.power_shell );
 				SetItemData( AddListItem( list, WIDE("Power Shell ISE") ), (PTRSZVAL)l.power_shell_ise );
@@ -1954,21 +1954,21 @@ OnEditControl( WIDE("Task Util/Set Resolution") )( PTRSZVAL psv, PSI_CONTROL par
 
 OnSaveControl( WIDE("Task Util/Set Resolution") )( FILE *file, PTRSZVAL psv )
 {
-   struct resolution_button *resbut = (struct resolution_button *)psv;
+	struct resolution_button *resbut = (struct resolution_button *)psv;
 	fprintf( file, WIDE("launch at %d by %d\n"), resbut->width, resbut->height );
 }
 
 PTRSZVAL CPROC SetLaunchResolution2( PTRSZVAL psv, arg_list args )
 {
-   PARAM( args, S_64, width );
+	PARAM( args, S_64, width );
 	PARAM( args, S_64, height );
-   struct resolution_button *resbut = (struct resolution_button *)psv;
+	struct resolution_button *resbut = (struct resolution_button *)psv;
 	if( resbut )
 	{
-		resbut->width = width;
-		resbut->height = height;
+		resbut->width = (int)width;
+		resbut->height = (int)height;
 	}
-   return psv;
+	return psv;
 }
 
 
@@ -2017,7 +2017,7 @@ static LOGICAL OnDropAccept( WIDE("Add Task Button") )( CTEXTSTR file, int x, in
    return 0;
 }
 
-#ifdef __WATCOMC__
+#if ( __WATCOMC__ < 1290 )
 PUBLIC( void, ExportThis )( void )
 {
 }

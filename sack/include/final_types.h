@@ -14,7 +14,7 @@
 #include <tchar.h>
 #include <strsafe.h>
 
-#endif
+#  endif
 
 // may consider changing this to P_16 for unicode...
 #ifdef UNICODE
@@ -36,12 +36,8 @@
 #    ifndef __cplusplus_cli
 #define fprintf   fwprintf
 #define atoi      _wtoi
-#define vsnprintf StringCbVPrintf
-#define snprintf  StringCbPrintf
 #define printf    wprintf
 // define sprintf here.
-#undef sprintf
-#define sprintf(buf,format,...)  StringCchPrintf( buf, sizeof( buf )/sizeof(TEXTCHAR), format,##__VA_ARGS__ )
 #       endif
 #    endif
 #    ifdef _ARM_
@@ -58,15 +54,46 @@
 #define fprintf   fwprintf
 #endif
 
-// len should be passed as character count.
-#define vsnprintf(buf,len,format,args) StringCchVPrintf( buf, len, format, args )
-#define snprintf(buf,len,format,...)  StringCchPrintf( buf, len, format,##__VA_ARGS__ )
-
-// this is a success condition to redefine this here (for now)
-#define sprintf(buf,format,...)  StringCchPrintf( buf, sizeof( buf )/sizeof(TEXTCHAR), format,##__VA_ARGS__ )
-
 # endif
 #endif
 
+#  ifdef _MSC_VER
+#define SUFFER_WITH_NO_SNPRINTF
+#    ifndef SUFFER_WITH_NO_SNPRINTF
+#      define vnsprintf protable_vsnprintf
+//   this one gives deprication warnings
+//   #    define vsnprintf _vsnprintf
+
+//   this one doesn't work to measure strings
+//   #    define vsnprintf(buf,len,format,args) _vsnprintf_s(buf,len,(len)/sizeof(TEXTCHAR),format,args)
+//   this one doesn't macro well, and doesnt' measure strings
+//  (SUCCEEDED(StringCbVPrintf( buf, len, format, args ))?StrLen(buf):-1)
+
+#      define snprintf portable_snprintf
+
+//   this one gives deprication warnings
+//   #    define snprintf _snprintf
+
+//   this one doesn't work to measure strings
+//   #    define snprintf(buf,len,format,...) _snprintf_s(buf,len,(len)/sizeof(TEXTCHAR),format,##__VA_ARGS__)
+//   this one doesn't macro well, and doesnt' measure strings
+//   (SUCCEEDED(StringCbPrintf( buf, len, format,##__VA_ARGS__ ))?StrLen(buf):-1)
+
+// make sure this is off, cause we really don't, and have to include the following
+#      undef HAVE_SNPRINTF
+#      define PREFER_PORTABLE_SNPRINTF // define this anyhow so we can avoid name collisions
+#      ifdef SACK_CORE_BUILD
+#        include <../src/snprintf_2.2/snprintf.h>
+#      else
+#        include <snprintf-2.2/snprintf.h>
+#      endif // SACK_CORE_BUILD
+#    else // SUFFER_WITH_WARNININGS
+#      define snprintf _snprintf
+#      define vsnprintf _vsnprintf
+#    endif// suffer_with_warnings
+
+#    define sscanf sscanf_s
+
+#  endif // _MSC_VER
 
 #endif

@@ -22,8 +22,8 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
                   PREFIX ""
                   FOLDER "InterShell/plugins"
 )
-target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} sack_widgets )
-install_literal_product( ${PROJECT_NAME} InterShell/plugins ) 
+target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARIES} sack_widgets )
+install_literal_product( ${PROJECT_NAME} plugins ) 
 
 add_subdirectory( frames )
 

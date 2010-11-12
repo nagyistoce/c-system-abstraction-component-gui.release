@@ -217,7 +217,7 @@ static _32 PutCharacterFontX ( ImageFile *pImage
          col = pchar->offset;
          for( bit = 0; bit < size; col++, bit++ )
          {
-            _8 chardata = CharDatax( data, bit );
+            _8 chardata = (_8)CharDatax( data, bit );
             if( chardata )
                CharPlotAlphax( pImage, StepX(x,col,line), StepY(y,line,col)
                              , chardata
@@ -635,9 +635,9 @@ _32 PutMenuStringFontEx( ImageFile *pImage, S_32 x, S_32 y, CDATA color, CDATA b
 			}
 			if( chars[(int)*pString] )
 			{
-				*width += chars[(int)*pString]->width;
-				if( (UseFont->baseline - chars[(int)*pString]->descent ) > maxheight )
-					maxheight = UseFont->baseline - chars[(int)*pString]->descent;
+				*width += chars[*pString]->width;
+				if( SUS_GT( (UseFont->baseline - chars[*pString]->descent ),S_32,maxheight,_32) )
+					maxheight = UseFont->baseline - chars[*pString]->descent;
 			}
 			pString++;
 		}

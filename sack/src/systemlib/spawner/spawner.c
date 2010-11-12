@@ -1,4 +1,4 @@
-#ifdef __WINDOWS__
+#ifdef WIN32
 #include <systray.h>
 #endif
 #include <sharemem.h>
@@ -369,7 +369,7 @@ ATEXIT( KillAllTasks )
 
 int main( void )
 {
-#ifdef __WINDOWS__
+#ifdef WIN32
    RegisterIcon( NULL );
 #endif
    Init();

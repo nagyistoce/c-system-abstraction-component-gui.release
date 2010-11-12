@@ -1852,14 +1852,18 @@ genxStatus genxPI(genxWriter w, constUtf8 target, constUtf8 text)
   if ((w->status = genxCheckText(w, target)) != GENX_SUCCESS)
     return w->status;
   if ((w->status = checkNCName(w, target)) != GENX_SUCCESS)
-    return w->status;
+	  return w->status;
+  /*
+	* but 99% of what I want to emit is <?XML ...
+	* and there's no other way to formulate this
+   * or xml-stylesheet
   if ((strlen((const char *) target) >= 3) &&
       (target[0] == 'x' || target[0] == 'X') &&
       (target[1] == 'm' || target[1] == 'M') &&
       (target[2] == 'l' || target[2] == 'L') &&
       (target[3] == 0))
     return w->status = GENX_XML_PI_TARGET;
-
+  */
   if ((w->status = genxCheckText(w, text)) != GENX_SUCCESS)
     return w->status;
 

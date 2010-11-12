@@ -1,6 +1,6 @@
 #define DEBUG_DRAW_MENU
 
-#if !defined( __WINDOWS__ ) && !defined( _MSC_VER)
+#if !defined( WIN32 ) && !defined( _MSC_VER)
 // haha - well at least under windows these menu issues can be resolved.
 #define CUSTOM_MENUS
 #endif
@@ -966,7 +966,7 @@ PSI_PROC( int, TrackPopup )( PMENU hMenuSub, PSI_CONTROL parent )
 		PRENDERER r = GetFrameRenderer( parent );
 		int nCmd;
 		 POINT p;
-#ifdef __WINDOWS__
+#ifdef WIN32
 		if( r )
 			hWndLastFocus = (HWND)GetNativeHandle( r );
 #endif

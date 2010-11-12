@@ -156,11 +156,11 @@ void RenderTCPClient( PTRSZVAL psvRenderWhat // user data to pass to render to g
 					 ( sample->tick - from ) // how much past the from that this is...
 					 * resolution
 					) / (to-from);
-			point.value =
-					(
+			point.value = (_32) // truncate
+					((
 					 ( sample->cpu_tick_delta - base_value )
 					 * value_resolution
-					) / ( (max_value - base_value) +1 );
+					) / ( (max_value - base_value) +1 ));
          //lprintf( "Base %Ld max %Ld val %Ld out %ld", base_value, max_value, sample->cpu_tick_delta, point.value );
 			point.tick = sample->tick;
 			tick = sample->tick + 1;

@@ -37,10 +37,10 @@ extern int bGLColorMode;
 
 typedef struct ImagePngRawData_tag
 {
-  // The buffer to "read" from
-  _8 *r_data;
-  // The buffer size
-  int r_size;
+	// The buffer to "read" from
+	_8 *r_data;
+	// The buffer size
+	png_size_t r_size;
 }ImagePngRawData;
 
 IMAGE_NAMESPACE
@@ -50,17 +50,17 @@ namespace loader {
 
 void ImagePngRead (png_structp png, png_bytep data, png_size_t size)
 {
-  ImagePngRawData *self = (ImagePngRawData *) png->io_ptr;
-  if (self->r_size < size)
-  {
-    png_error (png, "Space Read Error");
-  }
-  else
-  {
-    memcpy (data, self->r_data, size);
-    self->r_size -= size;
-    self->r_data += size;
-  } /* endif */
+	ImagePngRawData *self = (ImagePngRawData *) png->io_ptr;
+	if (self->r_size < size)
+	{
+		png_error (png, "Space Read Error");
+	}
+	else
+	{
+		memcpy (data, self->r_data, size);
+		self->r_size -= size;
+		self->r_data += size;
+	} /* endif */
 }
 
 void NotSoFatalError( png_structp png_ptr, png_const_charp c )

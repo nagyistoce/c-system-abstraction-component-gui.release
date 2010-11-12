@@ -578,7 +578,7 @@ PSI_PROC( int, PickColorEx )( CDATA *result, CDATA original, PSI_CONTROL hAbove,
 		//SetShadeMid( pcd.psw, original );
 		//SetColorWell( pcd.pcZoom, original );
 
-//#ifndef __WINDOWS__
+//#ifndef WIN32
 		SaveXMLFrame( pf, WIDE("palette.frame") );
 //#endif
 	}

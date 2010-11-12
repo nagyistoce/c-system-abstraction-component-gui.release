@@ -3,7 +3,7 @@
 #include <controls.h>
 #include <idle.h>
 
-#ifndef __WINDOWS__
+#ifndef WIN32
 #define BTN_OKAY   1
 #endif
 
@@ -42,7 +42,7 @@ int _SQLPromptINIValue(			 CTEXTSTR lpszSection,
 		PTHREAD me;
 		int done;
 	} done;
-	char text[256];
+	TEXTCHAR text[256];
 	done.me = MakeThread();
 	done.done = 0;
 	//if( blog )
@@ -51,7 +51,7 @@ int _SQLPromptINIValue(			 CTEXTSTR lpszSection,
 	if( frame )
 	{
 	MakeTextControl( frame, DIA_X(1), DIA_Y(2), DIA_W(254), DIA_H(16), -1, WIDE("The value below has not been found.  Please enter the correct value."), 0 );
-	sprintf( text, WIDE("%s\n   [%s]\n      %s ="), filename, lpszSection, lpszEntry );
+	snprintf( text, sizeof( text ), WIDE("%s\n   [%s]\n      %s ="), filename, lpszSection, lpszEntry );
 	MakeTextControl( frame, DIA_X(4), DIA_Y(18), DIA_W(248), DIA_H(28), 123, text, EDIT_READONLY );
 	MakeEditControl( frame, DIA_X(4), DIA_Y(46), DIA_W(248), DIA_H(12), 124, lpszDefault, 0 );
 	MakeButton( frame, DIA_X(4), DIA_Y(63), DIA_W(248), DIA_H(14), IDOK, WIDE("Ok"), 0, SetIntTRUE, (PTRSZVAL)&done );
@@ -70,8 +70,7 @@ int _SQLPromptINIValue(			 CTEXTSTR lpszSection,
 	else
 #endif
 	{
-		strncpy( lpszReturnBuffer, lpszDefault, cbReturnBuffer );
-		lpszReturnBuffer[cbReturnBuffer-1] = 0;
+		StrCpyEx( lpszReturnBuffer, lpszDefault, cbReturnBuffer );
 	}
 	return strlen( lpszReturnBuffer );
 }

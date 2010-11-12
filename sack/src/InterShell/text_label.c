@@ -193,7 +193,7 @@ PRELOAD( PreconfigureVariables )
 CTEXTSTR GetPageTitle( void )
 {
 	PPAGE_DATA page = ShellGetCurrentPage();
-   return page->title?page->title:WIDE( "DEFAULT PAGE" );
+	return page->title?page->title:WIDE( "DEFAULT PAGE" );
 }
 
 PVARIABLE FindVariableByName( CTEXTSTR variable )
@@ -201,20 +201,20 @@ PVARIABLE FindVariableByName( CTEXTSTR variable )
 	PVARIABLE var;
 	INDEX nVar;
 	if( !variable )
-      return NULL; // can't have a NULL variable.
+		return NULL; // can't have a NULL variable.
 	LIST_FORALL( extern_variables, nVar, PVARIABLE, var )
 	{
 		//for( nVar = 0; nVar < NUM_VARIABLES; nVar++ )
 		if( var->name )
 		{
 			int varnamelen = strlen( var->name );
-			if( strnicmp( variable, var->name, varnamelen ) == 0 )
+			if( StrCaseCmpEx( variable, var->name, varnamelen ) == 0 )
 			{
 				break;
 			}
 		}
 	}
-   return var;
+	return var;
 }
 
 CTEXTSTR InterShell_GetControlLabelText( PMENU_BUTTON button, PPAGE_LABEL label, CTEXTSTR variable )
@@ -226,47 +226,47 @@ CTEXTSTR InterShell_GetControlLabelText( PMENU_BUTTON button, PPAGE_LABEL label,
 		if( variable[0] == '%' )
 		{
 			PVARIABLE var = FindVariableByName( variable + 1);
-         if( var )
+			if( var )
 			{
 				if( var->flags.bString )
 				{
-					nOutput += snprintf( output + nOutput, sizeof( output ) - nOutput - 1
+					nOutput += snprintf( output + nOutput, sizeof( output ) - (nOutput - 1)*sizeof(TEXTCHAR)
 									 , WIDE("%s"), (*var->data.string_value) );
 				}
 				else if( var->flags.bConstString )
 				{
-					nOutput += snprintf( output + nOutput, sizeof( output ) - nOutput - 1
+					nOutput += snprintf( output + nOutput, sizeof( output ) - (nOutput - 1)*sizeof(TEXTCHAR)
 											 , WIDE("%s"), (var->data.string_const_value?var->data.string_const_value:WIDE("")) );
 				}
 				else if( var->flags.bInt )
 				{
-					nOutput += snprintf( output + nOutput, sizeof( output ) - nOutput - 1
+					nOutput += snprintf( output + nOutput, sizeof( output ) - (nOutput - 1)*sizeof(TEXTCHAR)
 									 , WIDE("%ld"), (*var->data.int_value) );
 				}
 				else if( var->flags.bProc )
 				{
 					//lprintf( "Calling external function to get value..." );
-					nOutput += snprintf( output + nOutput, sizeof( output ) - nOutput - 1
+					nOutput += snprintf( output + nOutput, sizeof( output ) - (nOutput - 1)*sizeof(TEXTCHAR)
 											 , WIDE("%s"), var->data.proc() );
 					//lprintf( "New output is [%s]", output );
 				}
 				else if( var->flags.bProcControlEx )
 				{
 					//lprintf( "Calling external function to get value..." );
-					nOutput += snprintf( output + nOutput, sizeof( output ) - nOutput - 1
+					nOutput += snprintf( output + nOutput, sizeof( output ) - (nOutput - 1)*sizeof(TEXTCHAR)
 											 , WIDE("%s"), var->data.proc_control_ex(var->psvUserData,button) );
 					//lprintf( "New output is [%s]", output );
 				}
 				else if( var->flags.bProcEx )
 				{
 					//lprintf( "Calling external extended function to get value..." );
-					nOutput += snprintf( output + nOutput, sizeof( output ) - nOutput - 1
+					nOutput += snprintf( output + nOutput, sizeof( output ) - (nOutput - 1)*sizeof(TEXTCHAR)
 											 , WIDE("%s"), var->data.proc_ex( var->psvUserData ) );
 					//lprintf( "New output is [%s]", output );
 				}
 				else
 				{
-					nOutput += snprintf( output + nOutput, sizeof( output ) - nOutput - 1
+					nOutput += snprintf( output + nOutput, sizeof( output ) - (nOutput - 1)*sizeof(TEXTCHAR)
 									 , WIDE("%%%s"), var->name );
 				}
 				if( label )
@@ -280,7 +280,7 @@ CTEXTSTR InterShell_GetControlLabelText( PMENU_BUTTON button, PPAGE_LABEL label,
 			{
 				static int n;
             n++;
-				nOutput += snprintf( output + nOutput, sizeof( output ) - nOutput - 1
+				nOutput += snprintf( output + nOutput, sizeof( output ) - (nOutput - 1)*sizeof(TEXTCHAR)
 								 , WIDE("[bad variable(%d)]"), n );
 			}
 		}
@@ -312,29 +312,29 @@ CTEXTSTR InterShell_TranslateLabelTextEx( PMENU_BUTTON button, PPAGE_LABEL label
 				{
 					if( var->flags.bString )
 					{
-						nOutput += snprintf( output + nOutput, buffer_len - nOutput - 1
+						nOutput += snprintf( output + nOutput, buffer_len - (nOutput - 1)*sizeof(TEXTCHAR)
 										 , WIDE("%s"), (*var->data.string_value) );
 					}
 					else if( var->flags.bConstString )
 					{
-						nOutput += snprintf( output + nOutput, buffer_len - nOutput - 1
+						nOutput += snprintf( output + nOutput, buffer_len - (nOutput - 1)*sizeof(TEXTCHAR)
 										 , WIDE("%s"), (var->data.string_const_value?var->data.string_const_value:WIDE("")) );
 					}
 					else if( var->flags.bInt )
 					{
-						nOutput += snprintf( output + nOutput, buffer_len - nOutput - 1
+						nOutput += snprintf( output + nOutput, buffer_len - (nOutput - 1)*sizeof(TEXTCHAR)
 										 , WIDE("%ld"), (*var->data.int_value) );
 					}
 					else if( var->flags.bProc )
 					{
                   //lprintf( "Calling external function to get value..." );
-                  nOutput += snprintf( output + nOutput, buffer_len - nOutput - 1
+                  nOutput += snprintf( output + nOutput, buffer_len - (nOutput - 1)*sizeof(TEXTCHAR)
 												 , WIDE("%s"), var->data.proc() );
 						//lprintf( "New output is [%s]", output );
 					}
 					else
 					{
-						nOutput += snprintf( output + nOutput, buffer_len - nOutput - 1
+						nOutput += snprintf( output + nOutput, buffer_len - (nOutput - 1)*sizeof(TEXTCHAR)
 										 , WIDE("%%%s"), var->name );
 					}
 					if( label )
@@ -358,17 +358,17 @@ CTEXTSTR InterShell_TranslateLabelTextEx( PMENU_BUTTON button, PPAGE_LABEL label
 					env_var = OSALOT_GetEnvironmentVariable( tmp );
 					if( env_var )
 					{
-						nOutput += snprintf( output + nOutput, buffer_len - nOutput - 1
+						nOutput += snprintf( output + nOutput, buffer_len - (nOutput - 1)*sizeof(TEXTCHAR)
 												 , WIDE( "%s" ), env_var );
 						variable += (env-variable);
 					}
 					else
 #endif
-						nOutput += snprintf( output + nOutput, buffer_len - nOutput - 1
+						nOutput += snprintf( output + nOutput, buffer_len - (nOutput - 1)*sizeof(TEXTCHAR)
 												 , WIDE("[bad variable]") );
 				}
 				else
-					nOutput += snprintf( output + nOutput, buffer_len - nOutput - 1
+					nOutput += snprintf( output + nOutput, buffer_len - (nOutput - 1)*sizeof(TEXTCHAR)
 											 , WIDE("[bad variable]") );
 			}
 		}

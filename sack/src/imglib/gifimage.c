@@ -103,8 +103,8 @@ _8 *Raster;       /* The raster data stream, unblocked */
 _8 used[256];
 int  numused;
 
-char *id87 = "GIF87a";
-char *id89 = "GIF89a";
+const char *id87 = "GIF87a";
+const char *id89 = "GIF89a";
 
 int   ReadCode (void);
 //int   log2 (int);

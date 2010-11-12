@@ -1,7 +1,7 @@
 #ifndef DEADSTART_DEFINED
 #define DEADSTART_DEFINED
 
-#ifdef __WINDOWS__
+#ifdef WIN32
 //#include <stdhdrs.h>
 #endif
 #include <sack_types.h>
@@ -373,6 +373,7 @@ typedef void(*__type_rtn ) ( void );
 #endif
 struct rt_init // structure placed in XI/YI segment
 {
+#define DEADSTART_RT_LIST_START 0xFF
     __type_rtp  rtn_type; // - near=0/far=1 routine indication
                           //   also used when walking table to flag
                           //   completed entries
@@ -451,6 +452,7 @@ struct rt_init // structure placed in XI/YI segment
 		}
       */
 #endif
+#define DEADSTART_RT_LIST_START 0xFF
     __type_rtp  rtn_type; // - near=0/far=1 routine indication
                           //   also used when walking table to flag
                           //   completed entries
@@ -559,6 +561,7 @@ struct rt_init // structure placed in XI/YI segment
 		}
       */
 #endif
+#define DEADSTART_RT_LIST_START 0xFF
     __type_rtp  rtn_type; // - near=0/far=1 routine indication
                           //   also used when walking table to flag
                           //   completed entries
@@ -712,12 +715,13 @@ void name( void) \
 #define pastejunk(a,b) pastejunk_(a,b)
 
 #define PRIORITY_PRELOAD(name,priority) static void name(void); \
+   static int schedule_##name(void);   \
+	static __declspec(allocate(_STARTSEG_)) void (CPROC*pastejunk(TARGET_LABEL,pastejunk( x_##name,__LINE__)))(void) = (void(CPROC*)(void))schedule_##name; \
 	static int schedule_##name(void) {                 \
-	RegisterPriorityStartupProc( name,WIDE(#name),priority,0/*chance to use label to reference*/,WIDE__FILE__,__LINE__ );\
+	RegisterPriorityStartupProc( name,WIDE(#name),priority,pastejunk(TARGET_LABEL,pastejunk( x_##name,__LINE__)),WIDE__FILE__,__LINE__ );\
 	return 0; \
 	}                                       \
 	/*static __declspec(allocate(_STARTSEG_)) void (CPROC*pointer_##name)(void) = schedule_##name;*/ \
-	/*static */__declspec(allocate(_STARTSEG_)) void (CPROC*pastejunk(unique_name,pastejunk( x_##name,__LINE__)))(void) = (void(CPROC*)(void))schedule_##name; \
 	static void name(void)
 
 /*

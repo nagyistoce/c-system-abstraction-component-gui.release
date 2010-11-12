@@ -58,7 +58,7 @@
 //*******************8
 
 #endif
-#ifdef __WINDOWS__
+#ifdef WIN32
 #include <windows.h>
 #include <stdio.h>
 #ifdef __CYGWIN__
@@ -91,9 +91,15 @@ PRELOAD( InitNetworkGlobalOptions )
 #endif
 }
 
+void LowLevelInit( void )
+{
+   if( !global_network_data )
+		SimpleRegisterAndCreateGlobal( global_network_data );
+}
+
 PRIORITY_PRELOAD( InitNetworkGlobal, GLOBAL_INIT_PRELOAD_PRIORITY )
 {
-	SimpleRegisterAndCreateGlobal( global_network_data );
+   LowLevelInit();
 	if( !g.system_name )
 	{
   		g.system_name = WIDE("no.network");
@@ -198,7 +204,7 @@ NETWORK_PROC( int, GetMacAddress)(PCLIENT pc )//int get_mac_addr (char *device, 
 
 	return 0;
 #endif
-#ifdef __WINDOWS__
+#ifdef WIN32
 
     HRESULT hr;
     ULONG   ulLen;
@@ -217,7 +223,9 @@ NETWORK_PROC( int, GetMacAddress)(PCLIENT pc )//int get_mac_addr (char *device, 
 
 	return 0;
 #endif
+#else
 	return 0;
+
 #endif
 }
 
@@ -585,7 +593,7 @@ static int NetworkStartup( void )
 
 		//--------------------
 		// sorry this is really really ugly to read!
-#ifdef __WINDOWS__
+#ifdef WIN32
 		sockMaster = OpenSocket( TRUE, FALSE, FALSE );
 		if( sockMaster == INVALID_SOCKET )
 		{
@@ -598,7 +606,7 @@ static int NetworkStartup( void )
 
 
 			//--------------------
-#ifdef __WINDOWS__
+#ifdef WIN32
 		}
 #endif
 		//--------------------
@@ -1357,11 +1365,11 @@ int CPROC ProcessNetworkMessages( PTRSZVAL quick_check )
 				DWORD dwError = WSAGetLastError();
 				if( dwError == WSA_INVALID_HANDLE )
 				{
-               lprintf( "Rebuild list, have a bad event handle somehow." );
+					lprintf( "Rebuild list, have a bad event handle somehow." );
 					break;
 				}
 				lprintf( WIDE( "error of wait is %d" ), WSAGetLastError() );
-            break;
+				break;
 			}
 #ifndef UNDER_CE
 			else if( result == WSA_WAIT_IO_COMPLETION )
@@ -1373,7 +1381,7 @@ int CPROC ProcessNetworkMessages( PTRSZVAL quick_check )
 			else if( result == WSA_WAIT_TIMEOUT )
 			{
 				if( quick_check )
-               return 1;
+					return 1;
 			}
 			else if( result >= WSA_WAIT_EVENT_0 )
 			{
@@ -1968,7 +1976,7 @@ void ReallocClients( _16 wClients, int nUserData )
 	P_8 pUserData;
 	PCLIENT_SLAB pClientSlab;
 	if( !global_network_data )
-		InvokeDeadstart();
+      LowLevelInit();
 
 	if( !MAX_NETCLIENTS )
 	{
@@ -2079,10 +2087,10 @@ NETWORK_PROC( LOGICAL, NetworkWait )(HWND hWndNotify,_16 wClients,int wUserData)
 		if( gethostname( buffer, sizeof( buffer ) ) == 0)
 			g.system_name = DupCStr( buffer );
 	}
-#ifdef __WINDOWS__
+#ifdef WIN32
 	{
-		ADDRINFO *result;
-		ADDRINFO *test;
+		struct addrinfo *result;
+		struct addrinfo *test;
 		getaddrinfo( g.system_name, NULL, NULL, (struct addrinfo**)&result );
 		for( test = result; test; test = test->ai_next )
 		{
@@ -2288,7 +2296,7 @@ SOCKADDR *CreateRemote(CTEXTSTR lpName,_16 nHisPort)
 {
 	SOCKADDR_IN *lpsaAddr;
    int conversion_success = FALSE;
-#ifndef __WINDOWS__
+#ifndef WIN32
 	PHOSTENT phe;
 	// a IP type name will never have a / in it, therefore
 	// we can assume it's a unix type address....
@@ -2346,10 +2354,10 @@ SOCKADDR *CreateRemote(CTEXTSTR lpName,_16 nHisPort)
 	{
 		if( lpName )
 		{
-#ifdef __WINDOWS__
+#ifdef WIN32
 			{
-				ADDRINFO *result;
-				ADDRINFO *test;
+				struct addrinfo *result;
+				struct addrinfo *test;
             int error;
 				if( ( error = getaddrinfo( lpName, NULL, NULL, (struct addrinfo**)&result ) ) == 0 )
 				{
@@ -2365,7 +2373,7 @@ SOCKADDR *CreateRemote(CTEXTSTR lpName,_16 nHisPort)
 				else
 					lprintf( "Error: %d", error );
 			}
-#else //__WINDOWS__
+#else //WIN32
 
 			char *tmp = CStrDup( lpName );
 			if( 1 )//!(phe=gethostbyname(tmp)))

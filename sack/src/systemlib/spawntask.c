@@ -133,7 +133,7 @@ static PTRSZVAL CPROC HandleTaskOutput(PTHREAD thread )
 #ifdef _DEBUG
                                             //lprintf( "Ending system thread because of broke pipe! %d", errno );
 #endif
-#ifdef __WINDOWS__
+#ifdef WIN32
                                             continue;
 #else
                                             //lprintf( "0 read = pipe failure." );

@@ -36,31 +36,31 @@ int PSIConsoleOutput( PSI_CONTROL pc, PTEXT lines )
 				if( prior )
 				{
 					SetStart( prior );
-               prior->format.position.spaces += console->pending_spaces;
-               prior->format.position.tabs += console->pending_tabs;
+					prior->format.position.offset.spaces += console->pending_spaces;
+					prior->format.position.offset.tabs += console->pending_tabs;
 					que = BuildLine( prior );
 					if( !console->flags.bNewLine )
-                  que->flags |= TF_NORETURN;
-					WinLogicWriteEx( console, que, 0 );
+						que->flags |= TF_NORETURN;
+					PSI_WinLogicWriteEx( console, que, 0 );
 					LineRelease( prior );
 				}
-            else
-					WinLogicWriteEx( console, SegCreate( 0 ), 0 );
+				else
+					PSI_WinLogicWriteEx( console, SegCreate( 0 ), 0 );
 
 				console->flags.bNewLine = 1;
 
             // throw away the blank... don't really need it on the display
 				SegGrab( tmp );
-            console->pending_spaces = tmp->format.position.spaces;
-            console->pending_tabs = tmp->format.position.tabs;
+				console->pending_spaces = tmp->format.position.offset.spaces;
+				console->pending_tabs = tmp->format.position.offset.tabs;
 				LineRelease( tmp );
-            remainder = next;
+				remainder = next;
 			}
 		}
 		if( remainder )
 		{
 			PTEXT que = BuildLine( remainder );
-			WinLogicWriteEx( console, que, 0 );
+			PSI_WinLogicWriteEx( console, que, 0 );
 			console->flags.bNewLine = 0;
 		}
 		else

@@ -22,8 +22,8 @@
 #endif
 
 // force windows on __MSVC
-#  ifndef __WINDOWS__
-#    define __WINDOWS__
+#  ifndef WIN32
+#    define WIN32
 #  endif
 
 
@@ -76,6 +76,9 @@ using namespace System;
 #define _TYPELIBRARY_SOURCE
 /* Defined when SACK_BAG_EXPORTS is defined. This was an
    individual library module once upon a time.           */
+#define HTTP_SOURCE
+/* Defined when SACK_BAG_EXPORTS is defined. This was an
+   individual library module once upon a time.           */
 #define TIMER_SOURCE
 /* Defined when SACK_BAG_EXPORTS is defined. This was an
    individual library module once upon a time.           */
@@ -119,7 +122,12 @@ using namespace System;
 /* Defined when SACK_BAG_EXPORTS is defined. This was an
    individual library module once upon a time.           */
 #define TYPELIB_SOURCE
-
+/* Defined when SACK_BAG_EXPORTS is defined. This was an
+   individual library module once upon a time.           */
+#define SEXPAT_SOURCE
+/* Defined when SACK_BAG_EXPORTS is defined. This was an
+   individual library module once upon a time.           */
+#define SERVICE_SOURCE
 #  ifndef __NO_SQL__
 #    ifndef __NO_OPTIONS__
 /* Defined when SACK_BAG_EXPORTS is defined. This was an
@@ -139,7 +147,8 @@ using namespace System;
 #ifdef _MSC_VER
 
 #ifndef JPEG_SOURCE
-#error projects were not generated with CMAKE, and JPEG_SORUCE needs to be defined
+//wouldn't matter... the external things wouldn't need to define this
+//#error projects were not generated with CMAKE, and JPEG_SORUCE needs to be defined
 #endif
 //#define JPEG_SOURCE
 //#define __PNG_LIBRARY_SOURCE__
@@ -210,7 +219,7 @@ using namespace System;
 #include <stdlib.h>
 #include <stdarg.h> // typelib requires this
 #include <string.h> // typelib requires this
-#if !defined( __WINDOWS__ ) && !defined( _WIN32 )
+#if !defined( WIN32 ) && !defined( _WIN32 )
 #include <dlfcn.h>
 #endif
 
@@ -251,6 +260,24 @@ using namespace System;
 /* Define the container namespace (when building with C++, the
    wrappers are namespace{} instead of extern"c"{} )           */
 #define _DATALIST_NAMESPACE_END }
+/* Define the container namespace (when building with C++, the
+   wrappers are namespace{} instead of extern"c"{} )           */
+#define _SETS_NAMESPACE namespace sets {
+/* Define the container namespace (when building with C++, the
+   wrappers are namespace{} instead of extern"c"{} )           */
+#define _SETS_NAMESPACE_END }
+/* Define the container namespace (when building with C++, the
+   wrappers are namespace{} instead of extern"c"{} )           */
+#define _TEXT_NAMESPACE namespace text {
+/* Define the container namespace (when building with C++, the
+   wrappers are namespace{} instead of extern"c"{} )           */
+#define _TEXT_NAMESPACE_END }
+/* Define the container namespace (when building with C++, the
+   wrappers are namespace{} instead of extern"c"{} )           */
+#define TEXT_NAMESPACE SACK_NAMESPACE _CONTAINER_NAMESPACE namespace text {
+/* Define the container namespace (when building with C++, the
+   wrappers are namespace{} instead of extern"c"{} )           */
+#define TEXT_NAMESPACE_END  } _CONTAINER_NAMESPACE_END SACK_NAMESPACE_END
 #else
 /* Define the sack namespace (when building with C++, the
    wrappers are namespace{} instead of extern"c"{} )           */
@@ -276,6 +303,24 @@ using namespace System;
 /* Define the container namespace (when building with C++, the
    wrappers are namespace{} instead of extern"c"{} )           */
 #define _DATALIST_NAMESPACE_END
+/* Define the container namespace (when building with C++, the
+   wrappers are namespace{} instead of extern"c"{} )           */
+#define _SETS_NAMESPACE
+/* Define the container namespace (when building with C++, the
+   wrappers are namespace{} instead of extern"c"{} )           */
+#define _SETS_NAMESPACE_END
+/* Define the container namespace (when building with C++, the
+   wrappers are namespace{} instead of extern"c"{} )           */
+#define _TEXT_NAMESPACE
+/* Define the container namespace (when building with C++, the
+   wrappers are namespace{} instead of extern"c"{} )           */
+#define _TEXT_NAMESPACE_END
+/* Define the container namespace (when building with C++, the
+   wrappers are namespace{} instead of extern"c"{} )           */
+#define TEXT_NAMESPACE
+/* Define the container namespace (when building with C++, the
+   wrappers are namespace{} instead of extern"c"{} )           */
+#define TEXT_NAMESPACE_END
 #endif
 
 /* declare composite SACK_CONTAINER namespace to declare sack::container in a single line */
@@ -327,7 +372,7 @@ using namespace System;
 #  endif
 # endif
 #else
-# if ( !defined( __STATIC__ ) && defined( __WINDOWS__ ) && !defined( __cplusplus_cli) )
+# if ( !defined( __STATIC__ ) && defined( WIN32 ) && !defined( __cplusplus_cli) )
 #  define EXPORT_METHOD __declspec(dllexport)
 #  define IMPORT_METHOD __declspec(dllimport)
 #  define LITERAL_LIB_EXPORT_METHOD __declspec(dllexport)
@@ -431,8 +476,6 @@ typedef int pid_t;
 //#define NEAR
 //#endif
 #define _fastcall
-//#define DYNAMIC_EXPORT EXPORT_METHOD
-//#define DYNAMIC_IMPORT __declspec(dllimport)
 #ifdef __cplusplus
 #ifdef __cplusplus_cli
 #define PUBLIC(type,name) extern "C"  LITERAL_LIB_EXPORT_METHOD type CPROC name
@@ -493,8 +536,6 @@ typedef int pid_t;
 #endif
 #define WINPROC(type,name)   type WINAPI name
 #define CALLBACKPROC( type, name ) type name
-//#define DYNAMIC_EXPORT
-//#define DYNAMIC_IMPORT extern
 #define PUBLIC(type,name) EXPORT_METHOD type CPROC name
 #define LIBMAIN() static int LibraryEntrance( void ) __attribute__((constructor)); static int LibraryEntrance( void ) { HINSTANCE hInstance = GetModuleHandle( NULL );
 #define LIBEXIT() } static int LibraryExit( void )    __attribute__((destructor)); static int LibraryExit( void )
@@ -1568,7 +1609,7 @@ SACK_NAMESPACE
 #  ifdef __cplusplus
 extern "C"  
 #  endif
-#  if defined( __WINDOWS__ ) && !defined( __STATIC__ )
+#  if defined( WIN32 ) && !defined( __STATIC__ )
 #    ifdef __NO_WIN32API__ 
 // DllImportAttribute ?
 #    else
@@ -1621,7 +1662,7 @@ SACK_NAMESPACE_END // namespace sack {
 // this should become common to all libraries and programs...
 #include <construct.h> // pronounced 'kahn-struct'
 #include <logging.h>
-
+#include <signed_unsigned_comparisons.h>
 
 #ifdef __cplusplus
 using namespace sack;

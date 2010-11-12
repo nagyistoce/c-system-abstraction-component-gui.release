@@ -450,8 +450,8 @@ void RenderMonoChar( PFONT font
 		charright ++; // add one back in... so we have a delta between left and right
 		//Log2( WIDE("Reduced char right size %d to %d"), charright, charright - charleft );
 
-		character->offset = charleft;
-		character->size = charright - charleft;
+		character->offset = (_8)charleft;
+		character->size = (_8)(charright - charleft);
 
 		//Log7( WIDE("(%d(%c)) Character parameters: %d %d %d %d %d")
 		//	 , idx, idx< 32 ? ' ':idx
@@ -468,7 +468,7 @@ void RenderMonoChar( PFONT font
 				outdata = character->data +
 					((line - linetop) * ((character->size + 7)/8));
 				data = (char*)bitmap->buffer + (line) * bitmap->pitch;
-            for( bit = 0; bit < ((character->size + 7)/8); bit++)
+				for( bit = 0; bit < ((character->size + 7U)/8U); bit++)
 					outdata[bit] = 0;
 				for( bit = 0; bit < character->size; bit++ )
 				{
@@ -662,8 +662,8 @@ void RenderGreyChar( PFONT font
 		charright ++; // add one back in... so we have a delta between left and right
 		//Log2( WIDE("Reduced char right size %d to %d"), charright, charright - charleft );
 
-		character->offset = charleft;
-		character->size = charright - charleft;
+		character->offset = (_8)charleft;
+		character->size = (_8)(charright - charleft);
 
 		{
 			unsigned char *outdata;
@@ -863,16 +863,19 @@ void InternalRenderFontCharacter( PFONT_RENDERER renderer, PFONT font, INDEX idx
 
 
 Font InternalRenderFontFile( CTEXTSTR file
-										, S_16 nWidth
-										, S_16 nHeight
+										, S_32 nWidth
+										, S_32 nHeight
 										, _32 flags // whether to render 1(0/1), 2(2), 8(3) bits, ...
 										)
 {
 	int error;
 	int bDefaultFile = 0;
-   PFONT_RENDERER renderer;
+	int face_idx = 0;
+	int num_faces = 0;
+	PFONT_RENDERER renderer;
+
 	//static CRITICALSECTION cs;
-   EnterCriticalSec( &cs );
+	EnterCriticalSec( &cs );
 	//if( !InitFont() )
 	{
       //lprintf( WIDE("Failed to init fonts.. failing font render.") );
@@ -912,15 +915,15 @@ try_another_default:
 				&& renderer->flags == flags
 				&& strcmp( renderer->file, file ) == 0 )
 			{
-            break;
+				break;
 			}
 		}
 		if( !renderer )
 		{
 			renderer = (PFONT_RENDERER)Allocate( sizeof( FONT_RENDERER ) );
 			MemSet( renderer, 0, sizeof( FONT_RENDERER ) );
-			renderer->nWidth = nWidth;
-			renderer->nHeight = nHeight;
+			renderer->nWidth = (S_16)nWidth;
+			renderer->nHeight = (S_16)nHeight;
 			renderer->flags = flags;
 			renderer->file = sack_prepend_path( 0, file );
 			AddLink( &fonts, renderer );
@@ -931,164 +934,171 @@ try_another_default:
 		}
 	}
 
-	// this needs to be post processed to
-	// center all characters in a font - favoring the
-	// bottom...
-
-	if( !renderer->face )
+	do
 	{
-		PTRSZVAL size = 0;
+		// this needs to be post processed to
+		// center all characters in a font - favoring the
+		// bottom...
 
-		renderer->font_memory = 
+		if( !renderer->face )
+		{
+			PTRSZVAL size = 0;
+			if( !renderer->font_memory && !renderer->file )
+			renderer->font_memory = 
 #ifdef UNDER_CE
-			NULL;
+				NULL;
 #else
-			OpenSpace( NULL, file, &size );
+				OpenSpace( NULL, file, &size );
 #endif
-
-		if( renderer->font_memory )
-		{
-			POINTER p = Allocate( size );
-			MemCpy( p, renderer->font_memory, size );
-			Release( renderer->font_memory );
-			renderer->font_memory = p;
-
-			//lprintf( WIDE("Using memory mapped space...") );
-			error = FT_New_Memory_Face( fg.library
-											  , (FT_Byte*)renderer->font_memory
-											  , size
-											  , 0
-											  , &renderer->face );
-			//if( renderer->font_memory )
-			//	Release( renderer->font_memory );
-		}
-		else
-		{
-#ifdef __cplusplus_cli
-			char *file = CStrDup( renderer->file );
-#else
-			CTEXTSTR file = renderer->file;
-#endif
-			//lprintf( WIDE("Using file access font... for %s"), file );
-			error = FT_New_Face( fg.library
-									 , file
-									 , 0
-									 , &renderer->face );
-         if( error )
-				lprintf( "Failed to open font %s Result %d", renderer->file, error );
-#ifdef __cplusplus_cli
-			Release( file );
-#endif
-		}
-	}
-	else
-	{
-      error = 0;
-	}
-
-	if( !renderer->face || error )
-	{
-      //DebugBreak();
-		//lprintf( WIDE("Failed to load font...Err:%d %s %d %d"), error, file, nWidth, nHeight );
-		DeleteLink( &fonts, renderer );
-		Release( renderer->file );
-      Release( renderer );
-      if( bDefaultFile )
-      	goto try_another_default;
-		LeaveCriticalSec( &cs );
-		return NULL;
-	}
-
-   if( !renderer->fontname[0] )
-	{
-      FT_Face face = renderer->face;
-		snprintf( renderer->fontname, 256, WIDE("%s%s%s%dBy%d")
-				  , face->family_name?face->family_name:"No-Name"
-				  , face->style_name?face->style_name:"normal"
-				  , (face->face_flags & FT_FACE_FLAG_FIXED_WIDTH)?"fixed":""
-				  , nWidth, nHeight
-				  );
-		KillSpaces( renderer->fontname );
-	}
-	// this may not be 'wide' enough...
-	// there may be characters which overflow the
-	// top/bottomm of the cell... probably will
-	// ignore that - but if we DO find such a font,
-	// maybe this can be adjusted -- NORMALLY
-	// this will be sufficient...
-   if( !renderer->font )
-	{
-		int max_ascent = 0;
-      int min_descent =0;
-      INDEX idx;
-		PFONT font;
-		renderer->font = (PFONT)Allocate( sizeof( FONT ) + 255 * sizeof(PCHARACTER) );
-		// this is okay it's a kludge so some other code worked magically
-      // it's redundant and should be dleete...
-      renderer->ResultFont = (Font)renderer->font;
-		font = (PFONT)renderer->ResultFont;
-      MemSet( font, 0, sizeof( FONT )+ 255 * sizeof(PCHARACTER) );
-		font->characters = 256;
-		font->baseline = 0;
-		if( ( flags & 3 ) == 3 )
-			font->flags = FONT_FLAG_8BIT;
-		else if( ( flags & 3 ) == 2 )
-			font->flags = FONT_FLAG_2BIT;
-		else
-			font->flags = FONT_FLAG_MONO;
-		// default rendering for one-to-one pixel sizes.
-		/*
-		 error = FT_Set_Char_Size( face
-		 , nWidth << 6
-		 , nHeight << 6
-		 , 96
-		 , 96 );
-		 */
-		error = FT_Set_Pixel_Sizes( renderer->face
-										  , renderer->nWidth
-										  , renderer->nHeight );
-		if( error )
-		{
-			Log1( WIDE("Fault setting char size - %d"), error );
-		}
-		font->height = 0; //CEIL(face->size->metrics.height);
-		font->name = StrDup( renderer->fontname );
-		InternalRenderFontCharacter( renderer, NULL, 0 );
-		for( idx = 0; idx < 256; idx++ )
-		{
-			FT_Face face = renderer->face;
-			int glyph_index = FT_Get_Char_Index( face, idx );
-			//Log2( WIDE("Character %d is glyph %d"), idx, glyph_index );
-			FT_Load_Glyph( face
-							 , glyph_index
-							 , 0
-							  | FT_LOAD_FORCE_AUTOHINT
-							 );
+			if( renderer->font_memory )
 			{
-				int ascent = CEIL(face->glyph->metrics.horiBearingY);
-				int descent;
-				if( face->glyph->metrics.height )
-				{
-					descent = -CEIL(face->glyph->metrics.height - face->glyph->metrics.horiBearingY) + 1;
-				}
-				else
-				{
-					descent = CEIL( face->glyph->metrics.horiBearingY ) /*- font->height + */ + 1;
-				}
+				POINTER p = Allocate( size );
+				MemCpy( p, renderer->font_memory, size );
+				Release( renderer->font_memory );
+				renderer->font_memory = p;
 
-				// done when the font is initially loaded
-				// loading face characteristics shouldn't matter
-				if( ascent > max_ascent )
-					max_ascent = ascent;
-				if( descent < min_descent )
-					min_descent = descent;
+				//lprintf( WIDE("Using memory mapped space...") );
+				error = FT_New_Memory_Face( fg.library
+												  , (FT_Byte*)renderer->font_memory
+												  , size
+												  , face_idx
+												  , &renderer->face );
+				//if( renderer->font_memory )
+				//	Release( renderer->font_memory );
+			}
+			else
+			{
+#ifdef __cplusplus_cli
+				char *file = CStrDup( renderer->file );
+#else
+				CTEXTSTR file = renderer->file;
+#endif
+				//lprintf( WIDE("Using file access font... for %s"), file );
+				error = FT_New_Face( fg.library
+										 , file
+										 , face_idx
+										 , &renderer->face );
+			 if( error )
+					lprintf( "Failed to open font %s Result %d", renderer->file, error );
+#ifdef __cplusplus_cli
+				Release( file );
+#endif
 			}
 		}
-		renderer->font->baseline = max_ascent +
-			( ( renderer->font->height
-				- ( max_ascent - min_descent ) )
-			 / 2 );
-	}
+		else
+		{
+		  error = 0;
+		}
+
+		if( !renderer->face || error )
+		{
+		  //DebugBreak();
+			//lprintf( WIDE("Failed to load font...Err:%d %s %d %d"), error, file, nWidth, nHeight );
+			DeleteLink( &fonts, renderer );
+			Release( renderer->file );
+			Release( renderer );
+			if( bDefaultFile )
+      			goto try_another_default;
+			LeaveCriticalSec( &cs );
+			return NULL;
+		}
+
+		if( !renderer->fontname[0] )
+		{
+			FT_Face face = renderer->face;
+			snprintf( renderer->fontname, 256, WIDE("%s%s%s%dBy%d")
+					  , face->family_name?face->family_name:"No-Name"
+					  , face->style_name?face->style_name:"normal"
+					  , (face->face_flags & FT_FACE_FLAG_FIXED_WIDTH)?"fixed":""
+					  , nWidth, nHeight
+					  );
+			KillSpaces( renderer->fontname );
+		}
+		// this may not be 'wide' enough...
+		// there may be characters which overflow the
+		// top/bottomm of the cell... probably will
+		// ignore that - but if we DO find such a font,
+		// maybe this can be adjusted -- NORMALLY
+		// this will be sufficient...
+		if( !renderer->font )
+		{
+			int max_ascent = 0;
+			int min_descent =0;
+			INDEX idx;
+			PFONT font;
+			renderer->font = (PFONT)Allocate( sizeof( FONT ) + 255 * sizeof(PCHARACTER) );
+			// this is okay it's a kludge so some other code worked magically
+			// it's redundant and should be dleete...
+			renderer->ResultFont = (Font)renderer->font;
+			font = (PFONT)renderer->ResultFont;
+			MemSet( font, 0, sizeof( FONT )+ 255 * sizeof(PCHARACTER) );
+			font->characters = 256;
+			font->baseline = 0;
+			if( ( flags & 3 ) == 3 )
+				font->flags = FONT_FLAG_8BIT;
+			else if( ( flags & 3 ) == 2 )
+				font->flags = FONT_FLAG_2BIT;
+			else
+				font->flags = FONT_FLAG_MONO;
+			// default rendering for one-to-one pixel sizes.
+			/*
+			 error = FT_Set_Char_Size( face
+			 , nWidth << 6
+			 , nHeight << 6
+			 , 96
+			 , 96 );
+			 */
+			error = FT_Set_Pixel_Sizes( renderer->face
+											  , renderer->nWidth
+											  , renderer->nHeight );
+			if( error )
+			{
+				Log1( WIDE("Fault setting char size - %d"), error );
+			}
+			font->height = 0; //CEIL(face->size->metrics.height);
+			font->name = StrDup( renderer->fontname );
+			InternalRenderFontCharacter( renderer, NULL, 0 );
+			for( idx = 0; idx < 256; idx++ )
+			{
+				FT_Face face = renderer->face;
+				int glyph_index = FT_Get_Char_Index( face, idx );
+				//Log2( WIDE("Character %d is glyph %d"), idx, glyph_index );
+				FT_Load_Glyph( face
+								 , glyph_index
+								 , 0
+								  | FT_LOAD_FORCE_AUTOHINT
+								 );
+				{
+					int ascent = CEIL(face->glyph->metrics.horiBearingY);
+					int descent;
+					if( face->glyph->metrics.height )
+					{
+						descent = -CEIL(face->glyph->metrics.height - face->glyph->metrics.horiBearingY) + 1;
+					}
+					else
+					{
+						descent = CEIL( face->glyph->metrics.horiBearingY ) /*- font->height + */ + 1;
+					}
+
+					// done when the font is initially loaded
+					// loading face characteristics shouldn't matter
+					if( ascent > max_ascent )
+						max_ascent = ascent;
+					if( descent < min_descent )
+						min_descent = descent;
+				}
+			}
+			renderer->font->baseline = max_ascent +
+				( ( renderer->font->height
+					- ( max_ascent - min_descent ) )
+				 / 2 );
+		}
+		if( !renderer->font )
+		{
+			FT_Done_Face( renderer->face );
+		}
+   }
+   while( ( face_idx < num_faces ) && !renderer->font );
 	//FT_Done_Face( face );
    //if( renderer->font_memory )
 	//	Release( renderer->font_memory );
@@ -1151,8 +1161,8 @@ Font RenderScaledFontData( PFONTDATA pfd, PFRACTION width_scale, PFRACTION heigh
 Font InternalRenderFont( _32 nFamily
 								  , _32 nStyle
 								  , _32 nFile
-								  , S_16 nWidth
-								  , S_16 nHeight
+								  , S_32 nWidth
+								  , S_32 nHeight
                           , _32 flags
 								  )
 {

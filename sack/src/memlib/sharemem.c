@@ -231,7 +231,7 @@ inline _32 DoXchg( PV_32 p, _32 val ){  __asm__( WIDE("lock xchg (%2),%0"):"=a"(
 {
 	// Windows only available - for linux platforms please consult
 	// the assembly version should be consulted
-#if defined( _WIN32 ) || defined( __WINDOWS__ ) || defined( WIN32 )
+#if defined( _WIN32 ) || defined( WIN32 ) || defined( WIN32 )
 #  if !defined(_MSC_VER)
 	return InterlockedExchange( (volatile LONG *)p, val );
 #  else
@@ -357,11 +357,21 @@ inline _32 DoXchg( PV_32 p, _32 val ){  __asm__( WIDE("lock xchg (%2),%0"):"=a"(
 	if( sz & 1 )
 		(*(_8*)( ((PTRSZVAL)p) + sz - (sz&1) ) ) = n;
 #else
+#ifdef __64__
+	__stosq( (_64*)p, n, sz / 4 );
+	if( sz & 4 )
+		(*(_32*)( ((PTRSZVAL)p) + sz - (sz&7) ) ) = (_32)n;
+	if( sz & 2 )
+		(*(_16*)( ((PTRSZVAL)p) + sz - (sz&3) ) ) = (_16)n;
+	if( sz & 1 )
+		(*(_8*)( ((PTRSZVAL)p) + sz - (sz&1) ) ) = (_8)n;
+#else
 	__stosd( (_32*)p, n, sz / 4 );
 	if( sz & 2 )
-		(*(_16*)( ((PTRSZVAL)p) + sz - (sz&3) ) ) = n;
+		(*(_16*)( ((PTRSZVAL)p) + sz - (sz&3) ) ) = (_16)n;
 	if( sz & 1 )
-		(*(_8*)( ((PTRSZVAL)p) + sz - (sz&1) ) ) = n;
+		(*(_8*)( ((PTRSZVAL)p) + sz - (sz&1) ) ) = (_8)n;
+#endif
 #endif
 #else
    memset( p, n, sz );
@@ -412,7 +422,8 @@ TEXTSTR StrCpyEx( TEXTSTR s1, CTEXTSTR s2, int n )
 {
 	int x;
 	for( x = 0; x < n && (s1[x]=s2[x]); x++ );
-	s1[n-1] = 0;
+	if( n )
+		s1[n-1] = 0;
 	return s1;
 }
 
@@ -1068,7 +1079,7 @@ void InitSharedMemory( void )
 //------------------------------------------------------------------------------------------------------
 // private
 static PSPACE AddSpace( PSPACE pAddAfter
-#if defined( __WINDOWS__ ) || defined( __CYGWIN__ )
+#if defined( WIN32 ) || defined( __CYGWIN__ )
 							 , HANDLE hFile
 							 , HANDLE hMem
 #else
@@ -1529,7 +1540,7 @@ PTRSZVAL GetFileSize( int fd )
 #ifdef DEBUG_OPEN_SPACE
 					lprintf( WIDE("Setting size to size of file (which was larger..") );
 #endif
-					(*dwSize) = lSize.QuadPart;
+					(*dwSize) = (PTRSZVAL)lSize.QuadPart;
 				}
 				if( bCreated )
 					(*bCreated) = 1;

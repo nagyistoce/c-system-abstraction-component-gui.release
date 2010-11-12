@@ -183,7 +183,7 @@ PACCUMULATOR TransferAccumluator( PACCUMULATOR accum_dest, PACCUMULATOR accum_so
    return accum_dest;
 }
 
-int GetAccumulatorText( PACCUMULATOR accum, char *text, int nLen )
+int GetAccumulatorText( PACCUMULATOR accum, TEXTCHAR *text, int nLen )
 {
 	int len = 0;
 	if( accum->flags.bText )
@@ -191,7 +191,7 @@ int GetAccumulatorText( PACCUMULATOR accum, char *text, int nLen )
 		PTEXT result = VarTextPeek( accum->pvt_text );
 		if( result )
 		{
-			strncpy( text, GetText( result ), nLen );
+			StrCpyEx( text, GetText( result ), nLen );
 			len = GetTextSize( result );
 		}
 	}

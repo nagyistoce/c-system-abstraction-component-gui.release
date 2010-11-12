@@ -50,8 +50,8 @@ PFONT_PRESET _CreateAFont( PCanvasData canvas, CTEXTSTR name, Font font, POINTER
 	INDEX idx;
 	LIST_FORALL( l.fonts, idx, PFONT_PRESET, font_preset )
 	{
-		if( stricmp( name, font_preset->name ) == 0 )
-         break;
+		if( StrCaseCmp( name, font_preset->name ) == 0 )
+			break;
 	}
 	if( !font_preset )
 	{
@@ -61,13 +61,13 @@ PFONT_PRESET _CreateAFont( PCanvasData canvas, CTEXTSTR name, Font font, POINTER
 		{
 			if( !font && !data )
 			{
-            font = RenderScaledFont( "Times New Roman", 25, 35, &canvas->width_scale, &canvas->height_scale, 3 );
+				font = RenderScaledFont( "Times New Roman", 25, 35, &canvas->width_scale, &canvas->height_scale, 3 );
 			}
 		}
 		AddLink( &l.fonts, font_preset );
 	}
 	else
-      DestroyFont( &font_preset->font );
+		DestroyFont( &font_preset->font );
 	font_preset->fontdata = NewArray( _8, datalen );
 	MemCpy( font_preset->fontdata, data, datalen );
 	font_preset->fontdatalen = datalen;
@@ -224,7 +224,7 @@ Font *SelectAFont( PSI_CONTROL parent, CTEXTSTR*default_name )
 				{
 					PLISTITEM pli = AddListItem( list, font_preset->name );
 					SetItemData( pli, (PTRSZVAL)font_preset );
-					if( default_name && default_name[0] && stricmp( font_preset->name, default_name[0] )==0 )
+					if( default_name && default_name[0] && StrCaseCmp( font_preset->name, default_name[0] )==0 )
 					{
 						SetSelectedItem( list, pli );
 						font_select.selected_font = font_preset;

@@ -271,7 +271,8 @@ void ExtendConnection( PODBC odbc )
 
 	if( !sqlite3_get_autocommit(odbc->db) )
 	{
-		DebugBreak();
+      lprintf( "auto commit off?" );
+		//DebugBreak();
 	}
 	{
 #if SQLITE_VERSION_NUMBER >= 3006011
@@ -516,7 +517,7 @@ PTRSZVAL CPROC SetUser( PTRSZVAL psv, arg_list args )
 PTRSZVAL CPROC SetPassword( PTRSZVAL psv, arg_list args )
 {
 	PARAM( args, CTEXTSTR, pPassword );
-	StrCpy( g.Primary.info.pPASSWORD, pPassword );
+	StrCpyEx( g.Primary.info.pPASSWORD, pPassword, sizeof( g.Primary.info.pPASSWORD ) );
 	return psv;
 }
 
@@ -555,7 +556,7 @@ PTRSZVAL CPROC SetRequireBackupConnection( PTRSZVAL psv, arg_list args )
 PTRSZVAL CPROC SetBackupUser( PTRSZVAL psv, arg_list args )
 {
 	PARAM( args, CTEXTSTR, pUser );
-	StrCpy( g.Backup.info.pID, pUser );
+	StrCpyEx( g.Backup.info.pID, pUser, sizeof( g.Primary.info.pID ) );
 	return psv;
 }
 
@@ -563,7 +564,7 @@ PTRSZVAL CPROC SetBackupUser( PTRSZVAL psv, arg_list args )
 PTRSZVAL CPROC SetBackupPassword( PTRSZVAL psv, arg_list args )
 {
 	PARAM( args, CTEXTSTR, pPassword );
-	StrCpy( g.Backup.info.pPASSWORD, pPassword );
+	StrCpyEx( g.Backup.info.pPASSWORD, pPassword, sizeof( g.Backup.info.pPASSWORD ) );
 	return psv;
 }
 
@@ -597,6 +598,14 @@ void SetSQLThreadProtect( PODBC odbc, LOGICAL bEnable )
 	}
 }
 
+void SetSQLAutoTransact( PODBC odbc, LOGICAL bEnable )
+{
+	if( odbc )
+	{
+      odbc->flags.bAutoTransact = bEnable;
+	}
+}
+
 LOGICAL EnsureLogOpen( PODBC odbc )
 {
 	if( odbc && odbc->flags.bNoLogging )
@@ -613,7 +622,7 @@ LOGICAL EnsureLogOpen( PODBC odbc )
 				if( attempt )
 					snprintf( logname, sizeof( logname ), "sql%d.log", attempt );
 				else
-					StrCpy( logname, WIDE("sql.log") );
+					StrCpyEx( logname, WIDE("sql.log"), sizeof( logname ) );
 				attempt++;
 				// this is going to be more hassle to conserve
 				// than benefit merits.
@@ -660,8 +669,7 @@ void InitLibrary( void )
 			if( !ProcessConfigurationFile( pch, WIDE("sql.config"), 0 ) )
 			{
 				FILE *file;
-				Fopen( file, WIDE("sql.config"), WIDE("wt") );
-				lprintf( WIDE("Read configuration failed, creating a new one.") );
+				file = sack_fopen( 1, WIDE("sql.config"), WIDE("wt") );
 				if( file )
 				{
                fprintf( file, "Option DSN=option.db\n" );
@@ -705,7 +713,7 @@ void InitLibrary( void )
 //-----------------------------------------------------------------------
 static int bOpening; // expose this so dump info doesn't open on failed open.
 
-int OpenSQLConnection( PODBC odbc )
+int OpenSQLConnectionEx( PODBC odbc DBG_PASS )
 {
 	int state = 0;
 	RETCODE rc;
@@ -860,7 +868,7 @@ int OpenSQLConnection( PODBC odbc )
 							odbc->info.pPASSWORD[0] = 0;
 						}
 					}
-					DumpInfo( odbc, pvt, SQL_HANDLE_DBC, &odbc->hdbc, odbc->flags.bNoLogging );
+					DumpInfoEx( odbc, pvt, SQL_HANDLE_DBC, &odbc->hdbc, odbc->flags.bNoLogging DBG_RELAY );
 				}
 				else
 				{
@@ -967,37 +975,57 @@ int OpenSQLConnection( PODBC odbc )
 	return TRUE;
 }
 
+#undef OpenSQLConnection
+int OpenSQLConnection( PODBC odbc )
+{
+   return OpenSQLConnectionEx( odbc DBG_SRC );
+}
 //----------------------------------------------------------------------
 
 void CPROC CommitTimer( PTRSZVAL psv )
 {
 	PODBC odbc = (PODBC)psv;
-   //lprintf( "Commit timer tick" );
-   if( odbc->last_command_tick )
-		if( odbc->last_command_tick < ( GetTickCount() - 5000 ) )
+	//lprintf( "Commit timer tick" );
+
+	EnterCriticalSec( &odbc->cs );
+	// so at this point, we lock into the timer, and finish the commit.
+	// or the time hasn't elapsed, and we'll release the critical section
+	if( odbc->last_command_tick )
+		if( odbc->last_command_tick < ( timeGetTime() - 500 ) )
 		{
-         lprintf( "Commit timer fire." );
+			//lprintf( "Commit timer fire." );
 			RemoveTimer( odbc->commit_timer );
 			odbc->flags.bAutoTransact = 0;
 			SQLCommand( odbc, "COMMIT" );
 			odbc->flags.bAutoTransact = 1;
 			odbc->last_command_tick = 0;
 		}
+	LeaveCriticalSec( &odbc->cs );
+
 }
 
 //----------------------------------------------------------------------
 
 void SQLCommit( PODBC odbc )
 {
-	if( 0 && odbc->flags.bAutoTransact )
+	if( odbc->flags.bAutoTransact )
 	{
-		int n = odbc->flags.bAutoTransact;
-		lprintf( "manual commit." );
-		odbc->last_command_tick = 0;
-		odbc->flags.bAutoTransact = 0;
-		RemoveTimer( odbc->commit_timer );
-		SQLCommand( odbc, "COMMIT" );
-		odbc->flags.bAutoTransact = n;
+		EnterCriticalSec( &odbc->cs );
+		// we will own the odbc here, so the timer will either block, or
+		// have completed, releasing this.
+
+		// maybe we don't have a pending commit.... (wouldn't if the timer hit just before we ran)
+		if( odbc->last_command_tick ) // otherwise we won't need a commit
+		{
+			int n = odbc->flags.bAutoTransact;
+			//lprintf( "manual commit." );
+			odbc->last_command_tick = 0;
+			odbc->flags.bAutoTransact = 0;
+			RemoveTimer( odbc->commit_timer );
+			SQLCommand( odbc, "COMMIT" );
+			odbc->flags.bAutoTransact = n;
+		}
+		LeaveCriticalSec( &odbc->cs );
 	}
 }
 
@@ -1007,10 +1035,10 @@ void BeginTransact( PODBC odbc )
 {
 	// I Only test this for SQLITE, specifically the optiondb.
 	// this transaction phrase is not really as important on server based systems.
-   lprintf( "BeginTransact." );
-	if( 0 && odbc->flags.bAutoTransact )
+   //lprintf( "BeginTransact." );
+	if( odbc->flags.bAutoTransact )
 	{
-      lprintf( "Allowed." );
+      //lprintf( "Allowed." );
 		if( !odbc->last_command_tick )
 		{
 			odbc->commit_timer = AddTimer( 100, CommitTimer, (PTRSZVAL)odbc );
@@ -1031,10 +1059,10 @@ void BeginTransact( PODBC odbc )
 			}
 			odbc->flags.bAutoTransact = 1;
 		}
-		odbc->last_command_tick = GetTickCount();
+		odbc->last_command_tick = timeGetTime();
 	}
-	else
-      lprintf( "No auto transact here." );
+	//else
+   //   lprintf( "No auto transact here." );
 }
 
 //----------------------------------------------------------------------
@@ -1180,7 +1208,7 @@ void GenerateResponce( PCOLLECT collection, int responce )
 
 //-----------------------------------------------------------------------
 
-int OpenSQL( void )
+int OpenSQL( DBG_VOIDPASS )
 {
 	static _32 _bOpening;
 	int bPrimaryComingUp = FALSE;
@@ -1198,13 +1226,13 @@ int OpenSQL( void )
 	}
 	if( !g.flags.bPrimaryUp )
 	{
-		//if(  g.PrimaryLastConnect < GetTickCount()
-		//	&& ( g.PrimaryLastConnect = GetTickCount() + 1000 ) )
+		//if(  g.PrimaryLastConnect < timeGetTime()
+		//	&& ( g.PrimaryLastConnect = timeGetTime() + 1000 ) )
 		{
 #ifdef LOG_ACTUAL_CONNECTION
 			lprintf( "Begin connection gPrimary=%d", g.Primary.flags.bConnected );
 #endif
-			if( OpenSQLConnection( &g.Primary ) )
+			if( OpenSQLConnectionEx( &g.Primary DBG_RELAY ) )
 				if( !g.flags.bPrimaryUp )
 					bPrimaryComingUp = TRUE;
 #ifdef LOG_ACTUAL_CONNECTION
@@ -1219,13 +1247,13 @@ int OpenSQL( void )
 	if( !g.flags.bNoBackup
 		&&(  !g.flags.bBackupUp ) )
 	{
-		//if ( g.BackupLastConnect < GetTickCount()
-		//	&& ( g.BackupLastConnect = GetTickCount() + 1000 ) )
+		//if ( g.BackupLastConnect < timeGetTime()
+		//	&& ( g.BackupLastConnect = timeGetTime() + 1000 ) )
 		{
 #ifdef LOG_ACTUAL_CONNECTION
 			lprintf( "Begin connection &gBackup=%p", g.Backup );
 #endif
-			if( OpenSQLConnection( &g.Backup ) )
+			if( OpenSQLConnectionEx( &g.Backup DBG_RELAY ) )
 			{
 				if( !g.flags.bBackupUp )
 					bBackupComingUp = TRUE;
@@ -1420,12 +1448,12 @@ void FailConnection( PODBC odbc )
 	if( is_default )
 	{
       //lprintf( "Default connectionf ailed... open general (backup/primary)" );
-		OpenSQL();
+		OpenSQL( DBG_VOIDSRC );
 	}
 	else
 	{
       //lprintf( "re-open self?" );
-		OpenSQLConnection( odbc );
+		OpenSQLConnectionEx( odbc DBG_SRC );
       //lprintf( "... " );
 	}
 }
@@ -1561,7 +1589,7 @@ PODBC ConnectToDatabaseEx( CTEXTSTR DSN, LOGICAL bRequireConnection )
 	// source ID is not known...
 	// is probably static link to library, rather than proxy operation
 	CreateCollector( 0, pODBC, FALSE );
-	OpenSQLConnection( pODBC );
+	OpenSQLConnectionEx( pODBC DBG_SRC );
 	return pODBC;
 }
 
@@ -1719,19 +1747,6 @@ int DumpInfoEx( PODBC odbc, PVARTEXT pvt, SQLSMALLINT type, SQLHANDLE *handle, L
 					vtprintf( pvt, WIDE("(%5s)[%") _32f WIDE("]:%s"), statecode, native, message );
 				if( !bNoLog && EnsureLogOpen( odbc ) )
 					fprintf( g.pSQLLog, WIDE("#%s\n"), GetText( VarTextPeek( pvt ) ) );
-#if 0
-            /*
-				if( !bOpening )
-				{
-					FailConnection();
-					if( IsSQLOpen( NULL ) )
-					{
-						lprintf( "Connection closed, and re-open worked." );
-						retry = 1;
-					}
-					}
-               */
-#endif
 			}
 		}
 		else
@@ -1852,7 +1867,7 @@ int __DoSQLCommandEx( PODBC odbc, PCOLLECT collection DBG_PASS )
       odbc->nProtect++;
 	}
 
-	if( !OpenSQLConnection( odbc ) )
+	if( !OpenSQLConnectionEx( odbc DBG_SRC ) )
 	{
 		lprintf( WIDE("Fail connect odbc... should already be open?!") );
 		GenerateResponce( collection, WM_SQL_RESULT_ERROR );
@@ -1911,7 +1926,7 @@ int __DoSQLCommandEx( PODBC odbc, PCOLLECT collection DBG_PASS )
 			//odbc->hidden_messages++
 			;
 		else
-			_lprintf(DBG_RElAY)( "Do Command: %s", GetText( cmd ) );
+			_lprintf(DBG_RElAY)( "Do Command[%p]: %s", odbc, GetText( cmd ) );
 	}
 
 #ifdef LOG_EVERYTHING
@@ -1956,7 +1971,8 @@ int __DoSQLCommandEx( PODBC odbc, PCOLLECT collection DBG_PASS )
 			case SQLITE_BUSY:
             // going to retry the statement as a whole anyhow.
 				sqlite3_finalize( collection->stmt );
-				lprintf( "Database busy, waiting..." );
+				if( !odbc->flags.bNoLogging )
+					_lprintf(DBG_RElAY)( "Database Busy, waiting on[%p]: %s", odbc, GetText( cmd ) );
             WakeableSleep( 25 );
 				Relinquish();
 				goto retry;
@@ -2062,7 +2078,7 @@ int __DoSQLCommandEx( PODBC odbc, PCOLLECT collection DBG_PASS )
 SQLPROXY_PROC( int, SQLCommandEx )( PODBC odbc, CTEXTSTR command DBG_PASS )
 {
 	PODBC use_odbc;
-	if( !IsSQLOpen( odbc ) )
+	if( !IsSQLOpenEx( odbc DBG_RELAY ) )
       return 0;
 	if( !( use_odbc = odbc ) )
 	{
@@ -2149,7 +2165,7 @@ void __GetSQLTypes( PODBC odbc, PCOLLECT collection )
 
 int GetSQLTypes( void )
 {
-   if( !OpenSQL() )
+   if( !OpenSQL( DBG_VOIDSRC ) )
    {
       return FALSE;
    }
@@ -2212,7 +2228,7 @@ SQLPROXY_PROC( int, FetchSQLError )( PODBC odbc, CTEXTSTR *result )
 SQLPROXY_PROC( int, GetSQLError )( CTEXTSTR *result )
 {
 	if( !g.odbc )
-		if( !OpenSQL() )
+		if( !OpenSQL( DBG_VOIDSRC ) )
 		{
          if( result ) (*result) = NULL;
 			return 0;
@@ -2272,7 +2288,7 @@ int __GetSQLResult( PODBC odbc, PCOLLECT collection, int bMore )
 		return 0;
 	}
 #if !defined( SQLPROXY_LIBRARY_SOURCE ) && !defined( SQLPROXY_SOURCE )
-	if( !OpenSQLConnection( odbc ) )
+	if( !OpenSQLConnectionEx( odbc DBG_SRC ) )
 	{
 		GenerateResponce( collection, WM_SQL_RESULT_ERROR );
 		return 0;
@@ -2304,7 +2320,7 @@ int __GetSQLResult( PODBC odbc, PCOLLECT collection, int bMore )
 		TEXTCHAR *byResult;
 #endif
 		TEXTCHAR *tmpResult = NULL;
-      int byTmpResultLen = 0;
+		PTRSZVAL byTmpResultLen = 0;
 		// SQLPrepare
 		// includes the table to list... therefore list the fields in the table.
 
@@ -2423,7 +2439,10 @@ int __GetSQLResult( PODBC odbc, PCOLLECT collection, int bMore )
 
          // end thread protection here - was started in the __DoSQLQuery
 			if( odbc->flags.bThreadProtect )
+			{
+				odbc->nProtect--;
 				LeaveCriticalSec( &odbc->cs );
+			}
 
 			//DestroyCollection( collection );
 			return 0;
@@ -2529,9 +2548,9 @@ int __GetSQLResult( PODBC odbc, PCOLLECT collection, int bMore )
 										, byResult
 										, colsize
 										, &ResultLen );
-					if( ResultLen > collection->colsizes[idx-1] )
+					if( SUS_GT( ResultLen,SQLINTEGER,collection->colsizes[idx-1],SQLUINTEGER) )
 					{
-                  lprintf( "SQL Result returned more data than the column described! (returned %d expected %d)", ResultLen, collection->colsizes[idx-1] );
+						lprintf( "SQL Result returned more data than the column described! (returned %d expected %d)", ResultLen, collection->colsizes[idx-1] );
 					}
 				}
 				else
@@ -2545,7 +2564,10 @@ int __GetSQLResult( PODBC odbc, PCOLLECT collection, int bMore )
 				}
 				//lprintf( "Column %s colsize %d coltype %d coltype %d idx %d", collection->fields[idx-1], colsize, coltype, collection->coltypes[idx-1], idx );
 				if( collection->coltypes && coltype != collection->coltypes[idx-1] )
-               DebugBreak();
+				{
+               lprintf( "Col type mismatch?" );
+					DebugBreak();
+				}
             if( rc == SQL_SUCCESS ||
 					rc == SQL_SUCCESS_WITH_INFO )
 				{
@@ -2745,7 +2767,7 @@ int GetSQLRecord( CTEXTSTR **result )
 {
 	if( result )
 	{
-		if( !OpenSQL() )
+		if( !OpenSQL( DBG_VOIDSRC ) )
 		{
 			return FALSE;
 		}
@@ -2758,7 +2780,7 @@ int GetSQLResult( CTEXTSTR *result )
 {
 	if( result )
 	{
-		if( !OpenSQL() )
+		if( !OpenSQL( DBG_VOIDSRC ) )
 		{
 			return FALSE;
 		}
@@ -2798,7 +2820,9 @@ int __DoSQLQueryEx( PODBC odbc, PCOLLECT collection, CTEXTSTR query DBG_PASS )
 		return FALSE;
 	}
 	if( !odbc )
+	{
 		DebugBreak();
+	}
 	if( !IsSQLOpen( odbc ) )
 	{
       return FALSE;
@@ -2877,7 +2901,7 @@ int __DoSQLQueryEx( PODBC odbc, PCOLLECT collection, CTEXTSTR query DBG_PASS )
 			//odbc->hidden_messages++
 			;
       else
-			_lprintf(DBG_RELAY)( "Do Command: %s", query );
+			_lprintf(DBG_RELAY)( "Do Command[%p]: %s", odbc, query );
 	}
 
 	//lprintf( DBG_FILELINEFMT "Query: %s" DBG_RELAY, GetText( query ) );
@@ -3095,7 +3119,7 @@ int SQLRecordQueryEx( PODBC odbc
 
 	do
 	{
-		if( !IsSQLOpen( odbc ) )
+		if( !IsSQLOpenEx( odbc DBG_RELAY ) )
 			return FALSE;
 		if( !( use_odbc = odbc ) )
 		{
@@ -3210,7 +3234,7 @@ int DoSQLQueryEx( CTEXTSTR query, CTEXTSTR *result DBG_PASS )
 	(*result) = NULL;
 	if( result )
 	{
-		if( !OpenSQL() )
+		if( !OpenSQL( DBG_VOIDSRC ) )
 		{
 			return FALSE;
 		}
@@ -3220,16 +3244,16 @@ int DoSQLQueryEx( CTEXTSTR query, CTEXTSTR *result DBG_PASS )
 }
 
 //-----------------------------------------------------------------------
-int IsSQLOpen( PODBC odbc )
+int IsSQLOpenEx( PODBC odbc DBG_PASS )
 {
 	if( !odbc )
 	{
       //lprintf( "open default..." );
-		OpenSQL();
+		OpenSQL( DBG_VOIDRELAY );
 		odbc = g.odbc;
 	}
 	else
-      OpenSQLConnection( odbc );
+      OpenSQLConnectionEx( odbc DBG_RELAY );
 #if defined( USE_SQLITE ) || defined( USE_SQLITE_INTERFACE )
 	if( odbc && odbc->flags.bSQLite_native )
 		if( odbc && odbc->db )
@@ -3245,6 +3269,12 @@ int IsSQLOpen( PODBC odbc )
 	// odbc library tends to be sluggish when the database fails connection...
 	// I dunno - this is intended to be used in an Idle() loop which will get the timer to fire eventually.
 	return FALSE;
+}
+
+#undef IsSQLOpen
+int IsSQLOpen( PODBC odbc )
+{
+   return IsSQLOpenEx( odbc DBG_SRC );
 }
 
 //-----------------------------------------------------------------------
@@ -3323,7 +3353,7 @@ SQLSTUB_PROC( int, SQLInsertFlush )( PODBC odbc )
 	PTEXT tmp, tmp2;
 	if( !odbc )
 	{
-		if( !OpenSQL() )
+		if( !OpenSQL( DBG_VOIDSRC ) )
 			return FALSE;
 		odbc = g.odbc;
 	}
@@ -3368,7 +3398,7 @@ SQLSTUB_PROC( int, vSQLInsert )( PODBC odbc, CTEXTSTR table, va_list args )
 	// a MSAccess database...
 	if( !odbc )
 	{
-		if( !OpenSQL() )
+		if( !OpenSQL( DBG_VOIDSRC ) )
 			return FALSE;
 		odbc = g.odbc;
 	}
@@ -3447,7 +3477,7 @@ SQLSTUB_PROC( int, vSQLInsert )( PODBC odbc, CTEXTSTR table, va_list args )
 SQLSTUB_PROC( int, DoSQLInsert )( CTEXTSTR table, ... )
 {
 	va_list args;
-	if( !OpenSQL() )
+	if( !OpenSQL( DBG_VOIDSRC ) )
 	{
 		return FALSE;
 	}
@@ -3510,7 +3540,7 @@ void CPROC Timer( PTRSZVAL psv )
 	// and within this is dispatched the backup/restore/init
 	// tasks.
 	//Log( WIDE("Tick...") );
-	OpenSQL();
+	OpenSQL( DBG_VOIDSRC );
 	if( g.odbc )
 	{
 		//VarTextEmpty( g.TimerCollect.pvt_out );
@@ -3548,7 +3578,7 @@ static void LoadTasks( void )
       {
          PUPDATE_TASK task = (PUPDATE_TASK)Allocate( sizeof( UPDATE_TASK ) );
          lprintf( WIDE("Task: \'%s\'"), updatetask );
-         StrCpy( task->name, updatetask );
+		 StrCpyEx( task->name, updatetask, sizeof( task->name ) );
          task->PrimaryRecovered = (void(CPROC *)(PODBC,PODBC))LoadFunction( task->name, WIDE("_PrimaryRecovered") );
          // it better never be  a post _ which implies register convention
          //if( !task->PrimaryRecovered )
@@ -3771,7 +3801,7 @@ CTEXTSTR GetSQLOffsetDate( PODBC odbc, CTEXTSTR BeginOfDayType )
 #ifndef __NO_OPTIONS__
 	SACK_GetProfileString( "SACK/Day Offset", BeginOfDayType, "5:00", offset, sizeof( offset ) );	
 #else
-	strcpy( offset, "5:00" );
+	StrCpyEx( offset, "5:00", sizeof( offset ) );
 #endif
 	if( StrChr( offset, ':' ) )
 	{

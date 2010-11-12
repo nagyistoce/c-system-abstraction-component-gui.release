@@ -24,22 +24,33 @@ void CPROC WindowInput( PTRSZVAL psv, PTEXT text )
    LineRelease( out );
 }
 
+#ifdef _MSC_VER
+int APIENTRY WinMain( HINSTANCE a, HINSTANCE b, LPSTR c, int d )
+{
+	TEXTCHAR **argv;
+	int argc;
+	ParseIntoArgs( c, &argc, &argv );
+	{
+#else
 int main( int argc, char **argv )
 {
-	PTASK_INFO task;
-   PSI_CONTROL pc;
-	pc = MakeNamedCaptionedControl( NULL, "PSI Console", 0, 0, 640, 480, INVALID_INDEX, "Command Prompt" );
-	DisplayFrame( pc );
-
-	//task = LaunchPeerProgram( argc>1?argv[1]:"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", ".", NULL, OutputHandle, TaskEnded, (PTRSZVAL)pc );
-	task = LaunchPeerProgram( argc>1?argv[1]:"cmd.exe", ".", NULL, OutputHandle, TaskEnded, (PTRSZVAL)pc );
-	if( task )
 	{
-		PSIConsoleInputEvent( pc, WindowInput, (PTRSZVAL)task );
-		pThread = MakeThread();
-		while( !done )
+#endif
+		PTASK_INFO task;
+		PSI_CONTROL pc;
+		pc = MakeNamedCaptionedControl( NULL, "PSI Console", 0, 0, 640, 480, INVALID_INDEX, "Command Prompt" );
+		DisplayFrame( pc );
+
+		//task = LaunchPeerProgram( argc>1?argv[1]:"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", ".", NULL, OutputHandle, TaskEnded, (PTRSZVAL)pc );
+		task = LaunchPeerProgram( argc>1?argv[1]:"cmd.exe", ".", NULL, OutputHandle, TaskEnded, (PTRSZVAL)pc );
+		if( task )
 		{
-			WakeableSleep( 25000 );
+			PSIConsoleInputEvent( pc, WindowInput, (PTRSZVAL)task );
+			pThread = MakeThread();
+			while( !done )
+			{
+				WakeableSleep( 25000 );
+			}
 		}
 	}
 	return 0;

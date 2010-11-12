@@ -617,9 +617,9 @@ typedef struct draw_popup_item_tag
        \ \                                                        */
     struct {
         /* Menu item is in a selected state. (Mouse Over) */
-        _32 selected : 1;
+        BIT_FIELD selected : 1;
         /* Menu item has a checkmark on it. */
-        _32 checked  : 1;
+        BIT_FIELD checked  : 1;
     } flags;
     /* Define options which may be passed to measure an item or to
        have an item drawn.                                         */
@@ -878,6 +878,10 @@ PSI_PROC( PTRSZVAL, GetCommonUserData )( PSI_CONTROL pf );
 #define GetFrameUserData(pf) GetCommonUserData( (PSI_CONTROL)pf )
 PSI_PROC( void, SetCommonUserData )( PSI_CONTROL pf, PTRSZVAL psv );
 #define SetFrameUserData(pf,d) SetCommonUserData( (PSI_CONTROL)pf,d )
+
+
+PSI_PROC( void, BeginUpdate )( PSI_CONTROL pc );
+PSI_PROC( void, EndUpdate )( PSI_CONTROL pc );
 
 
 // do the draw to the display...
@@ -1705,7 +1709,7 @@ PSI_PROC( int, GetListboxMultiSelectEx )( PSI_CONTROL, int *multi, int *lazy );
 PSI_PROC( int, GetListboxMultiSelect )( PSI_CONTROL ); // returns only multiselect option, not lazy with multselect
 PSI_PROC( void, ResetList)( PSI_CONTROL pc );
 // put an item at end of list.
-PSI_PROC( PLISTITEM, AddListItem)( PSI_CONTROL pc, const CTEXTSTR text );
+PSI_PROC( PLISTITEM, AddListItem)( PSI_CONTROL pc, CTEXTSTR text );
 PSI_PROC( PLISTITEM, AddListItemEx)( PSI_CONTROL pc, int nLevel, CTEXTSTR text );
 // put an item after a known item... NULL to add at head of list.
 PSI_PROC( PLISTITEM, InsertListItem)( PSI_CONTROL pc, PLISTITEM pAfter, CTEXTSTR text );
@@ -2247,11 +2251,11 @@ PSI_PROC_PTR( PLISTITEM, InsertListItem)( PSI_CONTROL pc, PLISTITEM prior, CTEXT
    
    \ \                                                                               */
 PSI_PROC_PTR( PLISTITEM, InsertListItemEx)( PSI_CONTROL pc, PLISTITEM prior, int nLevel, CTEXTSTR text );
-PSI_PROC_PTR( PLISTITEM, AddListItem)( PSI_CONTROL pc, const CTEXTSTR text );
+PSI_PROC_PTR( PLISTITEM, AddListItem)( PSI_CONTROL pc, CTEXTSTR text );
 /* <combine sack::PSI::listbox::AddListItemEx@PSI_CONTROL@int@CTEXTSTR>
    
    \ \                                                                  */
-PSI_PROC_PTR( PLISTITEM, AddListItemEx)( PSI_CONTROL pc, int nLevel, const CTEXTSTR text );
+PSI_PROC_PTR( PLISTITEM, AddListItemEx)( PSI_CONTROL pc, int nLevel, CTEXTSTR text );
 /* <combine sack::PSI::listbox::DeleteListItem@PSI_CONTROL@PLISTITEM>
    
    \ \                                                                */

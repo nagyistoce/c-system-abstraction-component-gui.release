@@ -77,14 +77,24 @@ SQLGETOPTION_PROC( void, EnumOptions )( INDEX parent
 {
    EnumOptionsEx( og.Option, parent, Process, psvUser );
 }
+struct copy_data {
+	INDEX iNewName;
+   POPTION_TREE tree;
+};
+
 static int CPROC CopyRoot( PTRSZVAL iNewRoot, CTEXTSTR name, _32 ID, int flags )
 {
+	struct copy_data *copydata = (struct copy_data *)iNewRoot;
+   struct copy_data newcopy;
 	// iNewRoot is at its source an INDEX
-	INDEX iCopy = GetOptionIndexEx( (INDEX)iNewRoot, NULL, name, NULL, TRUE DBG_SRC );
+	INDEX iCopy = GetOptionIndexEx( copydata->iNewName, NULL, name, NULL, TRUE DBG_SRC );
 	INDEX iValue = GetOptionValueIndex( ID );
+	newcopy.tree = copydata->tree;
+   newcopy.iNewName = iCopy;
    if( iValue != INVALID_INDEX )
-		SetOptionValue( iCopy, DuplicateValue( iValue, iCopy ) );
-	EnumOptions( ID, CopyRoot, iCopy );
+		SetOptionValueEx( copydata->tree, iCopy, DuplicateValue( iValue, iCopy ) );
+
+	EnumOptions( ID, CopyRoot, (PTRSZVAL)&newcopy );
    return TRUE;
 }
 
@@ -93,7 +103,9 @@ SQLGETOPTION_PROC( void, DuplicateOptionEx )( PODBC odbc, INDEX iRoot, CTEXTSTR 
 	INDEX iParent;
    CTEXTSTR result = NULL;
 	INDEX iNewName;
+	struct copy_data copydata;
 	POPTION_TREE tree = GetOptionTreeEx( odbc );
+	copydata.tree = tree;
 	if( tree->flags.bNewVersion )
 	{
 		NewDuplicateOption( og.Option, iRoot, pNewName );
@@ -103,7 +115,8 @@ SQLGETOPTION_PROC( void, DuplicateOptionEx )( PODBC odbc, INDEX iRoot, CTEXTSTR 
 	{
 		iParent = atoi( result );
 		iNewName = GetOptionIndexEx( iParent, NULL, pNewName, NULL, TRUE DBG_SRC );
-		EnumOptions( iRoot, CopyRoot, iNewName );
+		copydata.iNewName = iNewName;
+		EnumOptions( iRoot, CopyRoot, (PTRSZVAL)&copydata );
 	}
 }
 

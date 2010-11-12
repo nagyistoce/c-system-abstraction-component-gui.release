@@ -16,6 +16,5 @@ COMPILE_FLAGS  "-DTARGET_LABEL=${PROJECT_NAME}"
                   FOLDER utils
 )
 target_link_libraries( ${PROJECT_NAME} ${SACK_LIBRARY} ${SACK_PSI_LIBRARY} )
-install_default_dest( ${PROJECT_NAME} )
-
+install_mode_dest( ${PROJECT_NAME} )
 

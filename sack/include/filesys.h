@@ -175,6 +175,7 @@ FILESYS_PROC  int FILESYS_API  MakePath ( CTEXTSTR path );
    </code>                                                 */
 FILESYS_PROC  int FILESYS_API  IsPath ( CTEXTSTR path );
 
+FILESYS_PROC int FILESYS_API IsAbsolutePath( CTEXTSTR path );
 
 FILESYS_PROC  _64 FILESYS_API  GetFileWriteTime ( CTEXTSTR name );
 FILESYS_PROC  _64 FILESYS_API  GetTimeAsFileTime ( void );
@@ -295,10 +296,10 @@ FILESYS_PROC  int FILESYS_API  sack_fseek ( FILE *file_file, int pos, int whence
 FILESYS_PROC  int FILESYS_API  sack_fread ( CPOINTER buffer, int size, int count,FILE *file_file );
 FILESYS_PROC  int FILESYS_API  sack_fwrite ( CPOINTER buffer, int size, int count,FILE *file_file );
 
-FILESYS_PROC  int FILESYS_API  sack_unlink ( CTEXTSTR filename );
+FILESYS_PROC  int FILESYS_API  sack_unlink ( int group, CTEXTSTR filename );
 FILESYS_PROC  int FILESYS_API  sack_rename ( CTEXTSTR file_source, CTEXTSTR new_name );
 
-#ifdef __WINDOWS__
+#ifdef WIN32
 #if !defined( SACK_BAG_EXPORTS ) && !defined( BAG_EXTERNALS )
 # define open(a,...) sack_iopen(0,a,##__VA_ARGS__)
 # define _lopen(a,...) sack_open(0,a,##__VA_ARGS__)
@@ -319,8 +320,8 @@ FILESYS_PROC  int FILESYS_API  sack_rename ( CTEXTSTR file_source, CTEXTSTR new_
 # define _lwrite(a,b,c) sack_write(a,b,c)
 # define _lcreat(a,b) sack_creat(0,a,b)
 
-# define remove(a)   sack_unlink(a)
-# define unlink(a)   sack_unlink(a)
+# define remove(a)   sack_unlink(0,a)
+# define unlink(a)   sack_unlink(0,a)
 #endif
 #endif
 

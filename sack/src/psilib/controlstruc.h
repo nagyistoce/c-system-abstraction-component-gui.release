@@ -178,16 +178,16 @@ struct edit_state_tag {
 	S_32 delxaccum, delyaccum;
 
    struct {
-      _32 bActive : 1; // edit state is active.
-      _32 fLocked : 4; // which spot it's locked on...
-      _32 bDragging : 1;
-      _32 bSizing : 1; // any sizing flag set
-      _32 bSizing_left  : 1;
-      _32 bSizing_right : 1;
-      _32 bSizing_top   : 1;
-      _32 bSizing_bottom: 1;
-      _32 bFrameWasResizable : 1;
-      _32 bHotSpotsActive : 1;
+      BIT_FIELD bActive : 1; // edit state is active.
+      BIT_FIELD fLocked : 4; // which spot it's locked on...
+      BIT_FIELD bDragging : 1;
+      BIT_FIELD bSizing : 1; // any sizing flag set
+      BIT_FIELD bSizing_left  : 1;
+      BIT_FIELD bSizing_right : 1;
+      BIT_FIELD bSizing_top   : 1;
+      BIT_FIELD bSizing_bottom: 1;
+      BIT_FIELD bFrameWasResizable : 1;
+      BIT_FIELD bHotSpotsActive : 1;
    } flags;
 	_32 BorderType;
 //DOM-IGNORE-END
@@ -198,19 +198,19 @@ typedef struct edit_state_tag *PEDIT_STATE;
 struct physical_device_interface
 {
 //DOM-IGNORE-BEGIN
-   PRENDERER pActImg; // any control can have a physical renderer...
-   struct common_control_frame * common; // need this to easily back track...
-   struct device_flags {
-      _32 bDragging : 1; // frame is being moved
-      _32 bSizing       : 1; // flags for when frame is sizable
-      _32 bSizing_left  : 1;
-      _32 bSizing_right : 1;
-      _32 bSizing_top   : 1;
-      _32 bSizing_bottom: 1;
-      _32 bCurrentOwns : 1; // pCurrent is also owner of the mouse (button was clicked, and never released)
-		_32 bNoUpdate : 1; // don't call update function...
-		_32 bCaptured : 1; // frame owns mouse, control behaving as frame wants all mouse events.
-		_32 bApplicationOwned : 1; // current owns was set by application, do not auto disown.
+	PRENDERER pActImg; // any control can have a physical renderer...
+	struct common_control_frame * common; // need this to easily back track...
+	struct device_flags {
+		BIT_FIELD bDragging : 1; // frame is being moved
+		BIT_FIELD bSizing       : 1; // flags for when frame is sizable
+		BIT_FIELD bSizing_left  : 1;
+		BIT_FIELD bSizing_right : 1;
+		BIT_FIELD bSizing_top   : 1;
+		BIT_FIELD bSizing_bottom: 1;
+		BIT_FIELD bCurrentOwns : 1; // pCurrent is also owner of the mouse (button was clicked, and never released)
+		BIT_FIELD bNoUpdate : 1; // don't call update function...
+		BIT_FIELD bCaptured : 1; // frame owns mouse, control behaving as frame wants all mouse events.
+		BIT_FIELD bApplicationOwned : 1; // current owns was set by application, do not auto disown.
    }flags;
    EDIT_STATE EditState;
    //PRENDERER pActImg;
@@ -225,7 +225,7 @@ struct physical_device_interface
 	// bias.
 	struct {
 		struct {
-			_32 bias_is_surface : 1;
+			BIT_FIELD bias_is_surface : 1;
 		} flags;
 		S_32 x, y;
 	} CurrentBias;
@@ -301,77 +301,82 @@ typedef struct common_control_frame
 	   \ \                                                */
 	struct {
       /* Control is currently keyboard focused. */
-		_32 bFocused : 1;
+		BIT_FIELD bFocused : 1;
       // destroyed - and at next opportunity will be...
-		_32 bDestroy : 1; 
+		BIT_FIELD bDestroy : 1; 
       // set when a size op begins to void draw done during size
-		_32 bSizing : 1; 
+		BIT_FIELD bSizing : 1; 
       // used to make Frame more 'Pop' Up...
-		_32 bInitial : 1; 
+		BIT_FIELD bInitial : 1; 
       // set to disable updates
-		_32 bNoUpdate : 1;
+		BIT_FIELD bNoUpdate : 1;
       // this control was explicitly set hidden.. don't unhide.
-		_32 bHiddenParent : 1; 
+		BIT_FIELD bHiddenParent : 1; 
       // can't see it, can't touch it.
-		_32 bHidden : 1; 
+		BIT_FIELD bHidden : 1; 
       // scale currently applies.
-		_32 bScaled : 1; 
+		BIT_FIELD bScaled : 1; 
 		/* control gets no keyboard focus. */
-		_32 bNoFocus:1;
+		BIT_FIELD bNoFocus:1;
       // greyed out state?
-		_32 bDisable : 1; 
+		BIT_FIELD bDisable : 1; 
        // 0 = default alignment 1 = left, 2 = center 3 = right
-		_32 bAlign:2;
+		BIT_FIELD bAlign:2;
       // draw veritcal instead of horizontal
-		_32 bVertical:1;
+		BIT_FIELD bVertical:1;
        // draw opposite/upside down from normal
-		_32 bInvert:1;
+		BIT_FIELD bInvert:1;
       // needs DrawThySelf called...
-		_32 bDirty : 1;
+		BIT_FIELD bDirty : 1;
       // DrawThySelf has been called...
-		_32 bCleaning : 1;
+		BIT_FIELD bCleaning : 1;
       // only need to update the control's frame... (focus change)
-		_32 bDirtyBorder : 1;
+		BIT_FIELD bDirtyBorder : 1;
       // parent drew, therefore this needs to draw, and it's an initial draw.
-		_32 bParentCleaned : 1;
+		BIT_FIELD bParentCleaned : 1;
       // saves it's original surface and restores it before invoking the control draw.
-		_32 bTransparent : 1; 
+		BIT_FIELD bTransparent : 1; 
 
 		/* Adopted children are not automatically saved in XML files. */
-		_32 bAdoptedChild : 1;
+		BIT_FIELD bAdoptedChild : 1;
       // children were cleaned by an internal update... don't draw again.
-		_32 children_cleaned : 1;
-      // no extra init, and no save, this is a support control created for a master control
-		_32 private_control : 1; 
-		/* control has been temporarily displaced from its parent
-		   control.                                               */
-			_32 detached : 1;
-			// edit mode enabled visibility of this window and opened it.
-			_32 auto_opened : 1;
-         // first time this is being cleaned (during the course of refresh this could be called many times)
-			_32 bFirstCleaning : 1;
-         // frame was loaded from XML, and desires that EditFrame not be enablable.
-		_32 bNoEdit : 1; 
-		/* Edit has been enabled on the control. */
-			_32 bEditSet : 1;
-         // this came from the XML file.
-			_32 bEditLoaded : 1;
-         // an update event is already being done, bail on this and all children?
-			_32 bUpdating : 1;
-         // enable only real draw events in video thread.  (post invalidate only)
-			_32 bOpenGL : 1;
-         // needs DrawThySelf called... // collect these, so a master level draw can be done down. only if a control or it's child is dirty.
-			_32 bChildDirty : 1;
-         // there is a frame caption update (with flush to display) which needs to be locked....
-			_32 bRestoring : 1;
-         // got at least one frame redraw event (focus happens before first draw)
-		_32 bShown : 1; 
-		/* Set when resized by a mouse drag, causes a dirty state. */
-			_32 bResizedDirty : 1;
-         // during control update the effective surface region was set while away.
-			_32 bUpdateRegionSet : 1;
-         // control was in the process of being cleaned, and received a smudge again... control needs to draw itself AGAIN
-			BIT_FIELD bDirtied : 1;
+		BIT_FIELD children_cleaned : 1;
+		// no extra init, and no save, this is a support control created for a master control
+		BIT_FIELD private_control : 1;
+		// control has been temporarily displaced from its parent control.
+		BIT_FIELD detached : 1;
+		// edit mode enabled visibility of this window and opened it.
+		BIT_FIELD auto_opened : 1;
+		// first time this is being cleaned (during the course of refresh this could be called many times)
+		BIT_FIELD bFirstCleaning : 1;
+		// frame was loaded from XML, and desires that EditFrame not be enablable.
+		BIT_FIELD bNoEdit : 1;
+		// Edit has been enabled on the control.
+		BIT_FIELD bEditSet : 1;
+		// this came from the XML file.
+		BIT_FIELD bEditLoaded : 1;
+		// an update event is already being done, bail on this and all children?
+		BIT_FIELD bUpdating : 1;
+		// enable only real draw events in video thread.  (post invalidate only)
+		BIT_FIELD bOpenGL : 1;
+		// needs DrawThySelf called... // collect these, so a master level draw can be done down. only if a control or it's child is dirty.
+		BIT_FIELD bChildDirty : 1;
+		// there is a frame caption update (with flush to display) which needs to be locked....
+		BIT_FIELD bRestoring : 1;
+		// got at least one frame redraw event (focus happens before first draw)
+		BIT_FIELD bShown : 1;
+		// Set when resized by a mouse drag, causes a dirty state.
+		BIT_FIELD bResizedDirty : 1;
+		// during control update the effective surface region was set while away.
+		BIT_FIELD bUpdateRegionSet : 1;
+		// control was in the process of being cleaned, and received a smudge again... control needs to draw itself AGAIN
+		BIT_FIELD bDirtied : 1;
+		// parent did a draw, and marks this on all his children, then copy originalsurface clears this flag to indicate it got a clean snapshot
+		BIT_FIELD bParentUpdated : 1;
+		// this is set on controls which have completed their redraw after a smudge.
+		BIT_FIELD bCleanedRecently : 1;
+		// this is set by BeginUpdate and EndUpdate to prevent hiding/disable update during update
+		BIT_FIELD bDirectUpdating : 1;
 	} flags;
 
 

@@ -170,7 +170,7 @@ PHISTORYBLOCK CreateHistoryBlock( PHISTORY_BLOCK_LINK phbl )
 
 //----------------------------------------------------------------------------
 
-PHISTORY_LINE_CURSOR CreateHistoryCursor( PHISTORY_REGION phr )
+PHISTORY_LINE_CURSOR PSI_CreateHistoryCursor( PHISTORY_REGION phr )
 {
 	if( phr )
 	{
@@ -210,7 +210,7 @@ PHISTORY_LINE_CURSOR CreateHistoryCursor( PHISTORY_REGION phr )
 
 //----------------------------------------------------------------------------
 
-PHISTORY_REGION CreateHistoryRegion( void )
+PHISTORY_REGION PSI_CreateHistoryRegion( void )
 {
 	PHISTORY_REGION phr = (PHISTORY_REGION)Allocate( sizeof( HISTORY_REGION ) );
 	MemSet( phr, 0, sizeof( HISTORY_REGION ) );
@@ -221,7 +221,7 @@ PHISTORY_REGION CreateHistoryRegion( void )
 
 //----------------------------------------------------------------------------
 
-PHISTORY_BROWSER CreateHistoryBrowser( PHISTORY_REGION region )
+PHISTORY_BROWSER PSI_CreateHistoryBrowser( PHISTORY_REGION region )
 {
 	PHISTORY_BROWSER phbr = (PHISTORY_BROWSER)Allocate( sizeof( HISTORY_BROWSER ) );
 	MemSet( phbr, 0, sizeof( HISTORY_BROWSER ) );
@@ -837,21 +837,21 @@ PTEXT HandleExtendedFormat( PHISTORY_LINE_CURSOR phc, PTEXT pLine )
 }
 //----------------------------------------------------------------------------
 
-void EnqueDisplayHistory( PHISTORY_LINE_CURSOR phc, PTEXT pLine )
+void PSI_EnqueDisplayHistory( PHISTORY_LINE_CURSOR phc, PTEXT pLine )
 {
 	if( pLine->flags & TF_FORMATEX )
 	{
 		// clear this bit... extended format will result with bit re-set
-      // if it is so required.
+		// if it is so required.
 		pLine->flags &= ~TF_FORMATEX;
-      HandleExtendedFormat( phc, pLine );
+		HandleExtendedFormat( phc, pLine );
 	}
 	if( !(pLine->flags & TF_NORETURN) )
 	{
 		// auto return/newline if not noreturn
-      //lprintf( "Not NORETURN - therefore skipping to next line..." );
+		//lprintf( "Not NORETURN - therefore skipping to next line..." );
 		phc->output.nCursorX = 0;
-      phc->output.nCursorY++;
+		phc->output.nCursorY++;
 	}
 
 	{
@@ -1110,15 +1110,15 @@ _32 ComputeNextOffset( PTEXT segment, _32 nShown )
 
 //----------------------------------------------------------------------------
 
-int ComputeToShow( _32 cols, PTEXT segment, _32 nLen, int nOfs, int nShown )
+_32 ComputeToShow( _32 cols, PTEXT segment, _32 nLen, _32 nOfs, _32 nShown )
 {
-	int nShow = cols - nOfs;
+	_32 nShow = cols - nOfs;
 	// if space left to show here is less than
 	// then length to show, compute wrapping point.
 	//lprintf( "Compute to show: %d (%d)%s %d %d", cols, GetTextSize( segment ), GetText( segment ), nOfs, nShown );
 	if( nShow < (nLen-nShown) )
 	{
-		int nSpace = nShow + nShown;
+		_32 nSpace = nShow + nShown;
 		TEXTCHAR *text = GetText( segment );
 
 		// cheap test for a space...
@@ -1323,7 +1323,7 @@ int AlignHistory( PHISTORY_BROWSER phbr, S_32 nOffset )
 		phbr->nLine -= phbr->pBlock->nLinesUsed;
 		phbr->pBlock = phbr->pBlock->next;
 	}
-	if( phbr->nLine > phbr->pBlock->nLinesUsed )
+	if( SUS_GT( phbr->nLine, S_32, phbr->pBlock->nLinesUsed, _32 ) )
 	{
 		phbr->nLine = 0;
 		phbr->pBlock = NULL;
@@ -1405,7 +1405,7 @@ int GetCommandCursor( PHISTORY_BROWSER phbr
 						  )
 {
 	PTEXT pCmd;
-	int tmpx = 0, nLead, tmp_end;
+	_32 tmpx = 0, nLead, tmp_end;
 	PDISPLAYED_LINE pdl;
 
 	if( !CommandInfo )
@@ -1530,7 +1530,8 @@ PDATALIST *GetDisplayInfo( PHISTORY_BROWSER phbr )
 void BuildDisplayInfoLines( PHISTORY_BROWSER phbr )
 //void BuildDisplayInfoLines( PHISTORY_LINE_CURSOR phlc )
 {
-   int nLines, nLinesShown = 0, nChar, nLen;
+   int nLines, nLinesShown = 0, nChar;
+   _32 nLen;
    int nLineCount = phbr->nLines;
    PTEXT pText;
    PDATALIST *CurrentLineInfo = &phbr->DisplayLineInfo;
@@ -1711,7 +1712,7 @@ void BuildDisplayInfoLines( PHISTORY_BROWSER phbr )
 					if( !pLastSetLine )
 					{
 						nLen = GetTextSize( pText );
-						if( (dl.nOfs + nLen) < phbr->nOffset )
+						if( USS_LT( (dl.nOfs + nLen), _32, phbr->nOffset, int ) )
 						{
 							lprintf( WIDE("Skipping segement, it's before the offset...") );
 							dl.nOfs += nLen;
@@ -1808,18 +1809,18 @@ void SetCursorNoPrompt( PHISTORY_BROWSER phbr, LOGICAL bNoPrompt )
 
 //----------------------------------------------------------------------------
 
-void SetHistoryDefaultForeground( PHISTORY_LINE_CURSOR phlc, int iColor )
+void PSI_SetHistoryDefaultForeground( PHISTORY_LINE_CURSOR phlc, int iColor )
 {
 	phlc->output.DefaultColor.flags.foreground = iColor;
-   phlc->output.PriorColor = phlc->output.DefaultColor;
+	phlc->output.PriorColor = phlc->output.DefaultColor;
 }
 
 //----------------------------------------------------------------------------
 
-void SetHistoryDefaultBackground( PHISTORY_LINE_CURSOR phlc, int iColor )
+void PSI_SetHistoryDefaultBackground( PHISTORY_LINE_CURSOR phlc, int iColor )
 {
 	phlc->output.DefaultColor.flags.background = iColor;
-   phlc->output.PriorColor = phlc->output.DefaultColor;
+	phlc->output.PriorColor = phlc->output.DefaultColor;
 }
 
 
@@ -1893,24 +1894,24 @@ void SetHistoryCursorPos( PHISTORY_LINE_CURSOR phlc, S_32 x, S_32 y )
 
 //----------------------------------------------------------------------------
 
-void SetHistoryPageLines( PHISTORY_BROWSER phbr, _32 nLines )
+void PSI_SetHistoryPageLines( PHISTORY_BROWSER phbr, _32 nLines )
 {
-   //lprintf( "Set histpry lines at %d", nLines );
-   phbr->nPageLines = nLines;
+	//lprintf( "Set histpry lines at %d", nLines );
+	phbr->nPageLines = nLines;
 }
 
 //----------------------------------------------------------------------------
 
-void SetHistoryBrowserNoPageBreak( PHISTORY_BROWSER phbr )
+void PSI_SetHistoryBrowserNoPageBreak( PHISTORY_BROWSER phbr )
 {
-   phbr->flags.bNoPageBreak = 1;
+	phbr->flags.bNoPageBreak = 1;
 }
 
 //----------------------------------------------------------------------------
 
-void SetHistoryBrowserOwnPageBreak( PHISTORY_BROWSER phbr )
+void PSI_SetHistoryBrowserOwnPageBreak( PHISTORY_BROWSER phbr )
 {
-   phbr->flags.bOwnPageBreak = 1;
+	phbr->flags.bOwnPageBreak = 1;
 }
 PSI_CONSOLE_NAMESPACE_END
 //----------------------------------------------------------------------------

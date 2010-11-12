@@ -31,10 +31,10 @@ namespace image {
 #define StartLoop oo /= 4;    \
    oi /= 4;                   \
    {                          \
-      int row= 0;             \
+      _32 row= 0;             \
       while( row < hs )       \
       {                       \
-         int col=0;           \
+         _32 col=0;           \
          while( col < ws )    \
          {                    \
             {
@@ -52,8 +52,8 @@ namespace image {
    }
 
  void CPROC cCopyPixelsT0( PCDATA po, PCDATA  pi
-                          , int oo, int oi
-                          , int ws, int hs
+                          , _32 oo, _32 oi
+                          , _32 ws, _32 hs
                            )
 {
    StartLoop
@@ -64,8 +64,8 @@ namespace image {
 //---------------------------------------------------------------------------
 
  void CPROC cCopyPixelsT1( PCDATA po, PCDATA  pi
-                          , int oo, int oi
-                          , int ws, int hs
+                          , _32 oo, _32 oi
+                          , _32 ws, _32 hs
                            )
 {
    StartLoop
@@ -80,16 +80,17 @@ namespace image {
 //---------------------------------------------------------------------------
 
  void CPROC cCopyPixelsTA( PCDATA po, PCDATA  pi
-                          , int oo, int oi
-                          , int ws, int hs
-                          , int nTransparent )
+                          , _32 oo, _32 oi
+                          , _32 ws, _32 hs
+                          , _32 nTransparent )
 {
    StartLoop
             CDATA cin;
             if( (cin = *pi) )
-            {
-               *po = DOALPHA2( *po, cin, nTransparent );
-               //lprintf( "cin=%08x", cin );
+				{
+					*po = DOALPHA2( *po
+									  , cin
+									  , nTransparent );
             }
    EndLoop
 }
@@ -97,12 +98,12 @@ namespace image {
 //---------------------------------------------------------------------------
 
  void CPROC cCopyPixelsTImgA( PCDATA po, PCDATA  pi
-                          , int oo, int oi
-                          , int ws, int hs
-                          , int nTransparent )
+                          , _32 oo, _32 oi
+                          , _32 ws, _32 hs
+                          , _32 nTransparent )
 {
    StartLoop
-            int alpha;
+            _32 alpha;
             CDATA cin;
             if( (cin = *pi) )
             {
@@ -115,12 +116,12 @@ namespace image {
 //---------------------------------------------------------------------------
 
  void CPROC cCopyPixelsTImgAI( PCDATA po, PCDATA  pi
-                          , int oo, int oi
-                          , int ws, int hs
-                          , int nTransparent )
+                          , _32 oo, _32 oi
+                          , _32 ws, _32 hs
+                          , _32 nTransparent )
 {
    StartLoop
-            int alpha;
+            S_32 alpha;
 
             CDATA cin;
             if( (cin = *pi) )
@@ -138,8 +139,8 @@ namespace image {
 //---------------------------------------------------------------------------
 
  void CPROC cCopyPixelsShadedT0( PCDATA po, PCDATA  pi
-                            , int oo, int oi
-                            , int ws, int hs
+                            , _32 oo, _32 oi
+                            , _32 ws, _32 hs
                             , CDATA c )
 {
    StartLoop
@@ -151,8 +152,8 @@ namespace image {
 
 //---------------------------------------------------------------------------
  void CPROC cCopyPixelsShadedT1( PCDATA po, PCDATA  pi
-                            , int oo, int oi
-                            , int ws, int hs
+                            , _32 oo, _32 oi
+                            , _32 ws, _32 hs
                             , CDATA c )
 {
    StartLoop
@@ -166,9 +167,9 @@ namespace image {
 //---------------------------------------------------------------------------
 
  void CPROC cCopyPixelsShadedTA( PCDATA po, PCDATA  pi
-                            , int oo, int oi
-                            , int ws, int hs
-                            , int nTransparent
+                            , _32 oo, _32 oi
+                            , _32 ws, _32 hs
+                            , _32 nTransparent
                             , CDATA c )
 {
    StartLoop
@@ -183,16 +184,16 @@ namespace image {
 
 //---------------------------------------------------------------------------
  void CPROC cCopyPixelsShadedTImgA( PCDATA po, PCDATA  pi
-                            , int oo, int oi
-                            , int ws, int hs
-                            , int nTransparent
+                            , _32 oo, _32 oi
+                            , _32 ws, _32 hs
+                            , _32 nTransparent
                             , CDATA c )
 {
    StartLoop
             _32 pixel, pixout;
             if( (pixel = *pi) )
             {
-               int alpha;
+               _32 alpha;
                pixout = SHADEPIXEL(pixel, c);
                alpha = ( pixel & 0xFF000000 ) >> 24;
                alpha += nTransparent;
@@ -203,16 +204,16 @@ namespace image {
 
 //---------------------------------------------------------------------------
  void CPROC cCopyPixelsShadedTImgAI( PCDATA po, PCDATA  pi
-                            , int oo, int oi
-                            , int ws, int hs
-                            , int nTransparent
+                            , _32 oo, _32 oi
+                            , _32 ws, _32 hs
+                            , _32 nTransparent
                             , CDATA c )
 {
    StartLoop
             _32 pixel, pixout;
             if( (pixel = *pi) )
             {
-               int alpha;
+               _32 alpha;
                alpha = ( pixel & 0xFF000000 ) >> 24;
                alpha -= nTransparent;
                if( alpha > 1 )
@@ -228,14 +229,14 @@ namespace image {
 //---------------------------------------------------------------------------
 
  void CPROC cCopyPixelsMultiT0( PCDATA po, PCDATA  pi
-                            , int oo, int oi
-                            , int ws, int hs
+                            , _32 oo, _32 oi
+                            , _32 ws, _32 hs
                             , CDATA r, CDATA g, CDATA b )
 {
    StartLoop
             _32 pixel, pixout;
             {
-               int rout, gout, bout;
+               _32 rout, gout, bout;
                pixel = *pi;
                pixout = MULTISHADEPIXEL( pixel, r,g,b);
             }
@@ -245,15 +246,15 @@ namespace image {
 
 //---------------------------------------------------------------------------
  void CPROC cCopyPixelsMultiT1( PCDATA po, PCDATA  pi
-                            , int oo, int oi
-                            , int ws, int hs
+                            , _32 oo, _32 oi
+                            , _32 ws, _32 hs
                             , CDATA r, CDATA g, CDATA b )
 {
    StartLoop
             _32 pixel, pixout;
             if( (pixel = *pi) )
             {
-               int rout, gout, bout;
+               _32 rout, gout, bout;
                pixout = MULTISHADEPIXEL( pixel, r,g,b);
 
                *po = pixout;
@@ -262,16 +263,16 @@ namespace image {
 }
 //---------------------------------------------------------------------------
  void CPROC cCopyPixelsMultiTA( PCDATA po, PCDATA  pi
-                            , int oo, int oi
-                            , int ws, int hs
-                            , int nTransparent
+                            , _32 oo, _32 oi
+                            , _32 ws, _32 hs
+                            , _32 nTransparent
                             , CDATA r, CDATA g, CDATA b )
 {
    StartLoop
             _32 pixel, pixout;
             if( (pixel = *pi) )
             {
-               int rout, gout, bout;
+               _32 rout, gout, bout;
                pixout = MULTISHADEPIXEL( pixel, r,g,b);
                *po = DOALPHA2( *po, pixout, nTransparent );
             }
@@ -279,17 +280,17 @@ namespace image {
 }
 //---------------------------------------------------------------------------
  void CPROC cCopyPixelsMultiTImgA( PCDATA po, PCDATA  pi
-                            , int oo, int oi
-                            , int ws, int hs
-                            , int nTransparent
+                            , _32 oo, _32 oi
+                            , _32 ws, _32 hs
+                            , _32 nTransparent
                             , CDATA r, CDATA g, CDATA b )
 {
    StartLoop
             _32 pixel, pixout;
             if( (pixel = *pi) )
             {
-               int rout, gout, bout;
-               int alpha;
+               _32 rout, gout, bout;
+               _32 alpha;
                alpha = ( pixel & 0xFF000000 ) >> 24;
                alpha += nTransparent;
                pixout = MULTISHADEPIXEL( pixel, r,g,b);
@@ -300,17 +301,17 @@ namespace image {
 }
 //---------------------------------------------------------------------------
  void CPROC cCopyPixelsMultiTImgAI( PCDATA po, PCDATA  pi
-                            , int oo, int oi
-                            , int ws, int hs
-                            , int nTransparent
+                            , _32 oo, _32 oi
+                            , _32 ws, _32 hs
+                            , _32 nTransparent
                             , CDATA r, CDATA g, CDATA b )
 {
    StartLoop
             _32 pixel, pixout;
             if( (pixel = *pi) )
             {
-               int rout, gout, bout;
-               int alpha;
+               _32 rout, gout, bout;
+               _32 alpha;
                alpha = ( pixel & 0xFF000000 ) >> 24;
                alpha -= nTransparent;
                if( alpha > 1 )
@@ -362,16 +363,25 @@ namespace image {
 		IMAGE_RECTANGLE r1;
 		IMAGE_RECTANGLE r2;
       IMAGE_RECTANGLE rs;
-      IMAGE_RECTANGLE rd;
+		IMAGE_RECTANGLE rd;
+      int tmp;
       //IMAGE_RECTANGLE r3;
       r1.x = xd;
       r1.y = yd;
       r1.width = ws;
       r1.height = hs;
       r2.x = pifDest->eff_x;
-      r2.y = pifDest->eff_y;
-      r2.width = (pifDest->eff_maxx - pifDest->eff_x) + 1;
-		r2.height = (pifDest->eff_maxy - pifDest->eff_y) + 1;
+		r2.y = pifDest->eff_y;
+		tmp = (pifDest->eff_maxx - pifDest->eff_x) + 1;
+		if( tmp < 0 )
+			r2.width = 0;
+		else
+         r2.width = (IMAGE_SIZE_COORDINATE)tmp;
+		tmp = (pifDest->eff_maxy - pifDest->eff_y) + 1;
+		if( tmp < 0 )
+			r2.height = 0;
+		else
+         r2.height = (IMAGE_SIZE_COORDINATE)tmp;
 		if( !IntersectRectangle( &rd, &r1, &r2 ) )
 		{
 			//lprintf( "Images do not overlap. %d,%d %d,%d vs %d,%d %d,%d", r1.x,r1.y,r1.width,r1.height
@@ -385,9 +395,27 @@ namespace image {
 		//		 );
 
       xs += rd.x - xd;
-      ys += rd.y - yd;
-      ws -= rd.x - xd;
-      hs -= rd.y - yd;
+		ys += rd.y - yd;
+		tmp = rd.x - xd;
+		if( tmp > 0 && (unsigned)tmp > ws )
+			ws = 0;
+		else
+		{
+			if( tmp < 0 )
+				ws += (unsigned)-tmp;
+			else
+				ws -= (unsigned)tmp;
+		}
+		tmp = rd.y - yd;
+		if( tmp > 0 && (unsigned)tmp > hs )
+			hs = 0;
+		else
+		{
+			if( tmp < 0 )
+				hs += (unsigned)-tmp;
+			else
+				hs -= (unsigned)tmp;
+		}
       //lprintf( "Resulting dest is %d,%d %d,%d", rd.x,rd.y,rd.width,rd.height );
 		xd = rd.x;
       yd = rd.y;
@@ -396,9 +424,17 @@ namespace image {
       r1.width = ws;
       r1.height = hs;
       r2.x = pifSrc->eff_x;
-      r2.y = pifSrc->eff_y;
-      r2.width = (pifSrc->eff_maxx - pifSrc->eff_x) + 1;
-		r2.height = (pifSrc->eff_maxy - pifSrc->eff_y) + 1;
+		r2.y = pifSrc->eff_y;
+		tmp = (pifSrc->eff_maxx - pifSrc->eff_x) + 1;
+		if( tmp < 0 )
+			r2.width = 0;
+      else
+			r2.width = (IMAGE_SIZE_COORDINATE)tmp;
+		tmp = (pifSrc->eff_maxy - pifSrc->eff_y) + 1;
+		if( tmp < 0 )
+			r2.height = 0;
+		else
+         r2.height = (IMAGE_SIZE_COORDINATE)tmp;
 		if( !IntersectRectangle( &rs, &r1, &r2 ) )
 		{
          //lprintf( "Desired Output does not overlap..." );
@@ -413,82 +449,6 @@ namespace image {
 		//lprintf( "Resulting rect is %d,%d to %d,%d dim: %d,%d", xs, ys, xd, yd, ws, hs );
 	}
 	//lprintf( WIDE("Doing image (%d,%d)-(%d,%d) (%d,%d)-(%d,%d)"), xs, ys, ws, hs, xd, yd, wd, hd );
-#if 0
-#ifdef BROKEN_CODE
-   if( xs < 0 ) // source X before the start of image (0,0)
-   {
-      xd -= (xs - 0 ); // adds to the original position...
-      ws += (xs - 0 ); // subtract this from width to display
-      xs = 0;
-   }
-   if( ys < 0 )  // source Y above start of image( 0,0)
-   {
-      yd -= ys - 0; // add to destination to offset origin...
-      hs += ys - 0; // subtract from height source to display
-      ys = 0;
-   }
-   //
-   //lprintf( WIDE("Doing image (%d,%d)-(%d,%d) (%d,%d)-(%d,%d)"), xs, ys, ws, hs, xd, yd, wd, hd );
-   if( xd < pifDest->x )  // if destinatino before start of dest image(0,0)
-   {
-      xs -= xd - pifDest->x; // add to x source to place new xsource on edge
-      ws += xd - pifDest->x; // subtract from width possible to display from source
-      xd = pifDest->x;
-   }
-   if( yd < pifDest->y )  // destination before top of dest image(0,0)
-   {
-      ys -= yd - pifDest->y; // add to y source to place new ysource on edge
-      hs += yd - pifDest->y; // subtract this amount from the height
-      yd = pifDest->y;
-   }
-   //lprintf( WIDE("Doing image (%d,%d)-(%d,%d) (%d,%d)-(%d,%d)"), xs, ys, ws, hs, xd, yd, wd, hd );
-#else
-   if( xs < 0 ) // source X before the start of image (0,0)
-   {
-      xd -= (xs - 0 ); // adds to the original position...
-      ws += (xs - 0 ); // subtract this from width to display
-      xs = 0;
-   }
-   if( ys < 0 )  // source Y above start of image( 0,0)
-   {
-      yd -= ys - 0; // add to destination to offset origin...
-      hs += ys - 0; // subtract from height source to display
-      ys = 0;
-   }
-   //
-   if( xd < 0 )  // if destinatino before start of dest image(0,0)
-   {
-      xs -= xd - 0; // add to x source to place new xsource on edge
-      ws += xd - 0; // subtract from width possible to display from source
-      xd = 0;
-   }
-   if( yd < 0 )  // destination before top of dest image(0,0)
-   {
-      ys -= yd - 0; // add to y source to place new ysource on edge
-      hs += yd - 0; // subtract this amount from the height
-      yd = 0;
-   }
-#endif
-   if( ( ws + xd ) > ( pifDest->width ) )
-   {
-      ws = pifDest->width - xd;
-   }
-   if( ( hs + yd ) > ( pifDest->height ) )
-   {
-      hs = pifDest->height - yd;
-   }
-#ifdef BROKEN_CODE
-   if( ( (S_32)hs + ys ) > ( pifSrc->real_height ) )
-   {
-      hs = pifSrc->real_height - ys;
-   }
-   if( ( (S_32)ws + xs ) > ( pifSrc->real_width ) )
-   {
-      ws = pifSrc->real_width - xs;
-   }
-   //lprintf( WIDE("Doing image (%d,%d)-(%d,%d) (%d,%d)-(%d,%d)"), xs, ys, ws, hs, xd, yd, wd, hd );
-#endif
-#endif
    if( (S_32)ws <= 0 ||
        (S_32)hs <= 0 ||
        (S_32)wd <= 0 ||
@@ -503,8 +463,8 @@ namespace image {
    po = IMG_ADDRESS( pifDest, xd, yd );
 //cpg 19 Jan 2007 2>c:\work\sack\src\imglib\blotdirect.c(492) : warning C4146: unary minus operator applied to unsigned type, result still unsigned
 //cpg 19 Jan 2007 2>c:\work\sack\src\imglib\blotdirect.c(493) : warning C4146: unary minus operator applied to unsigned type, result still unsigned
-   oo = 4*-(ws+pifDest->pwidth);     // w is how much we can copy...
-   oi = 4*-(ws+pifSrc->pwidth); // adding remaining width...
+   oo = 4*-(int)(ws+pifDest->pwidth);     // w is how much we can copy...
+   oi = 4*-(int)(ws+pifSrc->pwidth); // adding remaining width...
 #else
    // set pointer in to the starting x pixel
    // on the first line of the image to be copied...

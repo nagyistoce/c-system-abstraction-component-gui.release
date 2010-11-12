@@ -21,6 +21,10 @@ char *location_table = "CREATE TABLE `location` ("
 ") TYPE=MyISAM; ";
  */
 
+#if !defined( _MSC_VER )
+#define C99_INITIALIZERS
+#endif
+
 FIELD link_hall_fields[] = { { "id", "int", "NOT NULL auto_increment" }
 									, { "hall_id" , "int", "NOT NULL default '0'" }
 									, { "enabled"     , "int", "NOT NULL default '0'" }
@@ -40,10 +44,15 @@ FIELD link_hall_fields[] = { { "id", "int", "NOT NULL auto_increment" }
 };
 
 // required key def.
-
+#ifndef C99_INITIALIZERS
+DB_KEY_DEF keys[] = { {  {1, 0} , NULL, KEY_COLUMNS("id")  }
+                    , {  {0, 1} , "hallkey", KEY_COLUMNS("hall_id")  }
+                    };
+#else
 DB_KEY_DEF keys[] = { {  .flags={.bPrimary=1} , NULL, KEY_COLUMNS("id")  }
                     , {  .flags={.bUnique=1} , "hallkey", KEY_COLUMNS("hall_id")  }
                     };
+#endif
 
 TABLE link_hall_state_table = { "link_hall_state", FIELDS( link_hall_fields ), TABLE_KEYS( keys ) };
 
@@ -54,8 +63,13 @@ FIELD link_state_fields[] = { { "id", "int", "NOT NULL auto_increment" }
 									 , { "controller_hall_id", "int", "NOT NULL default '0'" }
 									 , { "bingoday", "date", "NOT NULL default '0000-00-00'" }
 };
+#ifndef C99_INITIALIZERS
+DB_KEY_DEF ID_key[] = { {  {1,0} , NULL, KEY_COLUMNS("id") }
+						, { {0,1}, "daykey", {"bingoday"} }
+#else
 DB_KEY_DEF ID_key[] = { {  .flags={.bPrimary=1} , NULL, KEY_COLUMNS("id") }
-								, { .flags={.bUnique=1}, "daykey", {"bingoday"} }
+						, { .flags={.bUnique=1}, "daykey", {"bingoday"} }
+#endif
                     };
 TABLE link_state_table = { "link_state", FIELDS( link_state_fields ), TABLE_KEYS( ID_key ) };
 
@@ -63,7 +77,11 @@ TABLE link_state_table = { "link_state", FIELDS( link_state_fields ), TABLE_KEYS
 FIELD link_alive_fields[] = { { "hall_id", "int", NULL }
 									 , { "last_alive", "timestamp", NULL }
 };
+#ifndef C99_INITIALIZERS
+DB_KEY_DEF hall_id_key[] = { {  {1,0} , NULL, KEY_COLUMNS("hall_id") }
+#else
 DB_KEY_DEF hall_id_key[] = { {  .flags={.bPrimary=1} , NULL, KEY_COLUMNS("hall_id") }
+#endif
                     };
 TABLE link_alive_table = { "link_alive", FIELDS( link_alive_fields ), TABLE_KEYS( hall_id_key ) };
 
@@ -74,7 +92,11 @@ FIELD hall_systems_fields[] = { { "id", "int", "NOT NULL auto_increment" }
 										, { "system_id", "int", "NOT NULL default '0'" }
                            };
 
+#ifndef C99_INITIALIZERS
+DB_KEY_DEF hall_systems_key[] = { {  {1, 0} , NULL, KEY_COLUMNS("id") }
+#else
 DB_KEY_DEF hall_systems_key[] = { {  .flags={.bPrimary=1} , NULL, KEY_COLUMNS("id") }
+#endif
                     };
 TABLE hall_systems_table = { "hall_systems", FIELDS( hall_systems_fields ), TABLE_KEYS( hall_systems_key ) };
 
@@ -86,9 +108,15 @@ FIELD location_fields[] = { { "ID", "int", "NOT NULL auto_increment" }
 								  , { "address_video", "varchar(100)", "NOT NULL default ''" }
 								  , { "address_host_access", "varchar(100)", "NOT NULL default ''" }
                            };
+#ifndef C99_INITIALIZERS
+DB_KEY_DEF location_keys[] = { {  {1,0} , NULL, KEY_COLUMNS("id") }
+									  , {{0,1}, "namekey", KEY_COLUMNS( "name" ) }
+                    };
+#else
 DB_KEY_DEF location_keys[] = { {  .flags={.bPrimary=1} , NULL, KEY_COLUMNS("id") }
 									  , { .flags={.bUnique=1}, "namekey", KEY_COLUMNS( "name" ) }
                     };
+#endif
 
 TABLE location_table = { "location", FIELDS( location_fields ), TABLE_KEYS( location_keys ) };
 
@@ -108,4 +136,9 @@ void CheckMyTables( PODBC odbc )
 	}
 };
 
+#ifdef __WATCOMC__
+PUBLIC( void, MustExportOneFunction )( void )
+{
+}
+#endif
 

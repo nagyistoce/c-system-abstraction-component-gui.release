@@ -38,11 +38,11 @@
  int  sLogCoords ( TEXTCHAR *string, PCOORDPAIR pcp )
 {
 	TEXTCHAR *start = string;
-	string += snprintf( string, 2, WIDE("(") );
+	string += snprintf( string, 2*sizeof(TEXTCHAR), WIDE("(") );
 	string += sLogFraction( string, &pcp->x );
-	string += snprintf( string, 2, WIDE(",") );
+	string += snprintf( string, 2*sizeof(TEXTCHAR), WIDE(",") );
 	string += sLogFraction( string, &pcp->y );
-	string += snprintf( string, 2, WIDE(")") );
+	string += snprintf( string, 2*sizeof(TEXTCHAR), WIDE(")") );
 	return (int)(string - start);
 }
 
@@ -50,11 +50,11 @@
 {
 	TEXTCHAR buffer[256];
 	TEXTCHAR *string = buffer;
-	string += snprintf( string, 2, WIDE("(") );
+	string += snprintf( string, 2*sizeof(TEXTCHAR), WIDE("(") );
 	string += sLogFraction( string, &pcp->x );
-	string += snprintf( string, 2, WIDE(",") );
+	string += snprintf( string, 2*sizeof(TEXTCHAR), WIDE(",") );
 	string += sLogFraction( string, &pcp->y );
-	string += snprintf( string, 2, WIDE(")") );
+	string += snprintf( string, 2*sizeof(TEXTCHAR), WIDE(")") );
 	Log( buffer );
 }
 //---------------------------------------------------------------------------
@@ -182,8 +182,8 @@ static void NormalizeFraction( PFRACTION f )
  _32  ScaleValue ( PFRACTION f, S_32 value )
 {
 	S_32 result = 0;
-if( f->denominator )
-	result = ( value * f->numerator ) / f->denominator;
+	if( f->denominator )
+		result = ( value * f->numerator ) / f->denominator;
 	return result;
 }
 

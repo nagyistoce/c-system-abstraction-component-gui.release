@@ -1,5 +1,7 @@
 #include <stdhdrs.h>
 #include <system.h>
+#include <sqlgetoption.h>
+#include <network.h>
 
 
 static struct local_task_info
@@ -18,9 +20,9 @@ PRELOAD( LoadBdataTasks )
 {
 	{
 		TEXTCHAR tmp[256];
-      SACK_GetPrivateProfileInt( "config", "Bdata Local Server", "172.17.2.153", tmp, sizeof( tmp ), "vserver.ini" );
+      SACK_GetPrivateProfileString( "config", "Bdata Local Server", "172.17.2.153", tmp, sizeof( tmp ), "vserver.ini" );
 		l.local_hall_bdata_service = StrDup( tmp );
-      l.bdata_port = SACK_GetPrivateProfileInt( "config", "Bdata Service Port", 6594, tmp, sizeof( tmp ), "vserver.ini" );
+      l.bdata_port = SACK_GetPrivateProfileInt( "config", "Bdata Service Port", 6594, "vserver.ini" );
 	}
 
 }
@@ -82,3 +84,9 @@ ATEXIT( closebdata )
 {
    StopProgram( l.bdata_task );
 }
+
+#ifdef __WATCOMC__
+PUBLIC( void, MustExportOneFunction )( void )
+{
+}
+#endif

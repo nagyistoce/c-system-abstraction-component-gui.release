@@ -57,7 +57,7 @@
 
 PSI_CONSOLE_NAMESPACE
 
-#if !defined( __WINDOWS__ ) && !defined( _WIN32 )
+#if !defined( WIN32 ) && !defined( _WIN32 )
 typedef struct rect_tag {
    S_32 top,left,right,bottom;
 } RECT;

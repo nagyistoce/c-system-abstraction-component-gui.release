@@ -29,43 +29,34 @@ typedef struct STRUC_PREFIX(history_bios_tag) HISTORY_BIOS, *PHISTORY_BIOS;
 
 
 
-CORECON_PROC( PHISTORY_REGION, CreateHistoryRegion )( void );
-CORECON_PROC( PHISTORY_LINE_CURSOR, CreateHistoryCursor )( PHISTORY_REGION );
-CORECON_PROC( PHISTORY_BROWSER, CreateHistoryBrowser )( PHISTORY_REGION );
-CORECON_PROC( void, DestroyHistoryRegion )( PHISTORY_REGION );
-CORECON_PROC( void, DestroyHistoryCursor )( PHISTORY_LINE_CURSOR );
-CORECON_PROC( void, DestroyHistoryBrowser )( PHISTORY_BROWSER );
+CORECON_PROC( PHISTORY_REGION, PSI_CreateHistoryRegion )( void );
+CORECON_PROC( PHISTORY_LINE_CURSOR, PSI_CreateHistoryCursor )( PHISTORY_REGION );
+CORECON_PROC( PHISTORY_BROWSER, PSI_CreateHistoryBrowser )( PHISTORY_REGION );
+CORECON_PROC( void, PSI_DestroyHistoryRegion )( PHISTORY_REGION );
+CORECON_PROC( void, PSI_DestroyHistoryCursor )( PHISTORY_LINE_CURSOR );
+CORECON_PROC( void, PSI_DestroyHistoryBrowser )( PHISTORY_BROWSER );
 
-CORECON_PROC( void, DestroyHistory )( PHISTORYTRACK pht );
-CORECON_PROC( void, EnqueDisplayHistory )( PHISTORY_LINE_CURSOR phc, PTEXT pLine );
-CORECON_PROC( int, GetLastLineLength )( PHISTORY_REGION pht );
-CORECON_PROC( void, InitHistory )( PHISTORY_REGION pht, PTEXT name );
+CORECON_PROC( void, PSI_DestroyHistory )( PHISTORYTRACK pht );
+CORECON_PROC( void, PSI_EnqueDisplayHistory )( PHISTORY_LINE_CURSOR phc, PTEXT pLine );
+CORECON_PROC( int, PSI_GetLastLineLength )( PHISTORY_REGION pht );
+CORECON_PROC( void, PSI_InitHistory )( PHISTORY_REGION pht, PTEXT name );
 //void CalculateHistory( PHISTORYTRACK pht, int columns, int lines );
 
-// standard interface functions for dekware script
-#ifdef __DEKWARE_PLUGIN__
-CORECON_PROC( int, ConSetColor )( PDATAPATH pdp, PSENTIENT ps, PTEXT parameters );
-CORECON_PROC( int, HistoryStat )( PDATAPATH pdp, PSENTIENT ps, PTEXT parameters );
-CORECON_PROC( int, SetTabs )( PDATAPATH pdp, PSENTIENT ps, PTEXT parameters );
-CORECON_PROC( int, SetHistory )( PDATAPATH pdp, PSENTIENT ps, PTEXT parameters );
-CORECON_PROC( int, DumpHistory )( PDATAPATH pdp, PSENTIENT ps, PTEXT parameters );
-#endif
-
-CORECON_PROC( void, SetHistoryBrowserNoPageBreak )( PHISTORY_BROWSER phbr );
-CORECON_PROC( void, SetHistoryBrowserOwnPageBreak )( PHISTORY_BROWSER phbr );
+CORECON_PROC( void, PSI_SetHistoryBrowserNoPageBreak )( PHISTORY_BROWSER phbr );
+CORECON_PROC( void, PSI_SetHistoryBrowserOwnPageBreak )( PHISTORY_BROWSER phbr );
 
 
 
-CORECON_PROC( void, WriteHistoryToFile )( FILE *file, PHISTORY_REGION phr );
+CORECON_PROC( void, PSI_WriteHistoryToFile )( FILE *file, PHISTORY_REGION phr );
 
 // get a line - enumerate - start start == 0;
 // this routine will auto step start++...
-CORECON_PROC( PTEXT, EnumHistoryLine )( PHISTORY_BROWSER pht
+CORECON_PROC( PTEXT, PSI_EnumHistoryLine )( PHISTORY_BROWSER pht
 							, int *offset
 							, S_32 *length );
 
-CORECON_PROC( void, SetHistoryDefaultForeground )( PHISTORY_LINE_CURSOR phc, int iColor );
-CORECON_PROC( void, SetHistoryDefaultBackground )( PHISTORY_LINE_CURSOR phc, int iColor );
+CORECON_PROC( void, PSI_SetHistoryDefaultForeground )( PHISTORY_LINE_CURSOR phc, int iColor );
+CORECON_PROC( void, PSI_SetHistoryDefaultBackground )( PHISTORY_LINE_CURSOR phc, int iColor );
 
 //int BeginHistory( PHISTORY_LINE_CURSOR cursor );
 // adjust history by offset...
@@ -102,7 +93,7 @@ int MoveHistoryCursor( PHISTORY_BROWSER phbr, int amount );
 
 _32 ComputeNextOffset( PTEXT segment, _32 nShown );
 //int ComputeToShow( _32 cols, PTEXT segment, int nOfs, int nShown );
-int ComputeToShow( _32 cols, PTEXT segment, _32 nLen, int nOfs, int nShown );
+_32 ComputeToShow( _32 cols, PTEXT segment, _32 nLen, _32 nOfs, _32 nShown );
 int CountLinesSpanned( _32 cols, PTEXT countseg );
 
 void BuildDisplayInfoLines( PHISTORY_BROWSER phlc );
@@ -121,7 +112,7 @@ int GetCommandCursor( PHISTORY_BROWSER phbr
 PDATALIST *GetDisplayInfo( PHISTORY_BROWSER phbr );
 void GetHistoryCursorPos( PHISTORY_LINE_CURSOR phlc, PS_32 x, PS_32 y );
 void SetHistoryCursorPos( PHISTORY_LINE_CURSOR phlc, S_32 x, S_32 y );
-void SetHistoryPageLines( PHISTORY_BROWSER phbr, _32 nLines );
+void PSI_SetHistoryPageLines( PHISTORY_BROWSER phbr, _32 nLines );
 _32 GetBrowserDistance( PHISTORY_BROWSER phbr );
 void ResetHistoryBrowser( PHISTORY_BROWSER phbr );
 

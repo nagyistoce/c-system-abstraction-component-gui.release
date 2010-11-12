@@ -95,10 +95,10 @@ OnCreateMenuButton( "VLC/Stop Player button" )( PMENU_BUTTON button )
 {
 	struct player_button *play = New( struct player_button );
 	play->button = button;
-   play->url_name = NULL;
+	play->url_name = NULL;
 	InterShell_SetButtonStyle( button, "bicolor square" );
-   InterShell_SetButtonText( button, "Stop_Player" );
-   return (PTRSZVAL)button;
+	InterShell_SetButtonText( button, "Stop_Player" );
+	return (PTRSZVAL)button;
 }
 
 static PTRSZVAL CPROC SetButtonMedia( PTRSZVAL psv, arg_list args )
@@ -106,9 +106,9 @@ static PTRSZVAL CPROC SetButtonMedia( PTRSZVAL psv, arg_list args )
 	PARAM( args, CTEXTSTR, url );
 	struct player_button *play = (struct player_button *)psv;
 	if( play->url_name )
-		Release( play->url_name );
-   play->url_name = StrDup( url );
-   return psv;
+		Release( (POINTER)play->url_name );
+	play->url_name = StrDup( url );
+	return psv;
 }
 
 OnLoadControl( "VLC/Player button" )( PCONFIG_HANDLER pch, PTRSZVAL psv )
@@ -119,7 +119,7 @@ OnLoadControl( "VLC/Player button" )( PCONFIG_HANDLER pch, PTRSZVAL psv )
 OnSaveControl( "VLC/Player button" )( FILE *file, PTRSZVAL psv )
 {
 	struct player_button *play = (struct player_button *)psv;
-   if( play->url_name )
+	if( play->url_name )
 		fprintf( file, WIDE( "Play Media:%s\n" ), play->url_name );
 }
 
@@ -159,6 +159,7 @@ OnHideControl( "VLC/Player" )(PTRSZVAL psv )
 
 OnCreateControl( "VLC/Video Link" )( PSI_CONTROL parent, S_32 x, S_32 y, _32 w, _32 h )
 {
+	return 1;
 }
 
 
@@ -174,7 +175,7 @@ static void VideoLinkCommandServeMaster( "VLC_Video Link" )( void )
 	}
 }
 */
-#ifdef __WATCOMC__
+#if ( __WATCOMC__ < 1290 )
 PUBLIC( void, ExportThis )( void )
 {
 }

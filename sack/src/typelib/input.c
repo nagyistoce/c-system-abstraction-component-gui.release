@@ -583,7 +583,7 @@ static PTEXT SplitLine( PTEXT pLine, int nPos )
    	// in front of this....
 	   newseg = SegCreate( BUILD_LINE_OUTPUT_SIZE );
       newseg->data.size = 0;
-      pLine->format.position.spaces = 0;
+      pLine->format.position.offset.spaces = 0;
 		SegAppend( newseg, pLine );
 		return newseg;
    }

@@ -263,8 +263,8 @@ LOGICAL SetControlTextOffset( PSI_CONTROL pc, int offset )
 			case 1: // left
 				if( pc->flags.bVertical )
 				{
-					if( ( offset + ( (int)surface->height - _width ) > surface->height )
-						|| ( offset + ( (int)surface->height - _width ) < width ) )
+					if( ( ( offset + ( surface->height - _width ) ) > surface->height )
+						|| SUS_GT( ( offset + ( surface->height - _width ) ), S_32, width, _32 ) )
 						result = FALSE;
 				}
 				else
@@ -277,8 +277,8 @@ LOGICAL SetControlTextOffset( PSI_CONTROL pc, int offset )
 			case 2: // center
 				if( pc->flags.bVertical )
 				{
-					if( ( ( ( ptc->offset + ( (int)surface->height - _width )/2 ) ) > surface->height )
-						|| ( ( ptc->offset + _width + ( ( (int)surface->height - _width )/2 ) ) < 0 ) )
+					if( ( ( ( ptc->offset + ( surface->height - _width )/2 ) ) > surface->height )
+						|| ( ( ptc->offset + _width + ( ( surface->height - _width )/2 ) ) < 0 ) )
 					{
 						result = FALSE;
 					}

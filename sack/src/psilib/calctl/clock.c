@@ -54,11 +54,11 @@ static PTEXT GetTime( PCLOCK_CONTROL clock, int bNewline ) /*FOLD00*/
 		clock->time_data.sc = (_8)st.wSecond;
 		clock->time_data.mn = (_8)st.wMinute;
 		clock->time_data.hr = (_8)st.wHour;
-      //clock->time_data.doy = st.wDayOfWeek;
+		//clock->time_data.doy = st.wDayOfWeek;
 		clock->time_data.dy = (_8)st.wDay;
 		clock->time_data.mo = (_8)st.wMonth;
 		clock->time_data.yr = st.wYear;
-      clock->time_data.ms = st.wMilliseconds;
+		clock->time_data.ms = st.wMilliseconds;
 	/*
 	 n = sprintf( pTime->data.data, WIDE("%s, %s %d, %d, %02d:%02d:%02d"),
 	 Days[st.wDayOfWeek], Months[st.wMonth],
@@ -67,10 +67,10 @@ static PTEXT GetTime( PCLOCK_CONTROL clock, int bNewline ) /*FOLD00*/
 	 */
 		{
 			static int last_second;
-         static int prior_milli;
+			static int prior_milli;
 			if( clock->flags.bHighTime && ( last_second == st.wSecond || ( ( last_second+1)%60 == st.wSecond && prior_milli ) ) )
 			{
-				timenow->data.size = snprintf( timenow->data.data, 80, WIDE("%02d/%02d/%d%c%02d:%02d:%02d.%03d")
+				timenow->data.size = snprintf( timenow->data.data, 80*sizeof(TEXTCHAR), WIDE("%02d/%02d/%d%c%02d:%02d:%02d.%03d")
 													  , st.wMonth, st.wDay, st.wYear
 													  , bNewline?'\n':' '
 													  , st.wHour, st.wMinute, st.wSecond, st.wMilliseconds );
@@ -78,7 +78,7 @@ static PTEXT GetTime( PCLOCK_CONTROL clock, int bNewline ) /*FOLD00*/
 			}
 			else
 			{
-				timenow->data.size = snprintf( timenow->data.data, 80, WIDE("%02d/%02d/%d%c%02d:%02d:%02d")
+				timenow->data.size = snprintf( timenow->data.data, 80*sizeof(TEXTCHAR), WIDE("%02d/%02d/%d%c%02d:%02d:%02d")
 													  , st.wMonth, st.wDay, st.wYear
 													  , bNewline?'\n':' '
 													  , st.wHour, st.wMinute, st.wSecond );
@@ -122,70 +122,50 @@ static int CPROC DrawClock( PCOMMON pc )
 	if( pClk )
 	{
 		_32 w, h;
-      int line_count = 0;
-      int lines = 0;
-		PTEXT szNow = pClk->time;
-		static TEXTCHAR *text;
-		TEXTCHAR *line;
+		int line_count = 0;
+		int lines = 0;
+		//PTEXT szNow = pClk->time;
+      TEXTSTR line;
 
 		if( pClk->analog_clock )
 		{
-         //lprintf( "Draw." );
+			//lprintf( "Draw." );
 			DrawAnalogClock( pc );
-         return 1;
+			return 1;
 		}
 
-		if( text && StrCmp( text, GetText( szNow ) ) == 0 )
-			return 0;
-
-		if( text )
-			Release( text );
-      text = StrDup( GetText( szNow ) );
 		//else
 		{
-         //lprintf( "Get to draw before being analog?" );
-			for( line = text; line; line = strchr( line, '\n' ) )
+			//lprintf( "Get to draw before being analog?" );
+			for( line = GetText( pClk->time ); line; line = strchr( line, '\n' ) )
 			{
 				lines++;
 				line++;
 			}
-			for( line = text; line; line = strchr( line, '\n' ) )
+			for( line = GetText( pClk->time ); line; line = strchr( line, '\n' ) )
 			{
 				TEXTCHAR* trunk;
-				if( line != text )
-               line++;
+				if( line != GetText( pClk->time ) )
+					line++;
 				trunk = strchr( line, '\n' );
 				if( trunk )
-               trunk[0] = 0;
+					trunk[0] = 0;
 				GetStringSizeFont( line, &w, &h, GetCommonFont( pc ) );
 
 				if( pClk->back_image )
 					BlotScaledImageAlpha( surface, pClk->back_image, ALPHA_TRANSPARENT );
-				else if( pClk->backcolor )
+				else 
 					BlatColorAlpha( surface, 0, 0, surface->width, surface->height, pClk->backcolor );
 				//DebugBreak();
 				PutStringFontEx( surface
-									, (surface->width>w)?(( surface->width - w ) / 2):0
-									, ((surface->height>h)?(( surface->height - ( h * lines ) ) / 2):0) + ( line_count * h )
+									, (SUS_GT(surface->width,S_32,w,_32)?(( surface->width - w ) / 2):0)
+									, (SUS_GT(surface->height,S_32,h,_32)?(( surface->height - ( h * lines ) ) / 2):0) + ( line_count * h )
 									, pClk->textcolor, 0
 									, line, strlen( line )
 									, GetCommonFont( pc ) );
 				if( trunk )
 					trunk[0] = '\n';
-            line_count++;
-				/*
-				 if( line )
-				 {
-				 GetStringSizeFont( line+1, &w, NULL, GetCommonFont( pc ) );
-				 PutStringFont( surface
-				 , ( surface->width - w ) / 2
-				 , ( surface->height - h + line_count * h  ) / 2
-				 , pClk->textcolor, 0
-				 , line + 1
-				 , GetCommonFont( pc ) );
-
-				 }
-				 */
+				line_count++;
 			}
 		}
 	}
@@ -200,10 +180,29 @@ static void CPROC Update( PTRSZVAL psvPC )
 	{
 		if( !pClk->flags.bStopped )
 		{
+         int no_update = 0;
 			//( pClk->time )
 			// LineRelease( pClk->time );
 			pClk->time = GetTime(pClk, TRUE);
-			SmudgeCommon( (PCOMMON)psvPC );
+
+			if( !pClk->analog_clock )
+			{
+				static TEXTCHAR *text;
+				if( text && StrCmp( text, GetText( pClk->time ) ) == 0 )
+				{
+               no_update = 1;
+				}
+				else
+				{
+					if( text )
+						Release( text );
+					text = StrDup( GetText( pClk->time ) );
+				}
+			}
+
+         if( !no_update )
+				SmudgeCommon( (PCOMMON)psvPC );
+
 			if( pClk->analog_clock )
 			{
             // +100 from now... (less than 10/sec)
@@ -216,10 +215,7 @@ static void CPROC Update( PTRSZVAL psvPC )
 				else
 					RescheduleTimer( 250 );
 			}
-
 		}
-		//else
-        //   lprintf( WIDE("Clock is stopped.") );
 	}
 }
 
@@ -348,6 +344,6 @@ PRELOAD( DoRegisterClockControl )
    DoRegisterControl( &clock_control );
 }
 
-PUBLIC( _32, LinkClockPlease );
+//PUBLIC( _32, LinkClockPlease );
 
 PSI_CLOCK_NAMESPACE_END

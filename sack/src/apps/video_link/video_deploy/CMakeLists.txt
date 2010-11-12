@@ -3,7 +3,7 @@ PROJECT( video_link_deploy )
 
 ADD_EXECUTABLE( ${PROJECT_NAME} WIN32
 ${FIRST_GCC_PROGRAM_SOURCE} 
-  deploy.c
+  deploy.c regacces.c
 ${LAST_GCC_PROGRAM_SOURCE} 
 )
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${SACK_LIBRARIES} winmm.lib )
@@ -16,6 +16,6 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 install_default_dest( ${PROJECT_NAME} )
 install( FILES ClearShell.exe setcomputer.ps1
   DESTINATION bin )
-install( FILES configurations/Stations.Map 
-  DESTINATION resources )
+install( FILES configurations/Stations.Map configurations/Coast.Map 
+DESTINATION resources )
 

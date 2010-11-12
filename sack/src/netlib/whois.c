@@ -49,7 +49,7 @@ LOGICAL DoWhois( CTEXTSTR pHost, CTEXTSTR pServer, PVARTEXT pvtResult )
 		static char buf[4096];
 		int  l;
 
-		l = sprintf( buf, WIDE("%s\n"), pHost );
+		l = snprintf( buf, sizeof( buf ), WIDE("%s\n"), pHost );
 
 		if( send( S, buf, l, 0 ) != l )
 		{
@@ -79,7 +79,7 @@ LOGICAL DoWhois( CTEXTSTR pHost, CTEXTSTR pServer, PVARTEXT pvtResult )
 				pEnd[1] = '4';
 				pEnd[2] = '3';
 				pEnd[3] = 0;
-				strcpy( pEnd, WIDE(":43") ); // whois" );
+				//StrCpyEx( pEnd, WIDE(":43"),  ); // whois" );
 				DoWhois( pHost, pNext, pvtResult );
 			}
 		}

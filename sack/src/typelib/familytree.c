@@ -27,7 +27,7 @@ namespace family {
 // consider slab allocation... 32 bytes even.
 struct familynode_tag {
 	struct {
-		_32 bUsed:1;
+		BIT_FIELD bUsed:1;
 	} flags;
 	POINTER userdata;
 	PTRSZVAL key;
@@ -40,10 +40,10 @@ DeclareSet( FAMILYNODE );
 
 struct familyroot_tag {
 	struct {
-		_32 bUsed:1;
-		_32 bRoot:1;
-		_32 bShadow:1; // family points to the real FAMILYTREE (not a node)
-		_32 bNoDuplicate : 1;
+		BIT_FIELD bUsed:1;
+		BIT_FIELD bRoot:1;
+		BIT_FIELD bShadow:1; // family points to the real FAMILYTREE (not a node)
+		BIT_FIELD bNoDuplicate : 1;
 	} flags;
 	void (CPROC *Destroy)( POINTER user, PTRSZVAL key );
 	int (CPROC *Compare)(PTRSZVAL old,PTRSZVAL newx);

@@ -42,7 +42,7 @@
 #include "animation_plugin.h"
 #endif
 #include "fonts.h"
-#ifdef __WINDOWS__
+#ifdef WIN32
 #include <vidlib/vidstruc.h>
 #endif
 
@@ -637,7 +637,7 @@ void CPROC ApplyGlareSetChanges( PTRSZVAL psv, PSI_CONTROL button )
 	PGLARE_SET glare_set = params->current;
 	TEXTCHAR buffer[256];
 #define SetNewGlareImage( gs, var1, var2 )             \
-	if( gs->var1 && stricmp( buffer, gs->var1 ) )      \
+	if( gs->var1 && StrCaseCmp( buffer, gs->var1 ) )      \
 	{                                              \
 	Release( gs->var1 );                \
 	if( gs->var2 )                     \
@@ -1780,13 +1780,13 @@ void GetCommonButtonControls( PSI_CONTROL frame )
 			if( strcmp( buffer, WIDE("-- NONE --") ) == 0 )
 				buffer[0] = 0;
 			else if( strcmp( buffer, WIDE("-- Startup Page") ) == 0 )
-				StrCpy( buffer, WIDE("first" ) );
+				StrCpyEx( buffer, WIDE("first" ), sizeof( buffer ) );
 			else if( strcmp( buffer, WIDE("-- Next") ) == 0 )
-				StrCpy( buffer, WIDE("next" ) );
+				StrCpyEx( buffer, WIDE("next" ), sizeof( buffer ) );
 			else if( strcmp( buffer, WIDE("-- Return") ) == 0 )
-				strcpy( buffer, WIDE("return" ) );
+				StrCpyEx( buffer, WIDE("return" ), sizeof( buffer ) );
 			else if( strcmp( buffer, WIDE("-- Refresh Page(here)") ) == 0 )
-				strcpy( buffer, WIDE("here" ) );
+				StrCpyEx( buffer, WIDE("here" ), sizeof( buffer ) );
 
 			if( configure_key_dispatch.button->pPageName )
 				Release( configure_key_dispatch.button->pPageName );
@@ -2170,28 +2170,28 @@ void SetCommonButtonControls( PSI_CONTROL frame )
 					SetSelectedItem( list, pli );
 				pli = AddListItem( list, WIDE("-- Startup Page") );
 				if( configure_key_dispatch.button->pPageName &&
-					stricmp( configure_key_dispatch.button->pPageName, WIDE("first") ) == 0 )
+					StrCaseCmp( configure_key_dispatch.button->pPageName, WIDE("first") ) == 0 )
 					SetSelectedItem( list, pli );
 				pli = AddListItem( list, WIDE("-- Next") );
 				if( configure_key_dispatch.button->pPageName &&
-					stricmp( configure_key_dispatch.button->pPageName, WIDE("next") ) == 0 )
+					StrCaseCmp( configure_key_dispatch.button->pPageName, WIDE("next") ) == 0 )
 					SetSelectedItem( list, pli );
 
 				pli = AddListItem( list, WIDE("-- Return") );
 				if( configure_key_dispatch.button->pPageName &&
-					stricmp( configure_key_dispatch.button->pPageName, WIDE("return") ) == 0 )
+					StrCaseCmp( configure_key_dispatch.button->pPageName, WIDE("return") ) == 0 )
 					SetSelectedItem( list, pli );
 
 				pli = AddListItem( list, WIDE("-- Refresh Page(here)") );
 				if( configure_key_dispatch.button->pPageName &&
-					stricmp( configure_key_dispatch.button->pPageName, WIDE("here") ) == 0 )
+					StrCaseCmp( configure_key_dispatch.button->pPageName, WIDE("here") ) == 0 )
 					SetSelectedItem( list, pli );
 
 				LIST_FORALL( canvas->pages, idx, PPAGE_DATA, page )
 				{
 					pli = AddListItem( list, page->title );
 					if( configure_key_dispatch.button->pPageName &&
-						stricmp( configure_key_dispatch.button->pPageName, page->title ) == 0 )
+						StrCaseCmp( configure_key_dispatch.button->pPageName, page->title ) == 0 )
 					{
 						SetSelectedItem( list, pli );
 					}
@@ -2469,7 +2469,7 @@ void CloneCommonButtonProperties( PMENU_BUTTON clone, PMENU_BUTTON  clonebutton 
 	clone->font_preset     = clonebutton->font_preset;
 	clone->font_preset_name = clonebutton->font_preset_name;
 	clone->text            = StrDup( clonebutton->text );
-	StrCpy( clone->pImage, clonebutton->pImage );
+	StrCpyEx( clone->pImage, clonebutton->pImage, sizeof( clone->pImage ) );
 #ifndef __NO_ANIMATION__
 	strcpy( clone->pAnimation, clonebutton->pAnimation );
 #endif
@@ -4289,7 +4289,7 @@ PSI_CONTROL OpenPageFrame( PPAGE_DATA page )
 				BindEventToKey( renderer = GetFrameRenderer( page_frame ), KEY_X, KEY_MOD_ALT, GoodQuitMenu, 0 );
 				BindEventToKey( renderer, KEY_F4, KEY_MOD_ALT, GoodQuitMenu, 0 );
 #ifndef UNDER_CE
-#ifdef __WINDOWS__
+#ifdef WIN32
 				(((PRENDERER)g.mem_lock)[0]) = renderer[0];
 #endif
 #endif
@@ -4616,7 +4616,7 @@ int restart( void )
 				, image->x, image->y );
 			SetRendererTitle( canvas->renderer, WIDE( "Canvas Behind Banner" ) );
 #ifndef UNDER_CE
-#ifdef __WINDOWS__
+#ifdef WIN32
 			(((PRENDERER)g.mem_lock)[0]) = canvas->renderer[0];
 #endif
 #endif
@@ -4726,7 +4726,7 @@ PRIORITY_PRELOAD( LoadingMessage, DEFAULT_PRELOAD_PRIORITY+3 )
 }
 
 #ifndef UNDER_CE
-#if defined( __WINDOWS__ )
+#if defined( WIN32 )
 PRIORITY_PRELOAD( ProgramLock, DEFAULT_PRELOAD_PRIORITY+2 )
 {
 	PTRSZVAL size = 0;
@@ -4749,7 +4749,7 @@ PRIORITY_PRELOAD( ProgramLock, DEFAULT_PRELOAD_PRIORITY+2 )
 								  , sizeof( resource_path ), TRUE );
 
 	SetGroupFilePath( "Resources", resource_path );
-   SetCurrentPath( resource_path );
+	SetCurrentPath( resource_path );
 /*
 #  ifdef _WIN32
 #    ifdef UNDER_CE
@@ -4782,7 +4782,7 @@ PRIORITY_PRELOAD( ProgramLock, DEFAULT_PRELOAD_PRIORITY+2 )
 		, &size );
 	if( g.mem_lock )
 	{
-#ifdef __WINDOWS__
+#ifdef WIN32
 		PRENDER_INTERFACE pri = GetDisplayInterface();
 		pri->_ForceDisplayFront( (PRENDERER)g.mem_lock );
 #endif
@@ -4902,10 +4902,11 @@ PUBLIC( int, Main)( int argc, TEXTCHAR **argv, int bConsole )
 
 #ifndef __NO_OPTIONS__
 	g.flags.bTopmost = SACK_GetProfileIntEx( GetProgramName(), "Intershell Layout/Display Topmost", 0, TRUE );
-   g.flags.bTransparent = SACK_GetProfileIntEx( GetProgramName(), "Intershell Layout/Display is transparent", 1, TRUE );
-   g.flags.bSpanDisplay = SACK_GetProfileIntEx( GetProgramName(), "Intershell Layout/Use Both Displays(horizontal)", 0, TRUE );
+	g.flags.bTransparent = SACK_GetProfileIntEx( GetProgramName(), "Intershell Layout/Display is transparent", 1, TRUE );
+	g.flags.bSpanDisplay = SACK_GetProfileIntEx( GetProgramName(), "Intershell Layout/Use Both Displays(horizontal)", 0, TRUE );
 #endif
-   SetSystemLog( SYSLOG_FILE, stderr );
+	if( bConsole )
+		SetSystemLog( SYSLOG_FILE, stderr );
 	//SystemLogTime( SYSLOG_TIME_CPU| SYSLOG_TIME_DELTA );
 
 	g.system_name = GetSystemName(); // Initialized here. Command argument -Sysname= may override.
@@ -4927,21 +4928,21 @@ PUBLIC( int, Main)( int argc, TEXTCHAR **argv, int bConsole )
 				// with subcanvas support, this cannot function, sorry
 				// we get confused about which menu belongs to which frame
 				// some thought will have to be done to figure this one out.
-				if( stricmp( argv[n]+1, WIDE("multi") ) == 0 )
+				if( StrCaseCmp( argv[n]+1, WIDE("multi") ) == 0 )
 					g.flags.multi_edit = 1; // popup mulitiple framed windows instead of full screen mode.
-				else if( stricmp( argv[n]+1, WIDE("force") ) == 0 )
+				else if( StrCaseCmp( argv[n]+1, WIDE("force") ) == 0 )
 					g.flags.forceload = 1;
-				else if( stricmp( argv[n]+1, WIDE("restore") ) == 0 )
+				else if( StrCaseCmp( argv[n]+1, WIDE("restore") ) == 0 )
 					g.flags.restoreload = 1;
-				else if( stricmp( argv[n]+1, WIDE("SQL") ) == 0 )
+				else if( StrCaseCmp( argv[n]+1, WIDE("SQL") ) == 0 )
 					g.flags.bSQLConfig = 1;
-				else if( stricmp( argv[n]+1, WIDE("Sysname=") ) == 0 )
+				else if( StrCaseCmp( argv[n]+1, WIDE("Sysname=") ) == 0 )
 					g.system_name = StrDup( argv[n] + 9 );
-				else if( stricmp( argv[n]+1, WIDE("local") ) == 0 )
+				else if( StrCaseCmp( argv[n]+1, WIDE("local") ) == 0 )
 					g.flags.local_config = 1; // don't save in sql...
-				else if( stricmp( argv[n]+1, WIDE("tsr") ) == 0 )
+				else if( StrCaseCmp( argv[n]+1, WIDE("tsr") ) == 0 )
 					g.flags.bTerminateStayResident = 1; // return to caller from main instead of exit and idle.
-				else if( stricmp( argv[n]+1, WIDE("names" ) ) == 0 )
+				else if( StrCaseCmp( argv[n]+1, WIDE("names" ) ) == 0 )
 					g.flags.bLogNames = 1;
 			}
 			else
@@ -4967,7 +4968,7 @@ PUBLIC( int, Main)( int argc, TEXTCHAR **argv, int bConsole )
 	{
 		TEXTCHAR *ext;
 		ext = strrchr( g.config_filename, '.' );
-		if( !ext || strnicmp( ext, WIDE( ".AutoConfigBackup" ), 17 ) )
+		if( !ext || StrCaseCmpEx( ext, WIDE( ".AutoConfigBackup" ), 17 ) )
 		{
 			TEXTCHAR msg[256];
 			snprintf( msg, sizeof( msg ), WIDE( "%s\nINVALID Configuration Name to Restore\nShould be like *.AutoConfigBackup*" )

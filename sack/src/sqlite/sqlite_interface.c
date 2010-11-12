@@ -1,7 +1,9 @@
 #include <stdhdrs.h>
 #include <procreg.h>
 #include <deadstart.h>
+#ifndef USE_SQLITE_INTERFACE
 #define USE_SQLITE_INTERFACE
+#endif
 #define BUILDS_INTERFACE
 #include "../SQLlib/sqlstruc.h"
 #include "3.7.0/sqlite3.h"
@@ -38,8 +40,15 @@ static void CPROC DropSQLiteInterface( POINTER p )
 {
 }
 
-PRIORITY_PRELOAD( RegisterSQLiteInterface, GLOBAL_INIT_PRELOAD_PRIORITY-1 )
+PRIORITY_PRELOAD( RegisterSQLiteInterface, SQL_PRELOAD_PRIORITY-1 )
 {
 	RegisterInterface( WIDE("sqlite3"), GetSQLiteInterface, DropSQLiteInterface );
 
 }
+
+#ifdef __WATCOMC__
+// watcom requires at least one export
+PUBLIC( void, AtLeastOneExport )( void )
+{
+}
+#endif

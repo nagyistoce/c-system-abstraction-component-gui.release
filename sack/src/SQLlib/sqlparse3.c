@@ -124,8 +124,8 @@ static int GrabType( PTEXT *word, TEXTSTR *result DBG_PASS )
 		//int quote = 0;
 		//int escape = 0;
 		PTEXT type = SegDuplicate(*word);
-		type->format.position.spaces = 0;
-		type->format.position.tabs = 0;
+		type->format.position.offset.spaces = 0;
+		type->format.position.offset.tabs = 0;
 		(*word) = NEXTLINE( *word );
 		if( (*word) && GetText( *word )[0] == '(' )
 		{
@@ -168,8 +168,8 @@ static int GrabExtra( PTEXT *word, TEXTSTR *result )
 		}
 		if( type )
 		{
-			type->format.position.spaces = 0;
-			type->format.position.tabs = 0;
+			type->format.position.offset.spaces = 0;
+			type->format.position.offset.tabs = 0;
 			{
 				PTEXT tmp = BuildLine( type );
 				LineRelease( type );

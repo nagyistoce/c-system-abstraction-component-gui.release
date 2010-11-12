@@ -288,23 +288,23 @@ static int CPROC ButtonMouse( PSI_CONTROL pc, S_32 x, S_32 y, _32 b )
 	{
 		if( pb->buttonflags.pressed )
 		{
-         lprintf( WIDE("releaseing press state sorta...") );
+			lprintf( WIDE("releaseing press state sorta...") );
 			pb->buttonflags.pressed = FALSE;
-         SmudgeCommon( pc );
+			SmudgeCommon( pc );
 		}
 		pb->_b = 0;
 		return 1;
 	}
 	if( x < 0
 		 || y < 0
-		 || x > pc->rect.width
-		 || y > pc->rect.height )
+		 || SUS_GT( x,S_32,pc->rect.width,_32)
+		 || SUS_GT( y,S_32,pc->rect.height,_32) )
 	{
 		if( pb->buttonflags.pressed )
 		{
-         //lprintf( WIDE("Releasing button.") );
+			//lprintf( WIDE("Releasing button.") );
 			pb->buttonflags.pressed = FALSE;
-         SmudgeCommon( pc );
+			SmudgeCommon( pc );
 		}
 		pb->_b = 0; // pretend no mouse buttons..
 		return 0;
@@ -727,7 +727,7 @@ static int CPROC MouseCheckButton( PSI_CONTROL pCom, S_32 x, S_32 y, _32 b )
 		pc->_b = 0;
 		return 1;
 	}
-	if( x < 0 || y < 0 || x > pCom->rect.width || y > pCom->rect.height )
+	if( x < 0 || y < 0 || SUS_GT(x,S_32, pCom->rect.width,_32) || SUS_GT(y,S_32, pCom->rect.height,_32 ) )
 	{
 		pc->flags.pressed = FALSE;
 		SmudgeCommon( pCom );
@@ -1075,9 +1075,10 @@ radio_button = { RADIO_BUTTON_NAME
 };
 
 
-OnCommonFocus( NORMAL_BUTTON_NAME )( PSI_CONTROL pc, LOGICAL bFocus )
+static int OnCommonFocus( NORMAL_BUTTON_NAME )( PSI_CONTROL pc, LOGICAL bFocus )
 {
    SmudgeCommon( pc );
+   return 1;
 }
 
 PRIORITY_PRELOAD( register_buttons, PSI_PRELOAD_PRIORITY ) {

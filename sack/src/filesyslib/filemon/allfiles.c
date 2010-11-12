@@ -2,7 +2,7 @@
 #include <stdhdrs.h>
 #include <deadstart.h>
 #include <sqlgetoption.h>
-#ifdef __WINDOWS__
+#ifdef WIN32
 //#include <windows.h>
 #include <io.h>
 #include <fcntl.h>
@@ -11,11 +11,13 @@
 //#include <linux/fcntl.h>
 #include <unistd.h>
 #include <fcntl.h>
-#define O_BINARY 0
+#  ifndef O_BINARY
+#    define O_BINARY 0
+#  endif
 //#include <windunce.h>
 #endif
 
-#if defined( __WINDOWS__ ) && !defined( S_IFDIR )
+#if defined( WIN32 ) && !defined( S_IFDIR )
 #include <sys/stat.h>
 #endif
 
@@ -123,6 +125,8 @@ int IsDirectory( CTEXTSTR name )
 #ifdef WIN32
 	{
 		_32 dwAttr = GetFileAttributes( name );
+		if( dwAttr == -1 ) // uncertainty about what it really is, return ti's not a directory
+         return 0;
 		if( dwAttr & FILE_ATTRIBUTE_DIRECTORY )
 			return 1;
       return 0;
@@ -227,7 +231,7 @@ PTRSZVAL CPROC ScanFile( PTRSZVAL psv, INDEX idx, POINTER *item )
 #ifdef __cplusplus_cli
 	_64 dwSize, dwBigSize;
 #else
-	_32 dwSize, dwBigSize;
+	_32 dwSize;
 #ifdef WIN32
 #else
 	struct stat statbuf;

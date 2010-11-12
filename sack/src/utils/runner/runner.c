@@ -58,7 +58,7 @@ int APIENTRY WinMain( HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmdLine, int nCm
 int main( void )
 #endif
 	{
-#ifdef __WINDOWS__
+#ifdef WIN32
 		//HANDLE hModule;
 #else
 	//int hModule;

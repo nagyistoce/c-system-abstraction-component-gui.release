@@ -69,14 +69,14 @@ SQL table create is in 'mkopttabs.sql'
 
 void SetOptionDatabase( PODBC odbc )
 {
-   // maybe, if previously open with private database, close that connection
+	// maybe, if previously open with private database, close that connection
 	og.Option = odbc;
 	og.flags.bInited = FALSE;
    CreateOptionDatabase(); // make sure the option tables exist.
 }
 
 
-SQLGETOPTION_PROC( void, CreateOptionDatabaseEx )( PODBC odbc );
+SQLGETOPTION_PROC( void, CreateOptionDatabaseEx )( POPTION_TREE tree );
 
 POPTION_TREE GetOptionTreeEx( PODBC odbc )
 {
@@ -94,11 +94,12 @@ POPTION_TREE GetOptionTreeEx( PODBC odbc )
    // if it's a new optiontree, pass it to create...
 	node->option_tree = CreateFamilyTree( (int(CPROC*)(PTRSZVAL,PTRSZVAL))StrCaseCmp, NULL );
 	node->odbc = odbc;
+   node->odbc_writer = NULL;
    // default to the old version... allow other code to select new version.
    node->flags.bNewVersion = 0;
    node->flags.bCreated = 0;
 	AddLink( &og.trees, node );
-   CreateOptionDatabaseEx( odbc );
+   CreateOptionDatabaseEx( node );
 	return node;
 }
 
@@ -112,48 +113,49 @@ PFAMILYTREE* GetOptionTree( PODBC odbc )
 
 
 
-SQLGETOPTION_PROC( void, CreateOptionDatabaseEx )( PODBC odbc )
+SQLGETOPTION_PROC( void, CreateOptionDatabaseEx )( POPTION_TREE tree )
 {
-	SetSQLLoggingDisable( odbc, TRUE );
+#ifndef DETAILED_LOGGING
+	SetSQLLoggingDisable( tree->odbc, TRUE );
+#endif
 	{
 		PTABLE table;
-		POPTION_TREE tree = GetOptionTreeEx( odbc );
 		if( !tree->flags.bCreated )
 		{
 			if( !tree->flags.bNewVersion )
 			{
 				table = GetFieldsInSQLEx( option_exception, FALSE DBG_SRC );
-				CheckODBCTable( odbc, table, CTO_MERGE );
+				CheckODBCTable( tree->odbc, table, CTO_MERGE );
 				DestroySQLTable( table );
 				table = GetFieldsInSQLEx( option_map, FALSE DBG_SRC );
-				CheckODBCTable( odbc, table, CTO_MERGE );
+				CheckODBCTable( tree->odbc, table, CTO_MERGE );
 				DestroySQLTable( table );
 				table = GetFieldsInSQLEx( option_name, FALSE DBG_SRC );
-				CheckODBCTable( odbc, table, CTO_MERGE );
+				CheckODBCTable( tree->odbc, table, CTO_MERGE );
 				DestroySQLTable( table );
 				table = GetFieldsInSQLEx( option_values, FALSE DBG_SRC );
-				CheckODBCTable( odbc, table, CTO_MATCH );
+				CheckODBCTable( tree->odbc, table, CTO_MATCH );
 				DestroySQLTable( table );
 				table = GetFieldsInSQLEx( systems, FALSE DBG_SRC );
-				CheckODBCTable( odbc, table, CTO_MERGE );
+				CheckODBCTable( tree->odbc, table, CTO_MERGE );
 				DestroySQLTable( table );
 			}
 			else
 			{
 				table = GetFieldsInSQLEx( option2_exception, FALSE DBG_SRC );
-				CheckODBCTable( odbc, table, CTO_MERGE );
+				CheckODBCTable( tree->odbc, table, CTO_MERGE );
 				DestroySQLTable( table );
 				table = GetFieldsInSQLEx( option2_map, FALSE DBG_SRC );
-				CheckODBCTable( odbc, table, CTO_MERGE );
+				CheckODBCTable( tree->odbc, table, CTO_MERGE );
 				DestroySQLTable( table );
 				table = GetFieldsInSQLEx( option2_name, FALSE DBG_SRC );
-				CheckODBCTable( odbc, table, CTO_MERGE );
+				CheckODBCTable( tree->odbc, table, CTO_MERGE );
 				DestroySQLTable( table );
 				table = GetFieldsInSQLEx( option2_values, FALSE DBG_SRC );
-				CheckODBCTable( odbc, table, CTO_MATCH );
+				CheckODBCTable( tree->odbc, table, CTO_MATCH );
 				DestroySQLTable( table );
 				table = GetFieldsInSQLEx( option2_blobs, FALSE DBG_SRC );
-				CheckODBCTable( odbc, table, CTO_MERGE );
+				CheckODBCTable( tree->odbc, table, CTO_MERGE );
 				DestroySQLTable( table );
 			}
          //SQLCommit( odbc );
@@ -165,12 +167,28 @@ SQLGETOPTION_PROC( void, CreateOptionDatabaseEx )( PODBC odbc )
 
 void SetOptionDatabaseOption( PODBC odbc, int bNewVersion )
 {
-   POPTION_TREE node = GetOptionTreeEx( odbc );
+	POPTION_TREE node = GetOptionTreeEx( odbc );
 	if( node )
 	{
 		node->flags.bCreated = FALSE;
 		node->flags.bNewVersion = bNewVersion;
-      CreateOptionDatabaseEx( odbc );
+		CreateOptionDatabaseEx( node );
+	}
+}
+
+void OpenWriter( POPTION_TREE option )
+{
+	if( !option->odbc_writer )
+	{
+		option->odbc_writer = ConnectToDatabase( option->odbc?option->odbc->info.pDSN:global_sqlstub_data->Primary.info.pDSN );
+		if( option->odbc_writer )
+		{
+#ifndef DETAILED_LOGGING
+			SetSQLLoggingDisable( option->odbc_writer, TRUE );
+#endif
+			SetSQLThreadProtect( option->odbc_writer, TRUE );
+			SetSQLAutoTransact( option->odbc_writer, TRUE );
+		}
 	}
 }
 
@@ -182,13 +200,13 @@ SQLGETOPTION_PROC( void, CreateOptionDatabase )( void )
 		TEXTCHAR buffer[256];
 		CTEXTSTR loadpath = GetCurrentPath( buffer, sizeof( buffer ) );
 #else
-		CTEXTSTR loadpath = OSALOT_GetEnvironmentVariable( "MY_LOAD_PATH" );
-      //lprintf( "Loadpath is %p", loadpath );
+		CTEXTSTR loadpath = GetProgramPath();
 		if( !loadpath )
-         loadpath = ".";
+			loadpath = ".";
 #endif
 		if( strlen( global_sqlstub_data->Option.info.pDSN ) == 0 )
 			global_sqlstub_data->Option.info.pDSN = "option.db";
+
 		//lprintf( "connect to %s[%s]", global_sqlstub_data->Option.info.pDSN, loadpath );
 
 		//if( !pathchr( global_sqlstub_data->Option.info.pDSN )
@@ -202,18 +220,14 @@ SQLGETOPTION_PROC( void, CreateOptionDatabase )( void )
 			{
 				snprintf( out, len, "%s", global_sqlstub_data->Option.info.pDSN );
 			}
-         else
+			else
 				snprintf( out, len, "%s/%s", loadpath, global_sqlstub_data->Option.info.pDSN );
 #ifdef DETAILED_LOGGING
 			lprintf( "Connecting to default SQLite dabase?" );
 #endif
 			if( !og.Option )
 			{
-				//lprintf( "connect to %s", out );
 				og.Option = ConnectToDatabase( out );
-				SetSQLThreadProtect( og.Option, TRUE );
-				og.Option->flags.bAutoTransact = 1;
-				og.Option->last_command_tick = 0; // just to make sure
 			}
 		}
       //else
@@ -222,13 +236,16 @@ SQLGETOPTION_PROC( void, CreateOptionDatabase )( void )
 		{
          // make sure it's created as a tracked option thing...
 			GetOptionTree( og.Option );
-         // set to use new option tables.
+			// set to use new option tables.
+#ifdef DETAILED_LOGGING
+			lprintf( "Setting option database to new database." );
+#endif
 			SetOptionDatabaseOption( og.Option, TRUE );
 		}
 #ifdef DETAILED_LOGGING
 		lprintf( "Connected to default SQLite dabase?" );
 #endif
-		CreateOptionDatabaseEx( og.Option );
+		CreateOptionDatabaseEx( GetOptionTreeEx( og.Option ) );
 	}
 
 }
@@ -237,14 +254,18 @@ void InitMachine( void )
 {
 	if( !og.flags.bInited )
 	{
+#if 0
 		_32 timeout;
+#endif
 		CreateOptionDatabase();
 		// acutlaly init should be called always ....
+#if 0
 		timeout = GetTickCount() + 1000;
 		while( !IsSQLOpen( og.Option ) && ( timeout > GetTickCount() ) )
 		{
 			Sleep( 100 );
 		}
+#endif
 		if( !IsSQLOpen(og.Option) )
 		{
 			lprintf( WIDE("Get Option init failed... no database...") );
@@ -253,14 +274,7 @@ void InitMachine( void )
 		// og.system = GetSYstemID( WIDE("SYSTEMNAME") );
 		og.SystemID = 0;  // default - any system...
 		og.flags.bInited = 1;
-		{
-#ifdef _WIN32
-			WSADATA ws;
-			WSAStartup( MAKEWORD(1,1), &ws );
-#endif
-			gethostname( og.SystemName, sizeof( og.SystemName ) );
-			og.SystemID = SQLReadNameTable( og.Option, og.SystemName, WIDE("systems"), WIDE("system_id")  );
-		}
+		//og.SystemID = SQLReadNameTable( og.Option, GetSystemName(), WIDE("systems"), WIDE("system_id")  );
 	}
 }
 
@@ -270,6 +284,66 @@ void InitMachine( void )
 
 //------------------------------------------------------------------------
 
+INDEX ReadOptionNameTable( POPTION_TREE tree, CTEXTSTR name, CTEXTSTR table, CTEXTSTR col, CTEXTSTR namecol, int bCreate DBG_PASS )
+{
+			TEXTCHAR query[256];
+			TEXTCHAR *tmp;
+			CTEXTSTR result = NULL;
+			INDEX IDName = INVALID_INDEX;
+			if( !table || !name )
+				return INVALID_INDEX;
+
+			// look in internal cache first...
+			IDName = GetNameIndex(tree->odbc,table,name);
+			if( IDName != INVALID_INDEX )
+				return IDName;
+
+         CreateOptionDatabaseEx( tree );
+			PushSQLQueryEx( tree->odbc );
+			tmp = EscapeSQLStringEx( tree->odbc, name DBG_RELAY );
+			snprintf( query, sizeof( query ), WIDE("select %s from %s where %s like \'%s\'"), col?col:WIDE("id"), table, namecol, tmp );
+			Release( tmp );
+			if( SQLQueryEx( tree->odbc, query, &result DBG_RELAY) && result )
+			{
+				IDName = (INDEX)IntCreateFromText( result );
+            SQLEndQuery( tree->odbc );
+			}
+			else if( bCreate )
+			{
+            TEXTSTR newval = EscapeSQLString( tree->odbc, name );
+				snprintf( query, sizeof( query ), WIDE("insert into %s (%s) values( \'%s\' )"), table, namecol, newval );
+            OpenWriter( tree );
+				if( !SQLCommandEx( tree->odbc_writer, query DBG_RELAY ) )
+				{
+					lprintf( WIDE("insert failed, how can we define name %s?"), name );
+					// inser failed...
+				}
+				else
+				{
+					// all is well.
+					IDName = FetchLastInsertIDEx( tree->odbc_writer, table, col?col:WIDE("id") DBG_RELAY );
+				}
+				Release( newval );
+			}
+			else
+				IDName = INVALID_INDEX;
+
+			PopODBCEx(tree->odbc);
+
+			if( IDName != INVALID_INDEX )
+			{
+				TEXTCHAR *tmp;
+				// instead of strdup, consider here using SaveName from procreg?
+				AddBinaryNode( GetTableCache(tree->odbc,table), (POINTER)((PTRSZVAL)(IDName+1))
+								 , (PTRSZVAL)StrDup(tmp = EscapeString( name )) );
+				Release( tmp );
+			}
+			return IDName;
+}
+
+//---------------------------------------------------------------------------
+
+
 //#define OPTION_ROOT_VALUE INVALID_INDEX
 #define OPTION_ROOT_VALUE 0
 
@@ -278,7 +352,9 @@ static INDEX GetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, cons
 {
 	POPTION_TREE tree = GetOptionTreeEx( odbc );
 	if( tree->flags.bNewVersion )
+	{
 		return NewGetOptionIndexExx( odbc, parent, file, pBranch, pValue, bCreate DBG_RELAY );
+	}
 	{
 		const char **start = NULL;
 		char namebuf[256];
@@ -305,7 +381,7 @@ static INDEX GetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, cons
 		}
 		InitMachine();
 		// resets the search/browse cursor... not empty...
-		FamilyTreeReset( GetOptionTree( odbc ) );
+		FamilyTreeReset( &tree->option_tree );
 		while( system || program || file || pBranch || pValue || start )
 		{
 #ifdef DETAILED_LOGGING
@@ -383,7 +459,7 @@ static INDEX GetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, cons
 			}
 
 			{
-				INDEX IDName = SQLReadNameTable(odbc,namebuf,"option_name","name_id");
+				INDEX IDName = ReadOptionNameTable(tree,namebuf,"option_name","name_id","name",1 DBG_RELAY);
 
 				PushSQLQueryEx(odbc);
 				snprintf( query, sizeof( query )
@@ -399,14 +475,18 @@ static INDEX GetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, cons
 						// otherwise our root node creation failes if said root is gone.
 						//lprintf( "New entry... create it..." );
 						snprintf( query, sizeof( query ), WIDE("Insert into option_map(`parent_node_id`,`name_id`) values (%ld,%lu)"), parent, IDName );
-						if( SQLCommand( odbc, query ) )
+						lprintf( "query %s", query );
+                  OpenWriter( tree );
+						if( SQLCommand( tree->odbc_writer, query ) )
 						{
-							ID = FetchLastInsertID( odbc, WIDE("option_map"), WIDE("node_id") );
+                  lprintf( "query %s", query );
+							ID = FetchLastInsertID( tree->odbc_writer, WIDE("option_map"), WIDE("node_id") );
 						}
 						else
 						{
 							CTEXTSTR error;
-							FetchSQLError( odbc, &error );
+                  lprintf( "query %s", query );
+							FetchSQLError( tree->odbc_writer, &error );
 #ifdef DETAILED_LOGGING
 							lprintf( WIDE("Error inserting option: %s"), error );
 #endif
@@ -421,7 +501,7 @@ static INDEX GetOptionIndexExx( PODBC odbc, INDEX parent, const char *file, cons
 						continue; // get out of this loop, continue outer.
 					}
 #ifdef DETAILED_LOGGING
-					lprintf( WIDE("Option tree corrupt.  No option node_id=%ld"), ID );
+					_lprintf(DBG_RELAY)( WIDE("Option tree corrupt.  No option node_id=%ld"), ID );
 #endif
 					PopODBCEx( odbc );
 					return INVALID_INDEX;
@@ -458,8 +538,13 @@ INDEX GetSystemIndex( CTEXTSTR pSystemName )
 {
    if( pSystemName )
       return ReadNameTable( pSystemName, WIDE("systems"), WIDE("system_id") );
-   else
-      return og.SystemID;
+	else
+	{
+		if( !og.SystemID )
+			og.SystemID = SQLReadNameTable( og.Option, pSystemName, WIDE("systems"), WIDE("system_id")  );
+
+		return og.SystemID;
+	}
 }
 
 //------------------------------------------------------------------------
@@ -468,7 +553,7 @@ INDEX GetOptionValueIndexEx( PODBC odbc, INDEX ID )
 {
 	POPTION_TREE tree = GetOptionTreeEx( odbc );
 	if( tree->flags.bNewVersion )
-      return ID;
+		return ID;
 	{
 		char query[256];
 		CTEXTSTR result = NULL;
@@ -549,8 +634,9 @@ INDEX DuplicateValue( INDEX iOriginalValue, INDEX iNewValue )
 		snprintf( query, sizeof( query )
 				  , "insert into option_values select 0,`string`,`binary` from option_values where value_id=%ld"
 				  , iOriginalValue );
-		SQLCommand( og.Option, query );
-		iNewValue = FetchLastInsertID(og.Option,NULL,NULL);
+      OpenWriter( tree );
+		SQLCommand( tree->odbc_writer, query );
+		iNewValue = FetchLastInsertID(tree->odbc_writer, NULL,NULL);
 		return iNewValue;
 	}
 }
@@ -562,57 +648,57 @@ _32 GetOptionStringValueEx( PODBC odbc, INDEX optval, char *buffer, _32 len DBG_
 	POPTION_TREE tree = GetOptionTreeEx( odbc );
 	if( tree->flags.bNewVersion )
 	{
-      return NewGetOptionStringValue( odbc, optval, buffer, len DBG_RELAY );
+		return NewGetOptionStringValue( odbc, optval, buffer, len DBG_RELAY );
 	}
 	else
 	{
 		char query[256];
-   CTEXTSTR result = NULL;
-   int last_was_session, last_was_system;
-	INDEX _optval;
-   PTRSZVAL result_len = 0;
-   len--;
+		CTEXTSTR result = NULL;
+		int last_was_session, last_was_system;
+		INDEX _optval;
+		PTRSZVAL result_len = 0;
+		len--;
 
-   snprintf( query, sizeof( query ), "select override_value_id from option_exception "
-            "where ( apply_from<=now() or apply_from=0 )"
-            "and ( apply_until>now() or apply_until=0 )"
-            "and ( system_id=%d or system_id=0 )"
-            "and value_id=%d "
-           , og.SystemID
-           , optval );
-   last_was_session = 0;
-   last_was_system = 0;
-   PushSQLQueryEx( og.Option );
-	for( SQLQuery( og.Option, query, &result ); result; FetchSQLResult( og.Option, &result ) )
-	{
-		_optval = optval;
-		sscanf( result, WIDE("%") _32f, &optval );
-		if( (!optval) || ( optval == INVALID_INDEX ) )
-			optval = _optval;
-	}
-	snprintf( query, sizeof( query ), WIDE("select string from option_values where value_id=%ld"), optval );
-	// have to push here, the result of the prior is kept outstanding
-   // if this was not pushed, the prior result would evaporate.
-	PushSQLQueryEx( og.Option );
-	buffer[0] = 0;
-	//lprintf( WIDE("do query for value string...") );
-	if( SQLQuery( og.Option, query, &result ) )
-	{
-		//lprintf( WIDE(" query succeeded....") );
-		if( result )
+		snprintf( query, sizeof( query ), "select override_value_id from option_exception "
+				"where ( apply_from<=now() or apply_from=0 )"
+				"and ( apply_until>now() or apply_until=0 )"
+				"and ( system_id=%d or system_id=0 )"
+				"and value_id=%d "
+			   , og.SystemID
+			   , optval );
+		last_was_session = 0;
+		last_was_system = 0;
+		PushSQLQueryEx( og.Option );
+		for( SQLQuery( og.Option, query, &result ); result; FetchSQLResult( og.Option, &result ) )
 		{
-			result_len = StrLen( result );
-			strncpy( buffer, result, min(len,result_len) );
-			buffer[min(len,result_len)] = 0;
+			_optval = optval;
+			sscanf( result, WIDE("%") _32f, &optval );
+			if( (!optval) || ( optval == INVALID_INDEX ) )
+				optval = _optval;
 		}
-		else
+		snprintf( query, sizeof( query ), WIDE("select string from option_values where value_id=%ld"), optval );
+		// have to push here, the result of the prior is kept outstanding
+		// if this was not pushed, the prior result would evaporate.
+		PushSQLQueryEx( og.Option );
+		buffer[0] = 0;
+		//lprintf( WIDE("do query for value string...") );
+		if( SQLQuery( og.Option, query, &result ) )
 		{
-			buffer[0] = 0;
+			//lprintf( WIDE(" query succeeded....") );
+			if( result )
+			{
+				result_len = StrLen( result );
+				StrCpyEx( buffer, result, min(len,result_len) );
+				buffer[min(len,result_len)] = 0;
+			}
+			else
+			{
+				buffer[0] = 0;
+			}
 		}
-	}
-	PopODBCEx( og.Option );
-   PopODBCEx( og.Option );
-	return result_len;
+		PopODBCEx( og.Option );
+		PopODBCEx( og.Option );
+		return result_len;
 	}
 }
 
@@ -677,18 +763,17 @@ LOGICAL GetOptionIntValue( INDEX optval, int *result_value DBG_PASS )
 
 //------------------------------------------------------------------------
 
-INDEX CreateValue( PODBC odbc, INDEX iOption, CTEXTSTR pValue )
+static INDEX CreateValue( POPTION_TREE tree, INDEX iOption, CTEXTSTR pValue )
 {
-	POPTION_TREE tree = GetOptionTreeEx( odbc );
 	if( tree->flags.bNewVersion )
 	{
-		return NewCreateValue( odbc, iOption, pValue );
+		return NewCreateValue( tree, iOption, pValue );
 	}
 	else
 	{
 		char insert[256];
 		CTEXTSTR result=NULL;
-		TEXTSTR newval = EscapeSQLBinary( odbc, pValue, StrLen( pValue ) );
+		TEXTSTR newval = EscapeSQLBinary( tree->odbc, pValue, StrLen( pValue ) );
 		int IDValue;
 		if( pValue == NULL )
 			snprintf( insert, sizeof( insert ), WIDE("insert into option_blobs (`blob` ) values ('')")
@@ -698,13 +783,13 @@ INDEX CreateValue( PODBC odbc, INDEX iOption, CTEXTSTR pValue )
 					  ,pValue?"\'":""
 					  , pValue?newval:"NULL"
 					  ,pValue?"\'":"" );
-		if( SQLCommand( odbc, insert ) )
+		if( SQLCommand( tree->odbc_writer, insert ) )
 		{
-			IDValue = FetchLastInsertID( odbc, WIDE("option_values"), WIDE("value_id") );
+			IDValue = FetchLastInsertID( tree->odbc_writer, WIDE("option_values"), WIDE("value_id") );
 		}
 		else
 		{
-			FetchSQLError( odbc, &result );
+			FetchSQLError( tree->odbc_writer, &result );
 			lprintf( WIDE("Insert value failed: %s"), result );
 			IDValue = INVALID_INDEX;
 		}
@@ -716,9 +801,8 @@ INDEX CreateValue( PODBC odbc, INDEX iOption, CTEXTSTR pValue )
 
 //------------------------------------------------------------------------
 // result with option value ID
-INDEX SetOptionValueEx( PODBC odbc, INDEX optval, INDEX iValue )
+INDEX SetOptionValueEx( POPTION_TREE tree, INDEX optval, INDEX iValue )
 {
-	POPTION_TREE tree = GetOptionTreeEx( odbc );
 	if( tree->flags.bNewVersion )
 	{
       return optval;
@@ -729,23 +813,21 @@ INDEX SetOptionValueEx( PODBC odbc, INDEX optval, INDEX iValue )
 		CTEXTSTR result = NULL;
 		// should escape quotes passed in....
 		snprintf( update, sizeof( update ), WIDE("update option_map set value_id=%ld where node_id=%ld"), iValue, optval );
-		if( !SQLCommand( odbc, update ) )
+		if( !SQLCommand( tree->odbc_writer, update ) )
 		{
-			GetSQLResult( &result );
+			FetchSQLResult( tree->odbc_writer, &result );
 			lprintf( WIDE("Update value failed: %s"), result );
 			iValue = INVALID_INDEX;
 		}
-		// should do some sort of pop temp... it's a commit of sorts.
-		PopODBCEx( odbc );
 		return iValue;
 	}
 }
-
+#if 0
 INDEX SetOptionValue( INDEX optval, INDEX iValue )
 {
    return SetOptionValueEx( og.Option, optval, iValue );
 }
-
+#endif
 //------------------------------------------------------------------------
 // result with option value ID
 INDEX SetOptionStringValue( INDEX optval, CTEXTSTR pValue )
@@ -766,30 +848,31 @@ INDEX SetOptionStringValue( INDEX optval, CTEXTSTR pValue )
 					  , tree->flags.bNewVersion?OPTION_VALUES:"option_values"
 					  , tree->flags.bNewVersion?"option_id":"value_id"
 					  , IDValue );
-		strncpy( value, pValue, sizeof( value )-1 );
-		newval = EscapeSQLBinary( og.Option, pValue, strlen( pValue ) );
-		if( IDValue && SQLQuery( og.Option, update, &result ) && result )
+		StrCpyEx( value, pValue, sizeof( value )-1 );
+		newval = EscapeSQLBinary( tree->odbc, pValue, strlen( pValue ) );
+		if( IDValue && SQLQuery( tree->odbc, update, &result ) && result )
 		{
 			snprintf( update, sizeof( update ), WIDE("update %s set string='%s' where %s=%ld")
 					  , tree->flags.bNewVersion?OPTION_VALUES:"option_values"
 					  , newval
 					  , tree->flags.bNewVersion?"option_id":"value_id"
 					  , IDValue );
-			SQLEndQuery( og.Option );
-			if( !SQLCommand( og.Option, update ) )
+			SQLEndQuery( tree->odbc );
+         OpenWriter( tree );
+			if( !SQLCommand( tree->odbc_writer, update ) )
 			{
-				FetchSQLError( og.Option, &result );
+				FetchSQLError( tree->odbc_writer, &result );
 				lprintf( WIDE("Update value failed: %s"), result );
 				IDValue = INVALID_INDEX;
 			}
 		}
 		else
 		{
-			IDValue = CreateValue( og.Option, optval, value );
+			IDValue = CreateValue( tree, optval, value );
 			if( IDValue != INVALID_INDEX )
 			{
 				// setoption might fail, resulting in an invalid index ID
-				IDValue = SetOptionValueEx( og.Option, optval, IDValue );
+				IDValue = SetOptionValueEx( tree, optval, IDValue );
 			}
 		}
 	}
@@ -801,29 +884,29 @@ INDEX SetOptionStringValue( INDEX optval, CTEXTSTR pValue )
 
 //------------------------------------------------------------------------
 // result with option value ID
-INDEX SetOptionBlobValueEx( PODBC odbc, INDEX optval, POINTER buffer, _32 length )
+static INDEX SetOptionBlobValueEx( POPTION_TREE tree, INDEX optval, POINTER buffer, _32 length )
 {
    // update value.
    CTEXTSTR result = NULL;
-   INDEX IDValue = GetOptionValueIndexEx( odbc, optval );
+   INDEX IDValue = GetOptionValueIndexEx( tree->odbc, optval );
 	// should escape quotes passed in....
 	if( !IDValue )
 	{
-		IDValue = CreateValue( odbc, optval, NULL );
-		IDValue = SetOptionValueEx( odbc, optval, IDValue );
+		IDValue = CreateValue( tree, optval, NULL );
+		IDValue = SetOptionValueEx( tree, optval, IDValue );
 	}
 
    if( IDValue && IDValue != INVALID_INDEX )
 	{
       char *tmp = EscapeBinary( (CTEXTSTR)buffer, length );
-      if( !SQLCommandf( odbc, WIDE("update option_values set `binary`='%s' where value_id=%ld"), tmp, IDValue ) )
+      if( !SQLCommandf( tree->odbc_writer, WIDE("update option_values set `binary`='%s' where value_id=%ld"), tmp, IDValue ) )
       {
-         FetchSQLError( odbc, &result );
+         FetchSQLError( tree->odbc_writer, &result );
          lprintf( WIDE("Update value failed: %s"), result );
          IDValue = INVALID_INDEX;
 		}
       Release( tmp );
-		PopODBCEx( odbc );
+		//PopODBCEx( odbc );
    }
    return IDValue;
 }
@@ -875,7 +958,7 @@ int SQLPromptINIValue(
       return strlen( lpszReturnBuffer );
 	}
 #endif
-	strncpy( lpszReturnBuffer, lpszDefault, cbReturnBuffer );
+	StrCpyEx( lpszReturnBuffer, lpszDefault, cbReturnBuffer );
 	lpszReturnBuffer[cbReturnBuffer-1] = 0;
 	return strlen( lpszReturnBuffer );
 }
@@ -894,7 +977,8 @@ SQLGETOPTION_PROC( int, SACK_GetPrivateProfileStringExx )( CTEXTSTR pSection
 {
 	EnterCriticalSec( &og.cs_option );
 	{
-		INDEX optval = GetOptionIndex( pININame, pSection, pOptname );
+      // first try, do it as false, so we can fill in default values.
+		INDEX optval = GetOptionIndexEx( OPTION_ROOT_VALUE, pININame, pSection, pOptname, FALSE DBG_SRC );
       // maybe do an if( l.flags.bLogOptionsRead )
       //lprintf( "Getting option [%s] %s %s", pSection, pOptname, pININame );
 		if( optval == INVALID_INDEX )
@@ -908,16 +992,16 @@ SQLGETOPTION_PROC( int, SACK_GetPrivateProfileStringExx )( CTEXTSTR pSection
 				}
 				else
 				{
-               if( pDefaultbuf )
-						strncpy( pBuffer, pDefaultbuf, nBuffer );
+					if( pDefaultbuf )
+						StrCpyEx( pBuffer, pDefaultbuf, nBuffer );
 					else
-                  pBuffer[0] = 0;
+						pBuffer[0] = 0;
 				}
 			}
 			else
 			{
 				if( pDefaultbuf )
-					strncpy( pBuffer, pDefaultbuf, nBuffer );
+					StrCpyEx( pBuffer, pDefaultbuf, nBuffer );
 				else
 					pBuffer[0] = 0;
 			}
@@ -1004,7 +1088,9 @@ SQLGETOPTION_PROC( int, SACK_GetProfileString )( CTEXTSTR pSection, CTEXTSTR pOp
 
 SQLGETOPTION_PROC( int, SACK_GetProfileBlobOdbc )( PODBC odbc, CTEXTSTR pSection, CTEXTSTR pOptname, TEXTCHAR **pBuffer, _32 *pnBuffer )
 {
-   INDEX optval = GetOptionIndexExx( odbc, OPTION_ROOT_VALUE, NULL, pSection, pOptname, FALSE DBG_SRC );
+	INDEX optval;
+   lprintf( "Only single odbc available here." );
+	optval = GetOptionIndexExx( odbc, OPTION_ROOT_VALUE, NULL, pSection, pOptname, FALSE DBG_SRC );
    if( optval == INVALID_INDEX )
    {
       return FALSE;
@@ -1087,8 +1173,9 @@ SQLGETOPTION_PROC( int, SACK_WriteProfileBlobOdbc )( PODBC odbc, CTEXTSTR pSecti
       return FALSE;
    }
    else
-   {
-      return SetOptionBlobValueEx( odbc, optval, pBuffer, nBuffer ) != INVALID_INDEX;
+	{
+      POPTION_TREE tree = GetOptionTreeEx( odbc );
+      return SetOptionBlobValueEx( tree, optval, pBuffer, nBuffer ) != INVALID_INDEX;
 	}
    return 0;
 }
@@ -1203,5 +1290,43 @@ SQLGETOPTION_PROC( void, BeginBatchUpdate )( void )
 SQLGETOPTION_PROC( void, EndBatchUpdate )( void )
 {
    //SQLCommand( og.Option, "COMMIT" );
+}
+
+ATEXIT( CommitOptions )
+{
+	INDEX idx;
+	POPTION_TREE tree;
+#ifdef DETAILED_LOGGING
+	lprintf( "Running Option cleanup..." );
+#endif
+	LIST_FORALL( og.trees, idx, POPTION_TREE, tree )
+	{
+		if( tree->odbc_writer )
+		{
+#ifdef DETAILED_LOGGING
+			lprintf( "flushing a write on %p", tree->odbc_writer );
+#endif
+			SQLCommit( tree->odbc_writer );
+		}
+	}
+}
+
+PRIORITY_PRELOAD( CommitOptionsLoad, 150 )
+{
+	INDEX idx;
+	POPTION_TREE tree;
+#ifdef DETAILED_LOGGING
+	lprintf( "Running Option cleanup..." );
+#endif
+	LIST_FORALL( og.trees, idx, POPTION_TREE, tree )
+	{
+		if( tree->odbc_writer )
+		{
+#ifdef DETAILED_LOGGING
+			lprintf( "flushing a write on %p", tree->odbc_writer );
+#endif
+			SQLCommit( tree->odbc_writer );
+		}
+	}
 }
 SACK_OPTION_NAMESPACE_END

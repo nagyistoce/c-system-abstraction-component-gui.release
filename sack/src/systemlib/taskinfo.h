@@ -18,18 +18,18 @@ typedef struct handle_info_tag
 //typedef void (CPROC*TaskEnd)(PTRSZVAL, struct task_info_tag *task_ended);
 struct task_info_tag {
 	struct {
-		_32 closed : 1;
+		BIT_FIELD closed : 1;
 	} flags;
 	TaskEnd EndNotice;
-   TaskOutput OutputEvent;
-   PTRSZVAL psvEnd;
+	TaskOutput OutputEvent;
+	PTRSZVAL psvEnd;
 	HANDLEINFO hStdIn;
 	HANDLEINFO hStdOut;
 	//HANDLEINFO hStdErr;
 #if defined(WIN32)
 
-   HANDLE hReadOut, hWriteOut;
-   //HANDLE hReadErr, hWriteErr;
+	HANDLE hReadOut, hWriteOut;
+	//HANDLE hReadErr, hWriteErr;
 	HANDLE hReadIn, hWriteIn;
 	STARTUPINFO si;
 	PROCESS_INFORMATION pi;

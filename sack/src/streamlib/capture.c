@@ -18,7 +18,7 @@
 #include <xvid.h>
 #endif
 
-#ifdef __WINDOWS__
+#ifdef WIN32
 #include "v4w.h"
 #endif
 
@@ -311,7 +311,7 @@ PCAPTURE_DEVICE CreateCaptureStream( void )
 {
 	PCAPTURE_DEVICE pcd = New( CAPTURE_DEVICE);
 	MemSet( pcd, 0, sizeof( CAPTURE_DEVICE ) );
-#ifndef __WINDOWS__
+#ifndef WIN32
    /* this is driven by the camera on capture event... */
 	ThreadTo( CycleCallbacks, (PTRSZVAL)pcd );
 #endif
@@ -806,7 +806,7 @@ PTRSZVAL CPROC ThreadThing( PTHREAD thread )
    //SetAllocateLogging( TRUE );
 		{
 			char whatever[2];
-#ifdef __WINDOWS__
+#ifdef WIN32
          g.capture_thread = GetCurrentThreadId();
          g.flags.bRunning = 1;
          Start(); // v4w start();

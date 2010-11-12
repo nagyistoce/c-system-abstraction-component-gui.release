@@ -684,12 +684,12 @@ LOGICAL SetupInfo( void )
 
     // split extensions
     if(str)
-	 {
-       char *tmp = StrDup( str );
-	 tok = strtok((char*)tmp, " ");
-	 while(tok)
-		  {
-           AddLink( &glInfo.extensions, tok );
+	{
+		char *tmp = StrDup( str );
+		tok = strtok((char*)tmp, " ");
+		while(tok)
+		{
+			AddLink( &glInfo.extensions, tok );
             tok = strtok(0, " ");               // next token
         }
     }

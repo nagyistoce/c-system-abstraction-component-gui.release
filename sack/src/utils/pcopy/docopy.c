@@ -12,9 +12,9 @@ static PFILESOURCE copytree;
 PFILESOURCE CreateFileSource( CTEXTSTR name )
 {
 	PFILESOURCE pfs = (PFILESOURCE)Allocate( sizeof( FILESOURCE ) );
-   MemSet( pfs, 0, sizeof( FILESOURCE ) );
+	MemSet( pfs, 0, sizeof( FILESOURCE ) );
 	pfs->name = StrDup( name );
-   return pfs;
+	return pfs;
 }
 
 PFILESOURCE FindFileSource( PFILESOURCE pfs, CTEXTSTR name )
@@ -22,13 +22,13 @@ PFILESOURCE FindFileSource( PFILESOURCE pfs, CTEXTSTR name )
 	PFILESOURCE pFound = NULL;
 	while( pfs )
 	{
-		if( stricmp( name, pfs->name ) == 0 )
+		if( StrCaseCmp( name, pfs->name ) == 0 )
 			pFound = pfs;
 		if( !pFound ) pFound = FindFileSource( pfs->children, name );
-      if( pFound ) break;
-      pfs = pfs->next;
+		if( pFound ) break;
+		pfs = pfs->next;
 	}
-   return pFound;
+	return pFound;
 }
 
 PFILESOURCE AddDependCopy( PFILESOURCE pfs, CTEXTSTR name )
@@ -36,7 +36,7 @@ PFILESOURCE AddDependCopy( PFILESOURCE pfs, CTEXTSTR name )
 	PFILESOURCE pfsNew;
 	if( g.flags.bVerbose )
 	{
-      printf( WIDE("Adding %s as dependant of %s\n"), name, pfs->name );
+		printf( WIDE("Adding %s as dependant of %s\n"), name, pfs->name );
 	}
 	if( !(pfsNew = FindFileSource( copytree, name ) ) )
 	{
@@ -61,8 +61,8 @@ void AddFileCopy( CTEXTSTR name )
 	if( pathrchr( name ) )
 	{
 		TEXTSTR tmp = StrDup( name );
-		TEXTSTR x = pathrchr( tmp );
-      //lprintf( "..." );
+		TEXTSTR x = (TEXTSTR)pathrchr( tmp );
+		//lprintf( "..." );
 		x[0] = 0;
 		//printf( "Old path: %s\n%s\n", OSALOT_GetEnvironmentVariable( "PATH" ), tmp );
 		if( !StrStr( OSALOT_GetEnvironmentVariable( "PATH" ), tmp ) )
@@ -71,7 +71,7 @@ void AddFileCopy( CTEXTSTR name )
 			{
 				TEXTSTR path = (TEXTSTR)OSALOT_GetEnvironmentVariable( "MY_WORK_PATH" );
 				int len;
-#ifdef __WINDOWS__
+#ifdef WIN32
 #define PATHCHAR "\\"
 #else
 #define PATHCHAR "/"
@@ -82,11 +82,11 @@ void AddFileCopy( CTEXTSTR name )
 				while( path = strstr( real_tmp, ".." ) )
 				{
 					TEXTSTR prior;
-               path[-1] = 0;
-					prior = pathrchr( real_tmp );
+					path[-1] = 0;
+					prior = (TEXTSTR)pathrchr( real_tmp );
 					if( !prior )
 					{
-                  path[-1] = PATHCHAR[0];
+						path[-1] = PATHCHAR[0];
 						break;
 					}
                MemCpy( prior, path+2, strlen( path ) - 1 );
@@ -97,7 +97,7 @@ void AddFileCopy( CTEXTSTR name )
                goto skip_path;
 				}
 			}
-#ifdef __WINDOWS__
+#ifdef WIN32
 			x[0] = ';';
 #else
 			x[0] = ':';
@@ -128,45 +128,52 @@ void DoScanFileCopyTree( PFILESOURCE pfs )
             ; //fprintf( stderr, WIDE("Scanned extern library %s\n"), pfs->name );
 
 		}
-      DoScanFileCopyTree( pfs->children );
-      pfs = pfs->next;
+		DoScanFileCopyTree( pfs->children );
+		pfs = pfs->next;
 	}
 }
 
 void ScanFileCopyTree( void )
 {
-   DoScanFileCopyTree( copytree );
+	DoScanFileCopyTree( copytree );
 }
 
 void copy( char *src, char *dst )
 {
-	static _8 buffer[4096];
-	FILE *in, *out;
-	_64 filetime;
-   _64 filetime_dest;
-
-	filetime = GetFileWriteTime( src );
-	filetime_dest = GetFileWriteTime( dst );
-
-	if( filetime <= filetime_dest )
-      return;
-	in = fopen( src, WIDE("rb") );
-   if( in )
-		out = fopen( dst, WIDE("wb") );
-	else
-      out = NULL;
-	if( in && out )
+	if( g.flags.bDoNotCopy )
 	{
-      int len;
-		while( len = fread( buffer, 1, sizeof( buffer ), in ) )
-         fwrite( buffer, 1, len, out );
+		fprintf( stdout, "%s\n", src );
 	}
-	if( in )
-		fclose( in );
-	if( out )
-		fclose( out );
-   g.copied++;
-   SetFileWriteTime( dst, filetime );
+	else
+	{
+		static _8 buffer[4096];
+		FILE *in, *out;
+		_64 filetime;
+		_64 filetime_dest;
+
+		filetime = GetFileWriteTime( src );
+		filetime_dest = GetFileWriteTime( dst );
+
+		if( filetime <= filetime_dest )
+			return;
+		in = sack_fopen( 0, src, WIDE("rb") );
+		if( in )
+			out = sack_fopen( 0, dst, WIDE("wb") );
+		else
+			out = NULL;
+		if( in && out )
+		{
+			int len;
+			while( len = fread( buffer, 1, sizeof( buffer ), in ) )
+				fwrite( buffer, 1, len, out );
+		}
+		if( in )
+			fclose( in );
+		if( out )
+			fclose( out );
+		SetFileWriteTime( dst, filetime );
+	}
+	g.copied++;
 }
 
 void DoCopyFileCopyTree( PFILESOURCE pfs, CTEXTSTR dest )
@@ -178,12 +185,15 @@ void DoCopyFileCopyTree( PFILESOURCE pfs, CTEXTSTR dest )
 		name = pathrchr( pfs->name );
 		if( !name )
 			name = pfs->name;
-		snprintf( fname, sizeof( fname ), WIDE("%s/%s"), dest, name );
+      if( dest )
+			snprintf( fname, sizeof( fname ), WIDE("%s/%s"), dest, name );
 		//if( !IsFile( fname ) )
 		{
          // only copy if the file is new...
 			if( pfs->flags.bScanned && !pfs->flags.bSystem )
-				copy( pfs->name, fname );
+			{
+				copy( pfs->name, dest?fname:NULL );
+			}
 		}
 		DoCopyFileCopyTree( pfs->children, dest );
       pfs = pfs->next;

@@ -1,4 +1,4 @@
-#ifdef __WINDOWS__
+#ifdef WIN32
 #include "stdhdrs.h"
 //#include "RComLib.h"  // make sure we have the same typecasts...
 
