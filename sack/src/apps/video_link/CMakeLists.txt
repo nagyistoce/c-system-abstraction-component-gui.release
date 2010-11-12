@@ -281,10 +281,10 @@ add_subdirectory( video_deploy )
 add_subdirectory( video_map_editor )
 
 #install( FILES install/CMakeLists.txt DESTINATION install/video_link )
-#install( FILES vlc/vlc-1.1.4-win32.7z DESTINATION install/video_link )
-#install( FILES mysql/mysql-5.4-minimal.zip DESTINATION install/video_link )
-#install( FILES tools/pkzip25.exe DESTINATION install/video_link )
-#install( FILES tools/7za.exe DESTINATION install/video_link )
+install( FILES vlc/vlc-1.1.4-win32.7z DESTINATION install/video_link )
+install( FILES mysql/mysql-5.4-minimal.zip DESTINATION install/video_link ) 
+install( FILES tools/pkzip25.exe DESTINATION install/video_link ) 
+install( FILES tools/7za.exe DESTINATION install/video_link )
 
 if( ENABLE_CPACK )
 
