@@ -1,4 +1,0 @@
-:set NOTQUIET=1
-set MKCFLAGS=-DROMBUILD
-
-make DEST=release FINALDEST=$(SACK_BASE)

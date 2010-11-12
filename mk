@@ -1,1 +1,0 @@
-make BINPATH=/usr/bin LIBPATH=/tmp/static_lib BINLIBPATH=/usr/lib DATAPATH=/var/share/fortunet MONO_OUT_BUILD=1 $*

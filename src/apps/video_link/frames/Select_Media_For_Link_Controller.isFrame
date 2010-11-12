@@ -1,8 +1,0 @@
-<control border="4400" caption="Select_Media_For_Link_Controller.Frame" position="0,0" size="580,432" type="Frame">
-<control IDName="Controller Select Media/ListBox/LISTBOX_MEDIA_AVAILABLE" border="81" caption="" position="35,43" size="211,249" type="ListBox"></control>
-<control IDName="Controller Select Media/ListBox/LISTBOX_MEDIA_SELECTED" border="81" caption="" position="252,43" size="199,252" type="ListBox"></control>
-<control IDName="core/Button/BTN_CANCEL" PrivateData="#ff356059" border="1" caption="cancel" position="390,356" size="73,21" type="Button"></control>
-<control IDName="core/Button/BTN_OKAY" PrivateData="#ff356059" border="1" caption="okay" position="311,356" size="73,21" type="Button"></control>
-<control IDName="Controller Select Media/Button/BTN_ADD_AVAILABLE_TO_SELECTED_MEDIA" PrivateData="#ff356059" border="1" caption="Add" position="100,309" size="73,21" type="Button"></control>
-<control IDName="Controller Select Media/Button/BTN_SELECTED_UP" PrivateData="#ff356059" border="1" caption="Up" position="464,123" size="73,21" type="Button"></control>
-<control IDName="Controller Select Media/Button/BTN_SELECTED_DOWN" PrivateData="#ff356059" border="1" caption="Down" position="464,157" size="73,21" type="Button"></control></control>

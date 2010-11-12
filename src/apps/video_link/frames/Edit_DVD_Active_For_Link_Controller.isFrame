@@ -1,7 +1,0 @@
-<control border="4400" caption="Edit_DVD_Active_For_Link_Controller.Frame" position="0,0" size="484,299" type="Frame">
-<control IDName="Controller DVD Active/ListBox/LISTBOX_HALL_NUMBER" border="81" caption="" position="74,48" size="110,73" type="ListBox"></control>
-<control IDName="Controller DVD Active/CheckButton/CHECKBOX_ALL_HALLS_OFF" border="3" caption="All Halls OFF" position="247,115" size="126,21" type="CheckButton"></control>
-<control IDName="core/Button/BTN_OKAY" PrivateData="#ff356059" border="1" caption="ok" position="281,240" size="73,21" type="Button"></control>
-<control IDName="core/Button/BTN_CANCEL" PrivateData="#ff356059" border="1" caption="cancel" position="358,240" size="73,21" type="Button"></control>
-<control IDName="Controller DVD Active/CheckButton/CHECKBOX_ALL_HALLS_ON" border="3" caption="All Halls ON" position="246,133" size="181,21" type="CheckButton"></control>
-</control>

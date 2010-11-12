@@ -1,3 +1,0 @@
-
-all .DEFAULT:
-	$(MAKE) -C .. $(MAKECMDGOALS)

@@ -1,8 +1,0 @@
-
-
-LITERAL_LIBNAME=sqlite3.interface
-SRCS=sqlite3 sqlite_interface
-CXFLAGS=-DSQLITE_SOURCE -DUSE_SQLITE
-
-include $(SACK_BASE)/makefiles/makefile.single
-

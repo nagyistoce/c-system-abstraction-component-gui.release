@@ -1,0 +1,10 @@
+
+
+ALTMAKE=0
+
+all .DEFAULT:
+	$(MAKE) $(MAKECMDGOALS)
+
+$(SACK_BASE)/Makefile.alt: ;
+Makefile.alt: ;
+

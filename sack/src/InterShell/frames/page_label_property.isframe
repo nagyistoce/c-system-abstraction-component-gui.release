@@ -1,0 +1,11 @@
+<control border="4400" caption="Edit Text Label Properties" edit="1" position="0,0" size="641,260" type="Frame">
+<control IDName="InterShell/font/Button/BTN_PICKFONT" PrivateData="#ff356059" border="1" caption="Set Font" position="47,101" size="107,37" type="Button"></control>
+<control IDName="InterShell/Color Well/CLR_TEXT_COLOR" border="81" caption="" position="139,57" size="32,32" type="Color Well"></control>
+<control IDName="core/Button/BTN_OKAY" PrivateData="#ff356059" border="1" caption="Okay" position="476,197" size="73,21" type="Button"></control>
+<control IDName="core/Button/BTN_CANCEL" PrivateData="#ff356059" border="1" caption="Cancel" position="379,197" size="73,21" type="Button"></control>
+<control IDName="InterShell/EditControl/TXT_CONTROL_TEXT" border="81" caption="" position="18,16" size="582,21" type="EditControl"></control>
+<control IDName="InterShell/ListBox/LST_VARIABLES" border="81" caption="" position="240,54" size="327,120" type="ListBox"></control>
+<control border="3" caption="Text Color" position="21,61" size="104,21" type="TextControl"></control>
+<control IDName="InterShell/CheckButton/CHECKBOX_LABEL_CENTER" border="3" caption="Center" position="28,154" size="81,17" type="CheckButton"></control>
+<control IDName="InterShell/CheckButton/CHECKBOX_LABEL_RIGHT" border="3" caption="Right" position="28,175" size="83,21" type="CheckButton"></control>
+<control IDName="InterShell/CheckButton/CHECKBOX_LABEL_SCROLL" border="3" caption="Scroll" position="28,197" size="115,21" type="CheckButton"></control></control>
