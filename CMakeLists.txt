@@ -157,7 +157,7 @@ set( ExtraDefinitions ${ExtraDefinitions};__NO_OPTIONS__ )
  if( USE_SQLITE )
   SET( BAG_SQLITE_INTERFACE  src/sqlite/sqlite_interface.c )
 #if( !SQLITE3_FOUND )
-  SET( SQLITE_VERSION 3.7.0 ) #3.6.23
+  SET( SQLITE_VERSION 3.7.3 ) #3.7.0 3.6.23
   SET( SQLITE_SOURCES ${BAG_SQLITE_INTERFACE} src/sqlite/${SQLITE_VERSION}/sqlite3.c  )
   include_directories( ${SACK_BASE}/src/sqlite/${SQLITE_VERSION} )
   
