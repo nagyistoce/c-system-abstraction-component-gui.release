@@ -10,7 +10,7 @@
 #include "borders.h"
 #include "resource.h"
 
-//#define DEBUG_UPDAATE_DRAW 4
+#define DEBUG_UPDAATE_DRAW 4
 
 PSI_NAMESPACE
 
@@ -72,12 +72,14 @@ static void CPROC FrameRedraw( PTRSZVAL psvFrame, PRENDERER psvSelf )
 	if( !pc ) // might (and probalby isn't) attached to anything yet.
 	{
 #ifdef DEBUG_UPDAATE_DRAW
-		Log( WIDE("no frame... early return") );
+		if( g.flags.bLogDebugUpdate )
+			Log( WIDE("no frame... early return") );
 #endif
 		return;
 	}
 #ifdef DEBUG_UPDAATE_DRAW
-	lprintf( WIDE( " ------------- BEGIN FRAME DRAW -----------------" ) );
+	if( g.flags.bLogDebugUpdate )
+		lprintf( WIDE( " ------------- BEGIN FRAME DRAW -----------------" ) );
 #endif
    pc->flags.bShown = 1;
 	GetCurrentDisplaySurface(pf);
@@ -86,7 +88,8 @@ static void CPROC FrameRedraw( PTRSZVAL psvFrame, PRENDERER psvSelf )
 		pc->flags.bResizedDirty = 0;
       pc->flags.bDirty = 1;
 #ifdef DEBUG_UPDAATE_DRAW
-		Log( WIDE("Redraw frame...") );
+		if( g.flags.bLogDebugUpdate )
+			Log( WIDE("Redraw frame...") );
 #endif
 		AddUse( pc );
 
@@ -94,7 +97,8 @@ static void CPROC FrameRedraw( PTRSZVAL psvFrame, PRENDERER psvSelf )
 		{
 			Image OldSurface;
 #ifdef DEBUG_UPDAATE_DRAW
-			lprintf( WIDE( "!!Saving old image... (on frame)" ) );
+			if( g.flags.bLogDebugUpdate )
+				lprintf( WIDE( "!!Saving old image... (on frame)" ) );
 #endif
 			if( ( OldSurface = CopyOriginalSurface( pc, pc->OriginalSurface ) ) )
 			{
@@ -104,8 +108,10 @@ static void CPROC FrameRedraw( PTRSZVAL psvFrame, PRENDERER psvSelf )
 				if( pc->OriginalSurface )
 				{
 #ifdef DEBUG_UPDAATE_DRAW
-					lprintf( WIDE( "------------ Restoring old image..." ) );
-					lprintf( WIDE( "Restoring orignal background... " ) );
+					if( g.flags.bLogDebugUpdate )
+						lprintf( WIDE( "------------ Restoring old image..." ) );
+					if( g.flags.bLogDebugUpdate )
+						lprintf( WIDE( "Restoring orignal background... " ) );
 #endif
 					BlotImage( pc->Surface, pc->OriginalSurface, 0, 0 );
 				}
@@ -149,20 +155,23 @@ static void CPROC FrameRedraw( PTRSZVAL psvFrame, PRENDERER psvSelf )
 			// probably should just invoke draw... but then we won't get marked
 			// dirty - so redundant smudges wont be merged... and we'll do this all twice.
 #ifdef DEBUG_UPDAATE_DRAW
-			lprintf( WIDE( "Smudging the form... %p" ), pc );
+			if( g.flags.bLogDebugUpdate )
+				lprintf( WIDE( "Smudging the form... %p" ), pc );
 #endif
 		}
 		//SmudgeCommon( pc );
 		//else
 #ifdef DEBUG_UPDAATE_DRAW
-		lprintf( WIDE("delete use should refresh rectangle. %p"), pc );
+		if( g.flags.bLogDebugUpdate )
+			lprintf( WIDE("delete use should refresh rectangle. %p"), pc );
 #endif
 		DeleteUse( pc );
 	}
 	else
 	{
 #ifdef DEBUG_UPDAATE_DRAW
-		lprintf( WIDE( "trusting that the frame is already drawn to the stable buffer..." ) );
+		if( g.flags.bLogDebugUpdate )
+			lprintf( WIDE( "trusting that the frame is already drawn to the stable buffer..." ) );
 #endif
 		UpdateDisplay( pf->pActImg );
 	}
@@ -205,12 +214,14 @@ static void CPROC FrameFocusProc( PTRSZVAL psvFrame, PRENDERER loss )
 	}
 #ifdef DEBUG_UPDAATE_DRAW
 	else
-      lprintf( WIDE( "Frame is not initial..." ) );
+		if( g.flags.bLogDebugUpdate )
+			lprintf( WIDE( "Frame is not initial..." ) );
 #endif
 
 //#ifdef DEBUG_UPDAATE_DRAW
 #ifdef DEBUG_FOCUS_STUFF
-	Log1( WIDE("PSI Focus change called: %p"), loss );
+	if( g.flags.bLogDebugUpdate )
+		Log1( WIDE("PSI Focus change called: %p"), loss );
 #endif
 //#endif
 	if( loss )
@@ -267,9 +278,10 @@ static void CPROC FrameFocusProc( PTRSZVAL psvFrame, PRENDERER loss )
 			lprintf( WIDE( "Updating just the caption portion to the display" ) );
 #endif
 #ifdef DEBUG_UPDAATE_DRAW
-			lprintf( WIDE("updating display portion %d,%d")
-					 , pc->rect.width
-					 , pc->surface_rect.y );
+			if( g.flags.bLogDebugUpdate )
+				lprintf( WIDE("updating display portion %d,%d")
+						 , pc->rect.width
+						 , pc->surface_rect.y );
 #endif
 			UpdateDisplayPortion( frame->pActImg
 									  , 0, 0
@@ -280,7 +292,8 @@ static void CPROC FrameFocusProc( PTRSZVAL psvFrame, PRENDERER loss )
 	}
 #ifdef DEBUG_UPDAATE_DRAW
 	else
-		lprintf( WIDE("Did not draw frame of hidden frame.") );
+		if( g.flags.bLogDebugUpdate )
+			lprintf( WIDE("Did not draw frame of hidden frame.") );
 #endif
 	if( added_use )
 		DeleteUse( pc );
