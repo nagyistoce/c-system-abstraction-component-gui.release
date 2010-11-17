@@ -47,7 +47,7 @@ ${FIRST_GCC_PROGRAM_SOURCE}
     ${SOURCES_ROOT}/SQLlib/sqlutil.c
     ${SOURCES_ROOT}/SQLlib/sqlwrap.c
     ${SOURCES_ROOT}/SQLlib/sqlparse3.c
-    ${SOURCES_ROOT}/sqlite/3.7.0/sqlite3.c
+    ${SOURCES_ROOT}/sqlite/3.7.3/sqlite3.c
     ${SOURCES_ROOT}/memlib/sharemem.c
     ${SOURCES_ROOT}/timerlib/timers.c
     ${SOURCES_ROOT}/idlelib/idle.c

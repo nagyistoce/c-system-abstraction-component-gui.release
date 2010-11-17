@@ -71,8 +71,9 @@ typedef struct global_tag
 		// will be set optionally when on a touch display
 		// which will auto-magically grow certain controls
       // listbox, scrollbar...
-		_32 touch_display : 1;
-		_32 fancy_border : 1;
+		BIT_FIELD touch_display : 1;
+		BIT_FIELD fancy_border : 1;
+		BIT_FIELD bLogDebugUpdate : 1;
 	} flags;
 	CDATA *defaultcolors;
 	S_32 BorderWidth;
