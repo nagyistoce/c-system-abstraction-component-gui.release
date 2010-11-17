@@ -2,12 +2,24 @@ mkdir Debug
 cd Debug
 cmake -G "Visual Studio 10"  \sack -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=M:/build/vs10_sack_core
 devenv sack.sln /Build debug /Project Install.vcxproj
-devenv sack.sln /Build release /Project Install.vcxproj
-devenv sack.sln /Build relwithdebinfo /Project Install.vcxproj
-devenv sack.sln /Build MinSizeRel /Project Install.vcxproj
 devenv sack.sln /Build debug /Project Package.vcxproj
+cd ..
+mkdir Release
+cd Release
+cmake -G "Visual Studio 10"  \sack -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=M:/build/vs10_sack_core
+devenv sack.sln /Build release /Project Install.vcxproj
 devenv sack.sln /Build release /Project Package.vcxproj
+cd ..
+mkdir relwithdebinfo
+cd relwithdebinfo
+cmake -G "Visual Studio 10"  \sack -DCMAKE_BUILD_TYPE=relwithdebinfo -DCMAKE_INSTALL_PREFIX=M:/build/vs10_sack_core
+devenv sack.sln /Build relwithdebinfo /Project Install.vcxproj
 devenv sack.sln /Build relwithdebinfo /Project Package.vcxproj
+cd ..
+mkdir MinSizeRel
+cd MinSizeRel
+cmake -G "Visual Studio 10"  \sack -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_INSTALL_PREFIX=M:/build/vs10_sack_core
+devenv sack.sln /Build MinSizeRel /Project Install.vcxproj
 devenv sack.sln /Build MinSizeRel /Project Package.vcxproj
 cd ..
 
