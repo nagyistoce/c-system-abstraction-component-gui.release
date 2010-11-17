@@ -153,7 +153,7 @@ SRCS= src/deadstart/deadstart_core    \
  src/SQLlib/sqlparse3            \
  $(if $(__NO_OPTIONS__),,src/SQLlib/optlib/getoption src/SQLlib/optlib/getoption_new      \
  src/SQLlib/optlib/optionutil src/SQLlib/optlib/optionutil_new)    \
- $(if $(USE_SQLITE),src/sqlite/sqlite_interface src/sqlite/3.7.0/sqlite3,) )
+ $(if $(USE_SQLITE),src/sqlite/sqlite_interface src/sqlite/3.7.3/sqlite3,) )
 
 MORE_TARGETS+=$(if $(__NO_SQL__),,$(if $(USE_SQLITE),$(SACK_BASE)/include/sqlite3.h))
 
@@ -401,11 +401,11 @@ endif
 #	-mkdir $(call SYSCMDPATH,$@)
 ifndef __NO_SQL__
 ifeq '$(USE_SQLITE)' '1'
-$(SACK_BASE)/include/sqlite3.h: $(SACK_BASE)/src/sqlite/3.7.0/sqlite3.h
+$(SACK_BASE)/include/sqlite3.h: $(SACK_BASE)/src/sqlite/3.7.3/sqlite3.h
 	cp $< $@
 
-$(SACK_BASE)/src/sqlite/3.7.0/sqlite3.h:
-	make -C $(SACK_BASE)/src/sqlite/3.7.0
+$(SACK_BASE)/src/sqlite/3.7.3/sqlite3.h:
+	make -C $(SACK_BASE)/src/sqlite/3.7.3
 
 $(call CLEANTARGET,$(SACK_BASE)/include/sqlite3.h):
 	-rm -f $(subst /,$(SYSPATHCHAR),$(SACK_BASE)/include/sqlite3.h)

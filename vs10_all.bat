@@ -5,6 +5,10 @@ devenv sack.sln /Build debug /Project Install.vcxproj
 devenv sack.sln /Build release /Project Install.vcxproj
 devenv sack.sln /Build relwithdebinfo /Project Install.vcxproj
 devenv sack.sln /Build MinSizeRel /Project Install.vcxproj
+devenv sack.sln /Build debug /Project Package.vcxproj
+devenv sack.sln /Build release /Project Package.vcxproj
+devenv sack.sln /Build relwithdebinfo /Project Package.vcxproj
+devenv sack.sln /Build MinSizeRel /Project Package.vcxproj
 cd ..
 
 cmd /c "M:\build\vs10_sack_core\bin\Debug\sack_deploy.exe"
