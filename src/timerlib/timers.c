@@ -1352,7 +1352,7 @@ static int CPROC ProcessTimers( PTRSZVAL psvForce )
       return -1;
 	if( !psvForce && !IsThisThread( g.pTimerThread ) )
 	{
-		Log( WIDE("Unknown thread attempting to process timers...") );
+		//Log( WIDE("Unknown thread attempting to process timers...") );
 		return -1;
 	}
 #ifndef _WIN32
