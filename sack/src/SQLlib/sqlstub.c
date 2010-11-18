@@ -982,30 +982,6 @@ int OpenSQLConnection( PODBC odbc )
 }
 //----------------------------------------------------------------------
 
-void CPROC CommitTimer( PTRSZVAL psv )
-{
-	PODBC odbc = (PODBC)psv;
-	//lprintf( "Commit timer tick" );
-
-	EnterCriticalSec( &odbc->cs );
-	// so at this point, we lock into the timer, and finish the commit.
-	// or the time hasn't elapsed, and we'll release the critical section
-	if( odbc->last_command_tick )
-		if( odbc->last_command_tick < ( timeGetTime() - 500 ) )
-		{
-			//lprintf( "Commit timer fire." );
-			RemoveTimer( odbc->commit_timer );
-			odbc->flags.bAutoTransact = 0;
-			SQLCommand( odbc, "COMMIT" );
-			odbc->flags.bAutoTransact = 1;
-			odbc->last_command_tick = 0;
-		}
-	LeaveCriticalSec( &odbc->cs );
-
-}
-
-//----------------------------------------------------------------------
-
 void SQLCommit( PODBC odbc )
 {
 	if( odbc->flags.bAutoTransact )
@@ -1031,17 +1007,42 @@ void SQLCommit( PODBC odbc )
 
 //----------------------------------------------------------------------
 
+static void CPROC CommitTimer( PTRSZVAL psv )
+{
+	PODBC odbc = (PODBC)psv;
+	//lprintf( "Commit timer tick" );
+
+	EnterCriticalSec( &odbc->cs );
+	// so at this point, we lock into the timer, and finish the commit.
+	// or the time hasn't elapsed, and we'll release the critical section
+	if( odbc->last_command_tick )
+	{
+      //lprintf( "watiing..." );
+		if( odbc->last_command_tick < ( timeGetTime() - 500 ) )
+		{
+			//lprintf( "Commit timer fire." );
+         SQLCommit( odbc );
+		}
+	}
+	LeaveCriticalSec( &odbc->cs );
+
+}
+
+//----------------------------------------------------------------------
+
 void BeginTransact( PODBC odbc )
 {
 	// I Only test this for SQLITE, specifically the optiondb.
 	// this transaction phrase is not really as important on server based systems.
-   //lprintf( "BeginTransact." );
+	//lprintf( "BeginTransact." );
 	if( odbc->flags.bAutoTransact )
 	{
-      //lprintf( "Allowed." );
+		//lprintf( "Allowed." );
 		if( !odbc->last_command_tick )
 		{
+			//lprintf("so add a timer..." );
 			odbc->commit_timer = AddTimer( 100, CommitTimer, (PTRSZVAL)odbc );
+
 			odbc->flags.bAutoTransact = 0;
 #ifdef USE_SQLITE
 			if( odbc->flags.bSQLite_native )
@@ -1059,6 +1060,8 @@ void BeginTransact( PODBC odbc )
 			}
 			odbc->flags.bAutoTransact = 1;
 		}
+		//else
+      //   lprintf( "already ticking?" );
 		odbc->last_command_tick = timeGetTime();
 	}
 	//else

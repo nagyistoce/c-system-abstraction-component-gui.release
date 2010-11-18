@@ -59,7 +59,7 @@
  * (3) has control update path, not only just when updates occur
  *
  */
-//#define DEBUG_UPDAATE_DRAW 4
+#define DEBUG_UPDAATE_DRAW 4
 #ifdef _JIMBUILD_
 #define DEBUG_UPDAATE_DRAW
 #endif
@@ -499,6 +499,18 @@ void TryLoadingFrameImage( void )
 	}
 }
 
+// this can be run very late...
+PRELOAD( DefaultControlStartup )
+{
+#ifndef __NO_OPTIONS__
+   lprintf( "Goddamnit, read option." );
+	g.flags.bLogDebugUpdate = SACK_GetProfileIntEx( GetProgramName(), "SACK/PSI/Log Control Updates", 1, TRUE );
+#else
+#ifdef DEBUG_UPDAATE_DRAW
+	g.flags.bLogDebugUpdate = 1;
+#endif
+}
+
 // run this one later than our ealieest
 PRIORITY_PRELOAD( deadstart, DEFAULT_PRELOAD_PRIORITY - 2 )
 {
@@ -509,6 +521,7 @@ PRIORITY_PRELOAD( deadstart, DEFAULT_PRELOAD_PRIORITY - 2 )
 	{
 		//TryLoadingFrameImage();
 	}
+#endif
 }
 
 PSI_PROC( PIMAGE_INTERFACE, SetControlImageInterface )( PIMAGE_INTERFACE DisplayInterface )
@@ -682,7 +695,8 @@ void RestoreBackground( PSI_CONTROL pc, P_IMAGE_RECTANGLE r )
 		if( !parent )
 		{
 #ifdef DEBUG_UPDAATE_DRAW
-			lprintf( WIDE( "Restoring orignal background... " ) );
+			if( g.flags.bLogDebugUpdate )
+				lprintf( WIDE( "Restoring orignal background... " ) );
 #endif
 			pc->flags.bParentCleaned = 1;
 			BlotImageSizedTo( pc->Surface, pc->OriginalSurface,  r->x, r->y, r->x, r->y, r->width, r->height );
@@ -710,14 +724,16 @@ void UpdateSomeControlsWork( int level, PSI_CONTROL pc, P_IMAGE_RECTANGLE pRect 
 			//continue;
 		}
 #ifdef DEBUG_UPDAATE_DRAW
-		lprintf( WIDE("updating some controls... rectangles and stuff.") );
+		if( g.flags.bLogDebugUpdate )
+			lprintf( WIDE("updating some controls... rectangles and stuff.") );
 #endif
 		// bound window rect (frame update)
 		// The update region may be
 		if( IntersectRectangle( &surf_rect, pRect, &pc->surface_rect ) )
 		{
 #ifdef DEBUG_UPDAATE_DRAW
-			lprintf( WIDE("Some controls using normal updatecommon to draw...") );
+			if( g.flags.bLogDebugUpdate )
+				lprintf( WIDE("Some controls using normal updatecommon to draw...") );
 #endif
 			// enabled minimal update region...
 			pc->dirty_rect = surf_rect;
@@ -743,7 +759,8 @@ void UpdateSomeControlsWork( int level, PSI_CONTROL pc, P_IMAGE_RECTANGLE pRect 
 			{
 				//void DrawFrameCaption( PSI_CONTROL );
 #ifdef DEBUG_UPDAATE_DRAW
-				lprintf( WIDE("Drew border, drawing caption uhmm update some work controls") );
+				if( g.flags.bLogDebugUpdate )
+					lprintf( WIDE("Drew border, drawing caption uhmm update some work controls") );
 #endif
 				DrawFrameCaption( pc );
 			}
@@ -766,7 +783,8 @@ void UpdateSomeControls( PSI_CONTROL pc, P_IMAGE_RECTANGLE pRect )
 	PPHYSICAL_DEVICE pf = GetFrame( pc )->device;
 	//IMAGE_RECTANGLE _rect;
 #ifdef DEBUG_UPDAATE_DRAW
-	lprintf( WIDE( "Update Some Controls - (all controls within rect %d) " ), pc->flags.bInitial );
+	if( g.flags.bLogDebugUpdate )
+		lprintf( WIDE( "Update Some Controls - (all controls within rect %d) " ), pc->flags.bInitial );
 #endif
 	//ValidatedControlData( PFRAME, CONTROL_FRAME, pf, GetFrame( pc ) );
 	//cpg26dec2006 c:\work\sack\src\psilib\controls.c(741): Warning! W202: Symbol 'prior_flag' has been defined, but not referenced
@@ -828,12 +846,16 @@ void UpdateSomeControls( PSI_CONTROL pc, P_IMAGE_RECTANGLE pRect )
 				surf_rect.y += pc->surface_rect.y;
 			}
 #ifdef DEBUG_UPDAATE_DRAW
-			lprintf( WIDE("Some controls using normal updatecommon to draw...") );
+			if( g.flags.bLogDebugUpdate )
+				lprintf( WIDE("Some controls using normal updatecommon to draw...") );
 #endif
 			// enabled minimal update region...
 #ifdef DEBUG_UPDAATE_DRAW
-			lprintf( WIDE("Blatting color to surface so that we have something update?!") );
-			lprintf( WIDE("Update portion %d,%d to %d,%d"), surf_rect.x, surf_rect.y, surf_rect.width, surf_rect.height );
+			if( g.flags.bLogDebugUpdate )
+			{
+				lprintf( WIDE("Blatting color to surface so that we have something update?!") );
+				lprintf( WIDE("Update portion %d,%d to %d,%d"), surf_rect.x, surf_rect.y, surf_rect.width, surf_rect.height );
+			}
 #endif
 #ifdef BLAT_COLOR_UPDATE_PORTION
 			BlatColorAlpha( pc->Window,  surf_rect.x
@@ -883,7 +905,8 @@ void SmudgeSomeControlsWork( PSI_CONTROL pc, P_IMAGE_RECTANGLE pRect )
 			continue;
 		}
 #ifdef DEBUG_UPDAATE_DRAW
-		 lprintf( WIDE("updating some controls... rectangles and stuff.") );
+		if( g.flags.bLogDebugUpdate )
+			lprintf( WIDE("updating some controls... rectangles and stuff.") );
 #endif
 	 //Log( WIDE("Update some controls....") );
 		 if( !IntersectRectangle( &wind_rect, pRect, &pc->rect ) )
@@ -900,7 +923,8 @@ void SmudgeSomeControlsWork( PSI_CONTROL pc, P_IMAGE_RECTANGLE pRect )
             // bound surface rect
 				//SetImageBound( pc->Surface, &surf_rect );
 #ifdef DEBUG_UPDAATE_DRAW
-			lprintf( WIDE("Some controls using normal updatecommon to draw...") );
+				if( g.flags.bLogDebugUpdate )
+					lprintf( WIDE("Some controls using normal updatecommon to draw...") );
 #endif
             // enabled minimal update region...
 			pc->dirty_rect = surf_rect;
@@ -927,7 +951,8 @@ void SmudgeSomeControlsWork( PSI_CONTROL pc, P_IMAGE_RECTANGLE pRect )
 				{
 					//void DrawFrameCaption( PSI_CONTROL );
 #ifdef DEBUG_UPDAATE_DRAW
-					lprintf( WIDE("Drew border, drawing caption uhmm update some work controls") );
+					if( g.flags.bLogDebugUpdate )
+						lprintf( WIDE("Drew border, drawing caption uhmm update some work controls") );
 #endif
 					DrawFrameCaption( pc );
 				}
@@ -986,8 +1011,11 @@ void SmudgeSomeControls( PSI_CONTROL pc, P_IMAGE_RECTANGLE pRect )
     if( pf && !pc->flags.bInitial && pf->pActImg )
 	 {
 #ifdef DEBUG_UPDAATE_DRAW
-		 lprintf( WIDE("Blatting color to surface so that we have something update?!") );
-		 lprintf( WIDE("Update portion %d,%d to %d,%d"), pRect->x, pRect->y, pRect->width, pRect->height );
+		 if( g.flags.bLogDebugUpdate )
+		 {
+			 lprintf( WIDE("Blatting color to surface so that we have something update?!") );
+			 lprintf( WIDE("Update portion %d,%d to %d,%d"), pRect->x, pRect->y, pRect->width, pRect->height );
+		 }
 #endif
        /*
 		 UpdateDisplayPortion( pf->pActImg
@@ -1004,7 +1032,8 @@ void SmudgeSomeControls( PSI_CONTROL pc, P_IMAGE_RECTANGLE pRect )
 static int OnDrawCommon( "Frame" )( PSI_CONTROL pc )
 {
 #ifdef DEBUG_UPDAATE_DRAW
-	lprintf( WIDE( "-=-=-=-=- Output Frame background..." ) );
+	if( g.flags.bLogDebugUpdate )
+		lprintf( WIDE( "-=-=-=-=- Output Frame background..." ) );
 #endif
 	BlatColorAlpha( pc->Surface, 0, 0, pc->surface_rect.width, pc->surface_rect.height, basecolor(pc)[NORMAL] );
 	DrawFrameCaption( pc );
@@ -1046,21 +1075,24 @@ static void DoUpdateFrame( PSI_CONTROL pc
 		return;
 	}
 #if DEBUG_UPDAATE_DRAW > 2
-	_lprintf(DBG_RELAY)( WIDE( "Do Update frame.. x, y on frame of %d,%d,%d,%d " ), x, y, w, h );
+	if( g.flags.bLogDebugUpdate )
+		_lprintf(DBG_RELAY)( WIDE( "Do Update frame.. x, y on frame of %d,%d,%d,%d " ), x, y, w, h );
 #endif
 	level++;
 	if( pc && !pf )
 	{
 #ifdef DEBUG_UPDAATE_DRAW
-		lprintf( WIDE("Stepping to parent, adding my surface rect and my rect to the coordinate updated... %d+%d+%d %d+%d+%d")
-				 , x, pc->parent->rect.x, pc->parent->surface_rect.x
-				 , y, pc->parent->rect.y, pc->parent->surface_rect.y
-				 );
+		if( g.flags.bLogDebugUpdate )
+			lprintf( WIDE("Stepping to parent, adding my surface rect and my rect to the coordinate updated... %d+%d+%d %d+%d+%d")
+					 , x, pc->parent->rect.x, pc->parent->surface_rect.x
+					 , y, pc->parent->rect.y, pc->parent->surface_rect.y
+					 );
 #endif
 		if( pc->parent && !pc->device ) // otherwise we're probably still creating the thing, and it's in bInitial?
 		{
 #ifdef DEBUG_UPDAATE_DRAW
-			lprintf( WIDE( "stepping to parent, assuming I'm copying my surface, so update appropriately" ) );
+			if( g.flags.bLogDebugUpdate )
+				lprintf( WIDE( "stepping to parent, assuming I'm copying my surface, so update appropriately" ) );
 #endif
 			TESTCOLOR=SetAlpha( BASE_COLOR_BLUE, 128 );
 			DoUpdateFrame( pc->parent
@@ -1077,8 +1109,9 @@ static void DoUpdateFrame( PSI_CONTROL pc
 		if( pc->flags.bInitial || pc->flags.bNoUpdate )
 		{
 #ifdef DEBUG_UPDAATE_DRAW
-			lprintf( WIDE("Failing to update to screen cause %s and/or %s"), pc->flags.bInitial?WIDE( "it's initial" ):WIDE( "" )
-					 , pc->flags.bNoUpdate ?WIDE( "it's no update..." ):WIDE( "..." ));
+			if( g.flags.bLogDebugUpdate )
+				lprintf( WIDE("Failing to update to screen cause %s and/or %s"), pc->flags.bInitial?WIDE( "it's initial" ):WIDE( "" )
+						 , pc->flags.bNoUpdate ?WIDE( "it's no update..." ):WIDE( "..." ));
 #endif
 			level--;
 			return;
@@ -1088,10 +1121,11 @@ static void DoUpdateFrame( PSI_CONTROL pc
 			int bias_x = 0;
 			int bias_y = 0;
 #ifdef DEBUG_UPDAATE_DRAW
-			_xlprintf( 1 DBG_RELAY )( WIDE("updating display portion %d,%d (%d,%d)")
-											, bias_x + x
-											, bias_y + y
-											, w, h );
+			if( g.flags.bLogDebugUpdate )
+				_xlprintf( 1 DBG_RELAY )( WIDE("updating display portion %d,%d (%d,%d)")
+												, bias_x + x
+												, bias_y + y
+												, w, h );
 #endif
 #ifdef BLAT_COLOR_UPDATE_PORTION
 			BlatColorAlpha( pc->Window
@@ -1116,18 +1150,22 @@ PSI_PROC( void, UpdateFrameEx )( PSI_CONTROL pc
 	PPHYSICAL_DEVICE pf = pc->device;
    //ValidatedControlData( PFRAME, CONTROL_FRAME, pf, pc );
 #ifdef DEBUG_UPDAATE_DRAW
-	_lprintf(DBG_RELAY)( WIDE( "Update Frame (Another flavor ) %p %p  %d,%d %d,%d" ), pc, pf, x, y, w, h );
+	if( g.flags.bLogDebugUpdate )
+		_lprintf(DBG_RELAY)( WIDE( "Update Frame (Another flavor ) %p %p  %d,%d %d,%d" ), pc, pf, x, y, w, h );
 #endif
    //_xlprintf( 1 DBG_RELAY )( WIDE("Update Frame ------------") );
 	if( pc && !pf )
 	{
 #ifdef DEBUG_UPDAATE_DRAW
-		//lprintf( WIDE("Stepping to parent, adding my surface rect and my rect to the coordinate updated...") );
-		lprintf( WIDE( "stepping to parent, assuming I'm copying my surface, so update appropriately" ) );
-		lprintf( WIDE("Stepping to parent, adding my surface rect and my rect to the coordinate updated... %d+%d+%d %d+%d+%d")
-				 , x, pc->parent->rect.x, pc->parent->surface_rect.x
-				 , y, pc->parent->rect.y, pc->parent->surface_rect.y
-				 );
+		if( g.flags.bLogDebugUpdate )
+		{
+			//lprintf( WIDE("Stepping to parent, adding my surface rect and my rect to the coordinate updated...") );
+			lprintf( WIDE( "stepping to parent, assuming I'm copying my surface, so update appropriately" ) );
+			lprintf( WIDE("Stepping to parent, adding my surface rect and my rect to the coordinate updated... %d+%d+%d %d+%d+%d")
+					 , x, pc->parent->rect.x, pc->parent->surface_rect.x
+					 , y, pc->parent->rect.y, pc->parent->surface_rect.y
+					 );
+		}
 #endif
 		UpdateFrameEx( pc->parent
 						 , pc->rect.x + pc->surface_rect.x + x
@@ -1139,16 +1177,18 @@ PSI_PROC( void, UpdateFrameEx )( PSI_CONTROL pc
 		if( pc->flags.bInitial || pc->flags.bNoUpdate )
 		{
 #ifdef DEBUG_UPDAATE_DRAW
-			lprintf( WIDE("Faileing to update to screen cause we're initial or it's no update...") );
+			if( g.flags.bLogDebugUpdate )
+				lprintf( WIDE("Faileing to update to screen cause we're initial or it's no update...") );
 #endif
 			return;
 		}
 
 #ifdef DEBUG_UPDAATE_DRAW
-		_xlprintf( 1 DBG_RELAY )( WIDE("updating display portion %d,%d (%d,%d)")
-								  , pc->surface_rect.x + x
-								  , pc->surface_rect.y + y
-										, w, h );
+		if( g.flags.bLogDebugUpdate )
+			_xlprintf( 1 DBG_RELAY )( WIDE("updating display portion %d,%d (%d,%d)")
+											, pc->surface_rect.x + x
+											, pc->surface_rect.y + y
+											, w, h );
 #endif
 #ifdef BLAT_COLOR_UPDATE_PORTION
 		BlatColorAlpha( pc->Window,  x + pc->surface_rect.x
@@ -1175,7 +1215,8 @@ void IntelligentFrameUpdateAllDirtyControls( PSI_CONTROL pc DBG_PASS )
 				//InitializeCriticalSec( &upd.cs );
 #endif
 #ifdef DEBUG_UPDAATE_DRAW
-				lprintf( WIDE("pc = %08lx par = %08lx") );
+				if( g.flags.bLogDebugUpdate )
+					lprintf( WIDE("pc = %08lx par = %08lx") );
 #endif
 				upd.flags.bHasContent = 0;
 				upd.flags.bTmpRect = 0;
@@ -1185,7 +1226,8 @@ void IntelligentFrameUpdateAllDirtyControls( PSI_CONTROL pc DBG_PASS )
 				{
                PSI_CONTROL frame;
 #ifdef DEBUG_UPDAATE_DRAW
-					lprintf( WIDE("Updated all commons? %d,%d  %d,%d"), upd.x,upd.y, upd.width, upd.height );
+					if( g.flags.bLogDebugUpdate )
+						lprintf( WIDE("Updated all commons? %d,%d  %d,%d"), upd.x,upd.y, upd.width, upd.height );
 #endif
 #ifdef BLAT_COLOR_UPDATE_PORTION
 					BlatColor( GetFrame( pc )->Window
@@ -1218,7 +1260,8 @@ void AddCommonUpdateRegionEx( PPENDING_RECT update_rect, int bSurface, PSI_CONTR
 	if( !pc )
 		return;
 #ifdef DEBUG_UPDAATE_DRAW
-	_lprintf(DBG_RELAY)( "Adding region.... (maybe should wait)" );
+	if( g.flags.bLogDebugUpdate )
+		_lprintf(DBG_RELAY)( "Adding region.... (maybe should wait)" );
 #endif
 	if( pc->flags.bUpdateRegionSet )
 	{
@@ -1288,12 +1331,13 @@ void AddCommonUpdateRegionEx( PPENDING_RECT update_rect, int bSurface, PSI_CONTR
 		if( update_rect->flags.bHasContent )
 		{
 #ifdef DEBUG_UPDAATE_DRAW
-			lprintf( WIDE("Adding (%d,%d)-(%d,%d) to (%d,%d)-(%d,%d)")
-					 , x, y
-					 , wd, ht
-					 , update_rect->x, update_rect->y
-					 , update_rect->width, update_rect->height
-					 );
+			if( g.flags.bLogDebugUpdate )
+				lprintf( WIDE("Adding (%d,%d)-(%d,%d) to (%d,%d)-(%d,%d)")
+						 , x, y
+						 , wd, ht
+						 , update_rect->x, update_rect->y
+						 , update_rect->width, update_rect->height
+						 );
 #endif
 			if( x < update_rect->x )
 			{
@@ -1318,10 +1362,11 @@ void AddCommonUpdateRegionEx( PPENDING_RECT update_rect, int bSurface, PSI_CONTR
 		else
 		{
 #ifdef DEBUG_UPDAATE_DRAW
-			_lprintf(DBG_RELAY)( WIDE("Setting (%d,%d)-(%d,%d)")
-									 , x, y
-									 , wd, ht
-									 );
+			if( g.flags.bLogDebugUpdate )
+				_lprintf(DBG_RELAY)( WIDE("Setting (%d,%d)-(%d,%d)")
+										 , x, y
+										 , wd, ht
+										 );
 #endif
 			update_rect->x = x;
 			update_rect->y = y;
@@ -1388,10 +1433,11 @@ void SetUpdateRegionEx( PSI_CONTROL pc, S_32 rx, S_32 ry, _32 rw, _32 rh DBG_PAS
 		pc->flags.bUpdateRegionSet = 1;
 		{
 #ifdef DEBUG_UPDAATE_DRAW
-			_lprintf(DBG_RELAY)( WIDE("Setting (%d,%d)-(%d,%d)")
-									 , x, y
-									 , wd, ht
-									 );
+			if( g.flags.bLogDebugUpdate )
+				_lprintf(DBG_RELAY)( WIDE("Setting (%d,%d)-(%d,%d)")
+										 , x, y
+										 , wd, ht
+										 );
 #endif
 			pc->update_rect.x = x;
 			pc->update_rect.y = y;
@@ -1464,23 +1510,28 @@ static void DoUpdateCommonEx( PPENDING_RECT upd, PSI_CONTROL pc, int bDraw, int 
 	if( pc )
 	{
 #if DEBUG_UPDAATE_DRAW > 2
-		_lprintf(DBG_RELAY)( WIDE( ">>Control updating %p(parent:%p,child:%p)" ), pc, pc->parent, pc->child );
+		if( g.flags.bLogDebugUpdate )
+			_lprintf(DBG_RELAY)( WIDE( ">>Control updating %p(parent:%p,child:%p)" ), pc, pc->parent, pc->child );
 #endif
 		if( pc->flags.bNoUpdate || !GetImageSurface(pc->Surface) )
-         return;
+			return;
 #if DEBUG_UPDAATE_DRAW > 3
+		if( g.flags.bLogDebugUpdate )
+		{
       // might filter this to just if dirty, we get called a lot without dirty controls
 		lprintf( WIDE("Control %p(%s) is %s and parent is %s"), pc, pc->pTypeName, pc->flags.bDirty?WIDE( "SMUDGED" ):WIDE( "clean" ), pc->flags.bParentCleaned?"cleaned to me":"dirty to me" );
       // again might filter to just forced...
 		_xlprintf(LOG_NOISE DBG_RELAY )( WIDE(">>do draw... %p %p %s %s"), pc, pc->child
 									  , bDraw?WIDE( "FORCE" ):WIDE( "..." )
-									  , pc->flags.bCleaning?WIDE( "CLEANING" ):WIDE( "cleanable" ));
+												 , pc->flags.bCleaning?WIDE( "CLEANING" ):WIDE( "cleanable" ));
+		}
 #endif
 		//#endif
 		if( !pc->flags.bCleaning )
 		{
 #if DEBUG_UPDAATE_DRAW > 2
-			_xlprintf(1 DBG_RELAY)( WIDE(">>Begin control %p update forced?%s"), pc, bDraw?WIDE( "Yes" ):WIDE( "No" ) );
+			if( g.flags.bLogDebugUpdate )
+				_xlprintf(1 DBG_RELAY)( WIDE(">>Begin control %p update forced?%s"), pc, bDraw?WIDE( "Yes" ):WIDE( "No" ) );
 #endif
 			pc->flags.bCleaning = 1;
 		retry_update:
@@ -1503,10 +1554,11 @@ static void DoUpdateCommonEx( PPENDING_RECT upd, PSI_CONTROL pc, int bDraw, int 
 			if( !pc->flags.bNoUpdate && ((pc->parent&&!pc->device)?1:!pc->flags.bInitial) && ( pc->flags.bDirty || bDraw ) && !pc->flags.bHidden )
 			{
 #if DEBUG_UPDAATE_DRAW > 2
-				lprintf( WIDE("Control draw %p %s parent_clean?%d transparent?%d")
-						 , pc, pc->pTypeName
-						 , pc->flags.bParentCleaned
-						 , pc->flags.bTransparent );
+				if( g.flags.bLogDebugUpdate )
+					lprintf( WIDE("Control draw %p %s parent_clean?%d transparent?%d")
+							 , pc, pc->pTypeName
+							 , pc->flags.bParentCleaned
+							 , pc->flags.bTransparent );
 #endif
 				if( ( ((pc->parent&&!pc->device) && pc->parent->flags.bDirty ) || pc->flags.bParentCleaned ) && pc->flags.bTransparent )//&& pc->flags.bFirstCleaning )
 				{
@@ -1515,16 +1567,19 @@ static void DoUpdateCommonEx( PPENDING_RECT upd, PSI_CONTROL pc, int bDraw, int 
 					if( OldSurface )
 					{
 #ifdef DEBUG_UPDAATE_DRAW
-						_lprintf(DBG_RELAY)( WIDE("--------------- Successfully copied new background original image") );
+						if( g.flags.bLogDebugUpdate )
+							_lprintf(DBG_RELAY)( WIDE("--------------- Successfully copied new background original image") );
 #endif
 						pc->OriginalSurface = OldSurface;
 					}
-               else
+					else
 						if( pc->OriginalSurface )
 						{
 #ifdef DEBUG_UPDAATE_DRAW
-							_xlprintf(LOG_NOISE DBG_RELAY)( WIDE("--------------- Restoring prior image (didn't need a new image)") );
-							lprintf( WIDE( "Restoring orignal background... " ) );
+							if( g.flags.bLogDebugUpdate )
+								_xlprintf(LOG_NOISE DBG_RELAY)( WIDE("--------------- Restoring prior image (didn't need a new image)") );
+							if( g.flags.bLogDebugUpdate )
+								lprintf( WIDE( "Restoring orignal background... " ) );
 #endif
 							BlotImage( pc->Window, pc->OriginalSurface, 0, 0 );
 							pc->flags.bParentCleaned = 1;
@@ -1536,8 +1591,10 @@ static void DoUpdateCommonEx( PPENDING_RECT upd, PSI_CONTROL pc, int bDraw, int 
 					if( pc->OriginalSurface )
 					{
 #ifdef DEBUG_UPDAATE_DRAW
-						_xlprintf(LOG_NOISE DBG_RELAY)( WIDE("--------------- Restoring prior image") );
-						lprintf( WIDE( "Restore original background..." ) );
+						if( g.flags.bLogDebugUpdate )
+							_xlprintf(LOG_NOISE DBG_RELAY)( WIDE("--------------- Restoring prior image") );
+						if( g.flags.bLogDebugUpdate )
+							lprintf( WIDE( "Restore original background..." ) );
 #endif
 						BlotImage( pc->Window, pc->OriginalSurface, 0, 0 );
 						pc->flags.bParentCleaned = 1;
@@ -1552,14 +1609,16 @@ static void DoUpdateCommonEx( PPENDING_RECT upd, PSI_CONTROL pc, int bDraw, int 
 			{
             Image current = NULL;
 #ifdef DEBUG_UPDAATE_DRAW
-				lprintf( WIDE("Invoking a draw self for %p at %s(%d) level %d"), pc DBG_RELAY , level );
+				if( g.flags.bLogDebugUpdate )
+					lprintf( WIDE("Invoking a draw self for %p at %s(%d) level %d"), pc DBG_RELAY , level );
 #endif
 				if( pc->flags.bDestroy )
 					return;
 				if( pc->flags.bTransparent && !pc->flags.bParentCleaned && (pc->parent&&!pc->device) )
 				{
 #ifdef DEBUG_UPDAATE_DRAW
-					lprintf( WIDE( "(RECURSE UP!)Calling parent inline - wasn't clean, isn't clean, try and get it clean..." ) );
+					if( g.flags.bLogDebugUpdate )
+						lprintf( WIDE( "(RECURSE UP!)Calling parent inline - wasn't clean, isn't clean, try and get it clean..." ) );
 #endif
                // could adjust the clipping rectangle...
 					DoUpdateCommonEx( upd, pc->parent, TRUE, level+1 DBG_RELAY );
@@ -1587,13 +1646,15 @@ static void DoUpdateCommonEx( PPENDING_RECT upd, PSI_CONTROL pc, int bDraw, int 
             //   current = CopyOriginalSurface( pc, current );
 				pc->draw_result = 0;
 #ifdef DEBUG_UPDAATE_DRAW
-				_lprintf(DBG_RELAY)( " --- INVOKE DRAW (get region) --- %s ", pc->pTypeName );
+				if( g.flags.bLogDebugUpdate )
+					_lprintf(DBG_RELAY)( " --- INVOKE DRAW (get region) --- %s ", pc->pTypeName );
 #endif
 				InvokeDrawMethod( pc, _DrawThySelf, ( pc ) );
 
 #ifdef DEBUG_UPDAATE_DRAW
 				// if it didn't draw... then why do anything?
-				lprintf( WIDE( "draw result is... %d" ), pc->draw_result );
+				if( g.flags.bLogDebugUpdate )
+					lprintf( WIDE( "draw result is... %d" ), pc->draw_result );
 #endif
 
 				//if( current )
@@ -1606,7 +1667,8 @@ static void DoUpdateCommonEx( PPENDING_RECT upd, PSI_CONTROL pc, int bDraw, int 
 					else
 					{
 #ifdef DEBUG_UPDAATE_DRAW
-						lprintf( WIDE( "Parent is no longer cleaned...." ) );
+						if( g.flags.bLogDebugUpdate )
+							lprintf( WIDE( "Parent is no longer cleaned...." ) );
 #endif
                   pc->flags.bCleanedRecently = 1;
 						pc->flags.bParentCleaned = 0; // has now drawn itself, and we must assume that it's not clean.
@@ -1639,10 +1701,13 @@ static void DoUpdateCommonEx( PPENDING_RECT upd, PSI_CONTROL pc, int bDraw, int 
 					}
 
 #if DEBUG_UPDAATE_DRAW > 2
-            if( upd->flags.bHasContent )
-					_lprintf(DBG_RELAY)( WIDE("Added update region %d,%d %d,%d"), upd->x ,upd->y, upd->width, upd->height );
-				else
-               _lprintf(DBG_RELAY)( WIDE( "No prior content in update rect..." ) );
+				if( g.flags.bLogDebugUpdate )
+				{
+					if( upd->flags.bHasContent )
+						_lprintf(DBG_RELAY)( WIDE("Added update region %d,%d %d,%d"), upd->x ,upd->y, upd->width, upd->height );
+					else
+						_lprintf(DBG_RELAY)( WIDE( "No prior content in update rect..." ) );
+				}
 #endif
 				// okay hokey logic here...
 				// if not transparent - go
@@ -1654,8 +1719,11 @@ static void DoUpdateCommonEx( PPENDING_RECT upd, PSI_CONTROL pc, int bDraw, int 
 					AddCommonUpdateRegion( upd, FALSE, pc );
 				}
 #if DEBUG_UPDAATE_DRAW > 2
-            if( upd->flags.bHasContent )
-					_lprintf(DBG_RELAY)( WIDE("Added update region %d,%d %d,%d"), upd->x ,upd->y, upd->width, upd->height );
+				if( g.flags.bLogDebugUpdate )
+				{
+					if( upd->flags.bHasContent )
+						_lprintf(DBG_RELAY)( WIDE("Added update region %d,%d %d,%d"), upd->x ,upd->y, upd->width, upd->height );
+				}
 #endif
 				cleaned = 1;
 				{
@@ -1669,29 +1737,33 @@ static void DoUpdateCommonEx( PPENDING_RECT upd, PSI_CONTROL pc, int bDraw, int 
 						}
 						child->flags.bParentCleaned = 1; // has now drawn itself, and we must assume that it's not clean.
 #if DEBUG_UPDAATE_DRAW > 2
-						lprintf( WIDE( "marking on child %p parent %p is %s;%s" ), child, pc, cleaned?WIDE( "CLEANED" ):WIDE( "UNCLEAN" ), child->parent->flags.bDirty?WIDE( "DIRTY" ):WIDE( "not dirty" ) );
+						if( g.flags.bLogDebugUpdate )
+							lprintf( WIDE( "marking on child %p parent %p is %s;%s" ), child, pc, cleaned?WIDE( "CLEANED" ):WIDE( "UNCLEAN" ), child->parent->flags.bDirty?WIDE( "DIRTY" ):WIDE( "not dirty" ) );
 #endif
 					}
 				}
 				//pc->flags.bDirty = 0;
 #ifdef DEBUG_UPDAATE_DRAW
-				lprintf( WIDE("And now it has been cleaned...") );
+				if( g.flags.bLogDebugUpdate )
+					lprintf( WIDE("And now it has been cleaned...") );
 #endif
 			}
 			else
 			{
             //cleaned = 1; // well, lie here... cause we're already clean?
 #ifdef DEBUG_UPDAATE_DRAW
-				lprintf( WIDE("Not invoking draw self.") );
+				if( g.flags.bLogDebugUpdate )
+					lprintf( WIDE("Not invoking draw self.") );
 #endif
 				//#if 0
 #if DEBUG_UPDAATE_DRAW > 3
 				// general logging of the current status of the control
 				// at this point the NORMAL status is clean, visible, no force, and drawing proc.
-				lprintf( WIDE("control %p is %s %s %s %s"), pc, pc->flags.bDirty?WIDE( "dirty" ):WIDE( "clean" )
-				   	  , bDraw?WIDE( "force" ):WIDE( "" )
-						 , pc->flags.bHidden?WIDE( "hidden!" ):WIDE( "visible..." )
-						 , pc->_DrawThySelf?WIDE( "drawingproc" ):WIDE( "NO DRAW PROC" ) );
+				if( g.flags.bLogDebugUpdate )
+					lprintf( WIDE("control %p is %s %s %s %s"), pc, pc->flags.bDirty?WIDE( "dirty" ):WIDE( "clean" )
+							 , bDraw?WIDE( "force" ):WIDE( "" )
+							 , pc->flags.bHidden?WIDE( "hidden!" ):WIDE( "visible..." )
+							 , pc->_DrawThySelf?WIDE( "drawingproc" ):WIDE( "NO DRAW PROC" ) );
 #endif
 //#endif
 			}
@@ -1707,7 +1779,8 @@ static void DoUpdateCommonEx( PPENDING_RECT upd, PSI_CONTROL pc, int bDraw, int 
 					// I drew myself, must draw all children.
 					//lprintf( WIDE("doing a child update...") );
 #if DEBUG_UPDAATE_DRAW > 2
-					lprintf( WIDE( "marking on child %p parent %p is %s;%s" ), child, pc, cleaned?WIDE( "CLEANED" ):WIDE( "UNCLEAN" ), child->parent->flags.bDirty?WIDE( "DIRTY" ):WIDE( "not dirty" ) );
+					if( g.flags.bLogDebugUpdate )
+						lprintf( WIDE( "marking on child %p parent %p is %s;%s" ), child, pc, cleaned?WIDE( "CLEANED" ):WIDE( "UNCLEAN" ), child->parent->flags.bDirty?WIDE( "DIRTY" ):WIDE( "not dirty" ) );
 #endif
 					//lprintf( WIDE("Do update region %d,%d %d,%d"), upd->x ,upd->y, upd->width, upd->height );
 					//child->flags.bParentCleaned = 1; // has now drawn itself, and we must assume that it's not clean.
@@ -1718,7 +1791,8 @@ static void DoUpdateCommonEx( PPENDING_RECT upd, PSI_CONTROL pc, int bDraw, int 
 			{
 				pc->flags.bDirtied = 0;
 #ifdef DEBUG_UPDAATE_DRAW
-				lprintf( "Recovered dirty that was set while we were cleaning... going back to draw again." );
+				if( g.flags.bLogDebugUpdate )
+					lprintf( "Recovered dirty that was set while we were cleaning... going back to draw again." );
 #endif
             goto retry_update;
 			}
@@ -1729,7 +1803,8 @@ static void DoUpdateCommonEx( PPENDING_RECT upd, PSI_CONTROL pc, int bDraw, int 
 		else
 		{
 #ifdef DEBUG_UPDAATE_DRAW
-			_xlprintf(1 DBG_RELAY)( WIDE("Already Cleaning!!!!!  (THIS IS A FATAL LOCK POTENTIAL)") );
+			if( g.flags.bLogDebugUpdate )
+				_xlprintf(1 DBG_RELAY)( WIDE("Already Cleaning!!!!!  (THIS IS A FATAL LOCK POTENTIAL)") );
 #endif
 			if( pc->NotInUse )
 			{
@@ -1742,7 +1817,8 @@ static void DoUpdateCommonEx( PPENDING_RECT upd, PSI_CONTROL pc, int bDraw, int 
 				cleaned = 1; // lie.  The parent claims it finished cleaning
 				// clear this, cause we're no longer drawing within the parent
 #ifdef DEBUG_UPDAATE_DRAW
-				lprintf( WIDE( "Parent is no longer cleaned..." ) );
+				if( g.flags.bLogDebugUpdate )
+					lprintf( WIDE( "Parent is no longer cleaned..." ) );
 #endif
 				pc->flags.bParentCleaned = 0; // has now drawn itself, and we must assume that it's not clean.
 				pc->flags.children_cleaned = 1;
@@ -1754,7 +1830,8 @@ static void DoUpdateCommonEx( PPENDING_RECT upd, PSI_CONTROL pc, int bDraw, int 
 						// our max bound will be updated when children finish.
 						// I drew myself, must draw all children.
 #ifdef DEBUG_UPDAATE_DRAW
-						lprintf( WIDE("***doing a child update... to %s"), cleaned?WIDE( "CLEAN" ):WIDE( "UNCLEAN" ) );
+						if( g.flags.bLogDebugUpdate )
+							lprintf( WIDE("***doing a child update... to %s"), cleaned?WIDE( "CLEAN" ):WIDE( "UNCLEAN" ) );
 #endif
 						child->flags.bParentCleaned = cleaned; // has now drawn itself, and we must assume that it's not clean.
 						//lprintf( WIDE("Do update region %d,%d %d,%d"), upd->x ,upd->y, upd->width, upd->height );
@@ -1764,13 +1841,15 @@ static void DoUpdateCommonEx( PPENDING_RECT upd, PSI_CONTROL pc, int bDraw, int 
 				}
 			}
 #if DEBUG_UPDAATE_DRAW > 2
-			_xlprintf(1 DBG_RELAY)( WIDE("Control %p already drawing itself!?"), pc );
+			if( g.flags.bLogDebugUpdate )
+				_xlprintf(1 DBG_RELAY)( WIDE("Control %p already drawing itself!?"), pc );
 #endif
 		}
 	}
 #ifdef DEBUG_UPDAATE_DRAW
 	else
-		_xlprintf(1 DBG_RELAY)( WIDE("NULL control told to update!") );
+		if( g.flags.bLogDebugUpdate )
+			_xlprintf(1 DBG_RELAY)( WIDE("NULL control told to update!") );
 #endif
 }
 
@@ -1802,7 +1881,8 @@ void SmudgeCommonEx( PSI_CONTROL pc DBG_PASS )
 	if(pc)
 	{
 #if DEBUG_UPDAATE_DRAW > 0
-		_lprintf(DBG_RELAY)( WIDE( "Smudge %p %s" ), pc, pc->pTypeName?pc->pTypeName:"NoTypeName" );
+		if( g.flags.bLogDebugUpdate )
+			_lprintf(DBG_RELAY)( WIDE( "Smudge %p %s" ), pc, pc->pTypeName?pc->pTypeName:"NoTypeName" );
 #endif
 		{
 			PSI_CONTROL parent;
@@ -1811,11 +1891,12 @@ void SmudgeCommonEx( PSI_CONTROL pc DBG_PASS )
 				if( parent->flags.bNoUpdate || parent->flags.bHidden )
 				{
 #if DEBUG_UPDAATE_DRAW > 3
-					lprintf( WIDE("a control %p(%d) (self, or some parent %p(%d)) has %s or %s  (marks me as dirty anhow, but doesn't attempt anything further)")
-							 , pc, pc->nType, parent, parent->nType
-							 , parent->flags.bNoUpdate?WIDE( "noupdate" ):WIDE( "..." )
-							 , parent->flags.bHidden?WIDE( "hidden" ):WIDE( "..." )
-							 );
+					if( g.flags.bLogDebugUpdate )
+						lprintf( WIDE("a control %p(%d) (self, or some parent %p(%d)) has %s or %s  (marks me as dirty anhow, but doesn't attempt anything further)")
+								 , pc, pc->nType, parent, parent->nType
+								 , parent->flags.bNoUpdate?WIDE( "noupdate" ):WIDE( "..." )
+								 , parent->flags.bHidden?WIDE( "hidden" ):WIDE( "..." )
+								 );
 #endif
 					pc->flags.bDirty = 1;
 					return;
@@ -1830,11 +1911,12 @@ void SmudgeCommonEx( PSI_CONTROL pc DBG_PASS )
 				pc->flags.bDirtied = 1;
 			}
 #if DEBUG_UPDAATE_DRAW > 3
-			_xlprintf(LOG_DEBUG DBG_RELAY)( WIDE("%s %s %s %p")
-					 , pc->flags.bDirty?WIDE( "already smudged" ):WIDE( "" )
-					 ,(pc->flags.bDirty && pc->flags.bCleaning)?WIDE( "and" ):WIDE( "" )
-					 , pc->flags.bCleaning?WIDE( "in process of cleaning..." ):WIDE( "" )
-					  , pc );
+			if( g.flags.bLogDebugUpdate )
+				_xlprintf(LOG_DEBUG DBG_RELAY)( WIDE("%s %s %s %p")
+														, pc->flags.bDirty?WIDE( "already smudged" ):WIDE( "" )
+														,(pc->flags.bDirty && pc->flags.bCleaning)?WIDE( "and" ):WIDE( "" )
+														, pc->flags.bCleaning?WIDE( "in process of cleaning..." ):WIDE( "" )
+														, pc );
 #endif
 
          //Sleep( 10 );
@@ -1844,7 +1926,8 @@ void SmudgeCommonEx( PSI_CONTROL pc DBG_PASS )
 		{
 			PSI_CONTROL parent;
 #if DEBUG_UPDAATE_DRAW > 3
-			lprintf( "not dirty, and not cleaning" );
+			if( g.flags.bLogDebugUpdate )
+				lprintf( "not dirty, and not cleaning" );
 #endif
 
 			//if( pc->parent && pc->flags.bTransparent )
@@ -1854,12 +1937,13 @@ void SmudgeCommonEx( PSI_CONTROL pc DBG_PASS )
 				 !parent->flags.bDirty; parent = parent->parent )
 			{
 #ifdef DEBUG_UPDAATE_DRAW
-				_xlprintf( LOG_DEBUG DBG_RELAY ) ( WIDE("%s %p is %s and %s %s")
-															, (parent==pc)?WIDE( "self" ):WIDE( "parent" )
-															, parent
-															, parent->InUse?WIDE( "USED" ):WIDE( "Not Used" )
-															, parent->flags.bTransparent?WIDE( "Transparent" ):WIDE( "opaque" )
-															, parent->flags.bChildDirty?WIDE( "has Dirty Child" ):WIDE( "children clean" ));
+				if( g.flags.bLogDebugUpdate )
+					_xlprintf( LOG_DEBUG DBG_RELAY ) ( WIDE("%s %p is %s and %s %s")
+																, (parent==pc)?WIDE( "self" ):WIDE( "parent" )
+																, parent
+																, parent->InUse?WIDE( "USED" ):WIDE( "Not Used" )
+																, parent->flags.bTransparent?WIDE( "Transparent" ):WIDE( "opaque" )
+																, parent->flags.bChildDirty?WIDE( "has Dirty Child" ):WIDE( "children clean" ));
 #endif
             //parent->flags.bChildDirty = 1;
 			}
@@ -1880,7 +1964,8 @@ void SmudgeCommonEx( PSI_CONTROL pc DBG_PASS )
 					}
                */
 #ifdef DEBUG_UPDAATE_DRAW
-				_xlprintf(LOG_NOISE DBG_RELAY )( WIDE("marking myself dirty. %p"), pc );
+				if( g.flags.bLogDebugUpdate )
+					_xlprintf(LOG_NOISE DBG_RELAY )( WIDE("marking myself dirty. %p"), pc );
 #endif
 				pc->flags.bDirty = 1;
 			}
@@ -1905,19 +1990,22 @@ void SmudgeCommonEx( PSI_CONTROL pc DBG_PASS )
 		if( !pc->InUse && !ChildInUse( pc, 0 ) )
 		{
 #ifdef DEBUG_UPDAATE_DRAW
-         lprintf( WIDE( "control is not in use... (smudge logic" ) );
+			if( g.flags.bLogDebugUpdate )
+				lprintf( WIDE( "control is not in use... (smudge logic" ) );
 #endif
 			if( !pc->flags.bInitial )
 				IntelligentFrameUpdateAllDirtyControls( pc DBG_RELAY );
 #ifdef DEBUG_UPDAATE_DRAW
 			else
-				lprintf( WIDE( "pc->flags.bInitial is true..." ) );
+				if( g.flags.bLogDebugUpdate )
+					lprintf( WIDE( "pc->flags.bInitial is true..." ) );
 #endif
 		}
 #ifdef DEBUG_UPDAATE_DRAW
 		else // of if ( !inuse && !child in use )
 		{
-			lprintf( WIDE( "not actually updating" ) );
+			if( g.flags.bLogDebugUpdate )
+				lprintf( WIDE( "not actually updating" ) );
 		}
 #endif
 	}
@@ -1970,7 +2058,8 @@ PSI_PROC( void, UpdateCommonEx )( PSI_CONTROL pc, int bDraw DBG_PASS )
 		if( frame ) // else we're being destroyed probably...
 		{
 #if DEBUG_UPDAATE_DRAW > 2
-			_xlprintf(LOG_NOISE DBG_RELAY )( WIDE( "Updating common ( which invokes frame... )%p %p" ), pc, frame );
+			if( g.flags.bLogDebugUpdate )
+				_xlprintf(LOG_NOISE DBG_RELAY )( WIDE( "Updating common ( which invokes frame... )%p %p" ), pc, frame );
 #endif
 #ifdef __LINUX__
 			MemSet( &upd.cs, 0, sizeof( upd.cs ) );
@@ -1986,7 +2075,8 @@ PSI_PROC( void, UpdateCommonEx )( PSI_CONTROL pc, int bDraw DBG_PASS )
 			if( upd.flags.bHasContent )
 			{
 #ifdef DEBUG_UPDAATE_DRAW
-				lprintf( WIDE("Updated all commons? flush display %d,%d  %d,%d"), upd.x,upd.y, upd.width, upd.height );
+				if( g.flags.bLogDebugUpdate )
+					lprintf( WIDE("Updated all commons? flush display %d,%d  %d,%d"), upd.x,upd.y, upd.width, upd.height );
 #endif
 				TESTCOLOR=SetAlpha( BASE_COLOR_GREEN, 0x80 );
 				DoUpdateFrame( frame
@@ -2354,12 +2444,14 @@ PSI_PROC( void, RevealCommonEx )( PSI_CONTROL pc DBG_PASS )
 		int was_hidden = pc->flags.bHidden;
 		int revealed = 0;
 #ifdef DEBUG_UPDAATE_DRAW
-		_xlprintf(LOG_NOISE DBG_RELAY)( WIDE("Revealing %p %s"), pc, pc->pTypeName?pc->pTypeName:"NoTypeName" );
+		if( g.flags.bLogDebugUpdate )
+			_xlprintf(LOG_NOISE DBG_RELAY)( WIDE("Revealing %p %s"), pc, pc->pTypeName?pc->pTypeName:"NoTypeName" );
 #endif
 		if( pc->device )
 		{
 #ifdef DEBUG_UPDAATE_DRAW
-			lprintf( WIDE("showing a renderer...") );
+			if( g.flags.bLogDebugUpdate )
+				lprintf( WIDE("showing a renderer...") );
 #endif
 			revealed = was_hidden;
 			pc->flags.bHidden = 0;
@@ -2380,7 +2472,8 @@ PSI_PROC( void, RevealCommonEx )( PSI_CONTROL pc DBG_PASS )
 			{
 				//pc->child->flags.bHiddenParent = 0;
 #ifdef DEBUG_UPDAATE_DRAW
-				lprintf( WIDE("Found something hidden... revealing it, and all children.") );
+				if( g.flags.bLogDebugUpdate )
+					lprintf( WIDE("Found something hidden... revealing it, and all children.") );
 #endif
 				for( child = pc->child; child; child = child->next )
 					if( !child->flags.bHiddenParent )
@@ -2388,7 +2481,8 @@ PSI_PROC( void, RevealCommonEx )( PSI_CONTROL pc DBG_PASS )
 			}
 #ifdef DEBUG_UPDAATE_DRAW
 			else
-				lprintf( WIDE( "Control was hidden, now showing." ) );
+				if( g.flags.bLogDebugUpdate )
+					lprintf( WIDE( "Control was hidden, now showing." ) );
 #endif
 			pc->flags.bHiddenParent = 0;
 		}
@@ -2407,7 +2501,8 @@ PSI_PROC( void, RevealCommonEx )( PSI_CONTROL pc DBG_PASS )
 		}
 #ifdef DEBUG_UPDAATE_DRAW
 		else
-			lprintf( WIDE( "Initial, no draw" ) );
+			if( g.flags.bLogDebugUpdate )
+				lprintf( WIDE( "Initial, no draw" ) );
 #endif
 	}
 	level--;
@@ -2440,7 +2535,8 @@ PSI_PROC( void, DisplayFrameOverOnUnder )( PSI_CONTROL pc, PSI_CONTROL over, PRE
 		if( pc->flags.bInitial )
 		{
 #ifdef DEBUG_UPDAATE_DRAW
-			lprintf( WIDE( "********* FIrst showing of this window - it's been bINitial for so long..." ) );
+			if( g.flags.bLogDebugUpdate )
+				lprintf( WIDE( "********* FIrst showing of this window - it's been bINitial for so long..." ) );
 #endif
 		// one final draw to make sure everyone is clean.
          //lprintf( WIDE("Dipsatch draw.") );
@@ -2533,7 +2629,8 @@ PSI_PROC( void, HideCommon )( PSI_CONTROL pc )
 	if( !pc )
 		return;
 #ifdef DEBUG_UPDAATE_DRAW
-	lprintf( WIDE( "Hide common %p %s" ), pc, pc->pTypeName?pc->pTypeName:"NoTypeName" );
+	if( g.flags.bLogDebugUpdate )
+		lprintf( WIDE( "Hide common %p %s" ), pc, pc->pTypeName?pc->pTypeName:"NoTypeName" );
 #endif
 	//PSI_CONTROL _pc = pc;
 	levels++;
@@ -2542,7 +2639,8 @@ PSI_PROC( void, HideCommon )( PSI_CONTROL pc )
 	if( pc->flags.bHidden ) // already hidden, forget someeone telling me this.
 	{
 #ifdef DEBUG_UPDAATE_DRAW
-		lprintf( WIDE( "Already hidden..." ) );
+		if( g.flags.bLogDebugUpdate )
+			lprintf( WIDE( "Already hidden..." ) );
 #endif
       levels--;
 		return;
@@ -2551,7 +2649,8 @@ PSI_PROC( void, HideCommon )( PSI_CONTROL pc )
 	if( pc->flags.bInitial )
 	{
 #ifdef DEBUG_UPDAATE_DRAW
-		lprintf( WIDE( "Control hasn't been shown yet..." ) );
+		if( g.flags.bLogDebugUpdate )
+			lprintf( WIDE( "Control hasn't been shown yet..." ) );
 #endif
 		// even if not shown, do mark this hidden control as a hidden parent
       // so it's not auto unhidden on revealing the containing frame.
@@ -2592,13 +2691,16 @@ PSI_PROC( void, HideCommon )( PSI_CONTROL pc )
 			if( pc->flags.bTransparent )
 			{
 #ifdef DEBUG_UPDAATE_DRAW
-				lprintf( WIDE( "transparent thing..." ) );
+				if( g.flags.bLogDebugUpdate )
+					lprintf( WIDE( "transparent thing..." ) );
 #endif
 				if( !pc->flags.bParentCleaned && pc->OriginalSurface )
 				{
 #ifdef DEBUG_UPDAATE_DRAW
-					lprintf( WIDE( "Restoring old surface..." ) );
-					lprintf( WIDE( "Restoring orignal background... " ) );
+					if( g.flags.bLogDebugUpdate )
+						lprintf( WIDE( "Restoring old surface..." ) );
+					if( g.flags.bLogDebugUpdate )
+						lprintf( WIDE( "Restoring orignal background... " ) );
 #endif
 					BlotImage( pc->Window, pc->OriginalSurface, 0, 0 );
 					pc->flags.bParentCleaned = 1;
@@ -2610,13 +2712,15 @@ PSI_PROC( void, HideCommon )( PSI_CONTROL pc )
 						//InitializeCriticalSec( &upd.cs );
 #endif
 #ifdef DEBUG_UPDAATE_DRAW
-						lprintf( WIDE("pc = %08lx par = %08lx"), pc, pc->parent );
+						if( g.flags.bLogDebugUpdate )
+							lprintf( WIDE("pc = %08lx par = %08lx"), pc, pc->parent );
 #endif
 						upd.flags.bHasContent = 0;
 						upd.flags.bTmpRect = 0;
 						//lprintf( WIDE("doing update common...") );
 #ifdef DEBUG_UPDAATE_DRAW
-						lprintf( WIDE( "Flushing this button to the display..." ) );
+						if( g.flags.bLogDebugUpdate )
+							lprintf( WIDE( "Flushing this button to the display..." ) );
 #endif
 						TESTCOLOR=SetAlpha( BASE_COLOR_YELLOW, 0x20 );
 						DoUpdateFrame( pc
@@ -2631,7 +2735,8 @@ PSI_PROC( void, HideCommon )( PSI_CONTROL pc )
 				else if( pc->OriginalSurface )
 				{
 #ifdef DEBUG_UPDAATE_DRAW
-					lprintf( WIDE( "Parent was already clean... did nothing" ) );
+					if( g.flags.bLogDebugUpdate )
+						lprintf( WIDE( "Parent was already clean... did nothing" ) );
 #endif
 					//UnmakeImageFile( pc->OriginalSurface );
 					//pc->OriginalSurface = NULL; // won't need this until the control shows again?
@@ -2644,7 +2749,8 @@ PSI_PROC( void, HideCommon )( PSI_CONTROL pc )
 			else
 			{
 #ifdef DEBUG_UPDAATE_DRAW
-				lprintf( WIDE("Parent needs to be drawn, no auto recovery available" ));
+				if( g.flags.bLogDebugUpdate )
+					lprintf( WIDE("Parent needs to be drawn, no auto recovery available" ));
 #endif
 				SmudgeCommon( pc->parent );
 			}
@@ -2653,11 +2759,13 @@ PSI_PROC( void, HideCommon )( PSI_CONTROL pc )
 		}
 #ifdef DEBUG_UPDAATE_DRAW
 		else
-			lprintf( WIDE( "..." ) );
+			if( g.flags.bLogDebugUpdate )
+				lprintf( WIDE( "..." ) );
 #endif
 	}
 #ifdef DEBUG_UPDAATE_DRAW
-	lprintf( WIDE( "levels: %d" ), levels );
+	if( g.flags.bLogDebugUpdate )
+		lprintf( WIDE( "levels: %d" ), levels );
 #endif
 }
 
@@ -3100,7 +3208,8 @@ PSI_PROC( void, EnableCommonUpdates )( PSI_CONTROL common, int bEnable )
 		if( common->flags.bNoUpdate && bEnable )
 		{
 #ifdef DEBUG_UPDAATE_DRAW
-			lprintf( "Enable Common Updates on %p", common );
+			if( g.flags.bLogDebugUpdate )
+				lprintf( "Enable Common Updates on %p", common );
 #endif
 			common->flags.bNoUpdate = FALSE;
          // probably doing mass updates so just mark the status, and make the application draw.
@@ -3108,7 +3217,8 @@ PSI_PROC( void, EnableCommonUpdates )( PSI_CONTROL common, int bEnable )
 		else
 		{
 #ifdef DEBUG_UPDAATE_DRAW
-			lprintf( "Disable Common Updates on %p", common );
+			if( g.flags.bLogDebugUpdate )
+				lprintf( "Disable Common Updates on %p", common );
 #endif
 			common->flags.bNoUpdate = !bEnable;
 		}

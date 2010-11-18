@@ -1285,15 +1285,13 @@ static void InsertTimer( PTIMER timer )
 #ifdef LOG_INSERTS
 		Log( WIDE("Inserting timer...wake and done") );
 #endif
-		if( g.timers == timer )
-		{
+
 #ifdef LOG_SLEEPS
-			lprintf( "Wake timer thread." );
+		lprintf( "Wake timer thread." );
 #endif
-			// wake this thread because it's current scheduled delta (ex 1000ms)
-			// may put it's sleep beyond the frequency of this timer (ex 10ms)
-			WakeThread(g.pTimerThread);
-		}
+		// wake this thread because it's current scheduled delta (ex 1000ms)
+		// may put it's sleep beyond the frequency of this timer (ex 10ms)
+		WakeThread(g.pTimerThread);
 	}
 	else
 	{
@@ -1367,7 +1365,9 @@ static int CPROC ProcessTimers( PTRSZVAL psvForce )
 		{
 			if( !psvForce )
 				return 1;
-			//lprintf( WIDE("Timer thread sleeping forever...") );
+#ifdef LOG_SLEEPS
+			lprintf( WIDE("Timer thread sleeping forever...") );
+#endif
 #ifdef __LINUX__
          if( g.pTimerThread )
 				TimerWakeableSleep( SLEEP_FOREVER );
@@ -1376,7 +1376,9 @@ static int CPROC ProcessTimers( PTRSZVAL psvForce )
 #endif
 			// had no timers - but NOW either we woke up by default...
 			// OR - we go kicked awake - so mark the beginning of known time.
-			//Log( WIDE("Re-synch first tick...") );
+#ifdef LOG_LATENCY
+			Log( WIDE("Re-synch first tick...") );
+#endif
 			g.last_tick = timeGetTime();//GetTickCount();
 		}
 		// add and delete new/old timers here... 
@@ -1598,7 +1600,7 @@ TIMER_PROC( _32, AddTimerExx )( _32 start, _32 frequency, TimerCallbackProc call
 #endif
 	if( !g.pTimerThread )
 	{
-		 //Log( WIDE("Starting \")a\" timer thread!!!!" );
+		 //Log( WIDE("Starting \"a\" timer thread!!!!" ) );
 		 if( !( ThreadTo( ThreadProc, 0 ) ) )
 		 {
 				//Log1( WIDE("Failed to start timer ThreadProc... %d"), GetLastError() );
