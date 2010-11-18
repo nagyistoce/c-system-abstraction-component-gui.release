@@ -1,0 +1,9 @@
+
+{"display", /*libdisplayservice.so*/ GetDisplayFunctionTable}
+,{"image", /*libdisplayservice.so*/ GetImageFunctionTable}
+,{"controls", /*libpsi.so*/ GetFunctionTable}
+
+//display=libdisplayservice.so : GetDisplayFunctionTable
+//image=libdisplayservice.so : GetImageFunctionTable
+//controls=libpsi.so : GetFunctionTable
+
