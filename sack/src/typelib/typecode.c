@@ -723,6 +723,40 @@ static PLINKQUEUE ExpandLinkQueueEx( PLINKQUEUE *pplq, INDEX entries DBG_PASS )
 
 //--------------------------------------------------------------------------
 
+ PLINKQUEUE  PrequeLinkEx ( PLINKQUEUE *pplq, POINTER link DBG_PASS )
+{
+   INDEX tmp;
+   PLINKQUEUE plq;
+   if( !pplq )
+      return NULL;
+   if( !(*pplq) )
+      *pplq = CreateLinkQueueEx( DBG_VOIDRELAY );
+
+   while( LockedExchange( &(*pplq)->Lock, 1 ) )
+      Relinquish();
+
+   plq = *pplq;
+
+   if( link )
+   {
+      tmp = plq->Bottom - 1;
+      if( tmp & 0x80000000 )
+			tmp += plq->Cnt;
+      if( tmp == plq->Top ) // collided with self...
+      {
+         plq = ExpandLinkQueueEx( &plq, 16 DBG_RELAY );
+         tmp = plq->Cnt - 1; // should be room at the end of phsyical array....
+      }
+      plq->pNode[tmp] = link;
+      plq->Bottom = tmp;
+   }
+   *pplq = plq;
+   plq->Lock = 0;
+   return plq;
+}
+
+//--------------------------------------------------------------------------
+
  LOGICAL  IsQueueEmpty ( PLINKQUEUE *pplq  )
 {
    if( !pplq || !(*pplq) ||
