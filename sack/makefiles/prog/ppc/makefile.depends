@@ -1,0 +1,32 @@
+
+_PPC:=$(SACK_BASE)/makefiles/prog/ppc
+
+PPCDEPENDS=$(SACK_BASE)/makefiles/prog/ppc/makefile.$(COMPILER) \
+          $(SACK_BASE)/makefiles/prog/ppc/cppmain.c  \
+          $(SACK_BASE)/makefiles/prog/ppc/define.c    \
+          $(SACK_BASE)/makefiles/prog/ppc/expr.c      \
+          $(SACK_BASE)/makefiles/prog/ppc/fileio.c    \
+          $(SACK_BASE)/makefiles/prog/ppc/input.c     \
+          $(SACK_BASE)/makefiles/prog/ppc/links.c     \
+          $(SACK_BASE)/makefiles/prog/ppc/mem.c       \
+          $(SACK_BASE)/makefiles/prog/ppc/sizeof.c    \
+          $(SACK_BASE)/makefiles/prog/ppc/statemnt.c  \
+          $(SACK_BASE)/makefiles/prog/ppc/struct.c    \
+          $(SACK_BASE)/makefiles/prog/ppc/text.c  
+
+$(_PPC)/%.c: ;
+
+#$(_PPC)/makefile.depends: ;
+
+#$(_PPC)/makefile.$(COMPILER) makefile.$(COMPILER): ;
+
+$(SACK_BASE)/makefiles/ppc$(PROGEXT): $(PPCDEPENDS)
+	make -C $(_PPC) -f makefile.$(COMPILER) $(filter distclean,$(MAKECMDGOALS))
+	-cp $(_PPC)/ppc$(PROGEXT) $@
+	-cp $(_PPC)/config.ppc $(SACK_BASE)/makefiles
+        
+
+.PHONY: force_ppc_distclean
+clean distclean: force_ppc_distclean
+
+force_ppc_distclean: 
