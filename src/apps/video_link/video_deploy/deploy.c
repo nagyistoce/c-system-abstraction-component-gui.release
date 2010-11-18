@@ -382,7 +382,10 @@ void UpdateConfiguration( void )
 	// based on selected map and site, set hostname, and ODBC connection parameters.
 	if( StrCaseCmp( GetSystemName(), l.selected_site->hostname ) )
 	{
-		lprintf( "hostname needs update" );
+		char cmd[256];
+      snprintf( cmd, sizeof( cmd ), "ClearShell setcomputer.ps1 %s", l.selected_site->hostname );
+      system( cmd );
+		lprintf( "hostname needs update - we'll need a reboot too" );
 	}
 
 	UpdateHostsFile();
@@ -437,6 +440,14 @@ void FinishCopying( void )
 	{
 		CTEXTSTR args[] = { "video.ini", "/vlc/config", "vlc_path", "c:/tools/vlc-1.1.4", NULL };
 		LaunchProgram( "SetOption", NULL, args );
+	}
+	{
+		CTEXTSTR args[] = { "-ext", "-dir", "install/mysql-5.4-minimal.zip", NULL };
+		LaunchProgram( "install/pkzip25", NULL, args );
+	}
+	{
+		CTEXTSTR args[] = { "x", "install/vlc-1.1.4-win32.7z", NULL };
+		LaunchProgram( "install/7za x", NULL, args );
 	}
 }
 
